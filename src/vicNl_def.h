@@ -193,6 +193,10 @@
 /***** Baseflow parametrizations *****/
 #define ARNO        0
 #define NIJSSEN2001 1
+       
+/***** Glacier parametrizations *****/
+#define GL_DYNAMIC 1
+#define GL_SCALING 2
 
 /***** Aerodynamic Resistance options *****/
 #define AR_406      0
@@ -253,7 +257,8 @@
 #define PHOTO_C4 1
 
 /***** Hard-coded veg class parameters (mainly for pot_evap) *****/
-#define BARE_SOIL_ALBEDO 0.2	    /* albedo for bare soil */
+#define BARE_SOIL_ALBEDO 0.2      /* albedo for bare soil */
+#define BARE_ICE_ALBEDO 0.4       /* albedo for bare ice */
 #define H2O_SURF_ALBEDO 0.08	    /* albedo for deep water surface */
 extern char   ref_veg_over[];
 extern double ref_veg_rarc[];
@@ -271,40 +276,55 @@ extern double ref_veg_trunk_ratio[];
 extern char ref_veg_ref_crop[];
 
 /***** Time Constants *****/
-#define DAYS_PER_YEAR 365.
+#define DAYS_PER_YEAR 365.25
 #define HOURSPERDAY   24        /* number of hours per day */
-#define HOURSPERYEAR  24*365    /* number of hours per year */
-#define SECPHOUR     3600	/* seconds per hour */
-#define SEC_PER_DAY 86400.	/* seconds per day */
+#define HOURSPERYEAR  HOURSPERDAY*DAYS_PER_YEAR    /* number of hours per year */
+#define SECPHOUR      3600.	/* seconds per hour */
+#define SEC_PER_DAY   86400.	/* seconds per day */
 #define MONTHSPERYEAR 12
+
+/***** Length Constants *****/
+#define MMPERMETER 1000.0
+#define CMPERMETER 100.0
+#define MMPERCM    10.0
 #define METERS_PER_KM 1000.
 
 /***** Physical Constants *****/
-#define RESID_MOIST  0.0       /* define residual moisture content of soil column */
-#define ice_density  917.	    /* density of ice (kg/m^3) */
-#define T_LAPSE      -0.0065   /* temperature lapse rate of US Std 
-				       Atmos in C/km */
-#define von_K        0.40	/* Von Karman constant for evapotranspiration */
-#define KELVIN       273.15	/* conversion factor C to K */
+#define RESID_MOIST  0.0        /* define residual moisture content of soil column */
+#define ice_density  917.	      /* density of ice (kg/m^3) */
+#define h20_density  1000.      /* density of water at 4degC (kg/m^3) */
+#define RHOSNOW      250.       /* densities of water and snow */
+#define RHOICE       917.       /* ice density*/
+#define rhosurf      1.275      /* surface air density */
+#define T_LAPSE      -0.0065    /* temperature lapse rate of US Std Atmos in C/m */
+#define von_K        0.40	      /* Von Karman constant for evapotranspiration */
+#define Ka           0.0245187  /* thermal conductivity of air (W/mK) */
+#define KIN_VIS      1.3e-5     /* Kinemativ viscosity of air (m2/s) */
+#define CSALT        0.68       /* saltation constant m/s */
+#define KELVIN       273.15	    /* conversion factor C to K */
 #define STEFAN_B     5.6696e-8	/* stefan-boltzmann const in unit W/m^2/K^4 */
-#define Lf           3.337e5	/* Latent heat of freezing (J/kg) at 0C */
+#define EMISS        1.0        /* emissivity */
+#define EMICE        0.97       /* Ice emissivity */
+#define EMH2O        0.98
+#define Lf           3.337e5	  /* Latent heat of freezing (J/kg) at 0C */
 #define RHO_W        999.842594	/* Density of water (kg/m^3) at 0C */
-#define Cp           1013.0	/* Specific heat at constant pressure of moist air 
-				   (J/deg/K) (H.B.H. p.4.13)*/
-#define CH_ICE       2100.0e3	/* Volumetric heat capacity (J/(m3*C)) of ice */
+#define Cp           1013.0	    /* Specific heat at constant pressure of moist 
+				                           air (J/deg/K) (H.B.H. p.4.13)*/
+#define CH_ICE       2100.0e3	  /* Volumetric heat capacity (J/(m3*C)) of ice */
 #define CH_WATER     4186.8e3   /* volumetric heat capacity of water */
 #define K_SNOW       2.9302e-6  /* conductivity of snow (W/mK) */
 #define K_AIR        2.32e-2    /* conductivity of air (W/mK) */
 #define K_ICE        2.29       /* conductivity of ice (W/mK) */
-#define SOLAR_CONSTANT 1400.0	/* Solar constant in W/m^2 */
+#define SOLAR_CONSTANT 1400.0	  /* Solar constant in W/m^2 */
 #define EPS          0.62196351 /* Ratio of molecular weights: M_water_vapor/M_dry_air */
 #define G            9.81       /* gravity */
 #define Rd           287        /* Gas constant of dry air (J/degC*kg) */
 #define Rgas         8.3143     /* [m3 Pa mol-1 K-1] universal gas law constant */
 #define JOULESPCAL   4.1868     /* Joules per calorie */
 #define GRAMSPKG     1000.      /* convert grams to kilograms */
+#define RADIUS 6371.228 /* Earth radius in km. */
 #define kPa2Pa 1000.            /* converts kPa to Pa */
-#define DtoR 0.017453293	/* degrees to radians */
+#define DtoR 0.017453293	      /* degrees to radians */
 #ifndef PI
 #define PI 3.1415927
 #endif
@@ -421,6 +441,13 @@ extern char ref_veg_ref_crop[];
 #define DEFAULT_WIND_SPEED 3.0  /* Default wind speed [m/s] used when wind is not supplied as a forcing */
 #define SLAB_MOIST_FRACT 1.0    /* Volumetric moisture content (fraction of porosity) in the soil/rock below the bottom soil layer; this assumes that the soil below the bottom layer has the same texture as the bottom layer. */
 
+/***** Glacier Constraints *****/
+#define BAHR_C 0.033            /* V-A Scaling Coeficient */
+#define BAHR_LAMBDA 1.375       /* V-A Scaling Exponent */
+#define BAHR_T 788940000.0      /* Time Scaling Constant ~25yrs (secs) */
+#define SNOWICE_THRESH 700.    /* kg/m3 */ 
+#define SNOWICE_DEPTH 1.    /* kg/m3 */ 
+
 /***** Define Boolean Values *****/
 #ifndef FALSE
 #define FALSE 0
@@ -474,7 +501,7 @@ extern char ref_veg_ref_crop[];
 #define SKIP      28 /* place holder for unused data columns */
 
 /***** Output Variable Types *****/
-#define N_OUTVAR_TYPES 180
+#define N_OUTVAR_TYPES 185
 // Water Balance Terms - state variables
 #define OUT_ASAT             0  /* Saturated Area Fraction */
 #define OUT_LAKE_AREA_FRAC   1  /* lake surface area as fraction of the grid cell area [fraction] */
@@ -649,7 +676,19 @@ extern char ref_veg_ref_crop[];
 #define OUT_CLITTER        164  /* Carbon density in litter pool [g C/m2] */
 #define OUT_CINTER         165  /* Carbon density in intermediate pool [g C/m2] */
 #define OUT_CSLOW          166  /* Carbon density in slow pool [g C/m2] */
-
+// Glacier terms
+#define OUT_IWE            167
+#define OUT_IWE_BAND       168
+#define OUT_DELIWE         169
+#define OUT_GLACIER_MELT   170  /* glacier melt  [mm] (ALMA_OUTPUT: [mm/s]) */
+#define OUT_GLACIER_OVER   171  /* glacier overflow  [mm] (ALMA_OUTPUT: [mm/s]) */
+#define OUT_GL_MELT_BAND   172  /* glacier melt  [mm] (ALMA_OUTPUT: [mm/s]) */
+#define OUT_GL_OVER_BAND   173  /* glacier overflow  [mm] (ALMA_OUTPUT: [mm/s]) */
+#define OUT_GLQOUT_BAND    174
+#define OUT_GLQIN_BAND     175
+#define OUT_BN_BAND        176
+#define OUT_SNOW_DENSITY   177
+#define OUT_SNOW_DENS_BAND 178
 /***** Output BINARY format types *****/
 #define OUT_TYPE_DEFAULT 0 /* Default data type */
 #define OUT_TYPE_CHAR    1 /* char */
@@ -865,6 +904,12 @@ typedef struct {
 				   output files are used (for backwards-compatibility); if outfiles and
 				   variables are explicitly mentioned in global parameter file, this option
 				   is ignored. */
+  char GLACIER;          /* DYNAMIC = run glacier flow model in DYNAMIC mode,
+                            SCALING = run glacier flow model in Volume-Area scaling mode,
+                            FALSE = do not run glacier model */
+  char GLACIER_OVERFLOW; /* TRUE = glacier flow out of grid cell is converted to runoff
+                            FALSE = glacier flow is confined to veg tile */
+
 } option_struct;
 
 /*******************************************************
@@ -980,7 +1025,11 @@ typedef struct {
   double   soil_dens_min[MAX_LAYERS]; /* particle density of mineral soil (kg/m^3) */
   double   soil_dens_org[MAX_LAYERS]; /* particle density of organic soil (kg/m^3) */
   float   *BandElev;                  /* Elevation of each snow elevation band */
+  double  *BandIwq;                   /* Elevation of each snow elevation band */
+  double  *BandIceThick;              /* Elevation of each snow elevation band */
+  double  *BandSlope;                 /* Elevation of each snow elevation band */
   double  *AreaFract;                 /* Fraction of grid cell included in each snow elevation band */
+  double  *GlAreaFract;               /* Fraction of glacier included in each snow elevation band */
   double  *Pfactor;                   /* Change in Precipitation due to elevation (fract) in each snow elevation band */
   double  *Tfactor;                   /* Change in temperature due to elevation (C) in each snow elevation band */
   char    *AboveTreeLine;             /* Flag to indicate if band is above the treeline */
@@ -991,6 +1040,7 @@ typedef struct {
   float    time_zone_lng;             /* central meridian of the time zone */
   float  **layer_node_fract;          /* fraction of all nodes within each layer */
   int      gridcel;                   /* grid cell number */
+  int      glcel;                     /* glacier grid cell number */
   double   zwtvmoist_zwt[MAX_LAYERS+2][MAX_ZWTVMOIST]; /* zwt values in the zwt-v-moist curve for each layer */
   double   zwtvmoist_moist[MAX_LAYERS+2][MAX_ZWTVMOIST]; /* moist values in the zwt-v-moist curve for each layer */
   double   slope;
@@ -1280,7 +1330,8 @@ typedef struct {
   // State variables
   double albedo;            /* snow surface albedo (fraction) */
   double canopy_albedo;     /* albedo of the canopy (fract) */
-  double coldcontent;       /* cold content of snow pack */
+  double surf_coldcontent;  /* cold content of snow pack */
+  double pack_coldcontent;  /* cold content of snow pack */
   double coverage;          /* fraction of snow band that is covered with snow */
   double density;           /* snow density (kg/m^3) */
   double depth;             /* snow depth (m) */
@@ -1291,6 +1342,7 @@ typedef struct {
 			       previously */
   double pack_temp;         /* depth averaged temperature of the snowpack (C) */
   double pack_water;        /* liquid water content of the snow pack (m) */
+  double glwater;           /* liquid water content of the glacier pack (m) */
   int    snow;              /* TRUE = snow, FALSE = no snow */
   double snow_canopy;       /* amount of snow on canopy (m) */
   double store_coverage;    /* stores coverage fraction covered by new snow (m) */
@@ -1303,6 +1355,17 @@ typedef struct {
   double surf_temp_fbflag;  /* flag indicating if previous step's temperature was used */
   double surf_water;        /* liquid water content of the surface layer (m) */
   double swq;               /* snow water equivalent of the entire pack (m) */
+  double iwq;
+  double swqold;
+  double iwqold;
+  double icedepth;
+  double snowmelt;         /* snow melt */
+  double glmelt;           /* glacier melt */
+  double glarea;           /* glacier area */
+  double gl_overflow;      /* glacier overflow depth */
+  double Qin;              /* glacier flow into the cell*/
+  double Qout;             /* glacier flow out of the cell*/
+  double bn;               /* glacier mass balance */
   double snow_distrib_slope;/* current slope of uniform snow distribution (m/fract) */
   double tmp_int_storage;   /* temporary canopy storage, used in snow_canopy */
   // Fluxes
@@ -1415,6 +1478,7 @@ typedef struct {
   double	total_soil_moist; /* total column soil moisture [mm] */
   double	surfstor;         /* surface water storage [mm] */
   double	swe;              /* snow water equivalent [mm] */
+  double  iwe;              /* ice water equivalent [mm] */
   double	wdew;             /* canopy interception [mm] */
 } save_data_struct;
 

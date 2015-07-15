@@ -32,13 +32,7 @@
 
 static char vcid[] = "$Id$";
 
-#define GRAMSPKG 1000.
-#define CH_WATER 4186.8e3
-#define JOULESPCAL     4.1868   /* Joules per calorie */
-#define Ka  .0245187            /* thermal conductivity of air (W/mK) */
-#define CSALT 0.68              /* saltation constant m/s */
 #define UTHRESH 0.25            /* threshold shear velocity m/s */
-#define KIN_VIS 1.3e-5          /* Kinemativ viscosity of air (m2/s) */
 #define MAX_ITER 100             /* Max. iterations for numerical integration */
 #define K 5
 #define MACHEPS 1.0e-6          /* Accuracy tolerance for numerical integration */
@@ -146,7 +140,7 @@ double CalcBlowingSnow( double Dt,
   double Transport;
   int count=0;
 
-  Lv = (2.501e6 - 0.002361e6 * Tsnow);
+  Lv = calc_latent_heat_of_vaporization(Tsnow);
   /*******************************************************************/
   /* Calculate some general variables, that don't depend on wind speed. */
 
@@ -156,7 +150,7 @@ double CalcBlowingSnow( double Dt,
   /* Saturation density of water vapor, Liston A-8 */
   es = svp(Tair);
 
-  Tk = Tair  + KELVIN;
+  Tk = Tair + KELVIN;
     
   Ros = 0.622*es/(287*Tk);
   

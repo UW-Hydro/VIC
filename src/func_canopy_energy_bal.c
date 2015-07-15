@@ -179,7 +179,7 @@ double func_canopy_energy_bal(double Tfoliage, va_list ap)
      canopy radiates in two directions */
 
   Tmp = Tfoliage + KELVIN;
-  *LongOverOut = STEFAN_B * (Tmp * Tmp * Tmp * Tmp);
+  *LongOverOut = calc_outgoing_longwave(Tmp, EMISS);
   *NetRadiation = NetShortOver + LongOverIn + LongUnderOut 
     - 2 * (*LongOverOut);
 
@@ -217,8 +217,7 @@ double func_canopy_energy_bal(double Tfoliage, va_list ap)
       *VaporMassFlux = 0.0;
   
     /* Calculate the latent heat flux */
-    
-    Ls = (677. - 0.07 * Tfoliage) * JOULESPCAL * GRAMSPKG;
+    Ls = calc_latent_heat_of_sublimation(Tfoliage);
     *LatentHeatSub = Ls * *VaporMassFlux * RHO_W;
     *LatentHeat = 0;
     *Evap = 0;
@@ -238,15 +237,15 @@ double func_canopy_energy_bal(double Tfoliage, va_list ap)
       Ra_used[1] = Ra[0];
     }
 
-    *Wdew = IntRain * 1000.;
-    prec = Rainfall * 1000;
+    *Wdew = IntRain * MMPERMETER;
+    prec = Rainfall * MMPERMETER;
     *Evap = canopy_evap(layer, veg_var, FALSE, 
 			veg_class, month, Wdew, delta_t, *NetRadiation, 
 			Vpd, NetShortOver, Tcanopy, Ra_used[1], displacement[1], 
 			roughness[1], ref_height[1], elevation, prec, 
 			depth, Wmax, Wcr, Wpwp, frost_fract,
 			root, dryFrac, shortwave, Catm, CanopLayerBnd);
-    *Wdew /= 1000.;
+    *Wdew /= MMPERMETER;
 
     *LatentHeat = Le * *Evap * RHO_W;
     *LatentHeatSub = 0;
@@ -255,7 +254,7 @@ double func_canopy_energy_bal(double Tfoliage, va_list ap)
 
   /* Calculate the sensible heat flux */
 
-  *SensibleHeat = AirDens * Cp * (Tcanopy - Tfoliage) / Ra_used[1];
+  *SensibleHeat = calc_sensible_heat(AirDens, Tcanopy, Tfoliage, Ra_used[1]);
 
   /* Calculate the advected energy */
 

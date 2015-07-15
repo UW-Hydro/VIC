@@ -247,25 +247,25 @@ double SnowPackEnergyBalance(double TSurf, va_list ap)
   /* Calculate longwave exchange and net radiation */
 
   Tmp = TMean + KELVIN;
-  (*NetLongUnder) = LongSnowIn - STEFAN_B * Tmp * Tmp * Tmp * Tmp;
+  (*NetLongUnder) = LongSnowIn - calc_outgoing_longwave(Tmp, EMISS);
   NetRad = NetShortUnder + (*NetLongUnder);
   
   /* Calculate the sensible heat flux */
 
-  *SensibleHeat = AirDens * Cp * (Tair - TMean) / Ra_used[0];
+  *SensibleHeat = calc_sensible_heat(AirDens, Tair, TMean, Ra_used[0]);
 
   if (options.SPATIAL_SNOW) {
     /* Add in Sensible heat flux turbulent exchange from surrounding 
        snow free patches - if present */
-    if ( SnowCoverFract > 0 ) {
+    if ( SnowCoverFract > 0. ) {
       *(AdvectedSensibleHeat) = advected_sensible_heat(SnowCoverFract, 
 						       AirDens, Tair, TGrnd, 
 						       Ra_used[0]);
     }
-    else (*AdvectedSensibleHeat) = 0;
+    else (*AdvectedSensibleHeat) = 0.;
   }
   else {
-    (*AdvectedSensibleHeat) = 0;
+    (*AdvectedSensibleHeat) = 0.;
   }
 
   /* Convert sublimation terms from m/timestep to kg/m2s */
@@ -290,7 +290,7 @@ double SnowPackEnergyBalance(double TSurf, va_list ap)
   /* Calculate advected heat flux from rain 
      Equation 7.3.12 from H.B.H. for rain falling on melting snowpack */
   
-  if ( TMean == 0 )
+  if ( TMean == 0. )
     *AdvectedEnergy = (CH_WATER * (Tair) * Rain) / (Dt);
   else
     *AdvectedEnergy = 0.;
@@ -304,7 +304,7 @@ double SnowPackEnergyBalance(double TSurf, va_list ap)
     *GroundFlux = 2.9302e-6 * SnowDensity * SnowDensity
         * (TGrnd - TMean) / SnowDepth / (Dt);
   }
-  else *GroundFlux=0;
+  else *GroundFlux = 0.;
   *DeltaColdContent -= *GroundFlux;
 
   /* Calculate energy balance error at the snowpack surface */

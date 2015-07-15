@@ -92,7 +92,7 @@ void mtclim_wrapper(int have_dewpt, int have_shortwave, double hour_offset,
     nrerror("Memory allocation error in mtclim_init() ...\n");
   }
   for (i=0; i<366; i++) {
-    tiny_radfract[i] = (double *) calloc(86400, sizeof(double));
+    tiny_radfract[i] = (double *) calloc(SEC_PER_DAY, sizeof(double));
     if (tiny_radfract[i] == NULL) {
       nrerror("Memory allocation error in mtclim_init() ...\n");
     }
@@ -174,12 +174,12 @@ void mtclim_init(int have_dewpt, int have_shortwave, double elevation, double sl
      set to the same value.  The same is true for p->base_isoh and
      p->site_isoh. */
   p->base_elev   = elevation;
-  p->base_isoh   = annual_prcp/10.; /* MTCLIM prcp in cm */
+  p->base_isoh   = annual_prcp/MMPERCM; /* MTCLIM prcp in cm */
   p->site_lat    = lat;
   p->site_elev   = elevation;
   p->site_slp    = slope;
   p->site_asp    = aspect;
-  p->site_isoh   = annual_prcp/10.; /* MTCLIM prcp in cm */
+  p->site_isoh   = annual_prcp/MMPERCM; /* MTCLIM prcp in cm */
   p->site_ehoriz = ehoriz;
   p->site_whoriz = whoriz;
   p->tmax_lr     = -1*T_LAPSE*METERS_PER_KM;	/* not used since site_elev == base_elev */
@@ -192,15 +192,15 @@ void mtclim_init(int have_dewpt, int have_shortwave, double elevation, double sl
 
   /* initialize the data arrays with the vic input data */
   for (i = 0; i < ctrl->ndays; i++) {
-    mtclim_data->yday[i] = dmy[i*24].day_in_year;
+    mtclim_data->yday[i] = dmy[i*HOURSPERDAY].day_in_year;
     mtclim_data->tmax[i] = tmax[i];
     mtclim_data->tmin[i] = tmin[i];
     if (ctrl->insw) {
       mtclim_data->s_srad[i] = 0;
-      for (j=0; j<24; j++) {
-        mtclim_data->s_srad[i] += hourlyrad[i*24+j];
+      for (j=0; j<HOURSPERDAY; j++) {
+        mtclim_data->s_srad[i] += hourlyrad[i*HOURSPERDAY+j];
       }
-      mtclim_data->s_srad[i] /= 24;
+      mtclim_data->s_srad[i] /= HOURSPERDAY;
     }
     if (ctrl->invp) mtclim_data->s_hum[i] = vp[i];
     /* MTCLIM prcp in cm */
@@ -208,7 +208,7 @@ void mtclim_init(int have_dewpt, int have_shortwave, double elevation, double sl
     if (have_dewpt==1)
       nrerror("have_dewpt not yet implemented ...\n");
   }
-  tinystepspday = 86400/SRADDT;
+  tinystepspday = SECPHOUR/SRADDT;
   for (i = 0; i < 366; i++) {
     for (j = 0; j < tinystepspday; j++) {
       tiny_radfract[i][j] = 0;
@@ -235,7 +235,7 @@ void mtclim_to_vic(double hour_offset,
   int tiny_offset;
   double tmp_rad;
   
-  tinystepsphour = 3600/SRADDT;
+  tinystepsphour = SECPHOUR/SRADDT;
 
   tiny_offset = (int)((float)tinystepsphour * hour_offset);
   for (i = 0; i < ctrl->ndays; i++) {
@@ -249,24 +249,24 @@ void mtclim_to_vic(double hour_offset,
     //if radiation read from input file, assume it's a 24 hours average, 
     //else (i.e., MTCLIM calculated), assume it's a daylight period average
     if (ctrl->insw) {
-      tmp_rad = mtclim_data->s_srad[i] * 24.;
+      tmp_rad = mtclim_data->s_srad[i] * HOURSPERDAY;
     }
     else {
-      tmp_rad = mtclim_data->s_srad[i] * mtclim_data->s_dayl[i] / 3600.;
+      tmp_rad = mtclim_data->s_srad[i] * mtclim_data->s_dayl[i] / SECPHOUR;
     }    
-    for (j = 0; j < 24; j++) {
-      hourlyrad[i*24+j] = 0;
+    for (j = 0; j < HOURSPERDAY; j++) {
+      hourlyrad[i*HOURSPERDAY+j] = 0;
       for (k = 0; k < tinystepsphour; k++) {
         tinystep = j*tinystepsphour + k - tiny_offset;
         if (tinystep < 0) {
-          tinystep += 24*tinystepsphour; 
+          tinystep += HOURSPERDAY*tinystepsphour; 
         }
-        if (tinystep > 24*tinystepsphour-1) {
-          tinystep -= 24*tinystepsphour; 
+        if (tinystep > HOURSPERDAY*tinystepsphour-1) {
+          tinystep -= HOURSPERDAY*tinystepsphour; 
         }
-        hourlyrad[i*24+j] += tiny_radfract[dmy[i*24+j].day_in_year-1][tinystep];
+        hourlyrad[i*HOURSPERDAY+j] += tiny_radfract[dmy[i*HOURSPERDAY+j].day_in_year-1][tinystep];
       }
-      hourlyrad[i*24+j] *= tmp_rad;
+      hourlyrad[i*HOURSPERDAY+j] *= tmp_rad;
     }
   }
   

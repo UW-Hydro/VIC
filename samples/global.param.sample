@@ -48,6 +48,8 @@ FROZEN_SOIL	FALSE	# TRUE = calculate frozen soils.  Default = FALSE.
 #######################################################################
 #SNOW_DENSITY	DENS_BRAS	# DENS_BRAS = use traditional VIC algorithm taken from Bras, 1990; DENS_SNTHRM = use algorithm taken from SNTHRM model.
 #BLOWING		FALSE	# TRUE = compute evaporative fluxes due to blowing snow
+#GLACIER        FALSE   # DYNAMIC = use dynamic glacier model, SCALING = use V-A scaling glacier model
+#GLACIER_OVERFLOW   TRUE
 #COMPUTE_TREELINE	FALSE	# Can be either FALSE or the id number of an understory veg class; FALSE = turn treeline computation off; VEG_CLASS_ID = replace any overstory veg types with the this understory veg type in all snow bands for which the average July Temperature <= 10 C (e.g. "COMPUTE_TREELINE 10" replaces any overstory veg cover with class 10)
 #CORRPREC	FALSE	# TRUE = correct precipitation for gauge undercatch
 #MAX_SNOW_TEMP	0.5	# maximum temperature (C) at which snow can fall
@@ -170,6 +172,8 @@ ROOT_ZONES      3	# Number of root zones (must match format of veg param file)
 #ALB_SRC 	FROM_VEGLIB    # FROM_VEGPARAM = read albedo from veg param file; FROM_VEGLIB = read albedo from veg library file
 #VEGCOVER_SRC 	FROM_VEGLIB    # FROM_VEGPARAM = read veg_cover from veg param file; FROM_VEGLIB = read veg_cover from veg library file
 SNOW_BAND	1	# Number of snow bands; if number of snow bands > 1, you must insert the snow band path/file after the number of bands (e.g. SNOW_BAND 5 my_path/my_snow_band_file)
+#EQUAL_AREA FALSE   # TRUE = grid cells are from an equal-area projection; FALSE = grid cells are on a regular lat-lon grid.  Only needed when either LAKES or GLACIER is being used.  
+#RESOLUTION 0.125   # Grid cell resolution (degrees if EQUAL_AREA is FALSE, km^2 if EQUAL_AREA is TRUE); ignored if LAKES is FALSE.  Only needed when either LAKES or GLACIER is being used. 
 
 #######################################################################
 # Lake Simulation Parameters
@@ -177,8 +181,6 @@ SNOW_BAND	1	# Number of snow bands; if number of snow bands > 1, you must insert
 #######################################################################
 #LAKES		(put lake parameter path/file here)	# Lake parameter path/file
 #LAKE_PROFILE	FALSE	# TRUE = User-specified depth-area parameters in lake parameter file; FALSE = VIC computes a parabolic depth-area profile
-#EQUAL_AREA	FALSE	# TRUE = grid cells are from an equal-area projection; FALSE = grid cells are on a regular lat-lon grid
-#RESOLUTION	0.125	# Grid cell resolution (degrees if EQUAL_AREA is FALSE, km^2 if EQUAL_AREA is TRUE); ignored if LAKES is FALSE
 
 #######################################################################
 # Output Files and Parameters

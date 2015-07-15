@@ -119,12 +119,12 @@ void compute_soil_resp(int Nnodes,
   }
 
   /* Compute Rh for various pools, nodes; C fluxes in [gC/m2d] */
-  *RhLitter = Rfactor*(fTLitter*fMLitter/(tauLitter*365.25*24/dt))*CLitter;
+  *RhLitter = Rfactor*(fTLitter*fMLitter/(tauLitter*HOURSPERYEAR/dt))*CLitter;
   *RhInterTot = 0;
   *RhSlowTot = 0;
   for (i=0; i<Nnodes; i++) {
-    RhInter[i] = Rfactor*(fTSoil[i]*fMSoil[i]/(tauInter*365.25*24/dt))*CInterNode[i];
-    RhSlow[i] = Rfactor*(fTSoil[i]*fMSoil[i]/(tauSlow*365.25*24/dt))*CSlowNode[i];
+    RhInter[i] = Rfactor*(fTSoil[i]*fMSoil[i]/(tauInter*HOURSPERYEAR/dt))*CInterNode[i];
+    RhSlow[i] = Rfactor*(fTSoil[i]*fMSoil[i]/(tauSlow*HOURSPERYEAR/dt))*CSlowNode[i];
     *RhInterTot += RhInter[i];
     *RhSlowTot += RhSlow[i];
   }

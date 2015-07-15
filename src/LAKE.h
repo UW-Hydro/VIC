@@ -35,11 +35,6 @@
 
 #define LAKE_SET
 #define TMELT 0.0
-#define EMICE 0.97      /* Ice emissivity */
-#define EMH2O .98
-#define RHOSNOW   250.  /* densities of water and snow */
-#define RHOICE   917.   /* ice density*/
-#define rhosurf 1.275   /* surface air density */
 #define MAX_SURFACE_LAKE   .6  /* max. surface layer thickness for E-B (m) */
 #define BETA 0.001       /* Curve shape parameter for lake profile. */
 #define FRACMIN  0.10   /* min ice thickness in meters */
@@ -65,7 +60,6 @@
 #define  a1 0.7        /* Percent of radiation in visible band. */
 #define  a2 0.3        /* Percent of radiation in infrared band. */
 #define QWTAU 86400./2.   /* D. Pollard sub-ice time constant. */
-#define RADIUS 6371.228 /* Earth radius in km. */
 
 //#endif // LAKE_SET
 

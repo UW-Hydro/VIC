@@ -183,6 +183,7 @@ void initialize_global() {
   options.TFALLBACK             = TRUE;
   options.VP_INTERP             = TRUE;
   options.VP_ITER               = VP_ITER_ALWAYS;
+  options.GLACIER               = FALSE;
   // input options
   options.ALB_SRC               = FROM_VEGLIB;
   options.BASEFLOW              = ARNO;

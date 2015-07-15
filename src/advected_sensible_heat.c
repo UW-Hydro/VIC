@@ -27,7 +27,7 @@ double advected_sensible_heat(double SnowCoverFract,
   double val;
 
   /* Compute sensible heat flux from bare patches */
-  Qbare = AirDens * Cp * (Tair - TGrnd) / Ra;
+  Qbare = calc_sensible_heat(AirDens, Tair, TGrnd, Ra);
 
   /* Compute fraction of sensible heat that contributes to snowmelt */
   if ( SnowCoverFract > 0.6 ) Fs = 1.0;

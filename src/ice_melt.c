@@ -194,8 +194,8 @@ int ice_melt(double            z2,
 
   char ErrorString[MAXSTRING];
 
-  SnowFall = snowfall / 1000.; /* convert to m */
-  RainFall = rainfall / 1000.; /* convert to m */
+  SnowFall = snowfall / MMPERMETER; /* convert to m */
+  RainFall = rainfall / MMPERMETER; /* convert to m */
   IceMelt = 0.0;
   RefrozenWater = 0.0;
   
@@ -272,7 +272,7 @@ int ice_melt(double            z2,
   // calculated assuming 10 cm high protrusions on frozen ponds.
 
   if(options.BLOWING && snow->swq > 0.) {
-    Ls = (677. - 0.07 * snow->surf_temp) * JOULESPCAL * GRAMSPKG;
+    Ls = calc_latent_heat_of_sublimation(snow->surf_temp);
     snow->blowing_flux = CalcBlowingSnow((double) delta_t, air_temp,
 					 snow->last_snow, snow->surf_water,
 					 wind, Ls, density,
@@ -301,7 +301,7 @@ int ice_melt(double            z2,
   Qnet = CalcIcePackEnergyBalance((double)0.0, (double)delta_t, aero_resist,
 				  aero_resist_used, z2, displacement, Z0, wind, net_short, 
 				  longwave, density, Le, air_temp,
-				  pressure * 1000., vpd * 1000., vp * 1000.,
+				  pressure * kPa2Pa, vpd * kPa2Pa, vp * kPa2Pa,
 				  RainFall, SurfaceSwq, 
 				  snow->surf_water, OldTSurf, &RefreezeEnergy,
 				  &vapor_flux, &blowing_flux, &surface_flux,
@@ -422,8 +422,8 @@ int ice_melt(double            z2,
 				   IceEnergyBalance, (double)delta_t, 
 				   aero_resist, aero_resist_used, z2, 
 				   displacement, Z0, wind, net_short, longwave,
-				   density, Le, air_temp, pressure * 1000.,
-				   vpd * 1000., vp * 1000., RainFall, 
+				   density, Le, air_temp, pressure * kPa2Pa,
+				   vpd * kPa2Pa, vp * kPa2Pa, RainFall, 
 				   SurfaceSwq,
 				   snow->surf_water, OldTSurf, &RefreezeEnergy, 
 				   &vapor_flux, &blowing_flux, &surface_flux,
@@ -443,7 +443,7 @@ int ice_melt(double            z2,
           ErrorIcePackEnergyBalance(snow->surf_temp, (double)delta_t, aero_resist,
 				    aero_resist_used, z2, displacement, Z0, wind, net_short,
 				    longwave, density, Le, air_temp,
-				    pressure * 1000., vpd * 1000., vp * 1000.,
+				    pressure * kPa2Pa, vpd * kPa2Pa, vp * kPa2Pa,
 				    RainFall, SurfaceSwq, 
 				    snow->surf_water, OldTSurf, &RefreezeEnergy,
 				    &vapor_flux, &blowing_flux, &surface_flux,
@@ -464,8 +464,8 @@ int ice_melt(double            z2,
       Qnet = CalcIcePackEnergyBalance(snow->surf_temp, (double)delta_t, aero_resist,
 				      aero_resist_used, z2, displacement, Z0, wind, net_short,
 				      longwave, density, Le, air_temp,
-				      pressure * 1000., vpd * 1000., 
-				      vp * 1000.,RainFall, SurfaceSwq, 
+				      pressure * kPa2Pa, vpd * kPa2Pa, 
+				      vp * kPa2Pa,RainFall, SurfaceSwq, 
 				      snow->surf_water, OldTSurf, &RefreezeEnergy, 
 				      &vapor_flux, &blowing_flux, &surface_flux,
 				      &advection, deltaCC, Tcutoff, 
@@ -647,9 +647,9 @@ int ice_melt(double            z2,
   //   if(fabs(MassBalanceError) > SMALL)
   //  fprintf(stderr, "MassBalanceError = %g %e %e %e, %e, \n", MassBalanceError, InitialIce - LakeIce, IceMelt, InitialSwq, snow->swq);
 
-  melt[0] *= 1000.; /* converts back to mm */
+  melt[0] *= MMPERMETER; /* converts back to mm */
   snow->mass_error = MassBalanceError;
-  snow->coldcontent        = SurfaceCC;
+  snow->surf_coldcontent        = SurfaceCC;
   snow->vapor_flux *= -1.;
   *save_LWnet = LWnet;
   *save_advection = advection;

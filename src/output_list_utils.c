@@ -99,6 +99,8 @@ out_data_struct *create_output_list() {
   strcpy(out_data[OUT_SURFSTOR].varname,"OUT_SURFSTOR");               /* storage of liquid water on surface (ponding) [mm] */
   strcpy(out_data[OUT_SURF_FROST_FRAC].varname,"OUT_SURF_FROST_FRAC"); /* fraction of soil surface that is frozen [fraction] */
   strcpy(out_data[OUT_SWE].varname,"OUT_SWE");                         /* snow water equivalent in snow pack [mm] */
+  strcpy(out_data[OUT_SNOW_DENSITY].varname,"OUT_SNOW_DENSITY");       /* density of snow pack [kg/m3] */
+  strcpy(out_data[OUT_IWE].varname,"OUT_IWE");                         /* ice water equivalent in glacier pack [mm] */
   strcpy(out_data[OUT_WDEW].varname,"OUT_WDEW");                       /* total moisture interception storage in canopy [mm] */
   strcpy(out_data[OUT_ZWT].varname,"OUT_ZWT");                         /* water table position [cm] (zwt within lowest unsaturated layer) */
   strcpy(out_data[OUT_ZWT_LUMPED].varname,"OUT_ZWT_LUMPED");           /* lumped water table position [cm] (zwt of total moisture across all layers, lumped together) */
@@ -108,6 +110,7 @@ out_data_struct *create_output_list() {
   strcpy(out_data[OUT_DELINTERCEPT].varname,"OUT_DELINTERCEPT");       /* change in canopy interception storage [mm] */
   strcpy(out_data[OUT_DELSOILMOIST].varname,"OUT_DELSOILMOIST");       /* change in soil water content [mm] */
   strcpy(out_data[OUT_DELSWE].varname,"OUT_DELSWE");                   /* change in snow water equivalent [mm] */
+  strcpy(out_data[OUT_DELIWE].varname,"OUT_DELIWE");                   /* change in ice water equivalent [mm] */
   strcpy(out_data[OUT_DELSURFSTOR].varname,"OUT_DELSURFSTOR");         /* change in surface liquid water storage  [mm] */
   strcpy(out_data[OUT_EVAP].varname,"OUT_EVAP");                       /* total net evaporation [mm] (ALMA_OUTPUT: [mm/s]) */
   strcpy(out_data[OUT_EVAP_BARE].varname,"OUT_EVAP_BARE");             /* net evaporation from bare soil [mm] (ALMA_OUTPUT: [mm/s]) */
@@ -145,6 +148,7 @@ out_data_struct *create_output_list() {
   strcpy(out_data[OUT_REFREEZE].varname,"OUT_REFREEZE");               /* refreezing of water in the snow [mm] (ALMA_OUTPUT: [mm/s]) */
   strcpy(out_data[OUT_RUNOFF].varname,"OUT_RUNOFF");                   /* surface runoff [mm] (ALMA_OUTPUT: [mm/s]) */
   strcpy(out_data[OUT_SNOW_MELT].varname,"OUT_SNOW_MELT");             /* snow melt [mm] (ALMA_OUTPUT: [mm/s]) */
+  strcpy(out_data[OUT_GLACIER_MELT].varname,"OUT_GLACIER_MELT");             /* glacier melt [mm] (ALMA_OUTPUT: [mm/s]) */
   strcpy(out_data[OUT_SNOWF].varname,"OUT_SNOWF");                     /* snowfall [mm] (ALMA_OUTPUT: [mm/s]) */
   strcpy(out_data[OUT_SUB_BLOWING].varname,"OUT_SUB_BLOWING");         /* net sublimation of blowing snow [mm] (ALMA_OUTPUT: [mm/s]) */
   strcpy(out_data[OUT_SUB_CANOP].varname,"OUT_SUB_CANOP");             /* net sublimation from snow stored in canopy [mm] (ALMA_OUTPUT: [mm/s]) */
@@ -254,6 +258,14 @@ out_data_struct *create_output_list() {
   strcpy(out_data[OUT_SNOW_PACKT_BAND].varname,"OUT_SNOW_PACKT_BAND");           /* snow pack temperature [C] (ALMA_OUTPUT: [K]) */
   strcpy(out_data[OUT_SNOW_SURFT_BAND].varname,"OUT_SNOW_SURFT_BAND");           /* snow surface temperature [C] (ALMA_OUTPUT: [K]) */
   strcpy(out_data[OUT_SWE_BAND].varname,"OUT_SWE_BAND");                         /* snow water equivalent in snow pack [mm] */
+  strcpy(out_data[OUT_SNOW_DENS_BAND].varname,"OUT_SNOW_DENS_BAND");       /* density of snow pack [kg/m3] */
+  strcpy(out_data[OUT_IWE_BAND].varname,"OUT_IWE_BAND");                         /* ice water equivalent in snow pack [mm] */
+  strcpy(out_data[OUT_BN_BAND].varname,"OUT_BN_BAND");                           /* glacier mas balance [mm] */
+  strcpy(out_data[OUT_ZWT].varname,"OUT_ZWT");                                   /* depth to water table [m] */
+  strcpy(out_data[OUT_GLQOUT_BAND].varname,"OUT_GLQOUT_BAND");
+  strcpy(out_data[OUT_GLQIN_BAND].varname,"OUT_GLQIN_BAND");
+  strcpy(out_data[OUT_GL_MELT_BAND].varname,"OUT_GL_MELT_BAND");
+  strcpy(out_data[OUT_GL_OVER_BAND].varname,"OUT_GL_OVER_BAND");
 
   // Set number of elements - default is 1
   for (v=0; v<N_OUTVAR_TYPES; v++) {
@@ -293,6 +305,13 @@ out_data_struct *create_output_list() {
   out_data[OUT_SNOW_PACKT_BAND].nelem = options.SNOW_BAND;
   out_data[OUT_SNOW_SURFT_BAND].nelem = options.SNOW_BAND;
   out_data[OUT_SWE_BAND].nelem = options.SNOW_BAND;
+  out_data[OUT_SNOW_DENS_BAND].nelem = options.SNOW_BAND;
+  out_data[OUT_IWE_BAND].nelem = options.SNOW_BAND;
+  out_data[OUT_BN_BAND].nelem = options.SNOW_BAND;
+  out_data[OUT_GLQOUT_BAND].nelem = options.SNOW_BAND;
+  out_data[OUT_GLQIN_BAND].nelem = options.SNOW_BAND;
+  out_data[OUT_GL_MELT_BAND].nelem = options.SNOW_BAND;
+  out_data[OUT_GL_OVER_BAND].nelem = options.SNOW_BAND;
 
   // Set aggregation method - default is to average over the interval
   for (v=0; v<N_OUTVAR_TYPES; v++) {
@@ -322,6 +341,8 @@ out_data_struct *create_output_list() {
   out_data[OUT_SURFSTOR].aggtype = AGG_TYPE_END;
   out_data[OUT_SURF_FROST_FRAC].aggtype = AGG_TYPE_END;
   out_data[OUT_SWE].aggtype = AGG_TYPE_END;
+  out_data[OUT_SNOW_DENSITY].aggtype = AGG_TYPE_END;
+  out_data[OUT_IWE].aggtype = AGG_TYPE_END;
   out_data[OUT_WDEW].aggtype = AGG_TYPE_END;
   out_data[OUT_ZWT].aggtype = AGG_TYPE_END;
   out_data[OUT_ZWT_LUMPED].aggtype = AGG_TYPE_END;
@@ -329,10 +350,14 @@ out_data_struct *create_output_list() {
   out_data[OUT_SNOW_COVER_BAND].aggtype = AGG_TYPE_END;
   out_data[OUT_SNOW_DEPTH_BAND].aggtype = AGG_TYPE_END;
   out_data[OUT_SWE_BAND].aggtype = AGG_TYPE_END;
+  out_data[OUT_SNOW_DENS_BAND].aggtype = AGG_TYPE_END;
+  out_data[OUT_IWE_BAND].aggtype = AGG_TYPE_END;
+  out_data[OUT_BN_BAND].aggtype = AGG_TYPE_END;
   out_data[OUT_BASEFLOW].aggtype = AGG_TYPE_SUM;
   out_data[OUT_DELINTERCEPT].aggtype = AGG_TYPE_SUM;
   out_data[OUT_DELSOILMOIST].aggtype = AGG_TYPE_SUM;
   out_data[OUT_DELSWE].aggtype = AGG_TYPE_SUM;
+  out_data[OUT_DELIWE].aggtype = AGG_TYPE_SUM;
   out_data[OUT_DELSURFSTOR].aggtype = AGG_TYPE_SUM;
   out_data[OUT_EVAP].aggtype = AGG_TYPE_SUM;
   out_data[OUT_EVAP_BARE].aggtype = AGG_TYPE_SUM;
@@ -383,6 +408,10 @@ out_data_struct *create_output_list() {
   out_data[OUT_SURFT_FBFLAG].aggtype = AGG_TYPE_SUM;
   out_data[OUT_TCAN_FBFLAG].aggtype = AGG_TYPE_SUM;
   out_data[OUT_TFOL_FBFLAG].aggtype = AGG_TYPE_SUM;
+  out_data[OUT_GLQOUT_BAND].aggtype = AGG_TYPE_SUM;
+  out_data[OUT_GLQIN_BAND].aggtype = AGG_TYPE_SUM;
+  out_data[OUT_GLACIER_MELT].aggtype = AGG_TYPE_SUM;
+  out_data[OUT_GL_MELT_BAND].aggtype = AGG_TYPE_SUM;
 
   // Allocate space for data
   for (v=0; v<N_OUTVAR_TYPES; v++) {

@@ -179,7 +179,7 @@ int initialize_model_state(all_vars_struct     *all_vars,
     - some may be reset if state file present
   ********************************************/
 
-  initialize_snow(snow, Nveg, cellnum);
+  initialize_snow(snow, soil_con, Nveg, cellnum);
 
   /********************************************
     Initialize all soil layer variables 
@@ -299,7 +299,8 @@ int initialize_model_state(all_vars_struct     *all_vars,
         else {
           pack_swq = 0;
           surf_swq = snow[veg][band].swq;
-          snow[veg][band].pack_temp = 0;
+          snow[veg][band].pack_temp = 0.;
+          snow[veg][band].pack_coldcontent = 0.;
         }
         if (snow[veg][band].surf_water > LIQUID_WATER_CAPACITY*surf_swq) {
           snow[veg][band].pack_water += snow[veg][band].surf_water - (LIQUID_WATER_CAPACITY*surf_swq);
@@ -402,7 +403,7 @@ int initialize_model_state(all_vars_struct     *all_vars,
 	      Zsum += (soil_con->dz_node[Nnodes-2]
 		       +soil_con->dz_node[Nnodes-1])/2.;
 	      soil_con->Zsum_node[Nnodes-1] = Zsum;
-	      if((int)(Zsum*1000+0.5) != (int)(dp*1000+0.5)) {
+	      if((int)(Zsum*MMPERMETER+0.5) != (int)(dp*MMPERMETER+0.5)) {
 		sprintf(ErrStr,"Sum of thermal node thicknesses (%f) in initialize_model_state do not equal dp (%f), check initialization procedure",Zsum,dp);
 		nrerror(ErrStr);
 	      }
@@ -531,7 +532,7 @@ int initialize_model_state(all_vars_struct     *all_vars,
           /* Check node spacing v time step */
           /* (note this is only approximate since heat capacity and conductivity can change considerably during the simulation depending on soil moisture and ice content) */
           if ((options.FROZEN_SOIL && !options.QUICK_FLUX) && !options.IMPLICIT) {
-            dt_thresh = 0.5*energy[veg][band].Cs_node[1]/energy[veg][band].kappa_node[1]*pow((soil_con->dz_node[1]),2)/3600; // in hours
+            dt_thresh = 0.5*energy[veg][band].Cs_node[1]/energy[veg][band].kappa_node[1]*pow((soil_con->dz_node[1]),2)/SECPHOUR; // in hours
             if (global_param->dt > dt_thresh) {
               sprintf(ErrStr,"ERROR: You are currently running FROZEN SOIL with an explicit method (IMPLICIT is set to FALSE).  For the explicit method to be stable, time step %d hours is too large for the given thermal node spacing %f m, soil heat capacity %f J/m3/K, and soil thermal conductivity %f J/m/s/K.  Either set IMPLICIT to TRUE in your global parameter file (this is the recommended action), or decrease time step length to <= %f hours, or decrease the number of soil thermal nodes.",global_param->dt,soil_con->dz_node[1],energy[veg][band].Cs_node[1],energy[veg][band].kappa_node[1],dt_thresh);
               nrerror(ErrStr);
@@ -622,7 +623,7 @@ int initialize_model_state(all_vars_struct     *all_vars,
       energy[veg][band].snow_flux         = 0.0;
       /* Initial estimate of LongUnderOut for use by snow_intercept() */
       tmp = energy[veg][band].T[0] + KELVIN;
-      energy[veg][band].LongUnderOut = STEFAN_B * tmp * tmp * tmp * tmp;
+      energy[veg][band].LongUnderOut = calc_outgoing_longwave(tmp, EMISS);
       energy[veg][band].Tfoliage     = Tair + soil_con->Tfactor[band];
     }
   }
@@ -745,7 +746,7 @@ int update_thermal_nodes(all_vars_struct     *all_vars,
     Zsum += (soil_con->dz_node[Nnodes-2]
 	     +soil_con->dz_node[Nnodes-1])/2.;
     soil_con->Zsum_node[Nnodes-1] = Zsum;
-    if((int)(Zsum*1000+0.5) != (int)(dp*1000+0.5)) {
+    if((int)(Zsum*MMPERMETER+0.5) != (int)(dp*MMPERMETER+0.5)) {
       sprintf(ErrStr,"Sum of thermal node thicknesses (%f) in initialize_model_state do not equal dp (%f), check initialization procedure",Zsum,dp);
       nrerror(ErrStr);
     }

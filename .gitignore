@@ -15,5 +15,13 @@
 *.dylib
 
 vicNl
+DEPEND
+.depend
+VIC.sublime-project
+VIC.sublime-workspace
+*.sublime-project
+*.sublime-workspace
 
 .DS_Store
+
+*.uncrustify

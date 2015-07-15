@@ -216,7 +216,7 @@ int  runoff(cell_data_struct  *cell,
 
   /** Set Residual Moisture **/
   for ( i = 0; i < options.Nlayer; i++ ) 
-    resid_moist[i] = soil_con->resid_moist[i] * soil_con->depth[i] * 1000.;
+    resid_moist[i] = soil_con->resid_moist[i] * soil_con->depth[i] * MMPERMETER;
 
   /** Allocate and Set Values for Soil Sublayers **/
   layer = cell->layer;
@@ -284,7 +284,7 @@ int  runoff(cell_data_struct  *cell,
       Initialize Variables
     **************************************************/
     for ( lindex = 0; lindex < options.Nlayer; lindex++ ) {
-      Ksat[lindex]         = soil_con->Ksat[lindex] / 24.;
+      Ksat[lindex]         = soil_con->Ksat[lindex] / HOURSPERDAY;
       b[lindex]            = (soil_con->expt[lindex] - 3.) / 2.;
 
       /** Set Layer Liquid Moisture Content **/
@@ -418,7 +418,7 @@ int  runoff(cell_data_struct  *cell,
           soil layer moisture from previous time step) **/
 	    
       lindex = options.Nlayer-1;
-      Dsmax = soil_con->Dsmax / 24.;
+      Dsmax = soil_con->Dsmax / HOURSPERDAY;
 
       /** Compute relative moisture **/
       rel_moist = (liq[lindex]-resid_moist[lindex]) / (soil_con->max_moist[lindex]-resid_moist[lindex]);

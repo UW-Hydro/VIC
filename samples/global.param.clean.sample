@@ -1,0 +1,154 @@
+#######################################################################
+# VIC Model Parameters - 4.1.x
+#######################################################################
+
+#######################################################################
+# Simulation Parameters
+#######################################################################
+NLAYER              3
+NODES               10
+TIME_STEP           3
+SNOW_STEP           3
+STARTYEAR           2000
+STARTMONTH          01
+STARTDAY            01 
+STARTHOUR           00
+ENDYEAR             2000
+ENDMONTH            12
+ENDDAY              31
+
+#######################################################################
+# Energy Balance Parameters
+#######################################################################
+FULL_ENERGY         FALSE
+#CLOSE_ENERGY       FALSE
+
+#######################################################################
+# Soil Temperature Parameters
+#######################################################################
+FROZEN_SOIL         FALSE
+#QUICK_FLUX         FALSE
+#IMPLICIT           TRUE
+#QUICK_SOLVE        FALSE
+#NO_FLUX            FALSE
+#EXP_TRANS          TRUE
+#GRND_FLUX_TYPE     GF_410
+
+#TFALLBACK          TRUE
+#SPATIAL_FROST      FALSE   (Nfrost)
+
+#######################################################################
+# Precip (Rain and Snow) Parameters
+# Generally these default values do not need to be overridden
+#######################################################################
+#SNOW_DENSITY       DENS_BRAS
+#BLOWING            FALSE
+#GLACIER            FALSE  
+#GLACIER_OVERFLOW   TRUE
+#COMPUTE_TREELINE   FALSE
+#DIST_PRCP          FALSE
+#PREC_EXPT          0.6
+#CORRPREC           FALSE
+#MAX_SNOW_TEMP      0.5
+#MIN_RAIN_TEMP      -0.5
+
+#######################################################################
+# Turbulent Flux Parameters
+# Generally these default values do not need to be overridden
+#######################################################################
+#MIN_WIND_SPEED     0.1
+#AERO_RESIST_CANSNOW    AR_406_FULL
+
+#######################################################################
+# Meteorological Forcing Disaggregation Parameters
+# Generally these default values do not need to be overridden
+#######################################################################
+#OUTPUT_FORCE       FALSE
+#PLAPSE             TRUE
+#SW_PREC_THRESH     0
+#MTCLIM_SWE_CORR    TRUE
+#VP_ITER            VP_ITER_ANNUAL      
+#VP_INTERP          TRUE
+#LW_TYPE            LW_PRATA    
+#LW_CLOUD           LW_CLOUD_DEARDORFF
+
+#######################################################################
+# Miscellaneous Simulation Parameters
+# Generally these default values do not need to be overridden
+#######################################################################
+#CONTINUEONERROR    TRUE
+#LOG_MATRIC         FALSE
+#SPATIAL_SNOW       FALSE
+                       
+#######################################################################
+# State Files and Parameters
+#######################################################################
+#INIT_STATE         (put the initial state path/filename here)
+#STATENAME          (put the path/prefix of output state file here)
+#STATEYEAR          2000
+#STATEMONTH         12
+#STATEDAY           31
+#BINARY_STATE_FILE  FALSE
+
+#######################################################################
+# Forcing Files and Parameters
+#######################################################################
+FORCING1            (put the forcing path/prefix here)
+FORCE_FORMAT        BINARY
+FORCE_ENDIAN        LITTLE
+N_TYPES             4
+FORCE_TYPE          PREC    UNSIGNED    40
+FORCE_TYPE          TMAX    SIGNED      100
+FORCE_TYPE          TMIN    SIGNED      100
+FORCE_TYPE          WIND    SIGNED      100
+FORCE_DT            24
+FORCEYEAR           2000
+FORCEMONTH          01
+FORCEDAY            01
+FORCEHOUR           00
+GRID_DECIMAL        4
+WIND_H              10.0   
+MEASURE_H           2.0    
+ALMA_INPUT          FALSE
+
+#######################################################################
+# Land Surface Files and Parameters
+#######################################################################
+SOIL                (put the soil parameter path/file here)
+ARC_SOIL            FALSE  
+#SOIL_DIR           (soil param directory)  
+BASEFLOW            ARNO
+JULY_TAVG_SUPPLIED  FALSE
+ORGANIC_FRACT       FALSE
+VEGLIB              (put the veg library path/file here)
+VEGPARAM            (put the veg parameter path/file here)
+ROOT_ZONES          3
+VEGPARAM_LAI        TRUE   
+LAI_SRC             LAI_FROM_VEGLIB   
+SNOW_BAND           1
+#EQUAL_AREA         FALSE
+#RESOLUTION         0.125
+
+#######################################################################
+# Lake Simulation Parameters
+# These need to be un-commented and set to correct values only when running lake model (LAKES is not FALSE)
+#######################################################################
+#LAKES              (put lake parameter path/file here)
+#LAKE_PROFILE       FALSE
+
+#######################################################################
+# Output Files and Parameters
+#######################################################################
+RESULT_DIR          (put the result directory path here)
+OUT_STEP            0      
+SKIPYEAR            0
+COMPRESS            FALSE
+BINARY_OUTPUT       FALSE
+ALMA_OUTPUT         FALSE
+MOISTFRACT          FALSE
+PRT_HEADER          FALSE  
+PRT_SNOW_BAND       FALSE  
+
+#######################################################################
+# Output File Contents
+#######################################################################

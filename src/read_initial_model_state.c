@@ -304,6 +304,9 @@ void read_initial_model_state(FILE                *init_state,
 	if ( fread( &snow[veg][band].swq, sizeof(double), 1, 
 		    init_state ) != 1 )
 	  nrerror("End of model state file found unexpectedly");
+  if ( fread( &snow[veg][band].iwq, sizeof(double), 1, 
+        init_state ) != 1 )
+    nrerror("End of model state file found unexpectedly");
 	if ( fread( &snow[veg][band].surf_temp, sizeof(double), 1, 
 		    init_state ) != 1 )
 	  nrerror("End of model state file found unexpectedly");
@@ -319,27 +322,32 @@ void read_initial_model_state(FILE                *init_state,
 	if ( fread( &snow[veg][band].density, sizeof(double), 1, 
 		    init_state ) != 1 )
 	  nrerror("End of model state file found unexpectedly");
-	if ( fread( &snow[veg][band].coldcontent, sizeof(double), 1, 
+	if ( fread( &snow[veg][band].surf_coldcontent, sizeof(double), 1, 
 		    init_state ) != 1 )
 	  nrerror("End of model state file found unexpectedly");
+  if ( fread( &snow[veg][band].pack_coldcontent, sizeof(double), 1, 
+        init_state ) != 1 )
+    nrerror("End of model state file found unexpectedly");
 	if ( fread( &snow[veg][band].snow_canopy, sizeof(double), 1, 
 		    init_state ) != 1 )
 	  nrerror("End of model state file found unexpectedly");
       }
       else {
-	if ( fscanf(init_state," %d %d %lf %lf %lf %lf %lf %lf %lf %lf %lf", 
+	if ( fscanf(init_state," %d %d %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf", 
 		    &snow[veg][band].last_snow, &tmp_char,
-		    &snow[veg][band].coverage, &snow[veg][band].swq, 
+		    &snow[veg][band].coverage, &snow[veg][band].swq, &snow[veg][band].iwq,
 		    &snow[veg][band].surf_temp, &snow[veg][band].surf_water, 
 		    &snow[veg][band].pack_temp, &snow[veg][band].pack_water, 
-		    &snow[veg][band].density, &snow[veg][band].coldcontent, 
+		    &snow[veg][band].density, &snow[veg][band].surf_coldcontent,
+        &snow[veg][band].pack_coldcontent, 
 		    &snow[veg][band].snow_canopy) 
 	     == EOF ) 
 	  nrerror("End of model state file found unexpectedly");
 	snow[veg][band].MELTING = (char)tmp_char;
       }
+
       if(snow[veg][band].density > 0.) 
-	snow[veg][band].depth = 1000. * snow[veg][band].swq 
+	snow[veg][band].depth = MMPERMETER * snow[veg][band].swq 
 	  / snow[veg][band].density;
       
       /* Read soil thermal node temperatures */
@@ -402,12 +410,14 @@ void read_initial_model_state(FILE                *init_state,
 	nrerror("End of model state file found unexpectedly");
       if ( fread( &lake_var->snow.density, sizeof(double), 1, init_state ) != 1 )
 	nrerror("End of model state file found unexpectedly");
-      if ( fread( &lake_var->snow.coldcontent, sizeof(double), 1, init_state ) != 1 )
+      if ( fread( &lake_var->snow.surf_coldcontent, sizeof(double), 1, init_state ) != 1 )
 	nrerror("End of model state file found unexpectedly");
+      if ( fread( &lake_var->snow.pack_coldcontent, sizeof(double), 1, init_state ) != 1 )
+  nrerror("End of model state file found unexpectedly");
       if ( fread( &lake_var->snow.snow_canopy, sizeof(double), 1, init_state ) != 1 )
 	nrerror("End of model state file found unexpectedly");
       if(lake_var->snow.density > 0.) 
-	lake_var->snow.depth = 1000. * lake_var->snow.swq / lake_var->snow.density;
+	lake_var->snow.depth = MMPERMETER * lake_var->snow.swq / lake_var->snow.density;
       
       /* Read soil thermal node temperatures */
       for ( nidx = 0; nidx < options.Nnode; nidx++ ) {
@@ -493,18 +503,19 @@ void read_initial_model_state(FILE                *init_state,
       }
 
       /* Read snow data */
-      if ( fscanf(init_state," %d %d %lf %lf %lf %lf %lf %lf %lf %lf %lf", 
+      if ( fscanf(init_state," %d %d %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf", 
 		  &lake_var->snow.last_snow, &tmp_char,
 		  &lake_var->snow.coverage, &lake_var->snow.swq, 
 		  &lake_var->snow.surf_temp, &lake_var->snow.surf_water, 
 		  &lake_var->snow.pack_temp, &lake_var->snow.pack_water, 
-		  &lake_var->snow.density, &lake_var->snow.coldcontent, 
+		  &lake_var->snow.density, &lake_var->snow.surf_coldcontent,
+      &lake_var->snow.pack_coldcontent,
 		  &lake_var->snow.snow_canopy)
 	   == EOF ) 
         nrerror("End of model state file found unexpectedly");
       lake_var->snow.MELTING = (char)tmp_char;
       if(lake_var->snow.density > 0.) 
-	lake_var->snow.depth = 1000. * lake_var->snow.swq / lake_var->snow.density;
+	lake_var->snow.depth = MMPERMETER * lake_var->snow.swq / lake_var->snow.density;
       
       /* Read soil thermal node temperatures */
       for ( nidx = 0; nidx < options.Nnode; nidx++ ) {

@@ -135,7 +135,7 @@ int water_energy_balance(int     numnod,
       Compute the Latent Heat Flux 
     **********************************************************************/
  
-    Le = (2.501 - 0.002361 * Tair) * 1.0e6;   /*J/kg  */
+    Le = calc_latent_heat_of_vaporization(Tair);   /*J/kg  */
  
     *Qle = -1.*(*evapw)*Le;                          /* W/m^2 */
 
@@ -143,7 +143,7 @@ int water_energy_balance(int     numnod,
      * Calculate the outgoing long wave fluxes, positive downwards.
      * -------------------------------------------------------------------- */
 
-    *LWnet = longwave -EMH2O*STEFAN_B*Tskin*Tskin*Tskin*Tskin;
+    *LWnet = longwave - calc_outgoing_longwave(Tskin, EMISS);
  
     /*************************************************************
       Use a Triadiagonal Matric to Explicitly Solve for 
@@ -199,10 +199,10 @@ int water_energy_balance(int     numnod,
     latsens (Tskin, Tcutk, 0.0, Tair, wind, pressure, vp, air_density,
              evapw, Qh, wind_h);
 
-    Le = (2.501 - 0.002361 * Tair) * 1.0e6;     /*J/kg  */
+    Le = calc_latent_heat_of_vaporization(Tair);     /*J/kg  */
     *Qle = -1.*(*evapw)*Le;                          /* W/m^2 */
 
-    *LWnet = longwave -EMH2O*STEFAN_B*Tskin*Tskin*Tskin*Tskin;
+    *LWnet = longwave - calc_outgoing_longwave(Tskin, EMH2O);
 
     if(T[0] <  Tcutoff) {
       iceform (energy_ice_formation, T, Tcutoff, fracprv, new_ice_area,

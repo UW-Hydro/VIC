@@ -201,10 +201,10 @@ int snow_intercept(double  Dt,
   *Tfoliage_fbflag = 0;
 
   /* Convert Units from VIC (mm -> m) */
-  *RainFall /= 1000.;
-  *SnowFall /= 1000.;
-  *IntRain  /= 1000.;
-  MaxInt    /= 1000.;
+  *RainFall /= MMPERMETER;
+  *SnowFall /= MMPERMETER;
+  *IntRain  /= MMPERMETER;
+  MaxInt    /= MMPERMETER;
   IntRainOrg = *IntRain;
 
   /* Initialize Drip, H2O balance, and mass release variables. */
@@ -467,7 +467,7 @@ int snow_intercept(double  Dt,
   }
 
   if ( *IntSnow <= 0 )
-    RainThroughFall = veg_var->throughfall / 1000.;
+    RainThroughFall = veg_var->throughfall / (double)MMPERMETER;
 
   RefreezeEnergy *= Dt;
 
@@ -618,9 +618,9 @@ int snow_intercept(double  Dt,
 
   /* Convert Units to VIC (m -> mm) */
   *VaporMassFlux *= -1.;
-  *RainFall *= 1000.;
-  *SnowFall *= 1000.;
-  *IntRain  *= 1000.;
+  *RainFall *= MMPERMETER;
+  *SnowFall *= MMPERMETER;
+  *IntRain  *= MMPERMETER;
 
   /*** FIX THIS ***/
   *MeltEnergy = RefreezeEnergy / Dt;

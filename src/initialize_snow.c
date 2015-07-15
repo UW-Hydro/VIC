@@ -4,9 +4,10 @@
 
 static char vcid[] = "$Id$";
 
-void initialize_snow (snow_data_struct **snow, 
-		      int                veg_num,
-		      int                cellnum)
+void initialize_snow(snow_data_struct **snow,
+                     soil_con_struct   *soil_con,  
+                     int                veg_num,
+		                 int                cellnum)
 /**********************************************************************
 	initialize_snow		Keith Cherkauer		January 22, 1997
 
@@ -30,7 +31,8 @@ void initialize_snow (snow_data_struct **snow,
     snow[i][j].canopy_vapor_flux; depth of water evaporation, sublimation, or 
                                   condensation from intercepted snow (m) 
     snow[i][j].albedo;            snow surface albedo (fraction) 
-    snow[i][j].coldcontent;       cold content of snow pack 
+    snow[i][j].surf_coldcontent;  cold content of snow surface layer 
+    snow[i][j].pack_coldcontent;  cold content of snow pack layer 
     snow[i][j].mass_error;        snow mass balance error 
     snow[i][j].density;	          snow density (kg/m^3) 
     snow[i][j].depth;	          snow depth (m) 
@@ -73,7 +75,8 @@ void initialize_snow (snow_data_struct **snow,
       // State vars
       snow[i][j].albedo            = 0.0;
       snow[i][j].canopy_albedo     = 0.0;
-      snow[i][j].coldcontent       = 0.0;
+      snow[i][j].surf_coldcontent  = 0.0;
+      snow[i][j].pack_coldcontent  = 0.0;
       snow[i][j].coverage          = 0.0;
       snow[i][j].density           = 0.0;
       snow[i][j].depth             = 0.0;
@@ -94,6 +97,16 @@ void initialize_snow (snow_data_struct **snow,
       snow[i][j].swq               = 0.0;
       snow[i][j].snow_distrib_slope= 0.0;
       snow[i][j].tmp_int_storage   = 0.0;
+      snow[i][j].swqold            = 0.0;
+      snow[i][j].iwq               = 0.0;
+      snow[i][j].iwqold            = 0.0;
+      snow[i][j].bn                = 0.0;
+      snow[i][j].icedepth          = 0.0;
+      snow[i][j].glarea            = 0.0;
+      snow[i][j].glwater           = 0.0;
+      snow[i][j].Qin               = 0.0;
+      snow[i][j].Qout              = 0.0;
+
       // Fluxes
       snow[i][j].blowing_flux      = 0.0;
       snow[i][j].canopy_vapor_flux = 0.0;
@@ -103,6 +116,8 @@ void initialize_snow (snow_data_struct **snow,
       snow[i][j].surface_flux      = 0.0;
       snow[i][j].transport         = 0.0;
       snow[i][j].vapor_flux        = 0.0;
+      snow[i][j].glmelt            = 0.0;
+      snow[i][j].gl_overflow       = 0.0;
     }
   }
 }

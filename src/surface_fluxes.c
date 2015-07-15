@@ -538,7 +538,7 @@ int surface_fluxes(char                 overstory,
 
     // Compute mass flux of blowing snow
     if( !overstory && options.BLOWING && step_snow.swq > 0.) {
-      Ls = (677. - 0.07 * step_snow.surf_temp) * JOULESPCAL * GRAMSPKG;
+      Ls = calc_latent_heat_of_sublimation(step_snow.surf_temp);
       step_snow.blowing_flux = CalcBlowingSnow((double) step_dt, Tair,
 						step_snow.last_snow, step_snow.surf_water,
 						wind[2], Ls, atmos->density[hidx],
@@ -642,9 +642,9 @@ int surface_fluxes(char                 overstory,
 	/** Solve snow accumulation, ablation and interception **/
 	step_melt = solve_snow(overstory, BareAlbedo, LongUnderOut, 
 			       gp->MIN_RAIN_TEMP, gp->MAX_SNOW_TEMP, 
-			       Tcanopy, Tgrnd, Tair, dp,
-			       step_prec, snow_grnd_flux, gp->wind_h, 
-			       &energy->AlbedoUnder, &step_Evap, Le, 
+			       Tcanopy, Tgrnd, Tair,
+			       step_prec, snow_grnd_flux, 
+			       &energy->AlbedoUnder, Le, 
 			       &LongUnderIn, &NetLongSnow, &NetShortGrnd, 
 			       &NetShortSnow, &ShortUnderIn, &OldTSurf, 
 			       iter_aero_resist, iter_aero_resist_used,
@@ -654,15 +654,14 @@ int surface_fluxes(char                 overstory,
 			       &step_out_prec, &step_out_rain, &step_out_snow,
 			       &step_ppt, &rainfall, ref_height, 
 			       roughness, snow_inflow, &snowfall, &surf_atten, 
-			       wind, root, UNSTABLE_SNOW, options.Nnode, 
+			       wind, root, UNSTABLE_SNOW,
 			       Nveg, iveg, band, step_dt, rec, hidx, veg_class,
 			       &UnderStory, CanopLayerBnd, &dryFrac, 
 			       dmy, atmos, &(iter_snow_energy), 
 			       iter_layer, &(iter_snow), 
 			       soil_con, 
 			       &(iter_snow_veg_var));
-      
-// iter_snow_energy.sensible + iter_snow_energy.latent + iter_snow_energy.latent_sub + NetShortSnow + NetLongSnow + ( snow_grnd_flux + iter_snow_energy.advection - iter_snow_energy.deltaCC + iter_snow_energy.refreeze_energy + iter_snow_energy.advected_sensible ) * step_snow.coverage
+  
         if ( step_melt == ERROR ) return (ERROR);
 
 	/* Check that the snow surface temperature was estimated, if not
@@ -691,7 +690,7 @@ int surface_fluxes(char                 overstory,
 				     iter_snow_energy.sensible, 
 				     Tcanopy, VPDcanopy, 
 				     VPcanopy, iter_snow_energy.advection, 
-				     step_snow.coldcontent, delta_coverage, dp, 
+				     step_snow.surf_coldcontent, delta_coverage, dp, 
 				     ice0, step_melt_energy, moist0,
 				     iter_snow.coverage, 
 				     (step_snow.depth + iter_snow.depth) / 2., 
@@ -781,7 +780,7 @@ int surface_fluxes(char                 overstory,
 	}
 	else {
 	  store_tol_under = snow_flux - iter_soil_energy.snow_flux;
-	  tol_under       = fabs(store_tol_under);
+    tol_under       = fabs(store_tol_under);
 	}
 	if ( fabs( tol_under - last_tol_under ) < GRND_TOL && tol_under > 1. )
 	  tol_under = -999;

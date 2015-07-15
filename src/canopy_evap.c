@@ -198,7 +198,7 @@ double canopy_evap(layer_data_struct *layer,
     tmp_Evap          += layerevap[i];
   }
     
-  Evap += tmp_Evap / (1000. * delta_t);
+  Evap += tmp_Evap / (MMPERMETER * delta_t);
 
   return (Evap);
 

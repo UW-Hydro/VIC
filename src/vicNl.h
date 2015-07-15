@@ -315,7 +315,7 @@ int   initialize_model_state(all_vars_struct *, dmy_struct,
 			      int, int, int, 
 			      double, soil_con_struct *,
                               veg_con_struct *, lake_con_struct);
-void   initialize_snow(snow_data_struct **, int, int);
+void   initialize_snow(snow_data_struct **, soil_con_struct *, int, int);
 void   initialize_soil(cell_data_struct **, soil_con_struct *, veg_con_struct *, int);
 void   initialize_veg( veg_var_struct **, veg_con_struct *,
 		       global_param_struct *, int);
@@ -410,6 +410,10 @@ void set_node_parameters(double *, double *, double *, double *, double *, doubl
 out_data_file_struct *set_output_defaults(out_data_struct *);
 int set_output_var(out_data_file_struct *, int, int, out_data_struct *, char *, int, char *, int, float);
 double snow_albedo(double, double, double, double, double, double, int, char);
+double calc_snow_depth(double, double);
+double calc_cold_content(double, double);
+double calc_temp_from_cc(double, double);
+void snow_to_ice(double *, double *, double *, double *);
 double snow_density(snow_data_struct *, double, double, double, double, double);
 int    snow_intercept(double, double, double, double, double, double,
                       double, double, double, double, double, 
@@ -434,14 +438,13 @@ void   soil_carbon_balance(soil_con_struct *, energy_bal_struct *,
                            cell_data_struct *, veg_var_struct *);
 double soil_conductivity(double, double, double, double, double, double, double, double);
 double soil_thermal_eqn(double, va_list);
-double solve_snow(char, double, double, double, double, double,
-                  double, double, double, double, double, double,
+double solve_snow(char, double, double, double, double, double, double, double, 
+                  double, double, double *, double *, double *, double *,
                   double *, double *, double *, double *, double *,
-                  double *, double *, double *, double *, double *,
                   double *, double *, double *, double *, double *, double *,
                   double *, double *, double *, double *, double *, double *,
                   double *, double *, double *, double *, double *, double *,
-                  float *, int, int, int, int, int, int, int, int, int, int *,
+                  float *, int, int, int, int, int, int, int, int, int *,
                   double *, double *,
                   dmy_struct *, atmos_data_struct *, energy_bal_struct *,
                   layer_data_struct *,
@@ -500,3 +503,10 @@ void write_vegvar(veg_var_struct *, int);
 
 void zero_output_list(out_data_struct *);
 
+int  gl_flow(snow_data_struct **, soil_con_struct *, veg_con_struct *, int);
+int  gl_volume_area(snow_data_struct **, soil_con_struct *, veg_con_struct *, 
+                    int, int);
+double calc_latent_heat_of_vaporization(double);
+double calc_latent_heat_of_sublimation(double);
+double calc_outgoing_longwave(double, double);
+double calc_sensible_heat(double, double, double, double);

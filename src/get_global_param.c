@@ -666,7 +666,31 @@ global_param_struct get_global_param(filenames_struct *names,
 	  options.LAKE_PROFILE = TRUE;
 	}
       }
+      else if (strcasecmp("GLACIER", optstr) == 0) {
+        sscanf(cmdstr,"%*s %s", flgstr);
+        if (strcasecmp("DYNAMIC", flgstr) == 0) {
+          options.GLACIER = GL_DYNAMIC;
+        }
+        else if (strcasecmp("SCALING", flgstr) == 0) {
+          options.GLACIER = GL_SCALING;
+        }
+        else if (strcasecmp("FALSE", flgstr) == 0) {
+          options.GLACIER = FALSE;
+        }
+        else {
+          nrerror("Unknown value for GLACIER Option, valid values are DYNAMIC, SCALING, or FALSE");
+        }
+      }
+      else if (strcasecmp("GLACIER_OVERFLOW", optstr) == 0) {
+        sscanf(cmdstr,"%*s %s", flgstr);
+        if (strcasecmp("FALSE", flgstr) == 0) {
+          options.GLACIER_OVERFLOW = FALSE;
+        }
+        else {
+          options.GLACIER_OVERFLOW = TRUE;
+        }
 
+      }
       /*************************************
        Define output files
       *************************************/
@@ -754,12 +778,12 @@ global_param_struct get_global_param(filenames_struct *names,
   if (global.out_dt == 0 || global.out_dt == MISSING) {
     global.out_dt = global.dt;
   }
-  else if (global.out_dt < global.dt || global.out_dt > 24 || (float)global.out_dt/(float)global.dt != (float)(global.out_dt/global.dt)){
+  else if (global.out_dt < global.dt || global.out_dt > HOURSPERDAY || (float)global.out_dt/(float)global.dt != (float)(global.out_dt/global.dt)){
     nrerror("Invalid output step specified.  Output step must be an integer multiple of the model time step; >= model time step and <= 24");
   }
 
   // Validate SNOW_STEP and set NR and NF
-  if (global.dt < 24 && global.dt != options.SNOW_STEP)
+  if (global.dt < HOURSPERDAY && global.dt != options.SNOW_STEP)
     nrerror("If the model step is smaller than daily, the snow model should run\nat the same time step as the rest of the model.");
   if (global.dt % options.SNOW_STEP != 0 || options.SNOW_STEP > global.dt)
     nrerror("SNOW_STEP should be <= TIME_STEP and divide TIME_STEP evenly ");
@@ -789,7 +813,7 @@ global_param_struct get_global_param(filenames_struct *names,
     nrerror(ErrStr);
   }
   if (global.starthour == MISSING) {
-    if (global.dt == 24)
+    if (global.dt == HOURSPERDAY)
       global.starthour = 0;
     else
       nrerror("Simulation start hour has not been defined, yet model time step is less than 24 hours.  Make sure that the global file defines STARTHOUR.");
@@ -1038,6 +1062,34 @@ global_param_struct get_global_param(filenames_struct *names,
     }
     if (options.COMPUTE_TREELINE) {
       sprintf(ErrStr, "LAKES = TRUE and COMPUTE_TREELINE = TRUE are incompatible options.");
+      nrerror(ErrStr);
+    }
+  }
+
+  // Validate glacier parameter information
+  if (options.GLACIER) {
+    if (options.COMPUTE_TREELINE) {
+      sprintf(ErrStr, "GLACIER = TRUE and COMPUTE_TREELINE = TRUE are incompatible (untested) options.");
+      nrerror(ErrStr);
+    }
+    if (options.SPATIAL_SNOW) {
+      sprintf(ErrStr, "GLACIER = TRUE and SPATIAL_SNOW = TRUE are incompatible (untested) options.");
+      nrerror(ErrStr);
+    }
+    if (options.BLOWING) {
+      sprintf(ErrStr, "GLACIER = TRUE and BLOWING = TRUE are incompatible (untested) options.");
+      nrerror(ErrStr);
+    }
+    if (!options.FULL_ENERGY) {
+      sprintf(ErrStr, "GLACIER = TRUE and FULL_ENERGY = FALSE are incompatible options.");
+      nrerror(ErrStr);
+    }
+    if (global.resolution == MISSING || global.resolution <= 0) {
+      sprintf(ErrStr, "The model grid cell resolution (RESOLUTION) must be defined in the global control file when the lake model is active.");
+      nrerror(ErrStr);
+    }
+    if (global.resolution > 360 && !options.EQUAL_AREA) {
+      sprintf(ErrStr, "For EQUAL_AREA=FALSE, the model grid cell resolution (RESOLUTION) must be set to the number of lat or lon degrees per grid cell.  This cannot exceed 360.");
       nrerror(ErrStr);
     }
   }

@@ -86,9 +86,9 @@ void write_forcing_file(atmos_data_struct *atmos,
         out_data[OUT_RAINF].aggdata[0] /= dt_sec;
         out_data[OUT_SNOWF].aggdata[0] /= dt_sec;
         out_data[OUT_AIR_TEMP].aggdata[0] += KELVIN;
-        out_data[OUT_PRESSURE].aggdata[0] *= 1000;
-        out_data[OUT_VP].aggdata[0] *= 1000;
-        out_data[OUT_VPD].aggdata[0] *= 1000;
+        out_data[OUT_PRESSURE].aggdata[0] *= kPa2Pa;
+        out_data[OUT_VP].aggdata[0] *= kPa2Pa;
+        out_data[OUT_VPD].aggdata[0] *= kPa2Pa;
       }
 
       if (options.BINARY_OUTPUT) {

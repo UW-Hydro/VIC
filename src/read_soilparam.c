@@ -193,6 +193,7 @@ soil_con_struct read_soilparam(FILE *soilparam,
         nrerror(ErrStr);
       }
       sscanf(token, "%d", &temp.gridcel);
+
       token = strtok (NULL, delimiters);
       while (token != NULL && (length=strlen(token))==0) token = strtok (NULL, delimiters);
       if( token == NULL ) {
@@ -339,7 +340,7 @@ soil_con_struct read_soilparam(FILE *soilparam,
       if (!options.OUTPUT_FORCE) {
         /* round soil layer thicknesses to nearest mm */
         for(layer = 0; layer < options.Nlayer; layer++)
-          temp.depth[layer] = (float)(int)(temp.depth[layer] * 1000 + 0.5) / 1000;
+          temp.depth[layer] = (float)(int)(temp.depth[layer] * MMPERMETER + 0.5) / MMPERMETER;
       }
 
       /* read average soil temperature */
@@ -593,6 +594,14 @@ soil_con_struct read_soilparam(FILE *soilparam,
       sscanf(token, "%d", &tempint);
       temp.FS_ACTIVE = (char)tempint;
 
+      token = strtok (NULL, delimiters);
+      while (token != NULL && (length=strlen(token))==0) token = strtok (NULL, delimiters);
+        if( token == NULL ) {
+          sprintf(ErrStr,"ERROR: Can't find values for GLACIER CELL NUMBER in soil file\n");
+          nrerror(ErrStr);
+        }  
+      sscanf(token, "%d", &temp.glcel);
+
       /* read minimum snow depth for full coverage */
       if (options.SPATIAL_SNOW) {
         token = strtok (NULL, delimiters);
@@ -649,7 +658,7 @@ soil_con_struct read_soilparam(FILE *soilparam,
           if (temp.resid_moist[layer] == MISSING)
               temp.resid_moist[layer] = RESID_MOIST;
           temp.porosity[layer] = 1.0 - temp.bulk_density[layer] / temp.soil_density[layer];
-          temp.max_moist[layer] = temp.depth[layer] * temp.porosity[layer] * 1000.;
+          temp.max_moist[layer] = temp.depth[layer] * temp.porosity[layer] * MMPERMETER;
         }
 
         /**********************************************
@@ -687,9 +696,9 @@ soil_con_struct read_soilparam(FILE *soilparam,
             temp.Wpwp[layer], temp.Wcr[layer], layer);
             nrerror(ErrStr);
           }
-          if(temp.Wpwp[layer] < temp.resid_moist[layer] * temp.depth[layer] * 1000.) {
+          if(temp.Wpwp[layer] < temp.resid_moist[layer] * temp.depth[layer] * MMPERMETER) {
             sprintf(ErrStr,"Calculated wilting point moisture (%f mm) is less than calculated residual moisture (%f mm) for layer %d.\n\tIn the soil parameter file, Wpwp_FRACT MUST be >= resid_moist / (1.0 - bulk_density/soil_density).\n",
-            temp.Wpwp[layer], temp.resid_moist[layer] * temp.depth[layer] * 1000., layer);
+            temp.Wpwp[layer], temp.resid_moist[layer] * temp.depth[layer] * MMPERMETER, layer);
             nrerror(ErrStr);
           }
         }
@@ -731,7 +740,7 @@ soil_con_struct read_soilparam(FILE *soilparam,
 
         if (options.EQUAL_AREA) {
 
-          temp.cell_area = global_param.resolution * 1000. * 1000.; /* Grid cell area in m^2. */
+          temp.cell_area = global_param.resolution * METERS_PER_KM * METERS_PER_KM; /* Grid cell area in m^2. */
 
         }
         else {
@@ -752,7 +761,7 @@ soil_con_struct read_soilparam(FILE *soilparam,
             start_lat += global_param.resolution/10;
           }
 
-          temp.cell_area = dist * 1000. * 1000.; /* Grid cell area in m^2. */
+          temp.cell_area = dist * METERS_PER_KM * METERS_PER_KM; /* Grid cell area in m^2. */
 
         }
 
@@ -761,7 +770,10 @@ soil_con_struct read_soilparam(FILE *soilparam,
         *************************************************/
         Nbands         = options.SNOW_BAND;
         temp.AreaFract     = (double *)calloc(Nbands,sizeof(double));
+        temp.GlAreaFract   = (double *)calloc(Nbands,sizeof(double));
         temp.BandElev      = (float *)calloc(Nbands,sizeof(float));
+        temp.BandIceThick  = (double *)calloc(Nbands,sizeof(double));   /* By Bibi*/
+        temp.BandSlope     = (double *)calloc(Nbands,sizeof(double));
         temp.Tfactor       = (double *)calloc(Nbands,sizeof(double));
         temp.Pfactor       = (double *)calloc(Nbands,sizeof(double));
         temp.AboveTreeLine = (char *)calloc(Nbands,sizeof(char));
@@ -776,10 +788,13 @@ soil_con_struct read_soilparam(FILE *soilparam,
 
         /** Set default values for factors to use unmodified forcing data **/
         for (band = 0; band < Nbands; band++) {
-          temp.AreaFract[band] = 0.;
-          temp.BandElev[band]  = temp.elevation;
-          temp.Tfactor[band]   = 0.;
-          temp.Pfactor[band]   = 1.;
+          temp.AreaFract[band]    = 0.;
+          temp.GlAreaFract[band]  = 0.;
+          temp.BandIceThick[band] = 0.;
+          temp.BandSlope[band]    = 0.;
+          temp.BandElev[band]     = temp.elevation;
+          temp.Tfactor[band]      = 0.;
+          temp.Pfactor[band]      = 1.;
         }
         temp.AreaFract[0] = 1.;
 
@@ -826,17 +841,17 @@ soil_con_struct read_soilparam(FILE *soilparam,
         for (layer=0; layer<options.Nlayer; layer++) {
           b = 0.5*(temp.expt[layer]-3);
           bubble = temp.bubble[layer];
-          tmp_resid_moist = temp.resid_moist[layer]*temp.depth[layer]*1000; // in mm
+          tmp_resid_moist = temp.resid_moist[layer]*temp.depth[layer]*MMPERMETER; // in mm
           zwt_prime = 0; // depth of free water surface below top of layer (not yet elevation)
           for (i=0; i<MAX_ZWTVMOIST; i++) {
-            temp.zwtvmoist_zwt[layer][i] = -tmp_depth*100-zwt_prime; // elevation (cm) relative to soil surface
-            w_avg = ( temp.depth[layer]*100 - zwt_prime
+            temp.zwtvmoist_zwt[layer][i] = -tmp_depth*CMPERMETER-zwt_prime; // elevation (cm) relative to soil surface
+            w_avg = ( temp.depth[layer]*CMPERMETER - zwt_prime
                      - (b/(b-1))*bubble*(1-pow((zwt_prime+bubble)/bubble,(b-1)/b)) )
-                    / (temp.depth[layer]*100); // in cm
+                    / (temp.depth[layer]*CMPERMETER); // in cm
             if (w_avg < 0) w_avg = 0;
             if (w_avg > 1) w_avg = 1;
             temp.zwtvmoist_moist[layer][i] = w_avg*(temp.max_moist[layer]-tmp_resid_moist)+tmp_resid_moist;
-            zwt_prime += temp.depth[layer]*100/(MAX_ZWTVMOIST-1); // in cm
+            zwt_prime += temp.depth[layer]*CMPERMETER/(MAX_ZWTVMOIST-1); // in cm
           }
           tmp_depth += temp.depth[layer];
         }
@@ -851,7 +866,7 @@ soil_con_struct read_soilparam(FILE *soilparam,
           b += 0.5*(temp.expt[layer]-3)*temp.depth[layer];
           bubble += temp.bubble[layer]*temp.depth[layer];
           tmp_max_moist += temp.max_moist[layer]; // total max_moist
-          tmp_resid_moist += temp.resid_moist[layer]*temp.depth[layer]*1000; // total resid_moist in mm
+          tmp_resid_moist += temp.resid_moist[layer]*temp.depth[layer]*MMPERMETER; // total resid_moist in mm
           tmp_depth += temp.depth[layer];
         }
         b /= tmp_depth; // average b
@@ -859,13 +874,13 @@ soil_con_struct read_soilparam(FILE *soilparam,
         zwt_prime = 0; // depth of free water surface below top of layer (not yet elevation)
         for (i=0; i<MAX_ZWTVMOIST; i++) {
           temp.zwtvmoist_zwt[options.Nlayer][i] = -zwt_prime; // elevation (cm) relative to soil surface
-          w_avg = ( tmp_depth*100 - zwt_prime
+          w_avg = ( tmp_depth*CMPERMETER - zwt_prime
                      - (b/(b-1))*bubble*(1-pow((zwt_prime+bubble)/bubble,(b-1)/b)) )
-                    / (tmp_depth*100); // in cm
+                    / (tmp_depth*CMPERMETER); // in cm
           if (w_avg < 0) w_avg = 0;
           if (w_avg > 1) w_avg = 1;
           temp.zwtvmoist_moist[options.Nlayer][i] = w_avg*(tmp_max_moist-tmp_resid_moist)+tmp_resid_moist;
-          zwt_prime += tmp_depth*100/(MAX_ZWTVMOIST-1); // in cm
+          zwt_prime += tmp_depth*CMPERMETER/(MAX_ZWTVMOIST-1); // in cm
         }
 
         /* Compute zwt by taking total column soil moisture and filling column from bottom up */
@@ -887,16 +902,16 @@ soil_con_struct read_soilparam(FILE *soilparam,
             tmp_moist = 0;
             layer = options.Nlayer-1;
             tmp_depth2 = tmp_depth-temp.depth[layer];
-            while (layer>0 && zwt_prime <= tmp_depth2*100) {
+            while (layer>0 && zwt_prime <= tmp_depth2*CMPERMETER) {
               tmp_moist += temp.max_moist[layer];
               layer--;
               tmp_depth2 -= temp.depth[layer];
             }
-            w_avg = (tmp_depth2*100+temp.depth[layer]*100-zwt_prime)/(temp.depth[layer]*100);
+            w_avg = (tmp_depth2*CMPERMETER+temp.depth[layer]*CMPERMETER-zwt_prime)/(temp.depth[layer]*CMPERMETER);
             b = 0.5*(temp.expt[layer]-3);
             bubble = temp.bubble[layer];
-            tmp_resid_moist = temp.resid_moist[layer]*temp.depth[layer]*1000;
-            w_avg += -(b/(b-1))*bubble*( 1 - pow((zwt_prime+bubble-tmp_depth2*100)/bubble,(b-1)/b) ) / (temp.depth[layer]*100);
+            tmp_resid_moist = temp.resid_moist[layer]*temp.depth[layer]*MMPERMETER;
+            w_avg += -(b/(b-1))*bubble*( 1 - pow((zwt_prime+bubble-tmp_depth2*CMPERMETER)/bubble,(b-1)/b) ) / (temp.depth[layer]*CMPERMETER);
             tmp_moist += w_avg*(temp.max_moist[layer]-tmp_resid_moist)+tmp_resid_moist;
             b_save = b;
             bub_save = bubble;
@@ -906,9 +921,9 @@ soil_con_struct read_soilparam(FILE *soilparam,
               tmp_depth2 -= temp.depth[layer];
               b = 0.5*(temp.expt[layer]-3);
               bubble = temp.bubble[layer];
-              tmp_resid_moist = temp.resid_moist[layer]*temp.depth[layer]*1000;
-              zwt_prime_eff = tmp_depth2_save*100-bubble+bubble*pow((zwt_prime+bub_save-tmp_depth2_save*100)/bub_save,b/b_save);
-              w_avg = -(b/(b-1))*bubble*( 1 - pow((zwt_prime_eff+bubble-tmp_depth2*100)/bubble,(b-1)/b) ) / (temp.depth[layer]*100);
+              tmp_resid_moist = temp.resid_moist[layer]*temp.depth[layer]*MMPERMETER;
+              zwt_prime_eff = tmp_depth2_save*CMPERMETER-bubble+bubble*pow((zwt_prime+bub_save-tmp_depth2_save*CMPERMETER)/bub_save,b/b_save);
+              w_avg = -(b/(b-1))*bubble*( 1 - pow((zwt_prime_eff+bubble-tmp_depth2*CMPERMETER)/bubble,(b-1)/b) ) / (temp.depth[layer]*CMPERMETER);
               tmp_moist += w_avg*(temp.max_moist[layer]-tmp_resid_moist)+tmp_resid_moist;
               b_save = b;
               bub_save = bubble;
@@ -916,7 +931,7 @@ soil_con_struct read_soilparam(FILE *soilparam,
             }
             temp.zwtvmoist_moist[options.Nlayer+1][i] = tmp_moist;
           }
-          zwt_prime += tmp_depth*100/(MAX_ZWTVMOIST-1); // in cm
+          zwt_prime += tmp_depth*CMPERMETER/(MAX_ZWTVMOIST-1); // in cm
         }
 
         /* Compute soil albedo in PAR range (400-700nm) following eqn 122 in Knorr 1997 */

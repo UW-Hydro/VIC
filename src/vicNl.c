@@ -346,7 +346,10 @@ int main(int argc, char *argv[])
         free_all_vars(&all_vars,veg_con[0].vegetat_type_num);
         free_vegcon(&veg_con);
         free((char *)soil_con.AreaFract);
+        free((char *)soil_con.GlAreaFract);
         free((char *)soil_con.BandElev);
+        free((char *)soil_con.BandIceThick);
+        free((char *)soil_con.BandSlope);
         free((char *)soil_con.Tfactor);
         free((char *)soil_con.Pfactor);
         free((char *)soil_con.AboveTreeLine);

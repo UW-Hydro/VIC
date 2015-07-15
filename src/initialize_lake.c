@@ -195,7 +195,7 @@ int initialize_lake (lake_var_struct   *lake,
   // Snow state vars
   lake->snow.albedo            = 0.0;
   lake->snow.canopy_albedo     = 0.0;
-  lake->snow.coldcontent       = 0.0;
+  lake->snow.surf_coldcontent  = 0.0;
   lake->snow.coverage          = 0.0;
   lake->snow.density           = 0.0;
   lake->snow.depth             = 0.0;
@@ -316,7 +316,7 @@ int initialize_lake (lake_var_struct   *lake,
     lake->soil.layer[i].T        = lake->temp[0];
     lake->soil.layer[i].evap     = 0.0;
     lake->soil.layer[i].kappa    = cell->layer[i].kappa;
-    lake->soil.layer[i].moist    = soil_con->porosity[i]*soil_con->depth[i]*1000.;
+    lake->soil.layer[i].moist    = soil_con->porosity[i]*soil_con->depth[i]*MMPERMETER;
     lake->soil.layer[i].phi      = cell->layer[i].phi;
     for (k=0; k<options.Nfrost; k++) {
       lake->soil.layer[i].ice[k]     = 0.0;

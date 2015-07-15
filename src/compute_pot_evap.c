@@ -74,7 +74,7 @@ void compute_pot_evap(int veg_class,
       ra = aero_resist[i][1];
     net_short = (1.0 - albedo) * shortwave;
     net_rad = net_short + net_longwave;
-    pot_evap[i] = penman(tair, elevation, net_rad, vpd, ra, rc, rarc) * dt/24.0;
+    pot_evap[i] = penman(tair, elevation, net_rad, vpd, ra, rc, rarc) * dt/HOURSPERDAY;
   }
 
 }

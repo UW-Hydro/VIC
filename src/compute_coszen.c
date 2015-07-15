@@ -55,7 +55,7 @@ double compute_coszen(double lat,
 //  daylength[i] = 2.0 * hss * SECPERRAD;
 
   /* calculate cos of hour angle */
-  hour_offset = (time_zone_lng - lng) * 24/360;
+  hour_offset = (time_zone_lng - lng) * HOURSPERDAY/360;
   cosh = cos(((double)dmy.hour + hour_offset - 12)*PI/12);
 
   /* calculate cosine of solar zenith angle */

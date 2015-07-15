@@ -638,7 +638,8 @@ print_snow_data(snow_data_struct *snow)
     printf("snow_data:\n");
     printf("\talbedo            : %.4lf\n", snow->albedo);
     printf("\tcanopy_albedo     : %.4lf\n", snow->canopy_albedo);
-    printf("\tcoldcontent       : %.4lf\n", snow->coldcontent);
+    printf("\tsurf_coldcontent  : %.4lf\n", snow->surf_coldcontent);
+    printf("\tpack_coldcontent  : %.4lf\n", snow->pack_coldcontent);
     printf("\tcoverage          : %.4lf\n", snow->coverage);
     printf("\tdensity           : %.4lf\n", snow->density);
     printf("\tdepth             : %.4lf\n", snow->depth);
@@ -657,6 +658,15 @@ print_snow_data(snow_data_struct *snow)
     printf("\tsurf_temp_fbflag  : %.4lf\n", snow->surf_temp_fbflag);
     printf("\tsurf_water        : %.4lf\n", snow->surf_water);
     printf("\tswq               : %.4lf\n", snow->swq);
+    printf("\tiwq               : %.4lf\n", snow->iwq);
+    printf("\tiwqold            : %.4lf\n", snow->iwqold);
+    printf("\ticedepth          : %.4lf\n", snow->icedepth);
+    printf("\tglmelt            : %.4lf\n", snow->glmelt);
+    printf("\tglarea            : %.4lf\n", snow->glarea);
+    printf("\tgl_overflow       : %.4lf\n", snow->gl_overflow);
+    printf("\tQin               : %.4lf\n", snow->Qin);
+    printf("\tQout              : %.4lf\n", snow->Qout);
+    printf("\tbn                : %.4lf\n", snow->bn);
     printf("\tsnow_distrib_slope: %.4lf\n", snow->snow_distrib_slope);
     printf("\ttmp_int_storage   : %.4lf\n", snow->tmp_int_storage);
     printf("\tblowing_flux      : %.4lf\n", snow->blowing_flux);
@@ -667,6 +677,7 @@ print_snow_data(snow_data_struct *snow)
     printf("\tsurface_flux      : %.4lf\n", snow->surface_flux);
     printf("\ttransport         : %.4lf\n", snow->transport);
     printf("\tvapor_flux        : %.4lf\n", snow->vapor_flux);
+    
 }
 
 void

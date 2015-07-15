@@ -224,9 +224,8 @@ double penman(double tair,
      temperature is equal air_temp */
   pz = PS_PM * exp(-(double)elevation/h);
   
-  /* calculate latent heat of vaporization. Eq. 4.2.1 in Handbook of 
-     Hydrology, assume Ts is Tair */
-  lv = 2501000 - 2361 * tair;
+  /* calculate latent heat of vaporization. */
+  lv = calc_latent_heat_of_vaporization(tair);
   
   /* calculate gamma. Eq. 4.2.28. Handbook of Hydrology */
   gamma = 1628.6 * pz/lv;

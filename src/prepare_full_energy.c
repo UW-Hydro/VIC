@@ -61,7 +61,7 @@ void prepare_full_energy(int               iveg,
     
       /* Compute top soil layer moisture content (mm/mm) */
 
-      moist0[band] = layer[0].moist / ( soil_con->depth[0] * 1000. );
+      moist0[band] = layer[0].moist / ( soil_con->depth[0] * MMPERMETER );
 
       /* Compute top soil layer ice content (mm/mm) */
 
@@ -72,7 +72,7 @@ void prepare_full_energy(int               iveg,
 	    - maximum_unfrozen_water((all_vars->energy[iveg][band].T[0]
 				      + all_vars->energy[iveg][band].T[1]) / 2.,
 				     soil_con->max_moist[0]
-				     / (soil_con->depth[0] * 1000.),
+				     / (soil_con->depth[0] * MMPERMETER),
 				     soil_con->bubble[0], soil_con->expt[0]);
 	  if(ice0[band]<0.) ice0[band]=0.;
         }

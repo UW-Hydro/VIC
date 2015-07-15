@@ -70,7 +70,7 @@ void calc_longwave(double *longwave,
     emissivity = cloudfactor*emissivity_clear;
   }
 
-  *longwave = emissivity * STEFAN_B * air_temp * air_temp * air_temp * air_temp; 
+  *longwave = calc_outgoing_longwave(air_temp, emissivity); 
 
 }
 

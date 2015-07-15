@@ -405,7 +405,6 @@ int  full_energy(int                  gridcell,
       /******************************
         Solve ground surface fluxes 
       ******************************/
-  
       for ( band = 0; band < Nbands; band++ ) {
 	if( soil_con->AreaFract[band] > 0 ) {
 
@@ -432,9 +431,9 @@ int  full_energy(int                  gridcell,
 				     &(snow[iveg][band]), 
 				     soil_con, &(veg_var[iveg][band]), 
 				     lag_one, sigma_slope, fetch, veg_con[iveg].CanopLayerBnd);
-	  
+
 	  if ( ErrorFlag == ERROR ) return ( ERROR );
-	  
+
 	  atmos->out_prec += out_prec[band*2] * Cv * soil_con->AreaFract[band];
 	  atmos->out_rain += out_rain[band*2] * Cv * soil_con->AreaFract[band];
 	  atmos->out_snow += out_snow[band*2] * Cv * soil_con->AreaFract[band];
@@ -448,7 +447,7 @@ int  full_energy(int                  gridcell,
             if (veg_con->root[lidx] > 0) {
               cell[iveg][band].rootmoist += cell[iveg][band].layer[lidx].moist;
             }
-	    cell[iveg][band].wetness += (cell[iveg][band].layer[lidx].moist - soil_con->Wpwp[lidx])/(soil_con->porosity[lidx]*soil_con->depth[lidx]*1000 - soil_con->Wpwp[lidx]);
+	    cell[iveg][band].wetness += (cell[iveg][band].layer[lidx].moist - soil_con->Wpwp[lidx])/(soil_con->porosity[lidx]*soil_con->depth[lidx]*MMPERMETER - soil_con->Wpwp[lidx]);
           }
           cell[iveg][band].wetness /= options.Nlayer;
 
@@ -468,13 +467,26 @@ int  full_energy(int                  gridcell,
     }
   }
 
+  // Run glacier model
+  if (options.GLACIER == GL_DYNAMIC && soil_con->glcel) {
+    if (dmy[rec].day == 1) {
+      ErrorFlag = gl_flow(snow, soil_con, veg_con, options.SNOW_BAND);
+      if (ErrorFlag == ERROR) return (ERROR);
+      }
+  }
+  else if (options.GLACIER == GL_SCALING && soil_con->glcel) {
+    ErrorFlag = gl_volume_area(snow, soil_con, veg_con, options.SNOW_BAND,
+                               gp->dt);
+    if (ErrorFlag == ERROR) return (ERROR);
+  }
+
   for (p=0; p<N_PET_TYPES+1; p++) {
     free((char *)aero_resist[p]);
   }
   free((char *)aero_resist);
 
   /****************************
-     Run Lake Model           
+     Run Lake Model
   ****************************/
 
   /** Compute total runoff and baseflow for all vegetation types
@@ -483,10 +495,10 @@ int  full_energy(int                  gridcell,
 
     wetland_runoff = wetland_baseflow = 0;
     sum_runoff = sum_baseflow = 0;
-	
+
     // Loop through all vegetation tiles
     for ( iveg = 0; iveg <= Nveg; iveg++ ) {
-	  
+
       /** Solve Veg Tile only if Coverage Greater than 0% **/
       if (veg_con[iveg].Cv  > 0.) {
 
@@ -548,10 +560,10 @@ int  full_energy(int                  gridcell,
     atmos->out_snow += snowprec * lake_con->Cl[0] * lakefrac;
 
     ErrorFlag = solve_lake(snowprec, rainprec, atmos->air_temp[NR],
-                           atmos->wind[NR], atmos->vp[NR] / 1000.,
+                           atmos->wind[NR], atmos->vp[NR] / kPa2Pa,
                            atmos->shortwave[NR], atmos->longwave[NR],
-                           atmos->vpd[NR] / 1000.,
-                           atmos->pressure[NR] / 1000.,
+                           atmos->vpd[NR] / kPa2Pa,
+                           atmos->pressure[NR] / kPa2Pa,
                            atmos->density[NR], lake_var, *lake_con,
                            *soil_con, gp->dt, rec, gp->wind_h, dmy[rec], fraci);
     if ( ErrorFlag == ERROR ) return (ERROR);

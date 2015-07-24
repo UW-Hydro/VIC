@@ -61,6 +61,38 @@ typedef struct {
     size_t N_TYPES[2];
 } param_set_struct;
 
+/******************************************************************************
+ * @brief   This structure stores output information for one output file.
+ *****************************************************************************/
+typedef struct {
+    char prefix[20];         /**< prefix of the file name, e.g. "fluxes" */
+    char filename[MAXSTRING];        /**< complete file name */
+    FILE *fh;                /**< filehandle */
+    size_t nvars;            /**< number of variables to store in the file */
+    unsigned int *varid;         /**< id numbers of the variables to store in the file
+                                    (a variable's id number is its index in the out_data array).
+                                    The order of the id numbers in the varid array
+                                    is the order in which the variables will be written. */
+} out_data_file_struct;
+
+/******************************************************************************
+ * @brief   This structure holds all variables needed for the error handling
+ *          routines.
+ *****************************************************************************/
+typedef struct {
+    atmos_data_struct *atmos;
+    double dt;
+    energy_bal_struct *energy;
+    filep_struct filep;
+    size_t rec;
+    out_data_struct *out_data;
+    out_data_file_struct *out_data_files;
+    snow_data_struct *snow;
+    soil_con_struct soil_con;
+    veg_con_struct *veg_con;
+    veg_var_struct *veg_var;
+} Error_struct;
+
 double all_30_day_from_dmy(dmy_struct *dmy);
 double all_leap_from_dmy(dmy_struct *dmy);
 void calc_root_fractions(veg_con_struct *veg_con, soil_con_struct *soil_con);

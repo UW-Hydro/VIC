@@ -31,7 +31,7 @@
 #include <vic_def.h>
 #include <vic_physical_constants.h>
 
-#define VERSION "5.0 beta 2014-Dec-03"
+#define VERSION "5.0 beta 2015-July-26"
 #define SHORT_VERSION "5.0.beta"
 
 /******************************************************************************
@@ -65,7 +65,7 @@ typedef struct {
  * @brief   This structure stores output information for one output file.
  *****************************************************************************/
 typedef struct {
-    char prefix[20];         /**< prefix of the file name, e.g. "fluxes" */
+    char prefix[MAXSTRING];  /**< prefix of the file name, e.g. "fluxes" */
     char filename[MAXSTRING];        /**< complete file name */
     FILE *fh;                /**< filehandle */
     size_t nvars;            /**< number of variables to store in the file */

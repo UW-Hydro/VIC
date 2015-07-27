@@ -1,0 +1,67 @@
+site_name: VIC
+site_description: Variable Infiltration Capacity Model
+site_author: UW Hydro | Computational Hydrology
+repo_url: https://github.com/UW-Hydro/VIC
+site_url: http://vic.readthedocs.org/
+theme: readthedocs
+site_favicon: vic_favicon.jpg
+copyright: 2015
+docs_dir: docs
+site_dir: site
+use_directory_urls: true
+
+# TODO:
+# Pages: creating a hydrograph, plotting, miscellaneous
+# figures
+# links
+# cant figure out how to hide pages
+# decom WIKI
+# two basin deliniation pages?
+# pages:
+# # Main pages
+# - Home: 'index.md'
+#
+# # About VIC papges
+# - About:
+#     - 'Model Overview': 'about/ModelOverview.md'
+#     - 'References': 'about/references.md'
+#     - 'FAQ': 'about/FAQ.md'
+#     - 'Contact': 'about/contact.md'
+#
+# - 'Model Development':
+#     - 'Current Version': 'model-development/CurrentVersion.md'
+#     - 'Version Summaries': 'model-development/VersionSummaries.md'
+#     - 'Archived Versions': 'model-development/ArchivedVersions.md'
+#     - 'Open Source Philosophy': 'model-development/open-source-philosophy.md'
+#     - 'Contributing': 'model-development/Contributing.md'
+#     - 'Working with Git': 'model-development/working-with-git.md'
+#     - 'Git Workflow': 'model-development/git-workflow.md'
+#
+# # Downloads
+# - Downloads:
+#     - 'Code': 'downloads/Code.md'
+#     - 'Datasets': 'downloads/Datasets.md'
+#
+# # User guide pages
+# - 'User Guide':
+#     - 'Getting Started': 'user-guide/UserGuide.md'
+#     - 'Basin Delineation': 'user-guide/BasinDelineation.md'
+#     - 'Inputs':
+#         - 'Inputs': 'user-guide/inputs.md'
+#         - 'Global Parameter File': 'user-guide/GlobalParam.md'
+#         - 'Forcing Data': 'user-guide/ForcingData.md'
+#         - 'Soil Parameter File': 'user-guide/SoilParam.md'
+#         - 'Vegetation Library': 'user-guide/VegLib.md'
+#         - 'Vegetation Parameter File': 'user-guide/VegParam.md'
+#         - 'State File': 'user-guide/StateFile.md'
+#         - 'Snow Band File': 'user-guide/SnowBand.md'
+#         - 'Lake Parameter File': 'user-guide/LakeParam.md'
+#     - 'Calibration': 'user-guide/Calibration.md'
+#     - 'Soil Texture': 'user-guide/soiltext.md' # Hide?
+#     - 'Definitions': 'user-guide/definitions.md' # Hide?
+
+markdown_extensions:
+    - toc:
+        permalink: True
+
+copyright: 'Copyright &copy; 2015, <a href="http://uw-hydro.github.io/">University of Washington Computational Hydrology Group</a>.'

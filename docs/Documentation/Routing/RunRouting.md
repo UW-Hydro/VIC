@@ -2,7 +2,7 @@
 
 ## Download Source Code
 
-*   The current routing model code is available in the [Routing Model Source Code](../downloads/Code.md) section of the download page.
+*   The current routing model code is available in the [Routing Model Source Code](../../SourceCode/Code.md) section of the download page.
 *   The code is packaged in a compressed tar archive. Extract the contents via:
 
     `tar -xvzf filenamee`

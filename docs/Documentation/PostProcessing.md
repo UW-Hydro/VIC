@@ -17,11 +17,11 @@ It is often desirable to aggregate model inputs or outputs to a coarser resoluti
 
 VIC internally disaggregates daily meteorological forcings to sub-daily intervals using the Thornton and Running algorithm among others (reference to be posted soon). In this way, VIC can be used as a temporal disaggregator of forcings - simply recompile VIC with OUTPUT_FORCE set to TRUE in the [global parameter file](GlobalParam.md), set the TIMESTEP to a sub-daily interval in your [global parameter file](GlobalParam.md), and make sure there is no output file format specification in your [global parameter file](GlobalParam.md). By default, VIC will bypass its simulation and simply produce output files consisting of sub-daily PRECIP, AIR_TEMP, SHORTWAVE, LONGWAVE, PRESSURE, VP, DENSITY, and WIND. NOTE: the sub-daily precipitation is assumed to fall at the same average rate throughout the day.
 
-To disaggregate precipitation so as to be non-uniform throughout the day, download the file [temporal_disagg_precip.tgz](ftp://ftp.hydro.washington.edu/pub/HYDRO/models/VIC/Utility_Programs/temporal_disagg_precip.tgz), also available under "Preparing VIC Model Inputs" section on the [download page](../SourceCode/Download.md).
+To disaggregate precipitation so as to be non-uniform throughout the day, download the file [temporal_disagg_precip.tgz](ftp://ftp.hydro.washington.edu/pub/HYDRO/models/VIC/Utility_Programs/temporal_disagg_precip.tgz), also available under "Preparing VIC Model Inputs" section on the [download page](../SourceCode/Code.md).
 
 ## Spatial Disaggregation: Sub-Sampling Data to a Finer Resolution
 
-Scripts to subsample meteorological data to finer resolution are in the file [spatial_disagg.tgz](ftp://ftp.hydro.washington.edu/pub/HYDRO/models/VIC/Utility_Programs/spatial_disagg.tgz), also available under the "Post-processing" section on the [download page](../SourceCode/Download.md).
+Scripts to subsample meteorological data to finer resolution are in the file [spatial_disagg.tgz](ftp://ftp.hydro.washington.edu/pub/HYDRO/models/VIC/Utility_Programs/spatial_disagg.tgz), also available under the "Post-processing" section on the [download page](../SourceCode/Code.md).
 
 ## VIC NetCDF Tools
 

@@ -1,6 +1,6 @@
 # Routing Model Input Files
 
-The routing model was developed by Dag Lohmann, please refer to the references given below for the methodology.  The model transports grid cell surface runoff and baseflow produced by VIC-Nl within each grid cell to the outlet of that grid cell then into the river system. The within cell routing uses a Unit Hydrograph approach and the channel routing uses the linearized Saint-Venant equation. The river routing model assumes all runoff exits a cell in a single flow direction. For a comprehensive example (for the Stehekin Basin) that contains example routing input files see the file [vic.sample.stehekin.tgz](ftp://ftp.hydro.washington.edu/pub/HYDRO/models/VIC/Datasets/vic.sample.stehekin.tgz), also available under the "Sample Data Sets" section of the [download page](../SourceCode/Download.md).
+The routing model was developed by Dag Lohmann, please refer to the references given below for the methodology.  The model transports grid cell surface runoff and baseflow produced by VIC-Nl within each grid cell to the outlet of that grid cell then into the river system. The within cell routing uses a Unit Hydrograph approach and the channel routing uses the linearized Saint-Venant equation. The river routing model assumes all runoff exits a cell in a single flow direction. For a comprehensive example (for the Stehekin Basin) that contains example routing input files see the file [vic.sample.stehekin.tgz](ftp://ftp.hydro.washington.edu/pub/HYDRO/models/VIC/Datasets/vic.sample.stehekin.tgz), also available under the "Sample Data Sets" section of the [download page](../../SourceCode/Code.md).
 
 * * *
 
@@ -55,7 +55,7 @@ The following files may be required by the model, depending on the flags set in 
 
 *Items in **bold** are always required*
 
-The parameter values in the [Flow Velocity File](#flowveloc), [Flow Diffusion File](#difffile), and [UH File](#UH_ALLfile) can all be [calibrated](../Calibration.md#RoutCal).
+The parameter values in the [Flow Velocity File](#flowveloc), [Flow Diffusion File](#difffile), and [UH File](#UH_ALLfile) can all be [calibrated](../Calibration.md#routcal).
 
 The start and stop year and month refer to the period over which the VIC simulation, which is the input to the routing model, was run.
 The first and last year refer to the period for which the results of the routing are to be written to output.
@@ -66,7 +66,7 @@ The fraction file is gridded information about the fraction of each grid cell th
 
 The format is an arc/info ascii grid. It contains a 6-line header that tells the routing model the lower left latitude and longitude, the number of rows and columns, and the grid cell resolution.
 
-More information on the [Fraction File](Fraction.md) and [creating the file](PrepRoutingParams.md#FractionFile).
+More information on the [Fraction File](Fraction.md) and [creating the file](PrepRoutingParams.md#fractionfile).
 
 ## Flow Direction File
 
@@ -74,7 +74,7 @@ The flow direction file tells the routing model how all of the grid cells are co
 
 The format is an arc/info ascii grid. It contains a 6-line header that tells the routing model the lower left latitude and longitude, the number of rows and columns, and the grid cell resolution.
 
-More information on the [Flow Direction File](FlowDirection.md) and [creating the file](PrepRoutingParams.md#FlowDirectionFile).
+More information on the [Flow Direction File](FlowDirection.md) and [creating the file](PrepRoutingParams.md#flowdirectionfile).
 
 ## Flow Velocity File
 
@@ -82,7 +82,7 @@ This file contains information about the velocity (m/s) for the river routing co
 
 The format is an arc/info ascii grid. It contains a 6-line header that tells the routing model the lower left latitude and longitude, the number of rows and columns, and the grid cell resolution.
 
-More information on the [Flow Velocity File](FlowVelocity.md), [creating the file](PrepRoutingParams.md#FlowVelocityFile), and [calibrating the file](../Calibration.md#RoutCal).
+More information on the [Flow Velocity File](FlowVelocity.md), [creating the file](PrepRoutingParams.md#flowvelocityfile), and [calibrating the file](../Calibration.md#routcal).
 
 ## Flow Diffusion File
 
@@ -90,7 +90,7 @@ This file contains the flow diffusion (m<sup>2</sup>/s) parameter used in river 
 
 The format is an arc/info ascii grid. It contains a 6-line header that tells the routing model the lower left latitude and longitude, the number of rows and columns, and the grid cell resolution.
 
-More information on the [Flow Diffusion File](FlowDiffusion.md), [creating the file](PrepRoutingParams.md#FlowDiffusionFile), and [calibrating the file](../Calibration.md#RoutCal).
+More information on the [Flow Diffusion File](FlowDiffusion.md), [creating the file](PrepRoutingParams.md#flowdiffusionfile), and [calibrating the file](../Calibration.md#routcal).
 
 ## Fmask File
 
@@ -98,11 +98,11 @@ The values in the xmask file are related to the size (in metres) of a cell.
 
 The format is an arc/info ascii grid. It contains a 6-line header that tells the routing model the lower left latitude and longitude, the number of rows and columns, and the grid cell resolution.
 
-More information on the [Xmask File](Xmask.md) and [creating the file](PrepRoutingParams.md#XmaskFile).
+More information on the [Xmask File](Xmask.md) and [creating the file](PrepRoutingParams.md#xmaskfile).
 
 ## Ftation Location File
 
-The station location file tells the routing model from which grid cells to produce output flow data. Any number of stations may be defined within the basin, as well as a single basin outlet, where the routing network leaves the defined basin. Each line defining a station is followed by another that tells the routin model whether or not a uh_s file has been generated for the current station location. If set to NONE the routing model generates a new uh_s file in the current directory, otherwise it will read the defined uh_s file.
+The station location file tells the routing model from which grid cells to produce output flow data. Any number of stations may be defined within the basin, as well as a single basin outlet, where the routing network leaves the defined basin. Each line defining a station is followed by another that tells the routing model whether or not a uh_s file has been generated for the current station location. If set to NONE the routing model generates a new uh_s file in the current directory, otherwise it will read the defined uh_s file.
 
 More information on the [Station Location File](StationLocation.md).
 
@@ -110,14 +110,13 @@ More information on the [Station Location File](StationLocation.md).
 
 This file contains the grid cell impulse response function.
 
-More information on the [UH File](UH.md) and [calibrating the file](../Calibration.md#RoutCal).
+More information on the [UH File](UH.md) and [calibrating the file](../Calibration.md#routcal).
 
 * * *
 
 ## Runoff Time Series Files (typically from VIC)
 
-These files provide the time series of daily grid cell runoff and baseflow (one file per grid cell). These are based on the traditional [VIC output flux files](..
-/FluxOutputFiles.md), and are expected to be in ASCII column format, with the following columns:
+These files provide the time series of daily grid cell runoff and baseflow (one file per grid cell). These are based on the traditional [VIC output flux files](../FluxOutputFiles.md), and are expected to be in ASCII column format, with the following columns:
 
 `YYYY MM DD SKIP SKIP RUNOFF BASEFLOW ...`
 

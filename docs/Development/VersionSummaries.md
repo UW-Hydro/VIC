@@ -58,7 +58,7 @@ The tables below compare features (and bug fixes) of current and previous versio
         *   Removed all output options related to **LINK_DEBUG**
 
 * **Forcing estimation/ disaggregation**
-    *   We have improved some of the algorithms VIC uses for estimating daily and sub-daily short- and long-wave radiaton and humidity (see [Bohn et al., 2013a](../about/references.md) for more details)
+    *   We have improved some of the algorithms VIC uses for estimating daily and sub-daily short- and long-wave radiaton and humidity (see [Bohn et al., 2013a](../Documentation/References.md) for more details)
     *   To access these improvements, we have added the following new global parameter file options:
         *   **MTCLIM_SWE_CORR**: optional correction of downward shortwave for the effect of snow, taken from MTCLIM 4.3 (Thornton et al., 2000). Default value is TRUE.
         *   **VP_ITER**: optional changes in the iteration between shortwave and VP estimates. Allowed values (**some of which may be removed before release**) are:
@@ -116,7 +116,7 @@ The tables below compare features (and bug fixes) of current and previous versio
         *   OUT_LAKE_RO_IN_V
         *   OUT_LAKE_VAPFLX_V
         *   OUT_LAKE_VOLUME water stored in lake (liquid plus ice cover); OUT_LAKE_DSTOR_V is the derivative of this
-    *   see [Gao et al., 2011](../about/references.md) for an example application using CHANNEL_IN to convey runoff from upstream into a lake
+    *   see [Gao et al., 2011](../Documentation/References.md) for an example application using CHANNEL_IN to convey runoff from upstream into a lake
 
 * **Water table position**
     *   Added computation of water table position [cm]. Some details:
@@ -125,16 +125,16 @@ The tables below compare features (and bug fixes) of current and previous versio
         *   The water table position within the entire soil column is computed in 2 different ways, which can be saved as output via the new variables OUT_ZWT and OUT_ZWT_LUMPED:
             *   OUT_ZWT: Water table position falls in the highest layer having complete saturation in all layers below it (this is usually the lowest layer, since the lowest layer is rarely completely saturated).
             *   OUT_ZWT_LUMPED: Water table position is calculated by taking all soil moisture from the entire soil column and using it to fill the soil layers from the bottom layer upwards, as if all the water in the soil column were to sink downwards as far as it can go. The reason for this method is to eliminate jumps in the water table position as the soil moisture in the top layer passes the minimum threshold required to have a water table. This seems somewhat artificial at first glance, but the shape of the timeseries of soil moisture given by this method looks more realistic. It simply may be biased in certain circumstances.
-    *   see [Bohn et al., 2012a](../about/references.md) for more details
+    *   see [Bohn et al., 2012a](../Documentation/References.md) for more details
 
 * **Soil temperatures**
     *   Extended the computation of soil temperatures, ice contents, and ground fluxes to all modes of model operation.
         *   Previously, soil temperatures (at the nodes in the vertical temperature profile) only explicitly computed and output for FROZEN_SOIL TRUE and QUICK_FLUX FALSE; average temperatures of the hydrologic soil layers were never output. Now all of these are computed and output for all settings of FROZEN_SOIL and QUICK_FLUX.
         *   Ice contents will always be 0 except when FROZEN_SOIL is TRUE.
         *   The default method of computing soil temperature profiles depends on the settings of FROZEN_SOIL and QUICK_FLUX:
-            *   FROZEN_SOIL = TRUE: default method is the finite element method of [_Cherkauer and Lettenmaier_ (1999)](../about/references.md). This corresponds to QUICK_FLUX=FALSE.
-            *   FROZEN_SOIL = FALSE: default method is the approximation of [_Liang et al._ (1999)](../References.md#VIC). This corresponds to QUICK_FLUX=TRUE.
-        *   To change which method is used to compute soil temperatures, set QUICK_FLUX appropriately in the global parameter file. (QUICK_FLUX TRUE = method of [_Liang et al._ (1999)](../References.md#VIC); FALSE = method of [_Cherkauer and Lettenmaier_ (1999)](../about/references.md))
+            *   FROZEN_SOIL = TRUE: default method is the finite element method of [_Cherkauer and Lettenmaier_ (1999)](../Documentation/References.md). This corresponds to QUICK_FLUX=FALSE.
+            *   FROZEN_SOIL = FALSE: default method is the approximation of [_Liang et al._ (1999)](../Documentation/References.md#VIC). This corresponds to QUICK_FLUX=TRUE.
+        *   To change which method is used to compute soil temperatures, set QUICK_FLUX appropriately in the global parameter file. (QUICK_FLUX TRUE = method of [_Liang et al._ (1999)](../Documentation/References.md#VIC); FALSE = method of [_Cherkauer and Lettenmaier_ (1999)](../Documentation/References.md))
 
 * **Organic Soil**
     *   VIC now accounts for the effects of organic matter on soil properties.
@@ -143,7 +143,7 @@ The tables below compare features (and bug fixes) of current and previous versio
         *   If ORGANIC_FRACT is TRUE, VIC assumes that there are 3*Nlayer extra columns in your soil parameter file (immediately following the soil particle density). These extra columns are: 1. Organic fraction of each soil layer, 2. bulk density for each soil layer, and 3. soil particle density for each soil layer.
         *   In this case, VIC assumes that the original quartz content, bulk density, and soil density columns in the soil parameter file pertain to the mineral fraction of the soil. Internally, VIC computes aggregate versions of soil properties (including porosity, thermal conductivity, and heat capacity) as a weighted average of the mineral and organic versions of these properties. The weights are (1-organic_fract)*mineral + organic_fract*organic.
         *   If ORGANIC_FRACT is FALSE, or is omitted entirely from the global parameter file, VIC behaves exactly as before (no extra fields in the soil param file) and organic fraction is assumed to be 0 everywhere.
-    *   see [Bohn et al., 2012a](../about/references.md) for more details
+    *   see [Bohn et al., 2012a](../Documentation/References.md) for more details
 
 * **Other**
     *   Removed **LINK_DEBUG** option, which was rarely used and difficult to maintain in the code base.

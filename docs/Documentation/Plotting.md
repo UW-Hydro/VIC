@@ -6,7 +6,7 @@ VIC model output may be plotted with available Splus (or R) or GMT scripts.
 
 ## Plotting VIC Outputs with Splus (or R)
 
-A few generic Splus scripts (which can also be run in R) have been developed to allow the user to quickly plot VIC model output. The complete library of scripts is available in the file [R_plot_scripts.tgz](ftp://ftp.hydro.washington.edu/pub/HYDRO/models/VIC/Plotting_Scripts/R_plot_scripts.tgz), also available under the "Plotting Scripts" section of the [download page](../downloads/Code.md).
+A few generic Splus scripts (which can also be run in R) have been developed to allow the user to quickly plot VIC model output. The complete library of scripts is available in the file [R_plot_scripts.tgz](ftp://ftp.hydro.washington.edu/pub/HYDRO/models/VIC/Plotting_Scripts/R_plot_scripts.tgz), also available under the "Plotting Scripts" section of the [download page](../SourceCode/Code.md).
 
 The main script, compare.results.s, compares the default output files (including fluxes, snow, and any other default output fiels depending on global parameter settings) from two model runs, with time series plots of the data, time series plots of the differences, and scatter plots. These scripts produce multi-page postscript-format plots (with .ps extension), which can be viewed with programs such as _ghostview_ and _ghostscript_. Postscript files can also be converted to more common graphic formats such as jpg and gif via tools such as _convert_ and _ps2raster_.
 
@@ -25,4 +25,4 @@ Descriptions of the Splus functions are included in the table below.
 
 ## GMT Plotting Scripts
 
-The [GMT package](http://gmt.soest.hawaii.edu/) of plotting scripts is another handy way to plot VIC outputs. An example plot script, [plot_flow_STEHE.scr](ftp://ftp.hydro.washington.edu/pub/HYDRO/models/VIC/Plotting_Scripts/plot_flow_STEHE.scr), that plots observed and simulated hydrographs for the [example Stehekin dataset](ftp://ftp.hydro.washington.edu/pub/HYDRO/models/VIC/Datasets/vic.sample.stehekin.tgz), is given on the [download page](../downloads/Code.md) under the Plotting Scripts heading. It is written in c-shell, and it calls perl and gmt commands. The output is in postscript format (see note above for viewing and converting postscript files).
+The [GMT package](http://gmt.soest.hawaii.edu/) of plotting scripts is another handy way to plot VIC outputs. An example plot script, [plot_flow_STEHE.scr](ftp://ftp.hydro.washington.edu/pub/HYDRO/models/VIC/Plotting_Scripts/plot_flow_STEHE.scr), that plots observed and simulated hydrographs for the [example Stehekin dataset](ftp://ftp.hydro.washington.edu/pub/HYDRO/models/VIC/Datasets/vic.sample.stehekin.tgz), is given on the [download page](../SourceCode/Code.md) under the Plotting Scripts heading. It is written in c-shell, and it calls perl and gmt commands. The output is in postscript format (see note above for viewing and converting postscript files).

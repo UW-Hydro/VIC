@@ -45,8 +45,8 @@ Type `"vicNl -v"`
 
 ## Current Version: 1.0
 
-This is the routing model of [Lohmann, et al. (1996)](../about/references.md), as implemented at UW, as of 2001.
+This is the routing model of [Lohmann, et al. (1996)](../Documentation/References.md), as implemented at UW, as of 2001.
 
 ## How to Obtain the Code
 
-For information on obtaining the routing model source code, [click here](../downloads/Code.md).
+For information on obtaining the routing model source code, [click here](../SourceCode/Code.md).

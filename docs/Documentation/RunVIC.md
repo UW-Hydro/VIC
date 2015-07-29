@@ -1,8 +1,8 @@
 # Running the VIC Model
 
-## Download Source Code
+## Code Source Code
 
-*   To download the latest VIC source code, proceed to the [download page](../SourceCode/Download.md).
+*   To download the latest VIC source code, proceed to the [download page](../SourceCode/Code.md).
 *   The code is packaged in a compressed tar archive. Extract the contents via:
 
     tar -xvzf filename

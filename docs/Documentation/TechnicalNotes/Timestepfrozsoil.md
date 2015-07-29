@@ -1,0 +1,10 @@
+# Notes on the frozen soil algorithm and time step
+
+Prepared by Keith Aric Cherkauer
+
+The VIC macroscale hydrologic model can be run at a variety of time steps with and without the frozen soil algorithm. When trying to calibrate or optimize the model, what are the advantages and disadvantages of the different combinations. This will be discussed by looking at simulations of the Minnesota River over the calibration period of 1980-1984\. Model parameters (b<sub>i</sub>, D<sub>s</sub>, W<sub>s</sub>, D<sub>1</sub>, and D<sub>2</sub>) were obtained by optimizing the VIC energy balance model at a three hour time step without the frozen soil algorithm. The resulting daily and monthly discharges are shown in **Figure 1**.
+
+It can be seen that the discharge peaks are diminished when using a longer time scale (see [Notes on time steps](Timestep.md)). It should also be noted that the frozen soil algorithm responds more to spring flow (especially in 1983), at both time steps, but there is more response seen by the model running with an hourly time step. Fewer differences can be seen in the monthly flows, but the frozen soil algorithm has more of an impact on timeing of the flows than on long term mean flows. The frozen soil algorithm is likely to yield better optimization results, but it is far more computationally intensive. Due to the similarities in the overall solutions, the first attempt at calibration should be carried out using the coarsest model run possible. Once the model simulation is in the right ballpark, the calibration can be tweaked using the model options desired for the final results.
+
+![](FS_EWB_compare.gif)  
+**Figure 1:** Simulated versus observed discharge for the Minnesota River. Daily flows are to the left, monthly to the right. (Top) Energy balance model with a three hour time step, (Upper Middle) Energy balance model with hourly time step, (Lower Middle) Energy balance model with frozen soil at an hourly time step, and (Bottom) Energy balance model with frozen soil at a three hour time step.

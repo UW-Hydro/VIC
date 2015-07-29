@@ -37,7 +37,7 @@ As of release 4.1.2, we have fixed inconsistencies (present in all previous rele
 
 Therefore, if mixing daily and sub-daily forcing inputs, it is important that any sub-daily forcing inputs be shifted as necessary to be in the time zone indicated by off_gmt.
 
-In all cases, the user must list the variables contained in the forcing files, by their names (listed below) and in the exact order in which they appear in the forcing files. This is done in the [global parameter file](GlobalParam.md) using the [FORCE_TYPE](Info/FORCE_TYPE.md) parameter. Possible forcing file data types and units are:
+In all cases, the user must list the variables contained in the forcing files, by their names (listed below) and in the exact order in which they appear in the forcing files. This is done in the [global parameter file](GlobalParam.md) using the [FORCE_TYPE](FORCETYPE.md) parameter. Possible forcing file data types and units are:
 
 | Variable Name     | Definition                                                                                        | Default Units     | ALMA units        |
 |---------------    |-------------------------------------------------------------------------------------------------- |---------------    |-----------------  |

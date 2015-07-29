@@ -12,16 +12,16 @@ Instructions for using Git and GitHub to access the VIC code and contribute chan
 
 Information about the VIC codebase:
 
-*   **[Current Versions of VIC and Routing Model](CurrentVersion.shtml)**
-    *   [Main features](CurrentVersion.shtml)
+*   **[Current Versions of VIC and Routing Model](CurrentVersion.md)**
+    *   [Main features](CurrentVersion.md)
     *   [Known issues](https://github.com/UW-Hydro/VIC/issues)
-    *   [Differences with previous versions](VersionTables.shtml)
-    *   [Backwards-compatibility with previous versions](CompatOpt.shtml)
-*   **[Previous Model Versions](ArchivedVersions.shtml)**
+    *   [Differences with previous versions](VersionSummaries.md)
+    *   [Backwards-compatibility with previous versions](CompatOpt.md)
+*   **[Previous Model Versions](ArchivedVersions.md)**
     *   Overview of recent VIC model development
     *   Brief descriptions of archived versions
     *   How to obtain the code
-*   **[Ongoing Development](OngoingDevelopment.shtml)**
+*   **[Ongoing Development](OngoingDevelopment.md)**
     *   Current development
         *   Features under development
         *   Issues under investigation

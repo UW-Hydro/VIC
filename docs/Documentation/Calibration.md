@@ -2,12 +2,6 @@
 
 While many of the parameters for these models are based on satellite observations or geological surveys, some of them are either so hetergeneous in space that in situ measurements cannot capture the large-scale "effective" values, or are more conceptual (such as soil layer boundaries) and do not correspond to actual physically-observable quantities. For these parameters, we either must make assumptions about their values or calibrate them (find optimal values for them) that minimize the differences between model output and observations.
 
-## Contents:
-
-*   [General Notes on Calibration](#General)
-*   [VIC Model Calibration](#VICCal)
-*   [Routing Model Calibration](#RoutCal)
-
 # General Notes on Calibration
 
 We can think of the VIC model and routing model as two parts of one larger modeling framework. Both models contain parameters that require either calibration or _a priori_ estimates of their values.
@@ -22,7 +16,7 @@ Dividing the record: for most applications it is necessary to ensure that you ha
 
 # VIC Model Calibration
 
-Although the VIC model contains many parameters, it is more appropriate to adjust some of these parameters during calibration than others. Often the distinction is based on the degree to which the parameter values can actually be measured or observed. The parameters most often adjusted during calibration of the VIC model include, [b_infilt](./Info/definitions.md), [Ds](./Info/definitions.md), [Ws](./Info/definitions.md), [Dsmax](./Info/definitions.md) and [soil depth](./Info/definitions.md).
+Although the VIC model contains many parameters, it is more appropriate to adjust some of these parameters during calibration than others. Often the distinction is based on the degree to which the parameter values can actually be measured or observed. The parameters most often adjusted during calibration of the VIC model include, [b_infilt](Definitions.md#b_infilt), [Ds](Definitions.md#ds), [Ws](Definitions.md#ws), [Dsmax](Definitions.md#dsmax) and [soil depth](Definitions.md#depth).
 
 ## Soil Parameters
 
@@ -81,4 +75,4 @@ The routing model contains many parameters, but it is more appropriate to adjust
 
 If only monthly mean flows are required then diffusivity of 800 m<sup>2</sup>/s and velocity of 1.5 m/s are deemed acceptable. If daily values are required then the calibration methodology outlined in [Lohmann et al. (1996, 1998a and 1998b)](References.md#Routing) should be followed.
 
-The example routing parameter files in the Stehekin dataset ([vic.sample.stehekin.tgz](ftp://ftp.hydro.washington.edu/pub/HYDRO/models/VIC/Datasets), available under Sample Data Sets on the [download page](../SourceCode/Download.md#SampleData)) should serve as a good starting point for your routing parameters.
+The example routing parameter files in the Stehekin dataset ([vic.sample.stehekin.tgz](ftp://ftp.hydro.washington.edu/pub/HYDRO/models/VIC/Datasets), available under Sample Data Sets on the [download page](../SourceCode/Code.md#SampleData)) should serve as a good starting point for your routing parameters.

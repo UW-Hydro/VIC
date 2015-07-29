@@ -4,6 +4,7 @@ site_author: UW Hydro | Computational Hydrology
 repo_url: https://github.com/UW-Hydro/VIC
 site_url: http://vic.readthedocs.org/
 theme: readthedocs
+theme_dir: 'docs/custom_rtd_theme'
 site_favicon: vic_favicon.jpg
 copyright: 2015
 docs_dir: docs
@@ -17,48 +18,55 @@ use_directory_urls: true
 # cant figure out how to hide pages
 # decom WIKI
 # two basin deliniation pages?
-# pages:
-# # Main pages
-# - Home: 'index.md'
-#
-# # About VIC papges
-# - About:
-#     - 'Model Overview': 'about/ModelOverview.md'
-#     - 'References': 'about/references.md'
-#     - 'FAQ': 'about/FAQ.md'
-#     - 'Contact': 'about/contact.md'
-#
-# - 'Model Development':
-#     - 'Current Version': 'model-development/CurrentVersion.md'
-#     - 'Version Summaries': 'model-development/VersionSummaries.md'
-#     - 'Archived Versions': 'model-development/ArchivedVersions.md'
-#     - 'Open Source Philosophy': 'model-development/open-source-philosophy.md'
-#     - 'Contributing': 'model-development/Contributing.md'
-#     - 'Working with Git': 'model-development/working-with-git.md'
-#     - 'Git Workflow': 'model-development/git-workflow.md'
-#
-# # Downloads
-# - Downloads:
-#     - 'Code': 'downloads/Code.md'
-#     - 'Datasets': 'downloads/Datasets.md'
-#
-# # User guide pages
-# - 'User Guide':
-#     - 'Getting Started': 'user-guide/UserGuide.md'
-#     - 'Basin Delineation': 'user-guide/BasinDelineation.md'
-#     - 'Inputs':
-#         - 'Inputs': 'user-guide/inputs.md'
-#         - 'Global Parameter File': 'user-guide/GlobalParam.md'
-#         - 'Forcing Data': 'user-guide/ForcingData.md'
-#         - 'Soil Parameter File': 'user-guide/SoilParam.md'
-#         - 'Vegetation Library': 'user-guide/VegLib.md'
-#         - 'Vegetation Parameter File': 'user-guide/VegParam.md'
-#         - 'State File': 'user-guide/StateFile.md'
-#         - 'Snow Band File': 'user-guide/SnowBand.md'
-#         - 'Lake Parameter File': 'user-guide/LakeParam.md'
-#     - 'Calibration': 'user-guide/Calibration.md'
-#     - 'Soil Texture': 'user-guide/soiltext.md' # Hide?
-#     - 'Definitions': 'user-guide/definitions.md' # Hide?
+pages:
+# Main pages
+- Home: 'index.md'
+- About:
+    - 'Model Overview': 'Overview/ModelOverview.md'
+    - 'References': 'Documentation/references.md'
+    - 'FAQ': 'FAQ/FAQ.md'
+    - 'Contact': 'contact.md'
+- Documentation:
+    - 'User Guide': 'Documentation/UserGuide.md'
+    - VIC:
+        - 'Basin Delineation': 'Documentation/BasinDelineation.md'
+        - 'Inputs': 'Documentation/Inputs.md'
+        - 'VIC Modes of Operation': 'Documentation/TechnicalNotes.md'
+        - 'Running VIC': 'Documentation/RunVIC.md'
+        - 'VIC Output Files': 'Documentation/Outputs.md'
+        - 'Post-processing': 'Documentation/PostProcessing.md'
+    - Routing:
+        - 'Routing Input': 'Documentation/Routing/RoutingInput.md'
+        - 'Run Routing': 'Documentation/Routing/RunRouting.md'
+        - 'Routing Output': 'Documentation/Routing/RoutingOutput.md'
+    - 'Plotting': 'Documentation/Plotting.md'
+    - 'Calibration': 'Documentation/Calibration.md'
+    - 'VIC Disagg': 'Documentation/VICDisagg.md'
+- Development:
+    - 'Development': 'Development/index.md'
+    - 'Current Version': 'Development/CurrentVersion.md'
+    - 'Archived Versions': 'Development/ArchivedVersions.md'
+    - 'Version Summaries': 'Development/VersionSummaries.md'
+    - 'Compatability': 'Development/CompatOpt.md'
+    - 'Contributing': 'Development/Contributing.md'
+    - 'Open Source': 'Development/open-source-philosophy.md'
+    - 'Working with Git': 'Development/working-with-git.md'
+    - 'Git Workflow': 'Development/git-workflow.md'
+- Downloads:
+    - Datasets: 'Datasets/Datasets.md'
+    - Code: 'SourceCode/Code.md'
+- hidden:
+    - 'Forcing Data': 'Documentation/ForcingData.md'
+    - 'Global Param': 'Documentation/GlobalParam.md'
+    - 'Lake Param': 'Documentation/LakeParam.md'
+    - 'Snow Band': 'Documentation/SnowBand.md'
+    - 'Soil Param': 'Documentation/SoilParam.md'
+    - 'State File': 'Documentation/StateFile.md'
+    - 'Station Location': 'Documentation/StationLocation.md'
+    - 'Veg Lib': 'Documentation/VegLib.md'
+    - 'Veg Param': 'Documentation/VegParam.md'
+    - 'Definitions': 'Documentation/definitions.md'
+    - 'Soiltext': 'Documentation/soiltext.md'
 
 markdown_extensions:
     - toc:

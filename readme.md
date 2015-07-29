@@ -1,8 +1,12 @@
 # Variable Infiltration Capacity (VIC) Model
 
-[![Build Status](https://travis-ci.org/UW-Hydro/VIC.png?branch=develop)](https://travis-ci.org/UW-Hydro/VIC) [![VIC Users Listserve](https://img.shields.io/badge/VIC%20Users%20Listserve-Active-blue.svg)](https://mailman.u.washington.edu/mailman/listinfo/vic_users) [![Join the chat at https://gitter.im/UW-Hydro/VIC](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/UW-Hydro/VIC?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)[![GitHub license](https://img.shields.io/badge/license-GPLv2-blue.svg)](https://raw.githubusercontent.com/UW-Hydro/VIC/master/LICENSE.txt)
+Travis CI Build Status: [![Build Status](https://travis-ci.org/UW-Hydro/VIC.png?branch=develop)](https://travis-ci.org/UW-Hydro/VIC)
 
-***Note:*** *The Gitter chat room space is a place for discussions about VIC model development.  For questions about how to run VIC, please email the [VIC users group (vic_users at u.washington.edu)](mailto: vic_users@u.washington.edu).  To report bugs or propose new features in VIC, use the [VIC Github Issues Page](https://github.com/UW-Hydro/VIC/issues)*.
+VIC Users Listserve: [![VIC Users Listserve](https://img.shields.io/badge/VIC%20Users%20Listserve-Active-blue.svg)](https://mailman.u.washington.edu/mailman/listinfo/vic_users)
+
+Developers Gitter Room: [![Join the chat at https://gitter.im/UW-Hydro/VIC](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/UW-Hydro/VIC?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+
+License: [![GitHub license](https://img.shields.io/badge/license-GPLv2-blue.svg)](https://raw.githubusercontent.com/UW-Hydro/VIC/master/LICENSE.txt)
 
 ----------
 
@@ -21,4 +25,3 @@ If you make use of this model, please acknowledge the appropriate references lis
 
 If you want to contact us directly about the VIC model, you can send
 e-mail to `vic_users at u.washington.edu`. Please include "VIC Model" in the subject line.
-

@@ -327,19 +327,14 @@ write_header(out_data_file_struct *out_data_files,
             else {
                 Nvars += 3;
             }
-            fprintf(out_data_files[file_idx].fh, "# NRECS: %zu\n",
-                    global.nrecs);
-            fprintf(out_data_files[file_idx].fh, "# DT: %f\n", global.out_dt);
-            fprintf(out_data_files[file_idx].fh,
-                    "# STARTDATE: %04d-%02d-%02d-%05d\n",
-                    dmy->year, dmy->month, dmy->day, dmy->dayseconds);
-            fprintf(out_data_files[file_idx].fh, "# ALMA_OUTPUT: %d\n",
-                    tmp_ALMA_OUTPUT);
-            fprintf(out_data_files[file_idx].fh, "# NVARS: %zu\n", Nvars);
+            fprintf(out_data_files[file_idx].fh, "# SIMULATION: %s\n",
+                    out_data_files[file_idx].prefix);
+            fprintf(out_data_files[file_idx].fh, "# MODEL_VERSION: %s\n",
+                    SHORT_VERSION);
+            fprintf(out_data_files[file_idx].fh, "# ALMA_UNITS: %s\n",
+                    tmp_ALMA_OUTPUT ? "True" : "False");
 
             // Header part 2: Variables
-            fprintf(out_data_files[file_idx].fh, "# ");
-
             // Write the date
             if (global.out_dt < SEC_PER_DAY) {
                 // Write year, month, day, and sec

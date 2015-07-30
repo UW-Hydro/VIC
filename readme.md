@@ -8,7 +8,7 @@ Developers Gitter Room: [![Join the chat at https://gitter.im/UW-Hydro/VIC](http
 
 License: [![GitHub license](https://img.shields.io/badge/license-GPLv2-blue.svg)](https://raw.githubusercontent.com/UW-Hydro/VIC/master/LICENSE.txt)
 
-VIC Documentation: [![Documentation Status](https://readthedocs.org/projects/vic/badge/?version=latest)](https://readthedocs.org/projects/vic/?badge=latest)
+VIC Documentation: [![Documentation Status](https://readthedocs.org/projects/vic/badge/?version=latest)](http://vic.readthedocs.org/en/latest/)
 
 ----------
 

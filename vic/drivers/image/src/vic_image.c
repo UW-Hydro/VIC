@@ -27,6 +27,7 @@
 #include <vic_def.h>
 #include <vic_run.h>
 #include <vic_driver_image.h>
+#include <rout.h>   // Routing routine (extension)
 
 size_t              NF, NR;
 size_t              current;
@@ -62,6 +63,7 @@ veg_con_map_struct *veg_con_map = NULL;
 veg_con_struct    **veg_con = NULL;
 veg_hist_struct   **veg_hist = NULL;
 veg_lib_struct    **veg_lib = NULL;
+rout_struct         rout; // Routing routine (extension)
 
 /******************************************************************************
  * @brief   Stand-alone image mode driver of the VIC model
@@ -97,12 +99,21 @@ main(int    argc,
 
     // read global parameters
     vic_start();
-
+    
+    // read global parameters for routing
+    rout_start();   // Routing routine (extension)
+    
     // allocate memory
     vic_alloc();
 
+    // allocate memory for routing
+    rout_alloc();   // Routing routine (extension)
+
     // initialize model parameters from parameter files
     vic_init();
+
+    // initialize routing parameters from parameter files
+    rout_init();    // Routing routine (extension)
 
     // restore model state, either using a cold start or from a restart file
     vic_restore();
@@ -118,8 +129,14 @@ main(int    argc,
         // run vic over the domain
         vic_image_run();
 
+        // run routing over the domain
+        rout_run();     // Routing routine (extension)
+
         // if output:
         vic_write();
+
+        // if output (routing)
+        rout_write(); // Routing routine (extension)
 
         // if save: TBD needs to be fixed - not working in MPI
         // if (current == global_param.nrecs - 1) {
@@ -129,6 +146,9 @@ main(int    argc,
 
     // clean up
     vic_finalize();
+
+    // clean up routing 
+    rout_finalize();    // Routing routine (extension)
 
     // finalize MPI
     status = MPI_Finalize();

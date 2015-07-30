@@ -37,6 +37,9 @@ SHAREDPATH = ../shared
 # VIC RUN PATH
 VICPATH = ../../vic_run
 
+# VIC EXTENTIONS PATH
+EXTPATH = ../../extensions
+
 # NETCDF include .. change the path depending on travis or other location
 ifeq (true, ${TRAVIS})
 NETCDFPATH = /usr
@@ -65,8 +68,14 @@ else
 CC = mpicc-mpich-mp
 endif
 
+# set routing extension here (rout_stub means: no routing)
+ROUT=rout_stub
+#ROUT=rout_rvic
+
+include ${EXTPATH}/${ROUT}/rout.mk
+
 # set includes
-INCLUDES = -I ${DRIVERPATH}/include -I ${VICPATH}/include -I ${SHAREDPATH}/include -I ${NETCDFPATH}/include -I ${MPIPATH}/include
+INCLUDES = -I ${DRIVERPATH}/include -I ${VICPATH}/include -I ${SHAREDPATH}/include -I ${NETCDFPATH}/include -I ${MPIPATH}/include -I ${EXTPATH}/${ROUT}/include
 
 # Uncomment for normal optimized code flags (fastest run option)
 #CFLAGS  = -O3 -Wall -Wno-unused
@@ -93,7 +102,8 @@ HDRS = ${VICPATH}/include/vic_def.h \
 	${DRIVERPATH}/include/vic_driver_image.h \
 	${SHAREDPATH}/include/vic_driver_shared.h \
 	${VICPATH}/include/vic_physical_constants.h \
-	${VICPATH}/include/vic_log.h
+	${VICPATH}/include/vic_log.h \
+	${INCL_ROUT}
 
 OBJS = \
 	${DRIVERPATH}/src/alloc_atmos.o \
@@ -205,7 +215,8 @@ OBJS = \
 	${VICPATH}/src/water_under_ice.o \
 	${VICPATH}/src/write_layer.o \
 	${VICPATH}/src/write_vegvar.o \
-	${VICPATH}/src/zero_output_list.o
+	${VICPATH}/src/zero_output_list.o \
+	${OBJS_ROUT}
 
 SRCS = $(OBJS:%.o=%.c)
 
@@ -224,7 +235,7 @@ full:
 	make model
 
 clean::
-	/bin/rm -f ${DRIVERPATH}/src/*.o ${SHAREDPATH}/src/*.o  ${VICPATH}/src/*.o core log ${DRIVERPATH}/src/*~ ${SHAREDPATH}/src/*.~ ${VICPATH}/src/*~ vic_image
+	/bin/rm -f ${DRIVERPATH}/src/*.o ${SHAREDPATH}/src/*.o  ${VICPATH}/src/*.o core ${EXTPATH}/${ROUT}/src/*.o log ${DRIVERPATH}/src/*~ ${SHAREDPATH}/src/*.~ ${VICPATH}/src/*~ ${EXTPATH}/${ROUT}/src/*~ vic_image
 
 model: $(OBJS)
 	$(CC) -o vic_image$(EXT) $(OBJS) $(CFLAGS) $(LIBRARY)

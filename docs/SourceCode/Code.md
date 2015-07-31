@@ -10,7 +10,7 @@ The VIC model is written in C and typically compiled with the [GNU gcc](http://g
 
 ## Routing Model Source Code
 
-The routing model is written in Fortran 77 and typically compiled with the [GNU g77](http://gcc.gnu.org/software/fortran/fortran.html) compiler (not to be confused with GNU's gfortran compiler, which may also work but hasn't been tested here in our lab).
+The routing model is written in Fortran 77 and typically compiled with the [GNU g77](https://gcc.gnu.org/fortran/) compiler (not to be confused with GNU's gfortran compiler, which may also work but hasn't been tested here in our lab).
 
 *   [Route 1.0](ftp://ftp.hydro.washington.edu/pub/HYDRO/models/VIC/Source_Code/route_code_1.0.tgz)
 

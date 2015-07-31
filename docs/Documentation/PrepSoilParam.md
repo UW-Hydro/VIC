@@ -1,10 +1,10 @@
 # Preparation of the Soil Parameter File
 
-The soil parameter file is used by VIC to describe the unique soil properties (in addition to several other variables) for each grid cell in the model domain. VIC 4.2 supports an Ascii (column) Format - this has one file with a column for each soil parameter and a seperate row for each grid cell.
+The soil parameter file is used by VIC to describe the unique soil properties (in addition to several other variables) for each grid cell in the model domain. VIC 4.2 supports an Ascii (column) Format - this has one file with a column for each soil parameter and a separate row for each grid cell.
 
 The complete list of parameters, as well as sources of data to estimate them and what ranges of reasonable values would be, are available at the [soil parameter file structure page](SoilParam.md).
 
-For the LDAS domain (-125 to -67 degrees longitude; 25 to 53 degrees latitude) at 1/8 degree resolution, a useful source of data is at the [LDAS Parameters web site](http://ldas.gsfc.nasa.gov/nldas/NLDASsoils.php). Raw soil texture data for the continental US can be obtained from [Penn State's Earth System Science Center](http://www.soilinfo.psu.edu/). Certain parameters can be estimated from a soil-texture index ([see summary table](soiltext.shtml)).
+For the LDAS domain (-125 to -67 degrees longitude; 25 to 53 degrees latitude) at 1/8 degree resolution, a useful source of data is at the [LDAS Parameters web site](http://ldas.gsfc.nasa.gov/nldas/NLDASsoils.php). Raw soil texture data for the continental US can be obtained from [Penn State's Earth System Science Center](http://www.soilinfo.psu.edu/). Certain parameters can be estimated from a soil-texture index ([see summary table](soiltext.md)).
 
 * * *
 

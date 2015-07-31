@@ -13,11 +13,11 @@ FULL_ENERGY	FALSE
 FROZEN_SOIL	FALSE
 GRND_FLUX	FALSE
 ```
-The water balance model does not solve the surface energy balance. Instead it assumes that the soil surface temperature is equal to the air temperature for the current time step. The exception to this is that the snow algorithm still solves the surface energy balance to determine the fluxes needed to drive accumulation and ablation processes. By eliminating the ground heat flux solution and the iterative processes required to close the surface energy balance, the water balance model requires significantly less computational time than other model modes ([Table I](#TableI)).
+The water balance model does not solve the surface energy balance. Instead it assumes that the soil surface temperature is equal to the air temperature for the current time step. The exception to this is that the snow algorithm still solves the surface energy balance to determine the fluxes needed to drive accumulation and ablation processes. By eliminating the ground heat flux solution and the iterative processes required to close the surface energy balance, the water balance model requires significantly less computational time than other model modes (Table I).
 
 It should be noted that the daily water balance model while significantly faster than sub-daily simulations is essentially a different model. The parameterizations required for daily solutions are different from those used for sub-daily solutions. While the daily water balance model can be used to simulate discharge from a basin it should be understood that calibration parameters for the daily water balance model are unlikely to be transferable to any model run with a sub-daily time step.
 
-[Figure 1](#Figure1) compares the simulated discharge from daily, hourly and three-hourly simulations of the Chippewa River using the VIC model in water balance mode. It is clearly visible that the daily water balance model solution is very different from that of either of the sub-daily simulations. Water and energy fluxes for a single grid cell and all three simulation modes are shown in [Figure 2](#Figure2). Here it is clear that the daily water balance model experiences higher evaporation, resulting in lower soil moistures and lower baseflows. This is directly responsible for the differences in discharge seen in [Figure 1](#Figure1).
+[Figure 1](#figure1) compares the simulated discharge from daily, hourly and three-hourly simulations of the Chippewa River using the VIC model in water balance mode. It is clearly visible that the daily water balance model solution is very different from that of either of the sub-daily simulations. Water and energy fluxes for a single grid cell and all three simulation modes are shown in [Figure 2](#figure2). Here it is clear that the daily water balance model experiences higher evaporation, resulting in lower soil moistures and lower baseflows. This is directly responsible for the differences in discharge seen in [Figure 1](#figure1).
 
 <a name="Figure1">![](mode_images/Figure1.gif)</a>  
 **Figure 1.** discharge from the Chippewa River basin for various water balance mode simulations.
@@ -36,7 +36,7 @@ GRND_FLUX	TRUE
 ```
 Energy balance mode solves the complete water balance but also minimizes the surface energy balance error. The surface energy balance is closed through an iterative process which tries finds a surface temperature which adjusts surface energy fluxes (sensible heat, ground heat, ground heat storage, outgoing longwave and indirectly latent heat) so that they compensate for incoming solar and longwave radiation fluxes. This mode requires more computational time than water balance mode as well as requiring a sub-daily simulation time step. However, it simulates the surface energy fluxes, which are important to understanding the hydrologic cycle and land surface-atmosphere interactions in a basin.
 
-[Figure 3](#Figure3) compares the simulated discharge from hourly and three hourly energy balance simulations versus the hourly water balance discharge from [Figure 1](#Figure1). All three modes yield very similar results. Looking at individual fluxes at a grid cell, [Figure 4](#Figure4) shows that moisture fluxes from the energy balance mode simulations are similar with those from the water balance mode simulation. It also shows that the with energy balance mode activated all of the components of the surface energy balance are simulated.
+[Figure 3](#figure3) compares the simulated discharge from hourly and three hourly energy balance simulations versus the hourly water balance discharge from [Figure 1](#figure1). All three modes yield very similar results. Looking at individual fluxes at a grid cell, [Figure 4](#figure4) shows that moisture fluxes from the energy balance mode simulations are similar with those from the water balance mode simulation. It also shows that the with energy balance mode activated all of the components of the surface energy balance are simulated.
 
 <a name="Figure3">![](mode_images/Figure3.gif)</a>  
 **Figure 3.** discharge from the Chippewa River basin for various energy balance mode time steps.
@@ -63,7 +63,7 @@ NOFLUX	FALSE
 
 The finite difference heat flux solution was developed for the frozen soil algorithm and is describe in detail by _Cherkauer and Lettenmaier_ ([1999](../References.md)). The finite difference method makes no assumptions about the temperature profile, instead it solves heat fluxes at nodes through the soil column using a finite difference solution to the heat flux equations. Soil nodes at set at the surface, between the first and second soil layers, at twice the depth of the second node, and at the thermal damping depth. Other nodes are either spaced equally between the third node and the damping depth, or at user defined depths in the same space. The solution uses a constant soil temperature at the damping depth.
 
-Differences in discharge between the hourly energy balance mode with the quick ground heat flux and the finite difference ground heat flux are shown in [Figure 5](#Figure5). The finite difference code takes slightly longer to run ([Table I](#TableI)) but yields similar discharge results. Larger differences can can seen in the simulated ground heat flux and sensible heat flux shown in [Figure 6](#Figure6). The technical note on ground heat flux calculations indicates that the finite difference method may provide a more accurate solution of ground heat flux but that in most cases the differences have a minimal effect on the components of the water balance. Therefore the method selected for computing ground heat flux is primarily an issue of computation time.
+Differences in discharge between the hourly energy balance mode with the quick ground heat flux and the finite difference ground heat flux are shown in [Figure 5](#figure5). The finite difference code takes slightly longer to run (Table I) but yields similar discharge results. Larger differences can can seen in the simulated ground heat flux and sensible heat flux shown in [Figure 6](#figure6). The technical note on ground heat flux calculations indicates that the finite difference method may provide a more accurate solution of ground heat flux but that in most cases the differences have a minimal effect on the components of the water balance. Therefore the method selected for computing ground heat flux is primarily an issue of computation time.
 
 <a name="Figure5">![](mode_images/Figure5.gif)</a>  
 **Figure 5.** discharge from the Chippewa River basin for various hourly energy balance mode simulations.
@@ -79,9 +79,9 @@ QUICK_FLUX	FALSE
 NOFLUX	TRUE
 ```
 
-When the no flux boundary is selected the VIC model solves ground heat flux using the finite difference method. However, instead of using a constant temperature boundary at the damping depth, the model uses a no flux boundary. This means that the soil temperature at the damping depth can change, but there is no loss or gain of heat energy through the boundary. This method adds slightly to the computation time ([Table I](#TableI)) but is especially useful for very long simulations, climate change studies and permafrost simulations.
+When the no flux boundary is selected the VIC model solves ground heat flux using the finite difference method. However, instead of using a constant temperature boundary at the damping depth, the model uses a no flux boundary. This means that the soil temperature at the damping depth can change, but there is no loss or gain of heat energy through the boundary. This method adds slightly to the computation time (Table I) but is especially useful for very long simulations, climate change studies and permafrost simulations.
 
-Discharge and flux estimates for the hourly energy balance model with a no flux bottom boundary are included in [Figures 5](#Figure5) and [6](#Figure6) respectively.
+Discharge and flux estimates for the hourly energy balance model with a no flux bottom boundary are included in [Figures 5](#figure5) and [6](#figure6) respectively.
 
 * * *
 
@@ -94,11 +94,11 @@ GRND_FLUX	TRUE
 NOFLUX	FALSE
 ```
 
-Frozen soil adds the effects of soil ice content to both moisture and energy fluxes. It solve thermal fluxes at nodes through the soil column using the [finite difference](#FiniteDifference) method previous described. In addition it computes the maximum unfrozen water content at each soil node based on the nodal temperature. Ice content for each soil moisture layer is then computed from the nodal values and is used to restrict infiltration and soil moisture drainage. The nodal ice contents are also used to derive the soil thermal conductivity and volumetric heat capacity for the next model time step.
+Frozen soil adds the effects of soil ice content to both moisture and energy fluxes. It solve thermal fluxes at nodes through the soil column using the [finite difference](#finitedifference) method previous described. In addition it computes the maximum unfrozen water content at each soil node based on the nodal temperature. Ice content for each soil moisture layer is then computed from the nodal values and is used to restrict infiltration and soil moisture drainage. The nodal ice contents are also used to derive the soil thermal conductivity and volumetric heat capacity for the next model time step.
 
-The frozen soil algorithm is computationally intensive ([Table I](#TableI)) but may play a major role in both the energy and water balance of cold regions (through seasonally frozen soil and permafrost). For details about the frozen soil see _Cherkauer and Lettenmaier_ ([1999](http://www.hydro.washington.edu//new/Documentation/References.md)).
+The frozen soil algorithm is computationally intensive (Table I) but may play a major role in both the energy and water balance of cold regions (through seasonally frozen soil and permafrost). For details about the frozen soil see _Cherkauer and Lettenmaier_ ([1999](../References.md)).
 
-[Figure 7](#Figure7) compares simulated discharge using hourly energy balance mode and hourly energy balance mode (**1hr EWB**) with frozen soil (**1hr EWB FS**). The frozen soil algorithm increases peak flows in te spring and decreases baseflow in the winters. A comparison of the fluxes for a grid cell in the same basin is shown in [Figure 8](#Figure8).
+[Figure 7](#figure7) compares simulated discharge using hourly energy balance mode and hourly energy balance mode (**1hr EWB**) with frozen soil (**1hr EWB FS**). The frozen soil algorithm increases peak flows in te spring and decreases baseflow in the winters. A comparison of the fluxes for a grid cell in the same basin is shown in [Figure 8](#figure8).
 
 <a name="Figure7">![](mode_images/Figure7.gif)</a>  
 **Figure 7.** discharge from the Chippewa River basin for various hourly energy balance with frozen soil algorithm mode simulations.
@@ -119,9 +119,9 @@ QUICK_FS	TRUE
 QUICK_FS_TEMPS	Ntemp
 ```
 
-The time required to solve the frozen soil algorithm can be reduced significantly by compiling the VIC model the the QUICK_FS pre-processor option activated. This creates a set of _Ntemp_ linear equations which represent the more complex maximum unfrozen water (UFWC) equation. The new set of equations reduces the accuracy of the solution of the UFWC equation but by removing the complex power function, which is solved often for each iteration, it saves a lot of computational time ([Table I](#TableI)).
+The time required to solve the frozen soil algorithm can be reduced significantly by compiling the VIC model the the QUICK_FS pre-processor option activated. This creates a set of _Ntemp_ linear equations which represent the more complex maximum unfrozen water (UFWC) equation. The new set of equations reduces the accuracy of the solution of the UFWC equation but by removing the complex power function, which is solved often for each iteration, it saves a lot of computational time (Table I).
 
-Differences between the hourly frozen soil algorithm with (1hr EWB FSq) and without (1hr EWB FS) the linearized UFWC equation are plotted in [Figures 7](Figure7) and [8](#Figure8).
+Differences between the hourly frozen soil algorithm with (1hr EWB FSq) and without (1hr EWB FS) the linearized UFWC equation are plotted in [Figures 7](Figure7) and [8](#figure8).
 
 ### No Flux Boundary
 
@@ -132,7 +132,7 @@ FROZEN_SOIL	TRUE
 GRND_FLUX	TRUE
 NOFLUX	TRUE
 ```
-The finite difference ground heat flux solution used with the frozen soil algorithm can, like that for the energy balance, be solved using a [no flux bottom boundary condition](#NoFluxEWB). Plots of discharge and cell fluxes of the hourly energy balance with frozen soil and no bottom flux (1hr EWB FSq NF) can be found in [Figures 7](#Figure7) and [8](#Figure8) respectively.
+The finite difference ground heat flux solution used with the frozen soil algorithm can, like that for the energy balance, be solved using a [no flux bottom boundary condition](#nofluxewb). Plots of discharge and cell fluxes of the hourly energy balance with frozen soil and no bottom flux (1hr EWB FSq NF) can be found in [Figures 7](#figure7) and [8](#figure8) respectively.
 
 * * *
 
@@ -148,7 +148,7 @@ This mode changes how the VIC model computes soil moisture drainage. In the orig
 ### Optimize Output
 ```OPTIMIZE  TRUE```
 
-This modifies the model so that it outputs daily runoff and baseflow only. This reduces simulation time slightly ([Table I](#TableI)) but can significantly reduce post-processing time for sub-daily model simulations. This mode was designed for use with the model optimization code though it may also be of use for calibration by hand since it eliminates some post-processing steps.
+This modifies the model so that it outputs daily runoff and baseflow only. This reduces simulation time slightly (Table I) but can significantly reduce post-processing time for sub-daily model simulations. This mode was designed for use with the model optimization code though it may also be of use for calibration by hand since it eliminates some post-processing steps.
 
 ### Model State
 ```SAVE_STATE   TRUE```
@@ -164,7 +164,7 @@ The LINK_DEBUG option allows the user to access various pre-defined debugging ou
 
 ## Simulation Time
 
-Though the core model for version 4.0.0 is faster than that released with version 3.2.1, the simulation times listed in [**Table I**](#TableI) show that version 3.2.1 is typically the faster model. This is due primarily to the MTCLIM routine which was added to release 4.0.0 to improve the estimation of incoming radiative fluxes, and atmospheric vapor pressure. Though it does a better job than the previous estimation routines, MTCLIM does require more time to prepare the forcings for each grid cell.
+Though the core model for version 4.0.0 is faster than that released with version 3.2.1, the simulation times listed in [**Table I**](#tablei) show that version 3.2.1 is typically the faster model. This is due primarily to the MTCLIM routine which was added to release 4.0.0 to improve the estimation of incoming radiative fluxes, and atmospheric vapor pressure. Though it does a better job than the previous estimation routines, MTCLIM does require more time to prepare the forcings for each grid cell.
 
 If simulation time is more important than conserving disk space (_e.g._ for calibration which requires many runs over short simulation periods) the sub-daily forcings estimated by MTCLIM can be extracted from the VIC model. By driving VIC directly with the estimated values, it does not have to run MTCLIM so simulation times should be significantly reduced.
 

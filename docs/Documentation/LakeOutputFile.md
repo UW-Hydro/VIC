@@ -1,8 +1,8 @@
 # Lake Output File
 
-The lake file contains information about the lake fraction of the grid cell. Lake files are only written when LAKES is set equal to a valid lake parameter file, in the [global parameter file](GlobalParam.shtml). Lake files begin with the prefix "lake_".
+The lake file contains information about the lake fraction of the grid cell. Lake files are only written when LAKES is set equal to a valid lake parameter file, in the [global parameter file](GlobalParam.md). Lake files begin with the prefix "lake_".
 
-Each output file contains model output from one grid cell. The files use the naming convention "fluxes_xx.xx_yy.yy", where xx.xx is the latitude, and yy.yy is the longitude. The number of decimal places in the output filename is determined by GRID_DECIMAL in the [global parameter file](GlobalParam.shtml), while the latitude and longitude values come from the [soil parameter file](SoilParam.shtml).
+Each output file contains model output from one grid cell. The files use the naming convention "fluxes_xx.xx_yy.yy", where xx.xx is the latitude, and yy.yy is the longitude. The number of decimal places in the output filename is determined by GRID_DECIMAL in the [global parameter file](GlobalParam.md), while the latitude and longitude values come from the [soil parameter file](SoilParam.md).
 
 | Column 	| Variable Name       	| Units                 	| Description                                             	|
 |--------	|---------------------	|-----------------------	|---------------------------------------------------------	|

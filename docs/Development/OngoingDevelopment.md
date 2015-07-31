@@ -10,7 +10,7 @@ We welcome contributions from the hydrology community. Currently we have substan
 
 *   [Land Surface Hydrology Group, Dept. of Civil and Environmental Engineering, Princeton University](http://hydrology.princeton.edu/home.php)
 *   [Keith Cherkauer's Lab, Dept. of Agricultural Engineering, Purdue University](https://engineering.purdue.edu/~cherkaue/)
-*   [Laura Bowling's Lab, Dept. of Agronomy, Purdue University](http://www.ag.purdue.edu/agry/Pages/bowling.aspx)
+*   [Laura Bowling's Lab, Dept. of Agronomy, Purdue University](https://ag.purdue.edu/agry/directory/Pages/bowling.aspx)
 *   [Jenny Adam's Lab, Dept. of Civil and Environmental Engineering, Washington State University](http://www.ce.wsu.edu/Faculty_Staff/Profiles/adam.htm)
 *   [Xu Liang's Lab, Dept. of Civil and Environmental Engineering, University of Pittsburg](http://www.engr.pitt.edu/civil/facstaff/liang_xu.html)
 

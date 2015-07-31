@@ -2,7 +2,7 @@
 
 This page describes a set of programs designed to spatially aggregate VIC model data and parameter files by factors of 2 (e.g. 1/8 -> 1/4 -> 1/2 -> 1 -> 2 degrees). Programs included with this page were developed by Bernt Viggo Matheussen and Keith Cherkauer.
 
-All programs discussed on this page are included in the file [spatial_agg.tgz](ftp://ftp.hydro.washington.edu/pub/HYDRO/models/VIC/Utility_Programs/spatial_agg.tgz), also available under the "Post-processing" section of the [download page](../SourceCode/Code.shtml).
+All programs discussed on this page are included in the file [spatial_agg.tgz](ftp://ftp.hydro.washington.edu/pub/HYDRO/models/VIC/Utility_Programs/spatial_agg.tgz), also available under the "Post-processing" section of the [download page](../SourceCode/Code.md).
 
 There are three programs that need to be run for each halving of the forcing data resolution:
 

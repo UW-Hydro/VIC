@@ -24,7 +24,7 @@ Genetic optimization was applied to the Wisconsin River (14 1/2 degree grid cell
 
 ## Calibration Procedure
 
-The following is a discussion of how the optimization was implemented for the VIC macroscale hydrologic model. Included are the scripts and source code used to run the optimizer, plus suggested modifications to both the VIC model and routing model source codes to make them function more efficently. The scripts and source code mentioned may be found in the file [calibrate_other.tgz](ftp://ftp.hydro.washington.edu/pub/HYDRO/models/VIC/Utility_Programs/calibrate_other.tgz), available in the Calibration section of the [download page](../SourceCode/Download.shtml).
+The following is a discussion of how the optimization was implemented for the VIC macroscale hydrologic model. Included are the scripts and source code used to run the optimizer, plus suggested modifications to both the VIC model and routing model source codes to make them function more efficently. The scripts and source code mentioned may be found in the file [calibrate_other.tgz](ftp://ftp.hydro.washington.edu/pub/HYDRO/models/VIC/Utility_Programs/calibrate_other.tgz), available in the Calibration section of the [download page](../SourceCode/Code.md).
 
 *   Determine if optimization is feasible in your situation:
     *   To determine the time necessary to run the optimization start by running the model with /usr/bin/time. Estimate the optimization time using the formula:  
@@ -58,8 +58,8 @@ The following is a discussion of how the optimization was implemented for the VI
          `compute_R2 RESULTS/CURRENT_RUN/DAILY/WISCR.day ROUTING/WISCR/wisc_daily.txt 366 1460 0.80 $OUTFILE > $R2FILE`
     *   $OUTFILE contains only the R<sup>2</sup> value and is read by the [model run script](#ModelRunScript) and returned to the [optimization program](#OptiModel).
 *   Model control file
-    *   wis_global_ewb_calib_opt is an example control file which runs the energy and water balane VIC model at a three hour time step. See the technical notes on [model time step](TechnicalNotes/Timestep.shtml) and [frozen soil time step](TechnicalNotes/TimeStopfrozsoil.shtml) issues for more about selecting a suitable time step.
+    *   wis_global_ewb_calib_opt is an example control file which runs the energy and water balane VIC model at a three hour time step. See the technical notes on [model time step](TechnicalNotes/Timestep.md) and [frozen soil time step](TechnicalNotes/Timestepfrozsoil.md) issues for more about selecting a suitable time step.
 *   Streamlining the VIC model code for optimization
     *   To reduce model run time, it helps to minimize VIC file writes. This can be done by:
-        1.  Specifying daily output, i.e. OUTPUT_STEP 24 in the [global parameter file](GlobalParam.shtml).
-        2.  Outputting the bare minimum for input into the routing model, i.e. specifying one output file per grid cell, with only the following variables: OUT_PRECIP, OUT_EVAP, OUT_RUNOFF, and OUT_BASEFLOW. This can be specified in the [global parameter file](GlobalParam.shtml) via [flexible output configuration](OutputFormatting.shtml).
+        1.  Specifying daily output, i.e. OUTPUT_STEP 24 in the [global parameter file](GlobalParam.md).
+        2.  Outputting the bare minimum for input into the routing model, i.e. specifying one output file per grid cell, with only the following variables: OUT_PRECIP, OUT_EVAP, OUT_RUNOFF, and OUT_BASEFLOW. This can be specified in the [global parameter file](GlobalParam.md) via [flexible output configuration](OutputFormatting.md).

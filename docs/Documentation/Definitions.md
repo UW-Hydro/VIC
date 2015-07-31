@@ -25,7 +25,7 @@ Figure courtesy F. Munoz, 2009
 Reference: Rawls et al., Infiltration and Soil Water Movement, In: _Handbook of Hydrology_, D. Maidment (ed.), 1993
 
 ### bulk_density
-The bulk density in layers used in the VIC model can be compiled from data available through Penn State University at [http://dbwww.essc.psu.edu/dbndx/tree/amer_n/us_48/data/soilprop/statsgo_geo.html](http://dbwww.essc.psu.edu/dbndx/tree/amer_n/us_48/data/soilprop/statsgo_geo.html)
+The bulk density in layers used in the VIC model can be compiled from data available through Penn State University at [http://dbwww.essc.psu.edu/geotree/dbtop/amer_n/us_48/data/soilprop/statsgo_geo/bd/doc.html](http://dbwww.essc.psu.edu/geotree/dbtop/amer_n/us_48/data/soilprop/statsgo_geo/bd/doc.html)
 
 This reports bulk density for each of 11 individual layers, which cover a depth of 2.5 meters. The majority of data does not extend beyond 1.5 meters, which includes the first 9 of their 11 layers. The Penn State data is available in gridded form at a resolution of 30 arc-seconds.
 
@@ -57,7 +57,7 @@ Initial moisture content of each layer can be set at any reasonable value. One a
 ### Ksat
 The parameter Ksat is the saturated hydraulic conductivity for each layer used in a VIC model. Ksat is approximated using data onsoil textures available for the basin.
 
-Soil textures are from the STATSGO database (USDA NRCS), which has been compiled from a state-by-state format into a U.S. database, available through Penn State University at [http://dbwww.essc.psu.edu/dbndx/tree/amer_n/us_48/data/soilprop/statsgo_geo.html](http://dbwww.essc.psu.edu/dbndx/tree/amer_n/us_48/data/soilprop/statsgo_geo.html)
+Soil textures are from the STATSGO database (USDA NRCS), which has been compiled from a state-by-state format into a U.S. database, available through Penn State University at [http://dbwww.essc.psu.edu/geotree/dbtop/amer_n/us_48/data/soilprop/statsgo_geo/soiltext/doc.html](http://dbwww.essc.psu.edu/geotree/dbtop/amer_n/us_48/data/soilprop/statsgo_geo/soiltext/doc.html)
 
 This reports 16 different soil texture classes for 11 layers, which cover a depth of 2.5 meters. The majority of data does not extend beyond 1.5 meters, which includes the first 9 of their 11 layers. The Penn State data is available in gridded form at a resolution of 30 arc-seconds.
 
@@ -133,7 +133,7 @@ The surface roughness of the snowpack, expressed in meters, can be set to an ini
 ### Wcr_FRACT
 The parameter Wcr_FRACT (Wcr) is the fractional soil moisture (expressed as a fraction of the maximum soil moisture; max. soil moisture = porosity * layer depth) at the critical point, which is the water content below which hydraulic conductivity begins to fall below saturated values, as does transpiration. This is set at 70% of the field capacity, in accordance with the different soil textures. Field Capacity is defined as the water content at a tension of -33kPa.
 
-Soil textures are from the STATSGO database (USDA NRCS), which has been compiled from a state-by-state format into a U.S. database, available through Penn State University at [http://dbwww.essc.psu.edu/dbndx/tree/amer_n/us_48/data/soilprop/statsgo_geo.html](http://dbwww.essc.psu.edu/dbndx/tree/amer_n/us_48/data/soilprop/statsgo_geo.html)
+Soil textures are from the STATSGO database (USDA NRCS), which has been compiled from a state-by-state format into a U.S. database, available through Penn State University at [http://dbwww.essc.psu.edu/geotree/dbtop/amer_n/us_48/data/soilprop/statsgo_geo/soiltext/doc.html](http://dbwww.essc.psu.edu/geotree/dbtop/amer_n/us_48/data/soilprop/statsgo_geo/soiltext/doc.html)
 
 This reports 16 different soil texture classes for 11 layers, which cover a depth of 2.5 meters. The majority of data does not extend beyond 1.5 meters, which includes the first 9 of their 11 layers. The Penn State data is available in gridded form at a resolution of 30 arc-seconds.
 
@@ -141,15 +141,15 @@ The soil texture data is then imported into Arc/Info, where it is indexed to val
 
 ### wind_h
 
-The measurement wind height is the height above the ground at which wind observations were recorded. Typically wind observations are taken at a height of 2 m in clearings. However, the VIC model assumes wind observations are made above the vegetation cover in each grid cell and that wind speeds through and below the canopy can be found using exponential and logorithmic wind profiles. For short vegetation types (grasses, shrubs, etc.), the wind measurment height should be ~2 m above the top of the vegetation. For tall vegetation types (trees), especially those defined with an overstory, the wind measurement height should be set much higher than the vegetation. This is physically justified because a forest canopy impacts atmospheric stability to a much higher elevation, than shorter vegetation. If the model is required to run with an overstory defined, and the wind height set to just above the vegetation (for example the tree height + 2m) large negative evaporations and sublimations may be found during the winter months, as the snow interception algorithm is forced to use unrealistically strong wind speeds.
+The measurement wind height is the height above the ground at which wind observations were recorded. Typically wind observations are taken at a height of 2 m in clearings. However, the VIC model assumes wind observations are made above the vegetation cover in each grid cell and that wind speeds through and below the canopy can be found using exponential and logorithmic wind profiles. For short vegetation types (grasses, shrubs, etc.), the wind measurement height should be ~2 m above the top of the vegetation. For tall vegetation types (trees), especially those defined with an overstory, the wind measurement height should be set much higher than the vegetation. This is physically justified because a forest canopy impacts atmospheric stability to a much higher elevation, than shorter vegetation. If the model is required to run with an overstory defined, and the wind height set to just above the vegetation (for example the tree height + 2m) large negative evaporations and sublimations may be found during the winter months, as the snow interception algorithm is forced to use unrealistically strong wind speeds.
 
-**When defining a vegetation type with overstory, it is strongly reccommended that wind_h be defined at least 10 m higher than the height of the vegetation.**
+**When defining a vegetation type with overstory, it is strongly recommended that wind_h be defined at least 10 m higher than the height of the vegetation.**
 
 ### Wpwp_FRACT
 
 The parameter Wpwp_FRACT (wp) is the fractional soil moisture (expressed as a fraction of the maximum soil moisture; max. soil moisture = porosity * layer depth) at the wilting point. Wilting Point is set at the water content at a tension of ?1500 kPa, and is approximated for the different soil textures.
 
-Soil textures are from the STATSGO database (USDA NRCS), which has been compiled from a state-by-state format into a U.S. database, available through Penn State University at [http://dbwww.essc.psu.edu/dbndx/tree/amer_n/us_48/data/soilprop/statsgo_geo.html](http://dbwww.essc.psu.edu/dbndx/tree/amer_n/us_48/data/soilprop/statsgo_geo.html)
+Soil textures are from the STATSGO database (USDA NRCS), which has been compiled from a state-by-state format into a U.S. database, available through Penn State University at [http://dbwww.essc.psu.edu/geotree/dbtop/amer_n/us_48/data/soilprop/statsgo_geo/soiltext/doc.html](http://dbwww.essc.psu.edu/geotree/dbtop/amer_n/us_48/data/soilprop/statsgo_geo/soiltext/doc.html)
 
 This reports 16 different soil texture classes for 11 layers, which cover a depth of 2.5 meters. The majority of data does not extend beyond 1.5 meters, which includes the first 9 of their 11 layers. The Penn State data is available in gridded form at a resolution of 30 arc-seconds.
 

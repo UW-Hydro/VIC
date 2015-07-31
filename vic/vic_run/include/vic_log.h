@@ -46,16 +46,15 @@
 #include <string.h>
 
 // Set the log level
-// To turn off debug statments, set LOG_LVL > 10
+// To turn off warning statments, set LOG_LVL >= 30
 // | Level     | Numeric value    |
 // |---------  |---------------   |
-// | ERROR     | 40               | > 40 will raise a compile time error
-// | WARNING   | 30               |
-// | INFO      | 20               |
-// | DEBUG     | 10               |
-// | NOTSET    | 0                |
+// | ERROR     | Always Active    |
+// | WARNING   | < 30             |
+// | INFO      | < 20             |
+// | DEBUG     | < 10             |
 #ifndef LOG_LVL
-#define LOG_LVL 0
+#define LOG_LVL 25
 #endif
 
 FILE *LOG_DEST;
@@ -71,7 +70,7 @@ void setup_logging(int id);
 #define clean_ncerrno(e) (nc_strerror(e))
 
 // Debug Level
-#if LOG_LVL > 10
+#if LOG_LVL >= 10
 #define debug(M, ...)
 #else
 #define debug(M, ...) fprintf(LOG_DEST, "[DEBUG] %s:%d: " M "\n", __FILE__, \
@@ -79,7 +78,7 @@ void setup_logging(int id);
 #endif
 
 // Info Level
-#if LOG_LVL > 20
+#if LOG_LVL >= 20
 #define log_info(M, ...)
 #else
 #ifdef NO_LINENOS
@@ -91,7 +90,7 @@ void setup_logging(int id);
 #endif
 
 // Warn Level
-#if LOG_LVL > 30
+#if LOG_LVL >= 30
 #define log_warn(M, ...)
 #else
 #ifdef NO_LINENOS
@@ -104,11 +103,7 @@ void setup_logging(int id);
 #endif
 #endif
 
-// Error Level
-#if LOG_LVL > 40
-// Make sure we still raise an exit code
-#error "VIC Compile Time Error: LOG_LVL is set such that error messages will not be printed, however errors will still be raised"
-#else
+// Error Level is always active
 #ifdef NO_LINENOS
 #define log_err(M, ...) fprintf(LOG_DEST, "[ERROR] errno: %s: " M "\n", \
                                 clean_errno(), ## __VA_ARGS__); exit(1);
@@ -120,7 +115,6 @@ void setup_logging(int id);
                                 clean_errno(), ## __VA_ARGS__); exit(1);
 #define log_ncerr(e) fprintf(LOG_DEST, "[ERROR] %s:%d: errno: %s \n", __FILE__, \
                              __LINE__, clean_ncerrno(e)); exit(1);
-#endif
 #endif
 
 // These depend on previously defined macros

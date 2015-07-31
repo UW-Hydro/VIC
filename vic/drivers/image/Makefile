@@ -84,8 +84,15 @@ CFLAGS  =  ${INCLUDES} -ggdb -O0 -Wall -Wextra
 #CFLAGS  = ${INCLUDES} -g -Wall -Wno-unused
 #LIBRARY = -lm -lefence -L/usr/local/lib
 
-# Set VIC logging level
-LOG_LVL = 0
+# Set the log level
+# To turn off warning statments, set LOG_LVL >= 30
+# | Level     | Numeric value    |
+# |---------  |---------------   |
+# | ERROR     | Always Active    |
+# | WARNING   | < 30             |
+# | INFO      | < 20             |
+# | DEBUG     | < 10             |
+LOG_LVL = 5
 
 # -----------------------------------------------------------------------
 # MOST USERS DO NOT NEED TO MODIFY BELOW THIS LINE

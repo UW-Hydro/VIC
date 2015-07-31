@@ -121,7 +121,7 @@ QUICK_FS_TEMPS	Ntemp
 
 The time required to solve the frozen soil algorithm can be reduced significantly by compiling the VIC model the the QUICK_FS pre-processor option activated. This creates a set of _Ntemp_ linear equations which represent the more complex maximum unfrozen water (UFWC) equation. The new set of equations reduces the accuracy of the solution of the UFWC equation but by removing the complex power function, which is solved often for each iteration, it saves a lot of computational time (Table I).
 
-Differences between the hourly frozen soil algorithm with (1hr EWB FSq) and without (1hr EWB FS) the linearized UFWC equation are plotted in [Figures 7](Figure7) and [8](#figure8).
+Differences between the hourly frozen soil algorithm with (1hr EWB FSq) and without (1hr EWB FS) the linearized UFWC equation are plotted in [Figures 7](#figure7) and [8](#figure8).
 
 ### No Flux Boundary
 

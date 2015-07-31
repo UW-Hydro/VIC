@@ -10,6 +10,8 @@ License: [![GitHub license](https://img.shields.io/badge/license-GPLv2-blue.svg)
 
 VIC Documentation: [![Documentation Status](https://readthedocs.org/projects/vic/badge/?version=latest)](http://vic.readthedocs.org/en/latest/)
 
+Current Release DOI: [![DOI](https://zenodo.org/badge/doi/10.5281/zenodo.22307.svg)](http://dx.doi.org/10.5281/zenodo.22307)
+
 ----------
 
 This repository serves as the public source code repository of the **Variable Infiltration Capacity Model**, better known as **VIC**. The [official VIC website](http://vic.readthedocs.org) it still maintained at the [University of Washington Computational Hydrology Group](http://www.hydro.washington.edu) headed by [Bart Nijssen](http://uw-hydro.github.io/current_member/bart_nijssen/).

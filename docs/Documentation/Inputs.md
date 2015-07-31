@@ -1,6 +1,6 @@
 # VIC Model Inputs
 
-VIC input files may be constructed using various programs and datasets. Below are general descriptions of each input file along with links to its structure and the methods that may be used to build it. For a comprehensive example, including an example of each input file, see the Stehekin Basin file in the Sample Data Sets section of the [downloads page](../SourceCode/Code.md).
+VIC input files may be constructed using various programs and datasets. Below are general descriptions of each input file along with links to its structure and the methods that may be used to build it. For a comprehensive example, including an example of each input file, see the Stehekin Basin file in the Sample Data Sets section of the [downloads page](../Datasets/Datasets.md).
 
 To run VIC, several sets of input data are necessary:
 

@@ -84,6 +84,9 @@ CFLAGS  =  ${INCLUDES} -ggdb -O0 -Wall -Wextra
 #CFLAGS  = ${INCLUDES} -g -Wall -Wno-unused
 #LIBRARY = -lm -lefence -L/usr/local/lib
 
+# Set VIC logging level
+LOG_LVL = 0
+
 # -----------------------------------------------------------------------
 # MOST USERS DO NOT NEED TO MODIFY BELOW THIS LINE
 # -----------------------------------------------------------------------
@@ -245,7 +248,7 @@ clean::
 # -------------------------------------------------------------
 depend: .depend
 .depend: $(SRCS) $(HDRS)
-	$(CC) $(CFLAGS) -M $(SRCS) > $@
+	$(CC) $(CFLAGS) -M $(SRCS) -DLOG_LVL=$(LOG_LVL) > $@
 
 clean::
 	\rm -f .depend

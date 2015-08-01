@@ -85,7 +85,7 @@ CFLAGS  =  ${INCLUDES} -ggdb -O0 -Wall -Wextra
 #LIBRARY = -lm -lefence -L/usr/local/lib
 
 # Set the log level
-# To turn off warning statments, set LOG_LVL >= 30
+# To turn off warning statements, set LOG_LVL >= 30
 # | Level     | Numeric value    |
 # |---------  |---------------   |
 # | ERROR     | Always Active    |

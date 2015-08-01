@@ -70,29 +70,28 @@ void setup_logging(int id);
 #define clean_ncerrno(e) (nc_strerror(e))
 
 // Debug Level
-#if LOG_LVL >= 10
-#define debug(M, ...)
-#else
+#if LOG_LVL < 10
 #define debug(M, ...) fprintf(LOG_DEST, "[DEBUG] %s:%d: " M "\n", __FILE__, \
                               __LINE__, ## __VA_ARGS__)
+#else
+#define debug(M, ...)
+
 #endif
 
 // Info Level
-#if LOG_LVL >= 20
-#define log_info(M, ...)
-#else
+#if LOG_LVL < 20
 #ifdef NO_LINENOS
 #define log_info(M, ...) fprintf(LOG_DEST, "[INFO] " M "\n", ## __VA_ARGS__)
 #else
 #define log_info(M, ...) fprintf(LOG_DEST, "[INFO] %s:%d: " M "\n", __FILE__, \
                                  __LINE__, ## __VA_ARGS__)
 #endif
+#else
+#define log_info(M, ...)
 #endif
 
 // Warn Level
-#if LOG_LVL >= 30
-#define log_warn(M, ...)
-#else
+#if LOG_LVL < 30
 #ifdef NO_LINENOS
 #define log_warn(M, ...) fprintf(LOG_DEST, "[WARN] errno: %s: " M "\n", \
                                  clean_errno(), ## __VA_ARGS__); errno = 0
@@ -101,6 +100,9 @@ void setup_logging(int id);
                                  __FILE__, __LINE__, \
                                  clean_errno(), ## __VA_ARGS__); errno = 0
 #endif
+#else
+#define log_warn(M, ...)
+
 #endif
 
 // Error Level is always active

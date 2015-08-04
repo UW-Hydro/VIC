@@ -127,3 +127,5 @@ markdown_extensions:
         permalink: True
 
 copyright: 'Copyright &copy; 2015, <a href="http://uw-hydro.github.io/">University of Washington Computational Hydrology Group</a>.'
+
+google_analytics: ['UA-65965729-1', 'vic.readthedocs.org']

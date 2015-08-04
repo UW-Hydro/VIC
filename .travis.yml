@@ -10,6 +10,6 @@ before_install:
     - sudo apt-get install -y libnetcdf-dev
     - sudo apt-get install -y mpich2
 script:
-    - make full -C drivers/classic/
-    - make full -C drivers/image/
-    - python setup.py install
+    - make full -C vic/drivers/classic/
+    - make full -C vic/drivers/image/
+    - python vic/drivers/python/setup.py install

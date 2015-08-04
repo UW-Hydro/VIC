@@ -1,1 +1,1 @@
-from . import vic
+from .vic import *

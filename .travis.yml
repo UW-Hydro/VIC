@@ -12,3 +12,4 @@ before_install:
 script:
     - make full -C drivers/classic/
     - make full -C drivers/image/
+    - python setup.py install

@@ -28,28 +28,28 @@
   51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 """
 
-import ctypes
-from ._vic_run_lib_names import vic_core
-from ._vic_run_lib import *
-from ._vic_run_lib import _libs
+from _vic import ffi
 
-# Map global scalars
-flag = ctypes.c_int.in_dll(_libs[vic_core], 'flag')
-NR = ctypes.c_size_t.in_dll(_libs[vic_core], 'NR')
-NF = ctypes.c_size_t.in_dll(_libs[vic_core], 'NF')
 
-# Map global structures
-global_param = global_param_struct.in_dll(_libs[vic_core], 'global_param')
-options = option_struct.in_dll(_libs[vic_core], 'options')
-param = parameters_struct.in_dll(_libs[vic_core], 'param')
-filenames = filenames_struct.in_dll(_libs[vic_core], 'filenames')
-filep = filep_struct.in_dll(_libs[vic_core], 'filep')
-param_set = param_set_struct.in_dll(_libs[vic_core], 'param_set')
+def _load_lib(lib):
+    import os
+    import sysconfig
+    suffix = sysconfig.get_config_var('SO')
+    path = os.path.join(os.path.dirname(__file__), os.pardir,
+                        '{0}{1}'.format(lib, suffix))
+
+    return ffi.dlopen(path)
+
+
+lib = _load_lib('vic_core')
 
 # Initialize global structures
-initialize_log()
-initialize_global()
-initialize_options()
-initialize_parameters()
-initialize_filenames()
-initialize_fileps()
+lib.initialize_log()
+lib.initialize_global()
+lib.initialize_options()
+lib.initialize_parameters()
+lib.initialize_filenames()
+lib.initialize_fileps()
+
+# TODO: wrappers for individual vic functions. For now, access to lib functions
+# is made directly through the lib object

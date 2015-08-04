@@ -12,4 +12,3 @@ before_install:
 script:
     - make full -C vic/drivers/classic/
     - make full -C vic/drivers/image/
-    - python vic/drivers/python/setup.py install

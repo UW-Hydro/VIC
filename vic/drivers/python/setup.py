@@ -25,6 +25,10 @@ vic_root_rel_path = os.path.join(os.pardir, os.pardir)
 vic_root_abs_path = os.path.abspath(vic_root_rel_path)
 
 
+start_dir = os.getcwd()
+setup_dir = os.path.dirname(__file__)
+os.chdir(setup_dir)
+
 # -------------------------------------------------------------------- #
 def write_version_py(filename=None):
     cnt = """\
@@ -32,8 +36,7 @@ version = '%s'
 short_version = '%s'
 """
     if not filename:
-        filename = os.path.join(
-            os.path.dirname(__file__), 'vic', 'version.py')
+        filename = os.path.join(setup_dir, 'vic', 'version.py')
 
     a = open(filename, 'w')
     try:
@@ -136,3 +139,5 @@ setup(name='vic',
       packages=find_packages(),
       ext_modules=[ext_module])
 # -------------------------------------------------------------------- #
+
+os.chdir(start_dir)

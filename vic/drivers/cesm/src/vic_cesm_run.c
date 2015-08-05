@@ -26,13 +26,13 @@
 
 #include <vic_def.h>
 #include <vic_run.h>
-#include <vic_driver_image.h>
+#include <vic_driver_cesm.h>
 
 /******************************************************************************
  * @brief    Run VIC for one timestep and store output data
  *****************************************************************************/
 void
-vic_cesm_run(bool save_state)
+vic_cesm_run_model()
 {
     extern size_t              current;
     extern all_vars_struct    *all_vars;
@@ -50,7 +50,7 @@ vic_cesm_run(bool save_state)
 
     size_t                     i;
 
-    for (i = 0; i < global_domain.ncells_global; i++) {
+    for (i = 0; i < global_domain.ncells; i++) {
         vic_run(current, &(atmos[i]), &(all_vars[i]), dmy, &global_param,
                 &lake_con, &(soil_con[i]), veg_con[i], veg_lib[i], veg_hist[i]);
         put_data(&(all_vars[i]), &(atmos[i]), &(soil_con[i]), veg_con[i],

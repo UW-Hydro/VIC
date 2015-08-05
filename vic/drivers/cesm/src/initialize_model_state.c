@@ -34,7 +34,7 @@
 
 #include <vic_def.h>
 #include <vic_run.h>
-#include <vic_driver_image.h>
+#include <vic_driver_cesm.h>
 
 /******************************************************************************
  * @brief    Initialize the model state (energy balance, water balance, and
@@ -51,7 +51,6 @@ initialize_model_state(all_vars_struct *all_vars,
     extern global_param_struct global_param;
     extern option_struct       options;
 
-    char                       ErrStr[MAXSTRING];
     char                       FIRST_VEG;
     size_t                     veg;
     size_t                     index;
@@ -128,6 +127,7 @@ initialize_model_state(all_vars_struct *all_vars,
             }
         }
     }
+
     /*****************************************************************
        CASE 3: Initialize Energy Balance Variables if not using quick
        ground heat flux, and no Initial Condition File Given
@@ -160,7 +160,7 @@ initialize_model_state(all_vars_struct *all_vars,
                         for (index = 3; index < Nnodes - 1; index++) {
                             if (FIRST_VEG) {
                                 soil_con->dz_node[index] = tmpdp /
-                                                           (((double)Nnodes -
+                                                           (((double) Nnodes -
                                                              tmpadj));
                             }
                             Zsum += (soil_con->dz_node[index] +
@@ -180,14 +180,12 @@ initialize_model_state(all_vars_struct *all_vars,
                             Zsum += (soil_con->dz_node[Nnodes - 2] +
                                      soil_con->dz_node[Nnodes - 1]) / 2.;
                             soil_con->Zsum_node[Nnodes - 1] = Zsum;
-                            if ((int)(Zsum * MM_PER_M + 0.5) !=
-                                (int)(dp * MM_PER_M + 0.5)) {
-                                sprintf(ErrStr,
-                                        "Sum of thermal node thicknesses (%f) "
+                            if ((int) (Zsum * MM_PER_M + 0.5) !=
+                                (int) (dp * MM_PER_M + 0.5)) {
+                                log_err("Sum of thermal node thicknesses (%f) "
                                         "in initialize_model_state do not "
                                         "equal dp (%f), check initialization "
                                         "procedure", Zsum, dp);
-                                nrerror(ErrStr);
                             }
                         }
                     }
@@ -195,12 +193,11 @@ initialize_model_state(all_vars_struct *all_vars,
                            // calculate exponential function parameter */
                         if (FIRST_VEG) {
                             // to force Zsum=dp at bottom node
-                            Bexp = logf(dp + 1.) / (double)(Nnodes - 1);
+                            Bexp = logf(dp + 1.) / (double) (Nnodes - 1);
                             // validate Nnodes by requiring that there be at
                             // least 3 nodes in the top 50cm
                             if (Nnodes < 5 * logf(dp + 1.) + 1) {
-                                sprintf(ErrStr,
-                                        "The number of soil thermal nodes (%zu) "
+                                log_err("The number of soil thermal nodes (%zu) "
                                         "is too small for the supplied damping "
                                         "depth (%f) with EXP_TRANS set to "
                                         "TRUE, leading to fewer than 3 nodes "
@@ -214,18 +211,16 @@ initialize_model_state(all_vars_struct *all_vars,
                                         "parameter file.  Or set EXP_TRANS to "
                                         "FALSE in the global parameter file.",
                                         Nnodes, dp,
-                                        (int)(5 * logf(
-                                                  dp + 1.)) + 2,
+                                        (int) (5 * logf(
+                                                   dp + 1.)) + 2,
                                         exp(0.2 * (Nnodes - 1)) + 1);
-                                nrerror(ErrStr);
                             }
                             for (index = 0; index <= Nnodes - 1; index++) {
                                 soil_con->Zsum_node[index] =
                                     expf(Bexp * index) - 1.;
                             }
                             if (soil_con->Zsum_node[0] > soil_con->depth[0]) {
-                                sprintf(ErrStr,
-                                        "Depth of first thermal node (%f) in "
+                                log_err("Depth of first thermal node (%f) in "
                                         "initialize_model_state is greater "
                                         "than depth of first soil layer (%f); "
                                         "increase the number of nodes or "
@@ -233,7 +228,6 @@ initialize_model_state(all_vars_struct *all_vars,
                                         "dp (%f)",
                                         soil_con->Zsum_node[0],
                                         soil_con->depth[0], dp);
-                                nrerror(ErrStr);
                             }
                         }
 
@@ -282,6 +276,7 @@ initialize_model_state(all_vars_struct *all_vars,
             }
         }
     }
+
     /*********************************
        CASE 4: Unknown option
     *********************************/
@@ -362,29 +357,28 @@ initialize_model_state(all_vars_struct *all_vars,
                     // simulation depending on soil moisture and ice content)
                     if ((options.FROZEN_SOIL &&
                          !options.QUICK_FLUX) && !options.IMPLICIT) {
-                        // in hours
+                        // in seconds
                         dt_thresh = 0.5 * energy[veg][band].Cs_node[1] /
                                     energy[veg][band].kappa_node[1] *
-                                    pow((soil_con->dz_node[1]), 2) / 3600;
+                                    pow((soil_con->dz_node[1]),
+                                        2);
                         if (global_param.dt > dt_thresh) {
-                            sprintf(ErrStr,
-                                    "ERROR: You are currently running FROZEN "
-                                    "SOIL with an explicit method (IMPLICIT is "
+                            log_err("You are currently running FROZEN SOIL "
+                                    "with an explicit method (IMPLICIT is "
                                     "set to FALSE).  For the explicit method "
-                                    "to be stable, time step %d hours is too "
+                                    "to be stable, time step %f seconds is too "
                                     "large for the given thermal node spacing "
                                     "%f m, soil heat capacity %f J/m3/K, and "
                                     "soil thermal conductivity %f J/m/s/K.  "
                                     "Either set IMPLICIT to TRUE in your "
                                     "global parameter file (this is the "
                                     "recommended action), or decrease time "
-                                    "step length to <= %f hours, or decrease "
+                                    "step length to <= %f seconds, or decrease "
                                     "the number of soil thermal nodes.",
                                     global_param.dt,
                                     soil_con->dz_node[1],
                                     energy[veg][band].Cs_node[1],
                                     energy[veg][band].kappa_node[1], dt_thresh);
-                            nrerror(ErrStr);
                         }
                     }
 

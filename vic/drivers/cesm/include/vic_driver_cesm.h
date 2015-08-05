@@ -1,7 +1,7 @@
 /******************************************************************************
  * @section DESCRIPTION
  *
- * Header file for RASM-VIC routines
+ * Header file for CESM-VIC routines
  *
  * @section LICENSE
  *
@@ -24,40 +24,19 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  *****************************************************************************/
 
-#ifndef VIC_DRIVER_RASM_H
-#define VIC_DRIVER_RASM_H
+#ifndef VIC_DRIVER_CESM_H
+#define VIC_DRIVER_CESM_H
 
 #include <stdbool.h>
 #include <netcdf.h>
 #include <stdio.h>
+#include <vic_mpi.h>
+#include <netcdf.h>
 #include <vic_driver_shared.h>
 
-#define VIC_DRIVER "RASM"
+#define VIC_DRIVER "CESM"
 
 #define MAXDIMS 10
-
-size_t              NF, NR;
-size_t              current;
-all_vars_struct    *all_vars = NULL;
-atmos_data_struct  *atmos = NULL;
-dmy_struct         *dmy = NULL;
-filenames_struct    filenames;
-filep_struct        filep;
-domain_struct       global_domain;
-global_param_struct global_param;
-lake_con_struct     lake_con;
-nc_file_struct      nc_hist_file;
-nc_var_struct       nc_vars[N_OUTVAR_TYPES];
-option_struct       options;
-parameters_struct   param;
-out_data_struct   **out_data;
-save_data_struct   *save_data;
-param_set_struct    param_set;
-soil_con_struct    *soil_con = NULL;
-veg_con_map_struct *veg_con_map = NULL;
-veg_con_struct    **veg_con = NULL;
-veg_hist_struct   **veg_hist = NULL;
-veg_lib_struct    **veg_lib = NULL;
 
 /******************************************************************************
  * @brief    Structure to store location information for individual grid cells.
@@ -71,12 +50,10 @@ typedef struct {
     double longitude; /**< longitude of grid cell center */
     double area; /**< area of grid cell */
     double frac; /**< fraction of grid cell that is active */
-    size_t global_cell_idx; /**< index of grid cell in global list of grid cells */
-    size_t global_x_idx; /**< index of x-dimension in global domain */
-    size_t global_y_idx; /**< index of y-dimension in global domain */
-    size_t local_cell_idx; /**< index of grid cell in local list of grid cells */
-    size_t local_x_idx; /**< index of x-dimension in local domain */
-    size_t local_y_idx; /**< index of y-dimension in local domain */
+    size_t nveg; /**< number of vegetation type according to parameter file */
+    size_t global_idx; /**< index of grid cell in global list of grid cells */
+    size_t io_idx; /**< index of cell in 1-D I/O arrays */
+    size_t local_idx; /**< index of grid cell in local list of grid cells */
 } location_struct;
 
 
@@ -85,10 +62,9 @@ typedef struct {
  *           model is run on a single processor, then the two are identical.
  *****************************************************************************/
 typedef struct {
-    size_t ncells_global; /**< number of active grid cell on global domain */
+    size_t ncells; /**< number of active grid cell on global domain */
     size_t n_nx; /**< size of x-index; */
     size_t n_ny; /**< size of y-index */
-    size_t ncells_local; /**< number of active grid cell on local domain */
     location_struct *locations; /**< locations structs for local domain */
 } domain_struct;
 
@@ -155,6 +131,7 @@ typedef struct {
     double *Cv;     /**< array of fractional coverage for nc_types */
 } veg_con_map_struct;
 
+void add_nveg_to_global_domain(char *nc_name, domain_struct *global_domain);
 void alloc_atmos(atmos_data_struct *atmos);
 void alloc_veg_hist(veg_hist_struct *veg_hist);
 double air_density(double t, double p);
@@ -206,7 +183,10 @@ void vic_nc_info(nc_file_struct *nc_hist_file, out_data_struct **out_data,
                  nc_var_struct *nc_vars);
 void vic_finalize(void);
 void vic_force(void);
-void vic_cesm_run(bool save_state);
+int vic_cesm_init(void);
+int vic_cesm_run(void);
+void vic_cesm_run_model();
+int vic_cesm_final(void);
 void vic_init(void);
 void vic_init_output(void);
 void vic_restore(void);

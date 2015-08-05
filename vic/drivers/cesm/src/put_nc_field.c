@@ -26,10 +26,7 @@
 
 #include <vic_def.h>
 #include <vic_run.h>
-#include <vic_driver_image.h>
-
-#define ERR(e) {fprintf(stderr, "\nError(put_nc_field): %s\n", \
-                        nc_strerror(e)); }
+#include <vic_driver_cesm.h>
 
 /******************************************************************************
  * @brief    Put double precision data field to netCDF.
@@ -56,14 +53,14 @@ put_nc_field_double(char   *nc_name,
                          NC_WRITE | NC_NOCLOBBER | NC_NETCDF4 | NC_CLASSIC_MODEL,
                          nc_id);
         if (status != NC_NOERR) {
-            ERR(status);
+            log_ncerr(status);
         }
         *open = true;
 
         // set the NC_FILL attribute
         status = nc_set_fill(*nc_id, NC_FILL, &old_fill_mode);
         if (status != NC_NOERR) {
-            ERR(status);
+            log_ncerr(status);
         }
     }
 
@@ -73,34 +70,33 @@ put_nc_field_double(char   *nc_name,
         // enter define mode
         status = nc_redef(*nc_id);
         if (status != NC_NOERR) {
-            ERR(status);
+            log_ncerr(status);
         }
         // define the variable
         status = nc_def_var(*nc_id, var_name, NC_DOUBLE, ndims, dimids,
                             &var_id);
         if (status != NC_NOERR) {
-            ERR(status);
+            log_ncerr(status);
         }
         // set the fill value attribute
         status = nc_put_att_double(*nc_id, var_id, "_FillValue", NC_DOUBLE, 1,
                                    &fillval);
         if (status != NC_NOERR) {
-            fprintf(stderr, "nc_att_double %s\n", var_name);
-            ERR(status);
+            log_ncerr(status);
         }
         // leave define mode
         status = nc_enddef(*nc_id);
         if (status != NC_NOERR) {
-            ERR(status);
+            log_ncerr(status);
         }
     }
     else if (status != NC_NOERR) {
-        ERR(status);
+        log_ncerr(status);
     }
 
     status = nc_put_vara_double(*nc_id, var_id, start, count, var);
     if (status != NC_NOERR) {
-        ERR(status);
+        log_ncerr(status);
     }
 
     // keep the file open
@@ -133,14 +129,14 @@ put_nc_field_int(char   *nc_name,
                          NC_WRITE | NC_NOCLOBBER | NC_NETCDF4 | NC_CLASSIC_MODEL,
                          nc_id);
         if (status != NC_NOERR) {
-            ERR(status);
+            log_ncerr(status);
         }
         *open = true;
 
         // set the NC_FILL attribute
         status = nc_set_fill(*nc_id, NC_FILL, &old_fill_mode);
         if (status != NC_NOERR) {
-            ERR(status);
+            log_ncerr(status);
         }
     }
 
@@ -150,34 +146,33 @@ put_nc_field_int(char   *nc_name,
         // enter define mode
         status = nc_redef(*nc_id);
         if (status != NC_NOERR) {
-            ERR(status);
+            log_ncerr(status);
         }
         // define the variable
         status = nc_def_var(*nc_id, var_name, NC_INT, ndims, dimids,
                             &var_id);
         if (status != NC_NOERR) {
-            ERR(status);
+            log_ncerr(status);
         }
         // set the fill value attribute
         status = nc_put_att_int(*nc_id, var_id, "_FillValue", NC_INT, 1,
                                 &fillval);
         if (status != NC_NOERR) {
-            fprintf(stderr, "nc_att_int %s\n", var_name);
-            ERR(status);
+            log_ncerr(status);
         }
         // leave define mode
         status = nc_enddef(*nc_id);
         if (status != NC_NOERR) {
-            ERR(status);
+            log_ncerr(status);
         }
     }
     else if (status != NC_NOERR) {
-        ERR(status);
+        log_ncerr(status);
     }
 
     status = nc_put_vara_int(*nc_id, var_id, start, count, var);
     if (status != NC_NOERR) {
-        ERR(status);
+        log_ncerr(status);
     }
 
     // keep the file open

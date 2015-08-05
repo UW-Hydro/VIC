@@ -16,10 +16,12 @@
 *.so
 *.so.*
 *.dylib
+*.dSYM
 
 vicNl
 vic_classic
 vic_image
+liblnd.a
 
 .DS_Store
 TAGS

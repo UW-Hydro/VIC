@@ -24,16 +24,30 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  *****************************************************************************/
 
+#include <vic_driver_cesm.h>
+
 size_t              NF, NR;
 size_t              current;
+size_t             *filter_active_cells = NULL;
+size_t             *mpi_map_mapping_array = NULL;
 all_vars_struct    *all_vars = NULL;
 atmos_data_struct  *atmos = NULL;
 dmy_struct         *dmy = NULL;
 filenames_struct    filenames;
 filep_struct        filep;
 domain_struct       global_domain;
+domain_struct       local_domain;
 global_param_struct global_param;
 lake_con_struct     lake_con;
+MPI_Datatype        mpi_global_struct_type;
+MPI_Datatype        mpi_location_struct_type;
+MPI_Datatype        mpi_nc_file_struct_type;
+MPI_Datatype        mpi_option_struct_type;
+MPI_Datatype        mpi_param_struct_type;
+int                *mpi_map_local_array_sizes = NULL;
+int                *mpi_map_global_array_offsets = NULL;
+int                 mpi_rank;
+int                 mpi_size;
 nc_file_struct      nc_hist_file;
 nc_var_struct       nc_vars[N_OUTVAR_TYPES];
 option_struct       options;
@@ -47,9 +61,9 @@ veg_con_struct    **veg_con = NULL;
 veg_hist_struct   **veg_hist = NULL;
 veg_lib_struct    **veg_lib = NULL;
 
-int vic_cesm_init(agrs_from_cesm) {
+int vic_cesm_init() {
 
-    filenames.global = "vic.globalconfig.txt";
+    // filenames.global = "vic.globalconfig.txt";
 
     // Initialize Log Destination
     initialize_log();
@@ -69,29 +83,34 @@ int vic_cesm_init(agrs_from_cesm) {
     // initialize output structures
     vic_init_output();
 
+    return 0;
 }
 
-int vic_cesm_run(agrs_from_cesm) {
+int vic_cesm_run() {
 
     // read forcing data
     vic_force();
 
     // run vic over the domain
-    vic_cesm_run();
+    vic_cesm_run_model(false);
 
     // if output:
     vic_write();
 
     // if save:
-    if (state_flag) {
+    if (true) {
         vic_store();
     }
+
+    return 0;
 }
 
-int vic_cesm_final(agrs_from_cesm) {
+int vic_cesm_final() {
 
     // clean up
     vic_finalize();
+
+    return 0;
 }
 
 

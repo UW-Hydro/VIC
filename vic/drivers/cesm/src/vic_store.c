@@ -26,9 +26,7 @@
 
 #include <vic_def.h>
 #include <vic_run.h>
-#include <vic_driver_image.h>
-
-#define ERR(e) {fprintf(stderr, "\nError(vic_store): %s\n", nc_strerror(e)); }
+#include <vic_driver_cesm.h>
 
 /******************************************************************************
  * @brief    Save model state.
@@ -38,6 +36,7 @@ vic_store(void)
 {
     extern all_vars_struct    *all_vars;
     extern domain_struct       global_domain;
+    extern domain_struct       local_domain;
     extern option_struct       options;
     extern soil_con_struct    *soil_con;
     extern veg_con_map_struct *veg_con_map;
@@ -56,7 +55,6 @@ vic_store(void)
     int                       *ivar = NULL;
     double                    *dvar = NULL;
     float                     *fvar = NULL;
-    size_t                    *idx = NULL;
     size_t                     d3count[3];
     size_t                     d3start[3];
     size_t                     d4count[4];
@@ -71,34 +69,24 @@ vic_store(void)
     grid_size = global_domain.n_ny * global_domain.n_nx;
 
     // allocate memory for variables to be stored
-    cvar = (char *) malloc(grid_size * sizeof(char));
+    cvar = (char *) malloc(local_domain.ncells * sizeof(char));
     if (cvar == NULL) {
-        nrerror("Memory allocation error in vic_store().");
+        log_err("Memory allocation error in vic_store().");
     }
 
-    ivar = (int *) malloc(grid_size * sizeof(int));
+    ivar = (int *) malloc(local_domain.ncells * sizeof(int));
     if (ivar == NULL) {
-        nrerror("Memory allocation error in vic_store().");
+        log_err("Memory allocation error in vic_store().");
     }
 
-    dvar = (double *) malloc(grid_size * sizeof(double));
+    dvar = (double *) malloc(local_domain.ncells * sizeof(double));
     if (dvar == NULL) {
-        nrerror("Memory allocation error in vic_store().");
+        log_err("Memory allocation error in vic_store().");
     }
 
-    fvar = (float *) malloc(grid_size * sizeof(float));
+    fvar = (float *) malloc(local_domain.ncells * sizeof(float));
     if (fvar == NULL) {
-        nrerror("Memory allocation error in vic_store().");
-    }
-
-    // get 1D indices used in mapping the netcdf fields to the locations
-    idx = (size_t *) malloc(global_domain.ncells_global *
-                            sizeof(size_t));
-    if (idx == NULL) {
-        nrerror("Memory allocation error in vic_store().");
-    }
-    for (i = 0; i < global_domain.ncells_global; i++) {
-        idx[i] = get_global_idx(&global_domain, i);
+        log_err("Memory allocation error in vic_store().");
     }
 
     // initialize starts and counts
@@ -146,7 +134,7 @@ vic_store(void)
     initialize_state_file(&nc_state_file);
 
     // set missing values
-    for (i = 0; i < grid_size; i++) {
+    for (i = 0; i < local_domain.ncells; i++) {
         cvar[i] = nc_state_file.c_fillvalue;
         ivar[i] = nc_state_file.i_fillvalue;
         dvar[i] = nc_state_file.d_fillvalue;
@@ -165,14 +153,16 @@ vic_store(void)
     dimids[2] = nc_state_file.ni_dimid;
     for (j = 0; j < options.Nnode; j++) {
         d3start[0] = j;
-        for (i = 0; i < global_domain.ncells_global; i++) {
-            dvar[idx[i]] = (double) soil_con[i].dz_node[j];
+        for (i = 0; i < local_domain.ncells; i++) {
+            dvar[i] = (double) soil_con[i].dz_node[j];
         }
-        put_nc_field_double(nc_state_file.fname, &(nc_state_file.open),
-                            &(nc_state_file.nc_id), nc_state_file.d_fillvalue,
-                            dimids, ndims, "dz_node", d3start, d3count, dvar);
-        for (i = 0; i < global_domain.ncells_global; i++) {
-            dvar[idx[i]] = nc_state_file.d_fillvalue;
+        gather_put_nc_field_double(nc_state_file.fname, &(nc_state_file.open),
+                                   &(nc_state_file.nc_id),
+                                   nc_state_file.d_fillvalue,
+                                   dimids, ndims, "dz_node", d3start, d3count,
+                                   dvar);
+        for (i = 0; i < local_domain.ncells; i++) {
+            dvar[i] = nc_state_file.d_fillvalue;
         }
     }
     for (i = 0; i < ndims; i++) {
@@ -187,14 +177,16 @@ vic_store(void)
     dimids[2] = nc_state_file.ni_dimid;
     for (j = 0; j < options.Nnode; j++) {
         d3start[0] = j;
-        for (i = 0; i < global_domain.ncells_global; i++) {
-            dvar[idx[i]] = (double) soil_con[i].Zsum_node[j];
+        for (i = 0; i < local_domain.ncells; i++) {
+            dvar[i] = (double) soil_con[i].Zsum_node[j];
         }
-        put_nc_field_double(nc_state_file.fname, &(nc_state_file.open),
-                            &(nc_state_file.nc_id), nc_state_file.d_fillvalue,
-                            dimids, ndims, "Zsum_node", d3start, d3count, dvar);
-        for (i = 0; i < global_domain.ncells_global; i++) {
-            dvar[idx[i]] = nc_state_file.d_fillvalue;
+        gather_put_nc_field_double(nc_state_file.fname, &(nc_state_file.open),
+                                   &(nc_state_file.nc_id),
+                                   nc_state_file.d_fillvalue,
+                                   dimids, ndims, "Zsum_node", d3start, d3count,
+                                   dvar);
+        for (i = 0; i < local_domain.ncells; i++) {
+            dvar[i] = nc_state_file.d_fillvalue;
         }
     }
     for (i = 0; i < ndims; i++) {
@@ -214,24 +206,24 @@ vic_store(void)
             d5start[1] = k;
             for (j = 0; j < options.Nlayer; j++) {
                 d5start[2] = j;
-                for (i = 0; i < global_domain.ncells_global; i++) {
+                for (i = 0; i < local_domain.ncells; i++) {
                     v = veg_con_map[i].vidx[k];
                     if (v >= 0) {
-                        dvar[idx[i]] = (double)
-                                       all_vars[i].cell[v][m].layer[j].moist;
+                        dvar[i] = (double)
+                                  all_vars[i].cell[v][m].layer[j].moist;
                     }
                     else {
-                        dvar[idx[i]] = nc_state_file.d_fillvalue;
+                        dvar[i] = nc_state_file.d_fillvalue;
                     }
                 }
-                put_nc_field_double(nc_state_file.fname,
-                                    &(nc_state_file.open),
-                                    &(nc_state_file.nc_id),
-                                    nc_state_file.d_fillvalue,
-                                    dimids, ndims, "Soil_moisture",
-                                    d5start, d5count, dvar);
-                for (i = 0; i < global_domain.ncells_global; i++) {
-                    dvar[idx[i]] = nc_state_file.d_fillvalue;
+                gather_put_nc_field_double(nc_state_file.fname,
+                                           &(nc_state_file.open),
+                                           &(nc_state_file.nc_id),
+                                           nc_state_file.d_fillvalue,
+                                           dimids, ndims, "Soil_moisture",
+                                           d5start, d5count, dvar);
+                for (i = 0; i < local_domain.ncells; i++) {
+                    dvar[i] = nc_state_file.d_fillvalue;
                 }
             }
         }
@@ -256,25 +248,24 @@ vic_store(void)
                 d6start[2] = j;
                 for (p = 0; p < options.Nfrost; p++) {
                     d6start[3] = p;
-                    for (i = 0; i < global_domain.ncells_global; i++) {
+                    for (i = 0; i < local_domain.ncells; i++) {
                         v = veg_con_map[i].vidx[k];
                         if (v >= 0) {
-                            dvar[idx[i]] = (double)
-                                           all_vars[i].cell[v][m].layer[j].ice[p
-                                           ];
+                            dvar[i] = (double)
+                                      all_vars[i].cell[v][m].layer[j].ice[p];
                         }
                         else {
-                            dvar[idx[i]] = nc_state_file.d_fillvalue;
+                            dvar[i] = nc_state_file.d_fillvalue;
                         }
                     }
-                    put_nc_field_double(nc_state_file.fname,
-                                        &(nc_state_file.open),
-                                        &(nc_state_file.nc_id),
-                                        nc_state_file.d_fillvalue,
-                                        dimids, ndims, "Ice_content",
-                                        d6start, d6count, dvar);
-                    for (i = 0; i < global_domain.ncells_global; i++) {
-                        dvar[idx[i]] = nc_state_file.d_fillvalue;
+                    gather_put_nc_field_double(nc_state_file.fname,
+                                               &(nc_state_file.open),
+                                               &(nc_state_file.nc_id),
+                                               nc_state_file.d_fillvalue,
+                                               dimids, ndims, "Ice_content",
+                                               d6start, d6count, dvar);
+                    for (i = 0; i < local_domain.ncells; i++) {
+                        dvar[i] = nc_state_file.d_fillvalue;
                     }
                 }
             }
@@ -294,24 +285,24 @@ vic_store(void)
         d4start[0] = m;
         for (k = 0; k < options.NVEGTYPES; k++) {
             d4start[1] = k;
-            for (i = 0; i < global_domain.ncells_global; i++) {
+            for (i = 0; i < local_domain.ncells; i++) {
                 v = veg_con_map[i].vidx[k];
                 if (v >= 0) {
-                    dvar[idx[i]] = (double)
-                                   all_vars[i].veg_var[v][m].Wdew;
+                    dvar[i] = (double)
+                              all_vars[i].veg_var[v][m].Wdew;
                 }
                 else {
-                    dvar[idx[i]] = nc_state_file.d_fillvalue;
+                    dvar[i] = nc_state_file.d_fillvalue;
                 }
             }
-            put_nc_field_double(nc_state_file.fname,
-                                &(nc_state_file.open),
-                                &(nc_state_file.nc_id),
-                                nc_state_file.d_fillvalue,
-                                dimids, ndims, "Wdew",
-                                d4start, d4count, dvar);
-            for (i = 0; i < global_domain.ncells_global; i++) {
-                dvar[idx[i]] = nc_state_file.d_fillvalue;
+            gather_put_nc_field_double(nc_state_file.fname,
+                                       &(nc_state_file.open),
+                                       &(nc_state_file.nc_id),
+                                       nc_state_file.d_fillvalue,
+                                       dimids, ndims, "Wdew",
+                                       d4start, d4count, dvar);
+            for (i = 0; i < local_domain.ncells; i++) {
+                dvar[i] = nc_state_file.d_fillvalue;
             }
         }
     }
@@ -330,24 +321,24 @@ vic_store(void)
             d4start[0] = m;
             for (k = 0; k < options.NVEGTYPES; k++) {
                 d4start[1] = k;
-                for (i = 0; i < global_domain.ncells_global; i++) {
+                for (i = 0; i < local_domain.ncells; i++) {
                     v = veg_con_map[i].vidx[k];
                     if (v >= 0) {
-                        dvar[idx[i]] = (double)
-                                       all_vars[i].veg_var[v][m].AnnualNPP;
+                        dvar[i] = (double)
+                                  all_vars[i].veg_var[v][m].AnnualNPP;
                     }
                     else {
-                        dvar[idx[i]] = nc_state_file.d_fillvalue;
+                        dvar[i] = nc_state_file.d_fillvalue;
                     }
                 }
-                put_nc_field_double(nc_state_file.fname,
-                                    &(nc_state_file.open),
-                                    &(nc_state_file.nc_id),
-                                    nc_state_file.d_fillvalue,
-                                    dimids, ndims, "AnnualNPP",
-                                    d4start, d4count, dvar);
-                for (i = 0; i < global_domain.ncells_global; i++) {
-                    dvar[idx[i]] = nc_state_file.d_fillvalue;
+                gather_put_nc_field_double(nc_state_file.fname,
+                                           &(nc_state_file.open),
+                                           &(nc_state_file.nc_id),
+                                           nc_state_file.d_fillvalue,
+                                           dimids, ndims, "AnnualNPP",
+                                           d4start, d4count, dvar);
+                for (i = 0; i < local_domain.ncells; i++) {
+                    dvar[i] = nc_state_file.d_fillvalue;
                 }
             }
         }
@@ -365,24 +356,24 @@ vic_store(void)
             d4start[0] = m;
             for (k = 0; k < options.NVEGTYPES; k++) {
                 d4start[1] = k;
-                for (i = 0; i < global_domain.ncells_global; i++) {
+                for (i = 0; i < local_domain.ncells; i++) {
                     v = veg_con_map[i].vidx[k];
                     if (v >= 0) {
-                        dvar[idx[i]] = (double)
-                                       all_vars[i].veg_var[v][m].AnnualNPPPrev;
+                        dvar[i] = (double)
+                                  all_vars[i].veg_var[v][m].AnnualNPPPrev;
                     }
                     else {
-                        dvar[idx[i]] = nc_state_file.d_fillvalue;
+                        dvar[i] = nc_state_file.d_fillvalue;
                     }
                 }
-                put_nc_field_double(nc_state_file.fname,
-                                    &(nc_state_file.open),
-                                    &(nc_state_file.nc_id),
-                                    nc_state_file.d_fillvalue,
-                                    dimids, ndims, "AnnualNPPPrev",
-                                    d4start, d4count, dvar);
-                for (i = 0; i < global_domain.ncells_global; i++) {
-                    dvar[idx[i]] = nc_state_file.d_fillvalue;
+                gather_put_nc_field_double(nc_state_file.fname,
+                                           &(nc_state_file.open),
+                                           &(nc_state_file.nc_id),
+                                           nc_state_file.d_fillvalue,
+                                           dimids, ndims, "AnnualNPPPrev",
+                                           d4start, d4count, dvar);
+                for (i = 0; i < local_domain.ncells; i++) {
+                    dvar[i] = nc_state_file.d_fillvalue;
                 }
             }
         }
@@ -400,24 +391,24 @@ vic_store(void)
             d4start[0] = m;
             for (k = 0; k < options.NVEGTYPES; k++) {
                 d4start[1] = k;
-                for (i = 0; i < global_domain.ncells_global; i++) {
+                for (i = 0; i < local_domain.ncells; i++) {
                     v = veg_con_map[i].vidx[k];
                     if (v >= 0) {
-                        dvar[idx[i]] = (double)
-                                       all_vars[i].cell[v][m].CLitter;
+                        dvar[i] = (double)
+                                  all_vars[i].cell[v][m].CLitter;
                     }
                     else {
-                        dvar[idx[i]] = nc_state_file.d_fillvalue;
+                        dvar[i] = nc_state_file.d_fillvalue;
                     }
                 }
-                put_nc_field_double(nc_state_file.fname,
-                                    &(nc_state_file.open),
-                                    &(nc_state_file.nc_id),
-                                    nc_state_file.d_fillvalue,
-                                    dimids, ndims, "CLitter",
-                                    d4start, d4count, dvar);
-                for (i = 0; i < global_domain.ncells_global; i++) {
-                    dvar[idx[i]] = nc_state_file.d_fillvalue;
+                gather_put_nc_field_double(nc_state_file.fname,
+                                           &(nc_state_file.open),
+                                           &(nc_state_file.nc_id),
+                                           nc_state_file.d_fillvalue,
+                                           dimids, ndims, "CLitter",
+                                           d4start, d4count, dvar);
+                for (i = 0; i < local_domain.ncells; i++) {
+                    dvar[i] = nc_state_file.d_fillvalue;
                 }
             }
         }
@@ -435,24 +426,24 @@ vic_store(void)
             d4start[0] = m;
             for (k = 0; k < options.NVEGTYPES; k++) {
                 d4start[1] = k;
-                for (i = 0; i < global_domain.ncells_global; i++) {
+                for (i = 0; i < local_domain.ncells; i++) {
                     v = veg_con_map[i].vidx[k];
                     if (v >= 0) {
-                        dvar[idx[i]] = (double)
-                                       all_vars[i].cell[v][m].CInter;
+                        dvar[i] = (double)
+                                  all_vars[i].cell[v][m].CInter;
                     }
                     else {
-                        dvar[idx[i]] = nc_state_file.d_fillvalue;
+                        dvar[i] = nc_state_file.d_fillvalue;
                     }
                 }
-                put_nc_field_double(nc_state_file.fname,
-                                    &(nc_state_file.open),
-                                    &(nc_state_file.nc_id),
-                                    nc_state_file.d_fillvalue,
-                                    dimids, ndims, "Cinter",
-                                    d4start, d4count, dvar);
-                for (i = 0; i < global_domain.ncells_global; i++) {
-                    dvar[idx[i]] = nc_state_file.d_fillvalue;
+                gather_put_nc_field_double(nc_state_file.fname,
+                                           &(nc_state_file.open),
+                                           &(nc_state_file.nc_id),
+                                           nc_state_file.d_fillvalue,
+                                           dimids, ndims, "Cinter",
+                                           d4start, d4count, dvar);
+                for (i = 0; i < local_domain.ncells; i++) {
+                    dvar[i] = nc_state_file.d_fillvalue;
                 }
             }
         }
@@ -470,24 +461,24 @@ vic_store(void)
             d4start[0] = m;
             for (k = 0; k < options.NVEGTYPES; k++) {
                 d4start[1] = k;
-                for (i = 0; i < global_domain.ncells_global; i++) {
+                for (i = 0; i < local_domain.ncells; i++) {
                     v = veg_con_map[i].vidx[k];
                     if (v >= 0) {
-                        dvar[idx[i]] = (double)
-                                       all_vars[i].cell[v][m].CSlow;
+                        dvar[i] = (double)
+                                  all_vars[i].cell[v][m].CSlow;
                     }
                     else {
-                        dvar[idx[i]] = nc_state_file.d_fillvalue;
+                        dvar[i] = nc_state_file.d_fillvalue;
                     }
                 }
-                put_nc_field_double(nc_state_file.fname,
-                                    &(nc_state_file.open),
-                                    &(nc_state_file.nc_id),
-                                    nc_state_file.d_fillvalue,
-                                    dimids, ndims, "CSlow",
-                                    d4start, d4count, dvar);
-                for (i = 0; i < global_domain.ncells_global; i++) {
-                    dvar[idx[i]] = nc_state_file.d_fillvalue;
+                gather_put_nc_field_double(nc_state_file.fname,
+                                           &(nc_state_file.open),
+                                           &(nc_state_file.nc_id),
+                                           nc_state_file.d_fillvalue,
+                                           dimids, ndims, "CSlow",
+                                           d4start, d4count, dvar);
+                for (i = 0; i < local_domain.ncells; i++) {
+                    dvar[i] = nc_state_file.d_fillvalue;
                 }
             }
         }
@@ -506,24 +497,24 @@ vic_store(void)
         d4start[0] = m;
         for (k = 0; k < options.NVEGTYPES; k++) {
             d4start[1] = k;
-            for (i = 0; i < global_domain.ncells_global; i++) {
+            for (i = 0; i < local_domain.ncells; i++) {
                 v = veg_con_map[i].vidx[k];
                 if (v >= 0) {
-                    ivar[idx[i]] = (int)
-                                   all_vars[i].snow[v][m].last_snow;
+                    ivar[i] = (int)
+                              all_vars[i].snow[v][m].last_snow;
                 }
                 else {
-                    ivar[idx[i]] = nc_state_file.i_fillvalue;
+                    ivar[i] = nc_state_file.i_fillvalue;
                 }
             }
-            put_nc_field_int(nc_state_file.fname,
-                             &(nc_state_file.open),
-                             &(nc_state_file.nc_id),
-                             nc_state_file.i_fillvalue,
-                             dimids, ndims, "Last_snow",
-                             d4start, d4count, ivar);
-            for (i = 0; i < global_domain.ncells_global; i++) {
-                ivar[idx[i]] = nc_state_file.i_fillvalue;
+            gather_put_nc_field_int(nc_state_file.fname,
+                                    &(nc_state_file.open),
+                                    &(nc_state_file.nc_id),
+                                    nc_state_file.i_fillvalue,
+                                    dimids, ndims, "Last_snow",
+                                    d4start, d4count, ivar);
+            for (i = 0; i < local_domain.ncells; i++) {
+                ivar[i] = nc_state_file.i_fillvalue;
             }
         }
     }
@@ -541,24 +532,24 @@ vic_store(void)
         d4start[0] = m;
         for (k = 0; k < options.NVEGTYPES; k++) {
             d4start[1] = k;
-            for (i = 0; i < global_domain.ncells_global; i++) {
+            for (i = 0; i < local_domain.ncells; i++) {
                 v = veg_con_map[i].vidx[k];
                 if (v >= 0) {
-                    ivar[idx[i]] = (int)
-                                   all_vars[i].snow[v][m].MELTING;
+                    ivar[i] = (int)
+                              all_vars[i].snow[v][m].MELTING;
                 }
                 else {
-                    ivar[idx[i]] = nc_state_file.i_fillvalue;
+                    ivar[i] = nc_state_file.i_fillvalue;
                 }
             }
-            put_nc_field_int(nc_state_file.fname,
-                             &(nc_state_file.open),
-                             &(nc_state_file.nc_id),
-                             nc_state_file.i_fillvalue,
-                             dimids, ndims, "Melt_state",
-                             d4start, d4count, ivar);
-            for (i = 0; i < global_domain.ncells_global; i++) {
-                ivar[idx[i]] = nc_state_file.i_fillvalue;
+            gather_put_nc_field_int(nc_state_file.fname,
+                                    &(nc_state_file.open),
+                                    &(nc_state_file.nc_id),
+                                    nc_state_file.i_fillvalue,
+                                    dimids, ndims, "Melt_state",
+                                    d4start, d4count, ivar);
+            for (i = 0; i < local_domain.ncells; i++) {
+                ivar[i] = nc_state_file.i_fillvalue;
             }
         }
     }
@@ -576,24 +567,24 @@ vic_store(void)
         d4start[0] = m;
         for (k = 0; k < options.NVEGTYPES; k++) {
             d4start[1] = k;
-            for (i = 0; i < global_domain.ncells_global; i++) {
+            for (i = 0; i < local_domain.ncells; i++) {
                 v = veg_con_map[i].vidx[k];
                 if (v >= 0) {
-                    dvar[idx[i]] = (double)
-                                   all_vars[i].snow[v][m].coverage;
+                    dvar[i] = (double)
+                              all_vars[i].snow[v][m].coverage;
                 }
                 else {
-                    dvar[idx[i]] = nc_state_file.d_fillvalue;
+                    dvar[i] = nc_state_file.d_fillvalue;
                 }
             }
-            put_nc_field_double(nc_state_file.fname,
-                                &(nc_state_file.open),
-                                &(nc_state_file.nc_id),
-                                nc_state_file.d_fillvalue,
-                                dimids, ndims, "Snow_coverage",
-                                d4start, d4count, dvar);
-            for (i = 0; i < global_domain.ncells_global; i++) {
-                dvar[idx[i]] = nc_state_file.d_fillvalue;
+            gather_put_nc_field_double(nc_state_file.fname,
+                                       &(nc_state_file.open),
+                                       &(nc_state_file.nc_id),
+                                       nc_state_file.d_fillvalue,
+                                       dimids, ndims, "Snow_coverage",
+                                       d4start, d4count, dvar);
+            for (i = 0; i < local_domain.ncells; i++) {
+                dvar[i] = nc_state_file.d_fillvalue;
             }
         }
     }
@@ -611,24 +602,24 @@ vic_store(void)
         d4start[0] = m;
         for (k = 0; k < options.NVEGTYPES; k++) {
             d4start[1] = k;
-            for (i = 0; i < global_domain.ncells_global; i++) {
+            for (i = 0; i < local_domain.ncells; i++) {
                 v = veg_con_map[i].vidx[k];
                 if (v >= 0) {
-                    dvar[idx[i]] = (double)
-                                   all_vars[i].snow[v][m].swq;
+                    dvar[i] = (double)
+                              all_vars[i].snow[v][m].swq;
                 }
                 else {
-                    dvar[idx[i]] = nc_state_file.d_fillvalue;
+                    dvar[i] = nc_state_file.d_fillvalue;
                 }
             }
-            put_nc_field_double(nc_state_file.fname,
-                                &(nc_state_file.open),
-                                &(nc_state_file.nc_id),
-                                nc_state_file.d_fillvalue,
-                                dimids, ndims, "Snow_water_equivalent",
-                                d4start, d4count, dvar);
-            for (i = 0; i < global_domain.ncells_global; i++) {
-                dvar[idx[i]] = nc_state_file.d_fillvalue;
+            gather_put_nc_field_double(nc_state_file.fname,
+                                       &(nc_state_file.open),
+                                       &(nc_state_file.nc_id),
+                                       nc_state_file.d_fillvalue,
+                                       dimids, ndims, "Snow_water_equivalent",
+                                       d4start, d4count, dvar);
+            for (i = 0; i < local_domain.ncells; i++) {
+                dvar[i] = nc_state_file.d_fillvalue;
             }
         }
     }
@@ -646,24 +637,24 @@ vic_store(void)
         d4start[0] = m;
         for (k = 0; k < options.NVEGTYPES; k++) {
             d4start[1] = k;
-            for (i = 0; i < global_domain.ncells_global; i++) {
+            for (i = 0; i < local_domain.ncells; i++) {
                 v = veg_con_map[i].vidx[k];
                 if (v >= 0) {
-                    dvar[idx[i]] = (double)
-                                   all_vars[i].snow[v][m].surf_temp;
+                    dvar[i] = (double)
+                              all_vars[i].snow[v][m].surf_temp;
                 }
                 else {
-                    dvar[idx[i]] = nc_state_file.d_fillvalue;
+                    dvar[i] = nc_state_file.d_fillvalue;
                 }
             }
-            put_nc_field_double(nc_state_file.fname,
-                                &(nc_state_file.open),
-                                &(nc_state_file.nc_id),
-                                nc_state_file.d_fillvalue,
-                                dimids, ndims, "Snow_surf_temp",
-                                d4start, d4count, dvar);
-            for (i = 0; i < global_domain.ncells_global; i++) {
-                dvar[idx[i]] = nc_state_file.d_fillvalue;
+            gather_put_nc_field_double(nc_state_file.fname,
+                                       &(nc_state_file.open),
+                                       &(nc_state_file.nc_id),
+                                       nc_state_file.d_fillvalue,
+                                       dimids, ndims, "Snow_surf_temp",
+                                       d4start, d4count, dvar);
+            for (i = 0; i < local_domain.ncells; i++) {
+                dvar[i] = nc_state_file.d_fillvalue;
             }
         }
     }
@@ -681,24 +672,24 @@ vic_store(void)
         d4start[0] = m;
         for (k = 0; k < options.NVEGTYPES; k++) {
             d4start[1] = k;
-            for (i = 0; i < global_domain.ncells_global; i++) {
+            for (i = 0; i < local_domain.ncells; i++) {
                 v = veg_con_map[i].vidx[k];
                 if (v >= 0) {
-                    dvar[idx[i]] = (double)
-                                   all_vars[i].snow[v][m].surf_water;
+                    dvar[i] = (double)
+                              all_vars[i].snow[v][m].surf_water;
                 }
                 else {
-                    dvar[idx[i]] = nc_state_file.d_fillvalue;
+                    dvar[i] = nc_state_file.d_fillvalue;
                 }
             }
-            put_nc_field_double(nc_state_file.fname,
-                                &(nc_state_file.open),
-                                &(nc_state_file.nc_id),
-                                nc_state_file.d_fillvalue,
-                                dimids, ndims, "Snow_surf_water",
-                                d4start, d4count, dvar);
-            for (i = 0; i < global_domain.ncells_global; i++) {
-                dvar[idx[i]] = nc_state_file.d_fillvalue;
+            gather_put_nc_field_double(nc_state_file.fname,
+                                       &(nc_state_file.open),
+                                       &(nc_state_file.nc_id),
+                                       nc_state_file.d_fillvalue,
+                                       dimids, ndims, "Snow_surf_water",
+                                       d4start, d4count, dvar);
+            for (i = 0; i < local_domain.ncells; i++) {
+                dvar[i] = nc_state_file.d_fillvalue;
             }
         }
     }
@@ -716,24 +707,24 @@ vic_store(void)
         d4start[0] = m;
         for (k = 0; k < options.NVEGTYPES; k++) {
             d4start[1] = k;
-            for (i = 0; i < global_domain.ncells_global; i++) {
+            for (i = 0; i < local_domain.ncells; i++) {
                 v = veg_con_map[i].vidx[k];
                 if (v >= 0) {
-                    dvar[idx[i]] = (double)
-                                   all_vars[i].snow[v][m].pack_temp;
+                    dvar[i] = (double)
+                              all_vars[i].snow[v][m].pack_temp;
                 }
                 else {
-                    dvar[idx[i]] = nc_state_file.d_fillvalue;
+                    dvar[i] = nc_state_file.d_fillvalue;
                 }
             }
-            put_nc_field_double(nc_state_file.fname,
-                                &(nc_state_file.open),
-                                &(nc_state_file.nc_id),
-                                nc_state_file.d_fillvalue,
-                                dimids, ndims, "Snow_pack_temp",
-                                d4start, d4count, dvar);
-            for (i = 0; i < global_domain.ncells_global; i++) {
-                dvar[idx[i]] = nc_state_file.d_fillvalue;
+            gather_put_nc_field_double(nc_state_file.fname,
+                                       &(nc_state_file.open),
+                                       &(nc_state_file.nc_id),
+                                       nc_state_file.d_fillvalue,
+                                       dimids, ndims, "Snow_pack_temp",
+                                       d4start, d4count, dvar);
+            for (i = 0; i < local_domain.ncells; i++) {
+                dvar[i] = nc_state_file.d_fillvalue;
             }
         }
     }
@@ -751,24 +742,24 @@ vic_store(void)
         d4start[0] = m;
         for (k = 0; k < options.NVEGTYPES; k++) {
             d4start[1] = k;
-            for (i = 0; i < global_domain.ncells_global; i++) {
+            for (i = 0; i < local_domain.ncells; i++) {
                 v = veg_con_map[i].vidx[k];
                 if (v >= 0) {
-                    dvar[idx[i]] = (double)
-                                   all_vars[i].snow[v][m].pack_water;
+                    dvar[i] = (double)
+                              all_vars[i].snow[v][m].pack_water;
                 }
                 else {
-                    dvar[idx[i]] = nc_state_file.d_fillvalue;
+                    dvar[i] = nc_state_file.d_fillvalue;
                 }
             }
-            put_nc_field_double(nc_state_file.fname,
-                                &(nc_state_file.open),
-                                &(nc_state_file.nc_id),
-                                nc_state_file.d_fillvalue,
-                                dimids, ndims, "Snow_pack_water",
-                                d4start, d4count, dvar);
-            for (i = 0; i < global_domain.ncells_global; i++) {
-                dvar[idx[i]] = nc_state_file.d_fillvalue;
+            gather_put_nc_field_double(nc_state_file.fname,
+                                       &(nc_state_file.open),
+                                       &(nc_state_file.nc_id),
+                                       nc_state_file.d_fillvalue,
+                                       dimids, ndims, "Snow_pack_water",
+                                       d4start, d4count, dvar);
+            for (i = 0; i < local_domain.ncells; i++) {
+                dvar[i] = nc_state_file.d_fillvalue;
             }
         }
     }
@@ -786,24 +777,24 @@ vic_store(void)
         d4start[0] = m;
         for (k = 0; k < options.NVEGTYPES; k++) {
             d4start[1] = k;
-            for (i = 0; i < global_domain.ncells_global; i++) {
+            for (i = 0; i < local_domain.ncells; i++) {
                 v = veg_con_map[i].vidx[k];
                 if (v >= 0) {
-                    dvar[idx[i]] = (double)
-                                   all_vars[i].snow[v][m].density;
+                    dvar[i] = (double)
+                              all_vars[i].snow[v][m].density;
                 }
                 else {
-                    dvar[idx[i]] = nc_state_file.d_fillvalue;
+                    dvar[i] = nc_state_file.d_fillvalue;
                 }
             }
-            put_nc_field_double(nc_state_file.fname,
-                                &(nc_state_file.open),
-                                &(nc_state_file.nc_id),
-                                nc_state_file.d_fillvalue,
-                                dimids, ndims, "Snow_density",
-                                d4start, d4count, dvar);
-            for (i = 0; i < global_domain.ncells_global; i++) {
-                dvar[idx[i]] = nc_state_file.d_fillvalue;
+            gather_put_nc_field_double(nc_state_file.fname,
+                                       &(nc_state_file.open),
+                                       &(nc_state_file.nc_id),
+                                       nc_state_file.d_fillvalue,
+                                       dimids, ndims, "Snow_density",
+                                       d4start, d4count, dvar);
+            for (i = 0; i < local_domain.ncells; i++) {
+                dvar[i] = nc_state_file.d_fillvalue;
             }
         }
     }
@@ -821,24 +812,24 @@ vic_store(void)
         d4start[0] = m;
         for (k = 0; k < options.NVEGTYPES; k++) {
             d4start[1] = k;
-            for (i = 0; i < global_domain.ncells_global; i++) {
+            for (i = 0; i < local_domain.ncells; i++) {
                 v = veg_con_map[i].vidx[k];
                 if (v >= 0) {
-                    dvar[idx[i]] = (double)
-                                   all_vars[i].snow[v][m].coldcontent;
+                    dvar[i] = (double)
+                              all_vars[i].snow[v][m].coldcontent;
                 }
                 else {
-                    dvar[idx[i]] = nc_state_file.d_fillvalue;
+                    dvar[i] = nc_state_file.d_fillvalue;
                 }
             }
-            put_nc_field_double(nc_state_file.fname,
-                                &(nc_state_file.open),
-                                &(nc_state_file.nc_id),
-                                nc_state_file.d_fillvalue,
-                                dimids, ndims, "Snow_cold_content",
-                                d4start, d4count, dvar);
-            for (i = 0; i < global_domain.ncells_global; i++) {
-                dvar[idx[i]] = nc_state_file.d_fillvalue;
+            gather_put_nc_field_double(nc_state_file.fname,
+                                       &(nc_state_file.open),
+                                       &(nc_state_file.nc_id),
+                                       nc_state_file.d_fillvalue,
+                                       dimids, ndims, "Snow_cold_content",
+                                       d4start, d4count, dvar);
+            for (i = 0; i < local_domain.ncells; i++) {
+                dvar[i] = nc_state_file.d_fillvalue;
             }
         }
     }
@@ -856,24 +847,24 @@ vic_store(void)
         d4start[0] = m;
         for (k = 0; k < options.NVEGTYPES; k++) {
             d4start[1] = k;
-            for (i = 0; i < global_domain.ncells_global; i++) {
+            for (i = 0; i < local_domain.ncells; i++) {
                 v = veg_con_map[i].vidx[k];
                 if (v >= 0) {
-                    dvar[idx[i]] = (double)
-                                   all_vars[i].snow[v][m].snow_canopy;
+                    dvar[i] = (double)
+                              all_vars[i].snow[v][m].snow_canopy;
                 }
                 else {
-                    dvar[idx[i]] = nc_state_file.d_fillvalue;
+                    dvar[i] = nc_state_file.d_fillvalue;
                 }
             }
-            put_nc_field_double(nc_state_file.fname,
-                                &(nc_state_file.open),
-                                &(nc_state_file.nc_id),
-                                nc_state_file.d_fillvalue,
-                                dimids, ndims, "Snow_canopy",
-                                d4start, d4count, dvar);
-            for (i = 0; i < global_domain.ncells_global; i++) {
-                dvar[idx[i]] = nc_state_file.d_fillvalue;
+            gather_put_nc_field_double(nc_state_file.fname,
+                                       &(nc_state_file.open),
+                                       &(nc_state_file.nc_id),
+                                       nc_state_file.d_fillvalue,
+                                       dimids, ndims, "Snow_canopy",
+                                       d4start, d4count, dvar);
+            for (i = 0; i < local_domain.ncells; i++) {
+                dvar[i] = nc_state_file.d_fillvalue;
             }
         }
     }
@@ -894,24 +885,24 @@ vic_store(void)
             d5start[1] = k;
             for (j = 0; j < options.Nnode; j++) {
                 d5start[2] = j;
-                for (i = 0; i < global_domain.ncells_global; i++) {
+                for (i = 0; i < local_domain.ncells; i++) {
                     v = veg_con_map[i].vidx[k];
                     if (v >= 0) {
-                        dvar[idx[i]] = (double)
-                                       all_vars[i].energy[v][m].T[j];
+                        dvar[i] = (double)
+                                  all_vars[i].energy[v][m].T[j];
                     }
                     else {
-                        dvar[idx[i]] = nc_state_file.d_fillvalue;
+                        dvar[i] = nc_state_file.d_fillvalue;
                     }
                 }
-                put_nc_field_double(nc_state_file.fname,
-                                    &(nc_state_file.open),
-                                    &(nc_state_file.nc_id),
-                                    nc_state_file.d_fillvalue,
-                                    dimids, ndims, "Node_temperature",
-                                    d5start, d5count, dvar);
-                for (i = 0; i < global_domain.ncells_global; i++) {
-                    dvar[idx[i]] = nc_state_file.d_fillvalue;
+                gather_put_nc_field_double(nc_state_file.fname,
+                                           &(nc_state_file.open),
+                                           &(nc_state_file.nc_id),
+                                           nc_state_file.d_fillvalue,
+                                           dimids, ndims, "Node_temperature",
+                                           d5start, d5count, dvar);
+                for (i = 0; i < local_domain.ncells; i++) {
+                    dvar[i] = nc_state_file.d_fillvalue;
                 }
             }
         }
@@ -921,18 +912,17 @@ vic_store(void)
     }
 
     if (options.LAKES) {
-        nrerror("LAKES option not yet implemented in vic_store()");
+        log_err("LAKES option not yet implemented in vic_store()");
     }
 
     // close the netcdf file if it is still open
     if (nc_state_file.open == true) {
         status = nc_close(nc_state_file.nc_id);
         if (status != NC_NOERR) {
-            ERR(status);
+            log_ncerr(status);
         }
     }
 
-    free(idx);
     free(cvar);
     free(ivar);
     free(dvar);
@@ -951,9 +941,9 @@ initialize_state_file(nc_file_struct *nc)
     int                     status;
     int                     old_fill_mode;
 
-    sprintf(nc->fname, "%s.%04d%02d%02d_%02d.nc",
+    sprintf(nc->fname, "%s.%04d%02d%02d_%05u.nc",
             filenames.statefile, dmy[current].year, dmy[current].month,
-            dmy[current].day, dmy[current].hour);
+            dmy[current].day, dmy[current].dayseconds);
 
     nc->c_fillvalue = NC_FILL_CHAR;
     nc->i_fillvalue = NC_FILL_INT;
@@ -972,73 +962,65 @@ initialize_state_file(nc_file_struct *nc)
     // open the netcdf file
     status = nc_create(nc->fname, NC_NETCDF4 | NC_CLASSIC_MODEL, &(nc->nc_id));
     if (status != NC_NOERR) {
-        ERR(status);
+        log_ncerr(status);
     }
     nc->open = true;
 
     // set the NC_FILL attribute
     status = nc_set_fill(nc->nc_id, NC_FILL, &old_fill_mode);
     if (status != NC_NOERR) {
-        ERR(status);
+        log_ncerr(status);
     }
 
     // define netcdf dimensions
     status = nc_def_dim(nc->nc_id, "snow_band", nc->band_size,
                         &(nc->band_dimid));
     if (status != NC_NOERR) {
-        fprintf(stderr, "nc_def_dim snow_band\n");
-        ERR(status);
+        log_ncerr(status);
     }
 
     status = nc_def_dim(nc->nc_id, "frost_area", nc->frost_size,
                         &(nc->frost_dimid));
     if (status != NC_NOERR) {
-        fprintf(stderr, "nc_def_dim frost_area\n");
-        ERR(status);
+        log_ncerr(status);
     }
 
     status = nc_def_dim(nc->nc_id, "nlayer", nc->layer_size,
                         &(nc->layer_dimid));
     if (status != NC_NOERR) {
-        fprintf(stderr, "nc_def_dim nlayer\n");
-        ERR(status);
+        log_ncerr(status);
     }
 
     status = nc_def_dim(nc->nc_id, "ni", nc->ni_size, &(nc->ni_dimid));
     if (status != NC_NOERR) {
-        fprintf(stderr, "nc_def_dim ni\n");
-        ERR(status);
+        log_ncerr(status);
     }
 
     status = nc_def_dim(nc->nc_id, "nj", nc->nj_size, &(nc->nj_dimid));
     if (status != NC_NOERR) {
-        fprintf(stderr, "nc_def_dim nj\n");
-        ERR(status);
+        log_ncerr(status);
     }
 
     status = nc_def_dim(nc->nc_id, "node", nc->node_size, &(nc->node_dimid));
     if (status != NC_NOERR) {
-        fprintf(stderr, "nc_def_dim node\n");
-        ERR(status);
+        log_ncerr(status);
     }
 
     status = nc_def_dim(nc->nc_id, "root_zone", nc->root_zone_size,
                         &(nc->root_zone_dimid));
     if (status != NC_NOERR) {
-        fprintf(stderr, "nc_def_dim root_zone\n");
-        ERR(status);
+        log_ncerr(status);
     }
 
     status = nc_def_dim(nc->nc_id, "veg_class", nc->veg_size,
                         &(nc->veg_dimid));
     if (status != NC_NOERR) {
-        fprintf(stderr, "nc_def_dim veg_class\n");
-        ERR(status);
+        log_ncerr(status);
     }
 
     // leave define mode
     status = nc_enddef(nc->nc_id);
     if (status != NC_NOERR) {
-        ERR(status);
+        log_ncerr(status);
     }
 }

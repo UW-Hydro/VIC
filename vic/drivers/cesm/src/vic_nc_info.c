@@ -26,9 +26,7 @@
 
 #include <vic_def.h>
 #include <vic_run.h>
-#include <vic_driver_image.h>
-
-#define ERR(e) {fprintf(stderr, "\nError(vic_nc_info): %s\n", nc_strerror(e)); }
+#include <vic_driver_cesm.h>
 
 /******************************************************************************
  * @brief    Setup netCDF output variables.
@@ -401,7 +399,7 @@ vic_nc_info(nc_file_struct   *nc_hist_file,
             strncpy(nc_vars[i].nc_units, "g C m-2", MAXSTRING);
             break;
         default:
-            fprintf(stderr, "%zd - not defined\n", i);
+            log_warn("%zd - not defined\n", i);
             break;
         }
     }

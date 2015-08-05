@@ -26,7 +26,7 @@
 
 #include <vic_def.h>
 #include <vic_run.h>
-#include <vic_driver_image.h>
+#include <vic_driver_cesm.h>
 
 /******************************************************************************
  * @brief    This routine creates the list of output variables.
@@ -39,7 +39,7 @@ create_output_list()
     out_data_struct     *out_data;
 
     out_data =
-        (out_data_struct *)calloc(N_OUTVAR_TYPES, sizeof(out_data_struct));
+        (out_data_struct *) calloc(N_OUTVAR_TYPES, sizeof(out_data_struct));
 
     // Build the list of supported output variables
 
@@ -353,9 +353,9 @@ create_output_list()
 
     // Allocate space for data
     for (v = 0; v < N_OUTVAR_TYPES; v++) {
-        out_data[v].data = (double *)calloc(out_data[v].nelem, sizeof(double));
+        out_data[v].data = (double *) calloc(out_data[v].nelem, sizeof(double));
         out_data[v].aggdata =
-            (double *)calloc(out_data[v].nelem, sizeof(double));
+            (double *) calloc(out_data[v].nelem, sizeof(double));
     }
 
     // Initialize data values
@@ -403,8 +403,8 @@ free_out_data(out_data_struct **out_data)
     int varid;
 
     for (varid = 0; varid < N_OUTVAR_TYPES; varid++) {
-        free((char*)(*out_data)[varid].data);
-        free((char*)(*out_data)[varid].aggdata);
+        free((char*) (*out_data)[varid].data);
+        free((char*) (*out_data)[varid].aggdata);
     }
     free((char*)(*out_data));
 }

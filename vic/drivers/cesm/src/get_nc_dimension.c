@@ -26,10 +26,7 @@
 
 #include <vic_def.h>
 #include <vic_run.h>
-#include <vic_driver_image.h>
-
-#define ERR(e) {fprintf(stderr, "\nError(get_nc_dimension): %s\n", \
-                        nc_strerror(e)); }
+#include <vic_driver_cesm.h>
 
 /******************************************************************************
  * @brief    Get netCDF dimension.
@@ -46,25 +43,25 @@ get_nc_dimension(char *nc_name,
     // open the netcdf file
     status = nc_open(nc_name, NC_NOWRITE, &nc_id);
     if (status != NC_NOERR) {
-        ERR(status);
+        log_ncerr(status);
     }
 
     // get dimension id
     status = nc_inq_dimid(nc_id, dim_name, &dim_id);
     if (status != NC_NOERR) {
-        ERR(status);
+        log_ncerr(status);
     }
 
     // get dimension size
     status = nc_inq_dimlen(nc_id, dim_id, &dim_size);
     if (status != NC_NOERR) {
-        ERR(status);
+        log_ncerr(status);
     }
 
     // close the netcdf file
     status = nc_close(nc_id);
     if (status != NC_NOERR) {
-        ERR(status);
+        log_ncerr(status);
     }
 
     return dim_size;

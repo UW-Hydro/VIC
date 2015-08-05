@@ -26,10 +26,7 @@
 
 #include <vic_def.h>
 #include <vic_run.h>
-#include <vic_driver_image.h>
-
-#define ERR(e) {fprintf(stderr, "\nError(get_nc_field): %s\n", \
-                        nc_strerror(e)); }
+#include <vic_driver_cesm.h>
 
 /******************************************************************************
  * @brief    Read double precision netCDF field from file.
@@ -48,24 +45,24 @@ get_nc_field_double(char   *nc_name,
     // open the netcdf file
     status = nc_open(nc_name, NC_NOWRITE, &nc_id);
     if (status != NC_NOERR) {
-        ERR(status);
+        log_ncerr(status);
     }
 
     /* get NetCDF variable */
     status = nc_inq_varid(nc_id, var_name, &var_id);
     if (status != NC_NOERR) {
-        ERR(status);
+        log_ncerr(status);
     }
 
     status = nc_get_vara_double(nc_id, var_id, start, count, var);
     if (status != NC_NOERR) {
-        ERR(status);
+        log_ncerr(status);
     }
 
     // close the netcdf file
     status = nc_close(nc_id);
     if (status != NC_NOERR) {
-        ERR(status);
+        log_ncerr(status);
     }
 
     return status;
@@ -88,24 +85,24 @@ get_nc_field_float(char   *nc_name,
     // open the netcdf file
     status = nc_open(nc_name, NC_NOWRITE, &nc_id);
     if (status != NC_NOERR) {
-        ERR(status);
+        log_ncerr(status);
     }
 
     /* get NetCDF variable */
     status = nc_inq_varid(nc_id, var_name, &var_id);
     if (status != NC_NOERR) {
-        ERR(status);
+        log_ncerr(status);
     }
 
     status = nc_get_vara_float(nc_id, var_id, start, count, var);
     if (status != NC_NOERR) {
-        ERR(status);
+        log_ncerr(status);
     }
 
     // close the netcdf file
     status = nc_close(nc_id);
     if (status != NC_NOERR) {
-        ERR(status);
+        log_ncerr(status);
     }
 
     return status;
@@ -128,24 +125,24 @@ get_nc_field_int(char   *nc_name,
     // open the netcdf file
     status = nc_open(nc_name, NC_NOWRITE, &nc_id);
     if (status != NC_NOERR) {
-        ERR(status);
+        log_ncerr(status);
     }
 
     /* get NetCDF variable */
     status = nc_inq_varid(nc_id, var_name, &var_id);
     if (status != NC_NOERR) {
-        ERR(status);
+        log_ncerr(status);
     }
 
     status = nc_get_vara_int(nc_id, var_id, start, count, var);
     if (status != NC_NOERR) {
-        ERR(status);
+        log_ncerr(status);
     }
 
     // close the netcdf file
     status = nc_close(nc_id);
     if (status != NC_NOERR) {
-        ERR(status);
+        log_ncerr(status);
     }
 
     return status;

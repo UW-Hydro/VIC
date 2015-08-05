@@ -26,7 +26,7 @@
 
 #include <vic_def.h>
 #include <vic_run.h>
-#include <vic_driver_image.h>
+#include <vic_driver_cesm.h>
 
 /******************************************************************************
  * @brief    Read atmospheric forcing data.
@@ -40,6 +40,7 @@ vic_force(void)
     extern atmos_data_struct  *atmos;
     extern dmy_struct         *dmy;
     extern domain_struct       global_domain;
+    extern domain_struct       local_domain;
     extern filenames_struct    filenames;
     extern global_param_struct global_param;
     extern option_struct       options;
@@ -54,25 +55,13 @@ vic_force(void)
     size_t                     j;
     size_t                     v;
     int                        vidx;
-    size_t                    *idx = NULL;
     size_t                     d3count[3];
     size_t                     d3start[3];
 
     // allocate memory for variables to be read
-    fvar = (float *) malloc(global_domain.n_ny * global_domain.n_nx *
-                            sizeof(float));
+    fvar = (float *) malloc(local_domain.ncells * sizeof(float));
     if (fvar == NULL) {
-        nrerror("Memory allocation error in vic_force().");
-    }
-
-    // get 1D indices used in mapping the netcdf fields to the locations
-    idx = (size_t *) malloc(global_domain.ncells_global *
-                            sizeof(size_t));
-    if (idx == NULL) {
-        nrerror("Memory allocation error in vic_force().");
-    }
-    for (i = 0; i < global_domain.ncells_global; i++) {
-        idx[i] = get_global_idx(&global_domain, i);
+        log_err("Memory allocation error in vic_force().");
     }
 
     // for now forcing file is determined by the year
@@ -95,70 +84,70 @@ vic_force(void)
     // Air temperature: tas
     for (j = 0; j < NF; j++) {
         d3start[0] = global_param.forceoffset[0] + j;
-        get_nc_field_float(filenames.forcing[0], "tas",
-                           d3start, d3count, fvar);
-        for (i = 0; i < global_domain.ncells_global; i++) {
-            atmos[i].air_temp[j] = (double) fvar[idx[i]];
+        get_scatter_nc_field_float(filenames.forcing[0], "tas",
+                                   d3start, d3count, fvar);
+        for (i = 0; i < local_domain.ncells; i++) {
+            atmos[i].air_temp[j] = (double) fvar[i];
         }
     }
 
     // Precipitation: prcp
     for (j = 0; j < NF; j++) {
         d3start[0] = global_param.forceoffset[0] + j;
-        get_nc_field_float(filenames.forcing[0], "prcp",
-                           d3start, d3count, fvar);
-        for (i = 0; i < global_domain.ncells_global; i++) {
-            atmos[i].prec[j] = (double) fvar[idx[i]];
+        get_scatter_nc_field_float(filenames.forcing[0], "prcp",
+                                   d3start, d3count, fvar);
+        for (i = 0; i < local_domain.ncells; i++) {
+            atmos[i].prec[j] = (double) fvar[i];
         }
     }
 
     // Downward solar radiation: dswrf
     for (j = 0; j < NF; j++) {
         d3start[0] = global_param.forceoffset[0] + j;
-        get_nc_field_float(filenames.forcing[0], "dswrf",
-                           d3start, d3count, fvar);
-        for (i = 0; i < global_domain.ncells_global; i++) {
-            atmos[i].shortwave[j] = (double) fvar[idx[i]];
+        get_scatter_nc_field_float(filenames.forcing[0], "dswrf",
+                                   d3start, d3count, fvar);
+        for (i = 0; i < local_domain.ncells; i++) {
+            atmos[i].shortwave[j] = (double) fvar[i];
         }
     }
 
     // Downward longwave radiation: dlwrf
     for (j = 0; j < NF; j++) {
         d3start[0] = global_param.forceoffset[0] + j;
-        get_nc_field_float(filenames.forcing[0], "dlwrf",
-                           d3start, d3count, fvar);
-        for (i = 0; i < global_domain.ncells_global; i++) {
-            atmos[i].longwave[j] = (double) fvar[idx[i]];
+        get_scatter_nc_field_float(filenames.forcing[0], "dlwrf",
+                                   d3start, d3count, fvar);
+        for (i = 0; i < local_domain.ncells; i++) {
+            atmos[i].longwave[j] = (double) fvar[i];
         }
     }
 
     // Wind speed: wind
     for (j = 0; j < NF; j++) {
         d3start[0] = global_param.forceoffset[0] + j;
-        get_nc_field_float(filenames.forcing[0], "wind",
-                           d3start, d3count, fvar);
-        for (i = 0; i < global_domain.ncells_global; i++) {
-            atmos[i].wind[j] = (double) fvar[idx[i]];
+        get_scatter_nc_field_float(filenames.forcing[0], "wind",
+                                   d3start, d3count, fvar);
+        for (i = 0; i < local_domain.ncells; i++) {
+            atmos[i].wind[j] = (double) fvar[i];
         }
     }
 
     // Specific humidity: shum
     for (j = 0; j < NF; j++) {
         d3start[0] = global_param.forceoffset[0] + j;
-        get_nc_field_float(filenames.forcing[0], "shum",
-                           d3start, d3count, fvar);
-        for (i = 0; i < global_domain.ncells_global; i++) {
-            atmos[i].vp[j] = (double) fvar[idx[i]];
+        get_scatter_nc_field_float(filenames.forcing[0], "shum",
+                                   d3start, d3count, fvar);
+        for (i = 0; i < local_domain.ncells; i++) {
+            atmos[i].vp[j] = (double) fvar[i];
         }
     }
 
     // Pressure: pressure
     for (j = 0; j < NF; j++) {
         d3start[0] = global_param.forceoffset[0] + j;
-        get_nc_field_float(filenames.forcing[0], "pres",
-                           d3start, d3count, fvar);
-        for (i = 0; i < global_domain.ncells_global; i++) {
-            atmos[i].pressure[j] = (double) fvar[idx[i]];
+        get_scatter_nc_field_float(filenames.forcing[0], "pres",
+                                   d3start, d3count, fvar);
+        for (i = 0; i < local_domain.ncells; i++) {
+            atmos[i].pressure[j] = (double) fvar[i];
         }
     }
 
@@ -166,18 +155,18 @@ vic_force(void)
     global_param.forceoffset[0] += NF;
 
     if (options.SNOW_BAND > 1) {
-        nrerror("SNOW_BAND not implemented in vic_force()");
+        log_err("SNOW_BAND not implemented in vic_force()");
     }
     else {
         t_offset = 0;
     }
     // Convert forcings into what we need and calculate missing ones
-    for (i = 0; i < global_domain.ncells_global; i++) {
+    for (i = 0; i < local_domain.ncells; i++) {
         for (j = 0; j < NF; j++) {
             // temperature in CONST_TKFRZ
             atmos[i].air_temp[j] -= CONST_TKFRZ;
             // precipitation in mm/period
-            atmos[i].prec[j] *= (double) (options.SNOW_STEP * SEC_PER_HOUR);
+            atmos[i].prec[j] *= global_param.snow_dt;
             // pressure in kPa
             atmos[i].pressure[j] /= PA_PER_KPA;
             // vapor pressure in kPa (we read specific humidity in kg/kg)
@@ -199,7 +188,7 @@ vic_force(void)
 
 
     // Put average value in NR field
-    for (i = 0; i < global_domain.ncells_global; i++) {
+    for (i = 0; i < local_domain.ncells; i++) {
         atmos[i].air_temp[NR] = average(atmos[i].air_temp, NF);
         // For precipitation put total
         atmos[i].prec[NR] = average(atmos[i].prec, NF) * NF;
@@ -221,7 +210,7 @@ vic_force(void)
 
     // Update the veg_hist structure with the current vegetation parameters.
     // Currently only implemented for climatological values in image mode
-    for (i = 0; i < global_domain.ncells_global; i++) {
+    for (i = 0; i < local_domain.ncells; i++) {
         for (v = 0; v < options.NVEGTYPES; v++) {
             vidx = veg_con_map[i].vidx[v];
             if (vidx != -1) {
@@ -233,19 +222,20 @@ vic_force(void)
                     veg_hist[i][vidx].vegcover[j] =
                         veg_lib[i][v].vegcover[dmy[current].month - 1];
                 }
+                // not the correct way to calculate average albedo, but leave
+                // for now
+                veg_hist[i][vidx].albedo[NR] = average(veg_hist[i][vidx].albedo,
+                                                       NF);
+                veg_hist[i][vidx].LAI[NR] = average(veg_hist[i][vidx].LAI, NF);
+                veg_hist[i][vidx].vegcover[NR] = average(
+                    veg_hist[i][vidx].vegcover, NF);
             }
-            // not the correct way to calculate average albedo, but leave
-            // for now
-            veg_hist[i][v].albedo[NR] = average(veg_hist[i][v].albedo, NF);
-            veg_hist[i][v].LAI[NR] = average(veg_hist[i][v].LAI, NF);
-            veg_hist[i][v].vegcover[NR] = average(veg_hist[i][v].vegcover, NF);
         }
     }
 
 
     // cleanup
     free(fvar);
-    free(idx);
 }
 
 /******************************************************************************
@@ -259,7 +249,7 @@ average(double *ar,
     double sum = 0.;
 
     if (n <= 0) {
-        nrerror("Error in calc_average: divide by zero or negative");
+        log_err("Error in calc_average: divide by zero or negative");
     }
     else if (n == 1) {
         return ar[0];

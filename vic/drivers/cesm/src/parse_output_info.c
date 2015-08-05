@@ -27,7 +27,7 @@
 
 #include <vic_def.h>
 #include <vic_run.h>
-#include <vic_driver_image.h>
+#include <vic_driver_cesm.h>
 
 /******************************************************************************
  * @brief    Get output info from global parameter file.
@@ -59,10 +59,9 @@ parse_output_info(FILE             *gp,
                     }
                 }
                 if (!found) {
-                    fprintf(stderr, "Error: parse_output_info: \"%s\" was "
-                            "not found in the list of supported output "
-                            "variable names.  Please use "
-                            "the exact name listed in vic_def.h.\n",
+                    log_err("\"%s\" was not found in the list of supported "
+                            "output variable names.  Please use "
+                            "the exact name listed in vic_def.h.",
                             varname);
                 }
                 outvarnum++;

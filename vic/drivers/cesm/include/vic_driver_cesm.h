@@ -28,8 +28,6 @@
 #define VIC_DRIVER_CESM_H
 
 #include <stdbool.h>
-#include <netcdf.h>
-#include <stdio.h>
 #include <vic_mpi.h>
 #include <netcdf.h>
 #include <vic_driver_shared.h>

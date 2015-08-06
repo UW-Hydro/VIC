@@ -60,6 +60,7 @@ class CleanCommand(Command):
             except:
                 pass
 
+
 # -------------------------------------------------------------------- #
 def write_version_py(filename=None):
     cnt = """\
@@ -147,7 +148,6 @@ includes.append(os.path.join(vic_root_abs_path,
 
 ext_name = 'vic_core'
 # platform safe path to extension
-# ext_obj = os.path.join(os.pardir, ext_name + sysconfig.get_config_var('SO'))
 ext_obj = ext_name + sysconfig.get_config_var('SO')
 ext_module = Extension(ext_name,
                        sources=sources,

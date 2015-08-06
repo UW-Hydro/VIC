@@ -8,10 +8,9 @@ import argparse
 import datetime
 from collections import OrderedDict
 import string
-from tonic.models.vic import VIC, VICRuntimeError, read_vic_ascii
-from tonic.testing import VICTestError
+from tonic.models.vic.vic import VIC, VICRuntimeError, read_vic_ascii
 from tonic.io import read_config, read_configobj
-from tonic.testing import check_completed, check_for_nans
+from tonic.testing import check_completed, check_for_nans, VICTestError
 
 OUTPUT_WIDTH = 100
 

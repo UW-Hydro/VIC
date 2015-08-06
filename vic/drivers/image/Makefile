@@ -94,7 +94,7 @@ LIBRARY = -lm -L${NETCDFPATH}/lib -lnetcdf -L${MPIPATH}/lib -lmpi
 #CFLAGS  = ${INCLUDES} -g -Wall -Wno-unused -DLOG_LVL=$(LOG_LVL)
 #LIBRARY = -lm -L${NETCDFPATH}/lib -lnetcdf -L${MPIPATH}/lib -lmpi -lefence -L/usr/local/lib
 
-COMPLIB = vic_image
+COMPEXE = vic_image
 EXT = .exe
 
 # -----------------------------------------------------------------------
@@ -128,11 +128,11 @@ full:
 	make model
 
 clean::
-	rm -f core log
-	rm -rf ${COMPLIB}${EXT} ${COMPLIB}${EXT}.dSYM
+	\rm -f core log
+	\rm -rf ${COMPEXE}${EXT} ${COMPEXE}${EXT}.dSYM
 
 model: $(OBJS)
-	$(CC) -o ${COMPLIB}${EXT} $(OBJS) $(CFLAGS) $(LIBRARY)
+	$(CC) -o ${COMPEXE}${EXT} $(OBJS) $(CFLAGS) $(LIBRARY)
 
 # -------------------------------------------------------------
 # tags
@@ -142,7 +142,7 @@ tags:	TAGS
 TAGS:	$(SRCS) $(HDRS)
 	etags $(SRCS) $(HDRS)
 clean::
-	rm -f TAGS
+	\rm -f TAGS
 
 
 # -------------------------------------------------------------
@@ -153,4 +153,4 @@ depend: .depend
 	$(CC) $(CFLAGS) -M $(SRCS) > $@
 
 clean::
-	rm -f .depend
+	\rm -f .depend

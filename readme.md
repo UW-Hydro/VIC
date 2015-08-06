@@ -20,5 +20,5 @@ If you make use of this model, please acknowledge the appropriate references lis
 (http://www.hydro.washington.edu/Lettenmaier/Models/VIC/Documentation/References.shtml).
 
 If you want to contact us directly about the VIC model, you can send
-e-mail to `vicadmin at hydro.washington.edu`. Please include "VIC Model" in the subject line.
+e-mail to `vic_users at u.washington.edu`. Please include "VIC Model" in the subject line.
 

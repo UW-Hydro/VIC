@@ -65,8 +65,6 @@ else
 CC = mpicc-mpich-mp
 endif
 
-RM = /bin/rm
-
 # Set the log level
 # To turn off warning statements, set LOG_LVL >= 30
 # | Level     | Numeric value    |
@@ -130,8 +128,8 @@ full:
 	make model
 
 clean::
-	RM -f core log
-	RM -rf ${COMPLIB}${EXT} ${COMPLIB}${EXT}.dSYM
+	rm -f core log
+	rm -rf ${COMPLIB}${EXT} ${COMPLIB}${EXT}.dSYM
 
 model: $(OBJS)
 	$(CC) -o ${COMPLIB}${EXT} $(OBJS) $(CFLAGS) $(LIBRARY)
@@ -144,7 +142,7 @@ tags:	TAGS
 TAGS:	$(SRCS) $(HDRS)
 	etags $(SRCS) $(HDRS)
 clean::
-	RM -f TAGS
+	rm -f TAGS
 
 
 # -------------------------------------------------------------
@@ -155,4 +153,4 @@ depend: .depend
 	$(CC) $(CFLAGS) -M $(SRCS) > $@
 
 clean::
-	RM -f .depend
+	rm -f .depend

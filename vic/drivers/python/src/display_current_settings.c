@@ -27,7 +27,8 @@
 
 #include <vic_def.h>
 #include <vic_run.h>
-#include <vic_driver_image.h>
+#include <vic_driver_shared.h>
+#include <vic_driver_python.h>
 
 /******************************************************************************
  * @brief    Display the current settings of options defined in the header
@@ -57,8 +58,6 @@ display_current_settings(int mode)
     fprintf(LOG_DEST, "----------------------------------------\n\n");
 
     fprintf(LOG_DEST, "VIC_DRIVER:\t\t%s\n", VIC_DRIVER);
-    fprintf(LOG_DEST, "\n");
-    fprintf(LOG_DEST, "LOG_LEVEL:\t\t%d\n", LOG_LVL);
     fprintf(LOG_DEST, "\n");
     fprintf(LOG_DEST, "Maximum Array Sizes:\n");
     fprintf(LOG_DEST, "MAX_BANDS\t\t%2d\n", MAX_BANDS);

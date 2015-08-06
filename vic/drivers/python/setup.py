@@ -7,8 +7,9 @@ import sysconfig
 import warnings
 import glob
 import subprocess
+import shutil
 
-from setuptools import setup, find_packages
+from setuptools import setup, find_packages, Command
 from setuptools.extension import Extension
 
 MAJOR = 5
@@ -28,6 +29,36 @@ vic_root_abs_path = os.path.abspath(vic_root_rel_path)
 start_dir = os.path.abspath(os.getcwd())
 setup_dir = os.path.dirname(os.path.abspath(__file__))
 os.chdir(setup_dir)
+
+
+class CleanCommand(Command):
+    """Custom clean command to tidy up the project root."""
+    user_options = []
+
+    def initialize_options(self):
+        pass
+
+    def finalize_options(self):
+        pass
+
+    def run(self):
+        for path in ['./build', './dist', './__pycache__', './vic.egg-info']:
+            try:
+                print('removing %s' % path)
+                shutil.rmtree(path)
+            except:
+                pass
+
+        files = ['vic/_vic.py']
+        files.extend(glob.glob('vic/*pyc'))
+        files.extend(glob.glob('vic_core*'))
+
+        for filename in files:
+            try:
+                print('removing %s' % filename)
+                os.remove(filename)
+            except:
+                pass
 
 # -------------------------------------------------------------------- #
 def write_version_py(filename=None):
@@ -130,6 +161,7 @@ setup(name='vic',
       description='The Variable Infiltration Capacity model',
       author='Joe Hamman',
       author_email='jhamman1@uw.edu',
+      cmdclass={'clean': CleanCommand},
       setup_requires=["cffi>=1.0.0"],
       install_requires=["cffi>=1.0.0"],
       tests_require=['pytest'],

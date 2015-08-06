@@ -63,20 +63,15 @@ class CleanCommand(Command):
 
 # -------------------------------------------------------------------- #
 def write_version_py(filename=None):
-    cnt = """\
-version = '%s'
-short_version = '%s'
+    version_text = """\
+version = '{0}'
+short_version = '{1}'
 """
     if not filename:
         filename = os.path.join(setup_dir, 'vic', 'version.py')
 
-    a = open(filename, 'w')
-    try:
-        a.write(cnt % (FULLVERSION, VERSION))
-    finally:
-        a.close()
-
-    return
+    with open(filename, 'w') as f:
+        f.write(version_text.format(FULLVERSION, VERSION))
 # -------------------------------------------------------------------- #
 
 

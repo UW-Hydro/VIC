@@ -1,11 +1,7 @@
 """
   @section DESCRIPTION
 
-  ctypes wrapper for vic_run
-
-  This module initialize a few globals missed by ctypes gen and imports all the
-  objects from the vic_core.so. This is the module that should be used for
-  interacting with the ctypes objects in _vic_run_lib
+  cffi wrapper for vic_run
 
   @section LICENSE
 

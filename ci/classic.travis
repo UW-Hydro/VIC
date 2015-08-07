@@ -9,6 +9,10 @@ function vic_before_install {
 
 function vic_install {
     echo vic_install
+    if [ -z "$USE_CC" ]; then
+        echo "export CC=$USE_CC"
+        export CC=$USE_CC;
+    fi
     make full -C $DRIVER_PATH
 }
 

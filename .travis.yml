@@ -12,10 +12,12 @@ matrix:
   - compiler: gcc
     env: TESTID='classic'
   # Image Driver
-  - compiler: clang
-    env: TESTID='image'
   - compiler: gcc
     env: TESTID='image'
+    addons:
+      apt_packages:
+        - libnetcdf-dev
+        - mpich2
 before_install:
   - source ci/${TESTID}.travis
   - vic_before_install

@@ -18,6 +18,7 @@ matrix:
       apt_packages:
         - libnetcdf-dev
         - libopenmpi-dev
+        - openmpi
 before_install:
   - source ci/${TESTID}.travis
   - vic_before_install

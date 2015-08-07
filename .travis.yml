@@ -11,6 +11,11 @@ matrix:
     env: TESTID='classic'
   - compiler: gcc
     env: TESTID='classic'
+  # Image Driver
+  - compiler: clang
+    env: TESTID='image'
+  - compiler: gcc
+    env: TESTID='image'
 before_install:
   - source ci/${TESTID}.travis
   - vic_before_install

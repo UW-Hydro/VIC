@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
-DRIVER_PATH="vic/drivers/classic/"
-DRIVER_EXE="${DRIVER_PATH}vic_classic.exe"
+DRIVER_PATH="vic/drivers/image/"
+DRIVER_EXE="${DRIVER_PATH}vic_image.exe"
 
 function vic_before_install {
     echo vic_before_install

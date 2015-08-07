@@ -1,0 +1,36 @@
+#!/usr/bin/env bash
+
+DRIVER_PATH="vic/drivers/classic/"
+DRIVER_EXE="${DRIVER_PATH}vic_classic.exe"
+
+function vic_before_install {
+    echo vic_before_install
+}
+
+function vic_install {
+    echo vic_install
+    make full -C $DRIVER_PATH
+}
+
+function vic_before_script {
+    echo vic_before_script
+    if [ ! -f $DRIVER_EXE ]; then
+        echo "Executable (${DRIVER_EXE}) not found!"
+        exit 1
+    fi
+}
+
+function vic_script {
+    echo vic_script
+    $DRIVER_EXE -v
+    $DRIVER_EXE -o
+
+}
+
+function vic_after_success {
+    echo vic_after_success
+}
+
+function vic_after_failure {
+    echo vic_after_failure
+}

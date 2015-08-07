@@ -6,26 +6,19 @@ notifications:
 matrix:
   fast_finish: true
   include:
+  # Classic Driver
   - compiler: clang
-    env:
-    - DRIVER="classic"
-    - INSTALL="make full -C vic/drivers/classic"
-    - SCRIPT="./vic/drivers/classic/vic_classic.exe -o"
+    env: TESTID='classic'
   - compiler: gcc
-    env:
-    - DRIVER="classic"
-    - INSTALL="make full -C vic/drivers/classic"
-    - SCRIPT="./vic/drivers/classic/vic_classic.exe -o"
-  - compiler: gcc
-    env:
-    - DRIVER="image"
-    addons:
-      apt_packages:
-        - libnetcdf-dev
-        - mpich2
-    - INSTALL="make full -C vic/drivers/image"
-    - SCRIPT="./vic/drivers/image/vic_image.exe -o"
+    env: TESTID='classic'
+before_install:
+  - source ci/${TESTID}.travis
+  - vic_before_install
 install:
-  - echo $INSTALL; eval $INSTALL
+  - vic_install
 script:
-  - echo $SCRIPT; eval $SCRIPT
+  - vic_script
+after_success:
+  - vic_after_success
+after_failure:
+  - vic_after_failure

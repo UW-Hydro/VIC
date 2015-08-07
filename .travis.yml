@@ -12,7 +12,7 @@ matrix:
   - compiler: gcc
     env: TESTID='classic'
   - compiler: gcc
-    env: TESTID='classic'
+    env: TESTID=classic; CC=gcc-5
     addons:
       apt_packages:
         - gcc-5

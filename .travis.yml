@@ -17,7 +17,7 @@ matrix:
     addons:
       apt_packages:
         - libnetcdf-dev
-        - mpich2
+        - libopenmpi-dev
 before_install:
   - source ci/${TESTID}.travis
   - vic_before_install

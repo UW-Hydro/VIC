@@ -11,6 +11,11 @@ matrix:
     env: TESTID='classic'
   - compiler: gcc
     env: TESTID='classic'
+  - compiler: gcc
+    env: TESTID='classic'
+    addons:
+      apt_packages:
+        - gcc-5
   # Image Driver
   - compiler: gcc
     env: TESTID='image'

@@ -1,14 +1,31 @@
 language: c
-compiler:
-  - clang
-  - gcc
-os:
-  - linux
-  - osx
-before_install:
-    - sudo apt-get update -qq
-    - sudo apt-get install -y libnetcdf-dev
-    - sudo apt-get install -y mpich2
+sudo: false # use container based build
+notifications:
+  email: false
+
+matrix:
+  fast_finish: true
+  include:
+  - compiler: clang
+    env:
+    - DRIVER="classic"
+    - INSTALL="make full -C vic/drivers/classic"
+    - SCRIPT="./vic/drivers/classic/vic_classic.exe -o"
+  - compiler: gcc
+    env:
+    - DRIVER="classic"
+    - INSTALL="make full -C vic/drivers/classic"
+    - SCRIPT="./vic/drivers/classic/vic_classic.exe -o"
+  - compiler: gcc
+    env:
+    - DRIVER="image"
+    addons:
+      apt_packages:
+        - libnetcdf-dev
+        - mpich2
+    - INSTALL="make full -C vic/drivers/image"
+    - SCRIPT="./vic/drivers/image/vic_image.exe -o"
+install:
+  - echo $INSTALL; eval $INSTALL
 script:
-    - make full -C vic/drivers/classic/
-    - make full -C vic/drivers/image/
+  - echo $SCRIPT; eval $SCRIPT

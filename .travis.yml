@@ -11,15 +11,24 @@ matrix:
     env: TESTID='classic'
   - compiler: gcc
     env: TESTID='classic'
+  - compiler: clang
+    env: TESTID="python_3.4"
+  - compiler: gcc
+    env: TESTID="python_3.4"
+  allow_failures:
   # Image Driver
   - compiler: gcc
     env: TESTID='image'
     addons:
       apt_packages:
         - libnetcdf-dev
-        - libopenmpi-dev
-        - openmpi-bin
-        - openmpi
+        - mpich-bin
+  # Python Driver
+  - compiler: clang
+    env: TESTID="python_2.7"
+  - compiler: gcc
+    env: TESTID="python_2.7"
+
 before_install:
   - source ci/${TESTID}.travis
   - vic_before_install

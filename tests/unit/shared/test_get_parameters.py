@@ -19,12 +19,3 @@ def test_get_parameters(param_file):
 
 def test_validate_parameters():
     assert vic_lib.validate_parameters() is None
-
-
-# The System Exit Calls in vic_log.h are exiting out of the python testing
-# session. This test should pass and does to some extent but we need to rethink
-# the error call in vic_log.h before we can uncomment the lines below.
-# def test_validate_parameters_raise():
-#     vic_lib.param.LAPSE_RATE = 100
-#     with pytest.raises(SystemExit):
-#         vic_lib.validate_parameters()

@@ -1,10 +1,4 @@
 from vic import lib as vic_lib
-# from vic.vic import (calc_latent_heat_of_sublimation,
-#                      calc_latent_heat_of_vaporization,
-#                      calc_outgoing_longwave,
-#                      calc_scale_height,
-#                      calc_sensible_heat,
-#                      JOULES_PER_CAL, GRAMS_PER_KG, CONST_LATVAP)
 import numpy as np
 
 

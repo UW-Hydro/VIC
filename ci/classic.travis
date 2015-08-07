@@ -5,14 +5,15 @@ DRIVER_EXE="${DRIVER_PATH}vic_classic.exe"
 
 function vic_before_install {
     echo vic_before_install
+    if [ ! -z "$USE_CC" ]; then
+        echo "export CC=$USE_CC"
+        export CC=$USE_CC;
+        $CC --version
+    fi
 }
 
 function vic_install {
     echo vic_install
-    if [ -z "$USE_CC" ]; then
-        echo "export CC=$USE_CC"
-        export CC=$USE_CC;
-    fi
     make full -C $DRIVER_PATH
 }
 

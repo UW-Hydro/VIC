@@ -1,6 +1,6 @@
 import pytest
 import tempfile
-from vic.vic import open_file, param, get_parameters, validate_parameters
+from vic import lib as vic_lib
 
 
 @pytest.fixture()
@@ -9,22 +9,22 @@ def param_file(scope='function'):
     temp = tempfile.NamedTemporaryFile(prefix='test_param', suffix='txt')
     with open(temp.name, 'w') as f:
         f.write(p)
-    return open_file(temp.name, 'r')
+    return vic_lib.open_file(temp.name.encode(), b'r')
 
 
 def test_get_parameters(param_file):
-    assert get_parameters(param_file) is None
-    assert param.GAUGE_HEIGHT == 12.33
+    assert vic_lib.get_parameters(param_file) is None
+    assert vic_lib.param.GAUGE_HEIGHT == 12.33
 
 
 def test_validate_parameters():
-    assert validate_parameters(param) is None
+    assert vic_lib.validate_parameters() is None
 
 
 # The System Exit Calls in vic_log.h are exiting out of the python testing
 # session. This test should pass and does to some extent but we need to rethink
 # the error call in vic_log.h before we can uncomment the lines below.
 # def test_validate_parameters_raise():
-#     param.LAPSE_RATE = 100
+#     vic_lib.param.LAPSE_RATE = 100
 #     with pytest.raises(SystemExit):
-#         validate_parameters(param)
+#         vic_lib.validate_parameters()

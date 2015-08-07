@@ -1,13 +1,11 @@
-import pytest
-from vic.vic import initialize_filenames, initialize_fileps, filenames, filep
+from vic import lib as vic_lib
+from vic import ffi
 
 
 def test_initialize_filenames():
-    assert initialize_filenames() is None
-    assert filenames.init_state == 'MISSING'
+    assert vic_lib.initialize_filenames() is None
+    assert ffi.string(vic_lib.filenames.init_state) == b'MISSING'
 
 
 def test_initialize_fileps():
-    assert initialize_fileps() is None
-    with pytest.raises(ValueError):
-        filep.globalparam.contents
+    assert vic_lib.initialize_fileps() is None

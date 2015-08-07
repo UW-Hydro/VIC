@@ -1,12 +1,12 @@
-from vic.vic import initialize_options, options
+from vic import lib as vic_lib
 
 
 def test_initialize_options():
-    assert initialize_options() is None
-    assert options.AboveTreelineVeg == -1
+    assert vic_lib.initialize_options() is None
+    assert vic_lib.options.AboveTreelineVeg == -1
 
 
 def test_initialize_options_bools():
-    assert initialize_options() is None
-    assert not options.BLOWING
-    assert not options.PRT_SNOW_BAND
+    assert vic_lib.initialize_options() is None
+    assert not vic_lib.options.BLOWING
+    assert not vic_lib.options.PRT_SNOW_BAND

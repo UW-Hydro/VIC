@@ -1,48 +1,47 @@
 import datetime
 import os
-from vic.vic import (finalize_logging, get_current_datetime, get_logname,
-                     initialize_log, setup_logging, String, filenames)
+from vic import lib as vic_lib
+from vic import ffi
 
 
 def test_finalize_logging():
-    assert finalize_logging() is None
+    assert vic_lib.finalize_logging() is None
 
 
 def test_get_current_datetime():
-    dts = String()
-    assert len(dts) == 0
-    get_current_datetime(dts)
-    assert len(dts) == 14
-
+    dts = ffi.new('char [2048]')
+    assert len(ffi.string(dts)) == 0
+    vic_lib.get_current_datetime(dts)
+    assert len(ffi.string(dts)) == 14
     now = datetime.datetime.now()
     now_string = now.strftime('%Y%m%d')
     assert now_string == dts[:8]
 
 
-# Segfaulting for an unknown reason
-# def test_get_logname():
-#     path = String('some/path/')
-#     idnum = 3
-#     filename = String()
-#     print([type(o) for o in (path, idnum, filename)])
-#     print(get_logname.argtypes)
-#     assert get_logname(path, idnum, filename) is not None
-#     print(filename)
-#     assert len(filename) > 0
+def test_get_logname():
+    path = ffi.new('char [2048]', b'foobar/')
+    idnum = 3
+    filename = ffi.new('char [2048]')
+    print([type(o) for o in (path, idnum, filename)])
+    assert vic_lib.get_logname(path, idnum, filename) is None
+    print(ffi.string(filename))
+    assert len(ffi.string(filename)) > 0
+
 
 def test_initialize_log():
-    assert initialize_log() is None
+    assert vic_lib.initialize_log() is None
 
 
 def test_setup_logging():
-    assert setup_logging(1) is None
+    assert vic_lib.setup_logging(1) is None
 
 
 def test_setup_logging_to_file(tmpdir):
-    filenames.log_path = str(tmpdir.mkdir('log')) + '/'
+    vic_lib.filenames.log_path = (str(tmpdir.mkdir('log')) + '/').encode()
     num = 321
-    assert setup_logging(num) is None
-    log_file = os.listdir(filenames.log_path)[0]
-    assert log_file.startswith('vic.log')
-    assert log_file.endswith('{0}.txt'.format(num))
-    finalize_logging()
+    assert vic_lib.setup_logging(num) is None
+    log_file = os.listdir(ffi.string(vic_lib.filenames.log_path))[0]
+    print(log_file)
+    assert log_file.startswith(b'vic.log')
+    assert log_file.endswith('{0}.txt'.format(num).encode())
+    vic_lib.finalize_logging()

@@ -1,19 +1,19 @@
 import pytest
 import tempfile
-from vic.vic import open_file
+from vic import lib as vic_lib
 
 
 @pytest.fixture()
 def temp_file(scope='module'):
     temp = tempfile.NamedTemporaryFile(prefix='test_file', suffix='txt',
                                        delete=False)
-    return temp.name
+    return temp.name.encode()
 
 
 def test_open_file_read(temp_file):
     print(temp_file)
-    assert open_file(temp_file, 'r') is not None
+    assert vic_lib.open_file(temp_file, b'r') is not None
 
 
 def test_open_file_write(temp_file):
-    assert open_file(temp_file, 'w') is not None
+    assert vic_lib.open_file(temp_file, b'w') is not None

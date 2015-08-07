@@ -1,7 +1,7 @@
-from vic.vic import initialize_global, global_param, MISSING, SEC_PER_DAY
+from vic import lib as vic_lib
 
 
 def test_initialize_global():
-    assert initialize_global() is None
-    assert global_param.dt == MISSING
-    assert global_param.out_dt == SEC_PER_DAY
+    assert vic_lib.initialize_global() is None
+    assert vic_lib.global_param.dt == -99999
+    assert vic_lib.global_param.out_dt == 86400

@@ -1,12 +1,13 @@
-import ctypes
-from vic.vic import calc_Nscale_factors
+import numpy as np
+from vic.vic import ffi
+from vic import lib as vic_lib
 
 
 def test_calc_nscale_factors():
-    canopy_layer_bnd = ctypes.c_double()
-    nscale_factor = ctypes.c_double()
+    canopy_layer_bnd = np.ones(3, dtype=np.float64)
+    nscale_factor = np.empty(3, dtype=np.float64)
+    flag = ffi.cast('char', True)
 
-    assert calc_Nscale_factors(True,
-                               ctypes.byref(canopy_layer_bnd),
-                               3., 45, 0., 0., 45,
-                               ctypes.byref(nscale_factor)) is None
+    assert vic_lib.calc_Nscale_factors(
+        flag, ffi.cast('double *', canopy_layer_bnd.ctypes.data), 3., 45, 0., 
+        0., 45, ffi.cast('double *', nscale_factor.ctypes.data)) is None

@@ -1,11 +1,11 @@
-from vic.vic import svp, svp_slope
+from vic import lib as vic_lib
 
 
 def test_svp():
-    assert svp(0.) > 0.
-    assert svp(0.) > svp(-1.)
+    assert vic_lib.svp(0.) > 0.
+    assert vic_lib.svp(0.) > vic_lib.svp(-1.)
 
 
 def test_svp_slope():
-    assert svp_slope(0.) > 0.
-    assert svp_slope(0.) > svp_slope(-1.)
+    assert vic_lib.svp_slope(0.) > 0.
+    assert vic_lib.svp_slope(0.) > vic_lib.svp_slope(-1.)

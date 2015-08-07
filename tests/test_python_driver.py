@@ -15,9 +15,9 @@ def test_set_global_scalars():
     assert type(vic_lib.flag) == int
     assert type(vic_lib.NR) == int
     assert type(vic_lib.NF) == int
-    assert vic_lib.flag.value == 1
-    assert vic_lib.NR.value == 6
-    assert vic_lib.NF.value == 3
+    assert vic_lib.flag == 1
+    assert vic_lib.NR == 6
+    assert vic_lib.NF == 3
 
 
 def test_globals_are_initialized():

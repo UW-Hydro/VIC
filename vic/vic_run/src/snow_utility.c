@@ -234,7 +234,7 @@ snow_albedo(double new_snow,
             double cold_content,
             double dt,
             int    last_snow,
-            char   MELTING)
+            bool   MELTING)
 {
     extern parameters_struct param;
 

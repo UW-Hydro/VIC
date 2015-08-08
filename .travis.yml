@@ -15,10 +15,14 @@ matrix:
     env: TESTID=classic USE_CC=gcc-5
     addons:
       apt:
-        source:
-        - ubuntu-toolchain-r-test
         packages:
-        - gcc-5
+          - g++-5
+          - g++-5-multilib
+          - gcc-5
+          - gcc-5-multilib
+          - linux-libc-dev:i386
+        sources:
+          - ubuntu-toolchain-r-test
   # Image Driver
   - compiler: gcc
     env: TESTID='image'

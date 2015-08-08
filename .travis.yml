@@ -16,8 +16,6 @@ matrix:
     addons:
       apt:
         packages:
-          - g++-5
-          - g++-5-multilib
           - gcc-5
           - gcc-5-multilib
           - linux-libc-dev:i386

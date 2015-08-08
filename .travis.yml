@@ -14,7 +14,10 @@ matrix:
   - compiler: gcc
     env: TESTID=classic USE_CC=gcc-5
     addons:
-      apt_packages:
+      apt:
+        source:
+        - ubuntu-toolchain-r-test
+        packages:
         - gcc-5
   # Image Driver
   - compiler: gcc

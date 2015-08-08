@@ -12,9 +12,9 @@ def test_set_global_scalars():
     vic_lib.NR = 6
     vic_lib.NF = 3
 
-    assert type(vic_lib.flag) == int
-    assert type(vic_lib.NR) == int
-    assert type(vic_lib.NF) == int
+    assert isinstance(vic_lib.flag, int)
+    assert isinstance(vic_lib.NR, (int, long))
+    assert isinstance(vic_lib.NF, (int, long))
     assert vic_lib.flag == 1
     assert vic_lib.NR == 6
     assert vic_lib.NF == 3

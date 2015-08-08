@@ -30,11 +30,6 @@ start_dir = os.path.abspath(os.getcwd())
 setup_dir = os.path.dirname(os.path.abspath(__file__))
 os.chdir(setup_dir)
 
-print('setup_py_path: %s' % setup_py_path)
-print('vic_root_abs_path: %s' % vic_root_abs_path)
-print('start_dir: %s' % start_dir)
-print('setup_dir: %s' % setup_dir)
-
 
 class CleanCommand(Command):
     """Custom clean command to tidy up the project root."""
@@ -146,8 +141,6 @@ includes.append(os.path.join(vic_root_abs_path, 'vic',
                              'drivers', 'shared', 'include', ''))
 includes.append(os.path.join(vic_root_abs_path, 'vic',
                              'drivers', 'python', 'include', ''))
-
-print(sources, includes)
 
 ext_name = 'vic_core'
 # platform safe path to extension

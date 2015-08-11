@@ -133,8 +133,8 @@ The tables below compare features (and bug fixes) of current and previous versio
         *   Ice contents will always be 0 except when FROZEN_SOIL is TRUE.
         *   The default method of computing soil temperature profiles depends on the settings of FROZEN_SOIL and QUICK_FLUX:
             *   FROZEN_SOIL = TRUE: default method is the finite element method of [_Cherkauer and Lettenmaier_ (1999)](../Documentation/References.md). This corresponds to QUICK_FLUX=FALSE.
-            *   FROZEN_SOIL = FALSE: default method is the approximation of [_Liang et al._ (1999)](../Documentation/References.md#VIC). This corresponds to QUICK_FLUX=TRUE.
-        *   To change which method is used to compute soil temperatures, set QUICK_FLUX appropriately in the global parameter file. (QUICK_FLUX TRUE = method of [_Liang et al._ (1999)](../Documentation/References.md#VIC); FALSE = method of [_Cherkauer and Lettenmaier_ (1999)](../Documentation/References.md))
+            *   FROZEN_SOIL = FALSE: default method is the approximation of [_Liang et al._ (1999)](../Documentation/References.md#vic). This corresponds to QUICK_FLUX=TRUE.
+        *   To change which method is used to compute soil temperatures, set QUICK_FLUX appropriately in the global parameter file. (QUICK_FLUX TRUE = method of [_Liang et al._ (1999)](../Documentation/References.md#vic); FALSE = method of [_Cherkauer and Lettenmaier_ (1999)](../Documentation/References.md))
 
 * **Organic Soil**
     *   VIC now accounts for the effects of organic matter on soil properties.
@@ -287,7 +287,7 @@ The tables below compare features (and bug fixes) of current and previous versio
     *   use in conjunction with snow/elevation bands
     *   Uses avg July T of forcings to determine which bands are above treeline
     *   Above treeline, replaces any overstory vegetation tiles with non-overstory vegetation cover
-    *   Otherwise, runawat snowpack ("glaciers")
+    *   Otherwise, runaway snowpack ("glaciers")
     *   Set COMPUTE_TREELINE to a veg. class ID number in global parameter file (ID number of non-overstory class)
     *   JulyAvgT can be supplies in soil file instead of computed from forcings:
         *   Set JULY_TAVG_SUPPLIED to TRUE in global parameter file

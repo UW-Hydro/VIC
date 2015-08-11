@@ -1,5 +1,6 @@
 # Development Workflow
 The basic workflow described here follows a workflow originally outlined by Vincent Driessen.  The workflow is built around the Git version control system.  A basic description of the branching strategy and release management used by our research group is presented here.  We use a central truth repository (https://github.com/UW-Hydro/VIC) that contains our main branches.
+
 ## Main Branches
 Both of the main branches are published on the Github page and are controlled only by those within the admin group.  The repository is organized into several branches for different purposes.  In general, any new development will wan to start with a branch from the develop branch.
 
@@ -36,4 +37,4 @@ Using Github to host the central or truth repository of our models allows us to 
 
 2. Model Admins have full access to specific repositories.  They may push, pull, or make administrative changes to those repositories associated with their model.
 
-3. Developers have pull only access to any of the publically listed repositories under the UW-hydro name.  If a developer would like a feature branch merged into the main repository, a pull request must be submitted and a Model Admin may merge it in.
+3. Developers have pull only access to any of the publicly listed repositories under the UW-hydro name.  If a developer would like a feature branch merged into the main repository, a pull request must be submitted and a Model Admin may merge it in.

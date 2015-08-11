@@ -19,7 +19,7 @@ Here are some notable input and output data sets for VIC. If you use these data 
         *   Vegetation Parameter File
         *   Vegetation Library File
         *   Snowbands File
-    *   References: [Nijssen et al. (2001b)](../Documentation/References.md#Nijssen_et_al_2001b)
+    *   References: [Nijssen et al. (2001b)](../Documentation/References.md)
 *   [**Global Meteorological Forcing Files at 0.5-Degree Resolution**](http://www.hydro.washington.edu/SurfaceWaterGroup/Data/met_global_0.5deg.html)
     *   Spatial Resolution: 0.5-degree
     *   Temporal Resolution: daily
@@ -29,7 +29,7 @@ Here are some notable input and output data sets for VIC. If you use these data 
         *   Max Temperature
         *   Min Temperature
         *   Wind Speed
-    *   References: [Adam and Lettenmaier (2003); Adam et al (2006)](../Documentation/References.md#Adam_2003)
+    *   References: [Adam and Lettenmaier (2003); Adam et al (2006)](../Documentation/References.md)
 *   [**Global Simulations at 2-Degree Resolution**](http://www.hydro.washington.edu/SurfaceWaterGroup/Data/vic_global.html)
     *   Spatial Resolution: 2-degree
     *   Temporal Resolution: daily
@@ -40,7 +40,7 @@ Here are some notable input and output data sets for VIC. If you use these data 
         *   Daily Meteorological Forcings (Precip, Tmax, Tmin, Wind, Vapor Pressure, Downward Shortwave, Net Longwave)
         *   Daily Hydrologic Budget Terms (EvapoTranspiration, Runoff, Snow Water Equivalent, Soil Moisture Storage, Total Storage)
         *   Maps of Gridded Parameters (Land/sea mask, depth of top 2 soil layers, total storage capacity)
-    *   References: [Nijssen et al, 2001a,b,c](../Documentation/References.md#Nijssen_et_al_2001a)
+    *   References: [Nijssen et al, 2001a,b,c](../Documentation/References.md)
 *   [**Global River Routing Networks at Various Resolutions**](http://secure.ntsg.umt.edu/publications/2011/WKMS11/)
     *   Spatial Resolution: 2-, 1-, 1/2-, 1/4-, 1/8-, and 1/16-degree
     *   Coarser resolutions were upscaled from finer resolutions using DRT algorithm

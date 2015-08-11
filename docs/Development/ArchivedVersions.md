@@ -26,7 +26,7 @@ VIC development branched into 2 parallel paths at release 4.0.3. The 4.0.x branc
 
 Figure: Schematic of recent VIC versions and their features.
 
-**VIC Version 4.1.1 is the sucessor to both 4.0.6 and 4.1.0.**
+**VIC Version 4.1.1 is the successor to both 4.0.6 and 4.1.0.**
 
 *   Unfortunately, VIC versions 4.0.6 and 4.1.0 are not compatible
 *   Some of Version 4.1.0's new features broke older features, for example 24-hour water balance mode
@@ -43,7 +43,7 @@ Figure: Schematic of recent VIC versions and their features.
 New Features:
 
 *   Updated lake model
-    *   Lake drainage is now parameterized as flow over a broad-crested wier
+    *   Lake drainage is now parameterized as flow over a broad-crested weir
     *   2-layer snow pack model for snow on top of lake ice, consistent with upland snow pack model
     *   New format for lake parameter file, as a result of new drainage parameterization
 *   Option to use improved snow density algorithm, taken from SNTHERM89
@@ -254,5 +254,5 @@ VIC releases 4.0.3 and earlier, and VIC 4.1.0 Beta 1: You must use the version h
 
 1.  Run `grep Id *.c > ver_old.txt` in the directory with your current source code.
 2.  Get the most recent [version header file](ftp://ftp.hydro.washington.edu/pub/HYDRO/models/VIC/Version_Info), if you did not download the entire source code package.
-3.  Use xemacs file compare, sdiff, diff, or another file comparison package to compare the two header files for differences.
+3.  Use `xemacs` file compare, `sdiff`, diff, or another file comparison package to compare the two header files for differences.
 4.  Modified files can then either be directly substituted, or a compare can be run between the complete source files to identify the exact differences.

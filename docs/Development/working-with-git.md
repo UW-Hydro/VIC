@@ -110,7 +110,7 @@ At any point during the process of changing the code, you can pull in any change
 
 ### Committing changes ###
 
-Before committing your changes, remove any extraneous files that have been created during compiling and testing (e.g., *.o files, executables, .depends files, etc.).  An easy way to do this is to type `make clean` in VIC's "src" subdirectory.
+Before committing your changes, remove any extraneous files that have been created during compiling and testing (e.g., \*.o files, executables, .depends files, etc.).  An easy way to do this is to type `make clean` in VIC's "src" subdirectory.
 
 ### 1. Register your changes for commit ###
 

@@ -9,10 +9,11 @@ There are currently a number of active development projects working on VIC. To s
 We welcome contributions from the hydrology community. Currently we have substantial collaborations on model development with the following groups:
 
 *   [Land Surface Hydrology Group, Dept. of Civil and Environmental Engineering, Princeton University](http://hydrology.princeton.edu/home.php)
-*   [Keith Cherkauer's Lab, Dept. of Agricultural Engineering, Purdue University](https://engineering.purdue.edu/~cherkaue/)
+*   [Keith Cherkauer's Lab, Dept. of Agricultural Engineering, Purdue University](https://www.agry.purdue.edu/hydrology/index.asp)
 *   [Laura Bowling's Lab, Dept. of Agronomy, Purdue University](https://ag.purdue.edu/agry/directory/Pages/bowling.aspx)
-*   [Jenny Adam's Lab, Dept. of Civil and Environmental Engineering, Washington State University](http://www.ce.wsu.edu/Faculty_Staff/Profiles/adam.htm)
-*   [Xu Liang's Lab, Dept. of Civil and Environmental Engineering, University of Pittsburg](http://www.engr.pitt.edu/civil/facstaff/liang_xu.html)
+*   [Jenny Adam's Lab, Dept. of Civil and Environmental Engineering, Washington State University](http://hydro.cee.wsu.edu/index.htm)
+*   [Xu Liang's Lab, Dept. of Civil and Environmental Engineering, University of Pittsburg](http://www.engineering.pitt.edu/People/Faculty/Civil-Environmental/Primary/Liang,-Xu/)
+*   [Earth System Science Group, Wageningen University](http://www.wageningenur.nl/en/expertise-services/Chair-groups/Environmental-Sciences/Earth-System-Science-Group.htm)
 
 If you are a VIC user and have found a bug or have improved your private version of VIC in some way, please let us know by submitting an issue at the [UW-Hydro VIC GitHub Issues Page](https://github.com/UW-Hydro/VIC/issues).
 

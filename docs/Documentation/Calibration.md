@@ -6,7 +6,7 @@ While many of the parameters for these models are based on satellite observation
 
 We can think of the VIC model and routing model as two parts of one larger modeling framework. Both models contain parameters that require either calibration or _a priori_ estimates of their values.
 
-The total set of calibratable parameters from the two models can be quite large, so here at UW we typically make educated guesses about some of them to reduce the number of parameters to calibrate. Routing model parameters usually fall into the category of educated guesses. For some reasonable parameter values, see the section on [Routing Model Calibration](#RoutCal), below.
+The total set of calibratable parameters from the two models can be quite large, so here at UW we typically make educated guesses about some of them to reduce the number of parameters to calibrate. Routing model parameters usually fall into the category of educated guesses. For some reasonable parameter values, see the section on [Routing Model Calibration](#routing-model-calibration), below.
 
 The most common observation to use for calibration is streamflow. To use streamflow to calibrate VIC model parameters, we must convert VIC's simulated runoff and baseflow into simulated discharge using the routing model (presumably using reasonable estimates for the routing model parameters).
 
@@ -69,10 +69,10 @@ Our advice regarding routing model calibration is less specific than for the VIC
 
 The routing model contains many parameters, but it is more appropriate to adjust some of these parameters during calibration than others. Often the distinction is based on the degree to which the parameter values can actually be measured or observed. The routing model parameters most often adjusted during calibration are velocity, diffusivity, and the unit hydrograph.
 
-[Lohmann et al. (1996)](References.md#Routing) suggest velocity values in the range of 1 to 3 m/s and diffusivity of 200 to 4000 m<sup>2</sup>/s for the Weser basin in Germany.
+[Lohmann et al. (1996)](References.md#streamflow-routing-model-references) suggest velocity values in the range of 1 to 3 m/s and diffusivity of 200 to 4000 m<sup>2</sup>/s for the Weser basin in Germany.
 
-[Nijssen et al. (1997)](References.md#Routing) quote velocity values of 0.5 to 2.0 m/s for the Columbia basin and 1.0 m/s for the Delaware.
+[Nijssen et al. (1997)](References.md#streamflow-routing-model-references) quote velocity values of 0.5 to 2.0 m/s for the Columbia basin and 1.0 m/s for the Delaware.
 
-If only monthly mean flows are required then diffusivity of 800 m<sup>2</sup>/s and velocity of 1.5 m/s are deemed acceptable. If daily values are required then the calibration methodology outlined in [Lohmann et al. (1996, 1998a and 1998b)](References.md#Routing) should be followed.
+If only monthly mean flows are required then diffusivity of 800 m<sup>2</sup>/s and velocity of 1.5 m/s are deemed acceptable. If daily values are required then the calibration methodology outlined in [Lohmann et al. (1996, 1998a and 1998b)](References.md#streamflow-routing-model-references) should be followed.
 
-The example routing parameter files in the Stehekin dataset ([vic.sample.stehekin.tgz](ftp://ftp.hydro.washington.edu/pub/HYDRO/models/VIC/Datasets), available under Sample Data Sets on the [download page](../SourceCode/Code.md#SampleData)) should serve as a good starting point for your routing parameters.
+The example routing parameter files in the Stehekin dataset ([vic.sample.stehekin.tgz](ftp://ftp.hydro.washington.edu/pub/HYDRO/models/VIC/Datasets), available under Sample Data Sets on the [download page](../Datasets/Datasets.md/#sample-data-sets)) should serve as a good starting point for your routing parameters.

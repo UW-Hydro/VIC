@@ -20,7 +20,7 @@ Here are some commonly-asked questions and their answers. Another source of info
 
 3.  **Is the routing model available in C?**
 
-    For the most part, no. We do know of a version of the model written in C that is being tested by a group here at UW, but there are some discrepancies between it and the official Fortran version. When these are resolved, we may post the C version. If you would like to try the C version, with the caveat that it isn't exactly the same as the Fortran version, please send email to the [VIC Administrator](mailto:vicadmin@hydro.washington.edu).
+    For the most part, no. We do know of a version of the model written in C that is being tested by a group here at UW, but there are some discrepancies between it and the official Fortran version. When these are resolved, we may post the C version. If you would like to try the C version, take a look [here](https://github.com/UW-Hydro/VIC_Routing).
 
 4.  **What are the hardware requirements for VIC and the routing model? Do they take advantage of parallel processing / can they run in a multi-threaded environment?**
 

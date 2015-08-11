@@ -55,18 +55,18 @@ The following files may be required by the model, depending on the flags set in 
 
 *Items in **bold** are always required*
 
-The parameter values in the [Flow Velocity File](#flowveloc), [Flow Diffusion File](#difffile), and [UH File](#UH_ALLfile) can all be [calibrated](../Calibration.md#routcal).
+The parameter values in the [Flow Velocity File](#flow-velocity-file), [Flow Diffusion File](#flow-diffusion-file), and [UH File](#uh-file) can all be [calibrated](../Calibration.md#routing-model-calibration).
 
 The start and stop year and month refer to the period over which the VIC simulation, which is the input to the routing model, was run.
 The first and last year refer to the period for which the results of the routing are to be written to output.
 
 ## Fraction File
 
-The fraction file is gridded information about the fraction of each grid cell that flows into the basin being routed. This allows the user to more accurately define the basin area, since edge cell can contribute more or less than 100% of their runoff and baseflow components to thebasin.
+The fraction file is gridded information about the fraction of each grid cell that flows into the basin being routed. This allows the user to more accurately define the basin area, since edge cell can contribute more or less than 100% of their runoff and baseflow components to the basin.
 
 The format is an arc/info ascii grid. It contains a 6-line header that tells the routing model the lower left latitude and longitude, the number of rows and columns, and the grid cell resolution.
 
-More information on the [Fraction File](Fraction.md) and [creating the file](PrepRoutingParams.md#fractionfile).
+More information on the [Fraction File](Fraction.md) and [creating the file](PrepRoutingParams.md#flow-fraction-file).
 
 ## Flow Direction File
 
@@ -92,7 +92,7 @@ The format is an arc/info ascii grid. It contains a 6-line header that tells the
 
 More information on the [Flow Diffusion File](FlowDiffusion.md), [creating the file](PrepRoutingParams.md#flowdiffusionfile), and [calibrating the file](../Calibration.md#routcal).
 
-## Fmask File
+## Xmask File
 
 The values in the xmask file are related to the size (in metres) of a cell.
 
@@ -100,13 +100,13 @@ The format is an arc/info ascii grid. It contains a 6-line header that tells the
 
 More information on the [Xmask File](Xmask.md) and [creating the file](PrepRoutingParams.md#xmaskfile).
 
-## Ftation Location File
+## Station Location File
 
 The station location file tells the routing model from which grid cells to produce output flow data. Any number of stations may be defined within the basin, as well as a single basin outlet, where the routing network leaves the defined basin. Each line defining a station is followed by another that tells the routing model whether or not a uh_s file has been generated for the current station location. If set to NONE the routing model generates a new uh_s file in the current directory, otherwise it will read the defined uh_s file.
 
 More information on the [Station Location File](StationLocation.md).
 
-## FH File
+## UH File
 
 This file contains the grid cell impulse response function.
 
@@ -129,6 +129,6 @@ Where
 
 * * *
 
-## Fditing the Source Code for Specific Basins
+## Editing the Source Code for Specific Basins
 
 The [routing code](RunRouting.md) uses hard coded array dimensions. Before [compilation](RunRouting.md) the user should check in rout.f that **NROW** and **NCOL** are greater than or equal to the number of rows and columns specified in the direction file header, and that **NYR** is greater than the number of years over which flows are to be routed.  Also, make sure **PMAX** exceeds the total number of grid cells to be routed. If the dimensions are insufficient a warning will be generated and the program will terminate.

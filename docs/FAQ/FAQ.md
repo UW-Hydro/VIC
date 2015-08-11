@@ -38,21 +38,13 @@ Here are some commonly-asked questions and their answers. Another source of info
 
     If you'd like to capture VIC's screen output in a log file, you can do (in C-shell):
 
-    <dl>
-
-    <dd>vicNl -g _global_parameter_filename_ >& _log.txt_</dd>
-
-    </dl>
+    `vicNl -g global_parameter_filename >& log.txt`
 
     where
 
-    <dl>
+    `global_parameter_filename` = name of the global parameter file corresponding to your project.
 
-    <dd>_global_parameter_filename_ = name of the global parameter file corresponding to your project.</dd>
-
-    <dd>_log.txt_ = name of a log file to contain VIC's screen output.</dd>
-
-    </dl>
+    `log.txt` = name of a log file to contain VIC's screen output.
 
     This strategy also works for the routing model screen output.
 
@@ -91,7 +83,7 @@ Here are some commonly-asked questions and their answers. Another source of info
     *   Some of the differences may result from using inappropriate compiler option combinations, such as "-g" (debugging symbols) and "-O3" simultaneously. You should never combine the "-g" option with any compiler optimization options. Admittedly, this can make it difficult to debug an optimized version of the code.
     *   Some of the differences in results may in fact be introduced by the compiler when it attempts to optimize the code.
     *   Simply turning off the "-g" option without adding an optimization option will make the code run faster - this may be sufficient for your purposes and may reduce any differences in results.
-    *   We have not yet performed rigorous testing of any VIC versions on 64-bit platforms. At this point, users must assume some risk when runing VIC in a 64-bit environment. We hope to look into this further in the future.
+    *   We have not yet performed rigorous testing of any VIC versions on 64-bit platforms. At this point, users must assume some risk when running VIC in a 64-bit environment. We hope to look into this further in the future.
     *   VIC's numerical schemes may be partially responsible for differences. VIC uses simple first-order forward difference schemes for most of its computations, although VIC 4.1.1 and later have the option to use an implicit scheme to model soil temperatures.
 
     In summary, probably the best thing you can do at this point is to upgrade to the latest version of VIC and see if turning off the "-g" option is sufficient to speed up your code without invoking any compiler optimization options. If running with FROZEN_SOIL or FULL_ENERGY set to TRUE, setting IMPLICIT to TRUE may make VIC's results more stable as well.

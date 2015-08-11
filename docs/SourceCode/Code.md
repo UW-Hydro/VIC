@@ -26,7 +26,7 @@ Follow these instructions if you don't want to use our parameters.
     *   Additional Processing MethodPrograms: [met_prep_other.tgz](ftp://ftp.hydro.washington.edu/pub/HYDRO/models/VIC/Utility_Programs/met_prep_other.tgz)
     *   Temporal Disaggregation of Precipitation Data
         *   Tools for TemporalDisaggregation of Precipitation Data: [temporal_disagg_precip.tgz](ftp://ftp.hydro.washington.edu/pub/HYDRO/models/VIC/Utility_Programs/temporal_disagg_precip.tgz)
-        *   Lookup tables for thecontinental U.S. (by season): [US_LOOKUP_TABLES.TAR.gz](ftp://ftp.hydro.washington.edu/pub/HYDRO/models/VIC/Utility_Programs/US_LOOKUP_TABLES.TAR.gz)
+        *   Lookup tables for the continental U.S. (by season): [US_LOOKUP_TABLES.TAR.gz](ftp://ftp.hydro.washington.edu/pub/HYDRO/models/VIC/Utility_Programs/US_LOOKUP_TABLES.TAR.gz)
 *   Parameter Files
     *   Vegetation Parameter Preparation: [veg_param_prep.tgz](ftp://ftp.hydro.washington.edu/pub/HYDRO/models/VIC/Utility_Programs/veg_param_prep.tgz)
     *   Soil Parameter Preparation: [soil_param_prep.tgz](ftp://ftp.hydro.washington.edu/pub/HYDRO/models/VIC/Utility_Programs/soil_param_prep.tgz)

@@ -265,7 +265,7 @@ Once the rivers have been "burned" into the DEM, follow the ARC/INFO instruction
     *   The -M allows it to close the polygons.
 *   You have a GRID and want to know the value : in COMMANDS: `cellvalue gridname *` then select the cell. Type 9 to stop.
 *   Manually select a basin (in a basin coverage): in EDIT, FILE/open coverage in arcs or polygon, then click on the arrow. 9 to get out of the mode.
-*   When doing the delination, make sure there are only 2 polygons remaining after merging
+*   When doing the delineation, make sure there are only 2 polygons remaining after merging
 
 *   In GRID:
 
@@ -288,6 +288,6 @@ Once the rivers have been "burned" into the DEM, follow the ARC/INFO instruction
 *   `gridascii` exports grid files into ascii files
 *   Create a buffer for a grid: `outgrid = EXPAND (grid, # of cell desired for the buffer, LIST , value1, value2, value3, etc.)`
 *   Look at the help for this command for mode detaild. In particular, one can use FILE instead of LIST
-*   `CON` in the grid menu: it transforms a value by another one using a conditionnal statement: `outfile = con (isnull(infile),0,infile)` for example to change -9999 into 0 in a maskfile
+*   `CON` in the grid menu: it transforms a value by another one using a conditional statement: `outfile = con (isnull(infile),0,infile)` for example to change -9999 into 0 in a maskfile
 *   Note that Arcview reads grid files and coverages. It is easier to transform the projection in Arc/Info than in Arcview, (I found anyway, especially for large files)
 *   [http://gis.washington.edu/phurvitz/arc_lms/](http://gis.washington.edu/phurvitz/arc_lms/) has help for GIS Spatial Analyst and aml language

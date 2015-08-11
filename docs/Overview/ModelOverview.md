@@ -2,9 +2,9 @@
 
 ## Main Features
 
-The VIC model ([Liang et al., 1994](../Documentation/References.md#VIC)) is a large-scale, semi-distributed hydrologic model.  As such, it shares several basic features with the other land surface models (LSMs) that are commonly coupled to global circulation models (GCMs):
+The VIC model ([Liang et al., 1994](../Documentation/References.md#primary-historical-reference)) is a large-scale, semi-distributed hydrologic model.  As such, it shares several basic features with the other land surface models (LSMs) that are commonly coupled to global circulation models (GCMs):
 
-1. The land surface is modelled as a grid of large (>1km), flat, uniform cells
+1. The land surface is modeled as a grid of large (>1km), flat, uniform cells
     - Sub-grid heterogeneity (e.g. elevation, land cover) is handled via statistical distributions
 1. Inputs are time series of daily or sub-daily meteorological drivers (e.g. precipitation, air temperature, wind speed)
 1. Land-atmosphere fluxes, and the water and energy balances at the land surface, are simulated at a daily or sub-daily time step
@@ -71,7 +71,7 @@ For more information about the snow pack formulation, [click here](SnowModelText
 
 ## Meteorological Input Data
 
-VIC can use any combination of daily or sub-daily meteorogolical forcings, from point observations, gridded observations, or reanalysis fields.  At minimum, VIC requires daily {precipitation, max/min air temperature, and wind speed}.  VIC will derive all other needed forcings via the approach described in [Bohn et al., 2013a](../Documentation/References.md#VIC), which includes:
+VIC can use any combination of daily or sub-daily meteorogolical forcings, from point observations, gridded observations, or reanalysis fields.  At minimum, VIC requires daily {precipitation, max/min air temperature, and wind speed}.  VIC will derive all other needed forcings via the approach described in [Bohn et al., 2013a](../Documentation/References.mdprimary-historical-reference), which includes:
 
 - If incoming shortwave radiation or humidity are not supplied as forcings, VIC can estimate their daily average values via the algorithms of Kimball et al. (1997), Thornton and Running (1999), and Thornton et al. (2000). These algorithms are part of a stand-alone system called MTCLIM, produced by Steve Running's Numerical Terradynamics Simulation Group at U. Montana.
 - If incoming longwave radiation is not supplied, VIC can estimate this via the Tennessee Valley Authority algorithm (TVA, 1972) or the Prata (1996) algorithm, Prata is the default.
@@ -101,7 +101,7 @@ For more information about the snow/elevation band formulation, [click here](Sno
 
 ### Soil Thermal Solution
 
-VIC can use either the approximate soil temperature profile of [Liang et al. (1999)](../Documentation/References.md#VIC) or a finite difference solution that takes soil ice content into account, vis a vis [Cherkauer and Lettenmaier (1999)](../Documentation/References.md#VIC).
+VIC can use either the approximate soil temperature profile of [Liang et al. (1999)](../Documentation/References.mdprimary-historical-reference) or a finite difference solution that takes soil ice content into account, vis a vis [Cherkauer and Lettenmaier (1999)](../Documentation/References.mdprimary-historical-reference).
 
 - Liang et al. (1999): set QUICK_FLUX to TRUE in global parameter file; this is the default for FULL_ENERGY = TRUE and FROZEN_SOIL = FALSE.
 - Cherkauer et al. (1999): set QUICK_FLUX to FALSE in global parameter file; this is the default for FROZEN_SOIL = TRUE.
@@ -114,7 +114,7 @@ For more information about the frozen soil formulation, [click here](FrozenSoilT
 
 ### Permafrost
 
-These apply to the case QUICK_FLUX = FALSE and FROZEN_SOIL = TRUE, i.e. the formulation of [Cherkauer and Lettenmaier (1999)](../Documentation/References.md#VIC).
+These apply to the case QUICK_FLUX = FALSE and FROZEN_SOIL = TRUE, i.e. the formulation of [Cherkauer and Lettenmaier (1999)](../Documentation/References.mdprimary-historical-reference).
 
 - global parameter file option: IMPLICIT: uses an implicit scheme to solve the soil thermal profile. This is the default scheme.
 - global parameter file option: EXP_TRANS: uses exponential node spacing (dense node spacing near soil surface; sparse node spacing at depth)
@@ -131,7 +131,7 @@ These apply to the case QUICK_FLUX = FALSE and FROZEN_SOIL = TRUE, i.e. the form
 
 ## Dynamic Lake/Wetland Model
 
-The lake/wetland model ([Bowling and Lettenmaier, 2010](../Documentation/References.md#VIC)) handles the impoundment of surface water within a grid cell.  Each grid cell is allowed to have a lake/wetland system contained within one of its landcover tiles.  Here, a **_lake_** refers to any impounded surface water, including permanent lakes and seasonal flooding of vegetated land.  The lake's area can vary with time as a function of storage and topography (bathymetry).  In this context, **_wetland_** refers to the exposed portion of the landcover tile.
+The lake/wetland model ([Bowling and Lettenmaier, 2010](../Documentation/References.mdprimary-historical-reference)) handles the impoundment of surface water within a grid cell.  Each grid cell is allowed to have a lake/wetland system contained within one of its landcover tiles.  Here, a **_lake_** refers to any impounded surface water, including permanent lakes and seasonal flooding of vegetated land.  The lake's area can vary with time as a function of storage and topography (bathymetry).  In this context, **_wetland_** refers to the exposed portion of the landcover tile.
 
 ### Lake Model
 

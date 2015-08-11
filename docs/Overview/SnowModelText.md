@@ -1,6 +1,6 @@
 # Snow Model
 
-VIC uses an energy balance approach to represent snow accumulation and ablation on the ground ([Andreadis et al., 2009](../Documentation/References.md#VIC)). Although low-lying vegetation is assumed to be completely covered by snowfall, and hence does not affect the ground snow pack energy balance, the model does contain an explicit canopy snow interception scheme that accounts for sublimation, drip and release of intercepted snow. Additionally, each grid cell is subdivided into elevation bands were the user defines the precipitation fraction in each band.
+VIC uses an energy balance approach to represent snow accumulation and ablation on the ground ([Andreadis et al., 2009](../Documentation/References.md#primary-historical-reference)). Although low-lying vegetation is assumed to be completely covered by snowfall, and hence does not affect the ground snow pack energy balance, the model does contain an explicit canopy snow interception scheme that accounts for sublimation, drip and release of intercepted snow. Additionally, each grid cell is subdivided into elevation bands were the user defines the precipitation fraction in each band.
 
 ## Ground Snowpack
 

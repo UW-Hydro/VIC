@@ -1,6 +1,6 @@
 # Variable Infiltration Capacity (VIC) Model
 
-[![Build Status](https://travis-ci.org/UW-Hydro/VIC.png?branch=develop)](https://travis-ci.org/UW-Hydro/VIC) [![Join the chat at https://gitter.im/UW-Hydro/VIC](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/UW-Hydro/VIC?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+[![Build Status](https://travis-ci.org/UW-Hydro/VIC.png?branch=master)](https://travis-ci.org/UW-Hydro/VIC) [![Join the chat at https://gitter.im/UW-Hydro/VIC](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/UW-Hydro/VIC?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 
 ***Note:*** *The Gitter chat room space is a place for discussions about VIC model development.  For questions about how to run VIC, please email the [VIC users group (vic_users at u.washington.edu)](mailto: vic_users@u.washington.edu).  To report bugs or propose new features in VIC, use the [VIC Github Issues Page](https://github.com/UW-Hydro/VIC/issues)*.
 

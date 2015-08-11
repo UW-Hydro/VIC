@@ -75,6 +75,13 @@ def test_fractional_day_from_dmy(dmy_feb_3_noon):
     assert frac_day == 3.5
 
 
+def test_leap_year():
+    for year in np.arange(1900, 2100):
+        actual = calendar.isleap(year)
+        assert not bool(vic_lib.leap_year(year, calendars['noleap']))
+        assert actual == bool(vic_lib.leap_year(year, calendars['standard']))
+
+
 @pytest.mark.skipif(nctime_unavailable, reason=nc_reason)
 def test_julian_day_from_dmy(feb3_noon, dmy_feb_3_noon):
     for cal in ['standard', 'gregorian', 'proleptic_gregorian', 'julian']:
@@ -137,29 +144,27 @@ def test_num2date():
 
 @pytest.mark.skipif(nctime_unavailable, reason=nc_reason)
 def test_make_lastday():
-    lastday = np.zeros(12)
+    # wasn't able to map lastday to a numpy array, don't know why...
+    lastday = ffi.new('unsigned short int []', [0] * 12)
     for year in np.arange(1900, 2100):
-        for cal in ['standard', 'gregorian', 'proleptic_gregorian', 'julian']:
-            vic_lib.make_lastday(calendars[cal], year,
-                                 ffi.addressof(lastday).ctypes.data)
+        for cal in ['standard', 'gregorian', 'proleptic_gregorian']:
+            vic_lib.make_lastday(calendars[cal], year, lastday)
             cal_dpm = [calendar.monthrange(year, month)[1] for month in
                        np.arange(1, 13)]
-            np.testing.assert_equal(cal_dpm, lastday)
+            print(year, cal, cal_dpm, list(lastday))
+            np.testing.assert_equal(cal_dpm, list(lastday))
         for cal in ['noleap', '365_day']:
-            vic_lib.make_lastday(calendars[cal], year,
-                                 ffi.addressof(lastday).ctypes.data)
+            vic_lib.make_lastday(calendars[cal], year, lastday)
             cal_dpm = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31]
-            np.testing.assert_equal(cal_dpm, lastday)
+            np.testing.assert_equal(cal_dpm, list(lastday))
         for cal in ['all_leap', '366_day']:
-            vic_lib.make_lastday(calendars[cal], year,
-                                 ffi.addressof(lastday).ctypes.data)
+            vic_lib.make_lastday(calendars[cal], year, lastday)
             cal_dpm = [31, 29, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31]
-            np.testing.assert_equal(cal_dpm, lastday)
-        for cal in ['all_leap', '366_day']:
-            vic_lib.make_lastday(calendars[cal], year,
-                                 ffi.addressof(lastday).ctypes.data)
+            np.testing.assert_equal(cal_dpm, list(lastday))
+        for cal in ['360_day']:
+            vic_lib.make_lastday(calendars[cal], year, lastday)
             cal_dpm = [30] * 12
-            np.testing.assert_equal(cal_dpm, lastday)
+            np.testing.assert_equal(cal_dpm, list(lastday))
 
 
 @pytest.mark.skipif(nctime_unavailable, reason=nc_reason)

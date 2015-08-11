@@ -668,7 +668,7 @@ leap_year(unsigned short int year,
         }
         else if ((calendar == CALENDAR_STANDARD ||
                   calendar == CALENDAR_GREGORIAN) &&
-                 (year % 100 == 0) && (year % 400 != 0) && (year < 1583)) {
+                 (year % 100 == 0) && (year % 400 != 0) && (year > 1583)) {
             leap = false;
         }
     }

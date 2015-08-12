@@ -15,5 +15,5 @@ Model time steps are an important consideration when setting up and calibrating 
 
 Differences in simulated daily and monthly discharge as caused by changing the time step, and using the different model options are shown in **Figure 1**. It should be noted that the simulated peaks show the greatest sensitivity to model time step. Courser time steps yield fewer peaks. VIC was optimized for the basin using the hourly energy balance model, the optimized parameters were then applied to all cases.
 
-![](TimeStep.gif)  
+![TimeStep](../../img/VIC_TimeStep_1.gif)  
 **Figure 1:** Comparison of daily discharge for various model options and time steps. (Top) Daily water balance, (Upper Middle) Hourly water balance, (Lower Middle) Hourly full energy balance, and (Bottom) Three hour energy balance.

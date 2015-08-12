@@ -1,34 +1,34 @@
 # Running the VIC Model
 
-## Code Source Code
+## Source Code
 
 *   To download the latest VIC source code, proceed to the [download page](../SourceCode/Code.md).
 *   The code is packaged in a compressed tar archive. Extract the contents via:
 
-    tar -xvzf filename
+`tar -xvzf filename`
 
-    where `filename` = name of the file you downloaded, e.g. VIC_code_4.1.1.tar.gz
+    where `filename` = name of the file you downloaded, e.g. VIC_code_4.2.b.tar.gz
 
 ## Compile VIC
 
 *   Change directory, cd, to the source code directory (extracted from the compressed tar archive above)
 *   At the command prompt type:
 
-    make
+`make`
 
-*   If this completes without errors, you will now see a file called _vicNl_ in this directory. _vicNl_ is the executable file for the model.
+*   If this completes without errors, you will now see a file called `vicNl` in this directory. `vicNl` is the executable file for the model.
 
 ## Run VIC
 
 At the command prompt, type:
 
-    vicNl -g global_parameter_filename
+`vicNl -g global_parameter_filename`
 
 where `global_parameter_filename` = name of the global parameter file corresponding to your project.
 
 If you'd like to capture VIC's screen output in a log file, you can do (in C-shell):
 
-    vicNl -g global_parameter_filename >& log.txt
+`vicNl -g global_parameter_filename >& log.txt`
 
 where `global_parameter_filename`  name of the global parameter file corresponding to your project.
 

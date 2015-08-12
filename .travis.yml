@@ -12,3 +12,4 @@ before_install:
 script:
     - make full -C vic/drivers/classic/
     - make full -C vic/drivers/image/
+    - make full -C vic/drivers/cesm/

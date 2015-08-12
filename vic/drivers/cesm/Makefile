@@ -74,7 +74,7 @@ INCLUDES = -I ${DRIVERPATH}/include -I ${VICPATH}/include -I ${SHAREDPATH}/inclu
 LIBRARY = -lm -L${NETCDFPATH}/lib -lnetcdf -L${MPIPATH}/lib -lmpi
 
 # Uncomment to include debugging information
-CFLAGS  =  ${INCLUDES} -ggdb -O0 -Wall -Wextra
+CFLAGS  =  ${INCLUDES} -ggdb -O0 -Wall -Wextra -fPIC
 #LIBRARY = -lm
 
 # Uncomment to include execution profiling information

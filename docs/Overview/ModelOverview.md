@@ -4,7 +4,7 @@
 
 The VIC model ([Liang et al., 1994](../Documentation/References.md#primary-historical-reference)) is a large-scale, semi-distributed hydrologic model.  As such, it shares several basic features with the other land surface models (LSMs) that are commonly coupled to global circulation models (GCMs):
 
-1. The land surface is modeled as a grid of large (>1km), flat, uniform cells
+1. The land surface is modeled as a grid of large (>>1km), flat, uniform cells
     - Sub-grid heterogeneity (e.g. elevation, land cover) is handled via statistical distributions
 1. Inputs are time series of daily or sub-daily meteorological drivers (e.g. precipitation, air temperature, wind speed)
 1. Land-atmosphere fluxes, and the water and energy balances at the land surface, are simulated at a daily or sub-daily time step
@@ -124,7 +124,7 @@ These apply to the case QUICK_FLUX = FALSE and FROZEN_SOIL = TRUE, i.e. the form
 - Linear (uniform) distribution of soil temperature around a mean
 - Allows some moisture movement in soil when the average temperature is below freezing
 
-![VIC Spatial Frost Schematic Link](../img/VIC_spatial_frost.jpg)
+![VIC Spatial Frost Schematic Link](../img/VIC_spatial_frost.gif)
 
 ## Dynamic Lake/Wetland Model
 

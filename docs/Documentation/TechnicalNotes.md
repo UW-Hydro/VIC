@@ -10,8 +10,6 @@ A (large) number of options exist for tailoring VIC simulations to your applicat
 
 - [Ground Heat Flux Comparisons](TechnicalNotes/GroundHeatFlux.md)
 
-- [VIC/GOES Radiation Evaluation](http://ftp.hydro.washington.edu/pub/niklas/VIC_radiation_evaluation_010703.pdf)
-
 - [Stability Correction for Aerodynamic Resistance](TechnicalNotes/Stability.md)
 
 ## Archived Notes

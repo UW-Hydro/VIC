@@ -94,9 +94,9 @@ For more information about the snow/elevation band formulation, [click here](Sno
 
 ![VIC Snow Bands Schematic Link](../img/VIC_snow_bands_schematic.png)
 
-### Frozen Soil Formulation
+## Frozen Soil Formulation
 
-#### Soil Thermal Solution
+### Soil Thermal Solution
 
 VIC can use either the approximate soil temperature profile of [Liang et al. (1999)](../Documentation/References.md#primary-historical-reference) or a finite difference solution that takes soil ice content into account, vis a vis [Cherkauer and Lettenmaier (1999)](../Documentation/References.md#primary-historical-reference).
 
@@ -109,7 +109,7 @@ For more information about the frozen soil formulation, [click here](FrozenSoilT
 
 ![VIC Frozen Soil Schematic Link](../img/VIC_frozen_soil_schematic.png)
 
-#### Permafrost
+### Permafrost
 
 These apply to the case QUICK_FLUX = FALSE and FROZEN_SOIL = TRUE, i.e. the formulation of [Cherkauer and Lettenmaier (1999)](../Documentation/References.md#primary-historical-reference).
 
@@ -118,7 +118,7 @@ These apply to the case QUICK_FLUX = FALSE and FROZEN_SOIL = TRUE, i.e. the form
 
 ![VIC Permafrost Enhancements Link](../img/VIC_permafrost_enhancements.gif)
 
-#### Temperature Heterogeneity: "Spatial Frost"
+### Temperature Heterogeneity: "Spatial Frost"
 
 - Details described in Cherkauer et al., 2003
 - Linear (uniform) distribution of soil temperature around a mean
@@ -126,12 +126,11 @@ These apply to the case QUICK_FLUX = FALSE and FROZEN_SOIL = TRUE, i.e. the form
 
 ![VIC Spatial Frost Schematic Link](../img/VIC_spatial_frost.jpg)
 
-### Dynamic Lake/Wetland Model
+## Dynamic Lake/Wetland Model
 
 The lake/wetland model ([Bowling and Lettenmaier, 2010](../Documentation/References.md#primary-historical-reference)) handles the impoundment of surface water within a grid cell.  Each grid cell is allowed to have a lake/wetland system contained within one of its landcover tiles.  Here, a **_lake_** refers to any impounded surface water, including permanent lakes and seasonal flooding of vegetated land.  The lake's area can vary with time as a function of storage and topography (bathymetry).  In this context, **_wetland_** refers to the exposed portion of the landcover tile.
 
-#### Lake Model
-
+### Lake Model
 
 - Multi-layer lake model, based on the model of Hostetler and Bartlein (1990), Hostetler (1991), and Hostetler et al (2000)
 - Energy balance model
@@ -149,7 +148,7 @@ The lake/wetland model ([Bowling and Lettenmaier, 2010](../Documentation/Referen
 
 ![VIC Dynamic Lake Model Link](../img/VIC_dynamic_lake_model.jpg)
 
-#### Wetland Model
+### Wetland Model
 
 - Lakes and wetlands exist in their own "tile" within the grid cell
 - Dynamic wetland area = tile area - dynamic lake area

@@ -18,16 +18,9 @@ Information about the VIC codebase:
     *   [Differences with previous versions](VersionSummaries.md)
     *   [Backwards-compatibility with previous versions](CompatOpt.md)
 *   **[Previous Model Versions](ArchivedVersions.md)**
-    *   Overview of recent VIC model development
-    *   Brief descriptions of archived versions
-    *   How to obtain the code
-*   **[Ongoing Development](OngoingDevelopment.md)**
-    *   Current development
-        *   Features under development
-        *   Issues under investigation
-    *   Collaboration
-    *   Beta Testing
-    *   How to obtain the code
+*   **[Contributing](Contributing.md)**
+
+All development activity is coordinated via the [VIC github page](https://github.com/UW-Hydro/VIC), where you can also find all archived, current, beta, and development versions of the model.
 
 # Release Naming Convention
 

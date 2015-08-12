@@ -29,7 +29,7 @@ For more information about VIC 4.2 features and the differences VIC 4.2 has with
 
 Existing model setup from VIC 4.1.2 will still run with VIC 4.2.  The only exception to this may be when using an old state file to restart from a previous simulation
 
-Most of the changes in VIC 4.2 are new features that are turned off by default.  Therefore, similar, but not exact, results should be obtained by both VIC 4.1.2 and VIC 4.2.
+Most of the changes in VIC 4.2 are new features that are turned off by default.  Therefore, similar, but not exactly the same, results should be obtained by both VIC 4.1.2 and VIC 4.2.
 
 ## Earlier Versions
 
@@ -49,4 +49,4 @@ This is the routing model of [Lohmann, et al. (1996)](../Documentation/Reference
 
 ## How to Obtain the Code
 
-For information on obtaining the routing model source code, [click here](../SourceCode/Code.md).
+The routing model source code can be obtained from its [GitHub repo](https://github.com/UW-Hydro/VIC_Routing).

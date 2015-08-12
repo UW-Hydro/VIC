@@ -12,6 +12,10 @@ import shutil
 from setuptools import setup, find_packages, Command
 from setuptools.extension import Extension
 
+# set log level here
+log_level = 0
+
+
 MAJOR = 5
 MINOR = 0
 MICRO = 0
@@ -147,7 +151,8 @@ ext_obj = ext_name + sysconfig.get_config_var('SO')
 ext_module = Extension(ext_name,
                        sources=sources,
                        include_dirs=includes,
-                       extra_compile_args=['-std=c99'])
+                       extra_compile_args=['-std=c99',
+                                           '-DLOG_LVL={0}'.format(log_level)])
 
 # -------------------------------------------------------------------- #
 # Run Setup

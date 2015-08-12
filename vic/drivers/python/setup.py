@@ -12,9 +12,15 @@ import shutil
 from setuptools import setup, find_packages, Command
 from setuptools.extension import Extension
 
-# set log level here
+# Set the log level
+# To turn off warning statements, set LOG_LVL >= 30
+# | Level     | Numeric value    |
+# |---------  |---------------   |
+# | ERROR     | Always Active    |
+# | WARNING   | < 30             |
+# | INFO      | < 20             |
+# | DEBUG     | < 10             |
 log_level = 0
-
 
 MAJOR = 5
 MINOR = 0

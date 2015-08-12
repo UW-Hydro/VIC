@@ -350,7 +350,7 @@ dmy_no_leap_day(double      julian,
     E = (unsigned int) ((B - D) / 30.6001);
 
     // Convert to date
-    day = B - D - (unsigned int) (30.6001 * E) + (unsigned int) F;
+    day = B - D - (unsigned int) (30.6001 * E) + F;
     nday = B - D - 123;
     if (nday <= 305) {
         dayofyr = nday + 60;
@@ -375,13 +375,13 @@ dmy_no_leap_day(double      julian,
 
     // Convert fractions of a day to time
     dfrac = modf(day, &days);
-    seconds = round(dfrac * (SEC_PER_DAY));
+    seconds = round(dfrac * SEC_PER_DAY);
 
     dmy->year = year;
     dmy->month = month;
     dmy->day = (unsigned short int) days;
     dmy->day_in_year = dayofyr;
-    dmy->dayseconds = seconds;
+    dmy->dayseconds = (unsigned int) seconds;
 
     return;
 }
@@ -413,7 +413,7 @@ dmy_all_leap(double      julian,
     E = (unsigned int)((B - D) / 30.6001);
 
     // Convert to date
-    day = B - D - (unsigned int) (30.6001 * E) + (unsigned int) F;
+    day = B - D - (unsigned int) (30.6001 * E) + F;
     nday = B - D - 123;
     if (nday <= 305) {
         dayofyr = nday + 60;
@@ -440,7 +440,7 @@ dmy_all_leap(double      julian,
 
     // Convert fractions of a day to time
     dfrac = modf(day, &days);
-    seconds = round(dfrac * (SEC_PER_DAY));
+    seconds = round(dfrac * SEC_PER_DAY);
 
     dmy->year = year;
     dmy->month = month;
@@ -476,7 +476,7 @@ dmy_all_30_day(double      julian,
 
     // Convert fractions of a day to time
     dfrac = modf(day, &days);
-    seconds = round(dfrac * (SEC_PER_DAY));
+    seconds = round(dfrac * SEC_PER_DAY);
 
     dmy->year = year;
     dmy->month = month;

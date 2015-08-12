@@ -44,7 +44,6 @@ pages:
     - 'Calibration': 'Documentation/Calibration.md'
     - 'VIC Disagg': 'Documentation/VICDisagg.md'
 - Development:
-    - 'Development': 'Development/ModelDevelopment.md'
     - 'Ongoing Development': 'Development/OngoingDevelopment.md'
     - 'Current Version': 'Development/CurrentVersion.md'
     - 'Archived Versions': 'Development/ArchivedVersions.md'

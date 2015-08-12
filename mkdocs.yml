@@ -11,13 +11,6 @@ docs_dir: docs
 site_dir: site
 use_directory_urls: true
 
-# TODO:
-# Pages: creating a hydrograph, plotting, miscellaneous
-# figures
-# links
-# cant figure out how to hide pages
-# decom WIKI
-# two basin deliniation pages?
 pages:
 # Main pages
 - Home: 'index.md'
@@ -44,7 +37,7 @@ pages:
     - 'Calibration': 'Documentation/Calibration.md'
     - 'VIC Disagg': 'Documentation/VICDisagg.md'
 - Development:
-    - 'Ongoing Development': 'Development/OngoingDevelopment.md'
+    - 'Development': 'Development/ModelDevelopment.md'
     - 'Current Version': 'Development/CurrentVersion.md'
     - 'Archived Versions': 'Development/ArchivedVersions.md'
     - 'Version Summaries': 'Development/VersionSummaries.md'
@@ -56,6 +49,7 @@ pages:
 - Downloads:
     - Datasets: 'Datasets/Datasets.md'
     - Code: 'SourceCode/Code.md'
+# hidden pages
 - hidden:
     - 'Forcing Data': 'Documentation/ForcingData.md'
     - 'Global Param': 'Documentation/GlobalParam.md'

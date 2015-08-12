@@ -25,3 +25,5 @@ liblnd.a
 
 .DS_Store
 TAGS
+
+*egg-info*

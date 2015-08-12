@@ -54,7 +54,7 @@ double calc_outgoing_longwave(double temp, double emis);
 double calc_scale_height(double tair, double elevation);
 double calc_sensible_heat(double atmos_density, double t1, double t0,
                           double Ra);
-void calc_Nscale_factors(char, double *, double, double, double, double,
+void calc_Nscale_factors(bool, double *, double, double, double, double,
                          unsigned short int, double *);
 double calc_rainonly(double, double, double, double);
 double calc_rc(double, double, double, double, double, double, double, char);
@@ -157,7 +157,6 @@ int estimate_layer_ice_content_quick_flux(layer_data_struct *, double *, double,
                                           char);
 double estimate_T1(double, double, double, double, double, double, double,
                    double, double, double);
-double exp_interp(double, double, double, double, double);
 void faparl(double *, double, double, double, double, double *, double *);
 void fda_heat_eqn(double *, double *, int, int, ...);
 void fdjac3(double *, double *, double *, double *, double *, void (*vecfunc)(
@@ -202,7 +201,6 @@ double linear_interp(double, double, double, double, double);
 double lkdrag(double, double, double, double, double);
 void MassRelease(double *, double *, double *, double *);
 double maximum_unfrozen_water(double, double, double, double);
-double modify_Ksat(double);
 double new_snow_density(double);
 int newt_raph(void (*vecfunc)(double *, double *, int, int,
                               ...), double *, int);
@@ -235,7 +233,7 @@ void set_node_parameters(double *, double *, double *, double *, double *,
                          double *, int, int);
 void shear_stress(double U10, double ZO, double *ushear, double *Zo_salt,
                   double utshear);
-double snow_albedo(double, double, double, double, double, int, char);
+double snow_albedo(double, double, double, double, double, int, bool);
 double snow_density(snow_data_struct *, double, double, double, double);
 int snow_intercept(double, double, double, double, double, double, double,
                    double, double, double, double *, double *, double *,

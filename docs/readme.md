@@ -35,6 +35,6 @@ The VIC documentation is served by [Read the Docs](https://readthedocs.org/) at 
 
 Currently, there are three builds (versions) scheduled for the VIC documentation:
 
-1.  [`stable`](http://vic.readthedocs.org/en/stable/) - this represents the docs on VIC's `master` branch
-1.  [`latest`](http://vic.readthedocs.org/en/latest/) - this represents the docs on VIC's `develop` branch
+1.  [`master`](http://vic.readthedocs.org/en/master/) - this represents the docs on VIC's `master` branch
+1.  [`develop`](http://vic.readthedocs.org/en/develop/) - this represents the docs on VIC's `develop` branch
 1.  `VIC.${tag}` - this represents the docs for individual tags in VIC's history.

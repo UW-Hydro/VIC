@@ -222,9 +222,10 @@ def main():
 
 
 # -------------------------------------------------------------------- #
-def run_unit_tests(config_file):
+def run_unit_tests():
     '''Run unittests from config file'''
-    return OrderedDict()
+    pytest.main('-x unit')
+    return
 # -------------------------------------------------------------------- #
 
 

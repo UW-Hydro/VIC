@@ -15,7 +15,7 @@ function vic_before_install {
 
 function vic_install {
     echo vic_install
-    conda create --yes -n test_env python=3.4 numpy scipy pytest netCDF4 cffi
+    conda create --yes -n test_env python=3.4 numpy scipy pytest netCDF4 cffi pandas
     source activate test_env
     python ${DRIVER_PATH}setup.py install
 }

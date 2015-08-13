@@ -12,6 +12,16 @@ import shutil
 from setuptools import setup, find_packages, Command
 from setuptools.extension import Extension
 
+# Set the log level
+# To turn off warning statements, set LOG_LVL >= 30
+# | Level     | Numeric value    |
+# |---------  |---------------   |
+# | ERROR     | Always Active    |
+# | WARNING   | < 30             |
+# | INFO      | < 20             |
+# | DEBUG     | < 10             |
+log_level = 0
+
 MAJOR = 5
 MINOR = 0
 MICRO = 0
@@ -148,7 +158,8 @@ ext_obj = ext_name + sysconfig.get_config_var('SO')
 ext_module = Extension(ext_name,
                        sources=sources,
                        include_dirs=includes,
-                       extra_compile_args=['-std=c99'])
+                       extra_compile_args=['-std=c99',
+                                           '-DLOG_LVL={0}'.format(log_level)])
 
 # -------------------------------------------------------------------- #
 # Run Setup

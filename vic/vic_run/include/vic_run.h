@@ -157,7 +157,6 @@ int estimate_layer_ice_content_quick_flux(layer_data_struct *, double *, double,
                                           char);
 double estimate_T1(double, double, double, double, double, double, double,
                    double, double, double);
-double exp_interp(double, double, double, double, double);
 void faparl(double *, double, double, double, double, double *, double *);
 void fda_heat_eqn(double *, double *, int, int, ...);
 void fdjac3(double *, double *, double *, double *, double *, void (*vecfunc)(
@@ -202,7 +201,6 @@ double linear_interp(double, double, double, double, double);
 double lkdrag(double, double, double, double, double);
 void MassRelease(double *, double *, double *, double *);
 double maximum_unfrozen_water(double, double, double, double);
-double modify_Ksat(double);
 double new_snow_density(double);
 int newt_raph(void (*vecfunc)(double *, double *, int, int,
                               ...), double *, int);

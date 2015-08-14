@@ -24,6 +24,7 @@ This last point has several consequences for VIC model implementation:
 ## Land Cover and Soil
 
 ![VIC Grid Cell Schematic](../img/VIC_grid_cell_schematic.png)
+
 Figure 1.  VIC land cover tiles and soil column, with major water and energy fluxes.
 
 ### Land Cover
@@ -34,10 +35,11 @@ Figure 1.  VIC land cover tiles and soil column, with major water and energy flu
 - fluxes and storages from the tiles are averaged together (weighted by area fraction) to give grid-cell average for writing to output files.
 - for a given tile, jarvis-style veg stomatal response used in computing transpiration.
 - considers canopy energy balance separately from ground surface.
-- accounts for soil evaporation and different wind and radiation attenuation in spaces between individual plants (or gaps in the canopy); vegetated and non-vegetated area fractions are controlled by vegetated area fraction (fv) (Figure 2).  See [Bohn and Vivoni (in review)](../Documentation/References.md#primary-historical-reference) for more details.
-- supports optional input of daily timeseries of LAI, albedo, and vegetated area fraction from forcing files instead of using the monthly climatology specified in the veg library or veg parameter files.  See [Bohn and Vivoni (in review)](../Documentation/References.md#primary-historical-reference)for more details.
+- accounts for soil evaporation and different wind and radiation attenuation in spaces between individual plants (or gaps in the canopy); vegetated and non-vegetated area fractions are controlled by vegetated area fraction (fv) (Figure 2).  See [Bohn and Vivoni (in review)](../Documentation/References.md#other-historical-references) for more details.
+- supports optional input of daily timeseries of LAI, albedo, and vegetated area fraction from forcing files instead of using the monthly climatology specified in the veg library or veg parameter files.  See [Bohn and Vivoni (in review)](../Documentation/References.md#other-historical-references)for more details.
 
 ![Partial Vegetation Cover Schematic](../img/PartialVegCoverSchematic.bw.png)
+
 Figure 2. Schematic of the big leaf (pre-VIC 4.2) and clumped (4.2 and later) vegetation schemes. The spatial average leaf area index (LAI) within a given vegetation tile is assumed uniformly distributed in the big leaf scheme, but is rescaled by the vegetated area fraction (fv) to estimate a plant-specific LAI in the clumped scheme. Transpiration (T) and evaporation of canopy interception (Ecan) is complemented by soil evaporation (Esoil) in the clumped scheme. 
 
 >>#### Note Regarding Evapotranspiration and Time Step
@@ -52,38 +54,39 @@ Figure 2. Schematic of the big leaf (pre-VIC 4.2) and clumped (4.2 and later) ve
 - gravity-driven flow from upper layers to lower layers (Brooks and Corey, 1964)
 - ARNO baseflow formulation for drainage from bottom layer ([Francini and Pacciani, 1991](../Documentation/References.md#other-references))
 - each land cover tile has its own soil temperature profile
-- simulation of frozen soil ([Cherkauer and Lettenmaier, 1999](../Documentation/References.md#primary-historical-reference))
-- Simulates soil temperature spatial heterogeneity within a land cover tile ([Cherkauer et al., 2003](../Documentation/References.md#primary-historical-reference))
-- simulates permafrost-specific processes such as melting of excess ground ice ([Adam and Lettenmaier, 2008](../Documentation/References.md#primary-historical-reference))
-- computes the water table depth as a function of soil moisture and soil texture, as described in [Bohn et al. (2013b)](../Documentation/References.md#primary-historical-reference).
+- simulation of frozen soil ([Cherkauer and Lettenmaier, 1999](../Documentation/References.md#other-historical-references))
+- Simulates soil temperature spatial heterogeneity within a land cover tile ([Cherkauer et al., 2003](../Documentation/References.md#other-historical-references))
+- simulates permafrost-specific processes such as melting of excess ground ice ([Adam and Lettenmaier, 2008](../Documentation/References.md#other-historical-references))
+- computes the water table depth as a function of soil moisture and soil texture, as described in [Bohn et al. (2013b)](../Documentation/References.md#other-historical-references).
 - accounts for the thermal properties of organic soil, as described in [Farouki (1981)](../Documentation/References.md#other-references).
 
 ## Snow Model
 
 VIC considers snow in several forms: ground snow pack, snow in the vegetation canopy, and snow on top of lake ice (Figure 3). Main features:
 
-- ground snow pack is quasi 2-layer; the topmost portion of the pack is considered separately for solving energy balance at pack surface ([Andreadis et al., 2009](../Documentation/References.md#primary-historical-reference))
+- ground snow pack is quasi 2-layer; the topmost portion of the pack is considered separately for solving energy balance at pack surface ([Andreadis et al., 2009](../Documentation/References.md#other-historical-references))
 - considers partial snow coverage
-- considers blowing snow sublimation ([Bowling et al, 2004](../Documentation/References.md#primary-historical-reference))
+- considers blowing snow sublimation ([Bowling et al, 2004](../Documentation/References.md#other-historical-references))
 
 For more information about the snow pack formulation, [click here](SnowModelText.md).
 
 ![VIC Snow Model Schematic Link](../img/VIC_snow_model_schematic.png)
+
 Figure 3.  VIC snow model.
 
 ## Meteorology
 
 ### Meteorological Input Data
 
-VIC can use any combination of daily or sub-daily meteorological forcings, from point observations, gridded observations, or reanalysis fields.  At minimum, VIC requires daily {precipitation, max/min air temperature, and wind speed}.  VIC will derive all other needed forcings via the approach described in [Bohn et al., 2013a](../Documentation/References.md#primary-historical-reference), which includes:
+VIC can use any combination of daily or sub-daily meteorological forcings, from point observations, gridded observations, or reanalysis fields.  At minimum, VIC requires daily {precipitation, max/min air temperature, and wind speed}.  VIC will derive all other needed forcings via the approach described in [Bohn et al., 2013a](../Documentation/References.md#other-historical-references), which includes:
 
 - If incoming shortwave radiation or humidity are not supplied as forcings, VIC can estimate their daily average values via the algorithms of [Kimball et al. (1997)](../Documentation/References.md#other-references), [Thornton and Running (1999)](../Documentation/References.md#other-references), and [Thornton et al. (2000)](../Documentation/References.md#other-references). These algorithms are part of a stand-alone system called MTCLIM, produced by Steve Running's Numerical Terradynamics Simulation Group at U. Montana.
 - If incoming longwave radiation is not supplied, VIC can estimate this via the Tennessee Valley Authority algorithm ([TVA, 1972](../Documentation/References.md#other-references)) or the [Prata (1996)](../Documentation/References.md#other-references) algorithm, Prata is the default.
-- VIC can disaggregate daily forcings to sub-daily as needed, using a cubic spline to interpolate between min and max temperatures, and deriving the other variables from that ([Bohn et al., 2013a](../Documentation/References.md#primary-historical-reference))
+- VIC can disaggregate daily forcings to sub-daily as needed, using a cubic spline to interpolate between min and max temperatures, and deriving the other variables from that ([Bohn et al., 2013a](../Documentation/References.md#other-historical-references))
 
 ### Non-Meteorological Input Data
 
-Can read daily timeseries of land cover information such as albedo, LAI, and partial vegetation cover fraction as forcing variables ([Bohn and Vivoni, in review](../Documentation/References.md#primary-historical-reference)).
+Can read daily timeseries of land cover information such as albedo, LAI, and partial vegetation cover fraction as forcing variables ([Bohn and Vivoni, in review](../Documentation/References.md#other-historical-references)).
 
 ### Elevation Bands
 
@@ -99,13 +102,14 @@ VIC can consider spatial heterogeneity in precipitation, arising from either sto
 For more information about the snow/elevation band formulation, [click here](SnowBandsText.md).
 
 ![VIC Snow Bands Schematic Link](../img/VIC_snow_bands_schematic.png)
+
 Figure 4.  VIC snow (elevation) bands.
 
 ## Frozen Soil Formulation
 
 ### Soil Thermal Solution
 
-VIC can use either the approximate soil temperature profile of [Liang et al. (1999)](../Documentation/References.md#primary-historical-reference) or a finite difference solution that takes soil ice content into account, described in [Cherkauer and Lettenmaier (1999)](../Documentation/References.md#primary-historical-reference). (Figure 5)
+VIC can use either the approximate soil temperature profile of [Liang et al. (1999)](../Documentation/References.md#other-historical-references) or a finite difference solution that takes soil ice content into account, described in [Cherkauer and Lettenmaier (1999)](../Documentation/References.md#other-historical-references). (Figure 5)
 
 - Liang et al. (1999): set QUICK_FLUX to TRUE in global parameter file; this is the default for FULL_ENERGY = TRUE and FROZEN_SOIL = FALSE.
 - Cherkauer et al. (1999): set QUICK_FLUX to FALSE in global parameter file; this is the default for FROZEN_SOIL = TRUE.
@@ -115,30 +119,33 @@ VIC can use either the approximate soil temperature profile of [Liang et al. (19
 For more information about the frozen soil formulation, [click here](FrozenSoilText.md).
 
 ![VIC Frozen Soil Schematic Link](../img/VIC_frozen_soil_schematic.png)
+
 Figure 5.  VIC frozen soil formulation.
 
 ### Permafrost
 
-These apply to the case QUICK_FLUX = FALSE and FROZEN_SOIL = TRUE, i.e. the formulation of [Cherkauer and Lettenmaier (1999)](../Documentation/References.md#primary-historical-reference).
+These apply to the case QUICK_FLUX = FALSE and FROZEN_SOIL = TRUE, i.e. the formulation of [Cherkauer and Lettenmaier (1999)](../Documentation/References.md#other-historical-references).
 
 - global parameter file option: IMPLICIT: uses an implicit scheme to solve the soil thermal profile. This is the default scheme.
 - global parameter file option: EXP_TRANS: uses exponential node spacing (dense node spacing near soil surface; sparse node spacing at depth) (Figure 6)
 
 ![VIC Permafrost Enhancements Link](../img/VIC_permafrost_enhancements.gif)
+
 Figure 6.  VIC permafrost enhancements.
 
 ### Temperature Heterogeneity: "Spatial Frost"
 
-- Details described in [Cherkauer et al., 2003](../Documentation/References.md#primary-historical-reference)
+- Details described in [Cherkauer et al., 2003](../Documentation/References.md#other-historical-references)
 - Linear (uniform) distribution of soil temperature around a mean (Figure 7)
 - Allows some moisture movement in soil when the average temperature is below freezing
 
 ![VIC Spatial Frost Schematic Link](../img/VIC_spatial_frost.gif)
+
 Figure 7.  VIC spatial frost formulation.
 
 ## Dynamic Lake/Wetland Model
 
-The lake/wetland model ([Bowling and Lettenmaier, 2010](../Documentation/References.md#primary-historical-reference)) handles the impoundment of surface water within a grid cell.  Each grid cell is allowed to have a lake/wetland system contained within one of its landcover tiles.  Here, a **_lake_** refers to any impounded surface water, including permanent lakes and seasonal flooding of vegetated land.  The lake's area can vary with time as a function of storage and topography (bathymetry).  In this context, **_wetland_** refers to the exposed portion of the landcover tile.
+The lake/wetland model ([Bowling and Lettenmaier, 2010](../Documentation/References.md#other-historical-references)) handles the impoundment of surface water within a grid cell.  Each grid cell is allowed to have a lake/wetland system contained within one of its landcover tiles.  Here, a **_lake_** refers to any impounded surface water, including permanent lakes and seasonal flooding of vegetated land.  The lake's area can vary with time as a function of storage and topography (bathymetry).  In this context, **_wetland_** refers to the exposed portion of the landcover tile.
 
 ### Lake Model
 
@@ -157,6 +164,7 @@ The lake/wetland model ([Bowling and Lettenmaier, 2010](../Documentation/Referen
 - To turn the lake model off completely, the user must either set LAKES to FALSE or omit any mention of LAKES in the global parameter file.
 
 ![VIC Dynamic Lake Model Link](../img/VIC_dynamic_lake_model.jpg)
+
 Figure 8.  VIC lake model formulation.
 
 ### Wetland Model
@@ -168,11 +176,12 @@ Figure 8.  VIC lake model formulation.
 - Wetland soils will tend to be wetter than upland soils due to frequent inundation and recharge by lake
 
 ![VIC Dynamic Lake/Wetland Model Link](../img/VIC_dynamic_lake_wetland_model.gif)
+
 Figure 9.  VIC dynamic lake/wetland interaction.
 
 ## Carbon Cycle Processes
 
-- VIC optionally simulates photosynthesis, autotrophic respiration, and heterotrophic respiration, as described in [Bohn et al. (2013b)](../Documentation/References.md#primary-historical-reference)
+- VIC optionally simulates photosynthesis, autotrophic respiration, and heterotrophic respiration, as described in [Bohn et al. (2013b)](../Documentation/References.md#other-historical-references)
 - Plant phenology is NOT dynamic. Vegetative biomass is not simulated. LAI and other vegetation characteristics are prescribed in the same way as when carbon cycling is turned off.
 - There are three soil carbon reservoirs: litter (residence time of 2.86 years), intermediate (residence time of 33.3 years), and slow (residence time of 1000 years).
 - The previous year's total net primary productivity (NPP; photosynthesis minus autotrophic respiration) is added to the litter pool during the current year, with a constant flux equal to 1/365 * (previous year's total NPP).
@@ -187,4 +196,5 @@ Figure 9.  VIC dynamic lake/wetland interaction.
 - Then, each grid cell's input into the channel network is routed through the channel using linearized St. Venant's equations
 
 ![VIC Routing Model Schematic Link](../img/VIC_routing_model_schematic.png)
+
 Figure 10.  Routing model schematic.

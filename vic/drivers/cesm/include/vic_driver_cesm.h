@@ -139,7 +139,6 @@ void free_atmos(atmos_data_struct *atmos);
 void free_out_data(out_data_struct **out_data);
 void free_veg_hist(veg_hist_struct *veg_hist);
 size_t get_global_domain(char *fname, domain_struct *global_domain);
-size_t get_global_idx(domain_struct *domain, size_t i);
 void get_global_param(FILE *);
 size_t get_nc_dimension(char *nc_name, char *dim_name);
 int get_nc_field_double(char *nc_name, char *var_name, size_t *start,

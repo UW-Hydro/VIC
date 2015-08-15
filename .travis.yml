@@ -9,6 +9,7 @@ before_install:
     - sudo apt-get update -qq
     - sudo apt-get install -y libnetcdf-dev
     - sudo apt-get install -y mpich2
+    - sudo apt-get install -y openmpi
     - sudo apt-get install -y libopenmpi-dev
 script:
     - make full -C vic/drivers/classic/

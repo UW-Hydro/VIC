@@ -1165,8 +1165,6 @@ void fda_heat_eqn(double *, double *, int, int, ...);
 void fdjac3(double *, double *, double *, double *, double *, void (*vecfunc)(
                 double *, double *, int, int, ...), int);
 void find_0_degree_fronts(energy_bal_struct *, double *, double *, int);
-layer_data_struct find_average_layer(layer_data_struct *, layer_data_struct *,
-                                     double, double);
 double (*funcd)(double z, double es, double Wind, double AirDens, double ZO,
                 double EactAir, double F, double hsalt, double phi_r,
                 double ushear,

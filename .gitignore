@@ -17,6 +17,7 @@
 *.so.*
 *.dylib
 *.dSYM
+*.mod
 
 vicNl
 vic_classic

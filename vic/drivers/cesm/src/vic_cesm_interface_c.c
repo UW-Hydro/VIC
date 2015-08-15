@@ -25,6 +25,7 @@
  *****************************************************************************/
 
 #include <vic_driver_cesm.h>
+#include <vic_cesm_def.h>
 
 size_t              NF, NR;
 size_t              current;
@@ -61,9 +62,12 @@ veg_con_struct    **veg_con = NULL;
 veg_hist_struct   **veg_hist = NULL;
 veg_lib_struct    **veg_lib = NULL;
 
-int vic_cesm_init() {
+int vic_cesm_init(vic_clock_struct vic_clock) {
 
+    // Will this come from lnd_init_mct?
     strcpy(filenames.global, "vic.globalconfig.txt");
+    strcpy(filenames.log_path, "");  // write log files to cwd
+    strcpy(filenames.result_dir, ""); // write result files to cwd
 
     // Initialize Log Destination
     initialize_log();
@@ -86,19 +90,19 @@ int vic_cesm_init() {
     return 0;
 }
 
-int vic_cesm_run() {
+int vic_cesm_run(vic_clock_struct vic_clock) {
 
     // read forcing data
     vic_force();
 
     // run vic over the domain
-    vic_cesm_run_model(false);
+    vic_cesm_run_model();
 
     // if output:
     vic_write();
 
     // if save:
-    if (true) {
+    if (vic_clock.state_flag) {
         vic_store();
     }
 

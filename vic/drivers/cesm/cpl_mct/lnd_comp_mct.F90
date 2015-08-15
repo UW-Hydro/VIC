@@ -7,6 +7,7 @@ module lnd_comp_mct
   use seq_cdata_mod
   use seq_infodata_mod
   use vic_cesm_interface
+  use, intrinsic :: iso_c_binding
 
 !
 ! !PUBLIC TYPES:
@@ -48,6 +49,11 @@ CONTAINS
     type(mct_aVect)             , intent(inout) :: x2s, s2x
     character(len=*), optional  , intent(in)    :: NLFilename
 
+    ! Local Variables
+    integer(C_INT) :: errno
+    type(vic_clock_type) :: vic_clock
+    character(len=*), parameter     :: subname = "lnd_init_mct"
+
 !EOP
 !-------------------------------------------------------------------------------
 
@@ -55,7 +61,12 @@ CONTAINS
         lnd_present=.true., lnd_prognostic=.true., &
         sno_present=.false., sno_prognostic=.false.)
 
-   call vic_cesm_init(args_to_vic)
+  errno = vic_cesm_init(vic_clock)
+
+  if (errno /= 0) then
+    call shr_sys_abort(subname//':: vic_cesm_init returned a errno /= 0' )
+  endif
+
 
 end subroutine lnd_init_mct
 
@@ -85,10 +96,19 @@ subroutine lnd_run_mct( EClock, cdata, x2d, d2x, cdata_s, x2s, s2x)
    type(mct_aVect)             ,intent(inout) :: x2s
    type(mct_aVect)             ,intent(inout) :: s2x
 
+   ! Local Variables
+   integer(C_INT) :: errno
+   type(vic_clock_type) :: vic_clock
+   character(len=*), parameter     :: subname = "lnd_run_mct"
+
 !EOP
 !-------------------------------------------------------------------------------
 
-    vic_cesm_run(args_to_vic)
+  errno = vic_cesm_run(vic_clock)
+
+  if (errno /= 0) then
+    call shr_sys_abort(subname//':: vic_cesm_run returned a errno /= 0' )
+  endif
 
 end subroutine lnd_run_mct
 
@@ -118,11 +138,18 @@ subroutine lnd_final_mct( EClock, cdata, x2d, d2x, cdata_s, x2s, s2x)
     type(mct_aVect)             ,intent(inout) :: x2s
     type(mct_aVect)             ,intent(inout) :: s2x
 
+   ! Local Variables
+   integer(C_INT) :: errno
+   character(len=*), parameter     :: subname = "lnd_run_mct"
 !EOP
 !-------------------------------------------------------------------------------
 
     ! clean up
-    vic_cesm_final(args_to_vic)
+    errno = vic_cesm_final()
+
+  if (errno /= 0) then
+    call shr_sys_abort(subname//':: vic_cesm_final returned a errno /= 0' )
+  endif
 
  end subroutine lnd_final_mct
 

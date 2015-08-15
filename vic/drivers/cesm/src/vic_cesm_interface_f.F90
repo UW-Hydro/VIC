@@ -24,11 +24,27 @@
 !! 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 module vic_cesm_interface
+
+! !PUBLIC TYPES:
+  implicit none
+  save
+  private ! except
+
+!--------------------------------------------------------------------------
+! Public interfaces
+!--------------------------------------------------------------------------
+
+  public :: vic_cesm_init
+  public :: vic_cesm_run
+  public :: vic_cesm_final
+
     ! Init Interface
     interface
-        integer (C_INT) function vic_cesm_init() BIND(C, name='vic_cesm_init')
+        integer (C_INT) function vic_cesm_init(vic_clock) BIND(C, name='vic_cesm_init')
         use, intrinsic :: ISO_C_BINDING
+        use vic_cesm_def_mod
         implicit none
+          type(vic_clock_type), intent(inout) :: vic_clock
 !         type (C_PTR), value :: sendbuf
 !         integer (C_INT), value :: sendcount
 !         type (C_PTR), value :: recvcounts
@@ -37,9 +53,11 @@ module vic_cesm_interface
 
     ! Run Interface
     interface
-        integer (C_INT) function vic_cesm_run() BIND(C, name='vic_cesm_run')
+        integer (C_INT) function vic_cesm_run(vic_clock) BIND(C, name='vic_cesm_run')
         use, intrinsic :: ISO_C_BINDING
+        use vic_cesm_def_mod
         implicit none
+          type(vic_clock_type), intent(inout) :: vic_clock
 !         type (C_PTR), value :: sendbuf
 !         integer (C_INT), value :: sendcount
 !         type (C_PTR), value :: recvcounts
@@ -50,6 +68,7 @@ module vic_cesm_interface
     interface
         integer (C_INT) function vic_cesm_final() BIND(C, name='vic_cesm_final')
         use, intrinsic :: ISO_C_BINDING
+        use vic_cesm_def_mod
         implicit none
      end function vic_cesm_final
    end interface

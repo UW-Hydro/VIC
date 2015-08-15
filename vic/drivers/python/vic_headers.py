@@ -1340,7 +1340,6 @@ typedef struct {
 double all_30_day_from_dmy(dmy_struct *dmy);
 double all_leap_from_dmy(dmy_struct *dmy);
 void calc_root_fractions(veg_con_struct *veg_con, soil_con_struct *soil_con);
-int check_date(unsigned short int calendar, dmy_struct *dmy);
 void compute_treeline(atmos_data_struct *, dmy_struct *, double, double *,
                       _Bool *);
 void cmd_proc(int argc, char **argv, char *globalfilename);
@@ -1360,11 +1359,7 @@ void free_all_vars(all_vars_struct *all_vars, int Nveg);
 void free_dmy(dmy_struct **dmy);
 void free_vegcon(veg_con_struct **veg_con);
 double get_dist(double lat1, double long1, double lat2, double long2);
-void get_next_time_step(unsigned short int *, unsigned short int *,
-                        unsigned short int *, unsigned short int *,
-                        unsigned short int *, unsigned short int);
 void get_parameters(FILE *paramfile);
-void initialize_forcing_files(void);
 void initialize_filenames(void);
 void initialize_fileps(void);
 void initialize_global(void);

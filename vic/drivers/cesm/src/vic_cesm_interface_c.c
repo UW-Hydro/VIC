@@ -63,7 +63,7 @@ veg_lib_struct    **veg_lib = NULL;
 
 int vic_cesm_init() {
 
-    // filenames.global = "vic.globalconfig.txt";
+    strcpy(filenames.global, "vic.globalconfig.txt");
 
     // Initialize Log Destination
     initialize_log();

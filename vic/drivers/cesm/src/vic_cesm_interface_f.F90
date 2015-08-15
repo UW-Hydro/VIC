@@ -26,7 +26,7 @@
 module vic_cesm_interface
     ! Init Interface
     interface
-        integer (C_INT) function vic_cesm_init(args_to_define_below) BIND(C, name='vic_cesm_init')
+        integer (C_INT) function vic_cesm_init() BIND(C, name='vic_cesm_init')
         use, intrinsic :: ISO_C_BINDING
         implicit none
 !         type (C_PTR), value :: sendbuf
@@ -37,7 +37,7 @@ module vic_cesm_interface
 
     ! Run Interface
     interface
-        integer (C_INT) function vic_cesm_run(args_to_define_below) BIND(C, name='vic_cesm_run')
+        integer (C_INT) function vic_cesm_run() BIND(C, name='vic_cesm_run')
         use, intrinsic :: ISO_C_BINDING
         implicit none
 !         type (C_PTR), value :: sendbuf

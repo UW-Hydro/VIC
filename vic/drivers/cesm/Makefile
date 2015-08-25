@@ -139,6 +139,7 @@ clean::
 	rm -f core log
 	rm -f ${DRIVERPATH}/src/*~ ${SHAREDPATH}/src/*.~ ${VICPATH}/src/*~
 	rm -rf ${COMPLIB} ${COMPLIB}.dSYM
+	rm -f *.mod
 
 model: $(OBJS)
 	$(FC) $(LDFLAGGS) $(COBJS) $(FOBJS) $(FFLAGS) $(LIBRARY) -o ${COMPLIB}${EXT}

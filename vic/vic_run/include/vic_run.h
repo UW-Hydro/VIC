@@ -162,8 +162,6 @@ void fda_heat_eqn(double *, double *, int, int, ...);
 void fdjac3(double *, double *, double *, double *, double *, void (*vecfunc)(
                 double *, double *, int, int, ...), int);
 void find_0_degree_fronts(energy_bal_struct *, double *, double *, int);
-layer_data_struct find_average_layer(layer_data_struct *, layer_data_struct *,
-                                     double, double);
 double func_atmos_energy_bal(double, va_list);
 double func_atmos_moist_bal(double, va_list);
 double func_canopy_energy_bal(double, va_list);

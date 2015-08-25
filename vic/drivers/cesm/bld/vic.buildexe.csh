@@ -8,13 +8,13 @@ if ($COMP_INTERFACE == 'ESMF') set comp = esmf
 
 cat >! Filepath << EOF
 $CASEROOT/SourceMods/src.vic
-$CODEROOT/lnd/vic
-$CODEROOT/lnd/vic/vic_run/src
-$CODEROOT/lnd/vic/vic_run/include
-$CODEROOT/lnd/vic/drivers/shared/src
-$CODEROOT/lnd/vic/drivers/shared/include
-$CODEROOT/lnd/vic/drivers/rasm/src
-$CODEROOT/lnd/vic/drivers/rasm/include
+$CODEROOT/lnd/vic/vic
+$CODEROOT/lnd/vic/vic/vic_run/src
+$CODEROOT/lnd/vic/vic/vic_run/include
+$CODEROOT/lnd/vic/vic/drivers/shared/src
+$CODEROOT/lnd/vic/vic/drivers/shared/include
+$CODEROOT/lnd/vic/vic/drivers/rasm/src
+$CODEROOT/lnd/vic/vic/drivers/rasm/include
 EOF
 
 set vicdefs = "`cat $CASEBUILD/vicconf/CESM_cppdefs`"

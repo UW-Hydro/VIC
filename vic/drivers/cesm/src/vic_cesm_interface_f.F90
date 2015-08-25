@@ -40,33 +40,29 @@ module vic_cesm_interface
 
     ! Init Interface
     interface
-        integer (C_INT) function vic_cesm_init(vic_clock) BIND(C, name='vic_cesm_init')
+        integer(C_INT) function vic_cesm_init(vic_clock, &
+                                              vic_global_param_file) BIND(C, name='vic_cesm_init')
         use, intrinsic :: ISO_C_BINDING
         use vic_cesm_def_mod
         implicit none
           type(vic_clock_type), intent(inout) :: vic_clock
-!         type (C_PTR), value :: sendbuf
-!         integer (C_INT), value :: sendcount
-!         type (C_PTR), value :: recvcounts
+          character(len=1, kind=C_CHAR), dimension(*) :: vic_global_param_file
      end function vic_cesm_init
    end interface
 
     ! Run Interface
     interface
-        integer (C_INT) function vic_cesm_run(vic_clock) BIND(C, name='vic_cesm_run')
+        integer(C_INT) function vic_cesm_run(vic_clock) BIND(C, name='vic_cesm_run')
         use, intrinsic :: ISO_C_BINDING
         use vic_cesm_def_mod
         implicit none
           type(vic_clock_type), intent(inout) :: vic_clock
-!         type (C_PTR), value :: sendbuf
-!         integer (C_INT), value :: sendcount
-!         type (C_PTR), value :: recvcounts
      end function vic_cesm_run
    end interface
 
     ! Run Interface
     interface
-        integer (C_INT) function vic_cesm_final() BIND(C, name='vic_cesm_final')
+        integer(C_INT) function vic_cesm_final() BIND(C, name='vic_cesm_final')
         use, intrinsic :: ISO_C_BINDING
         use vic_cesm_def_mod
         implicit none

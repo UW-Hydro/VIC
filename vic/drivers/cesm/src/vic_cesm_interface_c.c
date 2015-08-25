@@ -62,10 +62,11 @@ veg_con_struct    **veg_con = NULL;
 veg_hist_struct   **veg_hist = NULL;
 veg_lib_struct    **veg_lib = NULL;
 
-int vic_cesm_init(vic_clock_struct vic_clock) {
+int vic_cesm_init(vic_clock_struct vic_clock,
+                  char *vic_global_param_file) {
 
     // Will this come from lnd_init_mct?
-    strcpy(filenames.global, "vic.globalconfig.txt");
+    strcpy(filenames.global, vic_global_param_file);
     strcpy(filenames.log_path, "");  // write log files to cwd
     strcpy(filenames.result_dir, ""); // write result files to cwd
 

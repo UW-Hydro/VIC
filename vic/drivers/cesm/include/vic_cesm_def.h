@@ -28,8 +28,9 @@
 #define VIC_CESM_DEF_H
 
 /******************************************************************************
- * @brief   This structure stores clock information. Order is important and any
- *          changes here must be echoed in vic_cesm_interface_f.F90
+ * @brief   This structure stores clock information. See also ESMF_Clock.
+ *          Order is important and any changes here must be echoed in
+ *          vic_cesm_interface_f.F90
  *****************************************************************************/
 typedef struct {
     int       timestep; // timestep in seconds
@@ -53,8 +54,24 @@ typedef struct {
     bool      stop_flag; // stop flag
 } vic_clock_struct;
 
+/******************************************************************************
+ * @brief   This structure stores mpi and domain information.
+ *          Order is important and any changes here must be echoed in
+ *          vic_cesm_interface_f.F90
+ *****************************************************************************/
+// typedef struct {
+//     int id; // component id
+//     int mpicom; //mpi communicator
+
+//     sometype dom; // domain info
+//     sometype gsmap; // decomp info
+//     sometype infodata; // input init object
+
+// } vic_seq_cdata_struct;
+
 #endif
 
-int vic_cesm_init(vic_clock_struct vic_clock);
+int vic_cesm_init(vic_clock_struct vic_clock,
+                  char *vic_global_param_file);
 int vic_cesm_run(vic_clock_struct vic_clock);
 int vic_cesm_final(void);

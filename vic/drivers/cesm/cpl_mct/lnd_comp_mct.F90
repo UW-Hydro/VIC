@@ -52,6 +52,7 @@ CONTAINS
     ! Local Variables
     integer(C_INT) :: errno
     type(vic_clock_type) :: vic_clock
+    character(len=*, kind=C_CHAR)   :: vic_global_param_file
     character(len=*), parameter     :: subname = "lnd_init_mct"
 
 !EOP
@@ -61,8 +62,17 @@ CONTAINS
         lnd_present=.true., lnd_prognostic=.true., &
         sno_present=.false., sno_prognostic=.false.)
 
-  errno = vic_cesm_init(vic_clock)
+  ! VIC global parameter file (namelist)
+  if(present(NLFilename)) then
+    vic_global_param_file = NLFilename
+  else
+    vic_global_param_file = "vic.globalconfig.txt"
+  endif
 
+  ! Call the VIC init function
+  errno = vic_cesm_init(vic_clock, vic_global_param_file)
+
+  ! Raise an error if anything went wrong
   if (errno /= 0) then
     call shr_sys_abort(subname//':: vic_cesm_init returned a errno /= 0' )
   endif

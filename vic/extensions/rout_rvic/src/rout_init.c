@@ -37,6 +37,8 @@ void
 rout_init(void)
 {
     extern rout_struct         rout;
+    extern domain_struct       global_domain; 
+    
     int                       *ivar = NULL;
     double                    *dvar = NULL;
 
@@ -107,12 +109,50 @@ rout_init(void)
         rout.rout_param.source_y_ind[i] = (int) ivar[i];
     }
 
+    // source_lat: Latitude coordinate of source grid cell
+    get_nc_field_double(rout.param_filename,
+                                "source_lat",
+                                &i1start, &rout.rout_param.iSources, dvar);
+    for (i = 0; i < rout.rout_param.iSources; i++) {
+        rout.rout_param.source_lat[i] = (double) dvar[i];
+    }
+    
+    // source_lat: Longitude coordinate of source grid cell
+    get_nc_field_double(rout.param_filename,
+                                "source_lon",
+                                &i1start, &rout.rout_param.iSources, dvar);
+    for (i = 0; i < rout.rout_param.iSources; i++) {
+        rout.rout_param.source_lon[i] = (double) dvar[i];
+    }
+    
     // Unit Hydrograph:
     get_nc_field_double(rout.param_filename,
                                 "unit_hydrograph",
                                 d3start, d3count, dvar);
     for (i = 0; i < (rout.rout_param.iSubsetLength * rout.rout_param.iSources); i++) {
         rout.rout_param.unit_hydrograph[i] = (double) dvar[i];
+    }
+
+    // TODO: MAPPING!
+    // TODO: Lat lon omgedraaid in netcdf?!?!??!?!
+    // TODO: Check inbouwen: wat als er geen VIC gridcell bestaat voor een Rout source?!
+    // Filling the VIC indices that corresponds to the routing file lat/lons
+    // Which source point of the routing corresponds to which gridcell index of VIC
+    size_t iSource;
+    for (iSource = 0; iSource < rout.rout_param.iSources; iSource++) {
+       for (i = 0; i < global_domain.ncells; i++) {
+          if (rout.rout_param.source_lat[iSource] == global_domain.locations[i].latitude && 
+              rout.rout_param.source_lon[iSource] == global_domain.locations[i].longitude) {
+                   rout.rout_param.source_VIC_index[iSource] = i;
+          }
+       }
+    }
+    
+    // TODO Weghalen
+    // Tijdelijk
+    printf("\nsource, index of VIC gridcell: \n ");
+    for (iSource = 0; iSource < rout.rout_param.iSources; iSource++) {
+       printf("%3i,  %7i \n ",(int)(iSource),rout.rout_param.source_VIC_index[iSource]);
     }
 
     // cleanup

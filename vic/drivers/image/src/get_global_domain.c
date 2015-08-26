@@ -112,7 +112,8 @@ get_global_domain(char          *nc_name,
 
     // get longitude -
     // TBD: read var id from file
-    get_nc_field_double(nc_name, "xc",
+//    get_nc_field_double(nc_name, "xc",
+    get_nc_field_double(nc_name, "yc", //WF
                         d2start, d2count, var);
     for (i = 0; i < global_domain->ncells; i++) {
         // rescale to [-180., 180]. Note that the if statement is not strictly
@@ -125,7 +126,8 @@ get_global_domain(char          *nc_name,
 
     // get latitude
     // TBD: read var id from file
-    get_nc_field_double(nc_name, "yc",
+//    get_nc_field_double(nc_name, "yc",
+    get_nc_field_double(nc_name, "xc",
                         d2start, d2count, var);
     for (i = 0; i < global_domain->ncells; i++) {
         global_domain->locations[i].latitude = (double) var[idx[i]];

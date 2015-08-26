@@ -68,35 +68,51 @@ else
 CC = mpicc-mpich-mp
 endif
 
+<<<<<<< HEAD
 # set routing extension here (rout_stub means: no routing)
 ROUT=rout_stub
 #ROUT=rout_rvic
 
 include ${EXTPATH}/${ROUT}/rout.mk
+=======
+# Set the log level
+# To turn off warning statements, set LOG_LVL >= 30
+# | Level     | Numeric value    |
+# |---------  |---------------   |
+# | ERROR     | Always Active    |
+# | WARNING   | < 30             |
+# | INFO      | < 20             |
+# | DEBUG     | < 10             |
+LOG_LVL = 5
+>>>>>>> 04fa923e12e7b33e74586c174b473073e95d2ee8
 
 # set includes
 INCLUDES = -I ${DRIVERPATH}/include -I ${VICPATH}/include -I ${SHAREDPATH}/include -I ${NETCDFPATH}/include -I ${MPIPATH}/include -I ${EXTPATH}/${ROUT}/include
 
 # Uncomment for normal optimized code flags (fastest run option)
-#CFLAGS  = -O3 -Wall -Wno-unused
-LIBRARY = -lm -L${NETCDFPATH}/lib -lnetcdf -L${MPIPATH}/lib -lmpi
+#CFLAGS  = -O3 -Wall -Wno-unused -DLOG_LVL=$(LOG_LVL)
+# LIBRARY = -lm -L${NETCDFPATH}/lib -lnetcdf -L${MPIPATH}/lib -lmpi
 
 # Uncomment to include debugging information
-CFLAGS  =  ${INCLUDES} -ggdb -O0 -Wall -Wextra
-#LIBRARY = -lm
+CFLAGS  =  ${INCLUDES} -ggdb -O0 -Wall -Wextra -std=c99 -DLOG_LVL=$(LOG_LVL)
+LIBRARY = -lm -L${NETCDFPATH}/lib -lnetcdf -L${MPIPATH}/lib -lmpi
 
 # Uncomment to include execution profiling information
-#CFLAGS  = ${INCLUDES} -O3 -pg -Wall -Wno-unused
-#LIBRARY = -lm
+# CFLAGS  = ${INCLUDES} -O3 -pg -Wall -Wno-unused  -DLOG_LVL=$(LOG_LVL)
+# LIBRARY = -lm -L${NETCDFPATH}/lib -lnetcdf -L${MPIPATH}/lib -lmpi
 
 # Uncomment to debug memory problems using electric fence (man efence)
-#CFLAGS  = ${INCLUDES} -g -Wall -Wno-unused
-#LIBRARY = -lm -lefence -L/usr/local/lib
+#CFLAGS  = ${INCLUDES} -g -Wall -Wno-unused -DLOG_LVL=$(LOG_LVL)
+#LIBRARY = -lm -L${NETCDFPATH}/lib -lnetcdf -L${MPIPATH}/lib -lmpi -lefence -L/usr/local/lib
+
+COMPEXE = vic_image
+EXT = .exe
 
 # -----------------------------------------------------------------------
 # MOST USERS DO NOT NEED TO MODIFY BELOW THIS LINE
 # -----------------------------------------------------------------------
 
+<<<<<<< HEAD
 HDRS = ${VICPATH}/include/vic_def.h \
 	${VICPATH}/include/vic_run.h \
 	${DRIVERPATH}/include/vic_driver_image.h \
@@ -219,6 +235,19 @@ OBJS = \
 	${OBJS_ROUT}
 
 SRCS = $(OBJS:%.o=%.c)
+=======
+HDRS = \
+	$(wildcard ${VICPATH}/include/*.h) \
+	$(wildcard ${DRIVERPATH}/include/*.h) \
+	$(wildcard ${SHAREDPATH}/include/*.h)
+
+SRCS = \
+	$(wildcard ${VICPATH}/src/*.c) \
+	$(wildcard ${DRIVERPATH}/src/*.c) \
+	$(wildcard ${SHAREDPATH}/src/*.c)
+
+OBJS = $(SRCS:%.o=%.c)
+>>>>>>> 04fa923e12e7b33e74586c174b473073e95d2ee8
 
 all:
 	make depend
@@ -235,10 +264,15 @@ full:
 	make model
 
 clean::
+<<<<<<< HEAD
 	/bin/rm -f ${DRIVERPATH}/src/*.o ${SHAREDPATH}/src/*.o  ${VICPATH}/src/*.o core ${EXTPATH}/${ROUT}/src/*.o log ${DRIVERPATH}/src/*~ ${SHAREDPATH}/src/*.~ ${VICPATH}/src/*~ ${EXTPATH}/${ROUT}/src/*~ vic_image
+=======
+	\rm -f core log
+	\rm -rf ${COMPEXE}${EXT} ${COMPEXE}${EXT}.dSYM
+>>>>>>> 04fa923e12e7b33e74586c174b473073e95d2ee8
 
 model: $(OBJS)
-	$(CC) -o vic_image$(EXT) $(OBJS) $(CFLAGS) $(LIBRARY)
+	$(CC) -o ${COMPEXE}${EXT} $(OBJS) $(CFLAGS) $(LIBRARY)
 
 # -------------------------------------------------------------
 # tags

@@ -4,19 +4,15 @@ Here are some commonly-asked questions and their answers. Another source of info
 
 1.  **Does VIC and/or the routing model run on Windows or MacOS?**
 
-    The VIC model and the routing model have been developed for use on LINUX and UNIX platforms.
+    The VIC model and the routing model have been developed for use on linux and unix platforms and as such it will run perfectly fine under OS X. On OS X, you may need to install some additional libraries such as NetCDF. For that you can use any of the OS X package managers such as [MacPorts](https://www.macports.org/index.php), [Homebrew](http://brew.sh), or [Fink](http://www.finkproject.org).
 
-    PLEASE NOTE: We do not have the resources to test or support running VIC or routing model on any other platforms. If you attempt to run VIC and/or the routing model on Windows or any other non-LINUX environment, and you encounter problems, WE CANNOT HELP YOU. If you do encounter problems on these other systems and believe you have found a bug in the model, PLEASE RUN THE MODEL ON LINUX AND TRY TO REPRODUCE THE PROBLEM. If you can reproduce the problem on LINUX, we will help you.
+    To use VIC and/or the routing model on a Windows platform, we suggest downloading a free UNIX emulator such as [Cygwin](http://www.cygwin.com) and compiling/running these models within this emulator. Please do not ask us for help with installing or using Cygwin.
 
-    There are some potential alternatives that can allow you to run VIC on a non-LINUX machine: To use VIC and/or the routing model on a Windows platform, we suggest downloading a free UNIX emulator such as [Cygwin](http://www.cygwin.com) and compiling/running these models within this emulator. PLEASE DO NOT ASK US FOR HELP WITH INSTALLING OR USING Cygwin. Also note: if you encounter problems with VIC and/or the routing model on an emulator like Cygwin, once again we will not help you until/unless you can reproduce the problem on a LINUX system.
-
-    While it is true that MacOS has a UNIX kernel, we have not yet tested VIC in this environment. We are looking into this. Stay tuned.
-
-    Thank you for understanding.
+    We do not have the resources to test or support running VIC or routing model on any non-\*nix platforms. If you encounter problems while running VIC and/or the routing model on Windows or any other non-\*nix environment, we will not be able to offer you support. If you do think you have found a bug in VIC while running on a non-\*nix platform, please replicate the error on a \*nix system before reporting it.
 
 2.  **Is VIC available in Fortran?**
 
-    For the most part, no. In the past, there have been attempts to translate the model to Fortran, but these versions are far out of date, and we do not recommend using them.
+    No. VIC is written and maintained in C.
 
 3.  **Is the routing model available in C?**
 
@@ -32,7 +28,7 @@ Here are some commonly-asked questions and their answers. Another source of info
 
 5.  **Are there any Matlab tools written for analyzing and/or plotting VIC results?**
 
-    No, not here in the lab. Check the [VIC Users Listserve](http://mailman.u.washington.edu/mailman/listinfo/vic_users).
+    No. We generally use python to do our analysis. Check the [VIC Users Listserve](http://mailman.u.washington.edu/mailman/listinfo/vic_users).
 
 6.  **How can I save VIC's screen output in a file?**
 

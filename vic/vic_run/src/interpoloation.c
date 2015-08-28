@@ -39,4 +39,3 @@ linear_interp(double x,
 {
     return((x - lx) / (ux - lx) * (uy - ly) + ly);
 }
-

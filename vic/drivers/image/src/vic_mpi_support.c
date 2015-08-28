@@ -544,7 +544,6 @@ create_MPI_nc_file_struct_type(MPI_Datatype *mpi_type)
     free(mpi_types);
 }
 
-
 /******************************************************************************
  * @brief   Create an MPI_Datatype that represents the option_struct
  * @details This allows MPI operations in which the entire option_struct can
@@ -2063,41 +2062,41 @@ get_scatter_nc_field_int(char   *nc_name,
 #include <vic_driver_shared.h>
 #include <assert.h>
 
-//size_t              NF, NR;
-//size_t              current;
-size_t             *filter_active_cells = NULL;
-size_t             *mpi_map_mapping_array = NULL;
-//all_vars_struct    *all_vars = NULL;
-//atmos_data_struct  *atmos = NULL;
-//dmy_struct         *dmy = NULL;
-filenames_struct    filenames;
-filep_struct        filep;
-domain_struct       global_domain;
-domain_struct       local_domain;
-//global_param_struct global_param;
-//lake_con_struct     lake_con;
-MPI_Datatype        mpi_global_struct_type;
-MPI_Datatype        mpi_location_struct_type;
-MPI_Datatype        mpi_nc_file_struct_type;
-MPI_Datatype        mpi_option_struct_type;
-MPI_Datatype        mpi_param_struct_type;
-int                *mpi_map_local_array_sizes = NULL;
-int                *mpi_map_global_array_offsets = NULL;
-int                 mpi_rank;
-int                 mpi_size;
-//nc_file_struct      nc_hist_file;
-//nc_var_struct       nc_vars[N_OUTVAR_TYPES];
-//option_struct       options;
-//parameters_struct   param;
-//out_data_struct   **out_data;
-//save_data_struct   *save_data;
-//param_set_struct    param_set;
-//soil_con_struct    *soil_con = NULL;
-//veg_con_map_struct *veg_con_map = NULL;
-//veg_con_struct    **veg_con = NULL;
-//veg_hist_struct   **veg_hist = NULL;
-//veg_lib_struct    **veg_lib = NULL;
-FILE            *LOG_DEST;
+// size_t              NF, NR;
+// size_t              current;
+size_t *filter_active_cells = NULL;
+size_t *mpi_map_mapping_array = NULL;
+// all_vars_struct    *all_vars = NULL;
+// atmos_data_struct  *atmos = NULL;
+// dmy_struct         *dmy = NULL;
+filenames_struct filenames;
+filep_struct     filep;
+domain_struct    global_domain;
+domain_struct    local_domain;
+// global_param_struct global_param;
+// lake_con_struct     lake_con;
+MPI_Datatype     mpi_global_struct_type;
+MPI_Datatype     mpi_location_struct_type;
+MPI_Datatype     mpi_nc_file_struct_type;
+MPI_Datatype     mpi_option_struct_type;
+MPI_Datatype     mpi_param_struct_type;
+int             *mpi_map_local_array_sizes = NULL;
+int             *mpi_map_global_array_offsets = NULL;
+int              mpi_rank;
+int              mpi_size;
+// nc_file_struct      nc_hist_file;
+// nc_var_struct       nc_vars[N_OUTVAR_TYPES];
+// option_struct       options;
+// parameters_struct   param;
+// out_data_struct   **out_data;
+// save_data_struct   *save_data;
+// param_set_struct    param_set;
+// soil_con_struct    *soil_con = NULL;
+// veg_con_map_struct *veg_con_map = NULL;
+// veg_con_struct    **veg_con = NULL;
+// veg_hist_struct   **veg_hist = NULL;
+// veg_lib_struct    **veg_lib = NULL;
+FILE *LOG_DEST;
 
 /******************************************************************************
  * @brief   Test routine for VIC MPI support functions
@@ -2113,7 +2112,6 @@ int
 main(int    argc,
      char **argv)
 {
-
     int                 status;
     global_param_struct global;
     location_struct     location;
@@ -2210,13 +2208,13 @@ main(int    argc,
         log_err("MPI error in main(): %d\n", status);
     }
 
-    // assert the values on all processes are the same as the original 
+    // assert the values on all processes are the same as the original
     // assignment
     printf("%d: global.forceskip == %d\n", mpi_rank, global.forceskip[0]);
     assert(global.forceskip[0] == 4321);
     printf("%d: global.forceskip == %d\n", mpi_rank, global.forceskip[1]);
     assert(global.forceskip[1] == 8765);
-    printf("%d: global.time_origin_num == %f\n", mpi_rank, 
+    printf("%d: global.time_origin_num == %f\n", mpi_rank,
            global.time_origin_num);
     assert(global.time_origin_num == -12345.6789);
     printf("%d: location.latitude == %f\n", mpi_rank, location.latitude);

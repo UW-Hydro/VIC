@@ -837,6 +837,7 @@ initialize_atmos(atmos_data_struct    *atmos,
             }
             param_set.TYPE[VP].SUPPLIED = param_set.TYPE[QAIR].SUPPLIED;
         }
+
         /*************************************************
            If provided, translate relative humidity and air temperature
            into vapor pressure

@@ -67,7 +67,7 @@ CC = mpicc-mpich-mp
 endif
 
 ifeq (true, ${TRAVIS})
-FC = mpifort
+FC = mpif90
 else
 FC = mpifort-mpich-mp
 endif

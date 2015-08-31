@@ -770,6 +770,7 @@ typedef struct {
     unsigned short int calendar;  /**< Date/time calendar */
     unsigned short int time_units;  /**< Units for numeric times */
     double time_origin_num;        /**< Numeric date origin */
+    char caseid[MAXSTRING];      /**< Case ID*/
 } global_param_struct;
 
 /******************************************************************************

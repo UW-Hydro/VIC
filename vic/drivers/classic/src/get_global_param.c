@@ -116,36 +116,7 @@ get_global_param(FILE *gp)
             }
             else if (strcasecmp("CALENDAR", optstr) == 0) {
                 sscanf(cmdstr, "%*s %s", flgstr);
-                if (strcasecmp("STANDARD", flgstr) == 0) {
-                    global_param.calendar = CALENDAR_STANDARD;
-                }
-                else if (strcasecmp("GREGORIAN", flgstr) == 0) {
-                    global_param.calendar = CALENDAR_GREGORIAN;
-                }
-                else if (strcasecmp("PROLEPTIC_GREGORIAN", flgstr) == 0) {
-                    global_param.calendar = CALENDAR_PROLEPTIC_GREGORIAN;
-                }
-                else if (strcasecmp("NOLEAP", flgstr) == 0) {
-                    global_param.calendar = CALENDAR_NOLEAP;
-                }
-                else if (strcasecmp("365_DAY", flgstr) == 0) {
-                    global_param.calendar = CALENDAR_365_DAY;
-                }
-                else if (strcasecmp("360_DAY", flgstr) == 0) {
-                    global_param.calendar = CALENDAR_360_DAY;
-                }
-                else if (strcasecmp("JULIAN", flgstr) == 0) {
-                    global_param.calendar = CALENDAR_JULIAN;
-                }
-                else if (strcasecmp("ALL_LEAP", flgstr) == 0) {
-                    global_param.calendar = CALENDAR_ALL_LEAP;
-                }
-                else if (strcasecmp("366_DAY", flgstr) == 0) {
-                    global_param.calendar = CALENDAR_366_DAY;
-                }
-                else {
-                    log_err("Unknown calendar specified: %s", flgstr);
-                }
+                global_param.calendar = calendar_from_char(flgstr);
             }
             else if (strcasecmp("OUT_TIME_UNITS", optstr) == 0) {
                 sscanf(cmdstr, "%*s %s", flgstr);

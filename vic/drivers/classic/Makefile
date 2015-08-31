@@ -74,7 +74,7 @@ LIBRARY = -lm
 #CFLAGS  = ${INCLUDES} -g -Wall -Wno-unused -DLOG_LVL=$(LOG_LVL)
 #LIBRARY = -lm -lefence -L/usr/local/lib
 
-COMPEXE = vic_image
+COMPEXE = vic_classic
 EXT = .exe
 
 # -----------------------------------------------------------------------

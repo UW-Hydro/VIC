@@ -33,6 +33,8 @@ size_t             *filter_active_cells = NULL;
 size_t             *mpi_map_mapping_array = NULL;
 all_vars_struct    *all_vars = NULL;
 atmos_data_struct  *atmos = NULL;
+x2l_data_struct    *x2l_vic = NULL;
+l2x_data_struct    *l2x_vic = NULL;
 dmy_struct         *dmy = NULL;
 filenames_struct    filenames;
 filep_struct        filep;
@@ -62,19 +64,49 @@ veg_con_struct    **veg_con = NULL;
 veg_hist_struct   **veg_hist = NULL;
 veg_lib_struct    **veg_lib = NULL;
 
-int vic_cesm_init(vic_clock_struct vic_clock,
-                  char *vic_global_param_file) {
+int
+vic_cesm_init_mpi(MPI_Fint MPI_COMM_VIC_F)
+{
+    // Set the VIC MPI communicator
+    MPI_COMM_VIC = MPI_Comm_f2c(MPI_COMM_VIC_F);
 
-    // Will this come from lnd_init_mct?
-    strcpy(filenames.global, vic_global_param_file);
-    strcpy(filenames.log_path, "");  // write log files to cwd
-    strcpy(filenames.result_dir, ""); // write result files to cwd
+    return 0;
+}
 
+int
+vic_cesm_init(char     *vic_global_param_file,
+              char     *caseid,
+              vic_clock vclock)
+{
     // Initialize Log Destination
     initialize_log();
 
     // read global parameters
     vic_start();
+
+    if (mpi_rank == 0) {
+        // Set driver specific filenames and paths
+        strcpy(filenames.global, vic_global_param_file);
+        strcpy(filenames.log_path, "");  // write log files to cwd
+        strcpy(filenames.result_dir, ""); // write result files to cwd
+
+        // caseid
+        strcpy(global_param.caseid, caseid);
+
+        // Unpack the vic_clock structure
+        // Model timestep
+        global_param.dt = (double) vclock.timestep;
+        global_param.model_steps_per_day =
+            (int) ((double) SEC_PER_DAY / global_param.dt);
+        // Start date/time
+        global_param.startyear = vclock.current_year;
+        global_param.startmonth = vclock.current_month;
+        global_param.startday = vclock.current_day;
+        global_param.startsec = vclock.current_dayseconds;
+
+        // Calendar
+        global_param.calendar = calendar_from_char(vclock.calendar);
+    }
 
     // allocate memory
     vic_alloc();
@@ -91,7 +123,11 @@ int vic_cesm_init(vic_clock_struct vic_clock,
     return 0;
 }
 
-int vic_cesm_run(vic_clock_struct vic_clock) {
+int
+vic_cesm_run(vic_clock vic_clock)
+{
+    // reset l2x fields
+    initialize_l2x_data();
 
     // read forcing data
     vic_force();
@@ -110,12 +146,11 @@ int vic_cesm_run(vic_clock_struct vic_clock) {
     return 0;
 }
 
-int vic_cesm_final() {
-
+int
+vic_cesm_final()
+{
     // clean up
     vic_finalize();
 
     return 0;
 }
-
-

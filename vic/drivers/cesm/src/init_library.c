@@ -151,3 +151,99 @@ initialize_veg_con(veg_con_struct *veg_con)
         }
     }
 }
+
+/******************************************************************************
+ * @brief    Initialize x2l_data_struct.
+ *****************************************************************************/
+void
+initialize_x2l_data()
+{
+    extern x2l_data_struct *x2l_vic;
+    extern domain_struct    local_domain;
+
+    size_t                  i;
+
+    log_info("Setting all x2l fields to %f", MISSING);
+
+    for (i = 0; i < local_domain.ncells; i++) {
+        x2l_vic[i].x2l_Sa_z = MISSING;
+        x2l_vic[i].x2l_Sa_u = MISSING;
+        x2l_vic[i].x2l_Sa_v = MISSING;
+        x2l_vic[i].x2l_Sa_ptem = MISSING;
+        x2l_vic[i].x2l_Sa_shum = MISSING;
+        x2l_vic[i].x2l_Sa_pbot = MISSING;
+        x2l_vic[i].x2l_Sa_tbot = MISSING;
+        x2l_vic[i].x2l_Faxa_lwdn = MISSING;
+        x2l_vic[i].x2l_Faxa_rainc = MISSING;
+        x2l_vic[i].x2l_Faxa_rainl = MISSING;
+        x2l_vic[i].x2l_Faxa_snowc = MISSING;
+        x2l_vic[i].x2l_Faxa_snowl = MISSING;
+        x2l_vic[i].x2l_Faxa_swndr = MISSING;
+        x2l_vic[i].x2l_Faxa_swvdr = MISSING;
+        x2l_vic[i].x2l_Faxa_swndf = MISSING;
+        x2l_vic[i].x2l_Faxa_swvdf = MISSING;
+        x2l_vic[i].x2l_Sa_co2prog = MISSING;
+        x2l_vic[i].x2l_Sa_co2diag = MISSING;
+        x2l_vic[i].x2l_Faxa_bcphidry = MISSING;
+        x2l_vic[i].x2l_Faxa_bcphodry = MISSING;
+        x2l_vic[i].x2l_Faxa_bcphiwet = MISSING;
+        x2l_vic[i].x2l_Faxa_ocphidry = MISSING;
+        x2l_vic[i].x2l_Faxa_ocphodry = MISSING;
+        x2l_vic[i].x2l_Faxa_ocphiwet = MISSING;
+        x2l_vic[i].x2l_Faxa_dstwet1 = MISSING;
+        x2l_vic[i].x2l_Faxa_dstwet2 = MISSING;
+        x2l_vic[i].x2l_Faxa_dstwet3 = MISSING;
+        x2l_vic[i].x2l_Faxa_dstwet4 = MISSING;
+        x2l_vic[i].x2l_Faxa_dstdry1 = MISSING;
+        x2l_vic[i].x2l_Faxa_dstdry2 = MISSING;
+        x2l_vic[i].x2l_Faxa_dstdry3 = MISSING;
+        x2l_vic[i].x2l_Faxa_dstdry4 = MISSING;
+        x2l_vic[i].x2l_Flrr_flood = MISSING;
+    }
+}
+
+/******************************************************************************
+ * @brief    Initialize l2x_data_struct.
+ *****************************************************************************/
+void
+initialize_l2x_data()
+{
+    extern l2x_data_struct *l2x_vic;
+    extern domain_struct    local_domain;
+
+    size_t                  i;
+
+    log_info("Setting all l2x fields to %f", MISSING);
+
+    for (i = 0; i < local_domain.ncells; i++) {
+        l2x_vic[i].l2x_Sl_t = MISSING;
+        l2x_vic[i].l2x_Sl_tref = MISSING;
+        l2x_vic[i].l2x_Sl_qref = MISSING;
+        l2x_vic[i].l2x_Sl_avsdr = MISSING;
+        l2x_vic[i].l2x_Sl_anidr = MISSING;
+        l2x_vic[i].l2x_Sl_avsdf = MISSING;
+        l2x_vic[i].l2x_Sl_anidf = MISSING;
+        l2x_vic[i].l2x_Sl_snowh = MISSING;
+        l2x_vic[i].l2x_Sl_u10 = MISSING;
+        l2x_vic[i].l2x_Sl_ddvel = MISSING;
+        l2x_vic[i].l2x_Sl_fv = MISSING;
+        l2x_vic[i].l2x_Sl_ram1 = MISSING;
+        l2x_vic[i].l2x_Sl_soilw = MISSING;
+        l2x_vic[i].l2x_Sl_logz0 = MISSING;
+        l2x_vic[i].l2x_Fall_taux = MISSING;
+        l2x_vic[i].l2x_Fall_tauy = MISSING;
+        l2x_vic[i].l2x_Fall_lat = MISSING;
+        l2x_vic[i].l2x_Fall_sen = MISSING;
+        l2x_vic[i].l2x_Fall_lwup = MISSING;
+        l2x_vic[i].l2x_Fall_evap = MISSING;
+        l2x_vic[i].l2x_Fall_swnet = MISSING;
+        l2x_vic[i].l2x_Fall_fco2_lnd = MISSING;
+        l2x_vic[i].l2x_Fall_flxdst1 = MISSING;
+        l2x_vic[i].l2x_Fall_flxdst2 = MISSING;
+        l2x_vic[i].l2x_Fall_flxdst3 = MISSING;
+        l2x_vic[i].l2x_Fall_flxdst4 = MISSING;
+        l2x_vic[i].l2x_Fall_flxvoc = MISSING;
+        l2x_vic[i].l2x_Flrl_rofliq = MISSING;
+        l2x_vic[i].l2x_Flrl_rofice = MISSING;
+    }
+}

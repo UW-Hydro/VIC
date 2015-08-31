@@ -774,3 +774,41 @@ dt_seconds_to_time_units(unsigned short int time_units,
         log_err("Unknown Time Units Flag: %hu", time_units);
     }
 }
+
+/******************************************************************************
+ * @brief Convert Calendar string to integer
+ *****************************************************************************/
+unsigned short int
+calendar_from_char(char *cal_str)
+{
+    if (strcasecmp("STANDARD", cal_str) == 0) {
+        return CALENDAR_STANDARD;
+    }
+    else if (strcasecmp("GREGORIAN", cal_str) == 0) {
+        return CALENDAR_GREGORIAN;
+    }
+    else if (strcasecmp("PROLEPTIC_GREGORIAN", cal_str) == 0) {
+        return CALENDAR_PROLEPTIC_GREGORIAN;
+    }
+    else if (strcasecmp("NOLEAP", cal_str) == 0) {
+        return CALENDAR_NOLEAP;
+    }
+    else if (strcasecmp("365_DAY", cal_str) == 0) {
+        return CALENDAR_365_DAY;
+    }
+    else if (strcasecmp("360_DAY", cal_str) == 0) {
+        return CALENDAR_360_DAY;
+    }
+    else if (strcasecmp("JULIAN", cal_str) == 0) {
+        return CALENDAR_JULIAN;
+    }
+    else if (strcasecmp("ALL_LEAP", cal_str) == 0) {
+        return CALENDAR_ALL_LEAP;
+    }
+    else if (strcasecmp("366_DAY", cal_str) == 0) {
+        return CALENDAR_366_DAY;
+    }
+    else {
+        log_err("Unknown calendar specified: %s", cal_str);
+    }
+}

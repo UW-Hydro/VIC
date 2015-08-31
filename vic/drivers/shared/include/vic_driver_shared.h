@@ -96,6 +96,7 @@ typedef struct {
 double all_30_day_from_dmy(dmy_struct *dmy);
 double all_leap_from_dmy(dmy_struct *dmy);
 void calc_root_fractions(veg_con_struct *veg_con, soil_con_struct *soil_con);
+unsigned short int calendar_from_char(char *cal_str);
 void compute_treeline(atmos_data_struct *, dmy_struct *, double, double *,
                       bool *);
 void cmd_proc(int argc, char **argv, char *globalfilename);

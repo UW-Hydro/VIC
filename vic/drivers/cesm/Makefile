@@ -138,7 +138,7 @@ clean::
 	rm -f ${VICPATH}/src/*.o
 	rm -f core log
 	rm -f ${DRIVERPATH}/src/*~ ${SHAREDPATH}/src/*.~ ${VICPATH}/src/*~
-	rm -rf ${COMPLIB} ${COMPLIB}.dSYM
+	rm -rf ${COMPLIB}${EXT} ${COMPLIB}.dSYM
 	rm -f *.mod
 
 model: $(OBJS)

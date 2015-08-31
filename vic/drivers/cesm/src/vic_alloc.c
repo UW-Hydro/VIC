@@ -36,6 +36,8 @@ vic_alloc(void)
 {
     extern all_vars_struct    *all_vars;
     extern atmos_data_struct  *atmos;
+    extern x2l_data_struct    *x2l_vic;
+    extern l2x_data_struct    *l2x_vic;
     extern domain_struct       local_domain;
     extern option_struct       options;
     extern out_data_struct   **out_data;
@@ -47,6 +49,26 @@ vic_alloc(void)
     extern veg_lib_struct    **veg_lib;
     size_t                     i;
     size_t                     j;
+
+    // allocate memory for x2l_vic structure
+    x2l_vic = (x2l_data_struct *)
+              malloc((size_t) local_domain.ncells *
+                     sizeof(x2l_data_struct));
+    if (x2l_vic == NULL) {
+        log_err("Memory allocation error in vic_alloc().");
+    }
+    // initialize x2l data
+    initialize_x2l_data();
+
+    // allocate memory for l2x_vic structure
+    l2x_vic = (l2x_data_struct *)
+              malloc((size_t) local_domain.ncells *
+                     sizeof(l2x_data_struct));
+    if (l2x_vic == NULL) {
+        log_err("Memory allocation error in vic_alloc().");
+    }
+    // initialize l2x data
+    initialize_l2x_data();
 
     // allocate memory for atmos structure
     atmos = (atmos_data_struct *)

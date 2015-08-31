@@ -23,50 +23,62 @@
 !! this program; if not, write to the Free Software Foundation, Inc.,
 !! 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
-module vic_cesm_interface
+MODULE vic_cesm_interface
 
-! !PUBLIC TYPES:
-  implicit none
-  save
-  private ! except
+  ! !PUBLIC TYPES:
+  IMPLICIT NONE
+  SAVE
+  PRIVATE ! except
 
-!--------------------------------------------------------------------------
-! Public interfaces
-!--------------------------------------------------------------------------
+  !--------------------------------------------------------------------------
+  ! Public interfaces
+  !--------------------------------------------------------------------------
 
-  public :: vic_cesm_init
-  public :: vic_cesm_run
-  public :: vic_cesm_final
+  PUBLIC :: vic_cesm_init_mpi
+  PUBLIC :: vic_cesm_init
+  PUBLIC :: vic_cesm_run
+  PUBLIC :: vic_cesm_final
 
-    ! Init Interface
-    interface
-        integer(C_INT) function vic_cesm_init(vic_clock, &
-                                              vic_global_param_file) BIND(C, name='vic_cesm_init')
-        use, intrinsic :: ISO_C_BINDING
-        use vic_cesm_def_mod
-        implicit none
-          type(vic_clock_type), intent(inout) :: vic_clock
-          character(len=1, kind=C_CHAR), dimension(*) :: vic_global_param_file
-     end function vic_cesm_init
-   end interface
+  ! Init MPI Interface
+  INTERFACE
+     INTEGER(C_INT) FUNCTION vic_cesm_init_mpi(MPI_COMM_VIC_F) BIND(C, name='vic_cesm_init_mpi')
+       USE, INTRINSIC :: ISO_C_BINDING
+       USE vic_cesm_def_mod
+       IMPLICIT NONE
+       INTEGER, INTENT(inout) :: MPI_COMM_VIC_F
+     END FUNCTION vic_cesm_init_mpi
+  END INTERFACE
 
-    ! Run Interface
-    interface
-        integer(C_INT) function vic_cesm_run(vic_clock) BIND(C, name='vic_cesm_run')
-        use, intrinsic :: ISO_C_BINDING
-        use vic_cesm_def_mod
-        implicit none
-          type(vic_clock_type), intent(inout) :: vic_clock
-     end function vic_cesm_run
-   end interface
+  ! Init Interface
+  INTERFACE
+     INTEGER(C_INT) FUNCTION vic_cesm_init(vic_global_param_file, caseid, &
+                                           vclock) BIND(C, name='vic_cesm_init')
+       USE, INTRINSIC :: ISO_C_BINDING
+       USE vic_cesm_def_mod
+       IMPLICIT NONE
+       CHARACTER(len=1, kind=C_CHAR), DIMENSION(*), INTENT(in) :: vic_global_param_file
+       CHARACTER(len=1, kind=C_CHAR), DIMENSION(*), INTENT(in) :: caseid
+       TYPE(vic_clock), INTENT(in) :: vclock
+       END FUNCTION vic_cesm_init
+  END INTERFACE
 
-    ! Run Interface
-    interface
-        integer(C_INT) function vic_cesm_final() BIND(C, name='vic_cesm_final')
-        use, intrinsic :: ISO_C_BINDING
-        use vic_cesm_def_mod
-        implicit none
-     end function vic_cesm_final
-   end interface
+  ! Run Interface
+  INTERFACE
+     INTEGER(C_INT) FUNCTION vic_cesm_run(vclock) BIND(C, name='vic_cesm_run')
+       USE, INTRINSIC :: ISO_C_BINDING
+       USE vic_cesm_def_mod
+       IMPLICIT NONE
+       TYPE(vic_clock), INTENT(inout) :: vclock
+     END FUNCTION vic_cesm_run
+  END INTERFACE
 
-end module vic_cesm_interface
+  ! Finalize Interface
+  INTERFACE
+     INTEGER(C_INT) FUNCTION vic_cesm_final() BIND(C, name='vic_cesm_final')
+       USE, INTRINSIC :: ISO_C_BINDING
+       USE vic_cesm_def_mod
+       IMPLICIT NONE
+     END FUNCTION vic_cesm_final
+  END INTERFACE
+
+END MODULE vic_cesm_interface

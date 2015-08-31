@@ -116,30 +116,30 @@ vic_start(void)
 
     // broadcast global, option, param structures as well as global valies
     // such as NF and NR
-    status = MPI_Bcast(&NF, 1, MPI_UNSIGNED_LONG, 0, MPI_COMM_WORLD);
+    status = MPI_Bcast(&NF, 1, MPI_UNSIGNED_LONG, 0, MPI_COMM_VIC);
     if (status != MPI_SUCCESS) {
         log_err("MPI error in vic_start(): %d\n", status);
     }
 
-    status = MPI_Bcast(&NR, 1, MPI_UNSIGNED_LONG, 0, MPI_COMM_WORLD);
+    status = MPI_Bcast(&NR, 1, MPI_UNSIGNED_LONG, 0, MPI_COMM_VIC);
     if (status != MPI_SUCCESS) {
         log_err("MPI error in vic_start(): %d\n", status);
     }
 
     status = MPI_Bcast(&global_param, 1, mpi_global_struct_type,
-                       0, MPI_COMM_WORLD);
+                       0, MPI_COMM_VIC);
     if (status != MPI_SUCCESS) {
         log_err("MPI error in vic_start(): %d\n", status);
     }
 
     status = MPI_Bcast(&options, 1, mpi_option_struct_type,
-                       0, MPI_COMM_WORLD);
+                       0, MPI_COMM_VIC);
     if (status != MPI_SUCCESS) {
         log_err("MPI error in vic_start(): %d\n", status);
     }
 
     status = MPI_Bcast(&param, 1, mpi_param_struct_type,
-                       0, MPI_COMM_WORLD);
+                       0, MPI_COMM_VIC);
     if (status != MPI_SUCCESS) {
         log_err("MPI error in vic_start(): %d\n", status);
     }
@@ -148,7 +148,7 @@ vic_start(void)
 
     // First scatter the array sizes
     status = MPI_Scatter(mpi_map_local_array_sizes, 1, MPI_INT,
-                         &local_ncells, 1, MPI_INT, 0, MPI_COMM_WORLD);
+                         &local_ncells, 1, MPI_INT, 0, MPI_COMM_VIC);
     local_domain.ncells = (size_t) local_ncells;
     if (status != MPI_SUCCESS) {
         log_err("MPI error in vic_start(): %d\n", status);
@@ -185,7 +185,7 @@ vic_start(void)
                           mpi_location_struct_type,
                           local_domain.locations, local_domain.ncells,
                           mpi_location_struct_type,
-                          0, MPI_COMM_WORLD);
+                          0, MPI_COMM_VIC);
     if (status != MPI_SUCCESS) {
         log_err("MPI error in vic_start(): %d\n", status);
     }

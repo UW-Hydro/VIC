@@ -38,6 +38,7 @@ vic_force(void)
     extern size_t              NR;
     extern size_t              current;
     extern atmos_data_struct  *atmos;
+    extern x2l_data_struct    *x2l_vic;
     extern dmy_struct         *dmy;
     extern domain_struct       global_domain;
     extern domain_struct       local_domain;
@@ -50,109 +51,85 @@ vic_force(void)
     extern parameters_struct   param;
 
     double                     t_offset;
-    float                     *fvar = NULL;
     size_t                     i;
     size_t                     j;
     size_t                     v;
     int                        vidx;
-    size_t                     d3count[3];
-    size_t                     d3start[3];
 
-    // allocate memory for variables to be read
-    fvar = (float *) malloc(local_domain.ncells * sizeof(float));
-    if (fvar == NULL) {
-        log_err("Memory allocation error in vic_force().");
-    }
-
-    // for now forcing file is determined by the year
-    sprintf(filenames.forcing[0], "%s%4d.nc", filenames.f_path_pfx[0],
-            dmy[current].year);
-
-    // global_param.forceoffset[0] resets every year since the met file restarts
-    // every year
-    if (current > 1 && (dmy[current].year != dmy[current - 1].year)) {
-        global_param.forceoffset[0] = 0;
-    }
-
-    // only the time slice changes for the met file reads. The rest is constant
-    d3start[1] = 0;
-    d3start[2] = 0;
-    d3count[0] = 1;
-    d3count[1] = global_domain.n_ny;
-    d3count[2] = global_domain.n_nx;
-
-    // Air temperature: tas
+    // Air temperature
     for (j = 0; j < NF; j++) {
-        d3start[0] = global_param.forceoffset[0] + j;
-        get_scatter_nc_field_float(filenames.forcing[0], "tas",
-                                   d3start, d3count, fvar);
         for (i = 0; i < local_domain.ncells; i++) {
-            atmos[i].air_temp[j] = (double) fvar[i];
+            // CESM units: K
+            // VIC units: C
+            atmos[i].air_temp[j] = x2l_vic[i].x2l_Sa_tbot - CONST_TKFRZ;
         }
     }
 
-    // Precipitation: prcp
+    // Precipitation
     for (j = 0; j < NF; j++) {
-        d3start[0] = global_param.forceoffset[0] + j;
-        get_scatter_nc_field_float(filenames.forcing[0], "prcp",
-                                   d3start, d3count, fvar);
         for (i = 0; i < local_domain.ncells; i++) {
-            atmos[i].prec[j] = (double) fvar[i];
+            // CESM units: km m-2 s-1
+            // VIC units: mm / timestep
+            // Note: VIC does not use liquid/solid precip partitioning
+            atmos[i].prec[j] = (x2l_vic[i].x2l_Faxa_rainc +
+                                x2l_vic[i].x2l_Faxa_rainl +
+                                x2l_vic[i].x2l_Faxa_snowc +
+                                x2l_vic[i].x2l_Faxa_snowl) *
+                               global_param.snow_dt;
         }
     }
 
-    // Downward solar radiation: dswrf
+    // Downward solar radiation
     for (j = 0; j < NF; j++) {
-        d3start[0] = global_param.forceoffset[0] + j;
-        get_scatter_nc_field_float(filenames.forcing[0], "dswrf",
-                                   d3start, d3count, fvar);
         for (i = 0; i < local_domain.ncells; i++) {
-            atmos[i].shortwave[j] = (double) fvar[i];
+            // CESM units: W m-2
+            // VIC units: W m-2
+            // Note: VIC does not use partitioned shortwave fluxes.
+            atmos[i].shortwave[j] = (x2l_vic[i].x2l_Faxa_swndr +
+                                     x2l_vic[i].x2l_Faxa_swvdr +
+                                     x2l_vic[i].x2l_Faxa_swndf +
+                                     x2l_vic[i].x2l_Faxa_swvdf);
         }
     }
 
-    // Downward longwave radiation: dlwrf
+    // Downward longwave radiation
     for (j = 0; j < NF; j++) {
-        d3start[0] = global_param.forceoffset[0] + j;
-        get_scatter_nc_field_float(filenames.forcing[0], "dlwrf",
-                                   d3start, d3count, fvar);
         for (i = 0; i < local_domain.ncells; i++) {
-            atmos[i].longwave[j] = (double) fvar[i];
+            // CESM units: W m-2
+            // VIC units: W m-2
+            atmos[i].longwave[j] = x2l_vic[i].x2l_Faxa_lwdn;
         }
     }
 
-    // Wind speed: wind
+    // Wind speed
     for (j = 0; j < NF; j++) {
-        d3start[0] = global_param.forceoffset[0] + j;
-        get_scatter_nc_field_float(filenames.forcing[0], "wind",
-                                   d3start, d3count, fvar);
         for (i = 0; i < local_domain.ncells; i++) {
-            atmos[i].wind[j] = (double) fvar[i];
+            // CESM units: m s-1
+            // VIC units: m s-1
+            // Note: VIC does not use partitioned wind speeds
+            atmos[i].wind[j] = sqrt(pow(x2l_vic[i].x2l_Sa_u, 2) +
+                                    pow(x2l_vic[i].x2l_Sa_v, 2));
         }
     }
 
-    // Specific humidity: shum
+    // Pressure
     for (j = 0; j < NF; j++) {
-        d3start[0] = global_param.forceoffset[0] + j;
-        get_scatter_nc_field_float(filenames.forcing[0], "shum",
-                                   d3start, d3count, fvar);
         for (i = 0; i < local_domain.ncells; i++) {
-            atmos[i].vp[j] = (double) fvar[i];
+            // CESM units: Pa
+            // VIC units: kPa
+            atmos[i].pressure[j] = x2l_vic[i].x2l_Sa_pbot / PA_PER_KPA;
         }
     }
 
-    // Pressure: pressure
+    // Vapor Pressure
     for (j = 0; j < NF; j++) {
-        d3start[0] = global_param.forceoffset[0] + j;
-        get_scatter_nc_field_float(filenames.forcing[0], "pres",
-                                   d3start, d3count, fvar);
         for (i = 0; i < local_domain.ncells; i++) {
-            atmos[i].pressure[j] = (double) fvar[i];
+            // CESM units: shum is specific humidity (g/g)
+            // VIC units: kPa
+            atmos[i].vp[j] = q_to_vp(x2l_vic[i].x2l_Sa_shum,
+                                     atmos[i].pressure[j]);
         }
     }
-
-    // Update the offset counter
-    global_param.forceoffset[0] += NF;
 
     if (options.SNOW_BAND > 1) {
         log_err("SNOW_BAND not implemented in vic_force()");
@@ -160,17 +137,10 @@ vic_force(void)
     else {
         t_offset = 0;
     }
+
     // Convert forcings into what we need and calculate missing ones
     for (i = 0; i < local_domain.ncells; i++) {
         for (j = 0; j < NF; j++) {
-            // temperature in CONST_TKFRZ
-            atmos[i].air_temp[j] -= CONST_TKFRZ;
-            // precipitation in mm/period
-            atmos[i].prec[j] *= global_param.snow_dt;
-            // pressure in kPa
-            atmos[i].pressure[j] /= PA_PER_KPA;
-            // vapor pressure in kPa (we read specific humidity in kg/kg)
-            atmos[i].vp[j] = q_to_vp(atmos[i].vp[j], atmos[i].pressure[j]);
             // vapor pressure deficit
             atmos[i].vpd[j] = svp(atmos[i].air_temp[j]) - atmos[i].vp[j];
             // photosynthetically active radiation
@@ -232,10 +202,6 @@ vic_force(void)
             }
         }
     }
-
-
-    // cleanup
-    free(fvar);
 }
 
 /******************************************************************************

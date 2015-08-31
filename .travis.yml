@@ -12,7 +12,7 @@ before_install:
     - sudo apt-get install -y libmpich2-dev
     - sudo apt-get install -y libopenmpi-dev
     - sudo apt-get install -y openmpi-bin
-    - gfortran
+    - sudo apt-get install -y gfortran
 script:
     - make full -C vic/drivers/classic/
     - make full -C vic/drivers/image/

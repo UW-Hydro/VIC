@@ -35,7 +35,7 @@ all_vars_struct    *all_vars = NULL;
 atmos_data_struct  *atmos = NULL;
 x2l_data_struct    *x2l_vic = NULL;
 l2x_data_struct    *l2x_vic = NULL;
-dmy_struct         *dmy = NULL;
+dmy_struct          dmy;
 filenames_struct    filenames;
 filep_struct        filep;
 domain_struct       global_domain;
@@ -64,8 +64,11 @@ veg_con_struct    **veg_con = NULL;
 veg_hist_struct   **veg_hist = NULL;
 veg_lib_struct    **veg_lib = NULL;
 
+/******************************************************************************
+ * @brief    Initialize VIC MPI communicator
+ *****************************************************************************/
 int
-vic_cesm_init_mpi(MPI_Fint MPI_COMM_VIC_F)
+vic_cesm_init_mpi(int MPI_COMM_VIC_F)
 {
     // Set the VIC MPI communicator
     MPI_COMM_VIC = MPI_Comm_f2c(MPI_COMM_VIC_F);
@@ -73,11 +76,17 @@ vic_cesm_init_mpi(MPI_Fint MPI_COMM_VIC_F)
     return 0;
 }
 
+/******************************************************************************
+ * @brief    Initialization function for CESM driver
+ *****************************************************************************/
 int
 vic_cesm_init(char     *vic_global_param_file,
               char     *caseid,
+              char     *runtype,
               vic_clock vclock)
 {
+    unsigned short int runtype_int;
+
     // Initialize Log Destination
     initialize_log();
 
@@ -98,15 +107,20 @@ vic_cesm_init(char     *vic_global_param_file,
         global_param.dt = (double) vclock.timestep;
         global_param.model_steps_per_day =
             (int) ((double) SEC_PER_DAY / global_param.dt);
+
         // Start date/time
         global_param.startyear = vclock.current_year;
         global_param.startmonth = vclock.current_month;
         global_param.startday = vclock.current_day;
         global_param.startsec = vclock.current_dayseconds;
+        global_param.nrecs = 1;
 
         // Calendar
         global_param.calendar = calendar_from_char(vclock.calendar);
     }
+
+    // Initialize time
+    initialize_cesm_time();
 
     // allocate memory
     vic_alloc();
@@ -115,7 +129,7 @@ vic_cesm_init(char     *vic_global_param_file,
     vic_init();
 
     // restore model state, either using a cold start or from a restart file
-    vic_restore();
+    vic_restore(runtype);
 
     // initialize output structures
     vic_init_output();
@@ -123,11 +137,18 @@ vic_cesm_init(char     *vic_global_param_file,
     return 0;
 }
 
+/******************************************************************************
+ * @brief    Run function for CESM driver
+ *****************************************************************************/
 int
-vic_cesm_run(vic_clock vic_clock)
+vic_cesm_run(vic_clock vclock)
 {
     // reset l2x fields
     initialize_l2x_data();
+
+    // advance the clock
+    advance_time();
+    assert_time_insync(&vclock, &dmy);
 
     // read forcing data
     vic_force();
@@ -139,13 +160,19 @@ vic_cesm_run(vic_clock vic_clock)
     vic_write();
 
     // if save:
-    if (vic_clock.state_flag) {
+    if (vclock.state_flag) {
         vic_store();
     }
+
+    // reset x2l fields
+    initialize_x2l_data();
 
     return 0;
 }
 
+/******************************************************************************
+ * @brief    Finalize function for CESM driver
+ *****************************************************************************/
 int
 vic_cesm_final()
 {

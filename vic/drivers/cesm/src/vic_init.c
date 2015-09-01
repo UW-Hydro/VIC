@@ -36,7 +36,6 @@ vic_init(void)
 {
     extern all_vars_struct    *all_vars;
     extern size_t              current;
-    extern dmy_struct         *dmy;
     extern domain_struct       global_domain;
     extern domain_struct       local_domain;
     extern option_struct       options;
@@ -66,9 +65,6 @@ vic_init(void)
     size_t                     d3start[3];
     size_t                     d4count[4];
     size_t                     d4start[4];
-
-    // make_dmy()
-    dmy = make_dmy(&global_param);
 
     // allocate memory for variables to be read
     dvar = (double *) malloc(local_domain.ncells *

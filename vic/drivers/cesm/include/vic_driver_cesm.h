@@ -34,9 +34,11 @@
 #include <vic_cesm_def.h>
 
 void add_nveg_to_global_domain(char *nc_name, domain_struct *global_domain);
+void advance_time(void);
 void alloc_atmos(atmos_data_struct *atmos);
 void alloc_veg_hist(veg_hist_struct *veg_hist);
 double air_density(double t, double p);
+void assert_time_insync(vic_clock *vclock, dmy_struct *dmy);
 double average(double *ar, size_t n);
 out_data_struct *create_output_list(void);
 void free_atmos(atmos_data_struct *atmos);
@@ -53,6 +55,7 @@ int get_nc_field_int(char *nc_name, char *var_name, size_t *start,
                      size_t *count, int *var);
 void init_output_list(out_data_struct *out_data, int write, char *format,
                       int type, double mult);
+void initialize_cesm_time(void);
 void initialize_domain(domain_struct *domain);
 void initialize_energy(energy_bal_struct **energy, size_t nveg);
 void initialize_history_file(nc_file_struct *nc);
@@ -83,10 +86,13 @@ int put_nc_field_int(char *nc_name, bool *open, int *nc_id, int fillval,
                      size_t *count, int *var);
 void print_x2l_data(x2l_data_struct *x2l);
 double q_to_vp(double q, double p);
+void read_rpointer_file(char *fname);
 void sprint_location(char *str, location_struct *loc);
+unsigned short int start_type_from_char(char *start_str);
 void vic_alloc(void);
-int vic_cesm_init_mpi(MPI_Fint MPI_COMM_VIC_F);
-int vic_cesm_init(char *vic_global_param_file, char *caseid, vic_clock vclock);
+int vic_cesm_init_mpi(int MPI_COMM_VIC_F);
+int vic_cesm_init(char *vic_global_param_file, char *caseid, char *runtype,
+                  vic_clock vclock);
 int vic_cesm_final(void);
 int vic_cesm_run(vic_clock vclock);
 void vic_nc_info(nc_file_struct *nc_hist_file, out_data_struct **out_data,
@@ -96,11 +102,12 @@ void vic_force(void);
 void vic_cesm_run_model(void);
 void vic_init(void);
 void vic_init_output(void);
-void vic_restore(void);
+void vic_restore(char *runtype_str);
 void vic_start(void);
 void vic_store(void);
 void vic_write(void);
 char will_it_snow(double *t, double t_offset, double max_snow_temp,
                   double *prcp, size_t n);
+void write_rpointer_file(char *fname);
 
 #endif

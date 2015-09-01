@@ -111,6 +111,7 @@ MODULE vic_cesm_def_mod
         REAL(C_DOUBLE) :: x2l_Faxa_dstdry3  !<flux: Size 3 dust -- dry deposition
         REAL(C_DOUBLE) :: x2l_Faxa_dstdry4  !<flux: Size 4 dust -- dry deposition
         REAL(C_DOUBLE) :: x2l_Flrr_flood  !<rtm->lnd rof (flood) flux
+        LOGICAL(C_BOOL) :: x2l_vars_set  !< x2l set flag
     END TYPE x2l_data_struct
 
 
@@ -147,6 +148,7 @@ MODULE vic_cesm_def_mod
         REAL(C_DOUBLE) :: l2x_Fall_flxvoc  !< MEGAN fluxes
         REAL(C_DOUBLE) :: l2x_Flrl_rofliq  !< lnd->rtm input fluxes
         REAL(C_DOUBLE) :: l2x_Flrl_rofice  !< lnd->rtm input fluxes
+        LOGICAL(C_BOOL) :: l2x_vars_set  !< l2x set flag
     END TYPE l2x_data_struct
 
 END MODULE vic_cesm_def_mod

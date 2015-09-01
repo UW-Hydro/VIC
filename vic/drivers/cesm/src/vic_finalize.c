@@ -38,7 +38,7 @@ vic_finalize(void)
     extern size_t             *mpi_map_mapping_array;
     extern all_vars_struct    *all_vars;
     extern atmos_data_struct  *atmos;
-    extern dmy_struct         *dmy;
+    extern dmy_struct          dmy;
     extern domain_struct       global_domain;
     extern domain_struct       local_domain;
     extern filep_struct        filep;
@@ -105,7 +105,6 @@ vic_finalize(void)
     free(out_data);
     free(save_data);
     free(local_domain.locations);
-    free(dmy);
     if (mpi_rank == 0) {
         free(filter_active_cells);
         free(global_domain.locations);

@@ -45,19 +45,20 @@ MODULE vic_cesm_interface
        USE, INTRINSIC :: ISO_C_BINDING
        USE vic_cesm_def_mod
        IMPLICIT NONE
-       INTEGER, INTENT(inout) :: MPI_COMM_VIC_F
+       INTEGER(C_INT), INTENT(inout) :: MPI_COMM_VIC_F
      END FUNCTION vic_cesm_init_mpi
   END INTERFACE
 
   ! Init Interface
   INTERFACE
      INTEGER(C_INT) FUNCTION vic_cesm_init(vic_global_param_file, caseid, &
-                                           vclock) BIND(C, name='vic_cesm_init')
+                                           runtype, vclock) BIND(C, name='vic_cesm_init')
        USE, INTRINSIC :: ISO_C_BINDING
        USE vic_cesm_def_mod
        IMPLICIT NONE
        CHARACTER(len=1, kind=C_CHAR), DIMENSION(*), INTENT(in) :: vic_global_param_file
        CHARACTER(len=1, kind=C_CHAR), DIMENSION(*), INTENT(in) :: caseid
+       CHARACTER(len=1, kind=C_CHAR), DIMENSION(*), INTENT(in) :: runtype
        TYPE(vic_clock), INTENT(in) :: vclock
        END FUNCTION vic_cesm_init
   END INTERFACE

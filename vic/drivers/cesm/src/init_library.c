@@ -199,6 +199,7 @@ initialize_x2l_data()
         x2l_vic[i].x2l_Faxa_dstdry3 = MISSING;
         x2l_vic[i].x2l_Faxa_dstdry4 = MISSING;
         x2l_vic[i].x2l_Flrr_flood = MISSING;
+        x2l_vic[i].x2l_vars_set = false;
     }
 }
 
@@ -245,5 +246,6 @@ initialize_l2x_data()
         l2x_vic[i].l2x_Fall_flxvoc = MISSING;
         l2x_vic[i].l2x_Flrl_rofliq = MISSING;
         l2x_vic[i].l2x_Flrl_rofice = MISSING;
+        l2x_vic[i].l2x_vars_set = false;
     }
 }

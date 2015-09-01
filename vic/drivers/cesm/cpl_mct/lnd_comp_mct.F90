@@ -169,7 +169,7 @@ CONTAINS
 
     !--- point/get data from cdata datatype
     CALL seq_cdata_setptrs(cdata, ID=LNDID, mpicom=mpicom_lnd, &
-         gsMap=GSMap_lnd, dom=dom_lnd, infodata=infodata)
+         g sMap=GSMap_lnd, dom=dom_lnd, infodata=infodata)
     CALL MPI_COMM_RANK(mpicom_lnd, mytask, ierr)
 
     !--- copy/hand the mpicom from the driver to the vic model
@@ -202,11 +202,11 @@ CONTAINS
 
     !--- get some clock info
     CALL seq_timemgr_EClockGetData(EClock, &
-         curr_yr=vic_clock%current_year, &
-         curr_mon=vic_clock%current_month, &
-         curr_day=vic_clock%current_day, &
-         curr_tod=vic_clock%current_dayseconds, &
-         calendar=calendar)
+         c urr_yr=vic_clock%current_year, &
+         c urr_mon=vic_clock%current_month, &
+         c urr_day=vic_clock%current_day, &
+         c urr_tod=vic_clock%current_dayseconds, &
+         c alendar=calendar)
     CALL seq_timemgr_EClockGetData(EClock, dtime=dtime)
 
     WRITE(iulog, *) 'EClock current_year = ', vic_clock%current_year
@@ -224,10 +224,7 @@ CONTAINS
     ENDIF
 
     !--- Call the VIC init function
-    errno = vic_cesm_init(vic_clock, &
-         vic_domain, &
-         vic_global_param_file, &
-         caseid)
+    errno = vic_cesm_init(vic_global_param_file, caseid, starttype, vclock)
     IF (errno /= 0) THEN
        CALL shr_sys_abort(subname//':: vic_cesm_init returned a errno /= 0')
     ENDIF
@@ -251,7 +248,7 @@ CONTAINS
 
     !--- initialize the dom, data in the dom is just local data of size lsize
     CALL mct_gGrid_init(GGrid=dom_lnd, CoordChars=TRIM(seq_flds_dom_coord), &
-         OtherChars=TRIM(seq_flds_dom_other), lsize=lsize)
+         O therChars=TRIM(seq_flds_dom_other), lsize=lsize)
     CALL mct_gsMap_orderedPoints(gsMap_lnd, mytask, idata)
     CALL mct_gGrid_importIAttr(dom_lnd, 'GlobGridNum', idata, lsize)
     CALL mct_gGrid_importRattr(dom_lnd, 'lon', lon_data, lsize)
@@ -274,8 +271,8 @@ CONTAINS
     !--- fill some scalar export data
 
     CALL seq_infodata_PutData(cdata%infodata, &
-         lnd_present=.TRUE., lnd_prognostic=.TRUE., &
-         sno_present=.FALSE., sno_prognostic=.FALSE.)
+         l nd_present=.TRUE., lnd_prognostic=.TRUE., &
+         s no_present=.FALSE., sno_prognostic=.FALSE.)
     CALL seq_infodata_PutData(infodata, lnd_nx = nx_global, lnd_ny = ny_global)
 
     !--- set share log unit back to generic one
@@ -326,8 +323,8 @@ CONTAINS
 
     !--- get time information
     CALL seq_timemgr_EClockGetData(EClock, &
-         curr_ymd=ymd, curr_tod=tod_sync,  &
-         curr_yr=yr_sync, curr_mon=mon_sync, curr_day=day_sync)
+         c urr_ymd=ymd, curr_tod=tod_sync,  &
+         c urr_yr=yr_sync, curr_mon=mon_sync, curr_day=day_sync)
     WRITE(iulog, *) 'EClock run', ymd, tod_sync, yr_sync, mon_sync, day_sync
 
     !--- get time of next radiation calc for time dependent albedo calc
@@ -346,7 +343,7 @@ CONTAINS
     CALL lnd_export_mct(l2x)
 
     !--- verify driver and vic are in sync, ymd and tod are vic yyyymmdd and sec
-    IF (.NOT. seq_timemgr_EClockDateInSync(EClock, ymd, tod))THEN
+    IF (.NOT. seq_timemgr_EClockDateInSync(EClock, ymd, tod)) THEN
        CALL seq_timemgr_EclockGetData(EClock, curr_ymd=ymd_sync, curr_tod=tod_sync)
        WRITE(iulog, *) ' vic ymd=', ymd     , '  clm tod= ', tod
        WRITE(iulog, *) 'sync ymd=', ymd_sync, ' sync tod= ', tod_sync
@@ -419,51 +416,56 @@ CONTAINS
     ! Copy values to attribute vector
     ! Sign convension and units handeld in VIC driver
     DO i = 1, lsize
-      l2x%rAttr(index_l2x_Sl_t, i) = l2x_vic_ptr(i)%l2x_Sl_t
-      l2x%rAttr(index_l2x_Sl_tref, i) = l2x_vic_ptr(i)%l2x_Sl_tref
-      l2x%rAttr(index_l2x_Sl_qref, i) = l2x_vic_ptr(i)%l2x_Sl_qref
-      l2x%rAttr(index_l2x_Sl_avsdr, i) = l2x_vic_ptr(i)%l2x_Sl_avsdr
-      l2x%rAttr(index_l2x_Sl_anidr, i) = l2x_vic_ptr(i)%l2x_Sl_anidr
-      l2x%rAttr(index_l2x_Sl_avsdf, i) = l2x_vic_ptr(i)%l2x_Sl_avsdf
-      l2x%rAttr(index_l2x_Sl_anidf, i) = l2x_vic_ptr(i)%l2x_Sl_anidf
-      l2x%rAttr(index_l2x_Sl_snowh, i) = l2x_vic_ptr(i)%l2x_Sl_snowh
-      l2x%rAttr(index_l2x_Sl_u10, i) = l2x_vic_ptr(i)%l2x_Sl_u10
-      l2x%rAttr(index_l2x_Sl_ddvel, i) = l2x_vic_ptr(i)%l2x_Sl_ddvel
-      l2x%rAttr(index_l2x_Sl_soilw, i) = l2x_vic_ptr(i)%l2x_Sl_soilw
-      l2x%rAttr(index_l2x_Sl_logz0, i) = l2x_vic_ptr(i)%l2x_Sl_logz0
-      l2x%rAttr(index_l2x_Fall_taux, i) = l2x_vic_ptr(i)%l2x_Fall_taux
-      l2x%rAttr(index_l2x_Fall_tauy, i) = l2x_vic_ptr(i)%l2x_Fall_tauy
-      l2x%rAttr(index_l2x_Fall_lat, i) = l2x_vic_ptr(i)%l2x_Fall_lat
-      l2x%rAttr(index_l2x_Fall_sen, i) = l2x_vic_ptr(i)%l2x_Fall_sen
-      l2x%rAttr(index_l2x_Fall_lwup, i) = l2x_vic_ptr(i)%l2x_Fall_lwup
-      l2x%rAttr(index_l2x_Fall_evap, i) = l2x_vic_ptr(i)%l2x_Fall_evap
-      l2x%rAttr(index_l2x_Fall_swnet, i) = l2x_vic_ptr(i)%l2x_Fall_swnet
-      l2x%rAttr(index_l2x_Fall_flxvoc, i) = l2x_vic_ptr(i)%l2x_Fall_flxvoc
-      l2x%rAttr(index_l2x_Flrl_rofliq, i) = l2x_vic_ptr(i)%l2x_Flrl_rofliq
-      l2x%rAttr(index_l2x_Flrl_rofice, i) = l2x_vic_ptr(i)%l2x_Flrl_rofice
+       l2x%rAttr(index_l2x_Sl_t, i) = l2x_vic_ptr(i)%l2x_Sl_t
+       l2x%rAttr(index_l2x_Sl_tref, i) = l2x_vic_ptr(i)%l2x_Sl_tref
+       l2x%rAttr(index_l2x_Sl_qref, i) = l2x_vic_ptr(i)%l2x_Sl_qref
+       l2x%rAttr(index_l2x_Sl_avsdr, i) = l2x_vic_ptr(i)%l2x_Sl_avsdr
+       l2x%rAttr(index_l2x_Sl_anidr, i) = l2x_vic_ptr(i)%l2x_Sl_anidr
+       l2x%rAttr(index_l2x_Sl_avsdf, i) = l2x_vic_ptr(i)%l2x_Sl_avsdf
+       l2x%rAttr(index_l2x_Sl_anidf, i) = l2x_vic_ptr(i)%l2x_Sl_anidf
+       l2x%rAttr(index_l2x_Sl_snowh, i) = l2x_vic_ptr(i)%l2x_Sl_snowh
+       l2x%rAttr(index_l2x_Sl_u10, i) = l2x_vic_ptr(i)%l2x_Sl_u10
+       l2x%rAttr(index_l2x_Sl_ddvel, i) = l2x_vic_ptr(i)%l2x_Sl_ddvel
+       l2x%rAttr(index_l2x_Sl_soilw, i) = l2x_vic_ptr(i)%l2x_Sl_soilw
+       l2x%rAttr(index_l2x_Sl_logz0, i) = l2x_vic_ptr(i)%l2x_Sl_logz0
+       l2x%rAttr(index_l2x_Fall_taux, i) = l2x_vic_ptr(i)%l2x_Fall_taux
+       l2x%rAttr(index_l2x_Fall_tauy, i) = l2x_vic_ptr(i)%l2x_Fall_tauy
+       l2x%rAttr(index_l2x_Fall_lat, i) = l2x_vic_ptr(i)%l2x_Fall_lat
+       l2x%rAttr(index_l2x_Fall_sen, i) = l2x_vic_ptr(i)%l2x_Fall_sen
+       l2x%rAttr(index_l2x_Fall_lwup, i) = l2x_vic_ptr(i)%l2x_Fall_lwup
+       l2x%rAttr(index_l2x_Fall_evap, i) = l2x_vic_ptr(i)%l2x_Fall_evap
+       l2x%rAttr(index_l2x_Fall_swnet, i) = l2x_vic_ptr(i)%l2x_Fall_swnet
+       l2x%rAttr(index_l2x_Fall_flxvoc, i) = l2x_vic_ptr(i)%l2x_Fall_flxvoc
+       l2x%rAttr(index_l2x_Flrl_rofliq, i) = l2x_vic_ptr(i)%l2x_Flrl_rofliq
+       l2x%rAttr(index_l2x_Flrl_rofice, i) = l2x_vic_ptr(i)%l2x_Flrl_rofice
 
        !--- optional fields ---
        IF (index_l2x_Fall_fco2_lnd /= 0) THEN
-         l2x%rAttr(index_l2x_Fall_fco2_lnd, i) = l2x_vic_ptr%l2x_Fall_fco2_lnd(i)
+          l2x%rAttr(index_l2x_Fall_fco2_lnd, i) = l2x_vic_ptr%l2x_Fall_fco2_lnd(i)
        ENDIF
        IF (index_l2x_Sl_fv /= 0) THEN
-         l2x%rAttr(index_l2x_Sl_fv, i) = l2x_vic_ptr%l2x_Sl_fv(i)
+          l2x%rAttr(index_l2x_Sl_fv, i) = l2x_vic_ptr%l2x_Sl_fv(i)
        ENDIF
        IF (index_l2x_Sl_ram1 /= 0) THEN
-         l2x%rAttr(index_l2x_Sl_ram1, i) = l2x_vic_ptr%l2x_Sl_ram1(i)
+          l2x%rAttr(index_l2x_Sl_ram1, i) = l2x_vic_ptr%l2x_Sl_ram1(i)
        ENDIF
        IF (index_l2x_Fall_flxdst1 /= 0) THEN
-         l2x%rAttr(index_l2x_Fall_flxdst1, i) = l2x_vic_ptr%l2x_Fall_flxdst1(i)
+          l2x%rAttr(index_l2x_Fall_flxdst1, i) = l2x_vic_ptr%l2x_Fall_flxdst1(i)
        ENDIF
        IF (index_l2x_Fall_flxdst2 /= 0) THEN
-         l2x%rAttr(index_l2x_Fall_flxdst2, i) = l2x_vic_ptr%l2x_Fall_flxdst2(i)
+          l2x%rAttr(index_l2x_Fall_flxdst2, i) = l2x_vic_ptr%l2x_Fall_flxdst2(i)
        ENDIF
        IF (index_l2x_Fall_flxdst3 /= 0) THEN
-         l2x%rAttr(index_l2x_Fall_flxdst3, i) = l2x_vic_ptr%l2x_Fall_flxdst3(i)
+          l2x%rAttr(index_l2x_Fall_flxdst3, i) = l2x_vic_ptr%l2x_Fall_flxdst3(i)
        ENDIF
        IF (index_l2x_Fall_flxdst4 /= 0) THEN
-         l2x%rAttr(index_l2x_Fall_flxdst4, i) = l2x_vic_ptr%l2x_Fall_flxdst4(i)
+          l2x%rAttr(index_l2x_Fall_flxdst4, i) = l2x_vic_ptr%l2x_Fall_flxdst4(i)
        ENDIF
+
+       IF (.NOT. l2x_vic_ptr(i)%l2x_vars_set) THEN
+          shr_sys_abort(subname//':: l2x export vars not set')
+       ENDIF
+
     END DO
 
   END SUBROUTINE lnd_export_mct
@@ -484,45 +486,48 @@ CONTAINS
     INTEGER  :: i, lsize
 
     DO i = 1, lsize
-      x2l_vic_ptr(i)%x2l_Sa_z = x2l%rAttr(index_x2l_Sa_z, i)
-      x2l_vic_ptr(i)%x2l_Sa_u = x2l%rAttr(index_x2l_Sa_u, i)
-      x2l_vic_ptr(i)%x2l_Sa_v = x2l%rAttr(index_x2l_Sa_v, i)
-      x2l_vic_ptr(i)%x2l_Sa_ptem = x2l%rAttr(index_x2l_Sa_ptem, i)
-      x2l_vic_ptr(i)%x2l_Sa_shum = x2l%rAttr(index_x2l_Sa_shum, i)
-      x2l_vic_ptr(i)%x2l_Sa_pbot = x2l%rAttr(index_x2l_Sa_pbot, i)
-      x2l_vic_ptr(i)%x2l_Sa_tbot = x2l%rAttr(index_x2l_Sa_tbot, i)
-      x2l_vic_ptr(i)%x2l_Faxa_lwdn = x2l%rAttr(index_x2l_Faxa_lwdn, i)
-      x2l_vic_ptr(i)%x2l_Faxa_rainc = x2l%rAttr(index_x2l_Faxa_rainc, i)
-      x2l_vic_ptr(i)%x2l_Faxa_rainl = x2l%rAttr(index_x2l_Faxa_rainl, i)
-      x2l_vic_ptr(i)%x2l_Faxa_snowc = x2l%rAttr(index_x2l_Faxa_snowc, i)
-      x2l_vic_ptr(i)%x2l_Faxa_snowl = x2l%rAttr(index_x2l_Faxa_snowl, i)
-      x2l_vic_ptr(i)%x2l_Faxa_swndr = x2l%rAttr(index_x2l_Faxa_swndr, i)
-      x2l_vic_ptr(i)%x2l_Faxa_swvdr = x2l%rAttr(index_x2l_Faxa_swvdr, i)
-      x2l_vic_ptr(i)%x2l_Faxa_swndf = x2l%rAttr(index_x2l_Faxa_swndf, i)
-      x2l_vic_ptr(i)%x2l_Faxa_swvdf = x2l%rAttr(index_x2l_Faxa_swvdf, i)
-      x2l_vic_ptr(i)%x2l_Faxa_bcphidry = x2l%rAttr(index_x2l_Faxa_bcphidry, i)
-      x2l_vic_ptr(i)%x2l_Faxa_bcphodry = x2l%rAttr(index_x2l_Faxa_bcphodry, i)
-      x2l_vic_ptr(i)%x2l_Faxa_bcphiwet = x2l%rAttr(index_x2l_Faxa_bcphiwet, i)
-      x2l_vic_ptr(i)%x2l_Faxa_ocphidry = x2l%rAttr(index_x2l_Faxa_ocphidry, i)
-      x2l_vic_ptr(i)%x2l_Faxa_ocphodry = x2l%rAttr(index_x2l_Faxa_ocphodry, i)
-      x2l_vic_ptr(i)%x2l_Faxa_ocphiwet = x2l%rAttr(index_x2l_Faxa_ocphiwet, i)
-      x2l_vic_ptr(i)%x2l_Faxa_dstwet1 = x2l%rAttr(index_x2l_Faxa_dstwet1, i)
-      x2l_vic_ptr(i)%x2l_Faxa_dstwet2 = x2l%rAttr(index_x2l_Faxa_dstwet2, i)
-      x2l_vic_ptr(i)%x2l_Faxa_dstwet3 = x2l%rAttr(index_x2l_Faxa_dstwet3, i)
-      x2l_vic_ptr(i)%x2l_Faxa_dstwet4 = x2l%rAttr(index_x2l_Faxa_dstwet4, i)
-      x2l_vic_ptr(i)%x2l_Faxa_dstdry1 = x2l%rAttr(index_x2l_Faxa_dstdry1, i)
-      x2l_vic_ptr(i)%x2l_Faxa_dstdry2 = x2l%rAttr(index_x2l_Faxa_dstdry2, i)
-      x2l_vic_ptr(i)%x2l_Faxa_dstdry3 = x2l%rAttr(index_x2l_Faxa_dstdry3, i)
-      x2l_vic_ptr(i)%x2l_Faxa_dstdry4 = x2l%rAttr(index_x2l_Faxa_dstdry4, i)
-      x2l_vic_ptr(i)%x2l_Flrr_flood = x2l%rAttr(index_x2l_Flrr_flood, i)
+       x2l_vic_ptr(i)%x2l_Sa_z = x2l%rAttr(index_x2l_Sa_z, i)
+       x2l_vic_ptr(i)%x2l_Sa_u = x2l%rAttr(index_x2l_Sa_u, i)
+       x2l_vic_ptr(i)%x2l_Sa_v = x2l%rAttr(index_x2l_Sa_v, i)
+       x2l_vic_ptr(i)%x2l_Sa_ptem = x2l%rAttr(index_x2l_Sa_ptem, i)
+       x2l_vic_ptr(i)%x2l_Sa_shum = x2l%rAttr(index_x2l_Sa_shum, i)
+       x2l_vic_ptr(i)%x2l_Sa_pbot = x2l%rAttr(index_x2l_Sa_pbot, i)
+       x2l_vic_ptr(i)%x2l_Sa_tbot = x2l%rAttr(index_x2l_Sa_tbot, i)
+       x2l_vic_ptr(i)%x2l_Faxa_lwdn = x2l%rAttr(index_x2l_Faxa_lwdn, i)
+       x2l_vic_ptr(i)%x2l_Faxa_rainc = x2l%rAttr(index_x2l_Faxa_rainc, i)
+       x2l_vic_ptr(i)%x2l_Faxa_rainl = x2l%rAttr(index_x2l_Faxa_rainl, i)
+       x2l_vic_ptr(i)%x2l_Faxa_snowc = x2l%rAttr(index_x2l_Faxa_snowc, i)
+       x2l_vic_ptr(i)%x2l_Faxa_snowl = x2l%rAttr(index_x2l_Faxa_snowl, i)
+       x2l_vic_ptr(i)%x2l_Faxa_swndr = x2l%rAttr(index_x2l_Faxa_swndr, i)
+       x2l_vic_ptr(i)%x2l_Faxa_swvdr = x2l%rAttr(index_x2l_Faxa_swvdr, i)
+       x2l_vic_ptr(i)%x2l_Faxa_swndf = x2l%rAttr(index_x2l_Faxa_swndf, i)
+       x2l_vic_ptr(i)%x2l_Faxa_swvdf = x2l%rAttr(index_x2l_Faxa_swvdf, i)
+       x2l_vic_ptr(i)%x2l_Faxa_bcphidry = x2l%rAttr(index_x2l_Faxa_bcphidry, i)
+       x2l_vic_ptr(i)%x2l_Faxa_bcphodry = x2l%rAttr(index_x2l_Faxa_bcphodry, i)
+       x2l_vic_ptr(i)%x2l_Faxa_bcphiwet = x2l%rAttr(index_x2l_Faxa_bcphiwet, i)
+       x2l_vic_ptr(i)%x2l_Faxa_ocphidry = x2l%rAttr(index_x2l_Faxa_ocphidry, i)
+       x2l_vic_ptr(i)%x2l_Faxa_ocphodry = x2l%rAttr(index_x2l_Faxa_ocphodry, i)
+       x2l_vic_ptr(i)%x2l_Faxa_ocphiwet = x2l%rAttr(index_x2l_Faxa_ocphiwet, i)
+       x2l_vic_ptr(i)%x2l_Faxa_dstwet1 = x2l%rAttr(index_x2l_Faxa_dstwet1, i)
+       x2l_vic_ptr(i)%x2l_Faxa_dstwet2 = x2l%rAttr(index_x2l_Faxa_dstwet2, i)
+       x2l_vic_ptr(i)%x2l_Faxa_dstwet3 = x2l%rAttr(index_x2l_Faxa_dstwet3, i)
+       x2l_vic_ptr(i)%x2l_Faxa_dstwet4 = x2l%rAttr(index_x2l_Faxa_dstwet4, i)
+       x2l_vic_ptr(i)%x2l_Faxa_dstdry1 = x2l%rAttr(index_x2l_Faxa_dstdry1, i)
+       x2l_vic_ptr(i)%x2l_Faxa_dstdry2 = x2l%rAttr(index_x2l_Faxa_dstdry2, i)
+       x2l_vic_ptr(i)%x2l_Faxa_dstdry3 = x2l%rAttr(index_x2l_Faxa_dstdry3, i)
+       x2l_vic_ptr(i)%x2l_Faxa_dstdry4 = x2l%rAttr(index_x2l_Faxa_dstdry4, i)
+       x2l_vic_ptr(i)%x2l_Flrr_flood = x2l%rAttr(index_x2l_Flrr_flood, i)
 
-      ! Determine optional receive fields
-      IF (index_x2l_Sa_co2prog /= 0) THEN
-        x2l_vic_ptr(i)%x2l_Sa_co2prog = x2l%rAttr(index_x2l_Sa_co2prog, i)
-      ENDIF
-      IF (index_x2l_Sa_co2diag /= 0) THEN
-        x2l_vic_ptr(i)%x2l_Sa_co2diag = x2l%rAttr(index_x2l_Sa_co2diag, i)
-      ENDIF
+       ! Determine optional receive fields
+       IF (index_x2l_Sa_co2prog /= 0) THEN
+          x2l_vic_ptr(i)%x2l_Sa_co2prog = x2l%rAttr(index_x2l_Sa_co2prog, i)
+       ENDIF
+       IF (index_x2l_Sa_co2diag /= 0) THEN
+          x2l_vic_ptr(i)%x2l_Sa_co2diag = x2l%rAttr(index_x2l_Sa_co2diag, i)
+       ENDIF
+
+       x2l_vic_ptr(i)%x2l_vars_set =  .TRUE.
+
     END DO
 
   END SUBROUTINE lnd_import_mct
@@ -549,9 +554,9 @@ CONTAINS
     !
     ! !USES:
     USE seq_flds_mod  , ONLY: seq_flds_x2l_fields, seq_flds_l2x_fields,     &
-         seq_flds_x2s_fields, seq_flds_s2x_fields
+         s eq_flds_x2s_fields, seq_flds_s2x_fields
     USE mct_mod       , ONLY: mct_aVect, mct_aVect_init, mct_avect_indexra, &
-         mct_aVect_clean, mct_avect_nRattr
+         m ct_aVect_clean, mct_avect_nRattr
     USE seq_drydep_mod, ONLY: drydep_fields_token, lnd_drydep
     USE shr_megan_mod,  ONLY: shr_megan_fields_token, shr_megan_mechcomps_n
 
@@ -601,7 +606,7 @@ CONTAINS
     index_l2x_Sl_fv         = mct_avect_indexra(l2x, 'Sl_fv')
     index_l2x_Sl_soilw      = mct_avect_indexra(l2x, 'Sl_soilw',perrwith='quiet')
     index_l2x_Sl_logz0      = mct_avect_indexra(l2x, 'Sl_logz0')
-    IF (lnd_drydep)THEN
+    IF (lnd_drydep) THEN
        index_l2x_Sl_ddvel = mct_avect_indexra(l2x, TRIM(drydep_fields_token))
     ELSE
        index_l2x_Sl_ddvel = 0
@@ -728,7 +733,8 @@ CONTAINS
     CALL c_f_pointer(local_domain%locations, locations, [local_domain%ncells])
 
     DO i = 1, local_domain%ncells
-       gindex(i) = locations(i)%global_idx + 1  ! 1 added for Fortran indexing
+       gindex(i) = c_to_f_index(locations(i)%global_idx,
+       global_domain%n_nx, global_domain%n_ny)
        lon_data(i) = locations(i)%longitude
        lat_data(i) = locations(i)%latitude
        area_data(i) = locations(i)%area
@@ -740,5 +746,14 @@ CONTAINS
 
   !=======================================================================
 
+  INTEGER FUNCTION c_to_f_index(c_index, nx, ny) RESULT(f_index)
+    INTEGER, INTENT(in)   :: c_index, nx, ny
+    INTEGER               :: f_index
+    INTEGER               :: row, col
+
+    row == INT(c_index / nx)
+    col = MOD(c_index, nx)
+    f_index = 1 + row + ny * col
+  END FUNCTION c_to_f_index
 
 END MODULE lnd_comp_mct

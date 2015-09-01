@@ -923,6 +923,9 @@ vic_store(void)
         }
     }
 
+    // write rpointer file
+    write_rpointer_file(nc_state_file.fname);
+
     free(cvar);
     free(ivar);
     free(dvar);
@@ -933,7 +936,7 @@ void
 initialize_state_file(nc_file_struct *nc)
 {
     extern size_t           current;
-    extern dmy_struct      *dmy;
+    extern dmy_struct       dmy;
     extern filenames_struct filenames;
     extern domain_struct    global_domain;
     extern option_struct    options;
@@ -942,8 +945,8 @@ initialize_state_file(nc_file_struct *nc)
     int                     old_fill_mode;
 
     sprintf(nc->fname, "%s.%04d%02d%02d_%05u.nc",
-            filenames.statefile, dmy[current].year, dmy[current].month,
-            dmy[current].day, dmy[current].dayseconds);
+            filenames.statefile, dmy.year, dmy.month,
+            dmy.day, dmy.dayseconds);
 
     nc->c_fillvalue = NC_FILL_CHAR;
     nc->i_fillvalue = NC_FILL_INT;
@@ -1023,4 +1026,23 @@ initialize_state_file(nc_file_struct *nc)
     if (status != NC_NOERR) {
         log_ncerr(status);
     }
+}
+
+/******************************************************************************
+ * @brief    Write rpointer file
+ *****************************************************************************/
+void
+write_rpointer_file(char *fname)
+{
+    FILE *fp = NULL;
+
+    fp = fopen(RPOINTER, "w");
+
+    if (fp == NULL) {
+        log_err("Error writing rpointer file %s", RPOINTER);
+    }
+
+    fprintf(fp, "%s\n", fname);
+
+    fclose(fp);
 }

@@ -39,7 +39,7 @@ vic_force(void)
     extern size_t              current;
     extern atmos_data_struct  *atmos;
     extern x2l_data_struct    *x2l_vic;
-    extern dmy_struct         *dmy;
+    extern dmy_struct          dmy;
     extern domain_struct       global_domain;
     extern domain_struct       local_domain;
     extern filenames_struct    filenames;
@@ -186,11 +186,11 @@ vic_force(void)
             if (vidx != -1) {
                 for (j = 0; j < NF; j++) {
                     veg_hist[i][vidx].albedo[j] =
-                        veg_lib[i][v].albedo[dmy[current].month - 1];
+                        veg_lib[i][v].albedo[dmy.month - 1];
                     veg_hist[i][vidx].LAI[j] =
-                        veg_lib[i][v].LAI[dmy[current].month - 1];
+                        veg_lib[i][v].LAI[dmy.month - 1];
                     veg_hist[i][vidx].vegcover[j] =
-                        veg_lib[i][v].vegcover[dmy[current].month - 1];
+                        veg_lib[i][v].vegcover[dmy.month - 1];
                 }
                 // not the correct way to calculate average albedo, but leave
                 // for now

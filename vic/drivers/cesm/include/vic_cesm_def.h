@@ -30,6 +30,17 @@
 #define VIC_DRIVER "CESM"
 
 #define MAXDIMS 10
+#define RPOINTER "rpointer.lnd"
+
+/******************************************************************************
+ * @brief   CESM run types
+ *****************************************************************************/
+enum
+{
+    CESM_RUNTYPE_CLEANSTART,
+    CESM_RUNTYPE_RESTART,
+    CESM_RUNTYPE_BRANCH
+};
 
 /******************************************************************************
  * @brief    Structure to store location information for individual grid cells.
@@ -180,6 +191,7 @@ typedef struct {
     double x2l_Faxa_dstdry3;  /** flux: Size 3 dust -- dry deposition */
     double x2l_Faxa_dstdry4;  /** flux: Size 4 dust -- dry deposition */
     double x2l_Flrr_flood;  /** rtm->lnd rof (flood) flux */
+    bool x2l_vars_set; /** x2l set flag */
 } x2l_data_struct;
 
 /******************************************************************************
@@ -217,6 +229,7 @@ typedef struct {
     double l2x_Fall_flxvoc;  /**< MEGAN fluxes */
     double l2x_Flrl_rofliq;  /**< lnd->rtm input fluxes */
     double l2x_Flrl_rofice;  /**< lnd->rtm input fluxes */
+    bool l2x_vars_set; /** l2x set flag */
 } l2x_data_struct;
 
 #endif

@@ -30,6 +30,7 @@
 // used for offsetof() macro
 #include <stddef.h>
 #include <mpi.h>
+#include <stdbool.h>
 
 // Component MPI Communicator
 MPI_Comm MPI_COMM_VIC;

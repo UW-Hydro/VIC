@@ -77,7 +77,6 @@ calc_surf_energy_bal(double             Le,
                      size_t             hidx,
                      unsigned short     iveg,
                      int                overstory,
-                     int                rec,
                      unsigned short     veg_class,
                      double            *CanopLayerBnd,
                      double            *dryFrac,
@@ -296,7 +295,7 @@ calc_surf_energy_bal(double             Le,
         }
 
         Tsurf = root_brent(T_lower, T_upper, ErrorString, func_surf_energy_bal,
-                           rec, VEG, veg_class, delta_t, Cs1, Cs2, D1, D2,
+                           VEG, veg_class, delta_t, Cs1, Cs2, D1, D2,
                            T1_old, T2, Ts_old, energy->T, bubble, dp, expt,
                            ice0, kappa1, kappa2, max_moist, moist, root,
                            CanopLayerBnd, UnderStory, overstory, NetShortBare,
@@ -414,7 +413,7 @@ calc_surf_energy_bal(double             Le,
             FIRST_SOLN[0] = true;
 
             Tsurf = root_brent(T_lower, T_upper, ErrorString,
-                               func_surf_energy_bal, rec, VEG, veg_class,
+                               func_surf_energy_bal, VEG, veg_class,
                                delta_t, Cs1, Cs2, D1, D2, T1_old, T2, Ts_old,
                                energy->T, bubble, dp, expt, ice0, kappa1,
                                kappa2, max_moist, moist, root, CanopLayerBnd,
@@ -543,7 +542,7 @@ calc_surf_energy_bal(double             Le,
         FIRST_SOLN[0] = true;
     }
 
-    error = solve_surf_energy_bal(Tsurf, rec, VEG, veg_class, delta_t, Cs1,
+    error = solve_surf_energy_bal(Tsurf, VEG, veg_class, delta_t, Cs1,
                                   Cs2, D1, D2, T1_old, T2, Ts_old, energy->T,
                                   bubble, dp, expt, ice0, kappa1, kappa2,
                                   max_moist, moist, root, CanopLayerBnd,

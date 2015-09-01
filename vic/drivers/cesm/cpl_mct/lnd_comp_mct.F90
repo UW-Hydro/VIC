@@ -119,14 +119,17 @@ CONTAINS
     SUBROUTINE lnd_init_mct(EClock, cdata, x2l, l2x, cdata_s, x2s, s2x, NLFilename)
 
         ! Uses:
-        USE shr_file_mod     , only : shr_file_getUnit, shr_file_setLogLevel
+        USE shr_file_mod     , only : shr_file_getUnit, shr_file_setLogLevel, &
+                                      shr_file_getLogUnit, shr_file_getLogUnit, &
+                                      shr_file_setLogUnit
         USE seq_timemgr_mod  , only : seq_timemgr_EClockGetData
         use mct_mod     , only : mct_gsMap, mct_gGrid, mct_gGrid_importIAttr, &
                                  mct_gGrid_importRAttr, mct_gGrid_init,       &
                                  mct_gsMap_orderedPoints
         USE seq_infodata_mod , only : seq_infodata_PutData, seq_infodata_PutData
         USE seq_flds_mod
-        use vic_cesm_def_mod
+        USE vic_cesm_def_mod
+        USE vic_cesm_print_library, only : print_vic_clock
 
         IMPLICIT NONE
 
@@ -308,6 +311,9 @@ CONTAINS
     !--------------------------------------------------------------------------
     SUBROUTINE lnd_run_mct(EClock, cdata, x2l, l2x, cdata_s, x2s, s2x)
 
+        USE shr_file_mod     , only : shr_file_getUnit, shr_file_setLogLevel, &
+                                      shr_file_getLogUnit, shr_file_getLogUnit, &
+                                      shr_file_setLogUnit
         USE seq_timemgr_mod ,only : seq_timemgr_EClockGetData, seq_timemgr_StopAlarmIsOn, &
                                     seq_timemgr_RestartAlarmIsOn
 

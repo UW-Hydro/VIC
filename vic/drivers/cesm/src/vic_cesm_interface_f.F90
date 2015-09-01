@@ -1,7 +1,7 @@
 !>
 !! @section DESCRIPTION
 !!
-!! Fortran interface for CESM driver.
+!! Fortran interface for CESM driver. Uses the Fortran/C ISO_C_BINDING.
 !!
 !! @section LICENSE
 !!
@@ -33,13 +33,14 @@ MODULE vic_cesm_interface
   !--------------------------------------------------------------------------
   ! Public interfaces
   !--------------------------------------------------------------------------
-
   PUBLIC :: vic_cesm_init_mpi
   PUBLIC :: vic_cesm_init
   PUBLIC :: vic_cesm_run
   PUBLIC :: vic_cesm_final
 
-  ! Init MPI Interface
+  !--------------------------------------------------------------------------
+  !> @brief   Init MPI Interface
+  !--------------------------------------------------------------------------
   INTERFACE
      INTEGER(C_INT) FUNCTION vic_cesm_init_mpi(MPI_COMM_VIC_F) BIND(C, name='vic_cesm_init_mpi')
        USE, INTRINSIC :: ISO_C_BINDING
@@ -49,7 +50,9 @@ MODULE vic_cesm_interface
      END FUNCTION vic_cesm_init_mpi
   END INTERFACE
 
-  ! Init Interface
+  !--------------------------------------------------------------------------
+  !> @brief   Init Interface
+  !--------------------------------------------------------------------------
   INTERFACE
      INTEGER(C_INT) FUNCTION vic_cesm_init(vic_global_param_file, caseid, &
                                            runtype, vclock) BIND(C, name='vic_cesm_init')
@@ -63,7 +66,9 @@ MODULE vic_cesm_interface
        END FUNCTION vic_cesm_init
   END INTERFACE
 
-  ! Run Interface
+  !--------------------------------------------------------------------------
+  !> @brief   Run Interface
+  !--------------------------------------------------------------------------
   INTERFACE
      INTEGER(C_INT) FUNCTION vic_cesm_run(vclock) BIND(C, name='vic_cesm_run')
        USE, INTRINSIC :: ISO_C_BINDING
@@ -73,7 +78,9 @@ MODULE vic_cesm_interface
      END FUNCTION vic_cesm_run
   END INTERFACE
 
-  ! Finalize Interface
+  !--------------------------------------------------------------------------
+  !> @brief   Finalize Interface
+  !--------------------------------------------------------------------------
   INTERFACE
      INTEGER(C_INT) FUNCTION vic_cesm_final() BIND(C, name='vic_cesm_final')
        USE, INTRINSIC :: ISO_C_BINDING

@@ -152,8 +152,6 @@ get_global_domain(char          *nc_name,
     free(var);
     free(run);
 
-    // print_domain(global_domain, true);
-
     return global_domain->ncells;
 }
 

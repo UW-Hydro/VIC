@@ -36,7 +36,6 @@ vic_restore(char *runtype_str)
 {
     extern all_vars_struct    *all_vars;
     extern domain_struct       local_domain;
-    extern global_param_struct global_param;
     extern option_struct       options;
     extern soil_con_struct    *soil_con;
     extern veg_con_struct    **veg_con;
@@ -44,7 +43,6 @@ vic_restore(char *runtype_str)
 
 
     double                     surf_temp;
-    int                        store_offset;
     size_t                     i;
     size_t                     nveg;
     unsigned short int         runtype;

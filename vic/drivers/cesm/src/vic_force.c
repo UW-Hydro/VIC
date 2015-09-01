@@ -56,6 +56,13 @@ vic_force(void)
     size_t                     v;
     int                        vidx;
 
+    // Check to make sure variables have been set by coupler
+    for (i = 0; i < local_domain.ncells; i++) {
+        if (!x2l_vic[i].x2l_vars_set) {
+            log_err("x2l_vars_set is false");
+        }
+    }
+
     // Air temperature
     for (j = 0; j < NF; j++) {
         for (i = 0; i < local_domain.ncells; i++) {

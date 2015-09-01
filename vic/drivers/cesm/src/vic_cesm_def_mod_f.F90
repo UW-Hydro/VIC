@@ -1,7 +1,8 @@
 !>
 !! @section DESCRIPTION
 !!
-!! Fortran definitions of VIC C structures
+!! Fortran definitions of VIC C structures see cesm_def.h for more on the
+!! c/fortran type defs
 !!
 !! @section LICENSE
 !!
@@ -29,11 +30,11 @@ MODULE vic_cesm_def_mod
 
     INTEGER,PARAMETER :: VICMAXSTRING = 2048 ! same as MAXSTRING in vic_def.h
 
-    ! type declarations (see cesm_def.h for more on the c/fortran type defs)
-
+    !--------------------------------------------------------------------------
     !> @brief   This structure stores clock information. See also ESMF_Clock.
     !! @note    Order is important and any changes here must be echoed in
     !!          vic_cesm_def.h
+    !--------------------------------------------------------------------------
     TYPE, bind(C) :: vic_clock
         INTEGER(C_INT) :: timestep  !< timestep in seconds
         INTEGER(C_INT16_T) :: current_year  !< current year
@@ -45,11 +46,12 @@ MODULE vic_cesm_def_mod
         CHARACTER(len=VICMAXSTRING, kind=C_CHAR), DIMENSION(1) :: calendar  !< calendar
     END TYPE vic_clock
 
-
+    !--------------------------------------------------------------------------
     !> @brief   This type stores location information for individual grid cells.
     !!          See also vic_cesm_def.h.
     !! @note    Order is important and any changes here must be echoed in
     !!          vic_cesm_def.h
+    !--------------------------------------------------------------------------
     TYPE, bind(C) :: location_struct
         REAL(C_DOUBLE) :: latitude  !< latitude of grid cell center
         REAL(C_DOUBLE) :: longitude  !< longitude of grid cell center
@@ -61,22 +63,25 @@ MODULE vic_cesm_def_mod
         INTEGER(C_SIZE_T) :: local_idx  !< index of grid cell in local list of grid cells
     END TYPE location_struct
 
-
+    !--------------------------------------------------------------------------
     !> @brief   This type stores domain information. See also
     !!          vic_cesm_def.h.
     !! @note    Order is important and any changes here must be echoed in
     !!          vic_cesm_def.h
+    !--------------------------------------------------------------------------
     TYPE, bind(C) :: domain_struct
         INTEGER(C_SIZE_T) :: ncells  !< number of active grid cell in domain
         INTEGER(C_SIZE_T) :: n_nx  !< size of x-index
         INTEGER(C_SIZE_T) :: n_ny  !< size of y-index
-        TYPE(C_PTR):: locations  !< locations structs for local domain
+        !--------------------------------------------------------------------------
+    TYPE(C_PTR):: locations  !< locations structs for local domain
     END TYPE domain_struct
 
-
+    !--------------------------------------------------------------------------
     !> @brief   This structure is a c type container for the x2l fields.
     !! @note    Order is important and any changes here must be echoed in
     !!          vic_cesm_def_mod_f.F90
+    !--------------------------------------------------------------------------
     TYPE, bind(C) :: x2l_data_struct
         REAL(C_DOUBLE) :: x2l_Sa_z  !<bottom atm level height
         REAL(C_DOUBLE) :: x2l_Sa_u  !<bottom atm level zon wind
@@ -114,10 +119,11 @@ MODULE vic_cesm_def_mod
         LOGICAL(C_BOOL) :: x2l_vars_set  !< x2l set flag
     END TYPE x2l_data_struct
 
-
+    !--------------------------------------------------------------------------
     !> @brief   This structure is a c type container for the l2x fields.
     !! @note    Order is important and any changes here must be echoed in
     !!          vic_cesm_def_mod_f.F90
+    !--------------------------------------------------------------------------
     TYPE, bind(C) :: l2x_data_struct
         REAL(C_DOUBLE) :: l2x_Sl_t  !< temperature
         REAL(C_DOUBLE) :: l2x_Sl_tref  !< 2m reference temperature

@@ -85,8 +85,6 @@ vic_cesm_init(char     *vic_global_param_file,
               char     *runtype,
               vic_clock vclock)
 {
-    unsigned short int runtype_int;
-
     // Initialize Log Destination
     initialize_log();
 

@@ -70,6 +70,8 @@ advance_time(void)
 
     num2date(global_param.time_origin_num, numdate, 0., global_param.calendar,
              global_param.time_units, &dmy);
+
+    print_dmy(&dmy);
 }
 
 /******************************************************************************

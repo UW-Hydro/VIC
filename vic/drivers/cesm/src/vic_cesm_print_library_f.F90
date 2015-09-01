@@ -53,7 +53,9 @@ CONTAINS
   END SUBROUTINE set_print_library_iulog
 
 
+  !--------------------------------------------------------------------------
   !> @brief   Print the VIC clock type
+  !--------------------------------------------------------------------------
   SUBROUTINE print_vic_clock(vclock)
 
     TYPE(vic_clock), INTENT(in) :: vclock
@@ -71,7 +73,9 @@ CONTAINS
   END SUBROUTINE print_vic_clock
 
 
+  !--------------------------------------------------------------------------
   !> @brief   Print the VIC domain type
+  !--------------------------------------------------------------------------
   SUBROUTINE print_domain(domain)
 
     TYPE(domain_struct), INTENT(in) :: domain
@@ -95,7 +99,9 @@ CONTAINS
   END SUBROUTINE print_domain
 
 
+  !--------------------------------------------------------------------------
   !> @brief   Print the VIC location struct
+  !--------------------------------------------------------------------------
   SUBROUTINE print_location(location)
 
     TYPE(location_struct), INTENT(in) :: location
@@ -113,7 +119,9 @@ CONTAINS
   END SUBROUTINE print_location
 
 
+  !--------------------------------------------------------------------------
   !> @brief   Print the VIC x2l data type
+  !--------------------------------------------------------------------------
   SUBROUTINE print_x2l_data(x2l_data)
 
     TYPE(x2l_data_struct), INTENT(in) :: x2l_data
@@ -156,7 +164,9 @@ CONTAINS
   END SUBROUTINE print_x2l_data
 
 
+  !--------------------------------------------------------------------------
   !> @brief   Print the VIC l2x data type
+  !--------------------------------------------------------------------------
   SUBROUTINE print_l2x_data(l2x_data)
 
     TYPE(l2x_data_struct), INTENT(in) :: l2x_data

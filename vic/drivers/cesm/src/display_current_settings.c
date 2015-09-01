@@ -43,7 +43,6 @@ display_current_settings(int mode)
 
     int                        file_num;
 
-
     print_version(VIC_DRIVER);
 
     if (mode == DISP_VERSION) {

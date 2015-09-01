@@ -38,7 +38,6 @@ vic_finalize(void)
     extern size_t             *mpi_map_mapping_array;
     extern all_vars_struct    *all_vars;
     extern atmos_data_struct  *atmos;
-    extern dmy_struct          dmy;
     extern domain_struct       global_domain;
     extern domain_struct       local_domain;
     extern filep_struct        filep;

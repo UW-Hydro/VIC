@@ -343,7 +343,7 @@ solve_snow(char               overstory,
                                   &energy->latent,
                                   &energy->latent_sub, &energy->refreeze_energy,
                                   &energy->sensible, INCLUDE_SNOW, iveg, band,
-								  snow);
+                                  snow);
             if (ErrorFlag == ERROR) {
                 return (ERROR);
             }

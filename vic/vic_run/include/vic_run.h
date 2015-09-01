@@ -115,8 +115,8 @@ void collect_wb_terms(cell_data_struct, veg_var_struct, snow_data_struct,
                       double, double, double, int, double, int, double *,
                       double *, out_data_struct *);
 double compute_coszen(double, double, double, unsigned short int, unsigned int);
-void compute_pot_evap(unsigned short int, dmy_struct *, double, double,
-                      double, double, double, double, double **, double *);
+void compute_pot_evap(unsigned short int, dmy_struct *, double, double, double,
+                      double, double, double, double **, double *);
 void compute_runoff_and_asat(soil_con_struct *, double *, double, double *,
                              double *);
 void compute_soil_resp(int, double *, double, double, double *, double *,
@@ -292,8 +292,8 @@ int surface_fluxes(bool, double, double, double, double, double *, double *,
                    double **, double *, double *, double *, double *, double *,
                    double *, double *, double *, double *, double *, size_t,
                    size_t, unsigned short int, double, unsigned short int,
-                   unsigned short int, atmos_data_struct *,
-                   dmy_struct *, energy_bal_struct *, global_param_struct *,
+                   unsigned short int, atmos_data_struct *, dmy_struct *,
+                   energy_bal_struct *, global_param_struct *,
                    cell_data_struct *, snow_data_struct *, soil_con_struct *,
                    veg_var_struct *, double, double, double, double *);
 double svp(double);

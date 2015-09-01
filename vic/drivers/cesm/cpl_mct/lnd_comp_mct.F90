@@ -147,11 +147,11 @@ CONTAINS
         INTEGER                         :: dtime ! timestep (seconds)
         INTEGER, POINTER                :: idata(:)
         INTEGER, DIMENSION(:), ALLOCATABLE :: gindex  ! Number the local grid points
-        REAL(r8), DIMENSION(:), ALLOCATABLE :: lon_data
-        REAL(r8), DIMENSION(:), ALLOCATABLE :: lat_data
-        REAL(r8), DIMENSION(:), ALLOCATABLE :: area_data
-        INTEGER, DIMENSION(:), ALLOCATABLE :: mask_data
-        REAL(r8), DIMENSION(:), ALLOCATABLE :: frac_data
+        REAL(r8), POINTER :: lon_data(:)
+        REAL(r8), POINTER :: lat_data(:)
+        REAL(r8), POINTER :: area_data(:)
+        REAL(r8), POINTER :: mask_data(:)
+        REAL(r8), POINTER :: frac_data(:)
         TYPE(mct_gsMap),  POINTER       :: GSMap_lnd
         TYPE(mct_gGrid),  POINTER       :: dom_lnd
         TYPE(seq_infodata_type), POINTER:: infodata
@@ -271,9 +271,9 @@ CONTAINS
         CALL mct_gGrid_importIAttr(dom_lnd, 'GlobGridNum', idata, lsize)
         CALL mct_gGrid_importRattr(dom_lnd, 'lon', lon_data, lsize)
         CALL mct_gGrid_importRattr(dom_lnd, 'lat', lat_data, lsize)
-        CALL mct_gGrid_importRattr(dom_lnd, 'lat', area_data, lsize)
-        CALL mct_gGrid_importRattr(dom_lnd, 'lat', mask_data, lsize)
-        CALL mct_gGrid_importRattr(dom_lnd, 'lat', frac_data, lsize)
+        CALL mct_gGrid_importRattr(dom_lnd, 'area', area_data, lsize)
+        CALL mct_gGrid_importRattr(dom_lnd, 'mask', mask_data, lsize)
+        CALL mct_gGrid_importRattr(dom_lnd, 'frac', frac_data, lsize)
 
         !--- intialize the attribute vectors
         CALL mct_aVect_init(x2l, rList=seq_flds_x2l_fields, lsize=lsize)
@@ -685,11 +685,11 @@ CONTAINS
         IMPLICIT NONE
 
         ! INPUT/OUTPUT PARAMETERS:
-        INTEGER, DIMENSION(:), INTENT(inout) :: gindex  ! Number the local grid points
+        INTEGER,  DIMENSION(:), INTENT(inout) :: gindex  ! Number the local grid points
         REAL(r8), DIMENSION(:), INTENT(inout) :: lon_data
         REAL(r8), DIMENSION(:), INTENT(inout) :: lat_data
         REAL(r8), DIMENSION(:), INTENT(inout) :: area_data
-        INTEGER, DIMENSION(:),  INTENT(inout) :: mask_data
+        REAL(R8), DIMENSION(:), INTENT(inout) :: mask_data
         REAL(r8), DIMENSION(:), INTENT(inout) :: frac_data
 
         ! LOCAL VARIABLES:

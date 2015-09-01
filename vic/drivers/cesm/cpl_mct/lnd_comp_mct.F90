@@ -4,6 +4,7 @@ MODULE lnd_comp_mct
     ! USES:
     !--------------------------------------------------------------------------
     USE mct_mod
+    use m_GeneralGrid ,only: mct_gGrid_importRattr
     USE esmf
     USE seq_cdata_mod
     USE seq_infodata_mod
@@ -11,13 +12,6 @@ MODULE lnd_comp_mct
     USE vic_cesm_interface
     USE vic_cesm_def_mod
     USE, INTRINSIC :: iso_c_binding
-
-    ! Access global variables in VIC C
-    TYPE(domain_struct), bind(C, name='local_domain') :: local_domain
-    TYPE(domain_struct), bind(C, name='global_domain') :: global_domain
-
-    TYPE(C_PTR), bind(C, name='x2l_vic') :: x2l_vic
-    TYPE(C_PTR), bind(C, name='l2x_vic') :: l2x_vic
 
     ! PUBLIC TYPES:
     IMPLICIT NONE
@@ -31,8 +25,20 @@ MODULE lnd_comp_mct
     PUBLIC :: lnd_run_mct
     PUBLIC :: lnd_final_mct
 
+    !--------------------------------------------------------------------------
+    ! Module level variables
+    !--------------------------------------------------------------------------
     INTEGER :: iulog   ! vic log file unit number
-    INTEGER :: shrlogunit   ! generic log unit
+    INTEGER :: shrlogunit, shrloglev   ! generic log unit
+    INTEGER :: year, month, day, seconds
+    TYPE(vic_clock) :: vclock
+    
+    ! Access global variables in VIC C
+    TYPE(domain_struct), bind(C, name='local_domain') :: local_domain
+    TYPE(domain_struct), bind(C, name='global_domain') :: global_domain
+
+    TYPE(C_PTR), bind(C, name='x2l_vic') :: x2l_vic
+    TYPE(C_PTR), bind(C, name='l2x_vic') :: l2x_vic
 
     TYPE(x2l_data_struct), DIMENSION(:), POINTER :: x2l_vic_ptr
     TYPE(l2x_data_struct), DIMENSION(:), POINTER :: l2x_vic_ptr
@@ -112,6 +118,18 @@ CONTAINS
     !--------------------------------------------------------------------------
     SUBROUTINE lnd_init_mct(EClock, cdata, x2l, l2x, cdata_s, x2s, s2x, NLFilename)
 
+        ! Uses:
+        USE shr_file_mod     , only : shr_file_getUnit, shr_file_setLogLevel
+        USE seq_timemgr_mod  , only : seq_timemgr_EClockGetData
+        use mct_mod     , only : mct_gsMap, mct_gGrid, mct_gGrid_importIAttr, &
+                                 mct_gGrid_importRAttr, mct_gGrid_init,       &
+                                 mct_gsMap_orderedPoints
+        USE seq_infodata_mod , only : seq_infodata_PutData, seq_infodata_PutData
+        USE seq_flds_mod
+        use vic_cesm_def_mod
+
+        IMPLICIT NONE
+
         ! INPUT/OUTPUT PARAMETERS:
         TYPE(ESMF_Clock)            , INTENT(in)    :: EClock
         TYPE(seq_cdata)             , INTENT(inout) :: cdata
@@ -125,6 +143,9 @@ CONTAINS
         INTEGER                         :: mpicom_lnd
         INTEGER                         :: mytask, ierr
         INTEGER                         :: lsize, gsize
+        INTEGER                         :: nx_global, ny_global
+        INTEGER                         :: dtime ! timestep (seconds)
+        INTEGER, POINTER                :: idata(:)
         INTEGER, DIMENSION(:), ALLOCATABLE :: gindex  ! Number the local grid points
         REAL(r8), DIMENSION(:), ALLOCATABLE :: lon_data
         REAL(r8), DIMENSION(:), ALLOCATABLE :: lat_data
@@ -134,24 +155,23 @@ CONTAINS
         TYPE(mct_gsMap),  POINTER       :: GSMap_lnd
         TYPE(mct_gGrid),  POINTER       :: dom_lnd
         TYPE(seq_infodata_type), POINTER:: infodata
-        CHARACTER(len=CL) :: caseid
-        CHARACTER(len=CL) :: starttype
-        CHARACTER(len=CL) :: calendar
-        INTEGER :: dtime
-        CHARACTER(len=*), PARAMETER     :: subname = 'lnd_init_mct'
+        CHARACTER(len=VICMAXSTRING) :: caseid
+        CHARACTER(len=VICMAXSTRING) :: starttype
+        CHARACTER(len=VICMAXSTRING) :: calendar
+        LOGICAL :: exists                               ! true if file exists
+        CHARACTER(len=*), PARAMETER :: subname = 'lnd_init_mct'
+        CHARACTER(len=*), PARAMETER :: FORMAT = "('("//trim(subname)//") :',A)"
 
         ! Local Variables for C/Fortran Interface
         INTEGER(C_INT) :: errno
-        TYPE(vic_clock) :: vclock
-        TYPE(vic_domain_type) :: vic_domain
-        CHARACTER(len=*, kind=C_CHAR)   :: vic_global_param_file
+        CHARACTER(len=VICMAXSTRING, kind=C_CHAR)   :: vic_global_param_file
 
         !--- initialize the field index values, subroutine is below in this file
         CALL cpl_indices_set()
 
         !--- point/get data from cdata datatype
         CALL seq_cdata_setptrs(cdata, ID=LNDID, mpicom=mpicom_lnd, &
-             g sMap=GSMap_lnd, dom=dom_lnd, infodata=infodata)
+             gsMap=GSMap_lnd, dom=dom_lnd, infodata=infodata)
         CALL MPI_COMM_RANK(mpicom_lnd, mytask, ierr)
 
         !--- copy/hand the mpicom from the driver to the vic model
@@ -164,11 +184,13 @@ CONTAINS
         !--- setup vic log file
         !--- set shr unit number to vic log file
         CALL shr_file_getLogUnit(shrlogunit)
-        IF (masterproc) THEN
-           INQUIRE(file='lnd_modelio.nml'//TRIM(inst_suffix), exist=exists)
+        IF (mpicom_lnd == 0) THEN
+           !Tony look here INQUIRE(file='lnd_modelio.nml'//TRIM(inst_suffix), exist=exists)
+           exists = .FALSE.
            IF (exists) THEN
               iulog = shr_file_getUnit()
-              CALL shr_file_setIO('lnd_modelio.nml'//TRIM(inst_suffix), iulog)
+              !Tony look here CALL shr_file_setIO('lnd_modelio.nml'//TRIM(inst_suffix), iulog)
+              CALL shr_file_setIO('lnd_modelio.nml', iulog) 
            ENDIF
            WRITE(iulog, FORMAT) 'VIC land model initialization'
         ELSE
@@ -184,19 +206,25 @@ CONTAINS
 
         !--- get some clock info
         CALL seq_timemgr_EClockGetData(EClock, &
-             curr_yr=vic_clock%current_year, &
-             curr_mon=vic_clock%current_month, &
-             curr_day=vic_clock%current_day, &
-             curr_tod=vic_clock%current_dayseconds, &
-             calendar=calendar)
-        CALL seq_timemgr_EClockGetData(EClock, dtime=dtime)
+                                       dtime=dtime, &
+                                       curr_yr=year, &
+                                       curr_mon=month, &
+                                       curr_day=day, &
+                                       curr_tod=seconds, &
+                                       calendar=calendar)
 
-        WRITE(iulog, *) 'EClock current_year = ', vic_clock%current_year
-        WRITE(iulog, *) 'EClock current_month = ', vic_clock%current_month
-        WRITE(iulog, *) 'EClock current_day = ', vic_clock%current_day
-        WRITE(iulog, *) 'EClock current_dayseconds = ', vic_clock%current_dayseconds
-        WRITE(iulog, *) 'EClock calendar = ', vic_clock%calendar
-        WRITE(iulog, *) 'EClock dtime = ', dtime
+        !--- initialize clock and add starting date / time info
+        vclock%timestep = dtime
+        vclock%current_year = year
+        vclock%current_month = month
+        vclock%current_day = day
+        vclock%current_dayseconds = seconds
+        vclock%state_flag =.FALSE.
+        vclock%stop_flag = .FALSE.
+        vclock%calendar = calendar
+
+        WRITE(iulog, *) 'EClock current time:'
+        CALL print_vic_clock(vclock)
 
         !--- VIC global parameter file (namelist)
         IF(PRESENT(NLFilename)) THEN
@@ -217,9 +245,19 @@ CONTAINS
         !   gsize = global size of grid (nx_global * ny_global)
         !   mpicom_lnd and LNDID from cdata above
         ! outputs are gsmap_lnd
-        CALL unpack_vic_domain(gindex, lon_data, lat_data, area_data, mask_data, frac_data)
         lsize = local_domain%ncells
         gsize = global_domain%n_nx * global_domain%n_ny
+
+        ! allocate domain arrays
+        ALLOCATE(gindex(lsize))
+        ALLOCATE(lon_data(lsize))
+        ALLOCATE(lat_data(lsize))
+        ALLOCATE(area_data(lsize))
+        ALLOCATE(mask_data(lsize))
+        ALLOCATE(frac_data(lsize))
+
+        CALL unpack_vic_domain(gindex, lon_data, lat_data, area_data, mask_data, frac_data)
+        
         CALL mct_gsMap_init(gsMap_lnd, gindex, mpicom_lnd, LNDID, lsize, gsize)
 
         !-- setup mappings for l2x and x2l structures
@@ -228,7 +266,7 @@ CONTAINS
 
         !--- initialize the dom, data in the dom is just local data of size lsize
         CALL mct_gGrid_init(GGrid=dom_lnd, CoordChars=TRIM(seq_flds_dom_coord), &
-             O therChars=TRIM(seq_flds_dom_other), lsize=lsize)
+                            OtherChars=TRIM(seq_flds_dom_other), lsize=lsize)
         CALL mct_gsMap_orderedPoints(gsMap_lnd, mytask, idata)
         CALL mct_gGrid_importIAttr(dom_lnd, 'GlobGridNum', idata, lsize)
         CALL mct_gGrid_importRattr(dom_lnd, 'lon', lon_data, lsize)
@@ -248,12 +286,20 @@ CONTAINS
 
         !--- fill some scalar export data
         CALL seq_infodata_PutData(cdata%infodata, &
-             l nd_present=.TRUE., lnd_prognostic=.TRUE., &
-             s no_present=.FALSE., sno_prognostic=.FALSE.)
+             lnd_present=.TRUE., lnd_prognostic=.TRUE., &
+             sno_present=.FALSE., sno_prognostic=.FALSE.)
         CALL seq_infodata_PutData(infodata, lnd_nx = nx_global, lnd_ny = ny_global)
 
         !--- set share log unit back to generic one
         CALL shr_file_setLogLevel(shrloglev)
+
+        ! deallocate domain arrays
+        DEALLOCATE(gindex)
+        DEALLOCATE(lon_data)
+        DEALLOCATE(lat_data)
+        DEALLOCATE(area_data)
+        DEALLOCATE(mask_data)
+        DEALLOCATE(frac_data)
 
     END SUBROUTINE lnd_init_mct
 
@@ -262,8 +308,11 @@ CONTAINS
     !--------------------------------------------------------------------------
     SUBROUTINE lnd_run_mct(EClock, cdata, x2l, l2x, cdata_s, x2s, s2x)
 
-        IMPLICIT NONE
+        USE seq_timemgr_mod ,only : seq_timemgr_EClockGetData, seq_timemgr_StopAlarmIsOn, &
+                                    seq_timemgr_RestartAlarmIsOn
 
+        IMPLICIT NONE
+        
         ! INPUT/OUTPUT PARAMETERS:
         TYPE(ESMF_Clock), INTENT(in)    :: EClock
         TYPE(seq_cdata),  INTENT(inout) :: cdata
@@ -274,46 +323,48 @@ CONTAINS
         TYPE(mct_aVect),  INTENT(inout) :: s2x
 
         ! Local Variables
+        TYPE(seq_infodata_type), POINTER :: infodata ! CESM information from the driver
         INTEGER(C_INT)  :: errno
-        TYPE(vic_clock) :: vclock
         CHARACTER(len=*), PARAMETER     :: subname = 'lnd_run_mct'
 
         !--- set vic log unit
-        CALL shr_file_getLogUnit (shrlogunit)
-        CALL shr_file_setLogUnit (iulog
+        CALL shr_file_getLogUnit(shrlogunit)
+        CALL shr_file_setLogUnit(iulog)
 
         !--- point to cdata
-        CALL seq_cdata_setptrs(cdata_l, infodata=infodata)
+        CALL seq_cdata_setptrs(cdata, infodata=infodata)
 
         !--- get time information
         CALL seq_timemgr_EClockGetData(EClock, &
-             c urr_ymd=ymd, curr_tod=tod_sync,  &
-             c urr_yr=yr_sync, curr_mon=mon_sync, curr_day=day_sync)
-        WRITE(iulog, *) 'EClock run', ymd, tod_sync, yr_sync, mon_sync, day_sync
+                                       curr_yr=year, &
+                                       curr_mon=month, &
+                                       curr_day=day, &
+                                       curr_tod=seconds)
+
+        !--- update the clock 
+        vclock%current_year = year
+        vclock%current_month = month
+        vclock%current_day = day
+        vclock%current_dayseconds = seconds
+        vclock%state_flag = seq_timemgr_RestartAlarmIsOn(EClock)
+        vclock%stop_flag = seq_timemgr_StopAlarmIsOn(EClock) 
 
         !--- get time of next radiation calc for time dependent albedo calc
-        CALL seq_infodata_GetData(infodata, nextsw_cday=nextsw_cday)
+        ! Tony - is this for the coupler or for the land model.  We dont need it
+        ! in VIC
+        !CALL seq_infodata_GetData(infodata, nextsw_cday=nextsw_cday)
 
         !--- import data from coupler
         CALL lnd_import_mct(x2l)
 
         !--- run vic
-        errno = vic_cesm_run(vic_clock)
+        errno = vic_cesm_run(vclock)
         IF (errno /= 0) THEN
            CALL shr_sys_abort(subname//':: vic_cesm_run returned a errno /= 0')
         ENDIF
 
         !--- export data to coupler
         CALL lnd_export_mct(l2x)
-
-        !--- verify driver and vic are in sync, ymd and tod are vic yyyymmdd and sec
-        IF (.NOT. seq_timemgr_EClockDateInSync(EClock, ymd, tod)) THEN
-            CALL seq_timemgr_EclockGetData(EClock, curr_ymd=ymd_sync, curr_tod=tod_sync)
-            WRITE(iulog, *) ' vic ymd=', ymd     , '  clm tod= ', tod
-            WRITE(iulog, *) 'sync ymd=', ymd_sync, ' sync tod= ', tod_sync
-            CALL shr_sys_flush(iulog)
-            CALL shr_sys_abort(subname//':: VIC clock not in sync with Master Sync clock')
-        ENDIF
 
         !--- set share log unit back to generic one
         CALL shr_file_setLogLevel(shrloglev)
@@ -393,29 +444,29 @@ CONTAINS
 
             !--- optional fields ---
             IF (index_l2x_Fall_fco2_lnd /= 0) THEN
-                l2x%rAttr(index_l2x_Fall_fco2_lnd, i) = l2x_vic_ptr%l2x_Fall_fco2_lnd(i)
+                l2x%rAttr(index_l2x_Fall_fco2_lnd, i) = l2x_vic_ptr(i)%l2x_Fall_fco2_lnd
             ENDIF
             IF (index_l2x_Sl_fv /= 0) THEN
-                l2x%rAttr(index_l2x_Sl_fv, i) = l2x_vic_ptr%l2x_Sl_fv(i)
+                l2x%rAttr(index_l2x_Sl_fv, i) = l2x_vic_ptr(i)%l2x_Sl_fv
             ENDIF
             IF (index_l2x_Sl_ram1 /= 0) THEN
-                l2x%rAttr(index_l2x_Sl_ram1, i) = l2x_vic_ptr%l2x_Sl_ram1(i)
+                l2x%rAttr(index_l2x_Sl_ram1, i) = l2x_vic_ptr(i)%l2x_Sl_ram1
             ENDIF
             IF (index_l2x_Fall_flxdst1 /= 0) THEN
-                l2x%rAttr(index_l2x_Fall_flxdst1, i) = l2x_vic_ptr%l2x_Fall_flxdst1(i)
+                l2x%rAttr(index_l2x_Fall_flxdst1, i) = l2x_vic_ptr(i)%l2x_Fall_flxdst1
             ENDIF
             IF (index_l2x_Fall_flxdst2 /= 0) THEN
-                l2x%rAttr(index_l2x_Fall_flxdst2, i) = l2x_vic_ptr%l2x_Fall_flxdst2(i)
+                l2x%rAttr(index_l2x_Fall_flxdst2, i) = l2x_vic_ptr(i)%l2x_Fall_flxdst2
             ENDIF
             IF (index_l2x_Fall_flxdst3 /= 0) THEN
-                l2x%rAttr(index_l2x_Fall_flxdst3, i) = l2x_vic_ptr%l2x_Fall_flxdst3(i)
+                l2x%rAttr(index_l2x_Fall_flxdst3, i) = l2x_vic_ptr(i)%l2x_Fall_flxdst3
             ENDIF
             IF (index_l2x_Fall_flxdst4 /= 0) THEN
-                l2x%rAttr(index_l2x_Fall_flxdst4, i) = l2x_vic_ptr%l2x_Fall_flxdst4(i)
+                l2x%rAttr(index_l2x_Fall_flxdst4, i) = l2x_vic_ptr(i)%l2x_Fall_flxdst4
             ENDIF
 
             IF (.NOT. l2x_vic_ptr(i)%l2x_vars_set) THEN
-                shr_sys_abort(subname//':: l2x export vars not set')
+                CALL shr_sys_abort(subname//':: l2x export vars not set')
             ENDIF
         END DO
 
@@ -486,9 +537,9 @@ CONTAINS
 
         ! USES:
         USE seq_flds_mod  , ONLY: seq_flds_x2l_fields, seq_flds_l2x_fields,     &
-             s eq_flds_x2s_fields, seq_flds_s2x_fields
+             seq_flds_x2s_fields, seq_flds_s2x_fields
         USE mct_mod       , ONLY: mct_aVect, mct_aVect_init, mct_avect_indexra, &
-             m ct_aVect_clean, mct_avect_nRattr
+             mct_aVect_clean, mct_avect_nRattr
         USE seq_drydep_mod, ONLY: drydep_fields_token, lnd_drydep
         USE shr_megan_mod,  ONLY: shr_megan_fields_token, shr_megan_mechcomps_n
 
@@ -605,66 +656,60 @@ CONTAINS
 
     END SUBROUTINE cpl_indices_set
 
+
+    !--------------------------------------------------------------------------
+    !> @brief   Unpack the VIC domain structure
+    !--------------------------------------------------------------------------
+    INTEGER FUNCTION f_index(c_index, nx, ny)
+
+        ! INPUT/OUTPUT PARAMETERS:
+        INTEGER(C_SIZE_T), INTENT(in)   :: c_index, nx, ny
+
+        ! LOCAL VARIABLES:
+        INTEGER               :: row, col
+
+        ! C to fortran index translation
+        row = INT(c_index / nx)
+        col = MOD(c_index, nx)
+        f_index = 1 + row + ny * col
+
+        RETURN
+    END FUNCTION f_index
+
     !--------------------------------------------------------------------------
     !> @brief   Unpack the VIC domain structure
     !--------------------------------------------------------------------------
     SUBROUTINE unpack_vic_domain(gindex, lon_data, lat_data, area_data, &
                                mask_data, frac_data)
 
-    ! INPUT/OUTPUT PARAMETERS:
-    INTEGER, DIMENSION(:), ALLOCATABLE, INTENT(inout) :: gindex  ! Number the local grid points
-    REAL(r8), DIMENSION(:), ALLOCATABLE, INTENT(inout) :: lon_data
-    REAL(r8), DIMENSION(:), ALLOCATABLE, INTENT(inout) :: lat_data
-    REAL(r8), DIMENSION(:), ALLOCATABLE, INTENT(inout) :: area_data
-    INTEGER, DIMENSION(:), ALLOCATABLE, INTENT(inout) :: mask_data
-    REAL(r8), DIMENSION(:), ALLOCATABLE, INTENT(inout) :: frac_data
-
-    IMPLICIT NONE
-
-    ! LOCAL VARIABLES:
-    INTEGER :: i
-    TYPE(location_struct), DIMENSION(:), POINTER :: locations
-
-    ! Allocate domain variables
-    ALLOCATE(gindex(local_domain%ncells))
-    ALLOCATE(lon_data(local_domain%ncells))
-    ALLOCATE(lat_data(local_domain%ncells))
-    ALLOCATE(area_data(local_domain%ncells))
-    ALLOCATE(mask_data(local_domain%ncells))
-    ALLOCATE(frac_data(local_domain%ncells))
-
-    ! Associate locations pointer in local_domain structure
-    CALL c_f_pointer(local_domain%locations, locations, [local_domain%ncells])
-
-    ! Get domain information for each cell in local domain
-    DO i = 1, local_domain%ncells
-        gindex(i) = c_to_f_index(locations(i)%global_idx,
-                                global_domain%n_nx, global_domain%n_ny)
-        lon_data(i) = locations(i)%longitude
-        lat_data(i) = locations(i)%latitude
-        area_data(i) = locations(i)%area
-        frac_data(i) = locations(i)%frac
-        mask_data(i) = 1  ! 1 for all active VIC grid cells
-    END DO
-
-    END SUBROUTINE unpack_vic_domain
-
-    !--------------------------------------------------------------------------
-    !> @brief   Unpack the VIC domain structure
-    !--------------------------------------------------------------------------
-    INTEGER FUNCTION c_to_f_index(c_index, nx, ny) RESULT(f_index)
+        IMPLICIT NONE
 
         ! INPUT/OUTPUT PARAMETERS:
-        INTEGER, INTENT(in)   :: c_index, nx, ny
-        INTEGER               :: f_index
+        INTEGER, DIMENSION(:), INTENT(inout) :: gindex  ! Number the local grid points
+        REAL(r8), DIMENSION(:), INTENT(inout) :: lon_data
+        REAL(r8), DIMENSION(:), INTENT(inout) :: lat_data
+        REAL(r8), DIMENSION(:), INTENT(inout) :: area_data
+        INTEGER, DIMENSION(:),  INTENT(inout) :: mask_data
+        REAL(r8), DIMENSION(:), INTENT(inout) :: frac_data
 
         ! LOCAL VARIABLES:
-        INTEGER               :: row, col
+        INTEGER :: i
+        TYPE(location_struct), DIMENSION(:), POINTER :: locations
 
-        ! C to fortran index translation
-        row == INT(c_index / nx)
-        col = MOD(c_index, nx)
-        f_index = 1 + row + ny * col
-    END FUNCTION c_to_f_index
+        ! Associate locations pointer in local_domain structure
+        CALL c_f_pointer(local_domain%locations, locations, [local_domain%ncells])
+
+        ! Get domain information for each cell in local domain
+        DO i = 1, local_domain%ncells
+            gindex(i) = f_index(locations(i)%global_idx, &
+                                global_domain%n_nx, global_domain%n_ny)
+            lon_data(i) = locations(i)%longitude
+            lat_data(i) = locations(i)%latitude
+            area_data(i) = locations(i)%area
+            frac_data(i) = locations(i)%frac
+            mask_data(i) = 1  ! 1 for all active VIC grid cells
+        END DO
+
+    END SUBROUTINE unpack_vic_domain
 
 END MODULE lnd_comp_mct

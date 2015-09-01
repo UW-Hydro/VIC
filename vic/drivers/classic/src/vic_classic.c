@@ -255,8 +255,8 @@ main(int   argc,
                     /**************************************************
                        Compute cell physics for 1 timestep
                     **************************************************/
-                    ErrorFlag = vic_run(rec, &atmos[rec], &all_vars,
-                                        dmy, &global_param, &lake_con,
+                    ErrorFlag = vic_run(&atmos[rec], &all_vars,
+                                        &(dmy[rec]), &global_param, &lake_con,
                                         &soil_con, veg_con, veg_lib,
                                         veg_hist[rec]);
 

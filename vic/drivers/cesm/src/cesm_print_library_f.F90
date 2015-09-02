@@ -44,6 +44,9 @@ MODULE vic_cesm_print_library
 CONTAINS
 
 
+  !--------------------------------------------------------------------------
+  !> @brief   Set print library iulog
+  !--------------------------------------------------------------------------
   SUBROUTINE set_print_library_iulog(unit_num)
 
     INTEGER, INTENT(in) :: unit_num

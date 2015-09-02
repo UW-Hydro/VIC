@@ -63,7 +63,7 @@ MODULE vic_cesm_interface
        CHARACTER(len=1, kind=C_CHAR), DIMENSION(*), INTENT(in) :: caseid
        CHARACTER(len=1, kind=C_CHAR), DIMENSION(*), INTENT(in) :: runtype
        TYPE(vic_clock), INTENT(in) :: vclock
-       END FUNCTION vic_cesm_init
+     END FUNCTION vic_cesm_init
   END INTERFACE
 
   !--------------------------------------------------------------------------

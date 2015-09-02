@@ -34,18 +34,18 @@
 void
 vic_restore(char *runtype_str)
 {
-    extern all_vars_struct    *all_vars;
-    extern domain_struct       local_domain;
-    extern option_struct       options;
-    extern soil_con_struct    *soil_con;
-    extern veg_con_struct    **veg_con;
-    extern filenames_struct    filenames;
+    extern all_vars_struct *all_vars;
+    extern domain_struct    local_domain;
+    extern option_struct    options;
+    extern soil_con_struct *soil_con;
+    extern veg_con_struct **veg_con;
+    extern filenames_struct filenames;
 
 
-    double                     surf_temp;
-    size_t                     i;
-    size_t                     nveg;
-    unsigned short int         runtype;
+    double                  surf_temp;
+    size_t                  i;
+    size_t                  nveg;
+    unsigned short int      runtype;
 
     runtype = start_type_from_char(runtype_str);
 

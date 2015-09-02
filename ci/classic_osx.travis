@@ -1,5 +1,8 @@
 #!/usr/bin/env bash
 
+set -e  # stop on first error
+set -x  # echo each executed line
+
 DRIVER_PATH="vic/drivers/classic/"
 DRIVER_EXE="${DRIVER_PATH}vic_classic.exe"
 
@@ -14,7 +17,10 @@ function vic_before_install {
         echo "Testing on osx"
         brew update
         if [ ! -z "$BREW_INSTALLS" ]; then
-            brew install "$BREW_INSTALLS"
+            for pkg in $BREW_INSTALLS
+            do
+                brew outdated $pkg || brew upgrade $pkg || brew install $pkg
+            done
         fi
     fi
 }

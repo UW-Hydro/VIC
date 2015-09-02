@@ -27,6 +27,8 @@ function vic_before_install {
 function vic_install {
     echo vic_install
     $CC --version
+    which $CC
+    type $CC
     make full -C $DRIVER_PATH
 }
 

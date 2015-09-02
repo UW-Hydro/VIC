@@ -10,10 +10,21 @@ function vic_before_install {
         export CC=$USE_CC;
         $CC --version
     fi
+    if [ "$TRAVIS_OS_NAME"=="osx" ]; then
+        echo "Testing on osx"
+        brew update
+        if [ ! -z "$BREW_INSTALLS" ]; then
+            for pkg in $BREW_INSTALLS
+            do
+                brew outdated $pkg || brew upgrade $pkg || brew install $pkg
+            done
+        fi
+    fi
 }
 
 function vic_install {
     echo vic_install
+    $CC --version
     make full -C $DRIVER_PATH
 }
 
@@ -29,6 +40,7 @@ function vic_script {
     echo vic_script
     $DRIVER_EXE -v
     $DRIVER_EXE -o
+
 }
 
 function vic_after_success {

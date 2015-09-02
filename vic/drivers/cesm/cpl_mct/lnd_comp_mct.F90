@@ -193,6 +193,7 @@ CONTAINS
     ELSE
        iulog = shrlogunit
     ENDIF
+    CALL set_print_library_iulog(iulog)
     CALL shr_file_setLogUnit(iulog)
 
     !--- get the casename, needed for output file names

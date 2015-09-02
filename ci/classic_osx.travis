@@ -10,8 +10,12 @@ function vic_before_install {
         export CC=$USE_CC;
         $CC --version
     fi
-    if [ "$TRAVIS_OS_NAME"=="osx"]; then
+    if [ "$TRAVIS_OS_NAME"=="osx" ]; then
+        echo "Testing on osx"
         brew update
+        if [ ! -z "$BREW_INSTALLS" ]; then
+            brew install "$BREW_INSTALLS"
+        fi
     fi
 }
 

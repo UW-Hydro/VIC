@@ -37,6 +37,9 @@ matrix:
   - compiler: gcc
     os: osx
     env: TESTID=classic_osx
+  - compiler: gcc
+    os: osx
+    env: TESTID=classic_osx BREW_INSTALLS="gcc"
   # Image Driver
   - compiler: gcc
     os: linux

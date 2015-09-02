@@ -8,10 +8,13 @@ matrix:
   include:
   # Classic Driver
   - compiler: clang
+    os: linux
     env: TESTID='classic'
   - compiler: gcc
+    os: linux
     env: TESTID='classic'
   - compiler: gcc
+    os: linux
     env: TESTID=classic USE_CC=gcc-5
     addons:
       apt:
@@ -22,6 +25,7 @@ matrix:
         sources:
           - ubuntu-toolchain-r-test
   - compiler: clang
+    os: linux
     env: TESTID=classic USE_CC=clang-3.6
     addons:
       apt:
@@ -30,8 +34,12 @@ matrix:
         sources:
           - llvm-toolchain-precise-3.6
           - ubuntu-toolchain-r-test
+  - compiler: clang
+    os: osx
+    env: TESTID='classic_osx'
   # Image Driver
   - compiler: gcc
+    os: linux
     env: TESTID='image'
     addons:
       apt_packages:
@@ -39,16 +47,21 @@ matrix:
         - mpich-bin
   # Python Driver
   - compiler: clang
+    os: linux
     env: TESTID="python_2.7"
   - compiler: gcc
+    os: linux
     env: TESTID="python_2.7"
   - compiler: clang
+    os: linux
     env: TESTID="python_3.4"
   - compiler: gcc
+    os: linux
     env: TESTID="python_3.4"
   allow_failures:
   # Image Driver
   - compiler: gcc
+    os: linux
     env: TESTID='image'
     addons:
       apt_packages:

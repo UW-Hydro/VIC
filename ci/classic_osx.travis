@@ -10,6 +10,8 @@ function vic_before_install {
         export CC=$USE_CC;
         $CC --version
     fi
+    brew update
+    brew install $CC
 }
 
 function vic_install {
@@ -29,6 +31,7 @@ function vic_script {
     echo vic_script
     $DRIVER_EXE -v
     $DRIVER_EXE -o
+
 }
 
 function vic_after_success {

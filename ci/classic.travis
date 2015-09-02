@@ -22,7 +22,6 @@ function vic_before_install {
             done
         fi
     fi
-    brew doctor
 }
 
 function vic_install {

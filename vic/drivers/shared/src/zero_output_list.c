@@ -24,8 +24,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  *****************************************************************************/
 
-#include <vic_def.h>
-#include <vic_run.h>
+#include <vic_driver_shared.h>
 
 /******************************************************************************
  * @brief    This routine resets the values of all output variables to 0.

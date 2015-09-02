@@ -36,10 +36,10 @@ matrix:
           - ubuntu-toolchain-r-test
   - compiler: gcc
     os: osx
-    env: TESTID=classic_osx
+    env: TESTID=classic
   - compiler: gcc
     os: osx
-    env: TESTID=classic_osx BREW_INSTALLS="gcc"
+    env: TESTID=classic BREW_INSTALLS="gcc"
   # Image Driver
   - compiler: gcc
     os: linux

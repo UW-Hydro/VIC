@@ -13,9 +13,6 @@ function vic_before_install {
     if [ "$TRAVIS_OS_NAME"=="osx"]; then
         brew update
     fi
-
-    fi
-
 }
 
 function vic_install {

@@ -162,8 +162,7 @@ CONTAINS
     CHARACTER(len=VICMAXSTRING)                 :: starttype
     CHARACTER(len=VICMAXSTRING)                 :: calendar
     LOGICAL                                     :: exists  ! true if file exists
-    CHARACTER(len=*), PARAMETER                 :: subname = 'lnd_init_mct'
-    CHARACTER(len=*), PARAMETER                 :: FORMAT = "('("//TRIM(subname)//") :',A)"
+    CHARACTER(len=*), PARAMETER                 :: subname = '(lnd_init_mct)'
 
     !--- Local Variables for C/Fortran Interface
     INTEGER(C_INT)                              :: errno
@@ -180,22 +179,17 @@ CONTAINS
     !--- copy/hand the mpicom from the driver to the vic model
     errno = vic_cesm_init_mpi(mpicom_lnd)
     IF (errno /= 0) THEN
-       CALL shr_sys_abort(subname//':: vic_cesm_init_mpi returned a errno /= 0')
+       CALL shr_sys_abort(subname//' ERROR: vic_cesm_init_mpi returned a errno /= 0')
     ENDIF
 
     !--- get unit number for vic log file
     !--- setup vic log file
     !--- set shr unit number to vic log file
     CALL shr_file_getLogUnit(shrlogunit)
-    IF (mpicom_lnd == 0) THEN
-       ! Tony look here INQUIRE(file='lnd_modelio.nml'//TRIM(inst_suffix), exist=exists)
-       exists = .FALSE.
-       IF (exists) THEN
-          iulog = shr_file_getUnit()
-          !Tony look here CALL shr_file_setIO('lnd_modelio.nml'//TRIM(inst_suffix), iulog)
-          CALL shr_file_setIO('lnd_modelio.nml', iulog)
-       ENDIF
-       WRITE(iulog, FORMAT) 'VIC land model initialization'
+    IF (mytask == 0) THEN
+       iulog = shr_file_getUnit()
+       CALL shr_file_setIO('lnd_modelio.nml', iulog)
+       WRITE(iulog, *) subname,': VIC land model initialization'
     ELSE
        iulog = shrlogunit
     ENDIF
@@ -226,7 +220,8 @@ CONTAINS
     vclock%stop_flag = .FALSE.
     vclock%calendar = calendar
 
-    WRITE(iulog, *) 'EClock current time:'
+    WRITE(iulog, '(1x,2a,4i8)') subname,' EClock current time ',year,month,day,seconds
+    WRITE(iulog, *) subname,' vclock current time:'
     CALL print_vic_clock(vclock)
 
     !--- VIC global parameter file (namelist)
@@ -239,7 +234,7 @@ CONTAINS
     !--- Call the VIC init function
     errno = vic_cesm_init(vic_global_param_file, caseid, starttype, vclock)
     IF (errno /= 0) THEN
-       CALL shr_sys_abort(subname//':: vic_cesm_init returned a errno /= 0')
+       CALL shr_sys_abort(subname//' ERROR: vic_cesm_init returned a errno /= 0')
     ENDIF
 
     ! initialize the gsmap, inputs are
@@ -294,9 +289,6 @@ CONTAINS
          sno_present=.FALSE., sno_prognostic=.FALSE.)
     CALL seq_infodata_PutData(infodata, lnd_nx = nx_global, lnd_ny = ny_global)
 
-    !--- set share log unit back to generic one
-    CALL shr_file_setLogLevel(shrloglev)
-
     !--- deallocate domain arrays
     DEALLOCATE(gindex)
     DEALLOCATE(lon_data)
@@ -304,6 +296,9 @@ CONTAINS
     DEALLOCATE(area_data)
     DEALLOCATE(mask_data)
     DEALLOCATE(frac_data)
+
+    !--- set share log unit back to generic one
+    CALL shr_file_setLogUnit(shrlogunit)
 
   END SUBROUTINE lnd_init_mct
 
@@ -332,7 +327,7 @@ CONTAINS
     !--- Local Variables
     TYPE(seq_infodata_type), POINTER :: infodata ! CESM information from the driver
     INTEGER(C_INT)                   :: errno
-    CHARACTER(len=*), PARAMETER      :: subname = 'lnd_run_mct'
+    CHARACTER(len=*), PARAMETER      :: subname = '(lnd_run_mct)'
 
     !--- set vic log unit
     CALL shr_file_getLogUnit(shrlogunit)
@@ -356,9 +351,18 @@ CONTAINS
     vclock%state_flag = seq_timemgr_RestartAlarmIsOn(EClock)
     vclock%stop_flag = seq_timemgr_StopAlarmIsOn(EClock)
 
-    !--- get time of next radiation calc for time dependent albedo calc
-    ! Tony - is this for the coupler or for the land model.  We dont need it
-    ! in VIC
+    ! tcraig, just for testing, this should probably be turned off after initial validation
+    WRITE(iulog, '(1x,2a,4i8)') subname,' EClock current time ',year,month,day,seconds
+    WRITE(iulog, *) subname,' vclock current time:'
+    CALL print_vic_clock(vclock)
+
+    !--- get time of next radiation calc for time dependent albedo calc.
+    !--- needed for time (solar angle) dependent albedo calculations.
+    !--- this is the julian day of the next radiation calculation
+    !--- defined by the atmosphere model.
+    !--- fyi, a negative number means don't compute albedos now.
+    !--- that will happen when the radiation is computed less frequently
+    !--- than the coupling frequency.
     !CALL seq_infodata_GetData(infodata, nextsw_cday=nextsw_cday)
 
     !--- import data from coupler
@@ -367,14 +371,14 @@ CONTAINS
     !--- run vic
     errno = vic_cesm_run(vclock)
     IF (errno /= 0) THEN
-       CALL shr_sys_abort(subname//':: vic_cesm_run returned a errno /= 0')
+       CALL shr_sys_abort(subname//' ERROR: vic_cesm_run returned a errno /= 0')
     ENDIF
 
     !--- export data to coupler
     CALL lnd_export_mct(l2x)
 
     !--- set share log unit back to generic one
-    CALL shr_file_setLogLevel(shrloglev)
+    CALL shr_file_setLogUnit(shrlogunit)
 
   END SUBROUTINE lnd_run_mct
 
@@ -396,13 +400,13 @@ CONTAINS
 
     !--- Local Variables
     INTEGER(C_INT) :: errno
-    CHARACTER(len=*), PARAMETER     :: subname = 'lnd_run_mct'
+    CHARACTER(len=*), PARAMETER     :: subname = '(lnd_final_mct)'
 
     !--- clean up
     errno = vic_cesm_final()
 
     IF (errno /= 0) THEN
-       CALL shr_sys_abort(subname//':: vic_cesm_final returned a errno /= 0')
+       CALL shr_sys_abort(subname//' ERROR: vic_cesm_final returned a errno /= 0')
     ENDIF
 
   END SUBROUTINE lnd_final_mct
@@ -416,7 +420,7 @@ CONTAINS
 
     TYPE(mct_aVect), INTENT(inout) :: l2x
     INTEGER :: i, lsize
-    CHARACTER(len=*), PARAMETER :: subname = 'lnd_export_mct'
+    CHARACTER(len=*), PARAMETER :: subname = '(lnd_export_mct)'
 
     lsize = mct_avect_lsize(l2x)
     l2x%rAttr(:, :) = 0.0_r8
@@ -471,7 +475,7 @@ CONTAINS
        ENDIF
 
        IF (.NOT. l2x_vic_ptr(i)%l2x_vars_set) THEN
-          CALL shr_sys_abort(subname//':: l2x export vars not set')
+          CALL shr_sys_abort(subname//' ERROR: l2x export vars not set')
        ENDIF
     END DO
 
@@ -489,6 +493,7 @@ CONTAINS
 
     !--- Local Variables
     INTEGER  :: i, lsize
+    CHARACTER(len=*), PARAMETER :: subname = '(lnd_import_mct)'
 
     DO i = 1, lsize
        x2l_vic_ptr(i)%x2l_Sa_z = x2l%rAttr(index_x2l_Sa_z, i)
@@ -561,7 +566,7 @@ CONTAINS
     INTEGER           :: num
     CHARACTER(len= 2) :: cnum
     CHARACTER(len=64) :: name
-    CHARACTER(len=32) :: subname = 'cpl_indices_set'  ! subroutine name
+    CHARACTER(len=32) :: subname = '(cpl_indices_set)'  ! subroutine name
 
     !--- Determine attribute vector indices
 
@@ -674,6 +679,7 @@ CONTAINS
 
     !--- LOCAL VARIABLES:
     INTEGER               :: row, col
+    CHARACTER(len=*), PARAMETER :: subname = '(f_index)'
 
     !--- C to fortran index translation
     row = INT(c_index / nx)
@@ -702,6 +708,7 @@ CONTAINS
     !--- LOCAL VARIABLES:
     INTEGER :: i
     TYPE(location_struct), DIMENSION(:), POINTER :: locations
+    CHARACTER(len=*), PARAMETER :: subname = '(unpack_vic_domain)'
 
     !--- Associate locations pointer in local_domain structure
     CALL c_f_pointer(local_domain%locations, locations, [local_domain%ncells])

@@ -34,9 +34,9 @@ matrix:
         sources:
           - llvm-toolchain-precise-3.6
           - ubuntu-toolchain-r-test
-  - compiler: clang
+  - compiler: gcc
     os: osx
-    env: TESTID='classic_osx'
+    env: TESTID=classic_osx
   # Image Driver
   - compiler: gcc
     os: linux

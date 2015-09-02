@@ -29,9 +29,10 @@
 
 #include <stdio.h>
 #include <vic_def.h>
+#include <vic_run.h>
 #include <vic_physical_constants.h>
 
-#define VERSION "5.0 beta 2015-July-26"
+#define VERSION "5.0 beta 2015-Septeber-2"
 #define SHORT_VERSION "5.0.beta"
 
 /******************************************************************************
@@ -95,7 +96,16 @@ typedef struct {
 
 double all_30_day_from_dmy(dmy_struct *dmy);
 double all_leap_from_dmy(dmy_struct *dmy);
+double calc_energy_balance_error(int, double, double, double, double, double);
 void calc_root_fractions(veg_con_struct *veg_con, soil_con_struct *soil_con);
+double calc_water_balance_error(int, double, double, double);
+void collect_eb_terms(energy_bal_struct, snow_data_struct, cell_data_struct,
+                      int *, int *, int *, int *, int *, double, double, double,
+                      int, int, double, int, int, double *, double,
+                      out_data_struct *);
+void collect_wb_terms(cell_data_struct, veg_var_struct, snow_data_struct,
+                      double, double, double, int, double, int, double *,
+                      double *, out_data_struct *);
 void compute_treeline(atmos_data_struct *, dmy_struct *, double, double *,
                       bool *);
 void cmd_proc(int argc, char **argv, char *globalfilename);
@@ -142,6 +152,9 @@ void num2date(double origin, double time_value, double tzoffset,
               unsigned short int calendar, unsigned short int time_units,
               dmy_struct *date);
 FILE *open_file(char string[], char type[]);
+int put_data(all_vars_struct *, atmos_data_struct *, soil_con_struct *,
+             veg_con_struct *, veg_lib_struct *veg_lib, lake_con_struct *,
+             out_data_struct *, save_data_struct *, int);
 void print_cell_data(cell_data_struct *cell, size_t nlayers, size_t nfrost,
                      size_t npet);
 void print_dmy(dmy_struct *dmy);

@@ -51,6 +51,17 @@ matrix:
   - compiler: gcc
     os: osx
     env: TESTID=image BREW_TAPS="homebrew/science" BREW_INSTALLS="gcc netcdf openmpi"
+  # CESM Driver
+  - compiler: gcc
+    os: linux
+    env: TESTID='cesm'
+    addons:
+      apt_packages:
+        - libnetcdf-dev
+        - mpich-bin
+  - compiler: gcc
+    os: osx
+    env: TESTID=cesm BREW_TAPS="homebrew/science" BREW_INSTALLS="gcc netcdf openmpi"
   # Python Driver
   - compiler: clang
     os: linux
@@ -85,6 +96,14 @@ matrix:
       apt_packages:
         - libnetcdf-dev
         - mpich-bin
+  # CESM Driver
+  - compiler: gcc
+    os: linux
+    env: TESTID='cesm'
+    addons:
+     apt_packages:
+       - libnetcdf-dev
+       - mpich-bin
 
 before_install:
   - source ci/${TESTID}.travis

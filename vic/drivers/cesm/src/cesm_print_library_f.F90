@@ -187,7 +187,6 @@ CONTAINS
     WRITE(iulog, *) '    l2x_Sl_ddvel       : ', l2x_data%l2x_Sl_ddvel
     WRITE(iulog, *) '    l2x_Sl_fv          : ', l2x_data%l2x_Sl_fv
     WRITE(iulog, *) '    l2x_Sl_ram1        : ', l2x_data%l2x_Sl_ram1
-    WRITE(iulog, *) '    l2x_Sl_soilw       : ', l2x_data%l2x_Sl_soilw
     WRITE(iulog, *) '    l2x_Sl_logz0       : ', l2x_data%l2x_Sl_logz0
     WRITE(iulog, *) '    l2x_Fall_taux      : ', l2x_data%l2x_Fall_taux
     WRITE(iulog, *) '    l2x_Fall_tauy      : ', l2x_data%l2x_Fall_tauy

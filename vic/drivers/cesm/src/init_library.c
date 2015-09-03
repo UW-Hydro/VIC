@@ -163,42 +163,42 @@ initialize_x2l_data()
 
     size_t                  i;
 
-    log_info("Setting all x2l fields to %f", MISSING);
+    log_info("Setting all x2l fields to %f", SHR_CONST_SPVAL);
 
     for (i = 0; i < local_domain.ncells; i++) {
-        x2l_vic[i].x2l_Sa_z = MISSING;
-        x2l_vic[i].x2l_Sa_u = MISSING;
-        x2l_vic[i].x2l_Sa_v = MISSING;
-        x2l_vic[i].x2l_Sa_ptem = MISSING;
-        x2l_vic[i].x2l_Sa_shum = MISSING;
-        x2l_vic[i].x2l_Sa_pbot = MISSING;
-        x2l_vic[i].x2l_Sa_tbot = MISSING;
-        x2l_vic[i].x2l_Faxa_lwdn = MISSING;
-        x2l_vic[i].x2l_Faxa_rainc = MISSING;
-        x2l_vic[i].x2l_Faxa_rainl = MISSING;
-        x2l_vic[i].x2l_Faxa_snowc = MISSING;
-        x2l_vic[i].x2l_Faxa_snowl = MISSING;
-        x2l_vic[i].x2l_Faxa_swndr = MISSING;
-        x2l_vic[i].x2l_Faxa_swvdr = MISSING;
-        x2l_vic[i].x2l_Faxa_swndf = MISSING;
-        x2l_vic[i].x2l_Faxa_swvdf = MISSING;
-        x2l_vic[i].x2l_Sa_co2prog = MISSING;
-        x2l_vic[i].x2l_Sa_co2diag = MISSING;
-        x2l_vic[i].x2l_Faxa_bcphidry = MISSING;
-        x2l_vic[i].x2l_Faxa_bcphodry = MISSING;
-        x2l_vic[i].x2l_Faxa_bcphiwet = MISSING;
-        x2l_vic[i].x2l_Faxa_ocphidry = MISSING;
-        x2l_vic[i].x2l_Faxa_ocphodry = MISSING;
-        x2l_vic[i].x2l_Faxa_ocphiwet = MISSING;
-        x2l_vic[i].x2l_Faxa_dstwet1 = MISSING;
-        x2l_vic[i].x2l_Faxa_dstwet2 = MISSING;
-        x2l_vic[i].x2l_Faxa_dstwet3 = MISSING;
-        x2l_vic[i].x2l_Faxa_dstwet4 = MISSING;
-        x2l_vic[i].x2l_Faxa_dstdry1 = MISSING;
-        x2l_vic[i].x2l_Faxa_dstdry2 = MISSING;
-        x2l_vic[i].x2l_Faxa_dstdry3 = MISSING;
-        x2l_vic[i].x2l_Faxa_dstdry4 = MISSING;
-        x2l_vic[i].x2l_Flrr_flood = MISSING;
+        x2l_vic[i].x2l_Sa_z = SHR_CONST_SPVAL;
+        x2l_vic[i].x2l_Sa_u = SHR_CONST_SPVAL;
+        x2l_vic[i].x2l_Sa_v = SHR_CONST_SPVAL;
+        x2l_vic[i].x2l_Sa_ptem = SHR_CONST_SPVAL;
+        x2l_vic[i].x2l_Sa_shum = SHR_CONST_SPVAL;
+        x2l_vic[i].x2l_Sa_pbot = SHR_CONST_SPVAL;
+        x2l_vic[i].x2l_Sa_tbot = SHR_CONST_SPVAL;
+        x2l_vic[i].x2l_Faxa_lwdn = SHR_CONST_SPVAL;
+        x2l_vic[i].x2l_Faxa_rainc = SHR_CONST_SPVAL;
+        x2l_vic[i].x2l_Faxa_rainl = SHR_CONST_SPVAL;
+        x2l_vic[i].x2l_Faxa_snowc = SHR_CONST_SPVAL;
+        x2l_vic[i].x2l_Faxa_snowl = SHR_CONST_SPVAL;
+        x2l_vic[i].x2l_Faxa_swndr = SHR_CONST_SPVAL;
+        x2l_vic[i].x2l_Faxa_swvdr = SHR_CONST_SPVAL;
+        x2l_vic[i].x2l_Faxa_swndf = SHR_CONST_SPVAL;
+        x2l_vic[i].x2l_Faxa_swvdf = SHR_CONST_SPVAL;
+        x2l_vic[i].x2l_Sa_co2prog = SHR_CONST_SPVAL;
+        x2l_vic[i].x2l_Sa_co2diag = SHR_CONST_SPVAL;
+        x2l_vic[i].x2l_Faxa_bcphidry = SHR_CONST_SPVAL;
+        x2l_vic[i].x2l_Faxa_bcphodry = SHR_CONST_SPVAL;
+        x2l_vic[i].x2l_Faxa_bcphiwet = SHR_CONST_SPVAL;
+        x2l_vic[i].x2l_Faxa_ocphidry = SHR_CONST_SPVAL;
+        x2l_vic[i].x2l_Faxa_ocphodry = SHR_CONST_SPVAL;
+        x2l_vic[i].x2l_Faxa_ocphiwet = SHR_CONST_SPVAL;
+        x2l_vic[i].x2l_Faxa_dstwet1 = SHR_CONST_SPVAL;
+        x2l_vic[i].x2l_Faxa_dstwet2 = SHR_CONST_SPVAL;
+        x2l_vic[i].x2l_Faxa_dstwet3 = SHR_CONST_SPVAL;
+        x2l_vic[i].x2l_Faxa_dstwet4 = SHR_CONST_SPVAL;
+        x2l_vic[i].x2l_Faxa_dstdry1 = SHR_CONST_SPVAL;
+        x2l_vic[i].x2l_Faxa_dstdry2 = SHR_CONST_SPVAL;
+        x2l_vic[i].x2l_Faxa_dstdry3 = SHR_CONST_SPVAL;
+        x2l_vic[i].x2l_Faxa_dstdry4 = SHR_CONST_SPVAL;
+        x2l_vic[i].x2l_Flrr_flood = SHR_CONST_SPVAL;
         x2l_vic[i].x2l_vars_set = false;
     }
 }
@@ -214,38 +214,37 @@ initialize_l2x_data()
 
     size_t                  i;
 
-    log_info("Setting all l2x fields to %f", MISSING);
+    log_info("Setting all l2x fields to %f", SHR_CONST_SPVAL);
 
     for (i = 0; i < local_domain.ncells; i++) {
-        l2x_vic[i].l2x_Sl_t = MISSING;
-        l2x_vic[i].l2x_Sl_tref = MISSING;
-        l2x_vic[i].l2x_Sl_qref = MISSING;
-        l2x_vic[i].l2x_Sl_avsdr = MISSING;
-        l2x_vic[i].l2x_Sl_anidr = MISSING;
-        l2x_vic[i].l2x_Sl_avsdf = MISSING;
-        l2x_vic[i].l2x_Sl_anidf = MISSING;
-        l2x_vic[i].l2x_Sl_snowh = MISSING;
-        l2x_vic[i].l2x_Sl_u10 = MISSING;
-        l2x_vic[i].l2x_Sl_ddvel = MISSING;
-        l2x_vic[i].l2x_Sl_fv = MISSING;
-        l2x_vic[i].l2x_Sl_ram1 = MISSING;
-        l2x_vic[i].l2x_Sl_soilw = MISSING;
-        l2x_vic[i].l2x_Sl_logz0 = MISSING;
-        l2x_vic[i].l2x_Fall_taux = MISSING;
-        l2x_vic[i].l2x_Fall_tauy = MISSING;
-        l2x_vic[i].l2x_Fall_lat = MISSING;
-        l2x_vic[i].l2x_Fall_sen = MISSING;
-        l2x_vic[i].l2x_Fall_lwup = MISSING;
-        l2x_vic[i].l2x_Fall_evap = MISSING;
-        l2x_vic[i].l2x_Fall_swnet = MISSING;
-        l2x_vic[i].l2x_Fall_fco2_lnd = MISSING;
-        l2x_vic[i].l2x_Fall_flxdst1 = MISSING;
-        l2x_vic[i].l2x_Fall_flxdst2 = MISSING;
-        l2x_vic[i].l2x_Fall_flxdst3 = MISSING;
-        l2x_vic[i].l2x_Fall_flxdst4 = MISSING;
-        l2x_vic[i].l2x_Fall_flxvoc = MISSING;
-        l2x_vic[i].l2x_Flrl_rofliq = MISSING;
-        l2x_vic[i].l2x_Flrl_rofice = MISSING;
+        l2x_vic[i].l2x_Sl_t = SHR_CONST_SPVAL;
+        l2x_vic[i].l2x_Sl_tref = SHR_CONST_SPVAL;
+        l2x_vic[i].l2x_Sl_qref = SHR_CONST_SPVAL;
+        l2x_vic[i].l2x_Sl_avsdr = SHR_CONST_SPVAL;
+        l2x_vic[i].l2x_Sl_anidr = SHR_CONST_SPVAL;
+        l2x_vic[i].l2x_Sl_avsdf = SHR_CONST_SPVAL;
+        l2x_vic[i].l2x_Sl_anidf = SHR_CONST_SPVAL;
+        l2x_vic[i].l2x_Sl_snowh = SHR_CONST_SPVAL;
+        l2x_vic[i].l2x_Sl_u10 = SHR_CONST_SPVAL;
+        l2x_vic[i].l2x_Sl_ddvel = SHR_CONST_SPVAL;
+        l2x_vic[i].l2x_Sl_fv = SHR_CONST_SPVAL;
+        l2x_vic[i].l2x_Sl_ram1 = SHR_CONST_SPVAL;
+        l2x_vic[i].l2x_Sl_logz0 = SHR_CONST_SPVAL;
+        l2x_vic[i].l2x_Fall_taux = SHR_CONST_SPVAL;
+        l2x_vic[i].l2x_Fall_tauy = SHR_CONST_SPVAL;
+        l2x_vic[i].l2x_Fall_lat = SHR_CONST_SPVAL;
+        l2x_vic[i].l2x_Fall_sen = SHR_CONST_SPVAL;
+        l2x_vic[i].l2x_Fall_lwup = SHR_CONST_SPVAL;
+        l2x_vic[i].l2x_Fall_evap = SHR_CONST_SPVAL;
+        l2x_vic[i].l2x_Fall_swnet = SHR_CONST_SPVAL;
+        l2x_vic[i].l2x_Fall_fco2_lnd = SHR_CONST_SPVAL;
+        l2x_vic[i].l2x_Fall_flxdst1 = SHR_CONST_SPVAL;
+        l2x_vic[i].l2x_Fall_flxdst2 = SHR_CONST_SPVAL;
+        l2x_vic[i].l2x_Fall_flxdst3 = SHR_CONST_SPVAL;
+        l2x_vic[i].l2x_Fall_flxdst4 = SHR_CONST_SPVAL;
+        l2x_vic[i].l2x_Fall_flxvoc = SHR_CONST_SPVAL;
+        l2x_vic[i].l2x_Flrl_rofliq = SHR_CONST_SPVAL;
+        l2x_vic[i].l2x_Flrl_rofice = SHR_CONST_SPVAL;
         l2x_vic[i].l2x_vars_set = false;
     }
 }

@@ -99,6 +99,18 @@ vic_force(void)
         }
     }
 
+    // Fraction of incoming shortwave that is direct
+    for (j = 0; j < NF; j++) {
+        for (i = 0; i < local_domain.ncells; i++) {
+            // CESM units: n/a (calculated from SW fluxes)
+            // VIC units: fraction
+            atmos[i].fdir[j] = (x2l_vic[i].x2l_Faxa_swndr +
+                                x2l_vic[i].x2l_Faxa_swvdr) /
+                               (x2l_vic[i].x2l_Faxa_swndf +
+                                x2l_vic[i].x2l_Faxa_swvdf);
+        }
+    }
+
     // Downward longwave radiation
     for (j = 0; j < NF; j++) {
         for (i = 0; i < local_domain.ncells; i++) {
@@ -138,6 +150,25 @@ vic_force(void)
         }
     }
 
+    //
+    for (j = 0; j < NF; j++) {
+        for (i = 0; i < local_domain.ncells; i++) {
+            // CESM units: 1e-6 mol/mol
+            // VIC units: mol CO2/ mol air
+            atmos[i].Catm[j] = 1e6 * x2l_vic[i].x2l_Sa_co2prog;
+        }
+    }
+
+    // incoming channel inflow
+    for (j = 0; j < NF; j++) {
+        for (i = 0; i < local_domain.ncells; i++) {
+            // CESM units: kg m-2 s-1
+            // VIC units: mm
+            atmos[i].channel_in[j] = x2l_vic[i].x2l_Flrr_flood *
+                                     global_param.snow_dt;
+        }
+    }
+
     if (options.SNOW_BAND > 1) {
         log_err("SNOW_BAND not implemented in vic_force()");
     }
@@ -174,6 +205,8 @@ vic_force(void)
         atmos[i].pressure[NR] = average(atmos[i].pressure, NF);
         atmos[i].wind[NR] = average(atmos[i].wind, NF);
         atmos[i].vp[NR] = average(atmos[i].vp, NF);
+        atmos[i].Catm[NR] = average(atmos[i].Catm, NF);
+        atmos[i].channel_in[NR] = average(atmos[i].channel_in, NF);
         atmos[i].vpd[NR] = (svp(atmos[i].air_temp[NR]) - atmos[i].vp[NR]);
         atmos[i].density[NR] = air_density(atmos[i].air_temp[NR],
                                            atmos[i].pressure[NR]);
@@ -182,8 +215,8 @@ vic_force(void)
                                              atmos[i].prec, NF);
     }
 
-    // TBD: coszen (used for some of the carbon functions), fdir (if needed)
-    // Catm, fdir (not used as far as I can tell)
+    // TBD: coszen (used for some of the carbon functions)
+    // Catm (not used as far as I can tell)
 
     // Update the veg_hist structure with the current vegetation parameters.
     // Currently only implemented for climatological values in image mode

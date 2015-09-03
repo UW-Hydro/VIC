@@ -136,7 +136,6 @@ MODULE vic_cesm_def_mod
     REAL(C_DOUBLE)  :: l2x_Sl_ddvel       !< dry deposition velocities (optional)
     REAL(C_DOUBLE)  :: l2x_Sl_fv          !< friction velocity
     REAL(C_DOUBLE)  :: l2x_Sl_ram1        !< aerodynamical resistance
-    REAL(C_DOUBLE)  :: l2x_Sl_soilw       !< volumetric soil water
     REAL(C_DOUBLE)  :: l2x_Sl_logz0       !< log z0
     REAL(C_DOUBLE)  :: l2x_Fall_taux      !< wind stress, zonal
     REAL(C_DOUBLE)  :: l2x_Fall_tauy      !< wind stress, meridional

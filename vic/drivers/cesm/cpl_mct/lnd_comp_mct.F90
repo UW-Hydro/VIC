@@ -57,7 +57,6 @@ MODULE lnd_comp_mct
   INTEGER :: index_l2x_Sl_ddvel       = 0 ! dry deposition velocities (optional)
   INTEGER :: index_l2x_Sl_fv          = 0 ! friction velocity
   INTEGER :: index_l2x_Sl_ram1        = 0 ! aerodynamical resistance
-  INTEGER :: index_l2x_Sl_soilw       = 0 ! volumetric soil water
   INTEGER :: index_l2x_Sl_logz0       = 0 ! log z0
   INTEGER :: index_l2x_Fall_taux      = 0 ! wind stress, zonal
   INTEGER :: index_l2x_Fall_tauy      = 0 ! wind stress, meridional
@@ -438,8 +437,6 @@ CONTAINS
        l2x%rAttr(index_l2x_Sl_anidf, i) = l2x_vic_ptr(i)%l2x_Sl_anidf
        l2x%rAttr(index_l2x_Sl_snowh, i) = l2x_vic_ptr(i)%l2x_Sl_snowh
        l2x%rAttr(index_l2x_Sl_u10, i) = l2x_vic_ptr(i)%l2x_Sl_u10
-       l2x%rAttr(index_l2x_Sl_ddvel, i) = l2x_vic_ptr(i)%l2x_Sl_ddvel
-       l2x%rAttr(index_l2x_Sl_soilw, i) = l2x_vic_ptr(i)%l2x_Sl_soilw
        l2x%rAttr(index_l2x_Sl_logz0, i) = l2x_vic_ptr(i)%l2x_Sl_logz0
        l2x%rAttr(index_l2x_Fall_taux, i) = l2x_vic_ptr(i)%l2x_Fall_taux
        l2x%rAttr(index_l2x_Fall_tauy, i) = l2x_vic_ptr(i)%l2x_Fall_tauy
@@ -453,6 +450,9 @@ CONTAINS
        l2x%rAttr(index_l2x_Flrl_rofice, i) = l2x_vic_ptr(i)%l2x_Flrl_rofice
 
        !--- optional fields ---
+       IF (index_l2x_Sl_ddvel /= 0) THEN
+          l2x%rAttr(index_l2x_Sl_ddvel, i) = l2x_vic_ptr(i)%l2x_Sl_ddvel
+       ENDIF
        IF (index_l2x_Fall_fco2_lnd /= 0) THEN
           l2x%rAttr(index_l2x_Fall_fco2_lnd, i) = l2x_vic_ptr(i)%l2x_Fall_fco2_lnd
        ENDIF
@@ -592,7 +592,6 @@ CONTAINS
     index_l2x_Sl_u10        = mct_avect_indexra(l2x, 'Sl_u10')
     index_l2x_Sl_ram1       = mct_avect_indexra(l2x, 'Sl_ram1')
     index_l2x_Sl_fv         = mct_avect_indexra(l2x, 'Sl_fv')
-    index_l2x_Sl_soilw      = mct_avect_indexra(l2x, 'Sl_soilw',perrwith='quiet')
     index_l2x_Sl_logz0      = mct_avect_indexra(l2x, 'Sl_logz0')
     IF (lnd_drydep) THEN
        index_l2x_Sl_ddvel = mct_avect_indexra(l2x, TRIM(drydep_fields_token))

@@ -48,6 +48,9 @@ matrix:
       apt_packages:
         - libnetcdf-dev
         - mpich-bin
+  - compiler: gcc
+    os: osx
+    env: TESTID=image BREW_TAPS="homebrew/science" BREW_INSTALLS="gcc netcdf openmpi"
   # Python Driver
   - compiler: clang
     os: linux

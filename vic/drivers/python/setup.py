@@ -32,10 +32,10 @@ QUALIFIER = ''
 FULLVERSION = VERSION
 write_version = False
 
-vic_root_rel_path = os.path.join(os.pardir, os.pardir)
-vic_root_abs_path = os.path.abspath(vic_root_rel_path)
-
-
+vic_root_rel_path = os.path.join(os.pardir, os.pardir, os.pardir)
+setup_py_path = os.path.abspath(os.path.dirname(__file__))
+vic_root_abs_path = os.path.abspath(
+    os.path.join(setup_py_path, os.pardir, os.pardir, os.pardir))
 start_dir = os.path.abspath(os.getcwd())
 setup_dir = os.path.dirname(os.path.abspath(__file__))
 os.chdir(setup_dir)
@@ -137,18 +137,19 @@ if write_version:
 # -------------------------------------------------------------------- #
 
 sources = []
-sources.extend(glob.glob(os.path.join(vic_root_abs_path, 'vic_run', 'src',
-                                      '*c')))
-sources.extend(glob.glob(os.path.join(vic_root_abs_path, 'drivers', 'shared',
+sources.extend(glob.glob(os.path.join(vic_root_abs_path, 'vic', 'vic_run',
                                       'src', '*c')))
-sources.extend(glob.glob(os.path.join(vic_root_abs_path, 'drivers', 'python',
-                                      'src', '*c')))
+sources.extend(glob.glob(os.path.join(vic_root_abs_path, 'vic', 'drivers',
+                                      'shared', 'src', '*c')))
+sources.extend(glob.glob(os.path.join(vic_root_abs_path, 'vic', 'drivers',
+                                      'python', 'src', '*c')))
 
 includes = []
-includes.append(os.path.join(vic_root_abs_path, 'vic_run', 'include', ''))
-includes.append(os.path.join(vic_root_abs_path,
+includes.append(os.path.join(vic_root_abs_path, 'vic', 'vic_run',
+                             'include', ''))
+includes.append(os.path.join(vic_root_abs_path, 'vic',
                              'drivers', 'shared', 'include', ''))
-includes.append(os.path.join(vic_root_abs_path,
+includes.append(os.path.join(vic_root_abs_path, 'vic',
                              'drivers', 'python', 'include', ''))
 
 ext_name = 'vic_core'

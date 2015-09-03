@@ -27,11 +27,11 @@ function vic_before_install {
                 brew link $pkg
             done
         fi
-		export NETCDFPATH=/usr/local
-		export MPIPATH=/usr/local
+		export TRAVIS_NETCDFPATH=/usr/local
+		export TRAVIS_MPIPATH=/usr/local
     else
-		export NETCDFPATH=/usr
-		export MPIPATH=/usr
+		export TRAVIS_NETCDFPATH=/usr
+		export TRAVIS_MPIPATH=/usr
 	fi
 
 }

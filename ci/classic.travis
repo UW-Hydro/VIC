@@ -13,6 +13,12 @@ function vic_before_install {
     fi
     if [ "$TRAVIS_OS_NAME"=="osx" ]; then
         echo "Testing on osx"
+		if [ ! -z "$BREW_TAPS" ]; then
+			for tap in $BREW_TAPS
+			do
+				brew tap $tap
+			done
+		fi
         if [ ! -z "$BREW_INSTALLS" ]; then
             brew update
             for pkg in $BREW_INSTALLS

@@ -154,6 +154,9 @@ vic_cesm_run(vic_clock vclock)
     // run vic over the domain
     vic_cesm_run_model();
 
+    // return fields to coupler
+    vic_cesm_put_data();
+
     // if output:
     vic_write();
 

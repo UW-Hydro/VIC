@@ -31,6 +31,7 @@
 
 #define MAXDIMS 10
 #define RPOINTER "rpointer.lnd"
+#define SHR_CONST_SPVAL 1.0e30
 
 /******************************************************************************
  * @brief   CESM run types
@@ -212,7 +213,6 @@ typedef struct {
     double l2x_Sl_ddvel;  /**< dry deposition velocities (optional) */
     double l2x_Sl_fv;  /**< friction velocity */
     double l2x_Sl_ram1;  /**< aerodynamical resistance */
-    double l2x_Sl_soilw;  /**< volumetric soil water */
     double l2x_Sl_logz0;  /**< log z0 */
     double l2x_Fall_taux;  /**< wind stress, zonal */
     double l2x_Fall_tauy;  /**< wind stress, meridional */

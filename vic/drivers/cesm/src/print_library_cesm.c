@@ -276,7 +276,6 @@ print_l2x_data(l2x_data_struct *l2x)
     fprintf(LOG_DEST, "\tl2x_Sl_ddvel      : %f\n", l2x->l2x_Sl_ddvel);
     fprintf(LOG_DEST, "\tl2x_Sl_fv         : %f\n", l2x->l2x_Sl_fv);
     fprintf(LOG_DEST, "\tl2x_Sl_ram1       : %f\n", l2x->l2x_Sl_ram1);
-    fprintf(LOG_DEST, "\tl2x_Sl_soilw      : %f\n", l2x->l2x_Sl_soilw);
     fprintf(LOG_DEST, "\tl2x_Sl_logz0      : %f\n", l2x->l2x_Sl_logz0);
     fprintf(LOG_DEST, "\tl2x_Fall_taux     : %f\n", l2x->l2x_Fall_taux);
     fprintf(LOG_DEST, "\tl2x_Fall_tauy     : %f\n", l2x->l2x_Fall_tauy);

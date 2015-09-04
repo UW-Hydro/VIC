@@ -99,6 +99,7 @@ void vic_nc_info(nc_file_struct *nc_hist_file, out_data_struct **out_data,
                  nc_var_struct *nc_vars);
 void vic_finalize(void);
 void vic_force(void);
+void vic_cesm_put_data(void);
 void vic_cesm_run_model(void);
 void vic_init(void);
 void vic_init_output(void);

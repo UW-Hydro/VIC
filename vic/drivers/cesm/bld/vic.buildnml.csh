@@ -1,3 +1,4 @@
 #! /bin/csh -f
 
-cd $RUNDIR
+echo "Building VIC namelists"
+./build_vic_namelist --config=vic.inputfiles.cfg

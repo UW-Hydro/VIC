@@ -1,0 +1,149 @@
+#!/usr/bin/env python
+from __future__ import print_function
+import os
+import stat
+try:
+    import argparse
+except ImportError:
+    argparse = False
+    import optparse
+try:
+    from ConfigParser import SafeConfigParser
+except ImportError:
+    from configparser import SafeConfigParser
+
+# header to put above VIC style config files
+header_template = '''# CESM-VIC Input File: {0}
+# CASEID: {1}
+'''
+
+
+def main():
+
+    # read the command line arguments
+    config_file = process_command_line()
+
+    # get CESM environment variables
+    try:
+        grid = os.environ['LND_GRID']
+        caseid = os.environ['CASEID']
+        casebld = os.environ['CASEBUILD']
+        rundir = os.environ['RUNDIR']
+        runtype = os.environ['RUN_TYPE']
+    except KeyError as e:
+        print('KeyError was raised accessing CESM environment variables')
+        raise(e)
+
+    # stop script if hybrid run is requested
+    if runtype.lower() == 'hybrid':
+        raise ValueError('Hybrid runs are not supported in RASM')
+
+    # parse the config file
+    all_grids = read_config(config_file)
+
+    # Get the config for the current LND_GRID
+    try:
+        grid_config = all_grids[grid]
+    except KeyError:
+        raise KeyError('Requested Grid "{0}" is not '
+                       'defined in {1}'.format(grid, config_file))
+
+    # copy Constants and Global Parameters to RUNDIR
+    for filekey, header_txt in [('vic_constants', 'Constants'),
+                                ('vic_global_param', 'Global Parameters')]:
+        header = header_template.format(header_txt, caseid)
+        dst_file = os.path.join(rundir, os.path.basename(grid_config[filekey]))
+
+        # if file exists so add temporarily write permissions
+        if os.path.isfile(dst_file):
+            os.chmod(dst_file, stat.S_IWUSR)
+
+        # copy file
+        copy_clean_vic_config(grid_config[filekey], dst_file,
+                              header=header, rundir=rundir, **grid_config)
+
+        # update the grid config
+        grid_config[filekey] = dst_file
+
+        # change permissions to read only
+        os.chmod(dst_file, stat.S_IRUSR | stat.S_IRGRP | stat.S_IROTH)
+
+    # write input files list
+    dst_file = os.path.join(casebld, 'vic.input_data.list')
+
+    # if file exists so add temporarily write permissions
+    if os.path.isfile(dst_file):
+        os.chmod(dst_file, stat.S_IWUSR)
+
+    write_input_data_list(grid_config, dst_file)
+    os.chmod(dst_file, stat.S_IRUSR | stat.S_IRGRP | stat.S_IROTH)
+
+
+def process_command_line():
+    """
+    Parse arguments and assign flags for further loading of variables, for
+    information on input arguments, type rout.py -h
+    """
+    # Parse arguments
+    if argparse:
+        parser = argparse.ArgumentParser()
+        parser.add_argument("--config", type=str,
+                            help="Input Configuration File")
+        args = parser.parse_args()
+        config = args.config
+    else:
+        parser = optparse.OptionParser()
+        parser.add_option("--config", dest="config",
+                          help="Input Configuration File")
+        (options, args) = parser.parse_args()
+        config = options.config
+
+    return config
+
+
+def read_config(config_file):
+    """
+    Return a dictionary with subdictionaries of all configFile options/values
+    """
+    config = SafeConfigParser()
+    config.optionxform = str
+    config.read(config_file)
+    sections = config.sections()
+    dict1 = {}
+    for section in sections:
+        options = config.options(section)
+        dict2 = {}
+        for option in options:
+            dict2[option] = config.get(section, option)
+        dict1[section] = dict2
+
+    return dict1
+
+
+def copy_clean_vic_config(src, dst, header=None, **kwargs):
+    """Copy VIC style ASCII configuratoin file from src to dst
+
+        remove comments and empty lines
+    """
+    with open(src, 'r') as fsrc:
+        with open(dst, 'w') as fdst:
+            lines = fsrc.readlines()
+            if header is not None:
+                fdst.write(header)
+            for line in lines:
+                line = line.format(**kwargs)
+                line = os.path.expandvars(line.split('#', 1)[0].strip())
+                if line:
+                    fdst.write(line + '\n')
+
+
+def write_input_data_list(files, fname):
+    """Write standard CESM input data namelist"""
+    with open(fname, 'w') as f:
+        for k, v in files.items():
+            line = '{0} = {1}\n'.format(k, v)
+            f.write(line)
+
+
+if __name__ == "__main__":
+    main()

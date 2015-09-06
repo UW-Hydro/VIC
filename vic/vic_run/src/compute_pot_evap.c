@@ -79,7 +79,6 @@ bool   ref_veg_ref_crop[] = {
 void
 compute_pot_evap(unsigned short veg_class,
                  dmy_struct    *dmy,
-                 size_t         rec,
                  double         dt,
                  double         shortwave,
                  double         net_longwave,
@@ -115,9 +114,9 @@ compute_pot_evap(unsigned short veg_class,
             rs = vic_run_veg_lib[NVegLibTypes + i].rmin;
             rarc = vic_run_veg_lib[NVegLibTypes + i].rarc;
             RGL = vic_run_veg_lib[NVegLibTypes + i].RGL;
-            lai = vic_run_veg_lib[NVegLibTypes + i].LAI[dmy[rec].month - 1];
+            lai = vic_run_veg_lib[NVegLibTypes + i].LAI[dmy->month - 1];
             albedo =
-                vic_run_veg_lib[NVegLibTypes + i].albedo[dmy[rec].month - 1];
+                vic_run_veg_lib[NVegLibTypes + i].albedo[dmy->month - 1];
         }
         else {
             rs = vic_run_veg_lib[veg_class].rmin;
@@ -126,8 +125,8 @@ compute_pot_evap(unsigned short veg_class,
             }
             rarc = vic_run_veg_lib[veg_class].rarc;
             RGL = vic_run_veg_lib[veg_class].RGL;
-            lai = vic_run_veg_lib[veg_class].LAI[dmy[rec].month - 1];
-            albedo = vic_run_veg_lib[veg_class].albedo[dmy[rec].month - 1];
+            lai = vic_run_veg_lib[veg_class].LAI[dmy->month - 1];
+            albedo = vic_run_veg_lib[veg_class].albedo[dmy->month - 1];
         }
         gsm_inv = 1.0;
         ref_crop = ref_veg_ref_crop[i];

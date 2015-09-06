@@ -290,7 +290,7 @@ create_MPI_filenames_struct_type(MPI_Datatype *mpi_type)
     MPI_Aint     *offsets;
     MPI_Datatype *mpi_types;
 
-    // nitems has to equal the number of elements in global_param_struct
+    // nitems has to equal the number of elements in filenames_struct
     nitems = 14;
     blocklengths = (int *) malloc(nitems * sizeof(int));
     if (blocklengths == NULL) {

@@ -29,9 +29,10 @@
 
 #include <stdio.h>
 #include <vic_def.h>
+#include <vic_run.h>
 #include <vic_physical_constants.h>
 
-#define VERSION "5.0 beta 2015-July-26"
+#define VERSION "5.0 beta 2015-Septeber-2"
 #define SHORT_VERSION "5.0.beta"
 
 /******************************************************************************
@@ -76,6 +77,43 @@ typedef struct {
 } out_data_file_struct;
 
 /******************************************************************************
+ * @brief   This structure stores moisture state information for differencing
+ *          with next time step.
+ *****************************************************************************/
+typedef struct {
+    double total_soil_moist;      /**< total column soil moisture [mm] */
+    double surfstor;              /**< surface water storage [mm] */
+    double swe;                   /**< snow water equivalent [mm] */
+    double wdew;                  /**< canopy interception [mm] */
+} save_data_struct;
+
+/******************************************************************************
+ * @brief   This structure stores output information for one variable.
+ *****************************************************************************/
+typedef struct {
+    char varname[20];        /**< name of variable */
+    bool write;              /**< FALSE = don't write; TRUE = write */
+    char format[10];         /**< format, when written to an ascii file;
+                                should match the desired fprintf format specifier, e.g. %.4f */
+    unsigned short int type;  /**< type, when written to a binary file;
+                                 OUT_TYPE_USunsigned short  = unsigned short int
+                                 OUT_TYPE_SINT   = short int
+                                 OUT_TYPE_FLOAT  = single precision floating point
+                                 OUT_TYPE_DOUBLE = double precision floating point */
+    double mult;             /**< multiplier, when written to a binary file */
+    unsigned short int aggtype;  /**< type of aggregation to use;
+                                    AGG_TYPE_AVG    = take average value over agg interval
+                                    AGG_TYPE_BEG    = take value at beginning of agg interval
+                                    AGG_TYPE_END    = take value at end of agg interval
+                                    AGG_TYPE_MAX    = take maximum value over agg interval
+                                    AGG_TYPE_MIN    = take minimum value over agg interval
+                                    AGG_TYPE_SUM    = take sum over agg interval */
+    unsigned int nelem;          /**< number of data values */
+    double *data;            /**< array of data values */
+    double *aggdata;         /**< array of aggregated data values */
+} out_data_struct;
+
+/******************************************************************************
  * @brief   This structure holds all variables needed for the error handling
  *          routines.
  *****************************************************************************/
@@ -95,7 +133,16 @@ typedef struct {
 
 double all_30_day_from_dmy(dmy_struct *dmy);
 double all_leap_from_dmy(dmy_struct *dmy);
+double calc_energy_balance_error(int, double, double, double, double, double);
 void calc_root_fractions(veg_con_struct *veg_con, soil_con_struct *soil_con);
+double calc_water_balance_error(int, double, double, double);
+void collect_eb_terms(energy_bal_struct, snow_data_struct, cell_data_struct,
+                      int *, int *, int *, int *, int *, double, double, double,
+                      int, int, double, int, int, double *, double,
+                      out_data_struct *);
+void collect_wb_terms(cell_data_struct, veg_var_struct, snow_data_struct,
+                      double, double, double, int, double, int, double *,
+                      double *, out_data_struct *);
 void compute_treeline(atmos_data_struct *, dmy_struct *, double, double *,
                       bool *);
 void cmd_proc(int argc, char **argv, char *globalfilename);
@@ -142,6 +189,9 @@ void num2date(double origin, double time_value, double tzoffset,
               unsigned short int calendar, unsigned short int time_units,
               dmy_struct *date);
 FILE *open_file(char string[], char type[]);
+int put_data(all_vars_struct *, atmos_data_struct *, soil_con_struct *,
+             veg_con_struct *, veg_lib_struct *veg_lib, lake_con_struct *,
+             out_data_struct *, save_data_struct *, int);
 void print_cell_data(cell_data_struct *cell, size_t nlayers, size_t nfrost,
                      size_t npet);
 void print_dmy(dmy_struct *dmy);
@@ -173,4 +223,6 @@ void print_usage(char *);
 void soil_moisture_from_water_table(soil_con_struct *soil_con, size_t nlayers);
 int valid_date(unsigned short int calendar, dmy_struct *dmy);
 void validate_parameters(void);
+void zero_output_list(out_data_struct *);
+
 #endif

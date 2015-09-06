@@ -16,7 +16,7 @@ def test_get_current_datetime():
     assert len(ffi.string(dts)) == 14
     now = datetime.datetime.now()
     now_string = now.strftime('%Y%m%d')
-    assert now_string == ffi.string(dts)[:8]
+    assert now_string == ffi.string(dts)[:8].decode()
 
 
 def test_get_logname():

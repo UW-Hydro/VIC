@@ -2,44 +2,56 @@
 from __future__ import print_function
 import os
 import stat
-try:
-    import argparse
-except ImportError:
-    argparse = False
-    import optparse
+import shutil
 try:
     from ConfigParser import SafeConfigParser
 except ImportError:
     from configparser import SafeConfigParser
+
+class VIC_Error(Exception):
+    pass
 
 # header to put above VIC style config files
 header_template = '''# CESM-VIC Input File: {0}
 # CASEID: {1}
 '''
 
+# CESM - VIC input file config
+config_file = 'vic.inputfiles.cfg'
+
 
 def main():
-
-    # read the command line arguments
-    config_file = process_command_line()
 
     # get CESM environment variables
     try:
         grid = os.environ['LND_GRID']
-        caseid = os.environ['CASEID']
         casebld = os.environ['CASEBUILD']
         rundir = os.environ['RUNDIR']
         runtype = os.environ['RUN_TYPE']
+        coderoot = os.environ['CODEROOT']
     except KeyError as e:
         print('KeyError was raised accessing CESM environment variables')
         raise(e)
+    caseid = os.path.normpath(casebld).split(os.sep)[-2]
 
     # stop script if hybrid run is requested
     if runtype.lower() == 'hybrid':
         raise ValueError('Hybrid runs are not supported in RASM')
 
+    # create vicconf if it doesn't exist already
+    confdir = os.path.join(casebld, 'vicconf')
+    if not os.path.isdir(confdir):
+        os.makedirs(confdir)
+
+    # copy input files config to
+    src_file = os.path.join(coderoot, 'lnd/vic/vic/drivers/cesm/bld', config_file)
+    dst_file = os.path.join(confdir, config_file)
+    if not os.path.isfile(dst_file):
+        shutil.copy(src_file, dst_file)
+        os.chmod(dst_file, stat.S_IWUSR | stat.S_IRUSR | stat.S_IRGRP | stat.S_IROTH)
+
     # parse the config file
-    all_grids = read_config(config_file)
+    all_grids = read_config(os.path.join(confdir, config_file))
 
     # Get the config for the current LND_GRID
     try:
@@ -47,6 +59,16 @@ def main():
     except KeyError:
         raise KeyError('Requested Grid "{0}" is not '
                        'defined in {1}'.format(grid, config_file))
+
+    # copy VIC files to confdir
+    for key in ['vic_global_param', 'vic_constants']:
+        src_file = os.path.join(coderoot, 'lnd/vic/vic/drivers/cesm/bld', grid_config[key])
+        dst_file = os.path.join(confdir, grid_config[key])
+        if not os.path.isfile(dst_file):
+            shutil.copy(src_file, dst_file)
+            os.chmod(dst_file, stat.S_IWUSR | stat.S_IRUSR | stat.S_IRGRP | stat.S_IROTH)
+        if key in grid_config:
+            grid_config[key] = dst_file
 
     # copy Constants and Global Parameters to RUNDIR
     for filekey, header_txt in [('vic_constants', 'Constants'),
@@ -69,7 +91,7 @@ def main():
         os.chmod(dst_file, stat.S_IRUSR | stat.S_IRGRP | stat.S_IROTH)
 
     # write input files list
-    dst_file = os.path.join(casebld, 'vic.input_data.list')
+    dst_file = os.path.join(casebld, 'vic.input_data_list')
 
     # if file exists so add temporarily write permissions
     if os.path.isfile(dst_file):
@@ -79,32 +101,14 @@ def main():
     os.chmod(dst_file, stat.S_IRUSR | stat.S_IRGRP | stat.S_IROTH)
 
 
-def process_command_line():
-    """
-    Parse arguments and assign flags for further loading of variables, for
-    information on input arguments, type rout.py -h
-    """
-    # Parse arguments
-    if argparse:
-        parser = argparse.ArgumentParser()
-        parser.add_argument("--config", type=str,
-                            help="Input Configuration File")
-        args = parser.parse_args()
-        config = args.config
-    else:
-        parser = optparse.OptionParser()
-        parser.add_option("--config", dest="config",
-                          help="Input Configuration File")
-        (options, args) = parser.parse_args()
-        config = options.config
-
-    return config
-
-
 def read_config(config_file):
     """
     Return a dictionary with subdictionaries of all configFile options/values
     """
+
+    if not os.path.isfile(config_file):
+        raise VIC_Error('Config File {0} does not exist'.format(config_file))
+
     config = SafeConfigParser()
     config.optionxform = str
     config.read(config_file)
@@ -141,7 +145,7 @@ def write_input_data_list(files, fname):
     """Write standard CESM input data namelist"""
     with open(fname, 'w') as f:
         for k, v in files.items():
-            line = '{0} = {1}\n'.format(k, v)
+            line = '{0} = {1}\n'.format(k, os.path.expandvars(v))
             f.write(line)
 
 

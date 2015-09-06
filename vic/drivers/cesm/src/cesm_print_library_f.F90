@@ -71,7 +71,7 @@ CONTAINS
     WRITE(iulog, *) '    current_dayseconds : ', vclock%current_dayseconds
     WRITE(iulog, *) '    state_flag         : ', vclock%state_flag
     WRITE(iulog, *) '    stop_flag          : ', vclock%stop_flag
-    WRITE(iulog, *) '    calendar           : ', vclock%calendar
+    WRITE(iulog, *) '    calendar           : ', trim(vclock%calendar)
 
   END SUBROUTINE print_vic_clock
 

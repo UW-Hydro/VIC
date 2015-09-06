@@ -216,7 +216,7 @@ CONTAINS
     vclock%current_month = month
     vclock%current_day = day
     vclock%current_dayseconds = seconds
-    vclock%state_flag =.FALSE.
+    vclock%state_flag = .FALSE.
     vclock%stop_flag = .FALSE.
     vclock%calendar = calendar
 

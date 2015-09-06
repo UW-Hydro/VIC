@@ -79,7 +79,7 @@ MODULE vic_cesm_def_mod
   !--------------------------------------------------------------------------
   !> @brief   This structure is a c type container for the x2l fields.
   !! @note    Order is important and any changes here must be echoed in
-  !!          vic_cesm_def_mod_f.F90
+  !!          vic_cesm_def.h
   !--------------------------------------------------------------------------
   TYPE, bind(C) :: x2l_data_struct
     REAL(C_DOUBLE)  :: x2l_Sa_z           !<bottom atm level height
@@ -121,7 +121,7 @@ MODULE vic_cesm_def_mod
   !--------------------------------------------------------------------------
   !> @brief   This structure is a c type container for the l2x fields.
   !! @note    Order is important and any changes here must be echoed in
-  !!          vic_cesm_def_mod_f.F90
+  !!          vic_cesm_def.h
   !--------------------------------------------------------------------------
   TYPE, bind(C) :: l2x_data_struct
     REAL(C_DOUBLE)  :: l2x_Sl_t           !< temperature

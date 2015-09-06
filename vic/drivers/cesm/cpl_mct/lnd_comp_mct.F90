@@ -4,13 +4,13 @@ MODULE lnd_comp_mct
   ! USES:
   !--------------------------------------------------------------------------
   USE mct_mod
-  USE m_GeneralGrid ,ONLY: mct_gGrid_importRattr
   USE esmf
   USE seq_cdata_mod
   USE seq_infodata_mod
   USE shr_kind_mod, ONLY : r8 => shr_kind_r8
   USE vic_cesm_interface
   USE vic_cesm_def_mod
+  USE vic_cesm_print_library
   USE, INTRINSIC :: iso_c_binding
 
   ! PUBLIC TYPES:
@@ -120,7 +120,7 @@ CONTAINS
     !--- Uses:
     USE shr_file_mod          , ONLY : shr_file_getUnit, shr_file_setLogLevel, &
                                        shr_file_getLogUnit, shr_file_getLogUnit, &
-                                       shr_file_setLogUnit
+                                       shr_file_setLogUnit, shr_file_setIO
     USE seq_timemgr_mod       , ONLY : seq_timemgr_EClockGetData
     USE mct_mod               , ONLY : mct_gsMap, mct_gGrid, mct_gGrid_importIAttr, &
                                        mct_gGrid_importRAttr, mct_gGrid_init, &
@@ -128,7 +128,7 @@ CONTAINS
     USE seq_infodata_mod      , ONLY : seq_infodata_PutData, seq_infodata_PutData
     USE seq_flds_mod
     USE vic_cesm_def_mod
-    USE vic_cesm_print_library, ONLY : print_vic_clock
+    USE vic_cesm_print_library, ONLY : set_print_library_iulog, print_vic_clock
 
     IMPLICIT NONE
 

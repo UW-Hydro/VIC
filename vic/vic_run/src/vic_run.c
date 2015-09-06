@@ -35,8 +35,7 @@ veg_lib_struct *vic_run_veg_lib;
 *               energy and water balance models, as well as frozen soils.
 ******************************************************************************/
 int
-vic_run(int                  rec,
-        atmos_data_struct   *atmos,
+vic_run(atmos_data_struct   *atmos,
         all_vars_struct     *all_vars,
         dmy_struct          *dmy,
         global_param_struct *gp,
@@ -275,11 +274,9 @@ vic_run(int                  rec,
                     pet_veg_class = veg_class;
                 }
                 displacement[0] =
-                    vic_run_veg_lib[pet_veg_class].displacement[dmy[rec].month -
-                                                                1];
+                    vic_run_veg_lib[pet_veg_class].displacement[dmy->month - 1];
                 roughness[0] =
-                    vic_run_veg_lib[pet_veg_class].roughness[dmy[rec].month -
-                                                             1];
+                    vic_run_veg_lib[pet_veg_class].roughness[dmy->month - 1];
                 overstory = vic_run_veg_lib[pet_veg_class].overstory;
                 if (p >= N_PET_TYPES_NON_NAT) {
                     if (roughness[0] == 0) {
@@ -335,14 +332,14 @@ vic_run(int                  rec,
                         calc_Nscale_factors(
                             vic_run_veg_lib[veg_class].NscaleFlag,
                             veg_con[iveg].CanopLayerBnd,
-                            vic_run_veg_lib[veg_class].LAI[dmy[rec].month - 1],
+                            vic_run_veg_lib[veg_class].LAI[dmy->month - 1],
                             soil_con->lat,
                             soil_con->lng,
                             soil_con->time_zone_lng,
-                            dmy[rec].day_in_year,
+                            dmy->day_in_year,
                             veg_var[iveg][band].NscaleFactor);
                     }
-                    if (dmy[rec].month == 1 && dmy[rec].day == 1) {
+                    if (dmy->month == 1 && dmy->day == 1) {
                         veg_var[iveg][band].AnnualNPPPrev =
                             veg_var[iveg][band].AnnualNPP;
                         veg_var[iveg][band].AnnualNPP = 0;
@@ -378,8 +375,7 @@ vic_run(int                  rec,
                                                &snow_inflow[band],
                                                tmp_wind, veg_con[iveg].root,
                                                options.Nlayer, Nveg, band, dp,
-                                               iveg, rec, veg_class,
-                                               atmos, dmy,
+                                               iveg, veg_class, atmos, dmy,
                                                &(energy[iveg][band]), gp,
                                                &(cell[iveg][band]),
                                                &(snow[iveg][band]),
@@ -421,12 +417,10 @@ vic_run(int                  rec,
     } /** end of vegetation loop **/
 
     /* Convert LAI back to global */
-    if (rec >= 0) {
-        for (iveg = 0; iveg < Nveg; iveg++) {
-            for (band = 0; band < Nbands; band++) {
-                veg_var[iveg][band].LAI *= veg_var[iveg][band].vegcover;
-                veg_var[iveg][band].Wdmax *= veg_var[iveg][band].vegcover;
-            }
+    for (iveg = 0; iveg < Nveg; iveg++) {
+        for (band = 0; band < Nbands; band++) {
+            veg_var[iveg][band].LAI *= veg_var[iveg][band].vegcover;
+            veg_var[iveg][band].Wdmax *= veg_var[iveg][band].vegcover;
         }
     }
 
@@ -517,7 +511,7 @@ vic_run(int                  rec,
                                atmos->vpd[NR] / PA_PER_KPA,
                                atmos->pressure[NR] / PA_PER_KPA,
                                atmos->density[NR], lake_var,
-                               *soil_con, gp->dt, gp->wind_h, dmy[rec],
+                               *soil_con, gp->dt, gp->wind_h, *dmy,
                                fraci);
         if (ErrorFlag == ERROR) {
             return (ERROR);
@@ -527,7 +521,7 @@ vic_run(int                  rec,
            Solve the water budget for the lake.
         **********************************************************************/
 
-        ErrorFlag = water_balance(lake_var, *lake_con, gp->dt, all_vars, rec,
+        ErrorFlag = water_balance(lake_var, *lake_con, gp->dt, all_vars,
                                   iveg, band, lakefrac, *soil_con, *veg_con);
         if (ErrorFlag == ERROR) {
             return (ERROR);

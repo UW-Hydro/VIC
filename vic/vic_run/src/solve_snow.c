@@ -78,7 +78,6 @@ solve_snow(char               overstory,
            unsigned short     iveg,
            unsigned short     band,
            double             dt,
-           size_t             rec,
            size_t             hidx,
            int                veg_class,
            int               *UnderStory,
@@ -113,8 +112,8 @@ solve_snow(char               overstory,
     double                   vp;
     double                   vpd;
 
-    month = dmy[rec].month;
-    day_in_year = dmy[rec].day_in_year;
+    month = dmy->month;
+    day_in_year = dmy->day_in_year;
 
     density = atmos->density[hidx];
     longwave = atmos->longwave[hidx];
@@ -217,7 +216,7 @@ solve_snow(char               overstory,
                                            displacement,
                                            ref_height, roughness, root,
                                            *UnderStory, band,
-                                           iveg, month, rec, hidx,
+                                           iveg, month, hidx,
                                            veg_class,
                                            CanopLayerBnd, dryFrac, atmos,
                                            layer, soil_con, veg_var);
@@ -343,8 +342,8 @@ solve_snow(char               overstory,
                                   &energy->deltaCC, &tmp_grnd_flux,
                                   &energy->latent,
                                   &energy->latent_sub, &energy->refreeze_energy,
-                                  &energy->sensible, INCLUDE_SNOW,
-                                  rec, iveg, band, snow);
+                                  &energy->sensible, INCLUDE_SNOW, iveg, band,
+                                  snow);
             if (ErrorFlag == ERROR) {
                 return (ERROR);
             }

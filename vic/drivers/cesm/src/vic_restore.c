@@ -47,6 +47,8 @@ vic_restore(char *runtype_str)
     size_t                  nveg;
     unsigned short int      runtype;
 
+    debug("In vic_restore");
+
     runtype = start_type_from_char(runtype_str);
 
     // read first forcing timestep (used in restoring model state)

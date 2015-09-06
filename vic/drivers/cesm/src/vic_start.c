@@ -62,8 +62,13 @@ vic_start(void)
     initialize_parameters();
     initialize_filenames();
 
+    debug("In vic_start");
+
     if (mpi_rank == 0) {
         // read global settings
+
+        debug("Reading global param");
+
         filep.globalparam = open_file(filenames.global, "r");
         get_global_param(filep.globalparam);
     }
@@ -72,11 +77,16 @@ vic_start(void)
     setup_logging(mpi_rank);
 
     if (mpi_rank == 0) {
+
+        debug("Reading constansts");
+
         // set model constants
         if (strcasecmp(filenames.constants, "MISSING")) {
             filep.constants = open_file(filenames.constants, "r");
             get_parameters(filep.constants);
         }
+
+        debug("Reading domain");
 
         // read domain info
         get_global_domain(filenames.domain, &global_domain);
@@ -84,6 +94,8 @@ vic_start(void)
         // add the number of vegetation type to the location info in the
         // global domain struct. This just makes life easier
         add_nveg_to_global_domain(filenames.veglib, &global_domain);
+
+        debug("Decomposing the domain");
 
         // decompose the mask
         mpi_map_decomp_domain(global_domain.ncells, mpi_size,
@@ -113,6 +125,8 @@ vic_start(void)
         // Check that model parameters are valid
         validate_parameters();
     }
+
+    debug("Brodcasting mpi structs");
 
     // broadcast global, option, param structures as well as global valies
     // such as NF and NR

@@ -50,6 +50,8 @@ vic_alloc(void)
     size_t                     i;
     size_t                     j;
 
+    debug("In vic_alloc");
+
     // allocate memory for x2l_vic structure
     x2l_vic = (x2l_data_struct *)
               malloc((size_t) local_domain.ncells *

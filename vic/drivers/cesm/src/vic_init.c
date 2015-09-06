@@ -66,6 +66,8 @@ vic_init(void)
     size_t                     d4count[4];
     size_t                     d4start[4];
 
+    debug("In vic_init");
+
     // allocate memory for variables to be read
     dvar = (double *) malloc(local_domain.ncells *
                              sizeof(double));

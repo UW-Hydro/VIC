@@ -54,6 +54,8 @@ vic_init_output(void)
     int                        status;
     size_t                     i;
 
+    debug("In vic_init_output");
+
     // initialize the output data structures
     for (i = 0; i < local_domain.ncells; i++) {
         put_data(&(all_vars[i]), &(atmos[i]), &(soil_con[i]), veg_con[i],

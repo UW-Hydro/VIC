@@ -39,6 +39,8 @@ initialize_cesm_time(void)
     extern dmy_struct          dmy;
     extern global_param_struct global_param;
 
+    debug("In initialize_cesm_time");
+
     // initialize time
     initialize_time();
 

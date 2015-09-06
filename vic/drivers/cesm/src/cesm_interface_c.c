@@ -85,6 +85,9 @@ vic_cesm_init(char     *vic_global_param_file,
               char     *runtype,
               vic_clock vclock)
 {
+
+    debug("In vic_cesm_init");
+
     // Initialize Log Destination
     initialize_log();
 
@@ -141,6 +144,9 @@ vic_cesm_init(char     *vic_global_param_file,
 int
 vic_cesm_run(vic_clock vclock)
 {
+
+    debug("In vic_cesm_run");
+
     // reset l2x fields
     initialize_l2x_data();
 
@@ -177,6 +183,9 @@ vic_cesm_run(vic_clock vclock)
 int
 vic_cesm_final()
 {
+
+    debug("In vic_cesm_final");
+
     // clean up
     vic_finalize();
 

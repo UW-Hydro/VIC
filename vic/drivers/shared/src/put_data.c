@@ -25,8 +25,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  *****************************************************************************/
 
-#include <vic_def.h>
-#include <vic_run.h>
+#include <vic_driver_shared.h>
 
 /******************************************************************************
  * @brief    This routine converts data units, and stores finalized values in
@@ -76,8 +75,8 @@ put_data(all_vars_struct   *all_vars,
     short                      j;
     double                     dt_sec;
     double                     out_dt_sec;
-    unsigned                   out_step_ratio;
-    static unsigned            step_count;
+    unsigned int               out_step_ratio;
+    static unsigned int        step_count;
     static int                 Tfoliage_fbcount_total;
     static int                 Tcanopy_fbcount_total;
     static int                 Tsnowsurf_fbcount_total;
@@ -103,7 +102,7 @@ put_data(all_vars_struct   *all_vars,
     frost_slope = soil_con->frost_slope;
     dt_sec = global_param.dt;
     out_dt_sec = global_param.out_dt;
-    out_step_ratio = (unsigned) (out_dt_sec / dt_sec);
+    out_step_ratio = (unsigned int) (out_dt_sec / dt_sec);
     if (rec >= 0) {
         step_count++;
     }
@@ -160,7 +159,7 @@ put_data(all_vars_struct   *all_vars,
     out_data[OUT_FDIR].data[0] = atmos->fdir[NR];
     out_data[OUT_LONGWAVE].data[0] = atmos->longwave[NR];
     out_data[OUT_PAR].data[0] = atmos->par[NR];
-    out_data[OUT_PREC].data[0] = atmos->out_prec;    // mm over grid cell
+    out_data[OUT_PREC].data[0] = atmos->out_prec;  // mm over grid cell
     out_data[OUT_PRESSURE].data[0] = atmos->pressure[NR] / PA_PER_KPA;
     out_data[OUT_QAIR].data[0] = CONST_EPS * atmos->vp[NR] /
                                  atmos->pressure[NR];
@@ -168,7 +167,7 @@ put_data(all_vars_struct   *all_vars,
     out_data[OUT_REL_HUMID].data[0] = FRACT_TO_PERCENT * atmos->vp[NR] /
                                       (atmos->vp[NR] + atmos->vpd[NR]);
     if (options.LAKES && lake_con->Cl[0] > 0) {
-        out_data[OUT_LAKE_CHAN_IN].data[0] = atmos->channel_in[NR]; // mm over grid cell
+        out_data[OUT_LAKE_CHAN_IN].data[0] = atmos->channel_in[NR];  // mm over grid cell
     }
     else {
         out_data[OUT_LAKE_CHAN_IN].data[0] = 0;
@@ -365,8 +364,8 @@ put_data(all_vars_struct   *all_vars,
                             out_data[OUT_LAKE_ICE_HEIGHT].data[0] =
                                 lake_var.hice;
                             out_data[OUT_LAKE_SWE].data[0] = lake_var.swe /
-                                                             lake_var.areai; // m over lake ice
-                            out_data[OUT_LAKE_SWE_V].data[0] = lake_var.swe; // m3
+                                                             lake_var.areai;  // m over lake ice
+                            out_data[OUT_LAKE_SWE_V].data[0] = lake_var.swe;  // m3
                         }
                         else {
                             out_data[OUT_LAKE_ICE].data[0] = 0.0;
@@ -376,11 +375,11 @@ put_data(all_vars_struct   *all_vars,
                             out_data[OUT_LAKE_SWE_V].data[0] = 0.0;
                         }
                         out_data[OUT_LAKE_DSWE_V].data[0] = lake_var.swe -
-                                                            lake_var.swe_save;    // m3
+                                                            lake_var.swe_save;  // m3
                         out_data[OUT_LAKE_DSWE].data[0] =
                             (lake_var.swe -
                              lake_var.swe_save) * MM_PER_M /
-                            soil_con->cell_area;                                                               // mm over gridcell
+                            soil_con->cell_area;  // mm over gridcell
 
                         // Lake dimensions
                         out_data[OUT_LAKE_AREA_FRAC].data[0] = Cv * Clake;
@@ -408,10 +407,10 @@ put_data(all_vars_struct   *all_vars,
                         if (out_data[OUT_LAKE_SURF_AREA].data[0] > 0) {
                             out_data[OUT_LAKE_MOIST].data[0] =
                                 (lake_var.volume /
-                                 soil_con->cell_area) * MM_PER_M;                                         // mm over gridcell
+                                 soil_con->cell_area) * MM_PER_M;  // mm over gridcell
                             out_data[OUT_SURFSTOR].data[0] =
                                 (lake_var.volume /
-                                 soil_con->cell_area) * MM_PER_M;                                         // same as OUT_LAKE_MOIST
+                                 soil_con->cell_area) * MM_PER_M;  // same as OUT_LAKE_MOIST
                         }
                         else {
                             out_data[OUT_LAKE_MOIST].data[0] = 0;
@@ -420,40 +419,40 @@ put_data(all_vars_struct   *all_vars,
 
                         // Lake moisture fluxes
                         out_data[OUT_LAKE_BF_IN_V].data[0] =
-                            lake_var.baseflow_in;                      // m3
+                            lake_var.baseflow_in;  // m3
                         out_data[OUT_LAKE_BF_OUT_V].data[0] =
-                            lake_var.baseflow_out;                       // m3
+                            lake_var.baseflow_out;  // m3
                         out_data[OUT_LAKE_CHAN_IN_V].data[0] =
-                            lake_var.channel_in;                        // m3
+                            lake_var.channel_in;  // m3
                         out_data[OUT_LAKE_CHAN_OUT_V].data[0] =
-                            lake_var.runoff_out;                         // m3
-                        out_data[OUT_LAKE_EVAP_V].data[0] = lake_var.evapw; // m3
-                        out_data[OUT_LAKE_PREC_V].data[0] = lake_var.prec; // m3
-                        out_data[OUT_LAKE_RCHRG_V].data[0] = lake_var.recharge; // m3
-                        out_data[OUT_LAKE_RO_IN_V].data[0] = lake_var.runoff_in; // m3
+                            lake_var.runoff_out;  // m3
+                        out_data[OUT_LAKE_EVAP_V].data[0] = lake_var.evapw;  // m3
+                        out_data[OUT_LAKE_PREC_V].data[0] = lake_var.prec;  // m3
+                        out_data[OUT_LAKE_RCHRG_V].data[0] = lake_var.recharge;  // m3
+                        out_data[OUT_LAKE_RO_IN_V].data[0] = lake_var.runoff_in;  // m3
                         out_data[OUT_LAKE_VAPFLX_V].data[0] =
-                            lake_var.vapor_flux;                       // m3
+                            lake_var.vapor_flux;  // m3
                         out_data[OUT_LAKE_BF_IN].data[0] =
                             lake_var.baseflow_in * MM_PER_M /
-                            soil_con->cell_area;                                                  // mm over gridcell
+                            soil_con->cell_area;  // mm over gridcell
                         out_data[OUT_LAKE_BF_OUT].data[0] =
                             lake_var.baseflow_out * MM_PER_M /
-                            soil_con->cell_area;                                                    // mm over gridcell
+                            soil_con->cell_area;  // mm over gridcell
                         out_data[OUT_LAKE_CHAN_OUT].data[0] =
                             lake_var.runoff_out * MM_PER_M /
-                            soil_con->cell_area;                                                    // mm over gridcell
+                            soil_con->cell_area;  // mm over gridcell
                         out_data[OUT_LAKE_EVAP].data[0] = lake_var.evapw *
                                                           MM_PER_M /
-                                                          soil_con->cell_area;          // mm over gridcell
+                                                          soil_con->cell_area;  // mm over gridcell
                         out_data[OUT_LAKE_RCHRG].data[0] = lake_var.recharge *
                                                            MM_PER_M /
-                                                           soil_con->cell_area;             // mm over gridcell
+                                                           soil_con->cell_area;  // mm over gridcell
                         out_data[OUT_LAKE_RO_IN].data[0] = lake_var.runoff_in *
                                                            MM_PER_M /
-                                                           soil_con->cell_area;              // mm over gridcell
+                                                           soil_con->cell_area;  // mm over gridcell
                         out_data[OUT_LAKE_VAPFLX].data[0] =
                             lake_var.vapor_flux * MM_PER_M /
-                            soil_con->cell_area;                                                  // mm over gridcell
+                            soil_con->cell_area;  // mm over gridcell
                     } // End if options.LAKES etc.
                 } // End if ThisAreaFract etc.
             } // End loop over bands
@@ -519,9 +518,8 @@ put_data(all_vars_struct   *all_vars,
         out_data[OUT_SMLIQFRAC].data[index] =
             out_data[OUT_SOIL_LIQ].data[index] /
             out_data[OUT_SOIL_MOIST].data[index];
-        out_data[OUT_SMFROZFRAC].data[index] = 1 -
-                                               out_data[OUT_SMLIQFRAC].data[
-            index];
+        out_data[OUT_SMFROZFRAC].data[index] = \
+            1 - out_data[OUT_SMLIQFRAC].data[index];
     }
     if (rec >= 0) {
         out_data[OUT_DELSOILMOIST].data[0] -= save_data->total_soil_moist;
@@ -552,7 +550,7 @@ put_data(all_vars_struct   *all_vars,
 
     // Carbon Terms
     if (options.CARBON) {
-        out_data[OUT_RHET].data[0] *= dt_sec / SEC_PER_DAY; // convert to gC/m2d
+        out_data[OUT_RHET].data[0] *= dt_sec / SEC_PER_DAY;  // convert to gC/m2d
         out_data[OUT_NEE].data[0] = out_data[OUT_NPP].data[0] -
                                     out_data[OUT_RHET].data[0];
     }
@@ -560,9 +558,9 @@ put_data(all_vars_struct   *all_vars,
     /********************
        Check Water Balance
     ********************/
-    inflow = out_data[OUT_PREC].data[0] + out_data[OUT_LAKE_CHAN_IN].data[0]; // mm over grid cell
+    inflow = out_data[OUT_PREC].data[0] + out_data[OUT_LAKE_CHAN_IN].data[0];  // mm over grid cell
     outflow = out_data[OUT_EVAP].data[0] + out_data[OUT_RUNOFF].data[0] +
-              out_data[OUT_BASEFLOW].data[0];                                                           // mm over grid cell
+              out_data[OUT_BASEFLOW].data[0];  // mm over grid cell
     storage = 0.;
     for (index = 0; index < options.Nlayer; index++) {
         if (options.MOISTFRACT) {
@@ -586,49 +584,24 @@ put_data(all_vars_struct   *all_vars,
        Check Energy Balance
     ********************/
     if (options.FULL_ENERGY) {
-        out_data[OUT_ENERGY_ERROR].data[0] = calc_energy_balance_error(rec,
-                                                                       out_data[
-                                                                           OUT_NET_SHORT].data[
-                                                                           0] +
-                                                                       out_data[
-                                                                           OUT_NET_LONG].data[
-                                                                           0],
-                                                                       out_data[
-                                                                           OUT_LATENT].data[
-                                                                           0] +
-                                                                       out_data[
-                                                                           OUT_LATENT_SUB].data[
-                                                                           0],
-                                                                       out_data[
-                                                                           OUT_SENSIBLE].data[
-                                                                           0] +
-                                                                       out_data[
-                                                                           OUT_ADV_SENS].data[
-                                                                           0],
-                                                                       out_data[
-                                                                           OUT_GRND_FLUX].data[
-                                                                           0] +
-                                                                       out_data[
-                                                                           OUT_DELTAH].data[
-                                                                           0] +
-                                                                       out_data[
-                                                                           OUT_FUSION].data[
-                                                                           0],
-                                                                       out_data[
-                                                                           OUT_ADVECTION].data[
-                                                                           0] -
-                                                                       out_data[
-                                                                           OUT_DELTACC].data[
-                                                                           0] +
-                                                                       out_data[
-                                                                           OUT_SNOW_FLUX].data[
-                                                                           0] +
-                                                                       out_data[
-                                                                           OUT_RFRZ_ENERGY].data[
-                                                                           0]);
+        out_data[OUT_ENERGY_ERROR].data[0] = \
+            calc_energy_balance_error(rec,
+                                      out_data[OUT_NET_SHORT].data[0] +
+                                      out_data[OUT_NET_LONG].data[0],
+                                      out_data[OUT_LATENT].data[0] +
+                                      out_data[OUT_LATENT_SUB].data[0],
+                                      out_data[OUT_SENSIBLE].data[0] +
+                                      out_data[OUT_ADV_SENS].data[0],
+                                      out_data[OUT_GRND_FLUX].data[0] +
+                                      out_data[OUT_DELTAH].data[0] +
+                                      out_data[OUT_FUSION].data[0],
+                                      out_data[OUT_ADVECTION].data[0] -
+                                      out_data[OUT_DELTACC].data[0] +
+                                      out_data[OUT_SNOW_FLUX].data[0] +
+                                      out_data[OUT_RFRZ_ENERGY].data[0]);
     }
     else {
-        out_data[OUT_ENERGY_ERROR].data[0] = 0; // Perhaps this should be replaced with a NODATA value in this case
+        out_data[OUT_ENERGY_ERROR].data[0] = 0;  // Perhaps this should be replaced with a NODATA value in this case
     }
 
     /******************************************************************************************
@@ -760,7 +733,7 @@ collect_wb_terms(cell_data_struct cell,
         tmp_evap += veg_var.canopyevap;
         out_data[OUT_EVAP_CANOP].data[0] += veg_var.canopyevap * AreaFactor;
     }
-    out_data[OUT_EVAP].data[0] += tmp_evap * AreaFactor; // mm over gridcell
+    out_data[OUT_EVAP].data[0] += tmp_evap * AreaFactor;  // mm over gridcell
 
     /** record potential evap **/
     out_data[OUT_PET_SATSOIL].data[0] += cell.pot_evap[0] * AreaFactor;

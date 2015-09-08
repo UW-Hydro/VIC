@@ -150,7 +150,9 @@ vic_cesm_put_data()
 
                 // albedo: direct , visible
                 // CESM units: unitless
-                albedo = AreaFactor * (atmos->shortwave[NR] / (atmos->shortwave[NR] - energy.NetShortAtmos));
+                albedo = AreaFactor *
+                         (atmos->shortwave[NR] /
+                          (atmos->shortwave[NR] - energy.NetShortAtmos));
                 l2x_vic[i].l2x_Sl_avsdr += albedo;
 
                 // albedo: direct , near-ir
@@ -230,7 +232,8 @@ vic_cesm_put_data()
 
                 // sensible heat flux
                 // CESM units: W m-2
-                l2x_vic[i].l2x_Fall_sen += -1 * AreaFactor * energy.AtmosSensible;
+                l2x_vic[i].l2x_Fall_sen += -1 * AreaFactor *
+                                           energy.AtmosSensible;
 
                 // upward longwave heat flux
                 // CESM units: W m-2
@@ -249,7 +252,8 @@ vic_cesm_put_data()
                     evap += snow.canopy_vapor_flux * MM_PER_M;
                     evap += veg_var.canopyevap;
                 }
-                l2x_vic[i].l2x_Fall_evap += -1 * AreaFactor * evap / global_param.dt;
+                l2x_vic[i].l2x_Fall_evap += -1 * AreaFactor * evap /
+                                            global_param.dt;
 
                 // heat flux shortwave net
                 l2x_vic[i].l2x_Fall_swnet += AreaFactor *

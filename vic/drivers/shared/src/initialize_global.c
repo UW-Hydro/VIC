@@ -76,5 +76,4 @@ initialize_global()
     global_param.calendar = CALENDAR_STANDARD;
     global_param.time_units = TIME_UNITS_DAYS;
     global_param.time_origin_num = MISSING;
-    strcpy(global_param.caseid, "MISSING");
 }

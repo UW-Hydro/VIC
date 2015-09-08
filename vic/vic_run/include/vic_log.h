@@ -43,6 +43,7 @@
 
 #include <stdio.h>
 #include <errno.h>
+#include <execinfo.h>
 #include <string.h>
 
 // Set the log level
@@ -63,11 +64,12 @@ void finalize_logging(void);
 void get_current_datetime(char *cdt);
 void get_logname(const char *path, int id, char *filename);
 void initialize_log(void);
+void print_trace(void);
 void setup_logging(int id);
+
 
 // Macros for logging
 #define clean_errno() (errno == 0 ? "None" : strerror(errno))
-#define clean_ncerrno(e) (nc_strerror(e))
 
 // Debug Level
 #if LOG_LVL < 10
@@ -107,16 +109,15 @@ void setup_logging(int id);
 
 // Error Level is always active
 #ifdef NO_LINENOS
-#define log_err(M, ...) fprintf(LOG_DEST, "[ERROR] errno: %s: " M "\n", \
-                                clean_errno(), ## __VA_ARGS__); exit(1);
-#define log_ncerr(e) fprintf(LOG_DEST, "[ERROR] errno: %s \n", \
-                             clean_ncerrno(e)); exit(1);
+#define log_err(M, ...) print_trace(); fprintf(LOG_DEST, \
+                                               "[ERROR] errno: %s: " M "\n", \
+                                               clean_errno(), ## __VA_ARGS__); \
+    exit(1);
 #else
-#define log_err(M, ...) fprintf(LOG_DEST, "[ERROR] %s:%d: errno: %s: " M "\n", \
-                                __FILE__, __LINE__, \
-                                clean_errno(), ## __VA_ARGS__); exit(1);
-#define log_ncerr(e) fprintf(LOG_DEST, "[ERROR] %s:%d: errno: %s \n", __FILE__, \
-                             __LINE__, clean_ncerrno(e)); exit(1);
+#define log_err(M, ...) print_trace(); fprintf(LOG_DEST, \
+                                               "[ERROR] %s:%d: errno: %s: " M "\n", __FILE__, __LINE__, \
+                                               clean_errno(), ## __VA_ARGS__); \
+    exit(1);
 #endif
 
 // These depend on previously defined macros

@@ -515,11 +515,12 @@ put_data(all_vars_struct   *all_vars,
             out_data[OUT_SOIL_ICE].data[index];
         out_data[OUT_DELSOILMOIST].data[0] +=
             out_data[OUT_SOIL_MOIST].data[index];
-        out_data[OUT_SMLIQFRAC].data[index] =
+        log_warn("Duct tape begins here: %f %f", out_data[OUT_SOIL_LIQ].data[index], out_data[OUT_SOIL_MOIST].data[index]);
+        /*out_data[OUT_SMLIQFRAC].data[index] =
             out_data[OUT_SOIL_LIQ].data[index] /
             out_data[OUT_SOIL_MOIST].data[index];
         out_data[OUT_SMFROZFRAC].data[index] = \
-            1 - out_data[OUT_SMLIQFRAC].data[index];
+            1 - out_data[OUT_SMLIQFRAC].data[index]; TODO: figure out why soil_liq is zero in some cases */
     }
     if (rec >= 0) {
         out_data[OUT_DELSOILMOIST].data[0] -= save_data->total_soil_moist;

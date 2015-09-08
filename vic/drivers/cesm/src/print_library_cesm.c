@@ -212,7 +212,22 @@ print_vic_clock(vic_clock *vclock)
             vclock->current_dayseconds);
     fprintf(LOG_DEST, "\tstate_flag         : %d\n", vclock->state_flag);
     fprintf(LOG_DEST, "\tstop_flag          : %d\n", vclock->stop_flag);
-    fprintf(LOG_DEST, "\tcalendar           : %s\n", vclock->calendar);
+    fprintf(LOG_DEST, "\tcalendar           : %s\n", trim(vclock->calendar));
+}
+
+/******************************************************************************
+ * @brief    Print case_metadata structure.
+ *****************************************************************************/
+void
+print_case_metadata(case_metadata *cmeta)
+{
+    fprintf(LOG_DEST, "case_metadata   :\n");
+    fprintf(LOG_DEST, "\tcaseid        : %s\n", trim(cmeta->caseid));
+    fprintf(LOG_DEST, "\tcasedesc      : %s\n", trim(cmeta->casedesc));
+    fprintf(LOG_DEST, "\tstarttype     : %s\n", trim(cmeta->starttype));
+    fprintf(LOG_DEST, "\tmodel_version : %s\n", trim(cmeta->model_version));
+    fprintf(LOG_DEST, "\thostname      : %s\n", trim(cmeta->hostname));
+    fprintf(LOG_DEST, "\tusername      : %s\n", trim(cmeta->username));
 }
 
 /******************************************************************************

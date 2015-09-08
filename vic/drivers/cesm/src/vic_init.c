@@ -1050,17 +1050,19 @@ vic_init(void)
         // rescale vegetation classes to 1.0 if their sum is greater than 0.99
         // otherwise throw an error
         // TBD: Need better check for equal to 1.
-        if (veg_con[i][0].Cv_sum != 1.) {
+        if (veg_con[i][0].Cv_sum > 1.) {
             sprint_location(locstr, &(local_domain.locations[i]));
             log_warn("Cv !=  1.0 (%f) at grid cell %zd. Rescaling ...\n%s",
                      veg_con[i][0].Cv_sum, i, locstr);
             for (j = 0; j < options.NVEGTYPES; j++) {
                 vidx = veg_con_map[i].vidx[j];
                 if (vidx != -1) {
-                    veg_con[i][vidx].Cv /= veg_con[i][0].Cv_sum;
+                    ;
+                    // veg_con[i][vidx].Cv /= veg_con[i][0].Cv_sum;
                 }
             }
-            veg_con[i][0].Cv_sum = 1.;
+            // veg_con[i][0].Cv_sum = 1.;
+            log_warn("Cv_sum does not include bare soil fraction and vic_init wanted to rescale Cv for all veg types");
         }
     }
 

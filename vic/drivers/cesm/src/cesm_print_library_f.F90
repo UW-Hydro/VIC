@@ -71,7 +71,7 @@ CONTAINS
     WRITE(iulog, *) '    current_dayseconds : ', vclock%current_dayseconds
     WRITE(iulog, *) '    state_flag         : ', vclock%state_flag
     WRITE(iulog, *) '    stop_flag          : ', vclock%stop_flag
-    WRITE(iulog, *) '    calendar           : ', trim(vclock%calendar)
+    WRITE(iulog, *) '    calendar           : ', TRIM(Copy_a2s(vclock%calendar))
 
   END SUBROUTINE print_vic_clock
 
@@ -205,5 +205,17 @@ CONTAINS
     WRITE(iulog, *) '    l2x_Flrl_rofice    : ', l2x_data%l2x_Flrl_rofice
 
   END SUBROUTINE print_l2x_data
+
+  !--------------------------------------------------------------------------
+  !> @brief   copy char array to string
+  !--------------------------------------------------------------------------
+  PURE FUNCTION Copy_a2s(a)  RESULT (s)    ! copy char array to string
+    CHARACTER,INTENT(IN) :: a(:)
+    CHARACTER(SIZE(a)) :: s
+    INTEGER :: i
+    DO i = 1,SIZE(a)
+      s(i:i) = a(i)
+    END DO
+  END FUNCTION Copy_a2s
 
 END MODULE vic_cesm_print_library

@@ -790,7 +790,8 @@ calendar_from_char(char *cal_str)
     else if (strcasecmp("PROLEPTIC_GREGORIAN", cal_str) == 0) {
         return CALENDAR_PROLEPTIC_GREGORIAN;
     }
-    else if (strcasecmp("NOLEAP", cal_str) == 0) {
+    else if ((strcasecmp("NOLEAP", cal_str) == 0) ||
+             (strcasecmp("NO_LEAP", cal_str) == 0)) {
         return CALENDAR_NOLEAP;
     }
     else if (strcasecmp("365_DAY", cal_str) == 0) {

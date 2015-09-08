@@ -154,6 +154,20 @@ typedef struct {
 
 
 /******************************************************************************
+ * @brief   This structure stores clock information. See also ESMF_Clock.
+ *          Order is important and any changes here must be echoed in
+ *          vic_cesm_def_mod_f.F90
+ *****************************************************************************/
+typedef struct {
+    char caseid[MAXSTRING];
+    char casedesc[MAXSTRING];
+    char starttype[MAXSTRING];
+    char model_version[MAXSTRING];
+    char hostname[MAXSTRING];
+    char username[MAXSTRING];
+} case_metadata;
+
+/******************************************************************************
  * @brief   This structure is a c type container for the x2l fields.
  *          Order is important and any changes here must be echoed in
  *          vic_cesm_def_mod_f.F90

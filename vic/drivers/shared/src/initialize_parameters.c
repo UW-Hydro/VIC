@@ -46,7 +46,7 @@ initialize_parameters()
     param.WIND_SPEED_MIN = 0.1;
 
     // Huge Resistance Term
-    param.HUGE_RESIST = DBL_MAX;
+    param.HUGE_RESIST = 1.e20;
 
     // Surface Albedo Parameters
     param.ALBEDO_BARE_SOIL = 0.2;

@@ -62,7 +62,7 @@ get_global_domain(char          *nc_name,
         log_err("Memory allocation error in get_global_domain().");
     }
 
-    get_nc_field_int(nc_name, "run_cell", d2start, d2count, run);
+    get_nc_field_int(nc_name, "mask", d2start, d2count, run);
 
     for (y = 0, i = 0; y < global_domain->n_ny; y++) {
         for (x = 0; x < global_domain->n_nx; x++, i++) {
@@ -136,7 +136,7 @@ get_global_domain(char          *nc_name,
     get_nc_field_double(nc_name, "area",
                         d2start, d2count, var);
     for (i = 0; i < global_domain->ncells; i++) {
-        global_domain->locations[i].area = (double) var[idx[i]];
+        global_domain->locations[i].area = (double) var[idx[i]] * CONST_REARTH * CONST_REARTH;
     }
 
     // get fraction

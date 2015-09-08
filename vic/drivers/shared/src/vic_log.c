@@ -53,22 +53,22 @@ finalize_logging(void)
 void
 get_current_datetime(char *cdt)
 {
-    char         ymd[8];
+    char         ymd[MAXSTRING];
     struct tm    timeinfo;
     unsigned int seconds_since_midnight;
     time_t       curr_date_time;
 
     curr_date_time = time(NULL);
     if (curr_date_time == -1) {
-        return;
+        log_err("Something went wrong getting the current time!");
     }
 
     localtime_r(&curr_date_time, &timeinfo);
 
     seconds_since_midnight = (unsigned int) curr_date_time % CONST_CDAY;
 
-    if (strftime(ymd, 7, "%Y%m%d", &timeinfo) == 0) {
-        return;
+    if (strftime(ymd, MAXSTRING - 1, "%Y%m%d", &timeinfo) == 0) {
+        log_err("Something went wrong converting the current time info to ymd");
     }
 
     sprintf(cdt, "%s-%05d", ymd, seconds_since_midnight);
@@ -141,4 +141,31 @@ setup_logging(int id)
     else {
         log_info("Logging to stderr");
     }
+}
+
+/******************************************************************************
+ * @brief    Print traceback for current error position
+ *****************************************************************************/
+void
+print_trace(void)
+{
+    void  *array[50];
+    size_t size;
+    char **strings;
+    size_t i;
+
+    size = backtrace(array, 50);
+    strings = backtrace_symbols(array, size);
+
+    /* Note: we are ignoring the first and last stack frame
+       the first is this function, the last is the linker, neither are
+       particularly useful */
+    fprintf(LOG_DEST,
+            "---------------------------------------------------------------------------\n");
+    fprintf(LOG_DEST, "Traceback (most recent call last):\n");
+    for (i = size - 2; i > 0; i--) {
+        fprintf(LOG_DEST, "%s\n", strings[i]);
+    }
+
+    free(strings);
 }

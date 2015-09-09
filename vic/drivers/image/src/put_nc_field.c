@@ -53,14 +53,14 @@ put_nc_field_double(char   *nc_name,
                          NC_WRITE | NC_NOCLOBBER | NC_NETCDF4 | NC_CLASSIC_MODEL,
                          nc_id);
         if (status != NC_NOERR) {
-            log_ncerr(status);
+            log_err("Error opening %s", nc_name);
         }
         *open = true;
 
         // set the NC_FILL attribute
         status = nc_set_fill(*nc_id, NC_FILL, &old_fill_mode);
         if (status != NC_NOERR) {
-            log_ncerr(status);
+            log_err("Error setting fill value in %s", nc_name);
         }
     }
 
@@ -70,33 +70,34 @@ put_nc_field_double(char   *nc_name,
         // enter define mode
         status = nc_redef(*nc_id);
         if (status != NC_NOERR) {
-            log_ncerr(status);
+            log_err("Error entering define mode in %s", nc_name);
         }
         // define the variable
         status = nc_def_var(*nc_id, var_name, NC_DOUBLE, ndims, dimids,
                             &var_id);
         if (status != NC_NOERR) {
-            log_ncerr(status);
+            log_err("Error defining variable %s in %s", var_name, nc_name);
         }
         // set the fill value attribute
         status = nc_put_att_double(*nc_id, var_id, "_FillValue", NC_DOUBLE, 1,
                                    &fillval);
         if (status != NC_NOERR) {
-            log_ncerr(status);
+            log_err("Error putting _FillValue attribute to %s in %s", var_name,
+                    nc_name)
         }
         // leave define mode
         status = nc_enddef(*nc_id);
         if (status != NC_NOERR) {
-            log_ncerr(status);
+            log_err("Error ending define mode for %s in %s", var_name, nc_name);
         }
     }
     else if (status != NC_NOERR) {
-        log_ncerr(status);
+        log_err("Error getting variable id for %s in %s", var_name, nc_name);
     }
 
     status = nc_put_vara_double(*nc_id, var_id, start, count, var);
     if (status != NC_NOERR) {
-        log_ncerr(status);
+        log_err("Error writing values to %s in %s", var_name, nc_name);
     }
 
     // keep the file open
@@ -129,14 +130,14 @@ put_nc_field_int(char   *nc_name,
                          NC_WRITE | NC_NOCLOBBER | NC_NETCDF4 | NC_CLASSIC_MODEL,
                          nc_id);
         if (status != NC_NOERR) {
-            log_ncerr(status);
+            log_err("Error opening %s", nc_name);
         }
         *open = true;
 
         // set the NC_FILL attribute
         status = nc_set_fill(*nc_id, NC_FILL, &old_fill_mode);
         if (status != NC_NOERR) {
-            log_ncerr(status);
+            log_err("Error setting fill value in %s", nc_name);
         }
     }
 
@@ -146,33 +147,34 @@ put_nc_field_int(char   *nc_name,
         // enter define mode
         status = nc_redef(*nc_id);
         if (status != NC_NOERR) {
-            log_ncerr(status);
+            log_err("Error entering define mode in %s", nc_name);
         }
         // define the variable
         status = nc_def_var(*nc_id, var_name, NC_INT, ndims, dimids,
                             &var_id);
         if (status != NC_NOERR) {
-            log_ncerr(status);
+            log_err("Error defining variable %s in %s", var_name, nc_name);
         }
         // set the fill value attribute
         status = nc_put_att_int(*nc_id, var_id, "_FillValue", NC_INT, 1,
                                 &fillval);
         if (status != NC_NOERR) {
-            log_ncerr(status);
+            log_err("Error putting _FillValue attribute to %s in %s", var_name,
+                    nc_name);
         }
         // leave define mode
         status = nc_enddef(*nc_id);
         if (status != NC_NOERR) {
-            log_ncerr(status);
+            log_err("Error ending define mode for %s in %s", var_name, nc_name);
         }
     }
     else if (status != NC_NOERR) {
-        log_ncerr(status);
+        log_err("Error getting variable id for %s in %s", var_name, nc_name);
     }
 
     status = nc_put_vara_int(*nc_id, var_id, start, count, var);
     if (status != NC_NOERR) {
-        log_ncerr(status);
+        log_err("Error writing values to %s in %s", var_name, nc_name);
     }
 
     // keep the file open

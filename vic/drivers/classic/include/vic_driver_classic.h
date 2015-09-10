@@ -55,6 +55,7 @@ void initialize_atmos(atmos_data_struct *, dmy_struct *, FILE **,
                       veg_lib_struct *, veg_con_struct *, veg_hist_struct **,
                       soil_con_struct *, out_data_file_struct *,
                       out_data_struct *);
+void initialize_forcing_files(void);
 int initialize_model_state(all_vars_struct *, global_param_struct *,
                            filep_struct, size_t, size_t, size_t, double,
                            soil_con_struct *, veg_con_struct *,

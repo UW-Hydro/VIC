@@ -1468,41 +1468,4 @@ typedef struct {
     veg_var_struct **veg_var;     /**< Stores vegetation variables */
 } all_vars_struct;
 
-/******************************************************************************
- * @brief   This structure stores moisture state information for differencing
- *          with next time step.
- *****************************************************************************/
-typedef struct {
-    double total_soil_moist;      /**< total column soil moisture [mm] */
-    double surfstor;              /**< surface water storage [mm] */
-    double swe;                   /**< snow water equivalent [mm] */
-    double wdew;                  /**< canopy interception [mm] */
-} save_data_struct;
-
-/******************************************************************************
- * @brief   This structure stores output information for one variable.
- *****************************************************************************/
-typedef struct {
-    char varname[20];        /**< name of variable */
-    bool write;              /**< FALSE = don't write; TRUE = write */
-    char format[10];         /**< format, when written to an ascii file;
-                                should match the desired fprintf format specifier, e.g. %.4f */
-    unsigned short int type;  /**< type, when written to a binary file;
-                                 OUT_TYPE_USunsigned short  = unsigned short int
-                                 OUT_TYPE_SINT   = short int
-                                 OUT_TYPE_FLOAT  = single precision floating point
-                                 OUT_TYPE_DOUBLE = double precision floating point */
-    double mult;             /**< multiplier, when written to a binary file */
-    unsigned short int aggtype;  /**< type of aggregation to use;
-                                    AGG_TYPE_AVG    = take average value over agg interval
-                                    AGG_TYPE_BEG    = take value at beginning of agg interval
-                                    AGG_TYPE_END    = take value at end of agg interval
-                                    AGG_TYPE_MAX    = take maximum value over agg interval
-                                    AGG_TYPE_MIN    = take minimum value over agg interval
-                                    AGG_TYPE_SUM    = take sum over agg interval */
-    unsigned int nelem;          /**< number of data values */
-    double *data;            /**< array of data values */
-    double *aggdata;         /**< array of aggregated data values */
-} out_data_struct;
-
 #endif

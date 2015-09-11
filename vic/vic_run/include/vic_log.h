@@ -55,7 +55,7 @@
 // | INFO      | < 20             |
 // | DEBUG     | < 10             |
 #ifndef LOG_LVL
-#define LOG_LVL 5
+#define LOG_LVL 25
 #endif
 
 FILE *LOG_DEST;

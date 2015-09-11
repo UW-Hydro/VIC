@@ -42,6 +42,7 @@ domain_struct       global_domain;
 domain_struct       local_domain;
 global_param_struct global_param;
 lake_con_struct     lake_con;
+MPI_Datatype        mpi_domain_struct_type;
 MPI_Datatype        mpi_global_struct_type;
 MPI_Datatype        mpi_location_struct_type;
 MPI_Datatype        mpi_nc_file_struct_type;
@@ -50,7 +51,6 @@ MPI_Datatype        mpi_param_struct_type;
 int                *mpi_map_local_array_sizes = NULL;
 int                *mpi_map_global_array_offsets = NULL;
 int                 mpi_rank;
-int                 mpi_size;
 nc_file_struct      nc_hist_file;
 nc_var_struct       nc_vars[N_OUTVAR_TYPES];
 option_struct       options;
@@ -65,60 +65,14 @@ veg_hist_struct   **veg_hist = NULL;
 veg_lib_struct    **veg_lib = NULL;
 
 /******************************************************************************
- * @brief    Initialize VIC MPI communicator
- *****************************************************************************/
-int
-vic_cesm_init_mpi(int MPI_COMM_VIC_F)
-{
-    // Set the VIC MPI communicator
-    MPI_COMM_VIC = MPI_Comm_f2c(MPI_COMM_VIC_F);
-
-    return 0;
-}
-
-/******************************************************************************
  * @brief    Initialization function for CESM driver
  *****************************************************************************/
 int
-vic_cesm_init(char     *vic_global_param_file,
-              char     *caseid,
-              char     *runtype,
-              vic_clock vclock)
+vic_cesm_init(vic_clock     *vclock,
+              case_metadata *cmeta)
 {
-
-    debug("In vic_cesm_init");
-
-    // Initialize Log Destination
-    initialize_log();
-
     // read global parameters
-    vic_start();
-
-    if (mpi_rank == 0) {
-        // Set driver specific filenames and paths
-        strcpy(filenames.global, vic_global_param_file);
-        strcpy(filenames.log_path, "");  // write log files to cwd
-        strcpy(filenames.result_dir, ""); // write result files to cwd
-
-        // caseid
-        strcpy(global_param.caseid, caseid);
-
-        // Unpack the vic_clock structure
-        // Model timestep
-        global_param.dt = (double) vclock.timestep;
-        global_param.model_steps_per_day =
-            (int) ((double) SEC_PER_DAY / global_param.dt);
-
-        // Start date/time
-        global_param.startyear = vclock.current_year;
-        global_param.startmonth = vclock.current_month;
-        global_param.startday = vclock.current_day;
-        global_param.startsec = vclock.current_dayseconds;
-        global_param.nrecs = 1;
-
-        // Calendar
-        global_param.calendar = calendar_from_char(vclock.calendar);
-    }
+    vic_start(vclock, cmeta);
 
     // Initialize time
     initialize_cesm_time();
@@ -130,7 +84,7 @@ vic_cesm_init(char     *vic_global_param_file,
     vic_init();
 
     // restore model state, either using a cold start or from a restart file
-    vic_restore(runtype);
+    vic_restore(trim(cmeta->starttype));
 
     // initialize output structures
     vic_init_output();
@@ -142,17 +96,14 @@ vic_cesm_init(char     *vic_global_param_file,
  * @brief    Run function for CESM driver
  *****************************************************************************/
 int
-vic_cesm_run(vic_clock vclock)
+vic_cesm_run(vic_clock *vclock)
 {
-
-    debug("In vic_cesm_run");
-
     // reset l2x fields
     initialize_l2x_data();
 
     // advance the clock
     advance_time();
-    assert_time_insync(&vclock, &dmy);
+    assert_time_insync(vclock, &dmy);
 
     // read forcing data
     vic_force();
@@ -167,7 +118,7 @@ vic_cesm_run(vic_clock vclock)
     vic_write();
 
     // if save:
-    if (vclock.state_flag) {
+    if (vclock->state_flag) {
         vic_store();
     }
 
@@ -183,9 +134,6 @@ vic_cesm_run(vic_clock vclock)
 int
 vic_cesm_final()
 {
-
-    debug("In vic_cesm_final");
-
     // clean up
     vic_finalize();
 

@@ -36,10 +36,13 @@ double numdate = MISSING;
 void
 initialize_cesm_time(void)
 {
+    extern size_t              current;
     extern dmy_struct          dmy;
     extern global_param_struct global_param;
 
     debug("In initialize_cesm_time");
+
+    current = 0;
 
     // initialize time
     initialize_time();
@@ -65,8 +68,11 @@ initialize_cesm_time(void)
 void
 advance_time(void)
 {
+    extern size_t              current;
     extern dmy_struct          dmy;
     extern global_param_struct global_param;
+
+    current++;
 
     numdate += dt_time_units;
 

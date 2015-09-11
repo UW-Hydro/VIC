@@ -31,7 +31,8 @@ MODULE lnd_comp_mct
   INTEGER :: iulog   ! vic log file unit number
   INTEGER :: shrlogunit, shrloglev   ! generic log unit
   INTEGER :: year, month, day, seconds
-  TYPE(vic_clock) :: vclock
+  TYPE(vic_clock), TARGET :: vclock
+  TYPE(case_metadata), TARGET :: cmeta
 
   ! Access global variables in VIC C
   TYPE(domain_struct), bind(C, name='local_domain') :: local_domain
@@ -157,15 +158,22 @@ CONTAINS
     TYPE(mct_gsMap),  POINTER                   :: GSMap_lnd
     TYPE(mct_gGrid),  POINTER                   :: dom_lnd
     TYPE(seq_infodata_type), POINTER            :: infodata
-    CHARACTER(len=VICMAXSTRING)                 :: caseid
-    CHARACTER(len=VICMAXSTRING)                 :: starttype
-    CHARACTER(len=VICMAXSTRING)                 :: calendar
+    CHARACTER(KIND=C_CHAR, len=VICMAXSTRING)    :: caseid
+    CHARACTER(KIND=C_CHAR, len=VICMAXSTRING)    :: casedesc
+    CHARACTER(KIND=C_CHAR, len=VICMAXSTRING)    :: starttype
+    CHARACTER(KIND=C_CHAR, len=VICMAXSTRING)    :: version
+    CHARACTER(KIND=C_CHAR, len=VICMAXSTRING)    :: hostname
+    CHARACTER(KIND=C_CHAR, len=VICMAXSTRING)    :: username
+    CHARACTER(KIND=C_CHAR, len=VICMAXSTRING)    :: calendar
     LOGICAL                                     :: exists  ! true if file exists
     CHARACTER(len=*), PARAMETER                 :: subname = '(lnd_init_mct)'
 
     !--- Local Variables for C/Fortran Interface
     INTEGER(C_INT)                              :: errno
     CHARACTER(len=VICMAXSTRING, kind=C_CHAR)    :: vic_global_param_file
+
+    !--- initialize the VIC logging to stderr (for now)
+    CALL initialize_log()
 
     !--- initialize the field index values, subroutine is below in this file
     CALL cpl_indices_set()
@@ -176,10 +184,7 @@ CONTAINS
     CALL MPI_COMM_RANK(mpicom_lnd, mytask, ierr)
 
     !--- copy/hand the mpicom from the driver to the vic model
-    errno = vic_cesm_init_mpi(mpicom_lnd)
-    IF (errno /= 0) THEN
-       CALL shr_sys_abort(subname//' ERROR: vic_cesm_init_mpi returned a errno /= 0')
-    ENDIF
+    CALL initialize_mpi(mpicom_lnd)
 
     !--- get unit number for vic log file
     !--- setup vic log file
@@ -201,6 +206,17 @@ CONTAINS
     !--- get the starttype, seq_infodata_start_type_[start,cont,brnch] = clean start, restart, branch
     CALL seq_infodata_GetData(infodata, start_type=starttype)
 
+    !--- get other metadata
+    CALL seq_infodata_GetData(infodata, case_desc=casedesc, model_version=version, &
+                              hostname=hostname, username=username)
+
+    cmeta%caseid = Copy_s2a(caseid)
+    cmeta%casedesc = Copy_s2a(casedesc)
+    cmeta%starttype = Copy_s2a(starttype)
+    cmeta%model_version = Copy_s2a(version)
+    cmeta%hostname = Copy_s2a(hostname)
+    cmeta%username = Copy_s2a(username)
+
     !--- get some clock info
     CALL seq_timemgr_EClockGetData(EClock, &
          dtime=dtime, &
@@ -218,21 +234,23 @@ CONTAINS
     vclock%current_dayseconds = seconds
     vclock%state_flag = .FALSE.
     vclock%stop_flag = .FALSE.
-    vclock%calendar = calendar
+    vclock%calendar = Copy_s2a(calendar)
 
     WRITE(iulog, '(1x,2a,4i8)') subname,' EClock current time ',year,month,day,seconds
     WRITE(iulog, *) subname,' vclock current time:'
     CALL print_vic_clock(vclock)
 
     !--- VIC global parameter file (namelist)
-    IF(PRESENT(NLFilename)) THEN
-       vic_global_param_file = NLFilename
-    ELSE
-       vic_global_param_file = 'vic.globalconfig.txt'
-    ENDIF
+    ! commenting out because it was yielding a drv_in <-- need to rethink this
+    !IF(PRESENT(NLFilename)) THEN
+    !   vic_global_param_file = NLFilename
+    !ELSE
+    !   vic_global_param_file = 'vic.globalconfig.txt'
+    !ENDIF
+    vic_global_param_file = 'vic.globalconfig.txt'
 
     !--- Call the VIC init function
-    errno = vic_cesm_init(vic_global_param_file, caseid, starttype, vclock)
+    errno = vic_cesm_init(vclock, cmeta)
     IF (errno /= 0) THEN
        CALL shr_sys_abort(subname//' ERROR: vic_cesm_init returned a errno /= 0')
     ENDIF
@@ -445,7 +463,6 @@ CONTAINS
        l2x%rAttr(index_l2x_Fall_lwup, i) = l2x_vic_ptr(i)%l2x_Fall_lwup
        l2x%rAttr(index_l2x_Fall_evap, i) = l2x_vic_ptr(i)%l2x_Fall_evap
        l2x%rAttr(index_l2x_Fall_swnet, i) = l2x_vic_ptr(i)%l2x_Fall_swnet
-       l2x%rAttr(index_l2x_Fall_flxvoc, i) = l2x_vic_ptr(i)%l2x_Fall_flxvoc
        l2x%rAttr(index_l2x_Flrl_rofliq, i) = l2x_vic_ptr(i)%l2x_Flrl_rofliq
        l2x%rAttr(index_l2x_Flrl_rofice, i) = l2x_vic_ptr(i)%l2x_Flrl_rofice
 
@@ -473,6 +490,9 @@ CONTAINS
        ENDIF
        IF (index_l2x_Fall_flxdst4 /= 0) THEN
           l2x%rAttr(index_l2x_Fall_flxdst4, i) = l2x_vic_ptr(i)%l2x_Fall_flxdst4
+       ENDIF
+       IF (index_l2x_Fall_flxvoc /= 0) THEN
+          l2x%rAttr(index_l2x_Fall_flxvoc, i) = l2x_vic_ptr(i)%l2x_Fall_flxvoc
        ENDIF
 
        IF (.NOT. l2x_vic_ptr(i)%l2x_vars_set) THEN
@@ -713,9 +733,18 @@ CONTAINS
     !--- Associate locations pointer in local_domain structure
     CALL c_f_pointer(local_domain%locations, locations, [local_domain%ncells])
 
+    WRITE(iulog, *) subname, 'global_domain%n_nx', global_domain%n_nx
+    WRITE(iulog, *) subname, 'global_domain%n_ny', global_domain%n_ny
+
+    if (global_domain%n_nx <= 0) then
+       WRITE(iulog, *) '[WARN]', subname, 'global domain is not filled, duct tape begins here'
+       global_domain%n_nx = 275
+       global_domain%n_ny = 205
+    endif
+
     !--- Get domain information for each cell in local domain
     DO i = 1, local_domain%ncells
-       gindex(i) = f_index(locations(i)%global_idx, &
+       gindex(i) = f_index(locations(i)%io_idx, &
                            global_domain%n_nx, global_domain%n_ny)
        lon_data(i) = locations(i)%longitude
        lat_data(i) = locations(i)%latitude
@@ -725,5 +754,19 @@ CONTAINS
     END DO
 
   END SUBROUTINE unpack_vic_domain
+
+  !--------------------------------------------------------------------------
+  !> @brief   Copy fortran string to character array
+  !--------------------------------------------------------------------------
+  PURE FUNCTION Copy_s2a(s)  RESULT (a)   ! copy s(1:Clen(s)) to char array
+    CHARACTER(*),INTENT(IN) :: s
+    CHARACTER(kind=C_CHAR)  :: a(LEN(s))
+    INTEGER                 :: i
+
+    DO i = 1,LEN(s) - 1 ! last char is null
+       a(i) = s(i:i)
+    END DO
+    a(LEN(s)) = C_NULL_CHAR
+  END FUNCTION Copy_s2a
 
 END MODULE lnd_comp_mct

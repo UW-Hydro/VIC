@@ -24,6 +24,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  *****************************************************************************/
 
+#include <ctype.h>
 #include <vic_def.h>
 #include <vic_run.h>
 #include <vic_driver_cesm.h>
@@ -32,7 +33,8 @@
  * @brief    Wrapper function for VIC startup tasks.
  *****************************************************************************/
 void
-vic_start(void)
+vic_start(vic_clock     *vclock,
+          case_metadata *cmeta)
 {
     int                        local_ncells;
     int                        status;
@@ -45,6 +47,7 @@ vic_start(void)
     extern domain_struct       global_domain;
     extern domain_struct       local_domain;
     extern global_param_struct global_param;
+    extern MPI_Datatype        mpi_domain_struct_type;
     extern MPI_Datatype        mpi_global_struct_type;
     extern MPI_Datatype        mpi_location_struct_type;
     extern MPI_Datatype        mpi_option_struct_type;
@@ -52,41 +55,60 @@ vic_start(void)
     extern int                *mpi_map_local_array_sizes;
     extern int                *mpi_map_global_array_offsets;
     extern int                 mpi_rank;
-    extern int                 mpi_size;
     extern option_struct       options;
     extern parameters_struct   param;
 
-    // Initialize global structures
-    initialize_options();
-    initialize_global();
-    initialize_parameters();
-    initialize_filenames();
-
-    debug("In vic_start");
-
     if (mpi_rank == 0) {
-        // read global settings
+        // Initialize global structures
+        initialize_options();
+        initialize_global();
+        initialize_parameters();
+        initialize_filenames();
 
-        debug("Reading global param");
+        // read global settings
+        strcpy(filenames.global, "vic.globalconfig.txt");
 
         filep.globalparam = open_file(filenames.global, "r");
         get_global_param(filep.globalparam);
-    }
 
-    // Set Log Destination
-    setup_logging(mpi_rank);
+        // Unpack the vic_clock structure
+        // Model timestep
+        global_param.dt = (double) vclock->timestep;
+        global_param.snow_dt = (double) vclock->timestep;
+        global_param.runoff_dt = (double) vclock->timestep;
+        global_param.atmos_dt = (double) vclock->timestep;
+        global_param.out_dt = (double) vclock->timestep;
 
-    if (mpi_rank == 0) {
+        global_param.model_steps_per_day =
+            (int) ((double) SEC_PER_DAY / global_param.dt);
+        global_param.snow_steps_per_day = global_param.model_steps_per_day;
+        global_param.runoff_steps_per_day = global_param.model_steps_per_day;
+        global_param.atmos_steps_per_day = global_param.model_steps_per_day;
+        global_param.output_steps_per_day = global_param.model_steps_per_day;
 
-        debug("Reading constansts");
+        // Start date/time
+        global_param.startyear = vclock->current_year;
+        global_param.startmonth = vclock->current_month;
+        global_param.startday = vclock->current_day;
+        global_param.startsec = vclock->current_dayseconds;
+        global_param.nrecs = 1;
+
+        // Calendar
+        global_param.calendar = calendar_from_char(trim(vclock->calendar));
+        // set NR and NF
+        NF = global_param.snow_steps_per_day / global_param.model_steps_per_day;
+        if (NF == 1) {
+            NR = 0;
+        }
+        else {
+            NR = NF;
+        }
 
         // set model constants
         if (strcasecmp(filenames.constants, "MISSING")) {
             filep.constants = open_file(filenames.constants, "r");
             get_parameters(filep.constants);
         }
-
-        debug("Reading domain");
 
         // read domain info
         get_global_domain(filenames.domain, &global_domain);
@@ -95,10 +117,8 @@ vic_start(void)
         // global domain struct. This just makes life easier
         add_nveg_to_global_domain(filenames.veglib, &global_domain);
 
-        debug("Decomposing the domain");
-
         // decompose the mask
-        mpi_map_decomp_domain(global_domain.ncells, mpi_size,
+        mpi_map_decomp_domain(global_domain.ncells,
                               &mpi_map_local_array_sizes,
                               &mpi_map_global_array_offsets,
                               &mpi_map_mapping_array);
@@ -115,18 +135,12 @@ vic_start(void)
         options.Nlayer = get_nc_dimension(filenames.soil, "nlayer");
         options.NVEGTYPES = get_nc_dimension(filenames.veg, "veg_class");
         if (options.SNOW_BAND > 1) {
-            if (options.SNOW_BAND !=
-                get_nc_dimension(filenames.snowband, "snow_band")) {
-                log_err("Number of snow bands in global file does not "
-                        "match parameter file");
-            }
+            log_err("Snowbands not implemented in CESM driver");
         }
 
         // Check that model parameters are valid
         validate_parameters();
     }
-
-    debug("Brodcasting mpi structs");
 
     // broadcast global, option, param structures as well as global valies
     // such as NF and NR
@@ -208,8 +222,46 @@ vic_start(void)
         local_domain.locations[i].local_idx = i;
     }
 
+    // Set Log Destination
+    setup_logging(mpi_rank);
+
     // cleanup
     if (mpi_rank == 0) {
         free(mapped_locations);
     }
+}
+
+/******************************************************************************
+ * @brief    C equivalent of the Fortran TRIM function
+ * @note     This function returns a pointer to a substring of the original
+ *           string. If the given string was allocated dynamically, the caller
+ *           must not overwrite that pointer with the returned value, since the
+ *           original pointer must be deallocated using the same allocator with
+ *           which it was allocated.  The return value must NOT be deallocated
+ *           using free() etc.
+ *****************************************************************************/
+char *
+trim(char *str)
+{
+    char *end;
+
+    // Trim leading space
+    while (isspace(*str)) {
+        str++;
+    }
+
+    if (*str == 0) { // All spaces?
+        return str;
+    }
+
+    // Trim trailing space
+    end = str + strlen(str) - 1;
+    while (end > str && isspace(*end)) {
+        end--;
+    }
+
+    // Write new null terminator
+    *(end + 1) = 0;
+
+    return str;
 }

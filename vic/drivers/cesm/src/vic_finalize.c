@@ -66,7 +66,7 @@ vic_finalize(void)
         if (nc_hist_file.open == true) {
             status = nc_close(nc_hist_file.nc_id);
             if (status != NC_NOERR) {
-                log_ncerr(status);
+                log_err("Error closing history file %s", nc_hist_file.fname);
             }
         }
     }

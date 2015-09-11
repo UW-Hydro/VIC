@@ -40,7 +40,6 @@ get_global_param(FILE *gp)
     extern global_param_struct global_param;
     extern param_set_struct    param_set;
     extern filenames_struct    filenames;
-    extern size_t              NF, NR;
 
     char                       cmdstr[MAXSTRING];
     char                       optstr[MAXSTRING];
@@ -70,15 +69,6 @@ get_global_param(FILE *gp)
             }
             else if (strcasecmp("NODES", optstr) == 0) {
                 sscanf(cmdstr, "%*s %zu", &options.Nnode);
-            }
-            else if (strcasecmp("MODEL_STEPS_PER_DAY", optstr) == 0) {
-                sscanf(cmdstr, "%*s %zu", &global_param.model_steps_per_day);
-            }
-            else if (strcasecmp("SNOW_STEPS_PER_DAY", optstr) == 0) {
-                sscanf(cmdstr, "%*s %zu", &global_param.snow_steps_per_day);
-            }
-            else if (strcasecmp("RUNOFF_STEPS_PER_DAY", optstr) == 0) {
-                sscanf(cmdstr, "%*s %zu", &global_param.runoff_steps_per_day);
             }
             else if (strcasecmp("OUT_TIME_UNITS", optstr) == 0) {
                 sscanf(cmdstr, "%*s %s", flgstr);
@@ -330,11 +320,12 @@ get_global_param(FILE *gp)
                     options.RC_MODE = RC_JARVIS;
                 }
             }
-            else if (strcasecmp("WIND_H", optstr) == 0) {
-                sscanf(cmdstr, "%*s %lf", &global_param.wind_h);
-            }
-            else if (strcasecmp("MEASURE_H", optstr) == 0) {
-                sscanf(cmdstr, "%*s %lf", &global_param.measure_h);
+
+            /*************************************
+               Define log directory
+            *************************************/
+            else if (strcasecmp("LOG_DIR", optstr) == 0) {
+                sscanf(cmdstr, "%*s %s", filenames.log_path);
             }
 
             /*************************************
@@ -343,6 +334,9 @@ get_global_param(FILE *gp)
 
             else if (strcasecmp("CONSTANTS", optstr) == 0) {
                 sscanf(cmdstr, "%*s %s", filenames.constants);
+            }
+            else if (strcasecmp("DOMAIN", optstr) == 0) {
+                sscanf(cmdstr, "%*s %s", filenames.domain);
             }
             else if (strcasecmp("SOIL", optstr) == 0) {
                 sscanf(cmdstr, "%*s %s", filenames.soil);
@@ -447,13 +441,6 @@ get_global_param(FILE *gp)
                 else {
                     options.LAI_SRC = LAI_FROM_VEGLIB;
                 }
-            }
-            else if (strcasecmp("ROOT_ZONES", optstr) == 0) {
-                sscanf(cmdstr, "%*s %zu", &options.ROOT_ZONES);
-            }
-            else if (strcasecmp("SNOW_BAND", optstr) == 0) {
-                sscanf(cmdstr, "%*s %zu %s", &options.SNOW_BAND,
-                       filenames.snowband);
             }
             else if (strcasecmp("LAKES", optstr) == 0) {
                 sscanf(cmdstr, "%*s %s", flgstr);
@@ -575,150 +562,6 @@ get_global_param(FILE *gp)
        Check for undefined required parameters
     ******************************************/
 
-    // Validate snow model time step
-    if (global_param.snow_steps_per_day == 0) {
-        log_err("Snow model time steps per day has not been defined.  Make "
-                "sure that the global file defines SNOW_STEPS_PER_DAY.");
-    }
-    else if (global_param.model_steps_per_day != 1 &&
-             global_param.snow_steps_per_day !=
-             global_param.model_steps_per_day) {
-        log_err("If the model step is smaller than daily, the snow model "
-                "should run at the same time step as the rest of the model.");
-    }
-    else if (global_param.snow_steps_per_day < MIN_SUBDAILY_STEPS_PER_DAY) {
-        log_err("The specified number of snow model steps per day (%zu) < "
-                "the minimum number of subdaily steps per day (%d).  Make "
-                "sure that the global file defines SNOW_STEPS_PER_DAY of at "
-                "least (%d).", global_param.snow_steps_per_day,
-                MIN_SUBDAILY_STEPS_PER_DAY,
-                MIN_SUBDAILY_STEPS_PER_DAY);
-    }
-    else if (global_param.snow_steps_per_day > MAX_SUBDAILY_STEPS_PER_DAY) {
-        log_err("The specified number of snow steps per day (%zu) > the "
-                "the maximum number of subdaily steps per day (%d).  Make "
-                "sure that the global file defines SNOW_STEPS_PER_DAY of at "
-                "most (%d).", global_param.snow_steps_per_day,
-                MAX_SUBDAILY_STEPS_PER_DAY,
-                MAX_SUBDAILY_STEPS_PER_DAY);
-    }
-    else if (global_param.snow_steps_per_day > HOURS_PER_DAY &&
-             global_param.snow_steps_per_day % HOURS_PER_DAY != 0) {
-        log_err("The specified number of snow model steps per day (%zu) is > "
-                "24 and is not evenly divided by 24.",
-                global_param.snow_steps_per_day);
-    }
-    else if (global_param.snow_steps_per_day %
-             global_param.model_steps_per_day != 0) {
-        log_err("The specified number of snow model timesteps (%zu) must be "
-                "evenly divisible by the number of model timesteps per day "
-                "(%zu)", global_param.snow_steps_per_day,
-                global_param.model_steps_per_day);
-    }
-    else {
-        global_param.snow_dt = SEC_PER_DAY /
-                               (double) global_param.snow_steps_per_day;
-    }
-
-    // Validate runoff time step
-    if (global_param.runoff_steps_per_day == 0) {
-        log_err("Runoff time steps per day has not been defined.  Make "
-                "sure that the global file defines RUNOFF_STEPS_PER_DAY.");
-    }
-    else if (global_param.runoff_steps_per_day <
-             MIN_SUBDAILY_STEPS_PER_DAY) {
-        log_err("The specified number of runoff steps per day (%zu) < "
-                "the minimum number of subdaily steps per day (%d).  Make "
-                "sure that the global file defines RUNOFF_STEPS_PER_DAY of at "
-                "least (%d).", global_param.runoff_steps_per_day,
-                MIN_SUBDAILY_STEPS_PER_DAY,
-                MIN_SUBDAILY_STEPS_PER_DAY);
-    }
-    else if (global_param.runoff_steps_per_day > HOURS_PER_DAY &&
-             global_param.runoff_steps_per_day % HOURS_PER_DAY != 0) {
-        log_err("The specified number of runoff steps per day (%zu) is > "
-                "24 and is not evenly divided by 24.",
-                global_param.runoff_steps_per_day);
-    }
-    else if (global_param.runoff_steps_per_day >
-             MAX_SUBDAILY_STEPS_PER_DAY) {
-        log_err("The specified number of runoff steps per day (%zu) > the "
-                "the maximum number of subdaily steps per day (%d).  Make "
-                "sure that the global file defines RUNOFF_STEPS_PER_DAY of at "
-                "most (%d).", global_param.runoff_steps_per_day,
-                MAX_SUBDAILY_STEPS_PER_DAY,
-                MAX_SUBDAILY_STEPS_PER_DAY);
-    }
-    else if (global_param.runoff_steps_per_day %
-             global_param.model_steps_per_day != 0) {
-        log_err("The specified number of runoff timesteps (%zu) must be "
-                "evenly divisible by the number of model timesteps per day "
-                "(%zu)", global_param.runoff_steps_per_day,
-                global_param.model_steps_per_day);
-    }
-    else {
-        global_param.runoff_dt = SEC_PER_DAY /
-                                 (double) global_param.runoff_steps_per_day;
-    }
-
-    // Validate atmos time step
-    if (global_param.atmos_steps_per_day == 0) {
-        // For image drivers, set to model timestep
-        global_param.atmos_steps_per_day = global_param.model_steps_per_day;
-    }
-    global_param.atmos_dt = SEC_PER_DAY /
-                            (double) global_param.atmos_steps_per_day;
-
-    // Validate the output step
-    if (global_param.output_steps_per_day == 0) {
-        global_param.output_steps_per_day = global_param.model_steps_per_day;
-    }
-    if (global_param.output_steps_per_day > global_param.model_steps_per_day) {
-        log_err("Invalid value for OUTPUT_STEPS_PER_DAY (%zu).  "
-                "OUTPUT_STEPS_PER_DAY must be <= MODEL_STEPS_PER_DAY (%zu)",
-                global_param.output_steps_per_day,
-                global_param.model_steps_per_day);
-    }
-    else if (global_param.model_steps_per_day %
-             global_param.output_steps_per_day != 0) {
-        log_err("Invalid value for OUTPUT_STEPS_PER_DAY (%zu).  "
-                "MODEL_STEPS_PER_DAY (%zu) must be a multiple of "
-                "OUTPUT_STEPS_PER_DAY.",
-                global_param.output_steps_per_day,
-                global_param.model_steps_per_day);
-    }
-    else if (global_param.output_steps_per_day != 1 &&
-             global_param.output_steps_per_day < MIN_SUBDAILY_STEPS_PER_DAY) {
-        log_err("The specified number of output steps per day (%zu) > 1 and < "
-                "the minimum number of subdaily steps per day (%d).  Make "
-                "sure that the global file defines OUTPUT_STEPS_PER_DAY of at "
-                "least (%d).", global_param.model_steps_per_day,
-                MIN_SUBDAILY_STEPS_PER_DAY,
-                MIN_SUBDAILY_STEPS_PER_DAY);
-    }
-    else if (global_param.output_steps_per_day >
-             MAX_SUBDAILY_STEPS_PER_DAY) {
-        log_err("The specified number of model steps per day (%zu) > the "
-                "the maximum number of subdaily steps per day (%d).  Make "
-                "sure that the global file defines MODEL_STEPS_PER_DAY of at "
-                "most (%d).", global_param.model_steps_per_day,
-                MAX_SUBDAILY_STEPS_PER_DAY,
-                MAX_SUBDAILY_STEPS_PER_DAY);
-    }
-    else {
-        global_param.out_dt = SEC_PER_DAY /
-                              (double) global_param.output_steps_per_day;
-    }
-
-    // set NR and NF
-    NF = global_param.snow_steps_per_day / global_param.model_steps_per_day;
-    if (NF == 1) {
-        NR = 0;
-    }
-    else {
-        NR = NF;
-    }
-
     // Validate result directory
     if (strcmp(filenames.result_dir, "MISSING") == 0) {
         log_err("No results directory has been defined.  Make sure that the "
@@ -743,10 +586,6 @@ get_global_param(FILE *gp)
         log_err("No vegetation library file has been defined.  Make sure "
                 "that the global file defines the vegetation library file "
                 "on the line that begins with \"VEGLIB\".");
-    }
-    if (options.ROOT_ZONES == 0) {
-        log_err("ROOT_ZONES must be defined to a positive integer greater "
-                "than 0, in the global control file.");
     }
     if (options.LAI_SRC == LAI_FROM_VEGPARAM && !options.VEGPARAM_LAI) {
         log_err("\"LAI_SRC\" was specified as \"LAI_FROM_VEGPARAM\", "

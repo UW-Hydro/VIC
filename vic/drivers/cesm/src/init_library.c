@@ -245,6 +245,6 @@ initialize_l2x_data()
         l2x_vic[i].l2x_Fall_flxvoc = SHR_CONST_SPVAL;
         l2x_vic[i].l2x_Flrl_rofliq = SHR_CONST_SPVAL;
         l2x_vic[i].l2x_Flrl_rofice = SHR_CONST_SPVAL;
-        l2x_vic[i].l2x_vars_set = false;
+        l2x_vic[i].l2x_vars_set = true;
     }
 }

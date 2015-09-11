@@ -36,15 +36,30 @@ MODULE vic_cesm_def_mod
   !!          vic_cesm_def.h
   !--------------------------------------------------------------------------
   TYPE, bind(C) :: vic_clock
-    INTEGER(C_INT)                                         :: timestep            !< timestep in seconds
-    INTEGER(C_INT16_T)                                     :: current_year        !< current year
-    INTEGER(C_INT16_T)                                     :: current_month       !< current month
-    INTEGER(C_INT16_T)                                     :: current_day         !< current day
-    INTEGER(C_INT)                                         :: current_dayseconds  !< current dayseconds
-    LOGICAL(C_BOOL)                                        :: state_flag          !< state flag
-    LOGICAL(C_BOOL)                                        :: stop_flag           !< stop flag
-    CHARACTER(len=VICMAXSTRING, kind=C_CHAR), DIMENSION(1) :: calendar            !< calendar
+    INTEGER(C_INT)         :: timestep                !< timestep in seconds
+    INTEGER(C_SHORT)       :: current_year            !< current year
+    INTEGER(C_SHORT)       :: current_month           !< current month
+    INTEGER(C_SHORT)       :: current_day             !< current day
+    INTEGER(C_INT)         :: current_dayseconds      !< current dayseconds
+    LOGICAL(C_BOOL)        :: state_flag              !< state flag
+    LOGICAL(C_BOOL)        :: stop_flag               !< stop flag
+    CHARACTER(KIND=C_CHAR) :: calendar(VICMAXSTRING)  !< calendar
   END TYPE vic_clock
+
+
+  !--------------------------------------------------------------------------
+  !> @brief   This structure stores meta data for the current case..
+  !! @note    Order is important and any changes here must be echoed in
+  !!          vic_cesm_def.h
+  !--------------------------------------------------------------------------
+  TYPE, bind(C) :: case_metadata
+    CHARACTER(KIND=C_CHAR) :: caseid(VICMAXSTRING)         !< case name
+    CHARACTER(KIND=C_CHAR) :: casedesc(VICMAXSTRING)       !< case description
+    CHARACTER(KIND=C_CHAR) :: starttype(VICMAXSTRING)      !< starttype
+    CHARACTER(KIND=C_CHAR) :: model_version(VICMAXSTRING)  !< cesm version
+    CHARACTER(KIND=C_CHAR) :: hostname(VICMAXSTRING)       !< hostname
+    CHARACTER(KIND=C_CHAR) :: username(VICMAXSTRING)       !< username
+  END TYPE case_metadata
 
   !--------------------------------------------------------------------------
   !> @brief   This type stores location information for individual grid cells.

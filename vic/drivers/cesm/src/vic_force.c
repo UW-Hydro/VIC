@@ -59,7 +59,12 @@ vic_force(void)
     // Check to make sure variables have been set by coupler
     for (i = 0; i < local_domain.ncells; i++) {
         if (!x2l_vic[i].x2l_vars_set) {
-            log_err("x2l_vars_set is false");
+            if (current == 0) {
+               make_dummy_forcings(&x2l_vic[i]);
+            }
+            else {
+                log_err("x2l_vars_set is false");
+            }
         }
     }
 
@@ -104,10 +109,15 @@ vic_force(void)
         for (i = 0; i < local_domain.ncells; i++) {
             // CESM units: n/a (calculated from SW fluxes)
             // VIC units: fraction
-            atmos[i].fdir[j] = (x2l_vic[i].x2l_Faxa_swndr +
-                                x2l_vic[i].x2l_Faxa_swvdr) /
-                               (x2l_vic[i].x2l_Faxa_swndf +
-                                x2l_vic[i].x2l_Faxa_swvdf);
+            if (atmos[i].shortwave[j] != 0.) {
+                atmos[i].fdir[j] = (x2l_vic[i].x2l_Faxa_swndr +
+                                    x2l_vic[i].x2l_Faxa_swvdr) /
+                                   (x2l_vic[i].x2l_Faxa_swndf +
+                                    x2l_vic[i].x2l_Faxa_swvdf);
+           }
+           else {
+               atmos[i].fdir[j] = 0.;
+           }
         }
     }
 
@@ -336,4 +346,49 @@ will_it_snow(double *t,
     }
 
     return 0;
+}
+
+/******************************************************************************
+ * @brief   dummy forcings for initialization (should be removed or never used)
+ *****************************************************************************/
+void
+make_dummy_forcings(x2l_data_struct *x2l)
+{
+    extern x2l_data_struct    *x2l_vic;
+    extern domain_struct       local_domain;
+
+    x2l->x2l_Sa_z = 10;  /** bottom atm level height */
+    x2l->x2l_Sa_u = 1.;  /** bottom atm level zon wind */
+    x2l->x2l_Sa_v = 1.;  /** bottom atm level mer wind */
+    x2l->x2l_Sa_ptem = 1.;  /** bottom atm level pot temp */
+    x2l->x2l_Sa_shum = 0.02;  /** bottom atm level spec hum */
+    x2l->x2l_Sa_pbot = 101325.;  /** bottom atm level pressure */
+    x2l->x2l_Sa_tbot = 1.;  /** bottom atm level temp */
+    x2l->x2l_Faxa_lwdn = 50;  /** downward lw heat flux */
+    x2l->x2l_Faxa_rainc = 0.;  /** prec: liquid "convective" */
+    x2l->x2l_Faxa_rainl = 0.;  /** prec: liquid "large scale" */
+    x2l->x2l_Faxa_snowc = 0.;  /** prec: frozen "convective" */
+    x2l->x2l_Faxa_snowl = 0.;  /** prec: frozen "large scale" */
+    x2l->x2l_Faxa_swndr = 1.;  /** sw: nir direct  downward */
+    x2l->x2l_Faxa_swvdr = 1.;  /** sw: vis direct  downward */
+    x2l->x2l_Faxa_swndf = 1.;  /** sw: nir diffuse downward */
+    x2l->x2l_Faxa_swvdf = 1.;  /** sw: vis diffuse downward */
+    x2l->x2l_Sa_co2prog = 0.;  /** bottom atm level prognostic co2 */
+    x2l->x2l_Sa_co2diag = 0.;  /** bottom atm level diagnostic co2 */
+    x2l->x2l_Faxa_bcphidry = 0.;  /** flux: Black Carbon hydrophilic dry deposition */
+    x2l->x2l_Faxa_bcphodry = 0.;  /** flux: Black Carbon hydrophobic dry deposition */
+    x2l->x2l_Faxa_bcphiwet = 0.;  /** flux: Black Carbon hydrophilic wet deposition */
+    x2l->x2l_Faxa_ocphidry = 0.;  /** flux: Organic Carbon hydrophilic dry deposition */
+    x2l->x2l_Faxa_ocphodry = 0.;  /** flux: Organic Carbon hydrophobic dry deposition */
+    x2l->x2l_Faxa_ocphiwet = 0.;  /** flux: Organic Carbon hydrophilic dry deposition */
+    x2l->x2l_Faxa_dstwet1 = 0.;  /** flux: Size 1 dust -- wet deposition */
+    x2l->x2l_Faxa_dstwet2 = 0.;  /** flux: Size 2 dust -- wet deposition */
+    x2l->x2l_Faxa_dstwet3 = 0.;  /** flux: Size 3 dust -- wet deposition */
+    x2l->x2l_Faxa_dstwet4 = 0.;  /** flux: Size 4 dust -- wet deposition */
+    x2l->x2l_Faxa_dstdry1 = 0.;  /** flux: Size 1 dust -- dry deposition */
+    x2l->x2l_Faxa_dstdry2 = 0.;  /** flux: Size 2 dust -- dry deposition */
+    x2l->x2l_Faxa_dstdry3 = 0.;  /** flux: Size 3 dust -- dry deposition */
+    x2l->x2l_Faxa_dstdry4 = 0.;  /** flux: Size 4 dust -- dry deposition */
+    x2l->x2l_Flrr_flood = 0.;  /** rtm->lnd rof (flood) flux */
+    x2l->x2l_vars_set = true; /** x2l set flag */
 }

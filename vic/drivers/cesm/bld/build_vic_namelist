@@ -29,6 +29,7 @@ def main():
         rundir = os.environ['RUNDIR']
         runtype = os.environ['RUN_TYPE']
         coderoot = os.environ['CODEROOT']
+        casedocs = os.environ['docdir']
     except KeyError as e:
         print('KeyError was raised accessing CESM environment variables')
         raise(e)
@@ -61,7 +62,7 @@ def main():
         grid_config[key] = copy_to_vicconf(coderoot, confdir, grid_config[key])
 
     # copy Constants and Global Parameters to RUNDIR
-    copy_to_rundir(grid_config, caseid, rundir, casebld)
+    copy_to_rundir(grid_config, caseid, rundir, casedocs)
 
     # write input files list
     dst_file = os.path.join(casebld, 'vic.input_data_list')
@@ -74,11 +75,12 @@ def main():
     set_readonly(dst_file)
 
 
-def copy_to_rundir(grid_config, caseid, rundir, casebld):
+def copy_to_rundir(grid_config, caseid, rundir, casedocs):
     for filekey, header_txt in [('vic_constants', 'Constants'),
                                 ('vic_global_param', 'Global Parameters')]:
         header = header_template.format(header_txt, caseid)
-        dst_file = os.path.join(rundir, os.path.basename(grid_config[filekey]))
+        fname = os.path.basename(grid_config[filekey])
+        dst_file = os.path.join(rundir, fname)
 
         # if file exists so add temporarily write permissions
         if os.path.isfile(dst_file):
@@ -87,6 +89,7 @@ def copy_to_rundir(grid_config, caseid, rundir, casebld):
         # copy file
         copy_clean_vic_config(grid_config[filekey], dst_file,
                               header=header, rundir=rundir, **grid_config)
+        shutil.copy(dst_file, os.path.join(casedocs, fname))
 
         # update the grid config
         grid_config[filekey] = dst_file

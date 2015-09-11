@@ -45,24 +45,24 @@ get_nc_field_double(char   *nc_name,
     // open the netcdf file
     status = nc_open(nc_name, NC_NOWRITE, &nc_id);
     if (status != NC_NOERR) {
-        log_ncerr(status);
+        log_err("Error opening %s", nc_name);
     }
 
     /* get NetCDF variable */
     status = nc_inq_varid(nc_id, var_name, &var_id);
     if (status != NC_NOERR) {
-        log_ncerr(status);
+        log_err("Error getting variable id for %s in %s", var_name, nc_name);
     }
 
     status = nc_get_vara_double(nc_id, var_id, start, count, var);
     if (status != NC_NOERR) {
-        log_ncerr(status);
+        log_err("Error getting values for %s in %s", var_name, nc_name);
     }
 
     // close the netcdf file
     status = nc_close(nc_id);
     if (status != NC_NOERR) {
-        log_ncerr(status);
+        log_err("Error closing %s", nc_name);
     }
 
     return status;
@@ -85,24 +85,24 @@ get_nc_field_float(char   *nc_name,
     // open the netcdf file
     status = nc_open(nc_name, NC_NOWRITE, &nc_id);
     if (status != NC_NOERR) {
-        log_ncerr(status);
+        log_err("Error opening %s", nc_name);
     }
 
     /* get NetCDF variable */
     status = nc_inq_varid(nc_id, var_name, &var_id);
     if (status != NC_NOERR) {
-        log_ncerr(status);
+        log_err("Error getting variable id for %s in %s", var_name, nc_name);
     }
 
     status = nc_get_vara_float(nc_id, var_id, start, count, var);
     if (status != NC_NOERR) {
-        log_ncerr(status);
+        log_err("Error getting values for %s in %s", var_name, nc_name);
     }
 
     // close the netcdf file
     status = nc_close(nc_id);
     if (status != NC_NOERR) {
-        log_ncerr(status);
+        log_err("Error closing %s", nc_name);
     }
 
     return status;
@@ -125,24 +125,24 @@ get_nc_field_int(char   *nc_name,
     // open the netcdf file
     status = nc_open(nc_name, NC_NOWRITE, &nc_id);
     if (status != NC_NOERR) {
-        log_ncerr(status);
+        log_err("Error opening %s", nc_name);
     }
 
     /* get NetCDF variable */
     status = nc_inq_varid(nc_id, var_name, &var_id);
     if (status != NC_NOERR) {
-        log_ncerr(status);
+        log_err("Error getting variable id for %s in %s", var_name, nc_name);
     }
 
     status = nc_get_vara_int(nc_id, var_id, start, count, var);
     if (status != NC_NOERR) {
-        log_ncerr(status);
+        log_err("Error getting values for %s in %s", var_name, nc_name);
     }
 
     // close the netcdf file
     status = nc_close(nc_id);
     if (status != NC_NOERR) {
-        log_ncerr(status);
+        log_err("Error closing %s", nc_name);
     }
 
     return status;

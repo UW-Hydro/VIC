@@ -1,8 +1,6 @@
 # VIC Global Configuration File
 
 NODES                  50
-SNOW_STEPS_PER_DAY     72
-RUNOFF_STEPS_PER_DAY   72
 OUT_TIME_UNITS         DAYS
 
 # Soil Temperature Options
@@ -39,16 +37,14 @@ RC_MODE              RC_JARVIS
 # Input Files and PATHS
 CONSTANTS        {vic_constants}
 DOMAIN           {vic_domain}
-LOG_DIR          {rundir}
+LOG_DIR          {rundir}/
 SOIL             {vic_params}
 VEGPARAM         {vic_params}
 VEGPARAM_LAI     TRUE
 LAI_SRC          LAI_FROM_VEGPARAM
 VEGLIB           {vic_params}
-SNOW_BAND        {vic_params}
-RESULT_DIR       {rundir}
-
-OUTPUT_STEPS_PER_DAY 24
+SNOW_BAND        1
+RESULT_DIR       {rundir}/
 
 N_OUTFILES  1
 OUTFILE     fluxes 21

@@ -68,9 +68,11 @@ void initialize_soil_con(soil_con_struct *soil_con);
 void initialize_state_file(nc_file_struct *nc);
 void initialize_veg_con(veg_con_struct *veg_con);
 void initialize_x2l_data(void);
+void make_dummy_forcings(x2l_data_struct *x2l);
 FILE *open_file(char *string, char *type);
 int parse_output_info(FILE *gp, out_data_struct **out_data);
 void print_atmos_data(atmos_data_struct *atmos);
+void print_case_metadata(case_metadata *cmeta);
 void print_domain(domain_struct *domain, bool print_loc);
 void print_l2x_data(l2x_data_struct *l2x);
 void print_location(location_struct *location);
@@ -89,12 +91,12 @@ double q_to_vp(double q, double p);
 void read_rpointer_file(char *fname);
 void sprint_location(char *str, location_struct *loc);
 unsigned short int start_type_from_char(char *start_str);
+char *trim(char *str);
 void vic_alloc(void);
 int vic_cesm_init_mpi(int MPI_COMM_VIC_F);
-int vic_cesm_init(char *vic_global_param_file, char *caseid, char *runtype,
-                  vic_clock vclock);
+int vic_cesm_init(vic_clock *vclock, case_metadata *cmeta);
 int vic_cesm_final(void);
-int vic_cesm_run(vic_clock vclock);
+int vic_cesm_run(vic_clock *vclock);
 void vic_nc_info(nc_file_struct *nc_hist_file, out_data_struct **out_data,
                  nc_var_struct *nc_vars);
 void vic_finalize(void);
@@ -104,7 +106,7 @@ void vic_cesm_run_model(void);
 void vic_init(void);
 void vic_init_output(void);
 void vic_restore(char *runtype_str);
-void vic_start(void);
+void vic_start(vic_clock *vclock, case_metadata *cmeta);
 void vic_store(void);
 void vic_write(void);
 char will_it_snow(double *t, double t_offset, double max_snow_temp,

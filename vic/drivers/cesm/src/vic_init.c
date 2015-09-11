@@ -1062,7 +1062,8 @@ vic_init(void)
                 }
             }
             // veg_con[i][0].Cv_sum = 1.;
-            log_warn("Cv_sum does not include bare soil fraction and vic_init wanted to rescale Cv for all veg types");
+            log_warn(
+                "Cv_sum does not include bare soil fraction and vic_init wanted to rescale Cv for all veg types");
         }
     }
 

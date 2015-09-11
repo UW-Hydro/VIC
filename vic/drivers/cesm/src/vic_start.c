@@ -134,12 +134,12 @@ vic_start(vic_clock     *vclock,
         options.ROOT_ZONES = get_nc_dimension(filenames.soil, "root_zone");
         options.Nlayer = get_nc_dimension(filenames.soil, "nlayer");
         options.NVEGTYPES = get_nc_dimension(filenames.veg, "veg_class");
-        if (options.SNOW_BAND > 1) {
-            log_err("Snowbands not implemented in CESM driver");
-        }
 
         // Check that model parameters are valid
         validate_parameters();
+        validate_filenames(&filenames);
+        validate_global_param(&global_param);
+        validate_options(&options);
     }
 
     // broadcast global, option, param structures as well as global valies

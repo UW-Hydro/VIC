@@ -558,36 +558,87 @@ get_global_param(FILE *gp)
         fgets(cmdstr, MAXSTRING, gp);
     }
 
-    /******************************************
-       Check for undefined required parameters
-    ******************************************/
+    // Output major options
+    display_current_settings(DISP_VERSION);
+}
+
+/******************************************************************************
+ * @brief    Validate the filenames_struct
+ *****************************************************************************/
+void
+validate_filenames(filenames_struct *filenames)
+{
+    extern option_struct       options;
+
+    // Validate log directory
+    if (strcmp(filenames->result_dir, "MISSING") == 0) {
+        log_err("Log directory must be specified in CESM driver");
+    }
 
     // Validate result directory
-    if (strcmp(filenames.result_dir, "MISSING") == 0) {
+    if (strcmp(filenames->result_dir, "MISSING") == 0) {
         log_err("No results directory has been defined.  Make sure that the "
                 "global file defines the result directory on the line that "
                 "begins with \"RESULT_DIR\".");
     }
 
     // Validate soil parameter file information
-    if (strcmp(filenames.soil, "MISSING") == 0) {
+    if (strcmp(filenames->soil, "MISSING") == 0) {
         log_err("No soil parameter file has been defined.  Make sure that the "
                 "global file defines the soil parameter file on the line that "
                 "begins with \"SOIL\".");
     }
 
     // Validate veg parameter information
-    if (strcmp(filenames.veg, "MISSING") == 0) {
+    if (strcmp(filenames->veg, "MISSING") == 0) {
         log_err("No vegetation parameter file has been defined.  Make sure "
                 "that the global file defines the vegetation parameter "
                 "file on the line that begins with \"VEGPARAM\".");
     }
-    if (strcmp(filenames.veglib, "MISSING") == 0) {
+    if (strcmp(filenames->veglib, "MISSING") == 0) {
         log_err("No vegetation library file has been defined.  Make sure "
                 "that the global file defines the vegetation library file "
                 "on the line that begins with \"VEGLIB\".");
     }
-    if (options.LAI_SRC == LAI_FROM_VEGPARAM && !options.VEGPARAM_LAI) {
+
+    // Validate snow parameter file
+    if (options.SNOW_BAND > 1) {
+        log_err("Snowbands not implemented in CESM driver");
+    }
+
+    // Validate lake parameter information
+    if (options.LAKES) {
+        log_err("Lakes are not implemented in CESM driver");
+    }
+}
+
+/******************************************************************************
+ * @brief    Validate the global_param_struct
+ *****************************************************************************/
+void
+validate_global_param(global_param_struct *gp)
+{
+    if (gp->model_steps_per_day != gp->snow_steps_per_day) {
+        log_err("snow_steps_per_day must match model_steps_per_day");
+    }
+    if (gp->model_steps_per_day != gp->runoff_steps_per_day) {
+        log_err("runoff_steps_per_day must match model_steps_per_day");
+    }
+    if (gp->model_steps_per_day != gp->atmos_steps_per_day) {
+        log_err("atmos_steps_per_day must match model_steps_per_day");
+    }
+    if (gp->model_steps_per_day != gp->output_steps_per_day) {
+        log_err("output_steps_per_day must match model_steps_per_day");
+    }
+}
+
+/******************************************************************************
+ * @brief    Validate the option_struct
+ *****************************************************************************/
+void
+validate_options(option_struct *options)
+{
+    if (options->LAI_SRC == LAI_FROM_VEGPARAM && !options->VEGPARAM_LAI) {
         log_err("\"LAI_SRC\" was specified as \"LAI_FROM_VEGPARAM\", "
                 "but \"VEGPARAM_LAI\" was set to \"FALSE\" in the global "
                 "parameter file.  If you want VIC to read LAI values from "
@@ -604,29 +655,29 @@ get_global_param(FILE *gp)
     }
 
     // Validate SPATIAL_FROST information
-    if (options.SPATIAL_FROST) {
-        if (options.Nfrost > MAX_FROST_AREAS) {
+    if (options->SPATIAL_FROST) {
+        if (options->Nfrost > MAX_FROST_AREAS) {
             log_err("\"SPATIAL_FROST\" was specified with %zu frost "
                     "subareas, which is greater than the maximum of %d.",
-                    options.Nfrost, MAX_FROST_AREAS);
+                    options->Nfrost, MAX_FROST_AREAS);
         }
-        if (options.Nfrost < 1) {
+        if (options->Nfrost < 1) {
             log_err("\"SPATIAL_FROST\" was specified with %zu frost "
                     "subareas, which is less than the mainmum of 1.",
-                    options.Nfrost);
+                    options->Nfrost);
         }
     }
 
     // Carbon-cycling options
-    if (!options.CARBON) {
-        if (options.RC_MODE == RC_PHOTO) {
+    if (!options->CARBON) {
+        if (options->RC_MODE == RC_PHOTO) {
             log_warn("If CARBON==FALSE, RC_MODE must be set to "
                      "RC_JARVIS.  Setting RC_MODE to set to RC_JARVIS.");
-            options.RC_MODE = RC_JARVIS;
+            options->RC_MODE = RC_JARVIS;
         }
     }
     else {
-        if (!options.VEGLIB_PHOTO) {
+        if (!options->VEGLIB_PHOTO) {
             log_err("Currently, CARBON==TRUE and VEGLIB_PHOTO==FALSE.  "
                     "If CARBON==TRUE, VEGLIB_PHOTO must be set to TRUE and "
                     "carbon-specific veg parameters must be listed in your "
@@ -635,89 +686,71 @@ get_global_param(FILE *gp)
     }
 
     // Validate the elevation band file information
-    if (options.SNOW_BAND > 1) {
-        if (strcmp(filenames.snowband, "MISSING") == 0) {
-            log_err("\"SNOW_BAND\" was specified with %zu elevation bands, "
-                    "but no elevation band file has been defined.  "
-                    "Make sure that the global file defines the elevation "
-                    "band file on the line that begins with \"SNOW_BAND\" "
-                    "(after the number of bands).", options.SNOW_BAND);
-        }
-        if (options.SNOW_BAND > MAX_BANDS) {
+    if (options->SNOW_BAND > 1) {
+        if (options->SNOW_BAND > MAX_BANDS) {
             log_err("Global file wants more snow bands (%zu) than are "
                     "defined by MAX_BANDS (%d).  Edit vicNl_def.h and "
-                    "recompile.", options.SNOW_BAND, MAX_BANDS);
+                    "recompile.", options->SNOW_BAND, MAX_BANDS);
         }
     }
-    else if (options.SNOW_BAND <= 0) {
+    else if (options->SNOW_BAND <= 0) {
         log_err("Invalid number of elevation bands specified in global "
                 "file (%zu).  Number of bands must be >= 1.",
-                options.SNOW_BAND);
+                options->SNOW_BAND);
     }
 
     // Validate soil parameter/simulation mode combinations
-    if (options.QUICK_FLUX) {
-        if (options.Nnode != 3) {
+    if (options->QUICK_FLUX) {
+        if (options->Nnode != 3) {
             log_warn("To run the model QUICK_FLUX=TRUE, you must "
                      "define exactly 3 soil thermal nodes.  Currently "
                      "Nnodes is set to %zu.  Setting Nnodes to 3.",
-                     options.Nnode);
-            options.Nnode = 3;
+                     options->Nnode);
+            options->Nnode = 3;
         }
-        if (options.IMPLICIT || options.EXP_TRANS) {
+        if (options->IMPLICIT || options->EXP_TRANS) {
             log_err("To run the model with QUICK_FLUX=TRUE, you cannot "
                     "have IMPLICIT=TRUE or EXP_TRANS=TRUE.");
         }
     }
-    if (options.QUICK_SOLVE && !options.QUICK_FLUX) {
-        if (options.NOFLUX) {
+    if (options->QUICK_SOLVE && !options->QUICK_FLUX) {
+        if (options->NOFLUX) {
             log_err("NOFLUX must be set to FALSE when QUICK_SOLVE=TRUE "
                     "and QUICK_FLUX=FALSE");
         }
-        if (options.EXP_TRANS) {
+        if (options->EXP_TRANS) {
             log_err("EXP_TRANS must be set to FALSE when QUICK_SOLVE=TRUE "
                     "and QUICK_FLUX=FALSE");
         }
     }
-    if (options.Nlayer < 3) {
+    if (options->Nlayer < 3) {
         log_err("You must define at least 3 soil moisture layers to run "
                 "the model in FULL_ENERGY or FROZEN_SOIL modes.  "
-                "Currently Nlayers is set to  %zu.", options.Nlayer);
+                "Currently Nlayers is set to  %zu.", options->Nlayer);
     }
-    if (options.Nlayer > MAX_LAYERS) {
+    if (options->Nlayer > MAX_LAYERS) {
         log_err("Global file wants more soil moisture layers (%zu) than "
                 "are defined by MAX_LAYERS (%d).  Edit vicNl_def.h and "
-                "recompile.", options.Nlayer, MAX_LAYERS);
+                "recompile.", options->Nlayer, MAX_LAYERS);
     }
-    if (options.Nnode > MAX_NODES) {
+    if (options->Nnode > MAX_NODES) {
         log_err("Global file wants more soil thermal nodes (%zu) than "
                 "are defined by MAX_NODES (%d).  Edit vicNl_def.h and "
-                "recompile.", options.Nnode, MAX_NODES);
+                "recompile.", options->Nnode, MAX_NODES);
     }
 
     // Validate treeline option
-    if (options.COMPUTE_TREELINE && !options.JULY_TAVG_SUPPLIED) {
+    if (options->COMPUTE_TREELINE && !options->JULY_TAVG_SUPPLIED) {
         log_err("COMPUTE_TREELINE is TRUE but JULY_TAVG_SUPPLIED is "
                 "FALSE.\n You must supply July average temperature if"
                 "you want to use the treeline option.");
     }
 
     // Validate lake parameter information
-    if (options.LAKES) {
-        if (strcmp(filenames.lakeparam, "MISSING") == 0) {
-            log_err("\"LAKES\" was specified, but no lake parameter "
-                    "file has been defined.  Make sure that the global "
-                    "file defines the lake parameter file on the line that "
-                    "begins with \"LAKES\".");
-        }
-        if (options.COMPUTE_TREELINE) {
+    if (options->LAKES) {
+        if (options->COMPUTE_TREELINE) {
             log_err("LAKES = TRUE and COMPUTE_TREELINE = TRUE are "
                     "incompatible options.");
         }
     }
-
-    /*********************************
-       Output major options
-    *********************************/
-    display_current_settings(DISP_VERSION);
 }

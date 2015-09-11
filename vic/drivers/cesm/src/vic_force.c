@@ -60,7 +60,7 @@ vic_force(void)
     for (i = 0; i < local_domain.ncells; i++) {
         if (!x2l_vic[i].x2l_vars_set) {
             if (current == 0) {
-               make_dummy_forcings(&x2l_vic[i]);
+                make_dummy_forcings(&x2l_vic[i]);
             }
             else {
                 log_err("x2l_vars_set is false");
@@ -114,10 +114,10 @@ vic_force(void)
                                     x2l_vic[i].x2l_Faxa_swvdr) /
                                    (x2l_vic[i].x2l_Faxa_swndf +
                                     x2l_vic[i].x2l_Faxa_swvdf);
-           }
-           else {
-               atmos[i].fdir[j] = 0.;
-           }
+            }
+            else {
+                atmos[i].fdir[j] = 0.;
+            }
         }
     }
 
@@ -354,8 +354,8 @@ will_it_snow(double *t,
 void
 make_dummy_forcings(x2l_data_struct *x2l)
 {
-    extern x2l_data_struct    *x2l_vic;
-    extern domain_struct       local_domain;
+    extern x2l_data_struct *x2l_vic;
+    extern domain_struct    local_domain;
 
     x2l->x2l_Sa_z = 10;  /** bottom atm level height */
     x2l->x2l_Sa_u = 1.;  /** bottom atm level zon wind */

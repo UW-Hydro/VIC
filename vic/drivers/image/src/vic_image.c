@@ -140,7 +140,7 @@ main(int    argc,
 
         // if save: TBD needs to be fixed - not working in MPI
         // if (current == global_param.nrecs - 1) {
-        //    vic_store();
+        // vic_store();
         // }
     }
 

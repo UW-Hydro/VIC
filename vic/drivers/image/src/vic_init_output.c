@@ -68,7 +68,7 @@ vic_init_output(void)
         // open the netcdf history file
         initialize_history_file(&nc_hist_file);
     }
-    
+
     // broadcast which variables to write.
     for (i = 0; i < N_OUTVAR_TYPES; i++) {
         status = MPI_Bcast(&out_data[0][i].write, 1, MPI_C_BOOL,
@@ -77,8 +77,8 @@ vic_init_output(void)
             log_err("MPI error in vic_init_output(): %d\n", status);
         }
     }
-    
-    // broadcast history file info. Only the master process will write to it, 
+
+    // broadcast history file info. Only the master process will write to it,
     // but the slave processes need some of the information to initialize as
     // well (particularly which variables to write and dimension sizes)
     status = MPI_Bcast(&nc_hist_file, 1, mpi_nc_file_struct_type,
@@ -86,10 +86,9 @@ vic_init_output(void)
     if (status != MPI_SUCCESS) {
         log_err("MPI error in vic_init_output(): %d\n", status);
     }
-  
+
     // initialize netcdf info for output variables
     vic_nc_info(&nc_hist_file, out_data, nc_vars);
-
 }
 
 /******************************************************************************

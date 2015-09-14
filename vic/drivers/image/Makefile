@@ -42,7 +42,7 @@ EXTPATH = ../../extensions
 
 # NETCDF include .. change the path depending on travis or other location
 ifeq (true, ${TRAVIS})
-NETCDFPATH = /usr
+NETCDFPATH = ${TRAVIS_NETCDFPATH}
 else ifeq (hydro-c1, $(shell hostname))
 NETCDFPATH = /usr/local/netcdf-4.3.0+gcc-4.7.2
 else
@@ -51,7 +51,7 @@ endif
 
 # MPI include .. change the path depending on travis or other location
 ifeq (true, ${TRAVIS})
-MPIPATH = /usr
+MPIPATH = ${TRAVIS_MPIPATH}
 else ifeq (hydro-c1, $(shell hostname))
 MPIPATH = /usr/local/netcdf-4.3.0+gcc-4.7.2
 else

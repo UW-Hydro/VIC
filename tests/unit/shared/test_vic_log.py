@@ -9,7 +9,6 @@ def test_finalize_logging():
     assert vic_lib.finalize_logging() is None
 
 
-@pytest.mark.xfail
 def test_get_current_datetime():
     dts = ffi.new('char [2048]')
     assert len(ffi.string(dts)) == 0
@@ -17,7 +16,7 @@ def test_get_current_datetime():
     assert len(ffi.string(dts)) == 14
     now = datetime.datetime.now()
     now_string = now.strftime('%Y%m%d')
-    assert now_string == dts[:8]
+    assert now_string == ffi.string(dts)[:8].decode()
 
 
 def test_get_logname():

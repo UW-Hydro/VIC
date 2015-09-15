@@ -98,7 +98,6 @@ read_soilparam(FILE *soilparam,
             log_err("Can't find values for CELL NUMBER in soil file");
         }
         sscanf(token, "%d", &temp.gridcel);
-        
         token = strtok(NULL, delimiters);
         while (token != NULL && (length = strlen(token)) == 0) {
             token = strtok(NULL, delimiters);
@@ -107,7 +106,6 @@ read_soilparam(FILE *soilparam,
             log_err("Can't find values for CELL LATITUDE in soil file");
         }
         sscanf(token, "%lf", &temp.lat);
-        
         token = strtok(NULL, delimiters);
         while (token != NULL && (length = strlen(token)) == 0) {
             token = strtok(NULL, delimiters);

@@ -72,6 +72,18 @@ void rout_alloc(void)
     if (rout.rout_param.source_VIC_index == NULL) {
         log_err("Memory allocation error in rout.rout_param.source_VIC_index().");
     }
+    rout.rout_param.outlet_lat       = (double *) malloc (rout.rout_param.iOutlets * sizeof (double));
+    if (rout.rout_param.outlet_lat == NULL) {
+        log_err("Memory allocation error in rout.rout_param.outlet_lat().");
+    }
+    rout.rout_param.outlet_lon       = (double *) malloc (rout.rout_param.iOutlets * sizeof (double));
+    if (rout.rout_param.outlet_lon == NULL) {
+        log_err("Memory allocation error in rout.rout_param.outlet_lon().");
+    }
+    rout.rout_param.outlet_VIC_index   = (int *) malloc (rout.rout_param.iOutlets * sizeof (int));
+    if (rout.rout_param.outlet_VIC_index == NULL) {
+        log_err("Memory allocation error in rout.rout_param.outlet_VIC_index().");
+    }
     rout.rout_param.unit_hydrograph    = (double *) malloc (rout.rout_param.iSources * rout.rout_param.iSubsetLength * sizeof (double));
     if (rout.rout_param.unit_hydrograph == NULL) {
         log_err("Memory allocation error in rout.rout_param.unit_hydrograph().");
@@ -79,6 +91,10 @@ void rout_alloc(void)
     rout.rout_param.aggrunin           = (double *)malloc (local_domain.ncells * sizeof (double));
     if (rout.rout_param.aggrunin == NULL) {
         log_err("Memory allocation error in rout.rout_param.aggrunin().");
+    }
+    rout.discharge           = (double *)malloc (local_domain.ncells * sizeof (double));
+    if (rout.discharge == NULL) {
+        log_err("Memory allocation error in rout.rout_param.discharge().");
     }
 
     // Allocate memory for the ring

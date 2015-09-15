@@ -139,7 +139,6 @@ full:
 	make model
 
 clean::
-	/bin/rm -f ${DRIVERPATH}/src/*.o ${SHAREDPATH}/src/*.o  ${VICPATH}/src/*.o core ${EXTPATH}/${ROUT}/src/*.o log ${DRIVERPATH}/src/*~ ${SHAREDPATH}/src/*.~ ${VICPATH}/src/*~ ${EXTPATH}/${ROUT}/src/*~ vic_image
 	\rm -f core log
 	\rm -rf ${COMPEXE}${EXT} ${COMPEXE}${EXT}.dSYM
 

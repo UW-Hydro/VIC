@@ -32,18 +32,21 @@
  * @brief   Routing Structs
  *****************************************************************************/
 typedef struct {
-    size_t              iSubsetLength;         /*scalar - number of timesteps*/
-    size_t              iSources;              /*scalar - number of sources*/
-    size_t              iOutlets;              /*scalar - length of subset*/
+    size_t              iSubsetLength;        /*scalar - number of timesteps*/
+    size_t              iSources;             /*scalar - number of sources*/
+    size_t              iOutlets;             /*scalar - length of subset*/
     size_t             *source2outlet_ind;    /*1d array - source to outlet mapping*/
     int                *source_y_ind ;        /*1d array - source y location*/
     int                *source_x_ind;         /*1d array - source x location*/
-    double             *source_lat;       /*1d array - Latitude coordinate of source grid cell*/
-    double             *source_lon;        /*1d array - Longitude coordinate of source grid cell*/
-    int                *source_VIC_index;    /*1d array - mapping of VIC index versus rout lat/lons*/
+    double             *source_lat;           /*1d array - Latitude coordinate of source grid cell*/
+    double             *source_lon;           /*1d array - Longitude coordinate of source grid cell*/
+    double             *outlet_lat;           /*1d array - Latitude coordinate of outlet grid cell*/
+    double             *outlet_lon;           /*1d array - Longitude coordinate of outlet grid cell*/
+    int                *source_VIC_index;     /*1d array - mapping of routing-source index to VIC index*/
+    int                *outlet_VIC_index;     /*1d array - mapping of routing-outlet index to VIC index*/
     int                *source_time_offset;   /*1d array - source time offset*/
-    double             *unit_hydrograph;   /*2d array[times][sources] - unit hydrographs*/
-    double             *aggrunin;          /*2d array[ysize][xsize] - vic runoff flux*/
+    double             *unit_hydrograph;      /*2d array[times][sources] - unit hydrographs*/
+    double             *aggrunin;             /*2d array[ysize][xsize] - vic runoff flux*/
 } rout_param_struct;
 
 /******************************************************************************
@@ -53,6 +56,7 @@ typedef struct {
     char                param_filename[MAXSTRING]; 
     rout_param_struct   rout_param; 
     double             *ring;
+    double             *discharge;
 } rout_struct;
 
 /******************************************************************************

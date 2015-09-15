@@ -78,6 +78,7 @@ create_output_list()
     strcpy(out_data[OUT_DELSOILMOIST].varname, "OUT_DELSOILMOIST");    /* change in soil water content [mm] */
     strcpy(out_data[OUT_DELSWE].varname, "OUT_DELSWE");                /* change in snow water equivalent [mm] */
     strcpy(out_data[OUT_DELSURFSTOR].varname, "OUT_DELSURFSTOR");      /* change in surface liquid water storage  [mm] */
+    strcpy(out_data[OUT_DISCHARGE].varname, "OUT_DISCHARGE");          /* river discharge [m3] (ALMA_OUTPUT: [m3/s]) */
     strcpy(out_data[OUT_EVAP].varname, "OUT_EVAP");                    /* total net evaporation [mm] (ALMA_OUTPUT: [mm/s]) */
     strcpy(out_data[OUT_EVAP_BARE].varname, "OUT_EVAP_BARE");          /* net evaporation from bare soil [mm] (ALMA_OUTPUT: [mm/s]) */
     strcpy(out_data[OUT_EVAP_CANOP].varname, "OUT_EVAP_CANOP");        /* net evaporation from canopy interception [mm] (ALMA_OUTPUT: [mm/s]) */

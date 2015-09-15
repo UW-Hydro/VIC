@@ -258,6 +258,7 @@ vic_nc_info(nc_file_struct   *nc_hist_file,
             strncpy(nc_vars[i].nc_units, "m3", MAXSTRING);
             break;
         // rate in m3 per timestep, changed to m3/s for ALMA_OUTPUT
+        case OUT_DISCHARGE:
         case OUT_LAKE_BF_IN_V:
         case OUT_LAKE_BF_OUT_V:
         case OUT_LAKE_CHAN_IN_V:

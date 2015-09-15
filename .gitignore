@@ -33,3 +33,9 @@ TAGS
 # Python stuff
 .ipynb_checkpoints
 .eggs
+
+# Netbeans stuff
+nbproject
+
+# Test folders
+image_test

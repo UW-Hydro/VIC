@@ -33,7 +33,6 @@ void rout_run(void) {
     //log_info("In Routing Lohmann Model");
 
     extern rout_struct rout;
-    extern domain_struct global_domain;
     extern out_data_struct **out_data;
     size_t i, j, s;
 
@@ -47,12 +46,10 @@ void rout_run(void) {
     }
 
 
-
-
-    // even worse stuff here 
-    for (i = 0; i < global_domain.ncells; i++) {
-        rout.rout_param.aggrunin[i] = out_data[i][OUT_RUNOFF].data[0] + out_data[i][OUT_BASEFLOW].data[0];
-    }
+//    // even worse stuff here 
+//    for (i = 0; i < global_domain.ncells; i++) {
+//        rout.rout_param.aggrunin[i] = out_data[i][OUT_RUNOFF].data[0] + out_data[i][OUT_BASEFLOW].data[0];
+//    }
 
     printf("\nThe hydrograph, just printed...\n");
     print_array(rout.rout_param.unit_hydrograph, rout.rout_param.iSubsetLength, rout.rout_param.iSources);
@@ -78,8 +75,6 @@ void rout_run(void) {
 
     printf("\nThe Ring, c-shifted...\n");
     print_array(rout.ring, rout.rout_param.iSubsetLength, rout.rout_param.iOutlets);
-
-
 
     printf("\nDoing convolution test!\n");
     int offset, outlet; /*2d indicies*/
@@ -112,4 +107,9 @@ void rout_run(void) {
 
     printf("\nThe Ring, after convolution...\n");
     print_array(rout.ring, rout.rout_param.iSubsetLength, rout.rout_param.iOutlets);
+
+    // Write to output struct...
+    for (s = 0; s < rout.rout_param.iOutlets; s++) {
+        out_data[rout.rout_param.outlet_VIC_index[s]][OUT_DISCHARGE].aggdata[0] = rout.ring[s];
+    }
 }

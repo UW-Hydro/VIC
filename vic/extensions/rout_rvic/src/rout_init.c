@@ -77,6 +77,11 @@ rout_init(void)
       }
     }
 
+    // discharge
+    for (j=0;j<global_domain.ncells;j++) {
+      rout.discharge[j] = 0.0;
+    }
+
     // source2outlet_ind: source to outlet index mapping
     get_nc_field_int(rout.param_filename,
                                 "source2outlet_ind",
@@ -117,12 +122,28 @@ rout_init(void)
         rout.rout_param.source_lat[i] = (double) dvar[i];
     }
     
-    // source_lat: Longitude coordinate of source grid cell
+    // source_lon: Longitude coordinate of source grid cell
     get_nc_field_double(rout.param_filename,
                                 "source_lon",
                                 &i1start, &rout.rout_param.iSources, dvar);
     for (i = 0; i < rout.rout_param.iSources; i++) {
         rout.rout_param.source_lon[i] = (double) dvar[i];
+    }
+    
+    // outlet_lat: Latitude coordinate of source grid cell
+    get_nc_field_double(rout.param_filename,
+                                "outlet_lat",
+                                &i1start, &rout.rout_param.iOutlets, dvar);
+    for (i = 0; i < rout.rout_param.iOutlets; i++) {
+        rout.rout_param.outlet_lat[i] = (double) dvar[i];
+    }
+    
+    // outlet_lon: Longitude coordinate of source grid cell
+    get_nc_field_double(rout.param_filename,
+                                "outlet_lon",
+                                &i1start, &rout.rout_param.iOutlets, dvar);
+    for (i = 0; i < rout.rout_param.iOutlets; i++) {
+        rout.rout_param.outlet_lon[i] = (double) dvar[i];
     }
     
     // Unit Hydrograph:
@@ -133,11 +154,9 @@ rout_init(void)
         rout.rout_param.unit_hydrograph[i] = (double) dvar[i];
     }
 
-    // TODO: MAPPING!
     // TODO: Lat lon omgedraaid in netcdf?!?!??!?!
     // TODO: Check inbouwen: wat als er geen VIC gridcell bestaat voor een Rout source?!
-    // Filling the VIC indices that corresponds to the routing file lat/lons
-    // Which source point of the routing corresponds to which gridcell index of VIC
+    // Mapping: Let the routing-source index numbers correspond to the VIC index numbers
     size_t iSource;
     for (iSource = 0; iSource < rout.rout_param.iSources; iSource++) {
        for (i = 0; i < global_domain.ncells; i++) {
@@ -149,10 +168,26 @@ rout_init(void)
     }
     
     // TODO Weghalen
-    // Tijdelijk
     printf("\nsource, index of VIC gridcell: \n ");
     for (iSource = 0; iSource < rout.rout_param.iSources; iSource++) {
        printf("%3i,  %7i \n ",(int)(iSource),rout.rout_param.source_VIC_index[iSource]);
+    }
+    
+    // Mapping: Let the routing-outlet index numbers correspond to the VIC index numbers
+    size_t iOutlet;
+    for (iOutlet = 0; iOutlet < rout.rout_param.iOutlets; iOutlet++) {
+       for (i = 0; i < global_domain.ncells; i++) {
+          if (rout.rout_param.outlet_lat[iOutlet] == global_domain.locations[i].latitude && 
+              rout.rout_param.outlet_lon[iOutlet] == global_domain.locations[i].longitude) {
+                   rout.rout_param.outlet_VIC_index[iOutlet] = i;
+          }
+       }
+    }
+    
+    // TODO Weghalen
+    printf("\noutlet, index of VIC gridcell: \n ");
+    for (iOutlet = 0; iOutlet < rout.rout_param.iOutlets; iOutlet++) {
+       printf("%3i,  %7i \n ",(int)(iOutlet),rout.rout_param.outlet_VIC_index[iOutlet]);
     }
 
     // cleanup

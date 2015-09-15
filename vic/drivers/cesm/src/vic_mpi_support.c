@@ -33,6 +33,7 @@
 void
 initialize_mpi(MPI_Fint *MPI_COMM_VIC_F)
 {
+    extern MPI_Datatype mpi_domain_struct_type;
     extern MPI_Datatype mpi_global_struct_type;
     extern MPI_Datatype mpi_location_struct_type;
     extern MPI_Datatype mpi_nc_file_struct_type;
@@ -70,6 +71,89 @@ initialize_mpi(MPI_Fint *MPI_COMM_VIC_F)
     create_MPI_nc_file_struct_type(&mpi_nc_file_struct_type);
     create_MPI_option_struct_type(&mpi_option_struct_type);
     create_MPI_param_struct_type(&mpi_param_struct_type);
+    create_MPI_domain_struct_type(&mpi_domain_struct_type);
+}
+
+/******************************************************************************
+ * @brief   Create an MPI_Datatype that represents the domain_struct
+ * @details This allows MPI operations in which the entire domain_struct
+ *          can be treated as an MPI_Datatype. NOTE: This function needs to be
+ *          kept in-sync with the domain_struct data type in vic_cesm_def.h
+ *
+ * @param mpi_type MPI_Datatype that can be used in MPI operations
+ *****************************************************************************/
+void
+create_MPI_domain_struct_type(MPI_Datatype *mpi_type)
+{
+    int           nitems; // number of elements in struct
+    int           status;
+    int          *blocklengths;
+    size_t        i;
+    MPI_Aint     *offsets;
+    MPI_Datatype *mpi_types;
+
+    // nitems has to equal the number of elements in domain_struct
+    nitems = 4;
+    blocklengths = (int *) malloc(nitems * sizeof(int));
+    if (blocklengths == NULL) {
+        log_err("Memory allocation error in create_MPI_domain_struct_type().")
+    }
+
+    offsets = (MPI_Aint *) malloc(nitems * sizeof(MPI_Aint));
+    if (offsets == NULL) {
+        log_err("Memory allocation error in create_MPI_domain_struct_type().")
+    }
+
+    mpi_types = (MPI_Datatype *) malloc(nitems * sizeof(MPI_Datatype));
+    if (mpi_types == NULL) {
+        log_err("Memory allocation error in create_MPI_domain_struct_type().")
+    }
+
+    // all of the elements in domain_struct are size 1 (scalars or pointers)
+    for (i = 0; i < (size_t) nitems; i++) {
+        blocklengths[i] = 1;
+    }
+
+    // reset i
+    i = 0;
+
+    // size_t ncells;
+    offsets[i] = offsetof(domain_struct, ncells);
+    mpi_types[i++] = MPI_AINT;
+
+    // size_t n_nx;
+    offsets[i] = offsetof(domain_struct, n_nx);
+    mpi_types[i++] = MPI_AINT;
+
+    // size_t n_ny;
+    offsets[i] = offsetof(domain_struct, n_ny);
+    mpi_types[i++] = MPI_AINT;
+
+    // location_struct *locations;
+    offsets[i] = offsetof(location_struct, locations);
+    mpi_types[i++] = MPI_AINT;
+
+    // make sure that the we have the right number of elements
+    if (i != (size_t) nitems) {
+        log_err("Miscount in create_MPI_domain_struct_type(): "
+                "%zd not equal to %d\n", i, nitems);
+    }
+
+    status = MPI_Type_create_struct(nitems, blocklengths, offsets, mpi_types,
+                                    mpi_type);
+    if (status != MPI_SUCCESS) {
+        log_err("MPI error in create_MPI_domain_struct_type(): %d\n", status);
+    }
+
+    status = MPI_Type_commit(mpi_type);
+    if (status != MPI_SUCCESS) {
+        log_err("MPI error in create_MPI_domain_struct_type(): %d\n", status);
+    }
+
+    // cleanup
+    free(blocklengths);
+    free(offsets);
+    free(mpi_types);
 }
 
 /******************************************************************************

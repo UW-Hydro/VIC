@@ -35,6 +35,7 @@
 // Component MPI Communicator
 MPI_Comm MPI_COMM_VIC;
 
+void create_MPI_domain_struct_type(MPI_Datatype *mpi_type);
 void create_MPI_global_struct_type(MPI_Datatype *mpi_type);
 void create_MPI_location_struct_type(MPI_Datatype *mpi_type);
 void create_MPI_nc_file_struct_type(MPI_Datatype *mpi_type);

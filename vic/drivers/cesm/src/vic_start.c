@@ -142,8 +142,8 @@ vic_start(vic_clock     *vclock,
         validate_parameters();
     }
 
-    // broadcast global, option, param structures as well as global valies
-    // such as NF and NR
+    // broadcast global, option, param and domain structures as well as global
+    // values such as NF and NR
     status = MPI_Bcast(&NF, 1, MPI_UNSIGNED_LONG, 0, MPI_COMM_VIC);
     if (status != MPI_SUCCESS) {
         log_err("MPI error in vic_start(): %d\n", status);
@@ -170,6 +170,15 @@ vic_start(vic_clock     *vclock,
                        0, MPI_COMM_VIC);
     if (status != MPI_SUCCESS) {
         log_err("MPI error in vic_start(): %d\n", status);
+    }
+
+    status = MPI_Bcast(&global_domain, 1, mpi_domain_type,
+                       0, MPI_COMM_VIC);
+    if (status != MPI_SUCCESS) {
+        log_err("MPI error in vic_start(): %d\n", status);
+    }
+    if (mpi_rank != 0) {
+        global_domain.locations = NULL;
     }
 
     // setup the local domain_structs

@@ -3,6 +3,7 @@
 ## VIC Developer Community
 
 *   [Computational Hydrology Group, University of Washington](http://www.hydro.washington.edu/)
+*   [Land Surface Hydrology Group, UCLA](http://hydro.ucla.edu/)
 *   [Land Surface Hydrology Group, Princeton University](http://hydrology.princeton.edu/home.php)
 *   [Keith Cherkauer's Lab, Dept. of Agricultural Engineering, Purdue University](http://www.agry.purdue.edu/hydrology/)
 *   [Laura Bowling's Lab, Dept. of Agronomy, Purdue University](http://www.agry.purdue.edu/hydrology/)
@@ -32,3 +33,7 @@
 *   [DHSVM](http://www.hydro.washington.edu/Lettenmaier/Models/DHSVM/index.shtml)
 *   [CLM](http://www.cgd.ucar.edu/tss/clm/)
 *   [SUMMA](https://www.ral.ucar.edu/projects/summa)
+
+## Streamflow Routing Models
+
+*   [RVIC](http://rvic.readthedocs.org)

@@ -1,14 +1,14 @@
 #######################################################################
-# VIC Model Parameters - 4.1.x
+# VIC Model Parameters - 5.0.0
 #######################################################################
-# $Id$
+
 #######################################################################
 # Simulation Parameters
 #######################################################################
 NLAYER		3	# number of soil layers
 NODES		10	# number of soil thermal nodes
-TIME_STEP 	3	# model time step in hours (set to 24 if FULL_ENERGY = FALSE, set to < 24 if FULL_ENERGY = TRUE)
-SNOW_STEP	3	# time step in hours for which to solve the snow model (should = TIME_STEP if TIME_STEP < 24)
+MODEL_STEPS_PER_DAY 	3	# model time step in hours (set to 1 if FULL_ENERGY = FALSE, set to > 1 if FULL_ENERGY = TRUE)
+SNOW_STEPS_PER_DAY	3	# time step in hours for which to solve the snow model (should = MODEL_STEPS_PER_DAY if MODEL_STEPS_PER_DAY < 24)
 STARTYEAR	2000	# year model simulation starts
 STARTMONTH	01	# month model simulation starts
 STARTDAY	01 	# day model simulation starts
@@ -150,7 +150,7 @@ FORCE_TYPE	PREC	UNSIGNED	40
 FORCE_TYPE	TMAX	SIGNED	100
 FORCE_TYPE	TMIN	SIGNED	100
 FORCE_TYPE	WIND	SIGNED	100
-FORCE_DT	24	# Forcing time step length (hours)
+FORCE_STEPS_PER_DAY	24	# Forcing time step length (hours)
 FORCEYEAR	2000	# Year of first forcing record
 FORCEMONTH	01	# Month of first forcing record
 FORCEDAY	01	# Day of first forcing record
@@ -192,7 +192,7 @@ SNOW_BAND	1	# Number of snow bands; if number of snow bands > 1, you must insert
 # Output Files and Parameters
 #######################################################################
 RESULT_DIR      (put the result directory path here)	# Results directory path
-OUT_STEP        0       # Output interval (hours); if 0, OUT_STEP = TIME_STEP
+OUTPUT_STEPS_PER_DAY        0       # Output interval (hours); if 0, OUTPUT_STEPS_PER_DAY = MODEL_STEPS_PER_DAY
 SKIPYEAR 	0	# Number of years of output to omit from the output files
 COMPRESS	FALSE	# TRUE = compress input and output files when done
 BINARY_OUTPUT	FALSE	# TRUE = binary output files

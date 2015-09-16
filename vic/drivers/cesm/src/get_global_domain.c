@@ -136,8 +136,7 @@ get_global_domain(char          *nc_name,
     get_nc_field_double(nc_name, "area",
                         d2start, d2count, var);
     for (i = 0; i < global_domain->ncells; i++) {
-        global_domain->locations[i].area = (double) var[idx[i]] * CONST_REARTH *
-                                           CONST_REARTH;
+        global_domain->locations[i].area = (double) var[idx[i]];
     }
 
     // get fraction

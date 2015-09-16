@@ -130,7 +130,7 @@ create_MPI_domain_struct_type(MPI_Datatype *mpi_type)
     mpi_types[i++] = MPI_AINT;
 
     // location_struct *locations;
-    offsets[i] = offsetof(location_struct, locations);
+    offsets[i] = offsetof(domain_struct, locations);
     mpi_types[i++] = MPI_AINT;
 
     // make sure that the we have the right number of elements

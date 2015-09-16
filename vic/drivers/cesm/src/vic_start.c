@@ -172,7 +172,7 @@ vic_start(vic_clock     *vclock,
         log_err("MPI error in vic_start(): %d\n", status);
     }
 
-    status = MPI_Bcast(&global_domain, 1, mpi_domain_type,
+    status = MPI_Bcast(&global_domain, 1, mpi_domain_struct_type,
                        0, MPI_COMM_VIC);
     if (status != MPI_SUCCESS) {
         log_err("MPI error in vic_start(): %d\n", status);

@@ -33,7 +33,6 @@
 
 void alloc_atmos(int, atmos_data_struct **);
 void alloc_veg_hist(int nrecs, int nveg, veg_hist_struct ***veg_hist);
-void calc_longwave(double *, double, double, double);
 void calc_netlongwave(double *, double, double, double);
 double calc_netshort(double, int, double, double *);
 void check_files(filep_struct *, filenames_struct *);
@@ -51,10 +50,6 @@ double hermint(double, int, double *, double *, double *, double *, double *);
 void hermite(size_t, double *, double *, double *, double *, double *);
 void SubDailyT(size_t, double *, double *, double *, double *, double *);
 void init_output_list(out_data_struct *, int, char *, int, double);
-void initialize_atmos(atmos_data_struct *, dmy_struct *, FILE **,
-                      veg_lib_struct *, veg_con_struct *, veg_hist_struct **,
-                      soil_con_struct *, out_data_file_struct *,
-                      out_data_struct *);
 void initialize_forcing_files(void);
 int initialize_model_state(all_vars_struct *, global_param_struct *,
                            filep_struct, size_t, size_t, size_t, double,
@@ -62,9 +57,6 @@ int initialize_model_state(all_vars_struct *, global_param_struct *,
                            lake_con_struct);
 void make_in_and_outfiles(filep_struct *, filenames_struct *, soil_con_struct *,
                           out_data_file_struct *);
-void mtclim_wrapper(int, int, double, double, double, double, double, double,
-                    double, double, size_t, dmy_struct *, double *, double *,
-                    double *, double *, double *, double *, double *);
 FILE *open_state_file(global_param_struct *, filenames_struct, int, int);
 void print_atmos_data(atmos_data_struct *atmos, size_t nr);
 void parse_output_info(FILE *, out_data_file_struct **, out_data_struct *);
@@ -82,6 +74,9 @@ void set_max_min_sec(double *, size_t, double *, double *);
 out_data_file_struct *set_output_defaults(out_data_struct *);
 int set_output_var(out_data_file_struct *, int, int, out_data_struct *, char *,
                    int, char *, int, double);
+void vic_force(atmos_data_struct *, dmy_struct *, FILE **, veg_lib_struct *,
+               veg_con_struct *, veg_hist_struct **, soil_con_struct *,
+               out_data_file_struct *, out_data_struct *);
 void write_data(out_data_file_struct *, out_data_struct *, dmy_struct *,
                 double);
 void write_forcing_file(atmos_data_struct *, int, out_data_file_struct *,

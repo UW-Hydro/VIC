@@ -118,10 +118,8 @@ main(int   argc,
     /** Check and Open Files **/
     check_files(&filep, &filenames);
 
-    if (!options.OUTPUT_FORCE) {
-        /** Read Vegetation Library File **/
-        veg_lib = read_veglib(filep.veglib, &Nveg_type);
-    } /* !OUTPUT_FORCE */
+    /** Read Vegetation Library File **/
+    veg_lib = read_veglib(filep.veglib, &Nveg_type);
 
     /** Initialize Parameters **/
     cellnum = -1;
@@ -135,23 +133,21 @@ main(int   argc,
 
     /** Initial state **/
     startrec = 0;
-    if (!options.OUTPUT_FORCE) {
-        if (options.INIT_STATE) {
-            filep.init_state = check_state_file(filenames.init_state,
-                                                options.Nlayer, options.Nnode,
-                                                &startrec);
-        }
+    if (options.INIT_STATE) {
+        filep.init_state = check_state_file(filenames.init_state,
+                                            options.Nlayer, options.Nnode,
+                                            &startrec);
+    }
 
-        /** open state file if model state is to be saved **/
-        if (options.SAVE_STATE && strcmp(filenames.statefile, "NONE") != 0) {
-            filep.statefile = open_state_file(&global_param, filenames,
-                                              options.Nlayer,
-                                              options.Nnode);
-        }
-        else {
-            filep.statefile = NULL;
-        }
-    } /* !OUTPUT_FORCE */
+    /** open state file if model state is to be saved **/
+    if (options.SAVE_STATE && strcmp(filenames.statefile, "NONE") != 0) {
+        filep.statefile = open_state_file(&global_param, filenames,
+                                          options.Nlayer,
+                                          options.Nnode);
+    }
+    else {
+        filep.statefile = NULL;
+    }
 
     /************************************
        Run Model for all Active Grid Cells
@@ -163,17 +159,15 @@ main(int   argc,
         if (RUN_MODEL) {
             cellnum++;
 
-            if (!options.OUTPUT_FORCE) {
-                /** Read Grid Cell Vegetation Parameters **/
-                veg_con = read_vegparam(filep.vegparam, soil_con.gridcel,
-                                        Nveg_type);
-                calc_root_fractions(veg_con, &soil_con);
+            /** Read Grid Cell Vegetation Parameters **/
+            veg_con = read_vegparam(filep.vegparam, soil_con.gridcel,
+                                    Nveg_type);
+            calc_root_fractions(veg_con, &soil_con);
 
-                if (options.LAKES) {
-                    lake_con =
-                        read_lakeparam(filep.lakeparam, soil_con, veg_con);
-                }
-            } /* !OUTPUT_FORCE */
+            if (options.LAKES) {
+                lake_con =
+                    read_lakeparam(filep.lakeparam, soil_con, veg_con);
+            }
 
             /** Build Gridded Filenames, and Open **/
             make_in_and_outfiles(&filep, &filenames, &soil_con, out_data_files);
@@ -183,145 +177,138 @@ main(int   argc,
                 write_header(out_data_files, out_data, dmy, global_param);
             }
 
-            if (!options.OUTPUT_FORCE) {
-                /** Read Elevation Band Data if Used **/
-                read_snowband(filep.snowband, &soil_con);
+            /** Read Elevation Band Data if Used **/
+            read_snowband(filep.snowband, &soil_con);
 
-                /** Make Top-level Control Structure **/
-                all_vars = make_all_vars(veg_con[0].vegetat_type_num);
+            /** Make Top-level Control Structure **/
+            all_vars = make_all_vars(veg_con[0].vegetat_type_num);
 
-                /** allocate memory for the veg_hist_struct **/
-                alloc_veg_hist(global_param.nrecs, veg_con[0].vegetat_type_num,
-                               &veg_hist);
-            } /* !OUTPUT_FORCE */
+            /** allocate memory for the veg_hist_struct **/
+            alloc_veg_hist(global_param.nrecs, veg_con[0].vegetat_type_num,
+                           &veg_hist);
 
             /**************************************************
                Initialize Meteological Forcing Values That
                Have not Been Specifically Set
             **************************************************/
 
-            initialize_atmos(atmos, dmy, filep.forcing, veg_lib, veg_con,
-                             veg_hist,
-                             &soil_con, out_data_files, out_data);
+            vic_force(atmos, dmy, filep.forcing, veg_lib, veg_con, veg_hist,
+                      &soil_con, out_data_files, out_data);
 
-            if (!options.OUTPUT_FORCE) {
+            /**************************************************
+               Initialize Energy Balance and Snow Variables
+            **************************************************/
+
+            ErrorFlag = initialize_model_state(&all_vars, &global_param,
+                                               filep, soil_con.gridcel,
+                                               veg_con[0].vegetat_type_num,
+                                               options.Nnode,
+                                               atmos[0].air_temp[NR],
+                                               &soil_con, veg_con,
+                                               lake_con);
+            if (ErrorFlag == ERROR) {
+                if (options.CONTINUEONERROR) {
+                    // Handle grid cell solution error
+                    log_warn("ERROR: Grid cell %i failed in record %zu so "
+                             "the simulation has not finished.  An "
+                             "incomplete output file has been generated, "
+                             "check your inputs before rerunning the "
+                             "simulation.\n", soil_con.gridcel, rec);
+                    break;
+                }
+                else {
+                    // Else exit program on cell solution error as in previous versions
+                    log_err("ERROR: Grid cell %i failed in record %zu so "
+                            "the simulation has ended. Check your inputs "
+                            "before rerunning the simulation.\n",
+                            soil_con.gridcel, rec);
+                }
+            }
+
+            /** Update Error Handling Structure **/
+            Error.filep = filep;
+            Error.out_data_files = out_data_files;
+
+            /** Initialize the storage terms in the water and energy balances **/
+
+            /** Sending a negative record number (-global_param.nrecs) to
+                put_data() will accomplish this **/
+            ErrorFlag = put_data(&all_vars, &atmos[0], &soil_con, veg_con,
+                                 veg_lib, &lake_con, out_data, &save_data,
+                                 -global_param.nrecs);
+
+            /******************************************
+               Run Model in Grid Cell for all Time Steps
+            ******************************************/
+
+            for (rec = startrec; rec < global_param.nrecs; rec++) {
                 /**************************************************
-                   Initialize Energy Balance and Snow Variables
+                   Compute cell physics for 1 timestep
                 **************************************************/
+                ErrorFlag = vic_run(&atmos[rec], &all_vars,
+                                    &(dmy[rec]), &global_param, &lake_con,
+                                    &soil_con, veg_con, veg_lib,
+                                    veg_hist[rec]);
 
-                ErrorFlag = initialize_model_state(&all_vars, &global_param,
-                                                   filep, soil_con.gridcel,
-                                                   veg_con[0].vegetat_type_num,
-                                                   options.Nnode,
-                                                   atmos[0].air_temp[NR],
-                                                   &soil_con, veg_con,
-                                                   lake_con);
+                /**************************************************
+                   Calculate cell average values for current time step
+                **************************************************/
+                write_flag = put_data(&all_vars, &atmos[rec], &soil_con,
+                                      veg_con, veg_lib, &lake_con, out_data,
+                                      &save_data, rec);
+
+                // Write cell average values for current time step
+                if (write_flag) {
+                    write_output(out_data, out_data_files, &dmy[rec], rec);
+                }
+
+                /************************************
+                   Save model state at assigned date
+                   (after the final time step of the assigned date)
+                ************************************/
+                if (filep.statefile != NULL &&
+                    (dmy[rec].year == global_param.stateyear &&
+                     dmy[rec].month == global_param.statemonth &&
+                     dmy[rec].day == global_param.stateday &&
+                     (rec + 1 == global_param.nrecs ||
+                      dmy[rec + 1].day != global_param.stateday))) {
+                    write_model_state(&all_vars, veg_con->vegetat_type_num,
+                                      soil_con.gridcel, &filep, &soil_con);
+                }
+
+
                 if (ErrorFlag == ERROR) {
                     if (options.CONTINUEONERROR) {
                         // Handle grid cell solution error
-                        log_warn("ERROR: Grid cell %i failed in record %zu so "
-                                 "the simulation has not finished.  An "
-                                 "incomplete output file has been generated, "
-                                 "check your inputs before rerunning the "
-                                 "simulation.\n", soil_con.gridcel, rec);
+                        log_warn("ERROR: Grid cell %i failed in record %zu "
+                                 "so the simulation has not finished.  An "
+                                 "incomplete output file has been "
+                                 "generated, check your inputs before "
+                                 "rerunning the simulation.\n",
+                                 soil_con.gridcel, rec);
                         break;
                     }
                     else {
                         // Else exit program on cell solution error as in previous versions
-                        log_err("ERROR: Grid cell %i failed in record %zu so "
-                                "the simulation has ended. Check your inputs "
-                                "before rerunning the simulation.\n",
+                        log_err("ERROR: Grid cell %i failed in record %zu "
+                                "so the simulation has ended. Check your "
+                                "inputs before rerunning the simulation.\n",
                                 soil_con.gridcel, rec);
                     }
                 }
-
-                /** Update Error Handling Structure **/
-                Error.filep = filep;
-                Error.out_data_files = out_data_files;
-
-                /** Initialize the storage terms in the water and energy balances **/
-
-                /** Sending a negative record number (-global_param.nrecs) to
-                    put_data() will accomplish this **/
-                ErrorFlag = put_data(&all_vars, &atmos[0], &soil_con, veg_con,
-                                     veg_lib, &lake_con, out_data, &save_data,
-                                     -global_param.nrecs);
-
-                /******************************************
-                   Run Model in Grid Cell for all Time Steps
-                ******************************************/
-
-                for (rec = startrec; rec < global_param.nrecs; rec++) {
-                    /**************************************************
-                       Compute cell physics for 1 timestep
-                    **************************************************/
-                    ErrorFlag = vic_run(&atmos[rec], &all_vars,
-                                        &(dmy[rec]), &global_param, &lake_con,
-                                        &soil_con, veg_con, veg_lib,
-                                        veg_hist[rec]);
-
-                    /**************************************************
-                       Calculate cell average values for current time step
-                    **************************************************/
-                    write_flag = put_data(&all_vars, &atmos[rec], &soil_con,
-                                          veg_con, veg_lib, &lake_con, out_data,
-                                          &save_data, rec);
-
-                    // Write cell average values for current time step
-                    if (write_flag) {
-                        write_output(out_data, out_data_files, &dmy[rec], rec);
-                    }
-
-                    /************************************
-                       Save model state at assigned date
-                       (after the final time step of the assigned date)
-                    ************************************/
-                    if (filep.statefile != NULL &&
-                        (dmy[rec].year == global_param.stateyear &&
-                         dmy[rec].month == global_param.statemonth &&
-                         dmy[rec].day == global_param.stateday &&
-                         (rec + 1 == global_param.nrecs ||
-                          dmy[rec + 1].day != global_param.stateday))) {
-                        write_model_state(&all_vars, veg_con->vegetat_type_num,
-                                          soil_con.gridcel, &filep, &soil_con);
-                    }
-
-
-                    if (ErrorFlag == ERROR) {
-                        if (options.CONTINUEONERROR) {
-                            // Handle grid cell solution error
-                            log_warn("ERROR: Grid cell %i failed in record %zu "
-                                     "so the simulation has not finished.  An "
-                                     "incomplete output file has been "
-                                     "generated, check your inputs before "
-                                     "rerunning the simulation.\n",
-                                     soil_con.gridcel, rec);
-                            break;
-                        }
-                        else {
-                            // Else exit program on cell solution error as in previous versions
-                            log_err("ERROR: Grid cell %i failed in record %zu "
-                                    "so the simulation has ended. Check your "
-                                    "inputs before rerunning the simulation.\n",
-                                    soil_con.gridcel, rec);
-                        }
-                    }
-                } /* End Rec Loop */
-            } /* !OUTPUT_FORCE */
+            } /* End Rec Loop */
 
             close_files(&filep, out_data_files, &filenames);
 
-            if (!options.OUTPUT_FORCE) {
-                free_veg_hist(global_param.nrecs, veg_con[0].vegetat_type_num,
-                              &veg_hist);
-                free_all_vars(&all_vars, veg_con[0].vegetat_type_num);
-                free_vegcon(&veg_con);
-                free((char *) soil_con.AreaFract);
-                free((char *) soil_con.BandElev);
-                free((char *) soil_con.Tfactor);
-                free((char *) soil_con.Pfactor);
-                free((char *) soil_con.AboveTreeLine);
-            } /* !OUTPUT_FORCE */
+            free_veg_hist(global_param.nrecs, veg_con[0].vegetat_type_num,
+                          &veg_hist);
+            free_all_vars(&all_vars, veg_con[0].vegetat_type_num);
+            free_vegcon(&veg_con);
+            free((char *) soil_con.AreaFract);
+            free((char *) soil_con.BandElev);
+            free((char *) soil_con.Tfactor);
+            free((char *) soil_con.Pfactor);
+            free((char *) soil_con.AboveTreeLine);
         } /* End Run Model Condition */
     }   /* End Grid Loop */
 
@@ -331,23 +318,21 @@ main(int   argc,
     free_out_data_files(&out_data_files);
     free_out_data(&out_data);
     fclose(filep.soilparam);
-    if (!options.OUTPUT_FORCE) {
-        free_veglib(&veg_lib);
-        fclose(filep.vegparam);
-        fclose(filep.veglib);
-        if (options.SNOW_BAND > 1) {
-            fclose(filep.snowband);
-        }
-        if (options.LAKES) {
-            fclose(filep.lakeparam);
-        }
-        if (options.INIT_STATE) {
-            fclose(filep.init_state);
-        }
-        if (options.SAVE_STATE && strcmp(filenames.statefile, "NONE") != 0) {
-            fclose(filep.statefile);
-        }
-    } /* !OUTPUT_FORCE */
+    free_veglib(&veg_lib);
+    fclose(filep.vegparam);
+    fclose(filep.veglib);
+    if (options.SNOW_BAND > 1) {
+        fclose(filep.snowband);
+    }
+    if (options.LAKES) {
+        fclose(filep.lakeparam);
+    }
+    if (options.INIT_STATE) {
+        fclose(filep.init_state);
+    }
+    if (options.SAVE_STATE && strcmp(filenames.statefile, "NONE") != 0) {
+        fclose(filep.statefile);
+    }
     finalize_logging();
 
     return EXIT_SUCCESS;

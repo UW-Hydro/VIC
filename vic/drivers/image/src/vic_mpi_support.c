@@ -693,7 +693,7 @@ create_MPI_option_struct_type(MPI_Datatype *mpi_type)
     MPI_Datatype *mpi_types;
 
     // nitems has to equal the number of elements in option_struct
-    nitems = 68;
+    nitems = 64;
     blocklengths = (int *) malloc(nitems * sizeof(int));
     if (blocklengths == NULL) {
         log_err("Memory allocation error in create_MPI_option_struct_type().")
@@ -801,18 +801,6 @@ create_MPI_option_struct_type(MPI_Datatype *mpi_type)
     offsets[i] = offsetof(option_struct, LAKES);
     mpi_types[i++] = MPI_C_BOOL;
 
-    // unsigned short LW_CLOUD;
-    offsets[i] = offsetof(option_struct, LW_CLOUD);
-    mpi_types[i++] = MPI_UNSIGNED_SHORT;
-
-    // unsigned short LW_TYPE;
-    offsets[i] = offsetof(option_struct, LW_TYPE);
-    mpi_types[i++] = MPI_UNSIGNED_SHORT;
-
-    // bool MTCLIM_SWE_CORR;
-    offsets[i] = offsetof(option_struct, MTCLIM_SWE_CORR);
-    mpi_types[i++] = MPI_C_BOOL;
-
     // size_t Ncanopy;
     offsets[i] = offsetof(option_struct, Ncanopy);
     mpi_types[i++] = MPI_AINT; // note there is no MPI_SIZE_T equivalent
@@ -840,10 +828,6 @@ create_MPI_option_struct_type(MPI_Datatype *mpi_type)
     // size_t NVEGTYPES;
     offsets[i] = offsetof(option_struct, NVEGTYPES);
     mpi_types[i++] = MPI_AINT; // note there is no MPI_SIZE_T equivalent
-
-    // bool PLAPSE;
-    offsets[i] = offsetof(option_struct, PLAPSE);
-    mpi_types[i++] = MPI_C_BOOL;
 
     // unsigned short RC_MODE;
     offsets[i] = offsetof(option_struct, RC_MODE);
@@ -977,10 +961,6 @@ create_MPI_option_struct_type(MPI_Datatype *mpi_type)
     offsets[i] = offsetof(option_struct, Noutfiles);
     mpi_types[i++] = MPI_AINT; // note there is no MPI_SIZE_T equivalent
 
-    // bool OUTPUT_FORCE;
-    offsets[i] = offsetof(option_struct, OUTPUT_FORCE);
-    mpi_types[i++] = MPI_C_BOOL;
-
     // bool PRT_HEADER;
     offsets[i] = offsetof(option_struct, PRT_HEADER);
     mpi_types[i++] = MPI_C_BOOL;
@@ -1030,7 +1010,7 @@ create_MPI_param_struct_type(MPI_Datatype *mpi_type)
     MPI_Datatype *mpi_types;
 
     // nitems has to equal the number of elements in parameters_struct
-    nitems = 159;
+    nitems = 143;
     blocklengths = (int *) malloc(nitems * sizeof(int));
     if (blocklengths == NULL) {
         log_err("Memory allocation error in create_MPI_param_struct_type().")
@@ -1132,70 +1112,6 @@ create_MPI_param_struct_type(MPI_Datatype *mpi_type)
 
     // double CANOPY_VPDMINFACTOR
     offsets[i] = offsetof(parameters_struct, CANOPY_VPDMINFACTOR);
-    mpi_types[i++] = MPI_DOUBLE;
-
-    // double MTCLIM_TDAYCOEF
-    offsets[i] = offsetof(parameters_struct, MTCLIM_TDAYCOEF);
-    mpi_types[i++] = MPI_DOUBLE;
-
-    // double MTCLIM_SOLAR_CONSTANT
-    offsets[i] = offsetof(parameters_struct, MTCLIM_SOLAR_CONSTANT);
-    mpi_types[i++] = MPI_DOUBLE;
-
-    // double MTCLIM_SNOW_TCRIT
-    offsets[i] = offsetof(parameters_struct, MTCLIM_SNOW_TCRIT);
-    mpi_types[i++] = MPI_DOUBLE;
-
-    // double MTCLIM_SNOW_TRATE
-    offsets[i] = offsetof(parameters_struct, MTCLIM_SNOW_TRATE);
-    mpi_types[i++] = MPI_DOUBLE;
-
-    // double MTCLIM_TBASE
-    offsets[i] = offsetof(parameters_struct, MTCLIM_TBASE);
-    mpi_types[i++] = MPI_DOUBLE;
-
-    // double MTCLIM_ABASE
-    offsets[i] = offsetof(parameters_struct, MTCLIM_ABASE);
-    mpi_types[i++] = MPI_DOUBLE;
-
-    // double MTCLIM_C
-    offsets[i] = offsetof(parameters_struct, MTCLIM_C);
-    mpi_types[i++] = MPI_DOUBLE;
-
-    // double MTCLIM_B0
-    offsets[i] = offsetof(parameters_struct, MTCLIM_B0);
-    mpi_types[i++] = MPI_DOUBLE;
-
-    // double MTCLIM_B1
-    offsets[i] = offsetof(parameters_struct, MTCLIM_B1);
-    mpi_types[i++] = MPI_DOUBLE;
-
-    // double MTCLIM_B2
-    offsets[i] = offsetof(parameters_struct, MTCLIM_B2);
-    mpi_types[i++] = MPI_DOUBLE;
-
-    // double MTCLIM_RAIN_SCALAR
-    offsets[i] = offsetof(parameters_struct, MTCLIM_RAIN_SCALAR);
-    mpi_types[i++] = MPI_DOUBLE;
-
-    // double MTCLIM_DIF_ALB
-    offsets[i] = offsetof(parameters_struct, MTCLIM_DIF_ALB);
-    mpi_types[i++] = MPI_DOUBLE;
-
-    // double MTCLIM_SC_INT
-    offsets[i] = offsetof(parameters_struct, MTCLIM_SC_INT);
-    mpi_types[i++] = MPI_DOUBLE;
-
-    // double MTCLIM_SC_SLOPE
-    offsets[i] = offsetof(parameters_struct, MTCLIM_SC_SLOPE);
-    mpi_types[i++] = MPI_DOUBLE;
-
-    // double MTCLIM_SRADDT
-    offsets[i] = offsetof(parameters_struct, MTCLIM_SRADDT);
-    mpi_types[i++] = MPI_DOUBLE;
-
-    // double MTCLIM_SW_PREC_THRESH
-    offsets[i] = offsetof(parameters_struct, MTCLIM_SW_PREC_THRESH);
     mpi_types[i++] = MPI_DOUBLE;
 
     // double LAKE_TMELT

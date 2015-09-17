@@ -364,54 +364,6 @@ get_global_param(FILE *gp)
                     options.GRND_FLUX_TYPE = GF_410;
                 }
             }
-            else if (strcasecmp("LW_TYPE", optstr) == 0) {
-                sscanf(cmdstr, "%*s %s", flgstr);
-                if (strcasecmp("LW_TVA", flgstr) == 0) {
-                    options.LW_TYPE = LW_TVA;
-                }
-                else if (strcasecmp("LW_ANDERSON", flgstr) == 0) {
-                    options.LW_TYPE = LW_ANDERSON;
-                }
-                else if (strcasecmp("LW_BRUTSAERT", flgstr) == 0) {
-                    options.LW_TYPE = LW_BRUTSAERT;
-                }
-                else if (strcasecmp("LW_SATTERLUND", flgstr) == 0) {
-                    options.LW_TYPE = LW_SATTERLUND;
-                }
-                else if (strcasecmp("LW_IDSO", flgstr) == 0) {
-                    options.LW_TYPE = LW_IDSO;
-                }
-                else if (strcasecmp("LW_PRATA", flgstr) == 0) {
-                    options.LW_TYPE = LW_PRATA;
-                }
-            }
-            else if (strcasecmp("LW_CLOUD", optstr) == 0) {
-                sscanf(cmdstr, "%*s %s", flgstr);
-                if (strcasecmp("LW_CLOUD_DEARDORFF", flgstr) == 0) {
-                    options.LW_CLOUD = LW_CLOUD_DEARDORFF;
-                }
-                else {
-                    options.LW_CLOUD = LW_CLOUD_BRAS;
-                }
-            }
-            else if (strcasecmp("MTCLIM_SWE_CORR", optstr) == 0) {
-                sscanf(cmdstr, "%*s %s", flgstr);
-                if (strcasecmp("TRUE", flgstr) == 0) {
-                    options.MTCLIM_SWE_CORR = true;
-                }
-                else {
-                    options.MTCLIM_SWE_CORR = false;
-                }
-            }
-            else if (strcasecmp("PLAPSE", optstr) == 0) {
-                sscanf(cmdstr, "%*s %s", flgstr);
-                if (strcasecmp("FALSE", flgstr) == 0) {
-                    options.PLAPSE = false;
-                }
-                else {
-                    options.PLAPSE = true;
-                }
-            }
             else if (strcasecmp("SPATIAL_FROST", optstr) == 0) {
                 sscanf(cmdstr, "%*s %s %s", flgstr, flgstr2);
                 if (strcasecmp("TRUE", flgstr) == 0) {
@@ -438,33 +390,6 @@ get_global_param(FILE *gp)
                 }
                 else {
                     options.TFALLBACK = false;
-                }
-            }
-            else if (strcasecmp("VP_INTERP", optstr) == 0) {
-                sscanf(cmdstr, "%*s %s", flgstr);
-                if (strcasecmp("TRUE", flgstr) == 0) {
-                    options.VP_INTERP = true;
-                }
-                else {
-                    options.VP_INTERP = false;
-                }
-            }
-            else if (strcasecmp("VP_ITER", optstr) == 0) {
-                sscanf(cmdstr, "%*s %s", flgstr);
-                if (strcasecmp("VP_ITER_NONE", flgstr) == 0) {
-                    options.VP_ITER = VP_ITER_NONE;
-                }
-                if (strcasecmp("VP_ITER_ALWAYS", flgstr) == 0) {
-                    options.VP_ITER = VP_ITER_ALWAYS;
-                }
-                if (strcasecmp("VP_ITER_ANNUAL", flgstr) == 0) {
-                    options.VP_ITER = VP_ITER_ANNUAL;
-                }
-                if (strcasecmp("VP_ITER_CONVERGE", flgstr) == 0) {
-                    options.VP_ITER = VP_ITER_CONVERGE;
-                }
-                else {
-                    options.VP_INTERP = VP_ITER_ALWAYS;
                 }
             }
             else if (strcasecmp("SHARE_LAYER_MOIST", optstr) == 0) {

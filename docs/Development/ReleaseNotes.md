@@ -74,6 +74,19 @@ This is a major update from VIC 4. The VIC 5.0.0 release aims to have nearly ide
 
 #### Depreciated Features:
 
+1.  Removed MTCLIM ([GH#288](https://github.com/UW-Hydro/VIC/pull/288)).
+
+	Previous versions of VIC used MTCLIM to generate missing forcing variables required to run VIC.  This led to confusion by many users and considerably more complex code in the Classic Driver. VIC forcings are now required to be provided at the same time frequency as the model will be run at (`SNOW_STEPS_PER_DAY` or `MODEL_STEPS_PER_DAY`). The following options have been removed from the Classic Driver:
+
+	- `LW_TYPE`
+	- `LW_CLOUD`
+	- `MTCLIM_SWE_CORR`
+	- `VP_INTERP`
+	- `VP_ITER`
+	- `OUTPUT_FORCE`
+
+	We are providing a stand-alone version of MTCLIM that produces subdaily VIC meteorological forcings.  That tool is available [here](http://mtclim.readthedocs.org).
+
 #### Bug Fixes:
 
 ------------------------------

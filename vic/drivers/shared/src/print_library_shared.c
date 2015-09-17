@@ -479,9 +479,6 @@ print_option(option_struct *option)
     fprintf(LOG_DEST, "\tJULY_TAVG_SUPPLIED   : %d\n",
             option->JULY_TAVG_SUPPLIED);
     fprintf(LOG_DEST, "\tLAKES                : %d\n", option->LAKES);
-    fprintf(LOG_DEST, "\tLW_CLOUD             : %d\n", option->LW_CLOUD);
-    fprintf(LOG_DEST, "\tLW_TYPE              : %d\n", option->LW_TYPE);
-    fprintf(LOG_DEST, "\tMTCLIM_SWE_CORR      : %d\n", option->MTCLIM_SWE_CORR);
     fprintf(LOG_DEST, "\tNcanopy              : %zu\n", option->Ncanopy);
     fprintf(LOG_DEST, "\tNfrost               : %zu\n", option->Nfrost);
     fprintf(LOG_DEST, "\tNlakenode            : %zu\n", option->Nlakenode);
@@ -489,7 +486,6 @@ print_option(option_struct *option)
     fprintf(LOG_DEST, "\tNnode                : %zu\n", option->Nnode);
     fprintf(LOG_DEST, "\tNOFLUX               : %d\n", option->NOFLUX);
     fprintf(LOG_DEST, "\tNVEGTYPES            : %zu\n", option->NVEGTYPES);
-    fprintf(LOG_DEST, "\tPLAPSE               : %d\n", option->PLAPSE);
     fprintf(LOG_DEST, "\tRC_MODE              : %d\n", option->RC_MODE);
     fprintf(LOG_DEST, "\tROOT_ZONES           : %zu\n", option->ROOT_ZONES);
     fprintf(LOG_DEST, "\tQUICK_FLUX           : %d\n", option->QUICK_FLUX);
@@ -520,7 +516,6 @@ print_option(option_struct *option)
     fprintf(LOG_DEST, "\tCOMPRESS             : %d\n", option->COMPRESS);
     fprintf(LOG_DEST, "\tMOISTFRACT           : %d\n", option->MOISTFRACT);
     fprintf(LOG_DEST, "\tNoutfiles            : %zu\n", option->Noutfiles);
-    fprintf(LOG_DEST, "\tOUTPUT_FORCE         : %d\n", option->OUTPUT_FORCE);
     fprintf(LOG_DEST, "\tPRT_HEADER           : %d\n", option->PRT_HEADER);
     fprintf(LOG_DEST, "\tPRT_SNOW_BAND        : %d\n", option->PRT_SNOW_BAND);
 }
@@ -626,25 +621,6 @@ print_parameters(parameters_struct *param)
     fprintf(LOG_DEST, "\tCANOPY_RSMAX: %.4f\n", param->CANOPY_RSMAX);
     fprintf(LOG_DEST, "\tCANOPY_VPDMINFACTOR: %.4f\n",
             param->CANOPY_VPDMINFACTOR);
-    fprintf(LOG_DEST, "\tMTCLIM_SOLAR_CONSTANT: %.4f\n",
-            param->MTCLIM_SOLAR_CONSTANT);
-    fprintf(LOG_DEST, "\tMTCLIM_TDAYCOEF: %.4f\n", param->MTCLIM_TDAYCOEF);
-    fprintf(LOG_DEST, "\tMTCLIM_SNOW_TCRIT: %.4f\n", param->MTCLIM_SNOW_TCRIT);
-    fprintf(LOG_DEST, "\tMTCLIM_SNOW_TRATE: %.4f\n", param->MTCLIM_SNOW_TRATE);
-    fprintf(LOG_DEST, "\tMTCLIM_TBASE: %.4f\n", param->MTCLIM_TBASE);
-    fprintf(LOG_DEST, "\tMTCLIM_ABASE: %.4f\n", param->MTCLIM_ABASE);
-    fprintf(LOG_DEST, "\tMTCLIM_C: %.4f\n", param->MTCLIM_C);
-    fprintf(LOG_DEST, "\tMTCLIM_B0: %.4f\n", param->MTCLIM_B0);
-    fprintf(LOG_DEST, "\tMTCLIM_B1: %.4f\n", param->MTCLIM_B1);
-    fprintf(LOG_DEST, "\tMTCLIM_B2: %.4f\n", param->MTCLIM_B2);
-    fprintf(LOG_DEST, "\tMTCLIM_RAIN_SCALAR: %.4f\n",
-            param->MTCLIM_RAIN_SCALAR);
-    fprintf(LOG_DEST, "\tMTCLIM_DIF_ALB: %.4f\n", param->MTCLIM_DIF_ALB);
-    fprintf(LOG_DEST, "\tMTCLIM_SC_INT: %.4f\n", param->MTCLIM_SC_INT);
-    fprintf(LOG_DEST, "\tMTCLIM_SC_SLOPE: %.4f\n", param->MTCLIM_SC_SLOPE);
-    fprintf(LOG_DEST, "\tMTCLIM_SRADDT: %.4f\n", param->MTCLIM_SRADDT);
-    fprintf(LOG_DEST, "\tMTCLIM_SW_PREC_THRESH: %.4f\n",
-            param->MTCLIM_SW_PREC_THRESH);
     fprintf(LOG_DEST, "\tLAKE_TMELT: %.4f\n", param->LAKE_TMELT);
     fprintf(LOG_DEST, "\tLAKE_MAX_SURFACE: %.4f\n", param->LAKE_MAX_SURFACE);
     fprintf(LOG_DEST, "\tLAKE_BETA: %.4f\n", param->LAKE_BETA);

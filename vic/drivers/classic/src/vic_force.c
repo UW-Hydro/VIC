@@ -1,7 +1,11 @@
 /******************************************************************************
  * @section DESCRIPTION
  *
- * This routine opens files for soil, vegetation, and global parameters.
+ * This routine initializes atmospheric variables for both the model time step,
+ * and the time step used by the snow algorithm (if different). Air temperature
+ * is estimated using MTCLIM (see routine for reference), atmospheric moisture
+ * is estimated using Kimball's algorithm (see routine for reference), and
+ * radiation is estimated using Bras's algorithms (see routines for reference).
  *
  * @section LICENSE
  *
@@ -29,23 +33,18 @@
 #include <vic_driver_classic.h>
 
 /******************************************************************************
- * @brief    This routine opens files for soil, vegetation, and global
- *           parameters.
+ * @brief    Initialize atmospheric variables for both the model time step.
  *****************************************************************************/
 void
-check_files(filep_struct     *filep,
-            filenames_struct *fnames)
+vic_force(atmos_data_struct    *atmos,
+          dmy_struct           *dmy,
+          FILE                **infile,
+          veg_lib_struct       *veg_lib,
+          veg_con_struct       *veg_con,
+          veg_hist_struct     **veg_hist,
+          soil_con_struct      *soil_con,
+          out_data_file_struct *out_data_files,
+          out_data_struct      *out_data)
 {
-    extern option_struct options;
-    extern FILE          *open_file(char string[], char type[]);
-
-    filep->soilparam = open_file(fnames->soil, "r");
-    filep->veglib = open_file(fnames->veglib, "r");
-    filep->vegparam = open_file(fnames->veg, "r");
-    if (options.SNOW_BAND > 1) {
-        filep->snowband = open_file(fnames->snowband, "r");
-    }
-    if (options.LAKES) {
-        filep->lakeparam = open_file(fnames->lakeparam, "r");
-    }
+    ;
 }

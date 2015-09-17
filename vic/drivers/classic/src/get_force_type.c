@@ -141,14 +141,6 @@ get_force_type(char *cmdstr,
     else if (strcasecmp("SNOWF", optstr) == 0) {
         type = SNOWF;
     }
-    /* type 20: maximum daily temperature [C] (ALMA_INPUT: [K]) */
-    else if (strcasecmp("TMAX", optstr) == 0) {
-        type = TMAX;
-    }
-    /* type 21: minimum daily temperature [C] (ALMA_INPUT: [K]) */
-    else if (strcasecmp("TMIN", optstr) == 0) {
-        type = TMIN;
-    }
     /* type 22: cloud cover fraction */
     else if (strcasecmp("TSKC", optstr) == 0) {
         type = TSKC;

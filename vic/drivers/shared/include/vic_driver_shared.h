@@ -455,8 +455,10 @@ typedef struct {
     veg_var_struct *veg_var;
 } Error_struct;
 
+double air_density(double t, double p);
 double all_30_day_from_dmy(dmy_struct *dmy);
 double all_leap_from_dmy(dmy_struct *dmy);
+double average(double *ar, size_t n);
 double calc_energy_balance_error(int, double, double, double, double, double);
 void calc_root_fractions(veg_con_struct *veg_con, soil_con_struct *soil_con);
 double calc_water_balance_error(int, double, double, double);
@@ -544,9 +546,12 @@ void print_veg_lib(veg_lib_struct *vlib, char carbon);
 void print_veg_var(veg_var_struct *vvar, size_t ncanopy);
 void print_version(char *);
 void print_usage(char *);
+double q_to_vp(double q, double p);
 void soil_moisture_from_water_table(soil_con_struct *soil_con, size_t nlayers);
 int valid_date(unsigned short int calendar, dmy_struct *dmy);
 void validate_parameters(void);
+char will_it_snow(double *t, double t_offset, double max_snow_temp,
+                  double *prcp, size_t n);
 void zero_output_list(out_data_struct *);
 
 #endif

@@ -1056,6 +1056,8 @@ void alblake(double, double, double *, double *, double *, double *, double,
              double);
 double arno_evap(layer_data_struct *, double, double, double, double, double,
                  double, double, double, double, double, double *);
+bool assert_close_double(double x, double y, double rtol, double abs_tol);
+bool assert_close_float(float x, float y, float rtol, float abs_tol);
 double calc_atmos_energy_bal(double, double, double, double, double, double,
                              double, double, double, double, double, double,
                              double, double *, double *, double *, double *,

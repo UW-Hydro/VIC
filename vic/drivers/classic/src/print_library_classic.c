@@ -113,11 +113,6 @@ print_atmos_data(atmos_data_struct *atmos,
         fprintf(LOG_DEST, "\t%d\n", atmos->snowflag[i]);
     }
     fprintf(LOG_DEST, "\n");
-    fprintf(LOG_DEST, "\ttskc      :");
-    for (i = 0; i <= nr; i++) {
-        fprintf(LOG_DEST, "\t%.4f", atmos->tskc[i]);
-    }
-    fprintf(LOG_DEST, "\n");
     fprintf(LOG_DEST, "\tvp        :");
     for (i = 0; i <= nr; i++) {
         fprintf(LOG_DEST, "\t%.4f", atmos->vp[i]);

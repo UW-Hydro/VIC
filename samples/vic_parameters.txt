@@ -74,32 +74,6 @@ CANOPY_VPDMINFACTOR 0.1  # Minimum allowable vapor pressure deficit factor
 ###############################################################################
 
 ###############################################################################
- # MTCLIM Parameters
-MTCLIM_SOLAR_CONSTANT 1368.0
-
-# parameters for the Tair algorithm
-MTCLIM_TDAYCOEF 0.45  # (dim) daylight air temperature coefficient (dim)
-
-# parameters for the snowpack algorithm
-MTCLIM_SNOW_TCRIT -6.0  # (deg C) critical temperature for snowmelt
-MTCLIM_SNOW_TRATE 0.042  # (cm/degC/day) snowmelt rate
-
-# parameters for the radiation algorithm
-MTCLIM_TBASE 0.870  # (dim) max inst. trans., 0m, nadir, dry atm
-MTCLIM_ABASE -6.1e-5  # (1/Pa) vapor pressure effect on transmittance
-MTCLIM_C 1.5  # (dim) radiation parameter
-MTCLIM_B0 0.031  # (dim) radiation parameter
-MTCLIM_B1 0.201  # (dim) radiation parameter
-MTCLIM_B2 0.185  # (dim) radiation parameter
-MTCLIM_RAIN_SCALAR 0.75  # (dim) correction to trans. for rain day
-MTCLIM_DIF_ALB 0.6  # (dim) diffuse albedo for horizon correction
-MTCLIM_SC_INT 1.32  # (MJ/m2/day) snow correction intercept
-MTCLIM_SC_SLOPE 0.096  # (MJ/m2/day/cm) snow correction slope
-MTCLIM_SRADDT 30.0  # timestep for radiation routine (seconds)
-                      # Note:  Make sure that 3600 % SRADDT == 0
-###############################################################################
-
-###############################################################################
 # Lake Model Parameters
 
 # lake model related constants

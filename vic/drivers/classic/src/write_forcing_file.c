@@ -69,7 +69,6 @@ write_forcing_file(atmos_data_struct    *atmos,
                                               (atmos[rec].vp[j] +
                                                atmos[rec].vpd[j]);
             out_data[OUT_SHORTWAVE].data[0] = atmos[rec].shortwave[j];
-            out_data[OUT_TSKC].data[0] = atmos[rec].tskc[j];
             out_data[OUT_VP].data[0] = atmos[rec].vp[j] / PA_PER_KPA;
             out_data[OUT_VPD].data[0] = atmos[rec].vpd[j] / PA_PER_KPA;
             out_data[OUT_WIND].data[0] = atmos[rec].wind[j];

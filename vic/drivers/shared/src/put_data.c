@@ -174,7 +174,6 @@ put_data(all_vars_struct   *all_vars,
     }
     out_data[OUT_SHORTWAVE].data[0] = atmos->shortwave[NR];
     out_data[OUT_SNOWF].data[0] = atmos->out_snow;   // mm over grid cell
-    out_data[OUT_TSKC].data[0] = atmos->tskc[NR];
     out_data[OUT_VP].data[0] = atmos->vp[NR] / PA_PER_KPA;
     out_data[OUT_VPD].data[0] = atmos->vpd[NR] / PA_PER_KPA;
     out_data[OUT_WIND].data[0] = atmos->wind[NR];

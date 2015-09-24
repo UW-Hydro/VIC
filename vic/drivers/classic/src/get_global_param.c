@@ -547,12 +547,7 @@ get_global_param(FILE *gp)
             else if (strcasecmp("MEASURE_H", optstr) == 0) {
                 sscanf(cmdstr, "%*s %lf", &global_param.measure_h);
             }
-            else if (strcasecmp("ALMA_INPUT", optstr) == 0) {
-                sscanf(cmdstr, "%*s %s", flgstr);
-                if (strcasecmp("TRUE", flgstr) == 0) {
-                    options.ALMA_INPUT = true;
-                }
-            }
+
             /*************************************
                Define parameter files
             *************************************/

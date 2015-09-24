@@ -50,7 +50,6 @@ print_atmos_data(atmos_data_struct *atmos)
     fprintf(LOG_DEST, "\tpressure  : %.4f\n", atmos->pressure[0]);
     fprintf(LOG_DEST, "\tshortwave : %.4f\n", atmos->shortwave[0]);
     fprintf(LOG_DEST, "\tsnowflag  : %d\n", atmos->snowflag[0]);
-    fprintf(LOG_DEST, "\ttskc      : %.4f\n", atmos->tskc[0]);
     fprintf(LOG_DEST, "\tvp        : %.4f\n", atmos->vp[0]);
     fprintf(LOG_DEST, "\tvpd       : %.4f\n", atmos->vpd[0]);
     fprintf(LOG_DEST, "\twind      : %.4f\n", atmos->wind[0]);

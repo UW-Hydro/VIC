@@ -55,6 +55,7 @@ vic_force(atmos_data_struct    *atmos,
     size_t                     v;
     size_t                     rec;
     size_t                     uidx;
+    double                     t_offset;
     double                   **forcing_data;
     double                  ***veg_hist_data;
     double                     avgJulyAirTemp;
@@ -119,6 +120,12 @@ vic_force(atmos_data_struct    *atmos,
        Variables in the atmos_data structure
     ****************************************************/
 
+    t_offset = Tfactor[0];
+    for (band = 1; band < options.SNOW_BAND; band++) {
+      if (Tfactor[band] < t_offset)
+        t_offset = Tfactor[band];
+    }
+
     for (rec = 0; rec < global_param.nrecs; rec++) {
         for (i = 0; i < NF; i++) {
             uidx = rec * NF + i;
@@ -142,6 +149,11 @@ vic_force(atmos_data_struct    *atmos,
                                                 atmos[rec].pressure[i]);
             // wind speed in m/s
             atmos[rec].wind[i] = forcing_data[WIND][uidx];
+            // snow flag
+            atmos[i].snowflag[j] = will_it_snow(&(atmos[i].air_temp[j]),
+                                                t_offset,
+                                                param.SNOW_MAX_SNOW_TEMP,
+                                                &(atmos[i].prec[j]), 1);
             // Optional inputs
             // Channel inflow from upstream (into lake)
             if (param_set.TYPE[CHANNEL_IN].SUPPLIED) {
@@ -153,6 +165,9 @@ vic_force(atmos_data_struct    *atmos,
             // Atmospheric CO2 concentration
             if (param_set.TYPE[CATM].SUPPLIED) {
                 atmos[rec].Catm[i] = forcing_data[CATM][uidx];
+            }
+            else {
+                atmos[rec].Catm[i] = param.CARBON_CATMCURRENT * PPM_to_MIXRATIO;
             }
             // Fraction of shortwave that is direct
             if (param_set.TYPE[FDIR].SUPPLIED) {
@@ -177,6 +192,12 @@ vic_force(atmos_data_struct    *atmos,
             atmos[rec].vpd[NR] = average(atmos[rec].vpd, NF);
             atmos[rec].density[NR] = average(atmos[rec].density, NF);
             atmos[rec].wind[NR] = average(atmos[rec].wind, NF);
+            atmos[rec].snowflag[NR] = FALSE;
+            for (i=0; i<NF; i++) {
+                if (atmos[rec].snowflag[i] == TRUE) {
+                    atmos[rec].snowflag[NR] = TRUE;
+                }
+            }
             atmos[rec].channel_in[NR] = average(atmos[rec].channel_in, NF);
             atmos[rec].Catm[NR] = average(atmos[rec].Catm, NF);
             atmos[rec].fdir[NR] = average(atmos[rec].fdir, NF);

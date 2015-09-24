@@ -76,32 +76,20 @@ enum
  *****************************************************************************/
 enum
 {
-    AIR_TEMP,    /**< air temperature per time step [C] (ALMA_INPUT: [K]) */
+    AIR_TEMP,    /**< air temperature per time step [C] */
     ALBEDO,      /**< surface albedo [fraction] */
     CATM,        /**< atmospheric CO2 concentration [ppm] */
-    CHANNEL_IN,  /**< incoming channel flow [m3] (ALMA_INPUT: [m3/s]) */
-    CRAINF,      /**< convective rainfall [mm] (ALMA_INPUT: [mm/s]) */
-    CSNOWF,      /**< convective snowfall [mm] (ALMA_INPUT: [mm/s]) */
-    DENSITY,     /**< atmospheric density [kg/m3] */
+    CHANNEL_IN,  /**< incoming channel flow [m3] */
     FDIR,        /**< fraction of incoming shortwave that is direct [fraction] */
     LAI_IN,      /**< leaf area index [m2/m2] */
     LONGWAVE,    /**< incoming longwave radiation [W/m2] */
-    LSRAINF,     /**< large-scale rainfall [mm] (ALMA_INPUT: [mm/s]) */
-    LSSNOWF,     /**< large-scale snowfall [mm] (ALMA_INPUT: [mm/s]) */
     PAR,         /**< incoming photosynthetically active radiation [W/m2] */
-    PREC,        /**< total precipitation (rain and snow) [mm] (ALMA_INPUT: [mm/s]) */
-    PRESSURE,    /**< atmospheric pressure [kPa] (ALMA_INPUT: [Pa]) */
+    PREC,        /**< total precipitation (rain and snow) [mm] */
+    PRESSURE,    /**< atmospheric pressure [kPa] */
     QAIR,        /**< specific humidity [kg/kg] */
-    RAINF,       /**< rainfall (convective and large-scale) [mm] (ALMA_INPUT: [mm/s]) */
-    REL_HUMID,   /**< relative humidity [%] */
     SHORTWAVE,   /**< incoming shortwave [W/m2] */
-    SNOWF,       /**< snowfall (convective and large-scale) [mm] (ALMA_INPUT: [mm/s]) */
-    TSKC,        /**< cloud cover fraction [fraction] */
     VEGCOVER,    /**< fraction of each veg tile covered by plants [fraction] */
-    VP,          /**< vapor pressure [kPa] (ALMA_INPUT: [Pa]) */
     WIND,        /**< wind speed [m/s] */
-    WIND_E,      /**< zonal component of wind speed [m/s] */
-    WIND_N,      /**< meridional component of wind speed [m/s] */
     SKIP,        /**< place holder for unused data columns */
     // Last value of enum - DO NOT ADD ANYTHING BELOW THIS LINE!!
     // used as a loop counter and must be >= the largest value in this enum
@@ -250,7 +238,6 @@ enum
     OUT_REL_HUMID,        /**< relative humidity [%]*/
     OUT_SHORTWAVE,        /**< incoming shortwave [W/m2] */
     OUT_SURF_COND,        /**< surface conductance [m/s] */
-    OUT_TSKC,             /**< cloud cover fraction [fraction] */
     OUT_VEGCOVER,         /**< fractional area of plants [fraction] */
     OUT_VP,               /**< near surface vapor pressure [kPa] (ALMA_OUTPUT: [Pa]) */
     OUT_VPD,              /**< near surface vapor pressure deficit [kPa] (ALMA_OUTPUT: [Pa]) */

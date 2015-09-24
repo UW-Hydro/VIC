@@ -82,10 +82,6 @@ alloc_atmos(atmos_data_struct *atmos)
     if (atmos->snowflag == NULL) {
         log_err("Memory allocation error in alloc_atmos().");
     }
-    atmos->tskc = (double *) calloc(NR + 1, sizeof(double));
-    if (atmos->tskc == NULL) {
-        log_err("Memory allocation error in alloc_atmos().");
-    }
     atmos->vp = (double *) calloc(NR + 1, sizeof(double));
     if (atmos->vp == NULL) {
         log_err("Memory allocation error in alloc_atmos().");
@@ -122,7 +118,6 @@ free_atmos(atmos_data_struct *atmos)
     free(atmos->pressure);
     free(atmos->shortwave);
     free(atmos->snowflag);
-    free(atmos->tskc);
     free(atmos->vp);
     free(atmos->vpd);
     free(atmos->wind);

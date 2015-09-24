@@ -91,10 +91,6 @@ alloc_atmos(int                 nrecs,
         if ((*atmos)[i].snowflag == NULL) {
             log_err("Memory allocation error in alloc_atmos().");
         }
-        (*atmos)[i].tskc = (double *) calloc(NR + 1, sizeof(double));
-        if ((*atmos)[i].tskc == NULL) {
-            log_err("Memory allocation error in alloc_atmos().");
-        }
         (*atmos)[i].vp = (double *) calloc(NR + 1, sizeof(double));
         if ((*atmos)[i].vp == NULL) {
             log_err("Memory allocation error in alloc_atmos().");
@@ -136,7 +132,6 @@ free_atmos(int                 nrecs,
         free((*atmos)[i].pressure);
         free((*atmos)[i].shortwave);
         free((*atmos)[i].snowflag);
-        free((*atmos)[i].tskc);
         free((*atmos)[i].vp);
         free((*atmos)[i].vpd);
         free((*atmos)[i].wind);

@@ -182,7 +182,6 @@ create_output_list()
     strcpy(out_data[OUT_REL_HUMID].varname, "OUT_REL_HUMID");          /* relative humidity [fraction]*/
     strcpy(out_data[OUT_SHORTWAVE].varname, "OUT_SHORTWAVE");          /* incoming shortwave [W/m2] */
     strcpy(out_data[OUT_SURF_COND].varname, "OUT_SURF_COND");          /* surface conductance [m/s] */
-    strcpy(out_data[OUT_TSKC].varname, "OUT_TSKC");                    /* cloud cover fraction [fraction] */
     strcpy(out_data[OUT_VP].varname, "OUT_VP");                        /* near surface vapor pressure [kPa] */
     strcpy(out_data[OUT_VPD].varname, "OUT_VPD");                      /* near surface vapor pressure deficit [kPa] */
     strcpy(out_data[OUT_WIND].varname, "OUT_WIND");                    /* near surface wind speed [m/s] */

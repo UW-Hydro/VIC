@@ -39,9 +39,7 @@ vic_force(atmos_data_struct    *atmos,
           veg_lib_struct       *veg_lib,
           veg_con_struct       *veg_con,
           veg_hist_struct     **veg_hist,
-          soil_con_struct      *soil_con,
-          out_data_file_struct *out_data_files,
-          out_data_struct      *out_data)
+          soil_con_struct      *soil_con)
 {
 
     extern option_struct       options;
@@ -121,9 +119,9 @@ vic_force(atmos_data_struct    *atmos,
     ****************************************************/
 
     t_offset = Tfactor[0];
-    for (band = 1; band < options.SNOW_BAND; band++) {
-      if (Tfactor[band] < t_offset)
-        t_offset = Tfactor[band];
+    for (i = 1; i < options.SNOW_BAND; i++) {
+      if (Tfactor[i] < t_offset)
+        t_offset = Tfactor[i];
     }
 
     for (rec = 0; rec < global_param.nrecs; rec++) {
@@ -192,10 +190,10 @@ vic_force(atmos_data_struct    *atmos,
             atmos[rec].vpd[NR] = average(atmos[rec].vpd, NF);
             atmos[rec].density[NR] = average(atmos[rec].density, NF);
             atmos[rec].wind[NR] = average(atmos[rec].wind, NF);
-            atmos[rec].snowflag[NR] = FALSE;
+            atmos[rec].snowflag[NR] = false;
             for (i=0; i<NF; i++) {
-                if (atmos[rec].snowflag[i] == TRUE) {
-                    atmos[rec].snowflag[NR] = TRUE;
+                if (atmos[rec].snowflag[i] == true) {
+                    atmos[rec].snowflag[NR] = true;
                 }
             }
             atmos[rec].channel_in[NR] = average(atmos[rec].channel_in, NF);
@@ -241,12 +239,6 @@ vic_force(atmos_data_struct    *atmos,
                     if (veg_hist_data[VEGCOVER][v][uidx] != NODATA_VH) {
                         veg_hist[rec][v].vegcover[i] =
                             veg_hist_data[VEGCOVER][v][uidx];
-                    }
-                    if (veg_hist[rec][v].vegcover[i] > MAX_VEGCOVER) {
-                        veg_hist[rec][v].vegcover[i] = MAX_VEGCOVER;
-                    }
-                    if (veg_hist[rec][v].vegcover[i] < MIN_VEGCOVER) {
-                        veg_hist[rec][v].vegcover[i] = MIN_VEGCOVER;
                     }
                 }
             }

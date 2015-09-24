@@ -75,8 +75,7 @@ out_data_file_struct *set_output_defaults(out_data_struct *);
 int set_output_var(out_data_file_struct *, int, int, out_data_struct *, char *,
                    int, char *, int, double);
 void vic_force(atmos_data_struct *, dmy_struct *, FILE **, veg_lib_struct *,
-               veg_con_struct *, veg_hist_struct **, soil_con_struct *,
-               out_data_file_struct *, out_data_struct *);
+               veg_con_struct *, veg_hist_struct **, soil_con_struct *);
 void write_data(out_data_file_struct *, out_data_struct *, dmy_struct *,
                 double);
 void write_forcing_file(atmos_data_struct *, int, out_data_file_struct *,

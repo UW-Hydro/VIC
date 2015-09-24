@@ -1298,21 +1298,6 @@ get_global_param(FILE *gp)
                 "consistent with the contents of the veg param file (i.e. "
                 "whether or not it contains vegcover values).");
     }
-    if (options.ALB_SRC == FROM_VEGLIB && !options.VEGLIB_ALB) {
-        log_err("\"ALB_SRC\" was specified as \"FROM_VEGLIB\", but "
-                "\"VEGLIB_ALB\" was set to \"FALSE\" in the global "
-                "parameter file.  If you want VIC to read albedo values from "
-                "the veglib file, you MUST make sure the veg lib file "
-                "contains 1 line of 12 monthly albedo values for EACH veg "
-                "class, and you MUST specify "
-                "\"VEGLIB_ALB\" as \"TRUE\" in the global parameter "
-                "file.  Alternatively, if you want VIC to read albedo values "
-                "from the veg param file, set \"ALB_SRC\" to "
-                "\"FROM_VEGPARAM\" in the global parameter file.  In "
-                "either case, the setting of \"VEGLIB_ALB\" must be "
-                "consistent with the contents of the veg lib file (i.e. "
-                "whether or not it contains albedo values).");
-    }
     if (options.VEGCOVER_SRC == FROM_VEGLIB && !options.VEGLIB_VEGCOVER) {
         log_err("\"VEGCOVER_SRC\" was specified as \"FROM_VEGLIB\", but "
                 "\"VEGLIB_VEGCOVER\" was set to \"FALSE\" in the global "

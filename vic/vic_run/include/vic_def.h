@@ -728,7 +728,6 @@ typedef struct {
  * @brief   This structure stores all model run global parameters.
  *****************************************************************************/
 typedef struct {
-    double measure_h;              /**< height of measurements (m) */
     double wind_h;                 /**< height of wind measurements (m) */
     double resolution;             /**< Model resolution (degrees) */
     double dt;                     /**< Time step in seconds */

@@ -74,6 +74,8 @@ This is a major update from VIC 4. The VIC 5.0.0 release aims to have nearly ide
 
 #### Depreciated Features:
 
+1.  Removed unused global paramerer option `MEASURE_H` ([GH#284](https://github.com/UW-Hydro/VIC/pull/284).)
+
 #### Bug Fixes:
 
 ------------------------------

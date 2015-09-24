@@ -448,7 +448,6 @@ typedef struct {
     _Bool PRT_SNOW_BAND;
 } option_struct;
 typedef struct {
-    double measure_h;
     double wind_h;
     double resolution;
     double dt;

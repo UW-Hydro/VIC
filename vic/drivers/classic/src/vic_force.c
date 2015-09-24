@@ -148,10 +148,10 @@ vic_force(atmos_data_struct    *atmos,
             // wind speed in m/s
             atmos[rec].wind[i] = forcing_data[WIND][uidx];
             // snow flag
-            atmos[i].snowflag[j] = will_it_snow(&(atmos[i].air_temp[j]),
+            atmos[rec].snowflag[i] = will_it_snow(&(atmos[rec].air_temp[i]),
                                                 t_offset,
                                                 param.SNOW_MAX_SNOW_TEMP,
-                                                &(atmos[i].prec[j]), 1);
+                                                &(atmos[rec].prec[i]), 1);
             // Optional inputs
             // Channel inflow from upstream (into lake)
             if (param_set.TYPE[CHANNEL_IN].SUPPLIED) {

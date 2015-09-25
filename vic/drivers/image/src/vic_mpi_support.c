@@ -869,18 +869,6 @@ create_MPI_option_struct_type(MPI_Datatype *mpi_type)
     offsets[i] = offsetof(option_struct, TFALLBACK);
     mpi_types[i++] = MPI_C_BOOL;
 
-    // bool VP_INTERP;
-    offsets[i] = offsetof(option_struct, VP_INTERP);
-    mpi_types[i++] = MPI_C_BOOL;
-
-    // unsigned short VP_ITER;
-    offsets[i] = offsetof(option_struct, VP_ITER);
-    mpi_types[i++] = MPI_UNSIGNED_SHORT;
-
-    // bool ALMA_INPUT;
-    offsets[i] = offsetof(option_struct, ALMA_INPUT);
-    mpi_types[i++] = MPI_C_BOOL;
-
     // bool BASEFLOW;
     offsets[i] = offsetof(option_struct, BASEFLOW);
     mpi_types[i++] = MPI_C_BOOL;

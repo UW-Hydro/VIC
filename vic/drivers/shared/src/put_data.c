@@ -174,7 +174,7 @@ put_data(all_vars_struct   *all_vars,
     out_data[OUT_VPD].data[0] = atmos->vpd[NR] / PA_PER_KPA;
     out_data[OUT_WIND].data[0] = atmos->wind[NR];
     if (options.CARBON) {
-        out_data[OUT_CATM].data[0] = atmos->Catm[NR] * 1e6;
+        out_data[OUT_CATM].data[0] = atmos->Catm[NR] / PPM_to_MIXRATIO;
         out_data[OUT_FDIR].data[0] = atmos->fdir[NR];
         out_data[OUT_PAR].data[0] = atmos->par[NR];
     }

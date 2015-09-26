@@ -153,7 +153,6 @@ vic_force(void)
     // Optional inputs
     if (options.LAKES) {
         // Channel inflow to lake
-        // set to 0 for image mode
         for (j = 0; j < NF; j++) {
             for (i = 0; i < local_domain.ncells; i++) {
                 atmos[i].channel_in[j] = 0;

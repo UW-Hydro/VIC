@@ -34,6 +34,8 @@
 void
 alloc_atmos(atmos_data_struct *atmos)
 {
+    extern option_struct       options;
+
     atmos->air_temp = (double *) calloc(NR + 1, sizeof(double));
     if (atmos->air_temp == NULL) {
         log_err("Memory allocation error in alloc_atmos().");
@@ -102,6 +104,8 @@ alloc_atmos(atmos_data_struct *atmos)
 void
 free_atmos(atmos_data_struct *atmos)
 {
+    extern option_struct       options;
+
     if (atmos == NULL) {
         return;
     }

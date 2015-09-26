@@ -35,6 +35,7 @@ void
 alloc_atmos(int                 nrecs,
             atmos_data_struct **atmos)
 {
+    extern option_struct       options;
     int i;
 
     *atmos = (atmos_data_struct *) calloc(nrecs, sizeof(atmos_data_struct));
@@ -113,6 +114,7 @@ void
 free_atmos(int                 nrecs,
            atmos_data_struct **atmos)
 {
+    extern option_struct       options;
     int i;
 
     if (*atmos == NULL) {

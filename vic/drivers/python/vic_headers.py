@@ -84,28 +84,19 @@ enum
     ALBEDO,
     CATM,
     CHANNEL_IN,
-    CRAINF,
-    CSNOWF,
     DENSITY,
     FDIR,
     LAI_IN,
     LONGWAVE,
-    LSRAINF,
-    LSSNOWF,
     PAR,
     PREC,
     PRESSURE,
     QAIR,
-    RAINF,
     REL_HUMID,
     SHORTWAVE,
-    SNOWF,
-    TSKC,
     VEGCOVER,
     VP,
     WIND,
-    WIND_E,
-    WIND_N,
     SKIP,
     N_FORCING_TYPES
 };
@@ -393,9 +384,6 @@ typedef struct {
     _Bool SPATIAL_FROST;
     _Bool SPATIAL_SNOW;
     _Bool TFALLBACK;
-    _Bool VP_INTERP;
-    unsigned short VP_ITER;
-    _Bool ALMA_INPUT;
     _Bool BASEFLOW;
     unsigned short int GRID_DECIMAL;
     _Bool VEGLIB_PHOTO;
@@ -501,8 +489,6 @@ typedef struct {
     double SVP_A;
     double SVP_B;
     double SVP_C;
-    double CARBON_CATMCURRENT;
-    double CARBON_SW2PAR;
     double PHOTO_OMEGA;
     double PHOTO_LAIMAX;
     double PHOTO_LAILIMIT;
@@ -713,7 +699,6 @@ typedef struct {
     double *air_temp;
     double *Catm;
     double *channel_in;
-    double *coszen;
     double *density;
     double *fdir;
     double *longwave;
@@ -725,7 +710,6 @@ typedef struct {
     double *pressure;
     double *shortwave;
     _Bool *snowflag;
-    double *tskc;
     double *vp;
     double *vpd;
     double *wind;

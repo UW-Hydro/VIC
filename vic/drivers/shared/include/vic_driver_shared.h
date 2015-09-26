@@ -227,7 +227,6 @@ enum
     OUT_AERO_RESIST2,     /**< overstory aerodynamic resistance [s/m] */
     OUT_AIR_TEMP,         /**< air temperature [C] (ALMA_OUTPUT: [K])*/
     OUT_CATM,             /**< atmospheric CO2 concentrtaion [ppm]*/
-    OUT_COSZEN,           /**< cosine of solar zenith angle [fraction]*/
     OUT_DENSITY,          /**< near-surface atmospheric density [kg/m3]*/
     OUT_FDIR,             /**< fraction of incoming shortwave that is direct [fraction]*/
     OUT_LAI,              /**< leaf area index [m2/m2] */

@@ -648,9 +648,6 @@ print_parameters(parameters_struct *param)
     fprintf(LOG_DEST, "\tSVP_A: %.4f\n", param->SVP_A);
     fprintf(LOG_DEST, "\tSVP_B: %.4f\n", param->SVP_B);
     fprintf(LOG_DEST, "\tSVP_C: %.4f\n", param->SVP_C);
-    fprintf(LOG_DEST, "\tCARBON_CATMCURRENT: %.4f\n",
-            param->CARBON_CATMCURRENT);
-    fprintf(LOG_DEST, "\tCARBON_SW2PAR: %.4f\n", param->CARBON_SW2PAR);
     fprintf(LOG_DEST, "\tPHOTO_OMEGA: %.4f\n", param->PHOTO_OMEGA);
     fprintf(LOG_DEST, "\tPHOTO_LAIMAX: %.4f\n", param->PHOTO_LAIMAX);
     fprintf(LOG_DEST, "\tPHOTO_LAILIMIT: %.4f\n", param->PHOTO_LAILIMIT);

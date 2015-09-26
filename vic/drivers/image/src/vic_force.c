@@ -150,6 +150,45 @@ vic_force(void)
             atmos[i].pressure[j] = (double) fvar[i];
         }
     }
+    // Optional inputs
+    if (options.LAKES) {
+        // Channel inflow to lake
+        // set to 0 for image mode
+        for (j = 0; j < NF; j++) {
+            for (i = 0; i < local_domain.ncells; i++) {
+                atmos[i].channel_in[j] = 0;
+            }
+        }
+    }
+    if (options.CARBON) {
+        // Atmospheric CO2 mixing ratio
+        for (j = 0; j < NF; j++) {
+            d3start[0] = global_param.forceoffset[0] + j;
+            get_scatter_nc_field_float(filenames.forcing[0], "catm",
+                                       d3start, d3count, fvar);
+            for (i = 0; i < local_domain.ncells; i++) {
+                atmos[i].Catm[j] = (double) fvar[i];
+            }
+        }
+        // Fraction of shortwave that is direct
+        for (j = 0; j < NF; j++) {
+            d3start[0] = global_param.forceoffset[0] + j;
+            get_scatter_nc_field_float(filenames.forcing[0], "fdir",
+                                       d3start, d3count, fvar);
+            for (i = 0; i < local_domain.ncells; i++) {
+                atmos[i].fdir[j] = (double) fvar[i];
+            }
+        }
+        // Photosynthetically active radiation
+        for (j = 0; j < NF; j++) {
+            d3start[0] = global_param.forceoffset[0] + j;
+            get_scatter_nc_field_float(filenames.forcing[0], "par",
+                                       d3start, d3count, fvar);
+            for (i = 0; i < local_domain.ncells; i++) {
+                atmos[i].par[j] = (double) fvar[i];
+            }
+        }
+    }
 
     // Update the offset counter
     global_param.forceoffset[0] += NF;
@@ -173,8 +212,6 @@ vic_force(void)
             atmos[i].vp[j] = q_to_vp(atmos[i].vp[j], atmos[i].pressure[j]);
             // vapor pressure deficit
             atmos[i].vpd[j] = svp(atmos[i].air_temp[j]) - atmos[i].vp[j];
-            // photosynthetically active radiation
-            atmos[i].par[j] = param.CARBON_SW2PAR * atmos[i].shortwave[j];
             // air density
             atmos[i].density[j] = air_density(atmos[i].air_temp[j],
                                               atmos[i].pressure[j]);
@@ -203,10 +240,16 @@ vic_force(void)
         atmos[i].snowflag[NR] = will_it_snow(atmos[i].air_temp, t_offset,
                                              param.SNOW_MAX_SNOW_TEMP,
                                              atmos[i].prec, NF);
+        // Optional inputs
+        if (options.LAKES) {
+            atmos[i].channel_in[NR] = average(atmos[i].channel_in, NF) * NF;
+        }
+        if (options.CARBON) {
+            atmos[i].Catm[NR] = average(atmos[i].Catm, NF);
+            atmos[i].fdir[NR] = average(atmos[i].fdir, NF);
+            atmos[i].par[NR] = average(atmos[i].par, NF);
+        }
     }
-
-    // TBD: coszen (used for some of the carbon functions), fdir (if needed)
-    // Catm, fdir (not used as far as I can tell)
 
     // Update the veg_hist structure with the current vegetation parameters.
     // Currently only implemented for climatological values in image mode

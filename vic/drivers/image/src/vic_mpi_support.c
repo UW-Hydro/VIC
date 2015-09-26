@@ -998,7 +998,7 @@ create_MPI_param_struct_type(MPI_Datatype *mpi_type)
     MPI_Datatype *mpi_types;
 
     // nitems has to equal the number of elements in parameters_struct
-    nitems = 143;
+    nitems = 141;
     blocklengths = (int *) malloc(nitems * sizeof(int));
     if (blocklengths == NULL) {
         log_err("Memory allocation error in create_MPI_param_struct_type().")
@@ -1200,14 +1200,6 @@ create_MPI_param_struct_type(MPI_Datatype *mpi_type)
 
     // double SVP_C
     offsets[i] = offsetof(parameters_struct, SVP_C);
-    mpi_types[i++] = MPI_DOUBLE;
-
-    // double CARBON_CATMCURRENT
-    offsets[i] = offsetof(parameters_struct, CARBON_CATMCURRENT);
-    mpi_types[i++] = MPI_DOUBLE;
-
-    // double CARBON_SW2PAR
-    offsets[i] = offsetof(parameters_struct, CARBON_SW2PAR);
     mpi_types[i++] = MPI_DOUBLE;
 
     // double PHOTO_OMEGA

@@ -153,30 +153,22 @@ vic_force(atmos_data_struct    *atmos,
                                                 param.SNOW_MAX_SNOW_TEMP,
                                                 &(atmos[rec].prec[i]), 1);
             // Optional inputs
-            // Channel inflow from upstream (into lake)
-            if (param_set.TYPE[CHANNEL_IN].SUPPLIED) {
-                atmos[rec].channel_in[i] = forcing_data[CHANNEL_IN][uidx];
+            if (options.LAKES) {
+                // Channel inflow from upstream (into lake)
+                if (param_set.TYPE[CHANNEL_IN].SUPPLIED) {
+                    atmos[rec].channel_in[i] = forcing_data[CHANNEL_IN][uidx];
+                }
+                else {
+                    atmos[rec].channel_in[i] = 0;
+                }
             }
-            else {
-                atmos[rec].channel_in[i] = 0;
-            }
-            // Atmospheric CO2 concentration
-            if (param_set.TYPE[CATM].SUPPLIED) {
+            if (options.CARBON) {
+                // Atmospheric CO2 concentration
                 atmos[rec].Catm[i] = forcing_data[CATM][uidx];
-            }
-            else {
-                atmos[rec].Catm[i] = param.CARBON_CATMCURRENT * PPM_to_MIXRATIO;
-            }
-            // Fraction of shortwave that is direct
-            if (param_set.TYPE[FDIR].SUPPLIED) {
+                // Fraction of shortwave that is direct
                 atmos[rec].fdir[i] = forcing_data[FDIR][uidx];
-            }
-            // photosynthetically active radiation
-            if (param_set.TYPE[PAR].SUPPLIED) {
+                // photosynthetically active radiation
                 atmos[rec].par[i] = forcing_data[PAR][uidx];
-            }
-            else {
-                atmos[rec].par[i] = param.CARBON_SW2PAR * atmos[rec].shortwave[i];
             }
         }
         if (NF > 1) {
@@ -196,10 +188,14 @@ vic_force(atmos_data_struct    *atmos,
                     atmos[rec].snowflag[NR] = true;
                 }
             }
-            atmos[rec].channel_in[NR] = average(atmos[rec].channel_in, NF);
-            atmos[rec].Catm[NR] = average(atmos[rec].Catm, NF);
-            atmos[rec].fdir[NR] = average(atmos[rec].fdir, NF);
-            atmos[rec].par[NR] = average(atmos[rec].par, NF);
+            if (options.LAKES) {
+                atmos[rec].channel_in[NR] = average(atmos[rec].channel_in, NF) * NF;
+            }
+            if (options.CARBON) {
+                atmos[rec].Catm[NR] = average(atmos[rec].Catm, NF);
+                atmos[rec].fdir[NR] = average(atmos[rec].fdir, NF);
+                atmos[rec].par[NR] = average(atmos[rec].par, NF);
+            }
         }
     }
 

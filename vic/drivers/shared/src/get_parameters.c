@@ -201,13 +201,6 @@ get_parameters(FILE *paramfile)
             else if (strcasecmp("SVP_C", optstr) == 0) {
                 sscanf(cmdstr, "%*s %lf", &param.SVP_C);
             }
-            // Carbon Parameters
-            else if (strcasecmp("CARBON_CATMCURRENT", optstr) == 0) {
-                sscanf(cmdstr, "%*s %lf", &param.CARBON_CATMCURRENT);
-            }
-            else if (strcasecmp("CARBON_SW2PAR", optstr) == 0) {
-                sscanf(cmdstr, "%*s %lf", &param.CARBON_SW2PAR);
-            }
             // Photosynthesis Parameters
             else if (strcasecmp("PHOTO_OMEGA", optstr) == 0) {
                 sscanf(cmdstr, "%*s %lf", &param.PHOTO_OMEGA);
@@ -642,14 +635,6 @@ validate_parameters()
     }
     if (!(param.SVP_C >= 0.)) {
         log_err("SVP_C must be defined on the interval [0, inf) (kPa)");
-    }
-    // Carbon Parameters
-    if (!(param.CARBON_CATMCURRENT >= 0.)) {
-        log_err(
-            "CARBON_CATMCURRENT must be defined on the interval [0, inf) (ppm)");
-    }
-    if (!(param.CARBON_SW2PAR >= 0.)) {
-        log_err("CARBON_SW2PAR must be defined on the interval [0, inf) (W/m2)");
     }
     // Photosynthesis Parameters
     // PHOTO_OMEGA - Currently, no constraints

@@ -102,10 +102,6 @@ initialize_parameters()
     param.SVP_B = 17.269;
     param.SVP_C = 237.3;
 
-    // Carbon Parameters
-    param.CARBON_CATMCURRENT = 383;
-    param.CARBON_SW2PAR = 0.45;
-
     // Photosynthesis Parameters
     param.PHOTO_OMEGA = 0.12;
     param.PHOTO_LAIMAX = 8.0;

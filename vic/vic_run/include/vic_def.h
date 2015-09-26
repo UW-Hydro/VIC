@@ -468,10 +468,6 @@ typedef struct {
     double SVP_B;  /**< constant for saturated vapor pressure curve (kPa) */
     double SVP_C;  /**< constant for saturated vapor pressure curve (kPa) */
 
-    // Carbon Parameters
-    double CARBON_CATMCURRENT;  /**< Current global atmospheric CO2 mixing ratio (ppm) */
-    double CARBON_SW2PAR;  /**< Empirical ratio of PAR (W/m2) to SHORTWAVE (W/m2) from Lopez et al., 2001 */
-
     // Photosynthesis Parameters
     double PHOTO_OMEGA;  /**< single leaf scattering albedo */
     double PHOTO_LAIMAX;  /**< Maximum LAI in nitrogen scaling */
@@ -747,7 +743,6 @@ typedef struct {
     double *air_temp; /**< air temperature (C) */
     double *Catm;    /**< atmospheric CO2 mixing ratio (mol CO2/ mol air) */
     double *channel_in; /**< incoming channel inflow for time step (mm) */
-    double *coszen;  /**< cosine of solar zenith angle (fraction) */
     double *density; /**< atmospheric density (kg/m^3) */
     double *fdir;    /**< fraction of incoming shortwave that is direct (fraction) */
     double *longwave; /**< incoming longwave radiation (W/m^2) (net incoming

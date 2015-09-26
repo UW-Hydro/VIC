@@ -278,12 +278,6 @@ display_current_settings(int mode)
         }
     }
     fprintf(LOG_DEST, "GRID_DECIMAL\t\t%hu\n", options.GRID_DECIMAL);
-    if (options.ALMA_INPUT) {
-        fprintf(LOG_DEST, "ALMA_INPUT\t\tTRUE\n");
-    }
-    else {
-        fprintf(LOG_DEST, "ALMA_INPUT\t\tFALSE\n");
-    }
 
     fprintf(LOG_DEST, "\n");
     fprintf(LOG_DEST, "Input Domain Data:\n");

@@ -228,12 +228,6 @@ display_current_settings(int mode)
     else {
         fprintf(LOG_DEST, "TFALLBACK\t\tFALSE\n");
     }
-    if (options.VP_INTERP) {
-        fprintf(LOG_DEST, "VP_INTERP\t\tTRUE\n");
-    }
-    else {
-        fprintf(LOG_DEST, "VP_INTERP\t\tFALSE\n");
-    }
     fprintf(LOG_DEST, "WIND_H\t\t\t%f\n", global_param.wind_h);
     fprintf(LOG_DEST, "MEASURE_H\t\t%f\n", global_param.measure_h);
     fprintf(LOG_DEST, "NODES\t\t\t%zu\n", options.Nnode);
@@ -283,12 +277,6 @@ display_current_settings(int mode)
         }
     }
     fprintf(LOG_DEST, "GRID_DECIMAL\t\t%hu\n", options.GRID_DECIMAL);
-    if (options.ALMA_INPUT) {
-        fprintf(LOG_DEST, "ALMA_INPUT\t\tTRUE\n");
-    }
-    else {
-        fprintf(LOG_DEST, "ALMA_INPUT\t\tFALSE\n");
-    }
 
     fprintf(LOG_DEST, "\n");
     fprintf(LOG_DEST, "Input Domain Data:\n");

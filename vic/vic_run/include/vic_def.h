@@ -286,10 +286,6 @@ typedef struct {
     bool NOFLUX;         /**< TRUE = Use no flux lower bondary when computing
                             soil thermal fluxes */
     size_t NVEGTYPES;    /**< number of vegetation types (used by image driver) */
-    bool PLAPSE;         /**< TRUE = If air pressure not supplied as an
-                            input forcing, compute it by lapsing sea-level
-                            pressure by grid cell average elevation;
-                            FALSE = air pressure set to constant 95.5 kPa */
     unsigned short int RC_MODE;        /**< RC_JARVIS = compute canopy resistance via Jarvis formulation (default)
                                           RC_PHOTO = compute canopy resistance based on photosynthetic activity */
     size_t ROOT_ZONES;   /**< Number of root zones used in simulation */
@@ -317,16 +313,8 @@ typedef struct {
                             FALSE = when iterations fail to converge, report an error
                                     and abort simulation for current grid cell
                             Default = TRUE */
-    bool VP_INTERP;      /**< How to disaggregate VP from daily to sub-daily;
-                            TRUE = linearly interpolate between daily VP values, assuming they occur at the times of Tmin;
-                            FALSE = hold VP constant at the daily value */
-    unsigned short VP_ITER;        /**< VP_ITER_NONE = never iterate with SW
-                                      VP_ITER_ALWAYS = always iterate with SW
-                                      VP_ITER_ANNUAL = use annual Epot/PRCP criterion
-                                      VP_ITER_CONVERGE = always iterate until convergence */
 
     // input options
-    bool ALMA_INPUT;     /**< TRUE = input variables are in ALMA-compliant units; FALSE = standard VIC units */
     bool BASEFLOW;       /**< ARNO: read Ds, Dm, Ws, c; NIJSSEN2001: read d1, d2, d3, d4 */
     unsigned short int GRID_DECIMAL; /**< Number of decimal places in grid file extensions */
     bool VEGLIB_PHOTO;   /**< TRUE = veg library contains photosynthesis parameters */
@@ -479,10 +467,6 @@ typedef struct {
     double SVP_A;  /**< constant for saturated vapor pressure curve (kPa) */
     double SVP_B;  /**< constant for saturated vapor pressure curve (kPa) */
     double SVP_C;  /**< constant for saturated vapor pressure curve (kPa) */
-
-    // Carbon Parameters
-    double CARBON_CATMCURRENT;  /**< Current global atmospheric CO2 mixing ratio (ppm) */
-    double CARBON_SW2PAR;  /**< Empirical ratio of PAR (W/m2) to SHORTWAVE (W/m2) from Lopez et al., 2001 */
 
     // Photosynthesis Parameters
     double PHOTO_OMEGA;  /**< single leaf scattering albedo */
@@ -759,7 +743,6 @@ typedef struct {
     double *air_temp; /**< air temperature (C) */
     double *Catm;    /**< atmospheric CO2 mixing ratio (mol CO2/ mol air) */
     double *channel_in; /**< incoming channel inflow for time step (mm) */
-    double *coszen;  /**< cosine of solar zenith angle (fraction) */
     double *density; /**< atmospheric density (kg/m^3) */
     double *fdir;    /**< fraction of incoming shortwave that is direct (fraction) */
     double *longwave; /**< incoming longwave radiation (W/m^2) (net incoming
@@ -774,7 +757,6 @@ typedef struct {
     double *shortwave; /**< incoming shortwave radiation (W/m^2) */
     bool *snowflag;    /**< TRUE if there is snowfall in any of the snow
                           bands during the timestep, FALSE otherwise*/
-    double *tskc;    /**< cloud cover fraction (fraction) */
     double *vp;      /**< atmospheric vapor pressure (kPa) */
     double *vpd;     /**< atmospheric vapor pressure deficit (kPa) */
     double *wind;    /**< wind speed (m/s) */

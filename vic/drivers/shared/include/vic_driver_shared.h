@@ -76,32 +76,20 @@ enum
  *****************************************************************************/
 enum
 {
-    AIR_TEMP,    /**< air temperature per time step [C] (ALMA_INPUT: [K]) */
+    AIR_TEMP,    /**< air temperature per time step [C] */
     ALBEDO,      /**< surface albedo [fraction] */
     CATM,        /**< atmospheric CO2 concentration [ppm] */
-    CHANNEL_IN,  /**< incoming channel flow [m3] (ALMA_INPUT: [m3/s]) */
-    CRAINF,      /**< convective rainfall [mm] (ALMA_INPUT: [mm/s]) */
-    CSNOWF,      /**< convective snowfall [mm] (ALMA_INPUT: [mm/s]) */
-    DENSITY,     /**< atmospheric density [kg/m3] */
+    CHANNEL_IN,  /**< incoming channel flow [m3] */
     FDIR,        /**< fraction of incoming shortwave that is direct [fraction] */
     LAI_IN,      /**< leaf area index [m2/m2] */
     LONGWAVE,    /**< incoming longwave radiation [W/m2] */
-    LSRAINF,     /**< large-scale rainfall [mm] (ALMA_INPUT: [mm/s]) */
-    LSSNOWF,     /**< large-scale snowfall [mm] (ALMA_INPUT: [mm/s]) */
     PAR,         /**< incoming photosynthetically active radiation [W/m2] */
-    PREC,        /**< total precipitation (rain and snow) [mm] (ALMA_INPUT: [mm/s]) */
-    PRESSURE,    /**< atmospheric pressure [kPa] (ALMA_INPUT: [Pa]) */
+    PREC,        /**< total precipitation (rain and snow) [mm] */
+    PRESSURE,    /**< atmospheric pressure [kPa] */
     QAIR,        /**< specific humidity [kg/kg] */
-    RAINF,       /**< rainfall (convective and large-scale) [mm] (ALMA_INPUT: [mm/s]) */
-    REL_HUMID,   /**< relative humidity [%] */
     SHORTWAVE,   /**< incoming shortwave [W/m2] */
-    SNOWF,       /**< snowfall (convective and large-scale) [mm] (ALMA_INPUT: [mm/s]) */
-    TSKC,        /**< cloud cover fraction [fraction] */
     VEGCOVER,    /**< fraction of each veg tile covered by plants [fraction] */
-    VP,          /**< vapor pressure [kPa] (ALMA_INPUT: [Pa]) */
     WIND,        /**< wind speed [m/s] */
-    WIND_E,      /**< zonal component of wind speed [m/s] */
-    WIND_N,      /**< meridional component of wind speed [m/s] */
     SKIP,        /**< place holder for unused data columns */
     // Last value of enum - DO NOT ADD ANYTHING BELOW THIS LINE!!
     // used as a loop counter and must be >= the largest value in this enum
@@ -239,7 +227,6 @@ enum
     OUT_AERO_RESIST2,     /**< overstory aerodynamic resistance [s/m] */
     OUT_AIR_TEMP,         /**< air temperature [C] (ALMA_OUTPUT: [K])*/
     OUT_CATM,             /**< atmospheric CO2 concentrtaion [ppm]*/
-    OUT_COSZEN,           /**< cosine of solar zenith angle [fraction]*/
     OUT_DENSITY,          /**< near-surface atmospheric density [kg/m3]*/
     OUT_FDIR,             /**< fraction of incoming shortwave that is direct [fraction]*/
     OUT_LAI,              /**< leaf area index [m2/m2] */
@@ -250,7 +237,6 @@ enum
     OUT_REL_HUMID,        /**< relative humidity [%]*/
     OUT_SHORTWAVE,        /**< incoming shortwave [W/m2] */
     OUT_SURF_COND,        /**< surface conductance [m/s] */
-    OUT_TSKC,             /**< cloud cover fraction [fraction] */
     OUT_VEGCOVER,         /**< fractional area of plants [fraction] */
     OUT_VP,               /**< near surface vapor pressure [kPa] (ALMA_OUTPUT: [Pa]) */
     OUT_VPD,              /**< near surface vapor pressure deficit [kPa] (ALMA_OUTPUT: [Pa]) */
@@ -455,8 +441,10 @@ typedef struct {
     veg_var_struct *veg_var;
 } Error_struct;
 
+double air_density(double t, double p);
 double all_30_day_from_dmy(dmy_struct *dmy);
 double all_leap_from_dmy(dmy_struct *dmy);
+double average(double *ar, size_t n);
 double calc_energy_balance_error(int, double, double, double, double, double);
 void calc_root_fractions(veg_con_struct *veg_con, soil_con_struct *soil_con);
 double calc_water_balance_error(int, double, double, double);
@@ -544,9 +532,12 @@ void print_veg_lib(veg_lib_struct *vlib, char carbon);
 void print_veg_var(veg_var_struct *vvar, size_t ncanopy);
 void print_version(char *);
 void print_usage(char *);
+double q_to_vp(double q, double p);
 void soil_moisture_from_water_table(soil_con_struct *soil_con, size_t nlayers);
 int valid_date(unsigned short int calendar, dmy_struct *dmy);
 void validate_parameters(void);
+char will_it_snow(double *t, double t_offset, double max_snow_temp,
+                  double *prcp, size_t n);
 void zero_output_list(out_data_struct *);
 
 #endif

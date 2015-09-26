@@ -150,6 +150,44 @@ vic_force(void)
             atmos[i].pressure[j] = (double) fvar[i];
         }
     }
+    // Optional inputs
+    if (options.LAKES) {
+        // Channel inflow to lake
+        for (j = 0; j < NF; j++) {
+            for (i = 0; i < local_domain.ncells; i++) {
+                atmos[i].channel_in[j] = 0;
+            }
+        }
+    }
+    if (options.CARBON) {
+        // Atmospheric CO2 mixing ratio
+        for (j = 0; j < NF; j++) {
+            d3start[0] = global_param.forceoffset[0] + j;
+            get_scatter_nc_field_float(filenames.forcing[0], "catm",
+                                       d3start, d3count, fvar);
+            for (i = 0; i < local_domain.ncells; i++) {
+                atmos[i].Catm[j] = (double) fvar[i];
+            }
+        }
+        // Fraction of shortwave that is direct
+        for (j = 0; j < NF; j++) {
+            d3start[0] = global_param.forceoffset[0] + j;
+            get_scatter_nc_field_float(filenames.forcing[0], "fdir",
+                                       d3start, d3count, fvar);
+            for (i = 0; i < local_domain.ncells; i++) {
+                atmos[i].fdir[j] = (double) fvar[i];
+            }
+        }
+        // Photosynthetically active radiation
+        for (j = 0; j < NF; j++) {
+            d3start[0] = global_param.forceoffset[0] + j;
+            get_scatter_nc_field_float(filenames.forcing[0], "par",
+                                       d3start, d3count, fvar);
+            for (i = 0; i < local_domain.ncells; i++) {
+                atmos[i].par[j] = (double) fvar[i];
+            }
+        }
+    }
 
     // Update the offset counter
     global_param.forceoffset[0] += NF;
@@ -163,7 +201,7 @@ vic_force(void)
     // Convert forcings into what we need and calculate missing ones
     for (i = 0; i < local_domain.ncells; i++) {
         for (j = 0; j < NF; j++) {
-            // temperature in CONST_TKFRZ
+            // temperature in Celsius
             atmos[i].air_temp[j] -= CONST_TKFRZ;
             // precipitation in mm/period
             atmos[i].prec[j] *= global_param.snow_dt;
@@ -173,8 +211,6 @@ vic_force(void)
             atmos[i].vp[j] = q_to_vp(atmos[i].vp[j], atmos[i].pressure[j]);
             // vapor pressure deficit
             atmos[i].vpd[j] = svp(atmos[i].air_temp[j]) - atmos[i].vp[j];
-            // photosynthetically active radiation
-            atmos[i].par[j] = param.CARBON_SW2PAR * atmos[i].shortwave[j];
             // air density
             atmos[i].density[j] = air_density(atmos[i].air_temp[j],
                                               atmos[i].pressure[j]);
@@ -203,10 +239,16 @@ vic_force(void)
         atmos[i].snowflag[NR] = will_it_snow(atmos[i].air_temp, t_offset,
                                              param.SNOW_MAX_SNOW_TEMP,
                                              atmos[i].prec, NF);
+        // Optional inputs
+        if (options.LAKES) {
+            atmos[i].channel_in[NR] = average(atmos[i].channel_in, NF) * NF;
+        }
+        if (options.CARBON) {
+            atmos[i].Catm[NR] = average(atmos[i].Catm, NF);
+            atmos[i].fdir[NR] = average(atmos[i].fdir, NF);
+            atmos[i].par[NR] = average(atmos[i].par, NF);
+        }
     }
-
-    // TBD: coszen (used for some of the carbon functions), fdir (if needed)
-    // Catm, fdir (not used as far as I can tell)
 
     // Update the veg_hist structure with the current vegetation parameters.
     // Currently only implemented for climatological values in image mode
@@ -238,96 +280,3 @@ vic_force(void)
     free(fvar);
 }
 
-/******************************************************************************
- * @brief    calculate 1d average
- *****************************************************************************/
-double
-average(double *ar,
-        size_t  n)
-{
-    size_t i;
-    double sum = 0.;
-
-    if (n <= 0) {
-        log_err("Error in calc_average: divide by zero or negative");
-    }
-    else if (n == 1) {
-        return ar[0];
-    }
-    else {
-        for (i = 0; i < n; i++) {
-            sum += ar[i];
-        }
-    }
-
-    return sum / n;
-}
-
-/******************************************************************************
- * @brief   convert specific humidity (q) to vapor pressure (vp) based on
- *          pressure (p)
- *
- * @param q specific humidity
- * @param p pressure
- *
- * @return vp vapor pressure (units are the same as p)
- *****************************************************************************/
-double
-q_to_vp(double q,
-        double p)
-{
-    double vp;
-
-    // full equation
-    // vp = q/(q+CONST_EPS*(1-q))*p;
-
-    // approximation used in VIC
-    vp = q * p / CONST_EPS;
-
-    return vp;
-}
-
-/******************************************************************************
- * @brief   convert surface pressure (kPa) to density (kg/m3) based on
- *          pressure (p), vapor pressure (vp), and temperature
- *
- * @param t temperature
- * @param p pressure
- *
- * @return rho surface pressure
- *****************************************************************************/
-double
-air_density(double t,
-            double p)
-{
-    double rho;
-
-    // full equation
-    // rho = (p*1000)/(Rd * *t+CONST_TKFRZ) + (pv*1000)/(Rv * *t+CONST_TKFRZ);
-
-    // approximation used in VIC
-    rho = 0.003486 * p / (275.0 + t);
-
-    return rho;
-}
-
-/******************************************************************************
- * @brief   return 1 if it will snow, otherwise return 0
- *****************************************************************************/
-char
-will_it_snow(double *t,
-             double  t_offset,
-             double  max_snow_temp,
-             double *prcp,
-             size_t  n)
-{
-    size_t i;
-
-    for (i = 0; i < n; i++) {
-        if ((t[i] + t_offset) < max_snow_temp && prcp[i] > 0.) {
-            return 1;
-        }
-    }
-
-    return 0;
-}

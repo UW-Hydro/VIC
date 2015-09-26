@@ -34,26 +34,30 @@
 void
 print_atmos_data(atmos_data_struct *atmos)
 {
+    extern option_struct       options;
+
     fprintf(LOG_DEST, "atmos_data  :\n");
     fprintf(LOG_DEST, "\tair_temp  : %.4f\n", atmos->air_temp[0]);
-    fprintf(LOG_DEST, "\tCatm      : %.4f\n", atmos->Catm[0]);
-    fprintf(LOG_DEST, "\tchannel_in: %.4f\n", atmos->channel_in[0]);
-    fprintf(LOG_DEST, "\tcoszen    : %.4f\n", atmos->coszen[0]);
     fprintf(LOG_DEST, "\tdensity   : %.4f\n", atmos->density[0]);
-    fprintf(LOG_DEST, "\tfdir      : %.4f\n", atmos->fdir[0]);
     fprintf(LOG_DEST, "\tlongwave  : %.4f\n", atmos->longwave[0]);
     fprintf(LOG_DEST, "\tout_prec  : %.4f\n", atmos->out_prec);
     fprintf(LOG_DEST, "\tout_rain  : %.4f\n", atmos->out_rain);
     fprintf(LOG_DEST, "\tout_snow  : %.4f\n", atmos->out_snow);
-    fprintf(LOG_DEST, "\tpar       : %.4f\n", atmos->par[0]);
     fprintf(LOG_DEST, "\tprec      : %.4f\n", atmos->prec[0]);
     fprintf(LOG_DEST, "\tpressure  : %.4f\n", atmos->pressure[0]);
     fprintf(LOG_DEST, "\tshortwave : %.4f\n", atmos->shortwave[0]);
     fprintf(LOG_DEST, "\tsnowflag  : %d\n", atmos->snowflag[0]);
-    fprintf(LOG_DEST, "\ttskc      : %.4f\n", atmos->tskc[0]);
     fprintf(LOG_DEST, "\tvp        : %.4f\n", atmos->vp[0]);
     fprintf(LOG_DEST, "\tvpd       : %.4f\n", atmos->vpd[0]);
     fprintf(LOG_DEST, "\twind      : %.4f\n", atmos->wind[0]);
+    if (options.LAKES) {
+        fprintf(LOG_DEST, "\tchannel_in: %.4f\n", atmos->channel_in[0]);
+    }
+    if (options.CARBON) {
+        fprintf(LOG_DEST, "\tCatm      : %.4f\n", atmos->Catm[0]);
+        fprintf(LOG_DEST, "\tfdir      : %.4f\n", atmos->fdir[0]);
+        fprintf(LOG_DEST, "\tpar       : %.4f\n", atmos->par[0]);
+    }
 }
 
 /******************************************************************************

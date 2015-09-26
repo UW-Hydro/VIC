@@ -115,6 +115,7 @@ surface_fluxes(bool                 overstory,
     double                   snowfall; // snowfall
     double                   snow_flux; // heat flux through snowpack
     double                   snow_grnd_flux; // ground heat flux into snowpack
+    double                   coszen; // cosine of solar zenith angle
     double                   tol_under;
     double                   tol_over;
     double                  *aero_resist_used;
@@ -411,6 +412,9 @@ surface_fluxes(bool                 overstory,
         if (options.CARBON && iveg < Nveg) {
             LAIlayer = (double *) calloc(options.Ncanopy, sizeof(double));
             faPAR = (double *) calloc(options.Ncanopy, sizeof(double));
+            coszen = compute_coszen(soil_con->lat, soil_con->lng,
+                                    soil_con->time_zone_lng,
+                                    dmy->day_in_year, (hidx+0.5)*step_dt);
 
             /* Compute absorbed PAR per ground area per canopy layer (W/m2)
                normalized to PAR = 1 W, i.e. the canopy albedo in the PAR
@@ -418,7 +422,7 @@ surface_fluxes(bool                 overstory,
             faparl(CanopLayerBnd,
                    veg_var->LAI,
                    soil_con->AlbedoPar,
-                   atmos->coszen[hidx],
+                   coszen,
                    atmos->fdir[hidx],
                    LAIlayer,
                    faPAR);

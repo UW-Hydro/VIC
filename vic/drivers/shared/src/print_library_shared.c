@@ -497,14 +497,16 @@ print_option(option_struct *option)
     fprintf(LOG_DEST, "\tSPATIAL_FROST        : %d\n", option->SPATIAL_FROST);
     fprintf(LOG_DEST, "\tSPATIAL_SNOW         : %d\n", option->SPATIAL_SNOW);
     fprintf(LOG_DEST, "\tTFALLBACK            : %d\n", option->TFALLBACK);
-    fprintf(LOG_DEST, "\tVP_INTERP            : %d\n", option->VP_INTERP);
-    fprintf(LOG_DEST, "\tVP_ITER              : %d\n", option->VP_ITER);
-    fprintf(LOG_DEST, "\tALMA_INPUT           : %d\n", option->ALMA_INPUT);
     fprintf(LOG_DEST, "\tBASEFLOW             : %d\n", option->BASEFLOW);
     fprintf(LOG_DEST, "\tGRID_DECIMAL         : %d\n", option->GRID_DECIMAL);
     fprintf(LOG_DEST, "\tVEGLIB_PHOTO         : %d\n", option->VEGLIB_PHOTO);
+    fprintf(LOG_DEST, "\tVEGLIB_VEGCOVER      : %d\n", option->VEGLIB_VEGCOVER);
+    fprintf(LOG_DEST, "\tVEGPARAM_ALB         : %d\n", option->VEGPARAM_ALB);
     fprintf(LOG_DEST, "\tVEGPARAM_LAI         : %d\n", option->VEGPARAM_LAI);
+    fprintf(LOG_DEST, "\tVEGPARAM_VEGCOVER    : %d\n", option->VEGPARAM_VEGCOVER);
+    fprintf(LOG_DEST, "\tALB_SRC              : %d\n", option->ALB_SRC);
     fprintf(LOG_DEST, "\tLAI_SRC              : %d\n", option->LAI_SRC);
+    fprintf(LOG_DEST, "\tVEGCOVER_SRC         : %d\n", option->VEGCOVER_SRC);
     fprintf(LOG_DEST, "\tLAKE_PROFILE         : %d\n", option->LAKE_PROFILE);
     fprintf(LOG_DEST, "\tORGANIC_FRACT        : %d\n", option->ORGANIC_FRACT);
     fprintf(LOG_DEST, "\tBINARY_STATE_FILE    : %d\n",
@@ -646,9 +648,6 @@ print_parameters(parameters_struct *param)
     fprintf(LOG_DEST, "\tSVP_A: %.4f\n", param->SVP_A);
     fprintf(LOG_DEST, "\tSVP_B: %.4f\n", param->SVP_B);
     fprintf(LOG_DEST, "\tSVP_C: %.4f\n", param->SVP_C);
-    fprintf(LOG_DEST, "\tCARBON_CATMCURRENT: %.4f\n",
-            param->CARBON_CATMCURRENT);
-    fprintf(LOG_DEST, "\tCARBON_SW2PAR: %.4f\n", param->CARBON_SW2PAR);
     fprintf(LOG_DEST, "\tPHOTO_OMEGA: %.4f\n", param->PHOTO_OMEGA);
     fprintf(LOG_DEST, "\tPHOTO_LAIMAX: %.4f\n", param->PHOTO_LAIMAX);
     fprintf(LOG_DEST, "\tPHOTO_LAILIMIT: %.4f\n", param->PHOTO_LAILIMIT);

@@ -80,29 +80,6 @@ FROZEN_SOIL	FALSE	# TRUE = calculate frozen soils.  Default = FALSE.
 #			# Default 	= AR_406_FULL
 
 #######################################################################
-# Meteorological Forcing Disaggregation Parameters
-# Generally these default values do not need to be overridden
-#######################################################################
-#OUTPUT_FORCE	FALSE	# TRUE = perform disaggregation of forcings, skip the simulation, and output the disaggregated forcings.
-#PLAPSE		TRUE	# This controls how VIC computes air pressure when air pressure is not supplied as an input forcing: TRUE = set air pressure to sea level pressure, lapsed to grid cell average elevation; FALSE = set air pressure to constant 95.5 kPa (as in all versions of VIC pre-4.1.1)
-#MTCLIM_SWE_CORR	TRUE    # This controls VIC's estimates of incoming shortwave in the presence of snow; TRUE = adjust incoming shortwave for snow albedo effect; FALSE = do not adjust shortwave; default = TRUE
-#VP_ITER		VP_ITER_ANNUAL	# This controls VIC's iteration between estimates of shortwave and vapor pressure:
-#			# VP_ITER_NEVER = never iterate; make estimates separately
-#			# VP_ITER_ALWAYS = always iterate once
-#			# VP_ITER_ANNUAL = iterate once for arid climates based on annual Precip/PET ratio
-#			# VP_ITER_CONVERGE = iterate until shortwave and vp stabilize
-#			# default = VP_ITER_ALWAYS
-#VP_INTERP	TRUE	# This controls sub-daily humidity estimates; TRUE = interpolate daily VP estimates linearly between sunrise of one day to the next; FALSE = hold VP constant for entire day
-#LW_TYPE		LW_PRATA	# This controls the algorithm used to estimate clear-sky longwave radiation:
-#			# LW_TVA = Tennessee Valley Authority algorithm (1972) (this was traditional VIC algorithm)
-#			# other options listed in vicNl_def.h
-#			# default = LW_PRATA
-#LW_CLOUD	LW_CLOUD_DEARDORFF	# This controls the algorithm used to estimate the influence of clouds on total longwave:
-#			# LW_CLOUD_BRAS = method from Bras textbook (this was the traditional VIC algorithm)
-#			# LW_CLOUD_DEARDORFF = method of Deardorff (1978)
-#			# default = LW_CLOUD_DEARDORFF
-
-#######################################################################
 # Carbon Cycle Parameters
 #######################################################################
 #CARBON 		FALSE		# TRUE = simulate carbon cycle; FALSE = do not simulate carbon cycle.  Default = FALSE.
@@ -158,7 +135,6 @@ FORCEHOUR	00	# Hour of first forcing record
 GRID_DECIMAL	4	# Number of digits after decimal point in forcing file names
 WIND_H          10.0    # height of wind speed measurement (m)
 MEASURE_H       2.0     # height of humidity measurement (m)
-ALMA_INPUT	FALSE	# TRUE = ALMA-compliant input variable units; FALSE = standard VIC units
 
 #######################################################################
 # Land Surface Files and Parameters

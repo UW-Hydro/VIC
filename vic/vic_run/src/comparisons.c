@@ -1,7 +1,7 @@
 /******************************************************************************
  * @section DESCRIPTION
  *
- * Get netCDF dimension.
+ * floating point comparison utilities
  *
  * @section LICENSE
  *
@@ -24,46 +24,36 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  *****************************************************************************/
 
+#include <stdbool.h>
+#include <math.h>
 #include <vic_def.h>
-#include <vic_run.h>
-#include <vic_driver_image.h>
 
 /******************************************************************************
- * @brief    Get netCDF dimension.
+ * @brief    returns false if two floats are not equal up to desired tolerance
  *****************************************************************************/
-size_t
-get_nc_dimension(char *nc_name,
-                 char *dim_name)
+bool
+assert_close_float(float x,
+                   float y,
+                   float rtol,
+                   float abs_tol)
 {
-    int    nc_id;
-    int    dim_id;
-    size_t dim_size;
-    int    status;
-
-    // open the netcdf file
-    status = nc_open(nc_name, NC_NOWRITE, &nc_id);
-    if (status != NC_NOERR) {
-        log_err("Error opening %s", nc_name);
+    if (fabs(x - y) <= abs_tol + rtol * fabs(y)) {
+        return true;
     }
+    return false;
+}
 
-    // get dimension id
-    status = nc_inq_dimid(nc_id, dim_name, &dim_id);
-    if (status != NC_NOERR) {
-        log_err("Error getting dimension id %s in %s", dim_name, nc_name);
+/******************************************************************************
+ * @brief    returns false if two doubles are not equal up to desired tolerance
+ *****************************************************************************/
+bool
+assert_close_double(double x,
+                    double y,
+                    double rtol,
+                    double abs_tol)
+{
+    if (fabs(x - y) <= abs_tol + rtol * fabs(y)) {
+        return true;
     }
-
-    // get dimension size
-    status = nc_inq_dimlen(nc_id, dim_id, &dim_size);
-    if (status != NC_NOERR) {
-        log_err("Error getting dimension size for dim %s in %s", dim_name,
-                nc_name);
-    }
-
-    // close the netcdf file
-    status = nc_close(nc_id);
-    if (status != NC_NOERR) {
-        log_err("Error closing %s", nc_name);
-    }
-
-    return dim_size;
+    return false;
 }

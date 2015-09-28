@@ -1,6 +1,6 @@
 # Output Variables
 
-Using options within the [Global Parameter File](GlobalParam.md), any combination of the variables listed below may be output by VIC.
+Using options within the *global parameter file*, any combination of the variables listed below may be output by VIC.
 
 ## Water Balance Terms (state variables)
 | Variable            	| Description                                                                                                                                                              	| Units                                                                                        	|

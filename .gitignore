@@ -8,13 +8,28 @@
 *.lib
 *.a
 
+# Build process
+.depend
+
 # Shared objects (inc. Windows DLLs)
 *.dll
 *.so
 *.so.*
 *.dylib
+*.dSYM
+*.mod
 
 vicNl
+vic_classic
+vic_image
+liblnd.a
+_vic.py
 
 .DS_Store
-site/
+TAGS
+
+*egg-info*
+
+# Python stuff
+.ipynb_checkpoints
+.eggs

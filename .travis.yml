@@ -1,3 +1,99 @@
 language: c
-compiler: gcc
-script: make -C src/ 
+sudo: false # use container based build
+notifications:
+  email: false
+
+matrix:
+  fast_finish: false
+  include:
+  # Classic Driver
+  - compiler: clang
+    os: linux
+    env: TESTID='classic'
+  - compiler: gcc
+    os: linux
+    env: TESTID='classic'
+  - compiler: gcc
+    os: linux
+    env: TESTID=classic USE_CC=gcc-5
+    addons:
+      apt:
+        packages:
+          - gcc-5
+          - gcc-5-multilib
+          - linux-libc-dev:i386
+        sources:
+          - ubuntu-toolchain-r-test
+  - compiler: clang
+    os: linux
+    env: TESTID=classic USE_CC=clang-3.6
+    addons:
+      apt:
+        packages:
+          - clang-3.6
+        sources:
+          - llvm-toolchain-precise-3.6
+          - ubuntu-toolchain-r-test
+  - compiler: gcc
+    os: osx
+    env: TESTID=classic
+  - compiler: gcc
+    os: osx
+    env: TESTID=classic BREW_INSTALLS="gcc"
+  # Image Driver
+  - compiler: gcc
+    os: linux
+    env: TESTID='image'
+    addons:
+      apt_packages:
+        - libnetcdf-dev
+        - mpich-bin
+  - compiler: gcc
+    os: osx
+    env: TESTID=image BREW_TAPS="homebrew/science" BREW_INSTALLS="gcc netcdf openmpi"
+  # Python Driver
+  - compiler: clang
+    os: linux
+    env: TESTID="python" TRAVIS_PYTHON=2.7
+  - compiler: gcc
+    os: linux
+    env: TESTID="python" TRAVIS_PYTHON=2.7
+  - compiler: clang
+    os: linux
+    env: TESTID="python" TRAVIS_PYTHON=3.4
+  - compiler: gcc
+    os: linux
+    env: TESTID="python" TRAVIS_PYTHON=3.4
+  - compiler: gcc
+    os: osx
+    env: TESTID="python" TRAVIS_PYTHON=2.7
+  - compiler: gcc
+    os: osx
+    env: TESTID="python" TRAVIS_PYTHON=3.4
+  - compiler: clang
+    os: osx
+    env: TESTID="python" TRAVIS_PYTHON=2.7
+  - compiler: clang
+    os: osx
+    env: TESTID="python" TRAVIS_PYTHON=3.4
+  allow_failures:
+  # Image Driver
+  - compiler: gcc
+    os: linux
+    env: TESTID='image'
+    addons:
+      apt_packages:
+        - libnetcdf-dev
+        - mpich-bin
+
+before_install:
+  - source ci/${TESTID}.travis
+  - vic_before_install
+install:
+  - vic_install
+script:
+  - vic_script
+after_success:
+  - vic_after_success
+after_failure:
+  - vic_after_failure

@@ -40,10 +40,10 @@ Figure 1.  VIC land cover tiles and soil column, with major water and energy flu
 
 ![Partial Vegetation Cover Schematic](../img/PartialVegCoverSchematic.bw.png)
 
-Figure 2. Schematic of the big leaf (pre-VIC 4.2) and clumped (4.2 and later) vegetation schemes. The spatial average leaf area index (LAI) within a given vegetation tile is assumed uniformly distributed in the big leaf scheme, but is rescaled by the vegetated area fraction (fv) to estimate a plant-specific LAI in the clumped scheme. Transpiration (T) and evaporation of canopy interception (Ecan) is complemented by soil evaporation (Esoil) in the clumped scheme. 
+Figure 2. Schematic of the big leaf (pre-VIC 4.2) and clumped (4.2 and later) vegetation schemes. The spatial average leaf area index (LAI) within a given vegetation tile is assumed uniformly distributed in the big leaf scheme, but is rescaled by the vegetated area fraction (fv) to estimate a plant-specific LAI in the clumped scheme. Transpiration (T) and evaporation of canopy interception (Ecan) is complemented by soil evaporation (Esoil) in the clumped scheme.
 
->>#### Note Regarding Evapotranspiration and Time Step
->>In order to compensate for the inaccuracies in simulating canopy interception and evaporation at a 24-hour time step, VIC makes an exception for the 24-hour case: in this case, canopy evaporation is allowed to encompass not only the water in the canopy at the beginning of the time step, but also any precipitation, up to the atmospheric demand for water.  At smaller time steps, canopy evaporation is limited to just the amount of water stored in the canopy at the beginning of the time step.  This can result in a) inaccurate apportioning of total ET between canopy evaporation and transpiration, and b) different behavior between VIC simulations at 24 hour time steps and simulations at smaller time steps (with the biggest differences occurring between 12-hour and 24-hour time steps).  For more information, see [Haddeland et al (2006a)](../Documentation/References.md#selected-application-references).
+!!!Note "Regarding Evapotranspiration and Time Step"
+    In order to compensate for the inaccuracies in simulating canopy interception and evaporation at a 24-hour time step, VIC makes an exception for the 24-hour case: in this case, canopy evaporation is allowed to encompass not only the water in the canopy at the beginning of the time step, but also any precipitation, up to the atmospheric demand for water.  At smaller time steps, canopy evaporation is limited to just the amount of water stored in the canopy at the beginning of the time step.  This can result in a) inaccurate apportioning of total ET between canopy evaporation and transpiration, and b) different behavior between VIC simulations at 24 hour time steps and simulations at smaller time steps (with the biggest differences occurring between 12-hour and 24-hour time steps).  For more information, see [Haddeland et al (2006a)](../Documentation/References.md#selected-application-references).
 
 ### Soil
 
@@ -90,7 +90,7 @@ Can read daily timeseries of land cover information such as albedo, LAI, and par
 
 ### Elevation Bands
 
-VIC can consider spatial heterogeneity in precipitation, arising from either storm fronts/local convection or topographic heterogeneity.  Here we consider the influence of topography, via elevation bands (Figure 4).  This is primarily used to produce more accurate estimates of mountain snow pack.  This functionality is controlled by the SNOW_BAND option in the [global parameter file](../Documentation/GlobalParam.md).  Main features:
+VIC can consider spatial heterogeneity in precipitation, arising from either storm fronts/local convection or topographic heterogeneity.  Here we consider the influence of topography, via elevation bands (Figure 4).  This is primarily used to produce more accurate estimates of mountain snow pack.  This functionality is controlled by the `SNOW_BAND` option in the *global parameter file*.  Main features:
 
 
 - Can subdivide the grid cell into arbitrary number of elevation bands, to account for variation of topography within cell
@@ -111,8 +111,8 @@ Figure 4.  VIC snow (elevation) bands.
 
 VIC can use either the approximate soil temperature profile of [Liang et al. (1999)](../Documentation/References.md#other-historical-references) or a finite difference solution that takes soil ice content into account, described in [Cherkauer and Lettenmaier (1999)](../Documentation/References.md#other-historical-references). (Figure 5)
 
-- Liang et al. (1999): set QUICK_FLUX to TRUE in global parameter file; this is the default for FULL_ENERGY = TRUE and FROZEN_SOIL = FALSE.
-- Cherkauer et al. (1999): set QUICK_FLUX to FALSE in global parameter file; this is the default for FROZEN_SOIL = TRUE.
+- Liang et al. (1999): set `QUICK_FLUX = TRUE` in *global parameter file*; this is the default for `FULL_ENERGY = TRUE` and `FROZEN_SOIL = FALSE`.
+- Cherkauer et al. (1999): set `QUICK_FLUX = FALSE` in *global parameter file*; this is the default for `FROZEN_SOIL = TRUE`.
     - By default, the finite difference formulation uses implicit scheme.
     - By default, the nodes of the finite difference formulation are distributed exponentially.
 
@@ -188,13 +188,6 @@ Figure 9.  VIC dynamic lake/wetland interaction.
 - Respiration from the three soil carbon pools is proportional to (the amount of carbon stored in the pool) * exp(-residence time) * (Lloyd-Taylor temperature dependence) * (function of soil moisture).
 - A constant fraction of respiration from each pool enters the atmosphere as CO2. For the litter pool, the remainder of respired carbon is sent to the intermediate and slow pools. For the intermediate pool, the remainder is sent to the slow pool. For the slow pool, all respired carbon is sent to the atmosphere.
 
-## Flow Routing
+## Streamflow Routing
 
-- Routing of stream flow (Figure 10) is performed separately from the land surface simulation, using a separate model, typically the routing model of [Lohmann, et al. (1996; 1998)](../Documentation/References.md#streamflow-routing-model-references)
-- Each grid cell is represented by a node in the channel network
-- The total runoff and baseflow from each grid cell is first convolved with a unit hydrograph representing the distribution of travel times of water from its points of origin to the channel network
-- Then, each grid cell's input into the channel network is routed through the channel using linearized St. Venant's equations
-
-![VIC Routing Model Schematic Link](../img/VIC_routing_model_schematic.png)
-
-Figure 10.  Routing model schematic.
+Routing of stream flow (Figure 10) is performed separately from the land surface simulation, using a separate model, typically the routing model of [Lohmann, et al. (1996; 1998)](../Documentation/References.md#streamflow-routing-model-references). The original Lohmann routing model no longer supported but remains available [here](https://github.com/UW-Hydro/VIC_Routing). An updated version of the model, RVIC, is available [here](http://rvic.readthedocs.org).

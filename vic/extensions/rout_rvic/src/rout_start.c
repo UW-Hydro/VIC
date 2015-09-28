@@ -30,13 +30,14 @@
 #include <rout.h>
 
 /******************************************************************************
- * @brief    
+ * @brief
  *****************************************************************************/
-void rout_start(void)
+void
+rout_start(void)
 {
-    extern filenames_struct    filenames;
-    extern filep_struct        filep;
-    extern int                 mpi_rank;
+    extern filenames_struct filenames;
+    extern filep_struct     filep;
+    extern int              mpi_rank;
 
     if (mpi_rank == 0) {
         // read global settings
@@ -45,11 +46,12 @@ void rout_start(void)
     }
 }
 
-void get_global_param_rout(FILE *gp)
+void
+get_global_param_rout(FILE *gp)
 {
     extern rout_struct rout;
-    char                       cmdstr[MAXSTRING];
-    char                       optstr[MAXSTRING];
+    char               cmdstr[MAXSTRING];
+    char               optstr[MAXSTRING];
 
     /** Read through global control file to find parameters **/
     rewind(gp);
@@ -71,8 +73,7 @@ void get_global_param_rout(FILE *gp)
             if (strcasecmp("ROUT_PARAM", optstr) == 0) {
                 sscanf(cmdstr, "%*s %s", rout.param_filename);
             }
-
         }
-    fgets(cmdstr, MAXSTRING, gp);
+        fgets(cmdstr, MAXSTRING, gp);
     }
 }

@@ -1,8 +1,14 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-void cshift(double *data, int nx, int ny, int axis, int direction) {
-    int x, y;
+void
+cshift(double *data,
+       int     nx,
+       int     ny,
+       int     axis,
+       int     direction)
+{
+    int    x, y;
     double b;
 
     if (axis == 0 && direction == 1) {
@@ -46,11 +52,15 @@ void cshift(double *data, int nx, int ny, int axis, int direction) {
     }
 }
 
-void print_array(double *data, int nx, int ny) {
+void
+print_array(double *data,
+            int     nx,
+            int     ny)
+{
     int x, y;
     for (y = 0; y != ny; y++) {
         for (x = 0; x != nx; x++) {
-            printf("%3i:%9.6f ",(int)(x * ny + y),data[x * ny + y]);
+            printf("%3i:%9.6f ", (int)(x * ny + y), data[x * ny + y]);
         }
         printf("\n");
     }
@@ -68,11 +78,16 @@ void print_array(double *data, int nx, int ny) {
 #define BITTEST(a, b) ((a)[BITSLOT(b)] & BITMASK(b))
 #define BITNSLOTS(nb) ((nb + CHAR_BIT - 1) / CHAR_BIT)
 
-void Print2DArray(double *A, int nr, int nc) {
+void
+Print2DArray(double *A,
+             int     nr,
+             int     nc)
+{
     int r, c;
     for (r = 0; r < nr; r++) {
-        for (c = 0; c < nc; c++)
+        for (c = 0; c < nc; c++) {
             printf("%7.1f", *(A + r * nc + c));
+        }
 
         printf("\n");
     }
@@ -81,14 +96,18 @@ void Print2DArray(double *A, int nr, int nc) {
 
 // Non-square matrix transpose of matrix of size r x c and base address data
 
-void MatrixInplaceTranspose(double *data, int r, int c) {
-    int size = r * c - 1;
+void
+MatrixInplaceTranspose(double *data,
+                       int     r,
+                       int     c)
+{
+    int    size = r * c - 1;
     double temp1, temp2; // holds element to be replaced, eventually becomes next element to move
-    int next; // location of 'temp1' to be moved
-    int cycleBegin; // holds start of cycle
-    int i; // iterator
+    int    next; // location of 'temp1' to be moved
+    int    cycleBegin; // holds start of cycle
+    int    i; // iterator
 
-    char bitarray[BITNSLOTS(size)];
+    char   bitarray[BITNSLOTS(size)];
     memset(bitarray, 0, BITNSLOTS(size));
 
     BITSET(bitarray, 0);
@@ -98,32 +117,39 @@ void MatrixInplaceTranspose(double *data, int r, int c) {
     while (i < size) {
         cycleBegin = i;
         temp1 = *(data + i);
-        do {
+        do
+        {
             next = (i * r) % size;
-            //swap
+            // swap
             temp2 = *(data + next);
             *(data + next) = temp1;
             temp1 = temp2;
             BITSET(bitarray, i);
             i = next;
-        } while (i != cycleBegin);
+        }
+        while (i != cycleBegin);
 
         // Get Next Move
-        for (i = 1; i < size && BITTEST(bitarray, i); i++);
+        for (i = 1; i < size && BITTEST(bitarray, i); i++) {
+            ;
+        }
     }
 }
 
 // Driver program to test above function
 
-int test_matrix(void) {
-    int r = 5, c = 6;
-    int size = r*c;
+int
+test_matrix(void)
+{
+    int     r = 5, c = 6;
+    int     size = r * c;
     double *A;
-    int i;
-    A = (double *) malloc(size * sizeof (double));
+    int     i;
+    A = (double *) malloc(size * sizeof(double));
 
-    for (i = 0; i < size; i++)
+    for (i = 0; i < size; i++) {
         A[i] = i + 11.1;
+    }
 
     Print2DArray(A, r, c);
     MatrixInplaceTranspose(A, r, c);

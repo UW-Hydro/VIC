@@ -32,73 +32,94 @@
 /******************************************************************************
  * @brief    Allocate memory for Routing structures.
  *****************************************************************************/
-void rout_alloc(void)
+void
+rout_alloc(void)
 {
-    extern domain_struct         local_domain;
-    extern rout_struct           rout;
-    //char       *nc_name="./input/stehekin_parameters_01.rvic.prm.Stehekin.20150727.nc";
-  
+    extern domain_struct local_domain;
+    extern rout_struct   rout;
+    // char       *nc_name="./input/stehekin_parameters_01.rvic.prm.Stehekin.20150727.nc";
+
     // Get some dimensions
-    rout.rout_param.iSubsetLength      = get_nc_dimension(rout.param_filename, "timesteps");
-    rout.rout_param.iOutlets           = get_nc_dimension(rout.param_filename, "outlets");
-    rout.rout_param.iSources           = get_nc_dimension(rout.param_filename, "sources");
+    rout.rout_param.iSubsetLength = get_nc_dimension(rout.param_filename,
+                                                     "timesteps");
+    rout.rout_param.iOutlets = get_nc_dimension(rout.param_filename, "outlets");
+    rout.rout_param.iSources = get_nc_dimension(rout.param_filename, "sources");
 
     // Allocate memory in rout param_struct
-    rout.rout_param.source2outlet_ind  = (size_t *) malloc (rout.rout_param.iSources * sizeof (size_t));
+    rout.rout_param.source2outlet_ind = (size_t *) malloc(
+        rout.rout_param.iSources * sizeof(size_t));
     if (rout.rout_param.source2outlet_ind == NULL) {
-        log_err("Memory allocation error in rout.rout_param.source2outlet_ind().");
+        log_err(
+            "Memory allocation error in rout.rout_param.source2outlet_ind().");
     }
-    rout.rout_param.source_time_offset = (int *) malloc (rout.rout_param.iSources * sizeof (int));
+    rout.rout_param.source_time_offset = (int *) malloc(
+        rout.rout_param.iSources * sizeof(int));
     if (rout.rout_param.source_time_offset == NULL) {
-        log_err("Memory allocation error in rout.rout_param.source_time_offset().");
+        log_err(
+            "Memory allocation error in rout.rout_param.source_time_offset().");
     }
-    rout.rout_param.source_x_ind       = (int *) malloc (rout.rout_param.iSources * sizeof (int));
+    rout.rout_param.source_x_ind = (int *) malloc(
+        rout.rout_param.iSources * sizeof(int));
     if (rout.rout_param.source_x_ind == NULL) {
         log_err("Memory allocation error in rout.rout_param.source_x_ind().");
     }
-    rout.rout_param.source_y_ind       = (int *) malloc (rout.rout_param.iSources * sizeof (int));
+    rout.rout_param.source_y_ind = (int *) malloc(
+        rout.rout_param.iSources * sizeof(int));
     if (rout.rout_param.source_y_ind == NULL) {
         log_err("Memory allocation error in rout.rout_param.source_y_ind().");
     }
-    rout.rout_param.source_lat       = (double *) malloc (rout.rout_param.iSources * sizeof (double));
+    rout.rout_param.source_lat = (double *) malloc(
+        rout.rout_param.iSources * sizeof(double));
     if (rout.rout_param.source_lat == NULL) {
         log_err("Memory allocation error in rout.rout_param.source_lat().");
     }
-    rout.rout_param.source_lon       = (double *) malloc (rout.rout_param.iSources * sizeof (double));
+    rout.rout_param.source_lon = (double *) malloc(
+        rout.rout_param.iSources * sizeof(double));
     if (rout.rout_param.source_lon == NULL) {
         log_err("Memory allocation error in rout.rout_param.source_lon().");
     }
-    rout.rout_param.source_VIC_index   = (int *) malloc (rout.rout_param.iSources * sizeof (int));
+    rout.rout_param.source_VIC_index = (int *) malloc(
+        rout.rout_param.iSources * sizeof(int));
     if (rout.rout_param.source_VIC_index == NULL) {
-        log_err("Memory allocation error in rout.rout_param.source_VIC_index().");
+        log_err(
+            "Memory allocation error in rout.rout_param.source_VIC_index().");
     }
-    rout.rout_param.outlet_lat       = (double *) malloc (rout.rout_param.iOutlets * sizeof (double));
+    rout.rout_param.outlet_lat = (double *) malloc(
+        rout.rout_param.iOutlets * sizeof(double));
     if (rout.rout_param.outlet_lat == NULL) {
         log_err("Memory allocation error in rout.rout_param.outlet_lat().");
     }
-    rout.rout_param.outlet_lon       = (double *) malloc (rout.rout_param.iOutlets * sizeof (double));
+    rout.rout_param.outlet_lon = (double *) malloc(
+        rout.rout_param.iOutlets * sizeof(double));
     if (rout.rout_param.outlet_lon == NULL) {
         log_err("Memory allocation error in rout.rout_param.outlet_lon().");
     }
-    rout.rout_param.outlet_VIC_index   = (int *) malloc (rout.rout_param.iOutlets * sizeof (int));
+    rout.rout_param.outlet_VIC_index = (int *) malloc(
+        rout.rout_param.iOutlets * sizeof(int));
     if (rout.rout_param.outlet_VIC_index == NULL) {
-        log_err("Memory allocation error in rout.rout_param.outlet_VIC_index().");
+        log_err(
+            "Memory allocation error in rout.rout_param.outlet_VIC_index().");
     }
-    rout.rout_param.unit_hydrograph    = (double *) malloc (rout.rout_param.iSources * rout.rout_param.iSubsetLength * sizeof (double));
+    rout.rout_param.unit_hydrograph = (double *) malloc(
+        rout.rout_param.iSources * rout.rout_param.iSubsetLength *
+        sizeof(double));
     if (rout.rout_param.unit_hydrograph == NULL) {
         log_err("Memory allocation error in rout.rout_param.unit_hydrograph().");
     }
-    rout.rout_param.aggrunin           = (double *)malloc (local_domain.ncells * sizeof (double));
+    rout.rout_param.aggrunin =
+        (double *)malloc(local_domain.ncells * sizeof(double));
     if (rout.rout_param.aggrunin == NULL) {
         log_err("Memory allocation error in rout.rout_param.aggrunin().");
     }
-    rout.discharge           = (double *)malloc (local_domain.ncells * sizeof (double));
+    rout.discharge = (double *)malloc(local_domain.ncells * sizeof(double));
     if (rout.discharge == NULL) {
         log_err("Memory allocation error in rout.rout_param.discharge().");
     }
 
     // Allocate memory for the ring
-    rout.ring                          = (double *)malloc (rout.rout_param.iSubsetLength * rout.rout_param.iOutlets * sizeof (double));
+    rout.ring = (double *)malloc(
+        rout.rout_param.iSubsetLength * rout.rout_param.iOutlets *
+        sizeof(double));
     if (rout.ring == NULL) {
         log_err("Memory allocation error in rout.ring().");
     }

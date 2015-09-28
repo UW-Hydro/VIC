@@ -39,3 +39,5 @@ nbproject
 
 # Test folders
 image_test
+uncrust.sh
+*.exe

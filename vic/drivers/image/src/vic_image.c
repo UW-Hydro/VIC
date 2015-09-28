@@ -100,10 +100,10 @@ main(int    argc,
 
     // read global parameters
     vic_start();
-    
+
     // read global parameters for routing
     rout_start();   // Routing routine (extension)
-    
+
     // allocate memory
     vic_alloc();
 
@@ -148,7 +148,7 @@ main(int    argc,
     // clean up
     vic_finalize();
 
-    // clean up routing 
+    // clean up routing
     rout_finalize();    // Routing routine (extension)
 
     // finalize MPI

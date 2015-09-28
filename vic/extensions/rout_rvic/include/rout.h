@@ -26,6 +26,8 @@
 #ifndef ROUT_RVIC_H
 #define ROUT_RVIC_H
 
+#define ROUT_EXT "rout_rvic"
+
 #include <vic_def.h>
 
 /******************************************************************************

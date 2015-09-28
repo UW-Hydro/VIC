@@ -28,7 +28,6 @@
 void
 rout_start(void)
 {
-// log_info("In Routing Stub Model");
 }
 
 // allocate memory

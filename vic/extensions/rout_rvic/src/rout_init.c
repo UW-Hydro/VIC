@@ -157,7 +157,6 @@ rout_init(void)
         rout.rout_param.unit_hydrograph[i] = (double) dvar[i];
     }
 
-    // TODO: Lat lon omgedraaid in netcdf?!?!??!?!
     // TODO: Check inbouwen: wat als er geen VIC gridcell bestaat voor een Rout source?!
     // Mapping: Let the routing-source index numbers correspond to the VIC index numbers
     size_t iSource;
@@ -172,11 +171,15 @@ rout_init(void)
         }
     }
 
-    // TODO Weghalen
     printf("\nsource, index of VIC gridcell: \n ");
     for (iSource = 0; iSource < rout.rout_param.iSources; iSource++) {
         printf("%3i,  %7i \n ", (int)(iSource),
                rout.rout_param.source_VIC_index[iSource]);
+        if ((size_t)rout.rout_param.source_VIC_index[iSource] < 0 ||
+            (size_t)rout.rout_param.source_VIC_index[iSource] >
+            global_domain.ncells) {
+            log_err("invalid source, index of VIC gridcell");
+        }
     }
 
     // Mapping: Let the routing-outlet index numbers correspond to the VIC index numbers
@@ -192,11 +195,15 @@ rout_init(void)
         }
     }
 
-    // TODO Weghalen
     printf("\noutlet, index of VIC gridcell: \n ");
     for (iOutlet = 0; iOutlet < rout.rout_param.iOutlets; iOutlet++) {
         printf("%3i,  %7i \n ", (int)(iOutlet),
                rout.rout_param.outlet_VIC_index[iOutlet]);
+        if ((size_t)rout.rout_param.outlet_VIC_index[iOutlet] < 0 ||
+            (size_t)rout.rout_param.outlet_VIC_index[iOutlet] >
+            global_domain.ncells) {
+            log_err("invalid outlet, index of VIC gridcell");
+        }
     }
 
     // cleanup

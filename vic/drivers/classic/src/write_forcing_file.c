@@ -87,7 +87,8 @@ write_forcing_file(atmos_data_struct    *atmos,
                                               out_data[OUT_RAINF].data[0];
             }
             if (options.CARBON) {
-                out_data[OUT_CATM].data[0] = atmos[rec].Catm[j] / PPM_to_MIXRATIO;
+                out_data[OUT_CATM].data[0] = atmos[rec].Catm[j] /
+                                             PPM_to_MIXRATIO;
                 out_data[OUT_FDIR].data[0] = atmos[rec].fdir[j];
                 out_data[OUT_PAR].data[0] = atmos[rec].par[j];
             }

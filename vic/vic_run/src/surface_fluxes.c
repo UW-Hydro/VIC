@@ -414,7 +414,7 @@ surface_fluxes(bool                 overstory,
             faPAR = (double *) calloc(options.Ncanopy, sizeof(double));
             coszen = compute_coszen(soil_con->lat, soil_con->lng,
                                     soil_con->time_zone_lng,
-                                    dmy->day_in_year, (hidx+0.5)*step_dt);
+                                    dmy->day_in_year, (hidx + 0.5) * step_dt);
 
             /* Compute absorbed PAR per ground area per canopy layer (W/m2)
                normalized to PAR = 1 W, i.e. the canopy albedo in the PAR

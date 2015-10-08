@@ -279,4 +279,3 @@ vic_force(void)
     // cleanup
     free(fvar);
 }
-

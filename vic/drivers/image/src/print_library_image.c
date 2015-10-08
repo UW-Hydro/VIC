@@ -34,7 +34,7 @@
 void
 print_atmos_data(atmos_data_struct *atmos)
 {
-    extern option_struct       options;
+    extern option_struct options;
 
     fprintf(LOG_DEST, "atmos_data  :\n");
     fprintf(LOG_DEST, "\tair_temp  : %.4f\n", atmos->air_temp[0]);

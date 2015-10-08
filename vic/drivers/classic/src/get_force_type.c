@@ -100,9 +100,9 @@ get_force_type(char *cmdstr,
     else if (strcasecmp("PRESSURE", optstr) == 0) {
         type = PRESSURE;
     }
-    /* type 10: specific humidity [kg/kg] */
-    else if (strcasecmp("QAIR", optstr) == 0) {
-        type = QAIR;
+    /* type 10: vapor pressure [kPa] */
+    else if (strcasecmp("VP", optstr) == 0) {
+        type = VP;
     }
     /* type 11: rainfall [mm] */
     else if (strcasecmp("SHORTWAVE",

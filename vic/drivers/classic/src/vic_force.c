@@ -33,15 +33,14 @@
  * @brief    Initialize atmospheric variables for the model and snow time steps.
  *****************************************************************************/
 void
-vic_force(atmos_data_struct    *atmos,
-          dmy_struct           *dmy,
-          FILE                **infile,
-          veg_lib_struct       *veg_lib,
-          veg_con_struct       *veg_con,
-          veg_hist_struct     **veg_hist,
-          soil_con_struct      *soil_con)
+vic_force(atmos_data_struct *atmos,
+          dmy_struct        *dmy,
+          FILE             **infile,
+          veg_lib_struct    *veg_lib,
+          veg_con_struct    *veg_con,
+          veg_hist_struct  **veg_hist,
+          soil_con_struct   *soil_con)
 {
-
     extern option_struct       options;
     extern param_set_struct    param_set;
     extern global_param_struct global_param;
@@ -79,8 +78,8 @@ vic_force(atmos_data_struct    *atmos,
     if (!param_set.TYPE[PRESSURE].SUPPLIED) {
         log_err("Atmospheric pressure must be supplied as a forcing");
     }
-    if (!param_set.TYPE[QAIR].SUPPLIED) {
-        log_err("Specific humidity must be supplied as a forcing");
+    if (!param_set.TYPE[VP].SUPPLIED) {
+        log_err("Vapor ressure must be supplied as a forcing");
     }
     if (!param_set.TYPE[WIND].SUPPLIED) {
         log_err("Wind speed must be supplied as a forcing");
@@ -120,8 +119,9 @@ vic_force(atmos_data_struct    *atmos,
 
     t_offset = Tfactor[0];
     for (i = 1; i < options.SNOW_BAND; i++) {
-      if (Tfactor[i] < t_offset)
-        t_offset = Tfactor[i];
+        if (Tfactor[i] < t_offset) {
+            t_offset = Tfactor[i];
+        }
     }
 
     for (rec = 0; rec < global_param.nrecs; rec++) {
@@ -137,9 +137,8 @@ vic_force(atmos_data_struct    *atmos,
             atmos[rec].longwave[i] = forcing_data[LONGWAVE][uidx];
             // pressure in kPa
             atmos[rec].pressure[i] = forcing_data[PRESSURE][uidx];
-            // vapor pressure in kPa (we read specific humidity in kg/kg)
-            atmos[rec].vp[i] = q_to_vp(forcing_data[QAIR][uidx],
-                                       atmos[rec].pressure[i]);
+            // vapor pressure in kPa
+            atmos[rec].vp[i] = forcing_data[VP][uidx];
             // vapor pressure deficit in kPa
             atmos[rec].vpd[i] = svp(atmos[rec].air_temp[i]) - atmos[rec].vp[i];
             // air density
@@ -149,9 +148,9 @@ vic_force(atmos_data_struct    *atmos,
             atmos[rec].wind[i] = forcing_data[WIND][uidx];
             // snow flag
             atmos[rec].snowflag[i] = will_it_snow(&(atmos[rec].air_temp[i]),
-                                                t_offset,
-                                                param.SNOW_MAX_SNOW_TEMP,
-                                                &(atmos[rec].prec[i]), 1);
+                                                  t_offset,
+                                                  param.SNOW_MAX_SNOW_TEMP,
+                                                  &(atmos[rec].prec[i]), 1);
             // Optional inputs
             if (options.LAKES) {
                 // Channel inflow from upstream (into lake)
@@ -183,13 +182,14 @@ vic_force(atmos_data_struct    *atmos,
             atmos[rec].density[NR] = average(atmos[rec].density, NF);
             atmos[rec].wind[NR] = average(atmos[rec].wind, NF);
             atmos[rec].snowflag[NR] = false;
-            for (i=0; i<NF; i++) {
+            for (i = 0; i < NF; i++) {
                 if (atmos[rec].snowflag[i] == true) {
                     atmos[rec].snowflag[NR] = true;
                 }
             }
             if (options.LAKES) {
-                atmos[rec].channel_in[NR] = average(atmos[rec].channel_in, NF) * NF;
+                atmos[rec].channel_in[NR] =
+                    average(atmos[rec].channel_in, NF) * NF;
             }
             if (options.CARBON) {
                 atmos[rec].Catm[NR] = average(atmos[rec].Catm, NF);
@@ -239,9 +239,11 @@ vic_force(atmos_data_struct    *atmos,
                 }
             }
             if (NF > 1) {
-                veg_hist[rec][v].albedo[NR] = average(veg_hist[rec][v].albedo, NF);
+                veg_hist[rec][v].albedo[NR] = average(veg_hist[rec][v].albedo,
+                                                      NF);
                 veg_hist[rec][v].LAI[NR] = average(veg_hist[rec][v].LAI, NF);
-                veg_hist[rec][v].vegcover[NR] = average(veg_hist[rec][v].vegcover, NF);
+                veg_hist[rec][v].vegcover[NR] = average(
+                    veg_hist[rec][v].vegcover, NF);
             }
         }
     }
@@ -276,5 +278,4 @@ vic_force(atmos_data_struct    *atmos,
                              AboveTreeLine);
         }
     }
-
 }

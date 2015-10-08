@@ -35,8 +35,8 @@ void
 print_atmos_data(atmos_data_struct *atmos,
                  size_t             nr)
 {
-    extern option_struct       options;
-    size_t i;
+    extern option_struct options;
+    size_t               i;
 
     fprintf(LOG_DEST, "atmos_data  :\n");
     fprintf(LOG_DEST, "\tair_temp  :");

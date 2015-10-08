@@ -427,12 +427,14 @@ get_global_param(FILE *gp)
                     options.RC_MODE = RC_JARVIS;
                 }
             }
+
             /*************************************
                Define log directory
             *************************************/
             else if (strcasecmp("LOG_DIR", optstr) == 0) {
                 sscanf(cmdstr, "%*s %s", filenames.log_path);
             }
+
             /*************************************
                Define state files
             *************************************/
@@ -468,6 +470,7 @@ get_global_param(FILE *gp)
                     options.BINARY_STATE_FILE = true;
                 }
             }
+
             /*************************************
                Define forcing files
             *************************************/
@@ -743,6 +746,7 @@ get_global_param(FILE *gp)
                     options.LAKE_PROFILE = true;
                 }
             }
+
             /*************************************
                Define output files
             *************************************/
@@ -809,6 +813,7 @@ get_global_param(FILE *gp)
                     options.PRT_SNOW_BAND = false;
                 }
             }
+
             /*************************************
                Define output file contents
             *************************************/
@@ -821,6 +826,7 @@ get_global_param(FILE *gp)
             else if (strcasecmp("OUTVAR", optstr) == 0) {
                 ; // do nothing
             }
+
             /*************************************
                Fail when depreciated options are used.
             *************************************/
@@ -840,6 +846,7 @@ get_global_param(FILE *gp)
                 log_err("FORCE_DT has been replaced with FORCE_STEPS_PER_DAY, "
                         "update your global parameter file accordingly");
             }
+
             /***********************************
                Unrecognized Global Parameter Flag
             ***********************************/

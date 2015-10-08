@@ -503,7 +503,8 @@ print_option(option_struct *option)
     fprintf(LOG_DEST, "\tVEGLIB_VEGCOVER      : %d\n", option->VEGLIB_VEGCOVER);
     fprintf(LOG_DEST, "\tVEGPARAM_ALB         : %d\n", option->VEGPARAM_ALB);
     fprintf(LOG_DEST, "\tVEGPARAM_LAI         : %d\n", option->VEGPARAM_LAI);
-    fprintf(LOG_DEST, "\tVEGPARAM_VEGCOVER    : %d\n", option->VEGPARAM_VEGCOVER);
+    fprintf(LOG_DEST, "\tVEGPARAM_VEGCOVER    : %d\n",
+            option->VEGPARAM_VEGCOVER);
     fprintf(LOG_DEST, "\tALB_SRC              : %d\n", option->ALB_SRC);
     fprintf(LOG_DEST, "\tLAI_SRC              : %d\n", option->LAI_SRC);
     fprintf(LOG_DEST, "\tVEGCOVER_SRC         : %d\n", option->VEGCOVER_SRC);

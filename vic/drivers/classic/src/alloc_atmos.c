@@ -35,8 +35,8 @@ void
 alloc_atmos(int                 nrecs,
             atmos_data_struct **atmos)
 {
-    extern option_struct       options;
-    int i;
+    extern option_struct options;
+    int                  i;
 
     *atmos = (atmos_data_struct *) calloc(nrecs, sizeof(atmos_data_struct));
     if (*atmos == NULL) {
@@ -88,7 +88,7 @@ alloc_atmos(int                 nrecs,
             (*atmos)[i].channel_in = (double *) calloc(NR + 1, sizeof(double));
             if ((*atmos)[i].channel_in == NULL) {
                 log_err("Memory allocation error in alloc_atmos().");
-                }
+            }
         }
         if (options.CARBON) {
             (*atmos)[i].Catm = (double *) calloc(NR + 1, sizeof(double));
@@ -97,7 +97,7 @@ alloc_atmos(int                 nrecs,
             }
             (*atmos)[i].fdir = (double *) calloc(NR + 1, sizeof(double));
             if ((*atmos)[i].fdir == NULL) {
-            log_err("Memory allocation error in alloc_atmos().");
+                log_err("Memory allocation error in alloc_atmos().");
             }
             (*atmos)[i].par = (double *) calloc(NR + 1, sizeof(double));
             if ((*atmos)[i].par == NULL) {
@@ -114,8 +114,8 @@ void
 free_atmos(int                 nrecs,
            atmos_data_struct **atmos)
 {
-    extern option_struct       options;
-    int i;
+    extern option_struct options;
+    int                  i;
 
     if (*atmos == NULL) {
         return;

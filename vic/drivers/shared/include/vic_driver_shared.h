@@ -86,7 +86,7 @@ enum
     PAR,         /**< incoming photosynthetically active radiation [W/m2] */
     PREC,        /**< total precipitation (rain and snow) [mm] */
     PRESSURE,    /**< atmospheric pressure [kPa] */
-    QAIR,        /**< specific humidity [kg/kg] */
+    VP,          /**< vapor pressure [kPa] */
     SHORTWAVE,   /**< incoming shortwave [W/m2] */
     VEGCOVER,    /**< fraction of each veg tile covered by plants [fraction] */
     WIND,        /**< wind speed [m/s] */

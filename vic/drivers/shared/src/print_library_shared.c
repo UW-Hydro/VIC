@@ -277,7 +277,6 @@ print_global_param(global_param_struct *gp)
     size_t i;
 
     fprintf(LOG_DEST, "global_param:\n");
-    fprintf(LOG_DEST, "\tmeasure_h           : %.4f\n", gp->measure_h);
     fprintf(LOG_DEST, "\twind_h              : %.4f\n", gp->wind_h);
     fprintf(LOG_DEST, "\tresolution          : %.4f\n", gp->resolution);
     fprintf(LOG_DEST, "\tdt                  : %.4f\n", gp->dt);

@@ -368,7 +368,6 @@ FORCEDAY    01  # Day of first forcing record
 FORCEHOUR   00  # Hour of first forcing record
 GRID_DECIMAL    4   # Number of digits after decimal point in forcing file names
 WIND_H          10.0    # height of wind speed measurement (m)
-MEASURE_H       2.0     # height of humidity measurement (m)
 ALMA_INPUT  FALSE   # TRUE = ALMA-compliant input variable units; FALSE = standard VIC units
 
 #######################################################################

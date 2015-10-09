@@ -136,9 +136,9 @@ vic_force(atmos_data_struct *atmos,
             // downward longwave in W/m2
             atmos[rec].longwave[i] = forcing_data[LONGWAVE][uidx];
             // pressure in kPa
-            atmos[rec].pressure[i] = forcing_data[PRESSURE][uidx];
+            atmos[rec].pressure[i] = forcing_data[PRESSURE][uidx] * 1000;
             // vapor pressure in kPa
-            atmos[rec].vp[i] = forcing_data[VP][uidx];
+            atmos[rec].vp[i] = forcing_data[VP][uidx] * 1000;
             // vapor pressure deficit in kPa
             atmos[rec].vpd[i] = svp(atmos[rec].air_temp[i]) - atmos[rec].vp[i];
             // air density

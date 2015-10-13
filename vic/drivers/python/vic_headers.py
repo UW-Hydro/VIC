@@ -445,8 +445,6 @@ typedef struct {
 typedef struct {
     double LAPSE_RATE;
     double GAUGE_HEIGHT;
-    double WIND_SPEED_DEFAULT;
-    double WIND_SPEED_MIN;
     double HUGE_RESIST;
     double ALBEDO_BARE_SOIL;
     double ALBEDO_H20_SURF;

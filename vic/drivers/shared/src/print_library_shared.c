@@ -599,9 +599,6 @@ print_parameters(parameters_struct *param)
     fprintf(LOG_DEST, "parameters:\n");
     fprintf(LOG_DEST, "\tLAPSE_RATE: %.4f\n", param->LAPSE_RATE);
     fprintf(LOG_DEST, "\tGAUGE_HEIGHT: %.4f\n", param->GAUGE_HEIGHT);
-    fprintf(LOG_DEST, "\tWIND_SPEED_DEFAULT: %.4f\n",
-            param->WIND_SPEED_DEFAULT);
-    fprintf(LOG_DEST, "\tWIND_SPEED_MIN: %.4f\n", param->WIND_SPEED_MIN);
     fprintf(LOG_DEST, "\tHUGE_RESIST: %.4f\n", param->HUGE_RESIST);
     fprintf(LOG_DEST, "\tALBEDO_BARE_SOIL: %.4f\n", param->ALBEDO_BARE_SOIL);
     fprintf(LOG_DEST, "\tALBEDO_H20_SURF: %.4f\n", param->ALBEDO_H20_SURF);

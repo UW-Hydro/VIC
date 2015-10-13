@@ -41,12 +41,8 @@ initialize_parameters()
     // Precipitation Guage Height
     param.GAUGE_HEIGHT = 1.0;
 
-    // Default Wind Speed
-    param.WIND_SPEED_DEFAULT = 3.0;
-    param.WIND_SPEED_MIN = 0.1;
-
     // Huge Resistance Term
-    param.HUGE_RESIST = DBL_MAX;
+    param.HUGE_RESIST = 1e20;
 
     // Surface Albedo Parameters
     param.ALBEDO_BARE_SOIL = 0.2;

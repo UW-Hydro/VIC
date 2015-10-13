@@ -63,13 +63,6 @@ get_parameters(FILE *paramfile)
             else if (strcasecmp("GAUGE_HEIGHT", optstr) == 0) {
                 sscanf(cmdstr, "%*s %lf", &param.GAUGE_HEIGHT);
             }
-            // Default Wind Speed
-            else if (strcasecmp("WIND_SPEED_DEFAULT", optstr) == 0) {
-                sscanf(cmdstr, "%*s %lf", &param.WIND_SPEED_DEFAULT);
-            }
-            else if (strcasecmp("WIND_SPEED_MIN", optstr) == 0) {
-                sscanf(cmdstr, "%*s %lf", &param.WIND_SPEED_MIN);
-            }
             // Huge Resistance Term
             else if (strcasecmp("HUGE_RESIST", optstr) == 0) {
                 sscanf(cmdstr, "%*s %lf", &param.HUGE_RESIST);
@@ -524,14 +517,6 @@ validate_parameters()
     // Precipitation Guage Height
     if (!(param.GAUGE_HEIGHT >= 0 && param.GAUGE_HEIGHT <= 100)) {
         log_err("GAUGE_HEIGHT must be defined on the interval [0,100] (m)")
-    }
-    // Default Wind Speed
-    if (!param.WIND_SPEED_DEFAULT > 0.) {
-        log_err(
-            "WIND_SPEED_DEFAULT must be defined on the interval [0, inf) (m/s)");
-    }
-    if (!(param.WIND_SPEED_MIN >= 0.)) {
-        log_err("WIND_SPEED_MIN must be defined on the interval [0, inf) (m/s)");
     }
     // Huge Resistance Term
     if (!(param.HUGE_RESIST >= 0.)) {

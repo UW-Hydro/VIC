@@ -406,10 +406,6 @@ typedef struct {
     // Precipitation Guage Height
     double GAUGE_HEIGHT;   /**< precipitation gauge height (m) */
 
-    // Default Wind Speed
-    double WIND_SPEED_DEFAULT;  /**< Default wind speed (m/s) used when wind is not supplied as a forcing */
-    double WIND_SPEED_MIN;  /**< Minimum wind speed in m/s that can be used by the model. */
-
     // Huge Resistance Term
     double HUGE_RESIST;  /**< Extermely large resistance term (s/m) */
 

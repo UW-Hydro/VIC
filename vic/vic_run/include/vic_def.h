@@ -64,13 +64,13 @@
 #define MAX_SUBDAILY_STEPS_PER_DAY  1440
 
 /***** Potential Evap types *****/
-#define N_PET_TYPES 0
-#define N_PET_TYPES_NON_NAT 0
+#define N_PET_TYPES 6
+#define N_PET_TYPES_NON_NAT 4
 #define PET_SATSOIL 0
 #define PET_H2OSURF 1
 #define PET_SHORT   2
 #define PET_TALL    3
-#define N_PET_TYPES_NAT 0
+#define N_PET_TYPES_NAT 2
 #define PET_NATVEG  4
 #define PET_VEGNOCR 5
 
@@ -728,7 +728,6 @@ typedef struct {
  * @brief   This structure stores all model run global parameters.
  *****************************************************************************/
 typedef struct {
-    double measure_h;              /**< height of measurements (m) */
     double wind_h;                 /**< height of wind measurements (m) */
     double resolution;             /**< Model resolution (degrees) */
     double dt;                     /**< Time step in seconds */

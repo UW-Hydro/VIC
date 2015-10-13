@@ -1,9 +1,5 @@
 # VIC Model References
 
-## A comprehensive description of the model as of release 4.1:
-
-Gao, H., Q. Tang, X. Shi, C. Zhu, T. J. Bohn, F. Su, J. Sheffield, M. Pan, D. P. Lettenmaier, and E. F. Wood, 2010: [Water Budget Record from Variable Infiltration Capacity (VIC) Model](http://www.hydro.washington.edu/SurfaceWaterGroup/Publications/Water_Cycle_MEaSUREs_ATBD_VICmodel_submit.doc). In _Algorithm Theoretical Basis Document for Terrestrial Water Cycle Data Records_ (unpublished).
-
 ## Primary Historical Reference
 
 Liang, X., D. P. Lettenmaier, E. F. Wood, and S. J. Burges, 1994: A Simple hydrologically Based Model of Land Surface Water and Energy Fluxes for GSMs, _J. Geophys. Res._, **99**(D7), 14,415-14,428.
@@ -27,6 +23,8 @@ Bowling, L.C. and D.P. Lettenmaier, 2010: Modeling the effects of lakes and wetl
 Cherkauer, K. A. and D. P. Lettenmaier, 1999: Hydrologic effects of frozen soils in the upper Mississippi River basin, _J. Geophys. Res._, **104**(D16), 19,599-19,610.
 
 Cherkauer, K. A., L. C. Bowling, and D. P. Lettenmaier, 2003: Variable infiltration capacity cold land process model updates, _Global and Planetary Change_, **38**, 151-159.
+
+Gao, H., Q. Tang, X. Shi, C. Zhu, T. J. Bohn, F. Su, J. Sheffield, M. Pan, D. P. Lettenmaier, and E. F. Wood, 2010: [Water Budget Record from Variable Infiltration Capacity (VIC) Model](http://www.hydro.washington.edu/SurfaceWaterGroup/Publications/Water_Cycle_MEaSUREs_ATBD_VICmodel_submit.doc). In _Algorithm Theoretical Basis Document for Terrestrial Water Cycle Data Records_ (unpublished).
 
 Liang, X., 1994: A Two-Layer Variable Infiltration Capacity Land Surface Representation for General Circulation Models, _Water Resour. Series_, **TR140**, 208 pp., Univ. of Washington, Seattle.
 

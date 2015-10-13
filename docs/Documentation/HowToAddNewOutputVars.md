@@ -1,6 +1,6 @@
 # How to Add New Output Variables
 
-As discussed [here](OutputFormatting.md), VIC allows users to select which output variables to write to their output files. Variables that can be selected are listed [here](OutputVarList.md) as well as in the VIC source code file **vicNl_def.h** (listed as `OUT_*`). However, not all variables that VIC simulates are available for output. And of course if you are changing VIC's physics, any new variables you add are also not available for output (yet).
+VIC allows users to select which output variables to write to their output files. Variables that can be selected are listed [here](OutputVarList.md) as well as in the VIC source code file `vic_def.h` (listed as `OUT_*`). However, not all variables that VIC simulates are available for output. And of course if you are changing VIC's physics, any new variables you add are also not available for output (yet).
 
 You can enable VIC to output new variables by making a few changes to the code, as follows:
 
@@ -8,64 +8,61 @@ You can enable VIC to output new variables by making a few changes to the code, 
 
 If VIC doesn't already compute the variable you need, or computes it but doesn't store it in one of the structures that is accessible to put_data(), you'll have to modify VIC to do this. The structures that put_data() has access to are: dmy, atmos_data, soil_con, cell_data, veg_con, veg_var, energy, snow_data, and all_vars.
 
-## 2\. Define the variable's name in vicNl_def.h.
+## 2\. Define the variable's name in `vic_def.h`.
 
-The list of output variables begins with a definition of the number of output variables in the list:
-
-```C
-/***** Output Variable Types *****/
-#define N_OUTVAR_TYPES 100
-                        ^
-                        | number of output variables (can be larger than the
-                          actual number of variables)
-```
-
-This is followed by a list of output variable names and ID codes:
+The list of output variables is a C `enum`.  To add a new variable, begin by appending the new variable to the ***next to*** last position in the `enum`. See the example of adding `OUT_NEW_VAR_NAME` below:
 
 ```C
-// Water Balance Terms - state variables
-#define OUT_ROOTMOIST        0  /* root zone soil moisture  [mm] */
-#define OUT_SMFROZFRAC       1  /* fraction of soil moisture (by mass) that is ice, for each soil layer */
-             ^               ^
-           name            ID code
-
-(etc)
+/******************************************************************************
+ * @brief   Output Variable Types
+ *****************************************************************************/
+enum
+{
+    // Water Balance Terms - state variables
+    OUT_ASAT,             /**< Saturated Area Fraction */
+    ...
+    OUT_CSLOW,            /**< Carbon density in slow pool [g C/m2] */
+    OUT_NEW_VAR_NAME      /**< Description of new output variable [units] */
+    // Last value of enum - DO NOT ADD ANYTHING BELOW THIS LINE!!
+    // used as a loop counter and must be >= the largest value in this enum
+    N_OUTVAR_TYPES        /**< used as a loop counter*/
+};
 ```
 
 Similarly, for input meteorological variables, we have:
 
 ```C
-/***** Forcing Variable Types *****/
-#define N_FORCING_TYPES 23
+/******************************************************************************
+ * @brief   Forcing Variable Types
+ *****************************************************************************/
+enum
+{
+    AIR_TEMP,    /**< air temperature per time step [C] (ALMA_INPUT: [K]) */
+    ...
+    WIND_N,      /**< meridional component of wind speed [m/s] */
+    NEW_FORCE_VAR, /**< Description of new forcing variable [units] */
+    SKIP,        /**< place holder for unused data columns */
+    // Last value of enum - DO NOT ADD ANYTHING BELOW THIS LINE!!
+    // used as a loop counter and must be >= the largest value in this enum
+    N_FORCING_TYPES  /**< Number of forcing types */
+};
 ```
-followed by:
-
-```
-#define AIR_TEMP   0 /* air temperature per time step [C] (ALMA_INPUT: [K]) */
-#define ALBEDO     1 /* surface albedo [fraction] */
-```
-
-To add a variable to either list, copy an existing entry and modify it to have your variable's name and ID code. If you're creating an output variable, the name should begin with "OUT_", similar to the other output variables. Variable names must be no longer than 19 characters.
-
-NOTE: The variable's ID code MUST BE UNIQUE!!! The safest thing to do is to create your new entry at the end of the list. Your new variable's ID code should be the previous variable's ID code + 1\. If you would like to insert your new entry elsewhere in the list (e.g. to group it with similar variables), then you will need to update all the ID codes in the list so that each code = the previous variable's ID code + 1.
-
-Next, if necessary, increase the number of variables defined at the top of the list (N_OUTVAR_TYPES for output variables, or N_FORCING_TYPES for input variables) so that it is >= to the number of variables in the list.
 
 ## 3\. For output variables, populate the variable's metadata in output_list_utils.c.
 
 In the function create_output_list(), there is a series of calls to strcpy, one per variable:
 
 ```C
-strcpy(out_data[OUT_ROOTMOIST].varname,"OUT_ROOTMOIST");
+strcpy(out_data[OUT_NEW_VAR_NAME].varname,"OUT_NEW_VAR_NAME");
                      ^                       ^
                 array index             variable name
 ```
-You must add an entry for your variable. The safest thing to do is to copy an existing entry and modify it. Make sure that the array index and variable name both match the name you entered in vicNl_def.h EXACTLY.
+You must add an entry for your variable. The safest thing to do is to copy an existing entry and modify it. Make sure that the array index and variable name both match the name you entered in `vic_def.h` EXACTLY.
 
 Next, if your variable consists of multiple values per grid cell (for example, per-layer soil moisture OUT_SOIL_MOIST has options.Nlayer values, while OUT_RUNOFF has only 1 value) you must define the number of elements for the variable. There is a series of lines defining the number of elements, as:
 
 ```C
-out_data[OUT_SMLIQFRAC].nelem = options.Nlayer;
+out_data[OUT_NEW_VAR_NAME].nelem = options.Nlayer;
 ```
 
 To add an entry, copy an existing entry and modify it.
@@ -73,7 +70,7 @@ To add an entry, copy an existing entry and modify it.
 Next, define your variable's aggregation method. This refers to the method used to aggregate up from smaller time steps to larger time steps, e.g. from hourly to daily. By default, variables are aggregated via averaging the original values over the output time step; if this is acceptable for your variable, then you do not need to specify anything here. Otherwise, you need to specify a method, e.g.:
 
 ```C
-out_data[OUT_ROOTMOIST].aggtype = AGG_TYPE_END;
+out_data[OUT_NEW_VAR_NAME].aggtype = AGG_TYPE_END;
 ```
 
 Once again, to add an entry, copy an existing entry and modify it. Possible aggregation methods are:

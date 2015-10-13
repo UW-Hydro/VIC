@@ -33,28 +33,27 @@
  *           double
  *****************************************************************************/
 void
-vic_write(void)
-{
+vic_write(void) {
     extern out_data_struct **out_data;
-    extern domain_struct     global_domain;
-    extern domain_struct     local_domain;
-    extern nc_file_struct    nc_hist_file;
-    extern nc_var_struct     nc_vars[N_OUTVAR_TYPES];
-    extern size_t            current;
-    int                      dimids[MAXDIMS];
-    size_t                   i;
-    size_t                   j;
-    size_t                   k;
-    size_t                   grid_size;
-    size_t                   ndims;
-    double                  *dvar = NULL;
-    size_t                   dcount[MAXDIMS];
-    size_t                   dstart[MAXDIMS];
+    extern domain_struct global_domain;
+    extern domain_struct local_domain;
+    extern nc_file_struct nc_hist_file;
+    extern nc_var_struct nc_vars[N_OUTVAR_TYPES];
+    extern size_t current;
+    int dimids[MAXDIMS];
+    size_t i;
+    size_t j;
+    size_t k;
+    size_t grid_size;
+    size_t ndims;
+    double *dvar = NULL;
+    size_t dcount[MAXDIMS];
+    size_t dstart[MAXDIMS];
 
     grid_size = global_domain.n_ny * global_domain.n_nx;
 
     // allocate memory for variables to be stored
-    dvar = (double *) malloc(local_domain.ncells * sizeof(double));
+    dvar = (double *) malloc(local_domain.ncells * sizeof (double));
     if (dvar == NULL) {
         log_err("Memory allocation error in vic_write().");
     }
@@ -95,10 +94,10 @@ vic_write(void)
                 dvar[i] = (double) out_data[i][k].aggdata[j];
             }
             gather_put_nc_field_double(nc_hist_file.fname, &(nc_hist_file.open),
-                                       &(nc_hist_file.nc_id),
-                                       nc_hist_file.d_fillvalue,
-                                       dimids, ndims, nc_vars[k].nc_var_name,
-                                       dstart, dcount, dvar);
+                    &(nc_hist_file.nc_id),
+                    nc_hist_file.d_fillvalue,
+                    dimids, ndims, nc_vars[k].nc_var_name,
+                    dstart, dcount, dvar);
             for (i = 0; i < local_domain.ncells; i++) {
                 dvar[i] = nc_hist_file.d_fillvalue;
             }
@@ -120,6 +119,51 @@ vic_write(void)
             }
         }
     }
+
+//    //ADD LON LAT VARS
+//    ndims = 2;
+//    dimids[0] = nc_hist_file.nj_dimid;
+//    dstart[0] = 0;
+//    dcount[0] = nc_hist_file.nj_size;
+//
+//    dimids[1] = nc_hist_file.ni_dimid;
+//    dstart[1] = 0;
+//    dcount[1] = nc_hist_file.ni_size;
+//
+//    for (i = 0; i < local_domain.ncells; i++) {
+//        dvar[i] = (double) local_domain.locations[i].longitude;
+//    }
+//
+//    gather_put_nc_field_double(nc_hist_file.fname, &(nc_hist_file.open),
+//            &(nc_hist_file.nc_id),
+//            nc_hist_file.d_fillvalue,
+//            dimids, ndims, "nav_lon",
+//            dstart, dcount, dvar);
+//
+//    for (i = 0; i < local_domain.ncells; i++) {
+//        dvar[i] = (double) local_domain.locations[i].latitude;
+//    }
+//
+//    gather_put_nc_field_double(nc_hist_file.fname, &(nc_hist_file.open),
+//            &(nc_hist_file.nc_id),
+//            nc_hist_file.d_fillvalue,
+//            dimids, ndims, "nav_lat",
+//            dstart, dcount, dvar);
+//   
+    //ADD Time var
+    ndims = 1;
+    dimids[0] = nc_hist_file.time_dimid;
+    dstart[0] = current;
+    dcount[0] = 1;
+
+    dvar[0] = (double) current;
+
+    // write to file
+    put_nc_field_double(nc_hist_file.fname, &(nc_hist_file.open),
+            &(nc_hist_file.nc_id),
+            nc_hist_file.d_fillvalue,
+            dimids, ndims, "time",
+            dstart, dcount, dvar);
 
     // free memory
     free(dvar);

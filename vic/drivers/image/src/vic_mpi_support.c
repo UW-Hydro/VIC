@@ -994,7 +994,7 @@ create_MPI_param_struct_type(MPI_Datatype *mpi_type)
     MPI_Datatype *mpi_types;
 
     // nitems has to equal the number of elements in parameters_struct
-    nitems = 141;
+    nitems = 139;
     blocklengths = (int *) malloc(nitems * sizeof(int));
     if (blocklengths == NULL) {
         log_err("Memory allocation error in create_MPI_param_struct_type().")
@@ -1024,14 +1024,6 @@ create_MPI_param_struct_type(MPI_Datatype *mpi_type)
 
     // double GAUGE_HEIGHT;
     offsets[i] = offsetof(parameters_struct, GAUGE_HEIGHT);
-    mpi_types[i++] = MPI_DOUBLE;
-
-    // double WIND_SPEED_DEFAULT;
-    offsets[i] = offsetof(parameters_struct, WIND_SPEED_DEFAULT);
-    mpi_types[i++] = MPI_DOUBLE;
-
-    // double WIND_SPEED_MIN;
-    offsets[i] = offsetof(parameters_struct, WIND_SPEED_MIN);
     mpi_types[i++] = MPI_DOUBLE;
 
     // double HUGE_RESIST;

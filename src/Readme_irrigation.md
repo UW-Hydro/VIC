@@ -1,12 +1,9 @@
 VIC 4.2.a with irrigation. 
 
-VIC stand-alone version: Only possible to model irrigation requirements ("potential irrigation"). Actual irrigation, i.e. with water limitation included, requires use of the routing model with dams included in addition.
+Developed by Ingjerd Haddeland and Ted Bohn. This stand alone version only possible to model irrigation requirements ("potential irrigation"). Actual irrigation, i.e. with water limitation included, requires use of the routing (reservoir) model with dams included.
 
-Limitations when irrigation is included: Only tested in daily water balance mode, one elevation band, and without distributed precipitation. Also, you can get water balance errors at the beginning of the second simulation month (has to do with initialization), so always include a spin up period! Does not allow for the use of INIT_STATE. You can only have one irrigated vegetation type within each cell.
-
-PotEvap does not funtction properly!
 ####################################
-Input files
+Input files differences compared to regular VIC inputs
 
 Global file: Two extra lines are included.
 IRRIGATION      FALSE/TRUE 

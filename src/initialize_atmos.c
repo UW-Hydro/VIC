@@ -384,6 +384,8 @@ void initialize_atmos(atmos_data_struct        *atmos,
             || type == CSNOWF
             || type == LSSNOWF
             || type == CHANNEL_IN
+            || type == IRR_RUN
+            || type == IRR_WITH
            ) {
           for (idx=0; idx<(global_param.nrecs*NF); idx++) {
             forcing_data[type][idx] *= param_set.FORCE_DT[param_set.TYPE[type].SUPPLIED-1] * 3600;
@@ -520,6 +522,8 @@ void initialize_atmos(atmos_data_struct        *atmos,
               || type == CSNOWF
               || type == LSSNOWF
               || type == CHANNEL_IN
+              || type == IRR_RUN
+              || type == IRR_WITH
              ) {
             /* Amounts per step need to be scaled to new step length */
             local_forcing_data[type][idx] = forcing_data[type][i]/param_set.FORCE_DT[param_set.TYPE[type].SUPPLIED-1];
@@ -1583,6 +1587,178 @@ void initialize_atmos(atmos_data_struct        *atmos,
           }
           if(NF>1) veg_hist[rec][v].vegcover[NR] = sum / (float)NF;
         }
+      }
+    }
+  }
+  /****************************************************
+    Crop Area Fraction
+  ****************************************************/
+
+  /* First, assign default climatology */
+  for (rec = 0; rec < global_param.nrecs; rec++) {
+    for(v = 0; v < veg_con[0].vegetat_type_num; v++) {
+      for (j = 0; j < NF; j++) {
+        veg_hist[rec][v].crop_frac[j] = veg_lib[veg_con[v].veg_class].crop_frac[dmy[rec].month-1];
+      }
+    }
+  }
+
+  if(param_set.TYPE[CROP_FRAC].SUPPLIED) {
+    if(param_set.FORCE_DT[param_set.TYPE[CROP_FRAC].SUPPLIED-1] == 24) {
+      /* daily crop_frac provided */
+      for (rec = 0; rec < global_param.nrecs; rec++) {
+        for(v = 0; v < veg_con[0].vegetat_type_num; v++) {
+          if (veg_con[v].crop_frac_active) {
+            sum = 0;
+            for (j = 0; j < NF; j++) {
+              hour = rec*global_param.dt + j*options.SNOW_STEP + global_param.starthour - hour_offset_int;
+              if (global_param.starthour - hour_offset_int < 0) hour += 24;
+              idx = (int)((float)hour/24.0);
+              if (local_forcing_data[CROP_FRAC][idx] != NODATA_VH) {
+	        veg_hist[rec][v].crop_frac[j] = local_forcing_data[CROP_FRAC][idx]; // assume constant over the day
+                if (veg_hist[rec][v].crop_frac[j] < MIN_CROP_FRAC) veg_hist[rec][v].crop_frac[j] = MIN_CROP_FRAC;
+              }
+              sum += veg_hist[rec][v].crop_frac[j];
+            }
+            if(NF>1) veg_hist[rec][v].crop_frac[NR] = sum / (float)NF;
+          }
+        }
+      }
+    }
+    else {
+      /* sub-daily crop_frac provided */
+      for(rec = 0; rec < global_param.nrecs; rec++) {
+        for(v = 0; v < param_set.TYPE[CROP_FRAC].N_ELEM; v++) {
+          if (veg_con[v].crop_frac_active) {
+            sum = 0;
+            for(i = 0; i < NF; i++) {
+              hour = rec*global_param.dt + i*options.SNOW_STEP + global_param.starthour - hour_offset_int;
+              veg_hist[rec][v].crop_frac[i] = 0;
+              while (hour < rec*global_param.dt + (i+1)*options.SNOW_STEP + global_param.starthour - hour_offset_int) {
+                idx = hour;
+                if (idx < 0) idx += 24;
+                if (local_forcing_data[CROP_FRAC][idx] != NODATA_VH) {
+	          veg_hist[rec][v].crop_frac[i] = local_forcing_data[CROP_FRAC][idx];
+                  if (veg_hist[rec][v].crop_frac[i] < MIN_CROP_FRAC) veg_hist[rec][v].crop_frac[i] = MIN_CROP_FRAC;
+                }
+                hour++;
+              }
+	      sum += veg_hist[rec][v].crop_frac[i];
+            }
+            if(NF>1) veg_hist[rec][v].crop_frac[NR] = sum / (float)NF;
+          }
+        }
+      }
+    }
+  }
+
+  /* HACK: if crop, and crop frac is active, normalize vegcover by crop_frac */
+  for (rec = 0; rec < global_param.nrecs; rec++) {
+    for(v = 0; v < veg_con[0].vegetat_type_num; v++) {
+      if (options.CROPFRAC && veg_con[v].crop_frac_active) {
+        if (veg_hist[rec][v].crop_frac[0] > 0) {
+          for (j = 0; j < NF; j++) {
+            veg_hist[rec][v].vegcover[j] /= veg_hist[rec][v].crop_frac[0];
+	    veg_hist[rec][v].vegcover[j] =1; //ingjerd added. keep vegcover at 1 for crops
+         }
+        }
+      }
+    }
+  }
+
+  /*************************************************
+    Water available for irrigation taken from local runoff
+  *************************************************/
+
+  if ( !param_set.TYPE[IRR_RUN].SUPPLIED ) {
+    /** values not supplied **/
+    for (rec = 0; rec < global_param.nrecs; rec++) {
+      sum = 0;
+      for (i = 0; i < NF; i++) {
+        atmos[rec].irr_run[i] = 0;
+        sum += atmos[rec].irr_run[i];
+      }
+      if(NF>1) atmos[rec].irr_run[NR] = sum / (float)NF;
+    }
+  }
+  else {
+    if(param_set.FORCE_DT[param_set.TYPE[IRR_RUN].SUPPLIED-1] == 24) {
+      /* daily values provided */
+      for (rec = 0; rec < global_param.nrecs; rec++) {
+        sum = 0;
+        for (j = 0; j < NF; j++) {
+          hour = rec*global_param.dt + j*options.SNOW_STEP + global_param.starthour - hour_offset_int;
+          if (global_param.starthour - hour_offset_int < 0) hour += 24;
+          idx = (int)((float)hour/24.0);
+          atmos[rec].irr_run[j] = local_forcing_data[IRR_RUN][idx];
+          sum += atmos[rec].irr_run[j];
+        }
+        if(NF>1) atmos[rec].irr_run[NR] = sum / (float)NF;
+      }
+    }
+    else {
+      /* sub-daily values provided */
+      for(rec = 0; rec < global_param.nrecs; rec++) {
+        sum = 0;
+        for(i = 0; i < NF; i++) {
+          hour = rec*global_param.dt + i*options.SNOW_STEP + global_param.starthour - hour_offset_int;
+          if (global_param.starthour - hour_offset_int < 0) hour += 24;
+          atmos[rec].irr_run[i] = 0;
+          for (idx = hour; idx < hour+options.SNOW_STEP; idx++) {
+	    atmos[rec].irr_run[i] += local_forcing_data[IRR_RUN][idx];
+          }
+          atmos[rec].irr_run[i] /= options.SNOW_STEP;
+	  sum += atmos[rec].irr_run[i];
+        }
+        if(NF>1) atmos[rec].irr_run[NR] = sum / (float)NF;
+      }
+    }
+  }
+  /*************************************************
+    Water available for irrigation taken from external withdrawals
+  *************************************************/
+
+  if ( !param_set.TYPE[IRR_WITH].SUPPLIED ) {
+    /** values not supplied **/
+    for (rec = 0; rec < global_param.nrecs; rec++) {
+      sum = 0;
+      for (i = 0; i < NF; i++) {
+        atmos[rec].irr_with[i] = 0;
+        sum += atmos[rec].irr_with[i];
+      }
+      if(NF>1) atmos[rec].irr_with[NR] = sum / (float)NF;
+    }
+  }
+  else {
+    if(param_set.FORCE_DT[param_set.TYPE[IRR_WITH].SUPPLIED-1] == 24) {
+      /* daily values provided */
+      for (rec = 0; rec < global_param.nrecs; rec++) {
+        sum = 0;
+        for (j = 0; j < NF; j++) {
+          hour = rec*global_param.dt + j*options.SNOW_STEP + global_param.starthour - hour_offset_int;
+          if (global_param.starthour - hour_offset_int < 0) hour += 24;
+          idx = (int)((float)hour/24.0);
+          atmos[rec].irr_with[j] = local_forcing_data[IRR_WITH][idx];
+          sum += atmos[rec].irr_with[j];
+        }
+        if(NF>1) atmos[rec].irr_with[NR] = sum / (float)NF;
+      }
+    }
+    else {
+      /* sub-daily values provided */
+      for(rec = 0; rec < global_param.nrecs; rec++) {
+        sum = 0;
+        for(i = 0; i < NF; i++) {
+          hour = rec*global_param.dt + i*options.SNOW_STEP + global_param.starthour - hour_offset_int;
+          if (global_param.starthour - hour_offset_int < 0) hour += 24;
+          atmos[rec].irr_with[i] = 0;
+          for (idx = hour; idx < hour+options.SNOW_STEP; idx++) {
+	    atmos[rec].irr_with[i] += local_forcing_data[IRR_WITH][idx];
+          }
+          atmos[rec].irr_with[i] /= options.SNOW_STEP;
+	  sum += atmos[rec].irr_with[i];
+        }
+        if(NF>1) atmos[rec].irr_with[NR] = sum / (float)NF;
       }
     }
   }

@@ -55,6 +55,7 @@ void initialize_soil (cell_data_struct **cell,
       cell[veg][band].CLitter = 0;
       cell[veg][band].CInter = 0;
       cell[veg][band].CSlow = 0;
+      cell[veg][band].irr_extract = 0;
     }
   }
 

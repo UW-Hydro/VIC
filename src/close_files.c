@@ -42,6 +42,10 @@ void close_files(filep_struct         *filep,
     fclose(filep->forcing[1]);
     if(options.COMPRESS) compress_files(fnames->forcing[1]);
   }
+  if(filep->forcing[2]!=NULL) {
+    fclose(filep->forcing[2]);
+    if(options.COMPRESS) compress_files(fnames->forcing[2]);
+  }
 
   /*******************
     Close Output Files

@@ -138,7 +138,8 @@ int main(int argc, char *argv[])
   out_data_file_struct     *out_data_files;
   out_data_struct          *out_data;
   save_data_struct         save_data;
-  
+  all_vars_struct          all_vars_crop;
+ 
   /** Read Model Options **/
   initialize_global();
   filenames = cmd_proc(argc, argv);
@@ -232,6 +233,7 @@ int main(int argc, char *argv[])
 
         /** Make Top-level Control Structure **/
         all_vars     = make_all_vars(veg_con[0].vegetat_type_num);
+        all_vars_crop     = make_all_vars(veg_con[0].Ncrop-1);
 
         /** allocate memory for the veg_hist_struct **/
         alloc_veg_hist(global_param.nrecs, veg_con[0].vegetat_type_num, &veg_hist);
@@ -259,7 +261,7 @@ int main(int argc, char *argv[])
 #if VERBOSE
         fprintf(stderr,"Model State Initialization\n");
 #endif /* VERBOSE */
-        ErrorFlag = initialize_model_state(&all_vars, dmy[0], &global_param, filep, 
+        ErrorFlag = initialize_model_state(&all_vars, &all_vars_crop, dmy[0], &global_param, filep, 
 			       soil_con.gridcel, veg_con[0].vegetat_type_num,
 			       options.Nnode, 
 			       atmos[0].air_temp[NR],
@@ -300,7 +302,7 @@ int main(int argc, char *argv[])
 	  /**************************************************
 	    Compute cell physics for 1 timestep
 	  **************************************************/
-	  ErrorFlag = full_energy(cellnum, rec, &atmos[rec], &all_vars, dmy, &global_param, &lake_con, &soil_con, veg_con, veg_hist);
+	  ErrorFlag = full_energy(cellnum, rec, &atmos[rec], &all_vars, &all_vars_crop, dmy, &global_param, &lake_con, &soil_con, veg_con, veg_hist);
 
 	  /**************************************************
 	    Write cell average values for current time step
@@ -344,6 +346,7 @@ int main(int argc, char *argv[])
 
         free_veg_hist(global_param.nrecs, veg_con[0].vegetat_type_num, &veg_hist);
         free_all_vars(&all_vars,veg_con[0].vegetat_type_num);
+        free_all_vars(&all_vars_crop,veg_con[0].Ncrop-1);
         free_vegcon(&veg_con);
         free((char *)soil_con.AreaFract);
         free((char *)soil_con.BandElev);

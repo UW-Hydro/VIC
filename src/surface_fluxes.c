@@ -1159,6 +1159,9 @@ int surface_fluxes(char                 overstory,
   ********************************************************/
 
   (*inflow) = ppt;
+  ppt += veg_var->irrig;
+
+  //fprintf(stdout,"surface_fluxes inflow %f ppt %f veg_varirrig %f\n",(*inflow),ppt,veg_var->irrig);
 
   ErrorFlag = runoff(cell, energy, soil_con, ppt, soil_con->frost_fract,
                      gp->dt, options.Nnode, band, rec, iveg);

@@ -148,7 +148,7 @@ double calc_netshort(double, int, double, double *);
 void calc_Nscale_factors(char, double *, double, double, double, double,
                          dmy_struct, double *);
 double calc_rainonly(double,double,double,double);
-double calc_rc(double,double,float,double,double,double,double,char);
+double calc_rc(double,double,float,double,double,double,double,char,int);
 void   calc_root_fractions(veg_con_struct *, soil_con_struct *);
 double calc_snow_coverage(int *, double, double, double, double, double, 
                           double, double, double *, double, double *, 
@@ -288,7 +288,7 @@ void   free_vegcon(veg_con_struct **);
 void   free_veglib(veg_lib_struct **);
 void   free_out_data_files(out_data_file_struct **);
 void   free_out_data(out_data_struct **);
-int    full_energy(int, int, atmos_data_struct *, all_vars_struct *,
+int    full_energy(int, int, atmos_data_struct *, all_vars_struct *, all_vars_struct *,
 		   dmy_struct *, global_param_struct *, lake_con_struct *,
                    soil_con_struct *, veg_con_struct *, veg_hist_struct **);
 double func_atmos_energy_bal(double, va_list);
@@ -310,7 +310,7 @@ void   initialize_atmos(atmos_data_struct *, dmy_struct *, FILE **,
 			veg_lib_struct *, veg_con_struct *, veg_hist_struct **,
 			soil_con_struct *, out_data_file_struct *, out_data_struct *);
 void   initialize_global();
-int   initialize_model_state(all_vars_struct *, dmy_struct,
+int   initialize_model_state(all_vars_struct *, all_vars_struct *, dmy_struct,
 			      global_param_struct *, filep_struct, 
 			      int, int, int, 
 			      double, soil_con_struct *,

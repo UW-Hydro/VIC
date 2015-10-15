@@ -48,8 +48,11 @@ double calc_rc(double rs,
 	       double vpd, 
 	       double lai, 
 	       double gsm_inv, 
-	       char   ref_crop)
+	       char   ref_crop,
+	       int flag_irr)
 {
+  extern option_struct options;
+
   double f;
   double DAYfactor;             /* factor for canopy resistance based on photosynthesis */
   double Tfactor;               /* factor for canopy resistance based on temperature */
@@ -80,6 +83,16 @@ double calc_rc(double rs,
 
     vpdfactor = 1 - vpd/CLOSURE;
     vpdfactor = (vpdfactor < VPDMINFACTOR) ? VPDMINFACTOR : vpdfactor;
+
+    /*Set limitations to 1 if irrigated vegetation (both when irrig=true and when irrig=false). 
+      Not perfect..., but is included because of FAO method used. Meaning T, vpd and Sw do not limit ET 
+      for irrigated crops, to be consistent with FAO method used when preprocessing data. */
+    if(flag_irr==1) {
+      Tfactor=1.;
+      DAYfactor=1.;
+      vpdfactor=1.;
+      if(options.IRRIGATION) gsm_inv=1.; //only when irrig=true
+    }
 
     /* calculate canopy resistance in s/m */
     rc = rs/(lai * gsm_inv * Tfactor * vpdfactor) * DAYfactor;

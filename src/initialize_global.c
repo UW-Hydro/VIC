@@ -151,12 +151,15 @@ void initialize_global() {
   options.COMPUTE_TREELINE      = FALSE;
   options.CONTINUEONERROR       = TRUE;
   options.CORRPREC              = FALSE;
+  options.CROPFRAC              = FALSE;
   options.EQUAL_AREA            = FALSE;
   options.EXP_TRANS             = TRUE;
   options.FROZEN_SOIL           = FALSE;
   options.FULL_ENERGY           = FALSE;
   options.GRND_FLUX_TYPE        = GF_410;
   options.IMPLICIT              = TRUE;
+  options.IRRIGATION            = FALSE;
+  options.IRR_FREE              = TRUE;
   options.LAKES                 = FALSE;
   options.LAKE_PROFILE          = FALSE;
   options.LW_CLOUD              = LW_CLOUD_DEARDORFF;
@@ -191,9 +194,11 @@ void initialize_global() {
   options.LAI_SRC               = FROM_VEGLIB;
   options.ORGANIC_FRACT         = FALSE;
   options.VEGCOVER_SRC          = FROM_VEGLIB;
+  options.VEGLIB_IRR            = FALSE;
   options.VEGLIB_PHOTO          = FALSE;
   options.VEGLIB_VEGCOVER       = FALSE;
   options.VEGPARAM_ALB          = FALSE;
+  options.VEGPARAM_CROPFRAC     = FALSE;
   options.VEGPARAM_LAI          = FALSE;
   options.VEGPARAM_VEGCOVER     = FALSE;
   // state options
@@ -217,7 +222,7 @@ void initialize_global() {
     param_set.TYPE[j].SIGNED   = 1;
     param_set.TYPE[j].multiplier = 1;
   }
-  for(i=0;i<2;i++) {
+  for(i=0;i<3;i++) {
     param_set.FORCE_DT[i] = MISSING;
     param_set.N_TYPES[i] = MISSING;
     param_set.FORCE_FORMAT[i] = MISSING;

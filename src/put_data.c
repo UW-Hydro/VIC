@@ -267,7 +267,6 @@ int  put_data(all_vars_struct   *all_vars,
 
   // Initialize output data to zero
   zero_output_list(out_data);
-
   // Set output versions of input forcings
   out_data[OUT_AIR_TEMP].data[0]  = atmos->air_temp[NR];
   out_data[OUT_CATM].data[0]      = atmos->Catm[NR]*1e6;
@@ -291,7 +290,8 @@ int  put_data(all_vars_struct   *all_vars,
   out_data[OUT_VP].data[0]        = atmos->vp[NR]/kPa2Pa;
   out_data[OUT_VPD].data[0]       = atmos->vpd[NR]/kPa2Pa;
   out_data[OUT_WIND].data[0]      = atmos->wind[NR];
- 
+  out_data[OUT_IRR_RUN].data[0]   = atmos->irr_run[NR];
+  out_data[OUT_IRR_WITH].data[0]  = atmos->irr_with[NR];
   /****************************************
     Store Output for all Vegetation Types (except lakes)
   ****************************************/
@@ -329,6 +329,8 @@ int  put_data(all_vars_struct   *all_vars,
           ThisAreaFract = 1;
           ThisTreeAdjust = 1;
         }
+
+	//fprintf(stderr,"put_data store output area of this elevationband %f veg %d vegvarirrig %f\n",ThisAreaFract,veg,veg_var[veg][band].irrig);
 
         if(ThisAreaFract > 0. && ( veg == veg_con[0].vegetat_type_num
            || ( !AboveTreeLine[band] || (AboveTreeLine[band] && !overstory)))) {
@@ -597,6 +599,35 @@ int  put_data(all_vars_struct   *all_vars,
     out_data[OUT_DELSURFSTOR].data[0] = out_data[OUT_SURFSTOR].data[0] - save_data->surfstor;
   }
 
+  // Irrigation terms
+  if (options.IRRIGATION) {
+    //fprintf(stderr,"put_data A0 rec%d out_irrig %f out_irr_extract %f out_irr_run %f\n",rec,out_data[OUT_IRRIG].data[0],out_data[OUT_IRR_EXTRACT].data[0],out_data[OUT_IRR_RUN].data[0]);
+    if (out_data[OUT_IRRIG].data[0]-out_data[OUT_IRR_EXTRACT].data[0] < out_data[OUT_IRR_RUN].data[0]) {
+      out_data[OUT_IRR_RUN_USED].data[0] = out_data[OUT_IRRIG].data[0]-out_data[OUT_IRR_EXTRACT].data[0];
+      out_data[OUT_IRR_RUN_UNUSED].data[0] = out_data[OUT_IRR_RUN].data[0]-out_data[OUT_IRR_RUN_USED].data[0];
+      //fprintf(stderr,"put_data A1 rec%d out_irrig %f out_irr_extract %f out_irr_run %f\n",rec,out_data[OUT_IRRIG].data[0],out_data[OUT_IRR_EXTRACT].data[0],out_data[OUT_IRR_RUN].data[0]);
+    }
+    else {
+      out_data[OUT_IRR_RUN_USED].data[0] = out_data[OUT_IRR_RUN].data[0];
+      out_data[OUT_IRR_RUN_UNUSED].data[0] = 0;
+    }
+    if (out_data[OUT_IRRIG].data[0]-out_data[OUT_IRR_EXTRACT].data[0]-out_data[OUT_IRR_RUN_USED].data[0] < out_data[OUT_IRR_WITH].data[0]) {
+      out_data[OUT_IRR_WITH_USED].data[0] = out_data[OUT_IRRIG].data[0]-out_data[OUT_IRR_EXTRACT].data[0]-out_data[OUT_IRR_RUN_USED].data[0];
+      out_data[OUT_IRR_WITH_UNUSED].data[0] = out_data[OUT_IRR_WITH].data[0]-out_data[OUT_IRR_WITH_USED].data[0];
+    }
+    else {
+      out_data[OUT_IRR_WITH_USED].data[0] = out_data[OUT_IRR_WITH].data[0];
+      out_data[OUT_IRR_WITH_UNUSED].data[0] = 0;
+    }
+    if (options.IRR_FREE) {
+      out_data[OUT_IRR_APPLIED].data[0] = out_data[OUT_IRRIG].data[0]-out_data[OUT_IRR_EXTRACT].data[0];
+      //fprintf(stderr,"put_data B1 rec%d %f %f %f\n",rec,out_data[OUT_IRR_APPLIED].data[0],out_data[OUT_IRRIG].data[0],out_data[OUT_IRR_EXTRACT].data[0]);
+    }
+    else {
+      out_data[OUT_IRR_APPLIED].data[0] = out_data[OUT_IRR_RUN_USED].data[0]+out_data[OUT_IRR_WITH_USED].data[0];
+    }
+  }
+
   // Energy terms
   out_data[OUT_REFREEZE].data[0] = (out_data[OUT_RFRZ_ENERGY].data[0]/Lf)*dt_sec;
   out_data[OUT_R_NET].data[0] = out_data[OUT_NET_SHORT].data[0] + out_data[OUT_NET_LONG].data[0];
@@ -621,6 +652,14 @@ int  put_data(all_vars_struct   *all_vars,
     ********************/
   inflow  = out_data[OUT_PREC].data[0] + out_data[OUT_LAKE_CHAN_IN].data[0]; // mm over grid cell
   outflow = out_data[OUT_EVAP].data[0] + out_data[OUT_RUNOFF].data[0] + out_data[OUT_BASEFLOW].data[0]; // mm over grid cell
+  if (options.IRRIGATION) {
+    inflow += out_data[OUT_IRR_APPLIED].data[0]; //orig
+    //fprintf(stderr,"put_data A rec %d inflow %f irr_applied %f\n",rec,inflow,out_data[OUT_IRR_APPLIED].data[0]);
+  }
+  //fprintf(stderr,"put_data L1 rec %d inflow %f storage %f\n",rec,inflow,out_data[OUT_SOIL_LIQ].data[0]+out_data[OUT_SOIL_LIQ].data[1]+out_data[OUT_SOIL_LIQ].data[2]);
+  //fprintf(stderr,"put_data L2 rec %d inflow %f storage %f\n",rec,inflow,out_data[OUT_SOIL_ICE].data[0]+out_data[OUT_SOIL_ICE].data[1]+out_data[OUT_SOIL_ICE].data[2]);
+  //fprintf(stderr,"put_data L3 rec %d inflow %f swe %f\n",rec,inflow,out_data[OUT_SWE].data[0]);
+
   storage = 0.;
   for(index=0;index<options.Nlayer;index++)
     if(options.MOISTFRACT)
@@ -630,7 +669,7 @@ int  put_data(all_vars_struct   *all_vars,
       storage += out_data[OUT_SOIL_LIQ].data[index] + out_data[OUT_SOIL_ICE].data[index];
   storage += out_data[OUT_SWE].data[0] + out_data[OUT_SNOW_CANOPY].data[0] + out_data[OUT_WDEW].data[0] + out_data[OUT_SURFSTOR].data[0];
   out_data[OUT_WATER_ERROR].data[0] = calc_water_balance_error(rec,inflow,outflow,storage);
-  
+  //fprintf(stderr,"put_data M rec %d storage %f\n",rec,storage); 
   /********************
     Check Energy Balance 
   ********************/
@@ -965,6 +1004,19 @@ void collect_wb_terms(cell_data_struct  cell,
     out_data[OUT_CSLOW].data[0] += cell.CSlow * AreaFactor;
 
   }
+
+  /*****************************
+    Record Irrigation Terms 
+  *****************************/
+  if (options.IRRIGATION) {
+    out_data[OUT_IRRIG].data[0] += veg_var.irrig * AreaFactor;
+    out_data[OUT_IRR_EXTRACT].data[0] += cell.irr_extract * AreaFactor;
+    //fprintf(stderr,"put_data A collect wb terms out_irrig %f irrig %f areafactor %f\n",out_data[OUT_IRRIG].data[0],veg_var.irrig,AreaFactor);
+    //fprintf(stderr,"put_data B collect wb terms out_irr_extract %f cell_irr_extract %f areafactor %f\n",out_data[OUT_IRR_EXTRACT].data[0],cell.irr_extract,AreaFactor);
+  }
+
+  if (options.IRRIGATION)
+	out_data[OUT_IRRIG_WITH_PREC].data[0] = out_data[OUT_IRRIG].data[0] + out_data[OUT_PREC].data[0];
 
 }
 

@@ -232,6 +232,18 @@ out_data_struct *create_output_list() {
   strcpy(out_data[OUT_CINTER].varname,"OUT_CINTER");                   /* intermediate pool carbon density [g C/m2] */
   strcpy(out_data[OUT_CSLOW].varname,"OUT_CSLOW");                     /* slow pool carbon density [g C/m2] */
 
+  // Irrigation terms
+  strcpy(out_data[OUT_IRRIG_WITH_PREC].varname, "OUT_IRRIG_WITH_PREC");                     /* Water goes into the field [mm] */
+  strcpy(out_data[OUT_IRRIG].varname,"OUT_IRRIG");                     /* Water needed for irrigation [mm] */
+  strcpy(out_data[OUT_IRR_RUN].varname,"OUT_IRR_RUN");                 /* Water available for irrigation from local stream network [mm] */
+  strcpy(out_data[OUT_IRR_RUN_USED].varname,"OUT_IRR_RUN_USED");       /* Water from local stream network actually used for irrigation [mm] */
+  strcpy(out_data[OUT_IRR_RUN_UNUSED].varname,"OUT_IRR_RUN_UNUSED");   /* Water from local stream network not used for irrigation [mm] */
+  strcpy(out_data[OUT_IRR_WITH].varname,"OUT_IRR_WITH");               /* Water available for irrigation from external withdrawals [mm] */
+  strcpy(out_data[OUT_IRR_WITH_USED].varname,"OUT_IRR_WITH_USED");     /* Water from external withdrawals actually used for irrigation [mm] */
+  strcpy(out_data[OUT_IRR_WITH_UNUSED].varname,"OUT_IRR_WITH_UNUSED"); /* Water from external withdrawals not used for irrigation [mm] */
+  strcpy(out_data[OUT_IRR_EXTRACT].varname,"OUT_IRR_EXTRACT");         /* Water extracted from local runoff and baseflow for irrigation [mm] */
+  strcpy(out_data[OUT_IRR_APPLIED].varname,"OUT_IRR_APPLIED");         /* Water actually used for irrigation [mm] */
+ 
   // Band-specific quantities
   strcpy(out_data[OUT_ADV_SENS_BAND].varname,"OUT_ADV_SENS_BAND");               /* net sensible heat flux advected to snow pack [W/m2] */
   strcpy(out_data[OUT_ADVECTION_BAND].varname,"OUT_ADVECTION_BAND");             /* advected energy [W/m2] */
@@ -383,6 +395,16 @@ out_data_struct *create_output_list() {
   out_data[OUT_SURFT_FBFLAG].aggtype = AGG_TYPE_SUM;
   out_data[OUT_TCAN_FBFLAG].aggtype = AGG_TYPE_SUM;
   out_data[OUT_TFOL_FBFLAG].aggtype = AGG_TYPE_SUM;
+  out_data[OUT_IRRIG].aggtype = AGG_TYPE_SUM;
+  out_data[OUT_IRR_RUN].aggtype = AGG_TYPE_SUM;
+  out_data[OUT_IRR_RUN_USED].aggtype = AGG_TYPE_SUM;
+  out_data[OUT_IRR_RUN_UNUSED].aggtype = AGG_TYPE_SUM;
+  out_data[OUT_IRR_WITH].aggtype = AGG_TYPE_SUM;
+  out_data[OUT_IRR_WITH_USED].aggtype = AGG_TYPE_SUM;
+  out_data[OUT_IRR_WITH_UNUSED].aggtype = AGG_TYPE_SUM;
+  out_data[OUT_IRR_EXTRACT].aggtype = AGG_TYPE_SUM;
+  out_data[OUT_IRR_APPLIED].aggtype = AGG_TYPE_SUM;
+  out_data[OUT_IRRIG_WITH_PREC].aggtype = AGG_TYPE_SUM;
 
   // Allocate space for data
   for (v=0; v<N_OUTVAR_TYPES; v++) {

@@ -205,7 +205,22 @@ void get_force_type(char   *cmdstr,
     type = WIND_N;
   }
 
-  /* type 28: unused (blank) data */
+ /* type 28: fractional area of crops (as opposed to fallow) [fraction] */
+  else if(strcasecmp("CROP_FRAC",optstr)==0){
+    type = CROP_FRAC;
+  }
+
+  /* type 29: water available for irrigation taken from local runoff [mm] */
+  else if(strcasecmp("IRR_RUN",optstr)==0){
+    type = IRR_RUN;
+  }
+
+  /* type 30: water available for irrigation taken from external withdrawals [mm] */
+  else if(strcasecmp("IRR_WITH",optstr)==0){
+    type = IRR_WITH;
+  }
+
+  /* type 31: unused (blank) data */
   else if(strcasecmp("SKIP",optstr)==0){
     type = SKIP;
   }

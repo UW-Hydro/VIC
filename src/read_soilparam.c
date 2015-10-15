@@ -692,6 +692,10 @@ soil_con_struct read_soilparam(FILE *soilparam,
             temp.Wpwp[layer], temp.resid_moist[layer] * temp.depth[layer] * 1000., layer);
             nrerror(ErrStr);
           }
+	  temp.Wcr_orig[layer]=temp.Wcr[layer]; //ingjerd jan 2015
+	  temp.Wpwp_orig[layer]=temp.Wpwp[layer]; //ingjerd jan 2015
+	  temp.Wcr_irrig[layer]=0.557*temp.max_moist[layer]; //ingjerd jan 2015
+	  temp.Wpwp_irrig[layer]=0.436*temp.max_moist[layer]; //ingjerd jan 2015
         }
 
         /**********************************************

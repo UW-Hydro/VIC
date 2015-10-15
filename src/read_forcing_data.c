@@ -62,6 +62,10 @@ double **read_forcing_data(FILE                **infile,
     read_atmos_data(infile[1], global_param, 1, global_param.forceskip[1], 
 		    forcing_data, (*veg_hist_data));
   }
+  if(param_set.FORCE_DT[2] > 0) {
+    read_atmos_data(infile[2], global_param, 2, global_param.forceskip[2], 
+		    forcing_data, (*veg_hist_data));
+  }
 
   return(forcing_data);
 

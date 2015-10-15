@@ -95,6 +95,12 @@ void alloc_atmos(int nrecs, atmos_data_struct **atmos)
     (*atmos)[i].wind = (double *) calloc(NR+1, sizeof(double));
     if ((*atmos)[i].wind == NULL)
       vicerror("Memory allocation error in alloc_atmos().");
+    (*atmos)[i].irr_run = (double *) calloc(NR+1, sizeof(double));
+    if ((*atmos)[i].irr_run == NULL)
+      vicerror("Memory allocation error in alloc_atmos().");
+    (*atmos)[i].irr_with = (double *) calloc(NR+1, sizeof(double));
+    if ((*atmos)[i].irr_with == NULL)
+      vicerror("Memory allocation error in alloc_atmos().");
   }    			
 
 }
@@ -140,6 +146,8 @@ void free_atmos(int nrecs, atmos_data_struct **atmos)
     free((*atmos)[i].vp);
     free((*atmos)[i].vpd);
     free((*atmos)[i].wind);
+    free((*atmos)[i].irr_run);
+    free((*atmos)[i].irr_with);
   }
 
   free(*atmos);

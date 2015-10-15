@@ -22,7 +22,7 @@
   2013-Dec-27 Removed QUICK_FS option.					TJB
   2014-May-20 Added ref_veg_vegcover.					TJB
 **********************************************************************/
-char *version = "4.2.1 2014-December-21";
+char *version = "4.2.1 IRR igh tz 2015";
 char *optstring = "g:vo";
 int flag;
 
@@ -56,6 +56,7 @@ param_set_struct param_set;
   double ref_veg_lai[]         = { 1.0, 1.0, 2.88, 4.45 };
   double ref_veg_albedo[]      = { BARE_SOIL_ALBEDO, H2O_SURF_ALBEDO, 0.23, 0.23 };
   double ref_veg_vegcover[]      = { MIN_VEGCOVER, MIN_VEGCOVER, 1.00, 1.00 };
+  double ref_veg_crop_frac[]   = { 0.0, 0.0, 1.00, 1.00 };
   double ref_veg_rough[]       = { 0.001, 0.001, 0.0148, 0.0615 };
   double ref_veg_displ[]       = { 0.0054, 0.0054, 0.08, 0.3333 };
   double ref_veg_wind_h[]      = { 10.0, 10.0, 10.0, 10.0 };

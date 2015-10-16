@@ -619,7 +619,6 @@ get_global_param(FILE *gp)
             /*************************************
                Define parameter files
             *************************************/
-
             else if (strcasecmp("CONSTANTS", optstr) == 0) {
                 sscanf(cmdstr, "%*s %s", filenames.constants);
             }
@@ -644,8 +643,9 @@ get_global_param(FILE *gp)
                             "NIJSSEN2001\" in your global parameter file.");
                 }
                 else {
-                    log_err("Please change \"ARNO_PARAMS FALSE\" to \"BASEFLOW "
-                            "ARNO\" in your global parameter file.");
+                    log_err(
+                        "Please change \"ARNO_PARAMS FALSE\" to \"BASEFLOW "
+                        "ARNO\" in your global parameter file.");
                 }
             }
             else if (strcasecmp("NIJSSEN2001_BASEFLOW", optstr) == 0) {
@@ -777,6 +777,9 @@ get_global_param(FILE *gp)
             else if (strcasecmp("SKIPYEAR", optstr) == 0) {
                 sscanf(cmdstr, "%*s %hu", &global_param.skipyear);
             }
+            else if (strcasecmp("COORD_DIMS_OUT", optstr) == 0) {
+                sscanf(cmdstr, "%*s %zu", &options.COORD_DIMS_OUT);
+            }
             else if (strcasecmp("COMPRESS", optstr) == 0) {
                 sscanf(cmdstr, "%*s %s", flgstr);
                 if (strcasecmp("TRUE", flgstr) == 0) {
@@ -838,6 +841,9 @@ get_global_param(FILE *gp)
             else if (strcasecmp("N_OUTFILES", optstr) == 0) {
                 ; // do nothing
             }
+            else if (strcasecmp("COORD_DIMS_OUT", optstr) == 0) {
+                ; // do nothing
+            }
             else if (strcasecmp("OUTFILE", optstr) == 0) {
                 ; // do nothing
             }
@@ -858,16 +864,18 @@ get_global_param(FILE *gp)
                Fail when depreciated options are used.
             *************************************/
             else if (strcasecmp("TIME_STEP", optstr) == 0) {
-                log_err("TIME_STEP has been replaced with MODEL_STEPS_PER_DAY, "
-                        "update your global parameter file accordingly");
+                log_err(
+                    "TIME_STEP has been replaced with MODEL_STEPS_PER_DAY, "
+                    "update your global parameter file accordingly");
             }
             else if (strcasecmp("SNOW_STEP", optstr) == 0) {
                 log_err("SNOW_STEP has been replaced with SNOW_STEPS_PER_DAY, "
                         "update your global parameter file accordingly");
             }
             else if (strcasecmp("OUT_STEP", optstr) == 0) {
-                log_err("OUT_STEP has been replaced with OUTPUT_STEPS_PER_DAY, "
-                        "update your global parameter file accordingly");
+                log_err(
+                    "OUT_STEP has been replaced with OUTPUT_STEPS_PER_DAY, "
+                    "update your global parameter file accordingly");
             }
             else if (strcasecmp("FORCE_DT", optstr) == 0) {
                 log_err("FORCE_DT has been replaced with FORCE_STEPS_PER_DAY, "
@@ -878,8 +886,9 @@ get_global_param(FILE *gp)
                Fail when classic driver specific options are used
             *************************************/
             else if (strcasecmp("ATMOS_STEPS_PER_DAY", optstr) == 0) {
-                log_err("ATMOS_STEPS_PER_DAY is not a valid option for this "
-                        "driver.  Update your global parameter file accordingly.");
+                log_err(
+                    "ATMOS_STEPS_PER_DAY is not a valid option for this "
+                    "driver.  Update your global parameter file accordingly.");
             }
             else if (strcasecmp("OUTPUT_FORCE", optstr) == 0) {
                 log_err("OUTPUT_FORCE is not a valid option for this driver.  "
@@ -1102,10 +1111,11 @@ get_global_param(FILE *gp)
         global_param.startsec = 0;
     }
     else if (global_param.startsec > SEC_PER_DAY) {
-        log_err("The specified simulation start second (%u) > 86400  Make sure "
-                "that the global file defines a positive integer "
-                "for STARTSEC.",
-                global_param.startsec);
+        log_err(
+            "The specified simulation start second (%u) > 86400  Make sure "
+            "that the global file defines a positive integer "
+            "for STARTSEC.",
+            global_param.startsec);
     }
 
     // Validate simulation end date and/or number of timesteps

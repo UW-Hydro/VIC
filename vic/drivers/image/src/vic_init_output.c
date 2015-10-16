@@ -33,31 +33,32 @@
  *           write
  *****************************************************************************/
 void
-vic_init_output(void) {
-    extern all_vars_struct *all_vars;
-    extern atmos_data_struct *atmos;
-    extern domain_struct local_domain;
-    extern filep_struct filep;
+vic_init_output(void)
+{
+    extern all_vars_struct    *all_vars;
+    extern atmos_data_struct  *atmos;
+    extern domain_struct       local_domain;
+    extern filep_struct        filep;
     extern global_param_struct global_param;
-    extern MPI_Datatype mpi_nc_file_struct_type;
-    extern int mpi_rank;
-    extern nc_file_struct nc_hist_file;
-    extern nc_var_struct nc_vars[N_OUTVAR_TYPES];
-    extern lake_con_struct lake_con;
-    extern out_data_struct **out_data;
-    extern save_data_struct *save_data;
-    extern soil_con_struct *soil_con;
-    extern veg_con_struct **veg_con;
-    extern veg_lib_struct **veg_lib;
+    extern MPI_Datatype        mpi_nc_file_struct_type;
+    extern int                 mpi_rank;
+    extern nc_file_struct      nc_hist_file;
+    extern nc_var_struct       nc_vars[N_OUTVAR_TYPES];
+    extern lake_con_struct     lake_con;
+    extern out_data_struct   **out_data;
+    extern save_data_struct   *save_data;
+    extern soil_con_struct    *soil_con;
+    extern veg_con_struct    **veg_con;
+    extern veg_lib_struct    **veg_lib;
 
-    int status;
-    size_t i;
+    int                        status;
+    size_t                     i;
 
     // initialize the output data structures
     for (i = 0; i < local_domain.ncells; i++) {
         put_data(&(all_vars[i]), &(atmos[i]), &(soil_con[i]), veg_con[i],
-                veg_lib[i], &lake_con, out_data[i], &(save_data[i]),
-                -global_param.nrecs);
+                 veg_lib[i], &lake_con, out_data[i], &(save_data[i]),
+                 -global_param.nrecs);
     }
 
     if (mpi_rank == 0) {
@@ -71,7 +72,7 @@ vic_init_output(void) {
     // broadcast which variables to write.
     for (i = 0; i < N_OUTVAR_TYPES; i++) {
         status = MPI_Bcast(&out_data[0][i].write, 1, MPI_C_BOOL,
-                0, MPI_COMM_WORLD);
+                           0, MPI_COMM_WORLD);
         if (status != MPI_SUCCESS) {
             log_err("MPI error in vic_init_output(): %d\n", status);
         }
@@ -81,7 +82,7 @@ vic_init_output(void) {
     // but the slave processes need some of the information to initialize as
     // well (particularly which variables to write and dimension sizes)
     status = MPI_Bcast(&nc_hist_file, 1, mpi_nc_file_struct_type,
-            0, MPI_COMM_WORLD);
+                       0, MPI_COMM_WORLD);
     if (status != MPI_SUCCESS) {
         log_err("MPI error in vic_init_output(): %d\n", status);
     }
@@ -94,13 +95,15 @@ vic_init_output(void) {
  * @brief    Initialize history files
  *****************************************************************************/
 void
-initialize_history_file(nc_file_struct *nc) {
-    extern filenames_struct filenames;
-    extern domain_struct global_domain;
-    extern option_struct options;
+initialize_history_file(nc_file_struct *nc)
+{
+    extern filenames_struct    filenames;
+    extern domain_struct       global_domain;
+    extern option_struct       options;
+    extern global_param_struct global_param;
 
-    int status;
-    int old_fill_mode;
+    int                        status;
+    int                        old_fill_mode;
 
     sprintf(nc->fname, "%s", filenames.result_dir);
 
@@ -135,36 +138,34 @@ initialize_history_file(nc_file_struct *nc) {
 
     // define netcdf dimensions
     status = nc_def_dim(nc->nc_id, "snow_band", nc->band_size,
-            &(nc->band_dimid));
+                        &(nc->band_dimid));
     if (status != NC_NOERR) {
         log_err("Error defining snow_band dimenension in %s", nc->fname);
     }
 
     status = nc_def_dim(nc->nc_id, "front", nc->front_size,
-            &(nc->front_dimid));
+                        &(nc->front_dimid));
     if (status != NC_NOERR) {
         log_err("Error defining front dimenension in %s", nc->fname);
     }
 
     status = nc_def_dim(nc->nc_id, "frost_area", nc->frost_size,
-            &(nc->frost_dimid));
+                        &(nc->frost_dimid));
     if (status != NC_NOERR) {
         log_err("Error defining frost_area dimenension in %s", nc->fname);
     }
 
     status = nc_def_dim(nc->nc_id, "nlayer", nc->layer_size,
-            &(nc->layer_dimid));
+                        &(nc->layer_dimid));
     if (status != NC_NOERR) {
         log_err("Error defining nlayer dimenension in %s", nc->fname);
     }
 
-    //    status = nc_def_dim(nc->nc_id, "ni", nc->ni_size, &(nc->ni_dimid));
     status = nc_def_dim(nc->nc_id, "lon", nc->ni_size, &(nc->ni_dimid));
     if (status != NC_NOERR) {
         log_err("Error defining ni dimenension in %s", nc->fname);
     }
 
-    //    status = nc_def_dim(nc->nc_id, "nj", nc->nj_size, &(nc->nj_dimid));
     status = nc_def_dim(nc->nc_id, "lat", nc->nj_size, &(nc->nj_dimid));
     if (status != NC_NOERR) {
         log_err("Error defining nj dimenension in %s", nc->fname);
@@ -176,19 +177,19 @@ initialize_history_file(nc_file_struct *nc) {
     }
 
     status = nc_def_dim(nc->nc_id, "root_zone", nc->root_zone_size,
-            &(nc->root_zone_dimid));
+                        &(nc->root_zone_dimid));
     if (status != NC_NOERR) {
         log_err("Error defining root_zone dimenension in %s", nc->fname);
     }
 
     status = nc_def_dim(nc->nc_id, "veg_class", nc->veg_size,
-            &(nc->veg_dimid));
+                        &(nc->veg_dimid));
     if (status != NC_NOERR) {
         log_err("Error defining veg_class dimenension in %s", nc->fname);
     }
 
     status = nc_def_dim(nc->nc_id, "time", nc->time_size,
-            &(nc->time_dimid));
+                        &(nc->time_dimid));
     if (status != NC_NOERR) {
         log_err("Error defining time dimenension in %s", nc->fname);
     }
@@ -196,45 +197,119 @@ initialize_history_file(nc_file_struct *nc) {
     // 1D TIME
     int time_var_id;
     status = nc_def_var(nc->nc_id, "time", NC_INT, 1,
-            &(nc->time_dimid), &(time_var_id));
+                        &(nc->time_dimid), &(time_var_id));
     if (status != NC_NOERR) {
-        log_err("Error defining time dimenension in %s", nc->fname);
+        log_err("Error defining time variable in %s", nc->fname);
     }
-
     status = nc_put_att_text(nc->nc_id, time_var_id, "standard_name",
-            strlen("time"), "time");
-    status = nc_put_att_text(nc->nc_id, time_var_id, "units",
-            strlen("days since 1971-01-01 00:00:00"), "days since 1971-01-01 00:00:00");
-    status = nc_put_att_text(nc->nc_id, time_var_id, "calendar",
-            strlen("standard"), "standard");
-   
-   // 1D LON
-    int lon_var_id;
-    status = nc_def_var(nc->nc_id, "lon", NC_DOUBLE, 1,
-            &(nc->ni_dimid), &(lon_var_id));
+                             strlen("time"), "time");
     if (status != NC_NOERR) {
-        log_err("Error defining time dimenension in %s", nc->fname);
+        log_err("Error adding attribute in %s", nc->fname);
     }
-    status = nc_put_att_text(nc->nc_id, lon_var_id, "long_name",
-            strlen("longitude"), "longitude");
-    status = nc_put_att_text(nc->nc_id, lon_var_id, "units",
-            strlen("degrees_east"), "degrees_east");
-    status = nc_put_att_text(nc->nc_id, lon_var_id, "standard_name",
-            strlen("longitude"), "longitude");
+    char  str[100];
+    char *strUnit;
+    if (global_param.output_steps_per_day == 1) {
+        strUnit = "days";
+    }
+    else {
+        strUnit = "hours";
+    }
+    sprintf(str, "%s since %i-%02i-%02i 00:00:00", strUnit,
+            global_param.startyear, global_param.startmonth,
+            global_param.startday);
 
-    // 1D LAT
-    int lat_var_id;
-    status = nc_def_var(nc->nc_id, "lat", NC_DOUBLE, 1,
-            &(nc->nj_dimid), &(lat_var_id));
+    status = nc_put_att_text(nc->nc_id, time_var_id, "units",
+                             strlen(str), str);
     if (status != NC_NOERR) {
-        log_err("Error defining time dimenension in %s", nc->fname);
+        log_err("Error adding attribute in %s", nc->fname);
+    }
+    status = nc_put_att_text(nc->nc_id, time_var_id, "calendar",
+                             strlen("standard"), "standard");
+    if (status != NC_NOERR) {
+        log_err("Error adding attribute in %s", nc->fname);
+    }
+
+    int     dimids[MAXDIMS];
+
+    size_t  ndims;
+    size_t  dcount[MAXDIMS];
+    size_t  dstart[MAXDIMS];
+    int     lon_var_id;
+    int     lat_var_id;
+    size_t  i;
+    double *dvar;
+
+    ndims = options.COORD_DIMS_OUT;
+    dstart[0] = 0;
+    dstart[1] = 0;
+
+    // LON
+    if (options.COORD_DIMS_OUT == 1) {
+        dimids[0] = nc->ni_dimid;
+
+        dcount[0] = nc->ni_size;
+    }
+    else if (options.COORD_DIMS_OUT == 2) {
+        dimids[0] = nc->nj_dimid;
+        dcount[0] = nc->nj_size;
+
+        dimids[1] = nc->ni_dimid;
+        dcount[1] = nc->ni_size;
+    }
+    else {
+        log_err("COORD_DIMS_OUT should be 1 or 2");
+    }
+
+    // LON
+    status = nc_def_var(nc->nc_id, "lon", NC_DOUBLE, ndims,
+                        dimids, &(lon_var_id));
+    if (status != NC_NOERR) {
+        log_err("Error defining lon variable in %s", nc->fname);
+    }
+
+    status = nc_put_att_text(nc->nc_id, lon_var_id, "long_name",
+                             strlen("longitude"), "longitude");
+    if (status != NC_NOERR) {
+        log_err("Error adding attribute in %s", nc->fname);
+    }
+    status = nc_put_att_text(nc->nc_id, lon_var_id, "units",
+                             strlen("degrees_east"), "degrees_east");
+    if (status != NC_NOERR) {
+        log_err("Error adding attribute in %s", nc->fname);
+    }
+    status = nc_put_att_text(nc->nc_id, lon_var_id, "standard_name",
+                             strlen("longitude"), "longitude");
+    if (status != NC_NOERR) {
+        log_err("Error adding attribute in %s", nc->fname);
+    }
+
+    if (options.COORD_DIMS_OUT == 1) {
+        dimids[0] = nc->nj_dimid;
+        dcount[0] = nc->nj_size;
+    }
+
+    // LAT
+    status = nc_def_var(nc->nc_id, "lat", NC_DOUBLE, ndims,
+                        dimids, &(lat_var_id));
+    if (status != NC_NOERR) {
+        log_err("Error defining lat variable in %s", nc->fname);
     }
     status = nc_put_att_text(nc->nc_id, lat_var_id, "long_name",
-            strlen("latitude"), "latitude");
+                             strlen("latitude"), "latitude");
+    if (status != NC_NOERR) {
+        log_err("Error adding attribute in %s", nc->fname);
+    }
     status = nc_put_att_text(nc->nc_id, lat_var_id, "units",
-            strlen("degrees_north"), "degrees_north");
+                             strlen("degrees_north"), "degrees_north");
+    if (status != NC_NOERR) {
+        log_err("Error adding attribute in %s", nc->fname);
+    }
     status = nc_put_att_text(nc->nc_id, lat_var_id, "standard_name",
-            strlen("latitude"), "latitude");
+                             strlen("latitude"), "latitude");
+    if (status != NC_NOERR) {
+        log_err("Error adding attribute in %s", nc->fname);
+    }
+
 
     // leave define mode
     status = nc_enddef(nc->nc_id);
@@ -242,16 +317,57 @@ initialize_history_file(nc_file_struct *nc) {
         log_err("Error leaving define mode for %s", nc->fname);
     }
 
-    size_t dcount[MAXDIMS];
-    size_t dstart[MAXDIMS];
+    if (options.COORD_DIMS_OUT == 1) {
+        dvar = (double *) malloc(nc->ni_size * sizeof(double));
 
-    dstart[0] = 0;
-    dcount[0] = nc->ni_size;
-    double var_lon[5] = {-121.0625, -120.9375, -120.8125, -120.6875, -120.5625};
-    status = nc_put_vara_double(nc->nc_id, lon_var_id, dstart, dcount, var_lon);
+        dcount[0] = nc->ni_size;
+        for (i = 0; i < nc->ni_size; i++) {
+            dvar[i] = (double) global_domain.locations_grid[i].longitude;
+        }
+        status = nc_put_vara_double(nc->nc_id, lon_var_id, dstart, dcount, dvar);
+        if (status != NC_NOERR) {
+            log_err("Error adding data to lon in %s", nc->fname);
+        }
+        free(dvar);
 
-    dstart[0] = 0;
-    dcount[0] = nc->nj_size;
-    double var_lat[4] = {48.1875, 48.3125, 48.4375, 48.5625};
-    status = nc_put_vara_double(nc->nc_id, lat_var_id, dstart, dcount, var_lat);
+        dvar = (double *) malloc(nc->nj_size * sizeof(double));
+        dcount[0] = nc->nj_size;
+        for (i = 0; i < nc->nj_size; i++) {
+            dvar[i] =
+                (double) global_domain.locations_grid[i +
+                                                      (i *
+                                                       (nc->ni_size -
+                                                        1))].latitude;
+        }
+
+        status = nc_put_vara_double(nc->nc_id, lat_var_id, dstart, dcount, dvar);
+        if (status != NC_NOERR) {
+            log_err("Error adding data to lon in %s", nc->fname);
+        }
+        free(dvar);
+    }
+    else if (options.COORD_DIMS_OUT == 2) {
+        dvar = (double *) malloc(nc->nj_size * nc->ni_size * sizeof(double));
+
+        for (i = 0; i < nc->nj_size * nc->ni_size; i++) {
+            dvar[i] = (double) global_domain.locations_grid[i].longitude;
+        }
+        status = nc_put_vara_double(nc->nc_id, lon_var_id, dstart, dcount, dvar);
+        if (status != NC_NOERR) {
+            log_err("Error adding data to lon in %s", nc->fname);
+        }
+
+        for (i = 0; i < nc->nj_size * nc->ni_size; i++) {
+            dvar[i] = (double) global_domain.locations_grid[i].latitude;
+        }
+        status = nc_put_vara_double(nc->nc_id, lat_var_id, dstart, dcount, dvar);
+        if (status != NC_NOERR) {
+            log_err("Error adding data to lat in %s", nc->fname);
+        }
+
+        free(dvar);
+    }
+    else {
+        log_err("COORD_DIMS_OUT should be 1 or 2");
+    }
 }

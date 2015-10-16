@@ -714,6 +714,7 @@ typedef struct {
     bool COMPRESS;       /**< TRUE = Compress all output files */
     bool MOISTFRACT;     /**< TRUE = output soil moisture as fractional moisture content */
     size_t Noutfiles;    /**< Number of output files (not including state files) */
+    size_t COORD_DIMS_OUT;    /**< Number of output dimensions for lat and lon variables. COORD_DIMS_OUT 1 = lon(lon), lat(lat). COORD_DIMS_OUT 2 = lon(xc, yc), lat(xc, yc) */
     bool OUTPUT_FORCE;   /**< TRUE = perform disaggregation of forcings, skip
                             the simulation, and output the disaggregated
                             forcings. */

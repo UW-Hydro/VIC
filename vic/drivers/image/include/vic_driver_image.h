@@ -53,6 +53,13 @@ typedef struct {
     size_t local_idx; /**< index of grid cell in local list of grid cells */
 } location_struct;
 
+/******************************************************************************
+ * @brief    Structure to store location information for unmasked lats and lons.
+ *****************************************************************************/
+typedef struct {
+    double latitude; /**< latitude of grid cell center */
+    double longitude; /**< longitude of grid cell center */
+} location_grid_struct;
 
 /******************************************************************************
  * @brief    Structure to store local and global domain information. If the
@@ -63,6 +70,7 @@ typedef struct {
     size_t n_nx; /**< size of x-index; */
     size_t n_ny; /**< size of y-index */
     location_struct *locations; /**< locations structs for local domain */
+    location_grid_struct *locations_grid; /**< locations structs for full unmasked latlon domain */
 } domain_struct;
 
 /******************************************************************************
@@ -141,20 +149,26 @@ size_t get_global_domain(char *fname, domain_struct *global_domain);
 void get_global_param(FILE *);
 size_t get_nc_dimension(char *nc_name, char *dim_name);
 int get_nc_field_double(char *nc_name, char *var_name, size_t *start,
-                        size_t *count, double *var);
+                        size_t *count,
+                        double *var);
 int get_nc_field_float(char *nc_name, char *var_name, size_t *start,
-                       size_t *count, float *var);
+                       size_t *count,
+                       float *var);
 int get_nc_field_int(char *nc_name, char *var_name, size_t *start,
-                     size_t *count, int *var);
+                     size_t *count,
+                     int *var);
 void init_output_list(out_data_struct *out_data, int write, char *format,
-                      int type, double mult);
+                      int type,
+                      double mult);
 void initialize_domain(domain_struct *domain);
 void initialize_energy(energy_bal_struct **energy, size_t nveg);
 void initialize_history_file(nc_file_struct *nc);
 void initialize_location(location_struct *location);
+void initialize_location_grid(location_grid_struct *location_grid);
 int initialize_model_state(all_vars_struct *all_vars, size_t Nveg,
                            size_t Nnodes, double surf_temp,
-                           soil_con_struct *soil_con, veg_con_struct *veg_con);
+                           soil_con_struct *soil_con,
+                           veg_con_struct *veg_con);
 void initialize_soil_con(soil_con_struct *soil_con);
 void initialize_state_file(nc_file_struct *nc);
 void initialize_veg_con(veg_con_struct *veg_con);
@@ -168,10 +182,12 @@ void print_nc_var(nc_var_struct *nc_var, size_t ndims);
 void print_veg_con_map(veg_con_map_struct *veg_con_map);
 int put_nc_field_double(char *nc_name, bool *open, int *nc_id, double fillval,
                         int *dimids, int ndims, char *var_name, size_t *start,
-                        size_t *count, double *var);
+                        size_t *count,
+                        double *var);
 int put_nc_field_int(char *nc_name, bool *open, int *nc_id, int fillval,
                      int *dimids, int ndims, char *var_name, size_t *start,
-                     size_t *count, int *var);
+                     size_t *count,
+                     int *var);
 double q_to_vp(double q, double p);
 void sprint_location(char *str, location_struct *loc);
 void vic_alloc(void);
@@ -187,6 +203,7 @@ void vic_start(void);
 void vic_store(void);
 void vic_write(void);
 char will_it_snow(double *t, double t_offset, double max_snow_temp,
-                  double *prcp, size_t n);
+                  double *prcp,
+                  size_t n);
 
 #endif

@@ -83,6 +83,18 @@ get_global_domain(char          *nc_name,
         initialize_location(&(global_domain->locations[i]));
     }
 
+    // if MASTER_PROC
+    global_domain->locations_grid = (location_grid_struct *)
+                                    malloc(
+        global_domain->n_ny * global_domain->n_nx *
+        sizeof(location_grid_struct));
+    if (global_domain->locations_grid == NULL) {
+        log_err("Memory allocation error in get_global_domain().");
+    }
+    for (i = 0; i < global_domain->n_ny * global_domain->n_nx; i++) {
+        initialize_location_grid(&(global_domain->locations_grid[i]));
+    }
+
     // allocate memory for variables
     var = (double *) malloc(global_domain->n_ny * global_domain->n_nx *
                             sizeof(double));
@@ -123,12 +135,22 @@ get_global_domain(char          *nc_name,
         global_domain->locations[i].longitude = (double) var[idx[i]];
     }
 
+    // get longitude for unmasked grid
+    for (i = 0; i < global_domain->n_ny * global_domain->n_nx; i++) {
+        global_domain->locations_grid[i].longitude = (double) var[i];
+    }
+
     // get latitude
     // TBD: read var id from file
     get_nc_field_double(nc_name, "yc",
                         d2start, d2count, var);
     for (i = 0; i < global_domain->ncells; i++) {
         global_domain->locations[i].latitude = (double) var[idx[i]];
+    }
+
+    // get latitude for unmasked grid
+    for (i = 0; i < global_domain->n_ny * global_domain->n_nx; i++) {
+        global_domain->locations_grid[i].latitude = (double) var[i];
     }
 
     // get area
@@ -183,6 +205,16 @@ initialize_location(location_struct *location)
     location->global_idx = 0;
     location->io_idx = 0;
     location->local_idx = 0;
+}
+
+/******************************************************************************
+ * @brief    Initialize location_grid structure.
+ *****************************************************************************/
+void
+initialize_location_grid(location_grid_struct *location_grid)
+{
+    location_grid->latitude = 0;
+    location_grid->longitude = 0;
 }
 
 /******************************************************************************

@@ -33,138 +33,133 @@
  *           double
  *****************************************************************************/
 void
-vic_write(void) {
-    extern out_data_struct **out_data;
-    extern domain_struct global_domain;
-    extern domain_struct local_domain;
-    extern nc_file_struct nc_hist_file;
-    extern nc_var_struct nc_vars[N_OUTVAR_TYPES];
-    extern size_t current;
-    int dimids[MAXDIMS];
-    size_t i;
-    size_t j;
-    size_t k;
-    size_t grid_size;
-    size_t ndims;
-    double *dvar = NULL;
-    size_t dcount[MAXDIMS];
-    size_t dstart[MAXDIMS];
+vic_write(void)
+{
+    extern out_data_struct   **out_data;
+    extern domain_struct       global_domain;
+    extern domain_struct       local_domain;
+    extern nc_file_struct      nc_hist_file;
+    extern nc_var_struct       nc_vars[N_OUTVAR_TYPES];
+    extern size_t              current;
+    extern global_param_struct global_param;
 
-    grid_size = global_domain.n_ny * global_domain.n_nx;
+    int                        dimids[MAXDIMS];
+    size_t                     i;
+    size_t                     j;
+    size_t                     k;
+    size_t                     grid_size;
+    size_t                     ndims;
+    double                    *dvar = NULL;
+    size_t                     dcount[MAXDIMS];
+    size_t                     dstart[MAXDIMS];
+    int                        nc_time;
+    
+    if ((current +
+         1) %
+        (global_param.model_steps_per_day /
+         global_param.output_steps_per_day) ==
+        0) {
+        // get start location in NetCDF file for current timestep.
+        nc_time =
+            ((current +
+              1) /
+             (global_param.model_steps_per_day /
+         global_param.output_steps_per_day)) - 1;
 
-    // allocate memory for variables to be stored
-    dvar = (double *) malloc(local_domain.ncells * sizeof (double));
-    if (dvar == NULL) {
-        log_err("Memory allocation error in vic_write().");
-    }
+        grid_size = global_domain.n_ny * global_domain.n_nx;
 
-    // set missing values
-    for (i = 0; i < local_domain.ncells; i++) {
-        dvar[i] = nc_hist_file.d_fillvalue;
-    }
-
-    // initialize dimids to invalid values - helps debugging
-    for (i = 0; i < MAXDIMS; i++) {
-        dimids[i] = -1;
-        dstart[i] = -1;
-        dcount[i] = -1;
-    }
-
-    for (k = 0; k < N_OUTVAR_TYPES; k++) {
-        if (!nc_vars[k].nc_write) {
-            continue;
+        // allocate memory for variables to be stored
+        dvar = (double *) malloc(local_domain.ncells * sizeof(double));
+        if (dvar == NULL) {
+            log_err("Memory allocation error in vic_write().");
         }
-        ndims = nc_vars[k].nc_dims;
-        for (j = 0; j < ndims; j++) {
-            dimids[j] = nc_vars[k].nc_dimids[j];
-            dstart[j] = 0;
-            dcount[j] = 1;
+
+        // set missing values
+        for (i = 0; i < local_domain.ncells; i++) {
+            dvar[i] = nc_hist_file.d_fillvalue;
         }
-        // The size of the last two dimensions are the grid size; files are
-        // written one slice at a time, so all counts are 1, except the last
-        // two
-        for (j = ndims - 2; j < ndims; j++) {
-            dcount[j] = nc_vars[k].nc_counts[j];
+
+        // initialize dimids to invalid values - helps debugging
+        for (i = 0; i < MAXDIMS; i++) {
+            dimids[i] = -1;
+            dstart[i] = -1;
+            dcount[i] = -1;
         }
-        dstart[0] = current;
-        for (j = 0; j < out_data[0][k].nelem; j++) {
-            // if there is more than one layer, then dstart needs to advance
-            dstart[1] = j;
-            for (i = 0; i < local_domain.ncells; i++) {
-                dvar[i] = (double) out_data[i][k].aggdata[j];
+
+        for (k = 0; k < N_OUTVAR_TYPES; k++) {
+            if (!nc_vars[k].nc_write) {
+                continue;
             }
-            gather_put_nc_field_double(nc_hist_file.fname, &(nc_hist_file.open),
-                    &(nc_hist_file.nc_id),
-                    nc_hist_file.d_fillvalue,
-                    dimids, ndims, nc_vars[k].nc_var_name,
-                    dstart, dcount, dvar);
-            for (i = 0; i < local_domain.ncells; i++) {
-                dvar[i] = nc_hist_file.d_fillvalue;
+            ndims = nc_vars[k].nc_dims;
+            for (j = 0; j < ndims; j++) {
+                dimids[j] = nc_vars[k].nc_dimids[j];
+                dstart[j] = 0;
+                dcount[j] = 1;
+            }
+            // The size of the last two dimensions are the grid size; files are
+            // written one slice at a time, so all counts are 1, except the last
+            // two
+            for (j = ndims - 2; j < ndims; j++) {
+                dcount[j] = nc_vars[k].nc_counts[j];
+            }
+            dstart[0] = nc_time;
+            for (j = 0; j < out_data[0][k].nelem; j++) {
+                // if there is more than one layer, then dstart needs to advance
+                dstart[1] = j;
+                for (i = 0; i < local_domain.ncells; i++) {
+                    dvar[i] = (double) out_data[i][k].aggdata[j];
+                }
+                gather_put_nc_field_double(nc_hist_file.fname,
+                                           &(nc_hist_file.open),
+                                           &(nc_hist_file.nc_id),
+                                           nc_hist_file.d_fillvalue,
+                                           dimids, ndims,
+                                           nc_vars[k].nc_var_name,
+                                           dstart, dcount,
+                                           dvar);
+                for (i = 0; i < local_domain.ncells; i++) {
+                    dvar[i] = nc_hist_file.d_fillvalue;
+                }
+            }
+
+            // reset dimids to invalid values - helps debugging
+            for (j = 0; j < MAXDIMS; j++) {
+                dimids[j] = -1;
+                dstart[j] = -1;
+                dcount[j] = -1;
             }
         }
 
-        // reset dimids to invalid values - helps debugging
-        for (j = 0; j < MAXDIMS; j++) {
-            dimids[j] = -1;
-            dstart[j] = -1;
-            dcount[j] = -1;
-        }
-    }
-
-    // reset the agg data
-    for (k = 0; k < N_OUTVAR_TYPES; k++) {
-        for (j = 0; j < out_data[0][k].nelem; j++) {
-            for (i = 0; i < local_domain.ncells; i++) {
-                out_data[i][k].aggdata[j] = 0;
+        // reset the agg data
+        for (k = 0; k < N_OUTVAR_TYPES; k++) {
+            for (j = 0; j < out_data[0][k].nelem; j++) {
+                for (i = 0; i < local_domain.ncells; i++) {
+                    out_data[i][k].aggdata[j] = 0;
+                }
             }
         }
+
+        // ADD Time variable
+        ndims = 1;
+        dimids[0] = nc_hist_file.time_dimid;
+        dstart[0] = nc_time;
+        dcount[0] = 1;
+
+        if (global_param.output_steps_per_day == 1) {
+            dvar[0] = (double) (current + 1) / 24 - 1;
+        }
+        else {
+            dvar[0] = (double) current;
+        }
+
+        // write to file
+        put_nc_field_double(nc_hist_file.fname, &(nc_hist_file.open),
+                            &(nc_hist_file.nc_id),
+                            nc_hist_file.d_fillvalue,
+                            dimids, ndims, "time",
+                            dstart, dcount, dvar);
+
+        // free memory
+        free(dvar);
     }
-
-//    //ADD LON LAT VARS
-//    ndims = 2;
-//    dimids[0] = nc_hist_file.nj_dimid;
-//    dstart[0] = 0;
-//    dcount[0] = nc_hist_file.nj_size;
-//
-//    dimids[1] = nc_hist_file.ni_dimid;
-//    dstart[1] = 0;
-//    dcount[1] = nc_hist_file.ni_size;
-//
-//    for (i = 0; i < local_domain.ncells; i++) {
-//        dvar[i] = (double) local_domain.locations[i].longitude;
-//    }
-//
-//    gather_put_nc_field_double(nc_hist_file.fname, &(nc_hist_file.open),
-//            &(nc_hist_file.nc_id),
-//            nc_hist_file.d_fillvalue,
-//            dimids, ndims, "nav_lon",
-//            dstart, dcount, dvar);
-//
-//    for (i = 0; i < local_domain.ncells; i++) {
-//        dvar[i] = (double) local_domain.locations[i].latitude;
-//    }
-//
-//    gather_put_nc_field_double(nc_hist_file.fname, &(nc_hist_file.open),
-//            &(nc_hist_file.nc_id),
-//            nc_hist_file.d_fillvalue,
-//            dimids, ndims, "nav_lat",
-//            dstart, dcount, dvar);
-//   
-    //ADD Time var
-    ndims = 1;
-    dimids[0] = nc_hist_file.time_dimid;
-    dstart[0] = current;
-    dcount[0] = 1;
-
-    dvar[0] = (double) current;
-
-    // write to file
-    put_nc_field_double(nc_hist_file.fname, &(nc_hist_file.open),
-            &(nc_hist_file.nc_id),
-            nc_hist_file.d_fillvalue,
-            dimids, ndims, "time",
-            dstart, dcount, dvar);
-
-    // free memory
-    free(dvar);
 }

@@ -7,7 +7,8 @@ from vic.vic import ffi
 from vic import lib as vic_lib
 
 try:
-    from netcdftime import netcdftime, utime, JulianDayFromDate
+    from netcdftime import (netcdftime, utime, JulianDayFromDate,
+                            DateFromJulianDay)
     from netcdftime.netcdftime import (_NoLeapDayFromDate,
                                        _AllLeapFromDate, _360DayFromDate)
     nctime_unavailable = False
@@ -80,7 +81,6 @@ def dmy_now(scope='function'):
 
 
 def test_fractional_day_from_dmy(dmy_feb_3_noon):
-    vic_lib.print_dmy(dmy_feb_3_noon)
     frac_day = vic_lib.fractional_day_from_dmy(dmy_feb_3_noon)
     assert frac_day == 3.5
 
@@ -145,12 +145,31 @@ def test_dmy_julian_day():
 
 
 @pytest.mark.skipif(nctime_unavailable, reason=nc_reason)
+def test_dmy_julian_day_timeseries():
+    # Regression test for GH298
+    jday = JulianDayFromDate(datetime.datetime(1980, 1, 1))
+    dt = np.float(1./24.)  # hourly timestep
+
+    dmy_struct = ffi.new("dmy_struct *")
+
+    # for cal in ['julian', 'standard', 'gregorian', 'proleptic_gregorian']:
+    for cal in ['standard']:
+        cal_num = calendars[cal]
+        for i in range(30):
+            expected = DateFromJulianDay(jday, calendar=cal)
+            vic_lib.dmy_julian_day(jday, cal_num, dmy_struct)
+            actual = dmy_to_datetime(dmy_struct)
+            # assert that the difference is less than one second
+            assert abs(expected - actual) < datetime.timedelta(seconds=1)
+            jday += dt
+
+
+@pytest.mark.skipif(nctime_unavailable, reason=nc_reason)
 def test_dmy_no_leap_day():
     dmy_struct = ffi.new("dmy_struct *")
     now = datetime.datetime.now()
     now_jd = _NoLeapDayFromDate(now)
     vic_lib.dmy_no_leap_day(now_jd, dmy_struct)
-    vic_lib.print_dmy(dmy_struct)
     actual = dmy_to_datetime(dmy_struct)
     # assert that the difference is less than one second
     assert abs(now - actual) < datetime.timedelta(seconds=1)
@@ -162,7 +181,6 @@ def test_dmy_all_leap():
     now = datetime.datetime.now()
     now_jd = _AllLeapFromDate(now)
     vic_lib.dmy_all_leap(now_jd, dmy_struct)
-    vic_lib.print_dmy(dmy_struct)
     actual = dmy_to_datetime(dmy_struct)
     # assert that the difference is less than one second
     assert abs(now - actual) < datetime.timedelta(seconds=1)
@@ -174,7 +192,6 @@ def test_dmy_all_30_day():
     now = datetime.datetime.now()
     now_jd = _360DayFromDate(now)
     vic_lib.dmy_all_30_day(now_jd, dmy_struct)
-    vic_lib.print_dmy(dmy_struct)
     actual = dmy_to_datetime(dmy_struct)
     # assert that the difference is less than one second
     assert abs(now - actual) < datetime.timedelta(seconds=1)
@@ -197,36 +214,30 @@ def test_num2date():
             assert abs(date - actual) < datetime.timedelta(seconds=1)
 
 
-@pytest.mark.xfail
 @pytest.mark.skipif(nctime_unavailable, reason=nc_reason)
 def test_make_lastday():
     # wasn't able to map lastday to a numpy array, don't know why...
-    lastday = ffi.new('unsigned short int []', [0] * 12)
+    lastday = ffi.new('unsigned short int [12]', [0] * 12)
     for year in np.arange(1900, 2100):
         for cal in ['standard', 'gregorian', 'proleptic_gregorian']:
             vic_lib.make_lastday(calendars[cal], year, lastday)
             cal_dpm = [calendar.monthrange(year, month)[1] for month in
                        np.arange(1, 13)]
-            print(year, cal, cal_dpm, list(lastday))
             np.testing.assert_equal(cal_dpm, list(lastday))
         for cal in ['noleap', '365_day']:
-            vic_lib.make_lastday(calendars[cal], year,
-                                 ffi.addressof(lastday).ctypes.data)
+            vic_lib.make_lastday(calendars[cal], year, lastday)
             cal_dpm = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31]
             np.testing.assert_equal(cal_dpm, list(lastday))
         for cal in ['all_leap', '366_day']:
-            vic_lib.make_lastday(calendars[cal], year,
-                                 ffi.addressof(lastday).ctypes.data)
+            vic_lib.make_lastday(calendars[cal], year, lastday)
             cal_dpm = [31, 29, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31]
-            np.testing.assert_equal(cal_dpm, lastday)
-        for cal in ['all_leap', '366_day']:
-            vic_lib.make_lastday(calendars[cal], year,
-                                 ffi.addressof(lastday).ctypes.data)
+            np.testing.assert_equal(cal_dpm, list(lastday))
+        for cal in ['360_day']:
+            vic_lib.make_lastday(calendars[cal], year, lastday)
             cal_dpm = [30] * 12
             np.testing.assert_equal(cal_dpm, list(lastday))
 
 
-@pytest.mark.xfail
 @pytest.mark.skipif(nctime_unavailable, reason=nc_reason)
 def test_initialize_time():
     # default

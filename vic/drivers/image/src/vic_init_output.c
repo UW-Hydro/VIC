@@ -105,6 +105,19 @@ initialize_history_file(nc_file_struct *nc)
     int                        status;
     int                        old_fill_mode;
 
+    char                       str[100];
+    char                       strUnit[6];
+
+    size_t                     i;
+    size_t                     ndims;
+    size_t                     dcount[MAXDIMS];
+    size_t                     dstart[MAXDIMS];
+    int                        dimids[MAXDIMS];
+    int                        time_var_id;
+    int                        lon_var_id;
+    int                        lat_var_id;
+    double                    *dvar;
+
     sprintf(nc->fname, "%s", filenames.result_dir);
 
     nc->c_fillvalue = NC_FILL_CHAR;
@@ -194,8 +207,7 @@ initialize_history_file(nc_file_struct *nc)
         log_err("Error defining time dimenension in %s", nc->fname);
     }
 
-    // 1D TIME
-    int time_var_id;
+    // define the netcdf variable time
     status = nc_def_var(nc->nc_id, "time", NC_INT, 1,
                         &(nc->time_dimid), &(time_var_id));
     if (status != NC_NOERR) {
@@ -206,13 +218,11 @@ initialize_history_file(nc_file_struct *nc)
     if (status != NC_NOERR) {
         log_err("Error adding attribute in %s", nc->fname);
     }
-    char  str[100];
-    char *strUnit;
     if (global_param.output_steps_per_day == 1) {
-        strUnit = "days";
+        sprintf(strUnit, "days");
     }
     else {
-        strUnit = "hours";
+        sprintf(strUnit, "hours");
     }
     sprintf(str, "%s since %i-%02i-%02i 00:00:00", strUnit,
             global_param.startyear, global_param.startmonth,
@@ -229,21 +239,10 @@ initialize_history_file(nc_file_struct *nc)
         log_err("Error adding attribute in %s", nc->fname);
     }
 
-    int     dimids[MAXDIMS];
-
-    size_t  ndims;
-    size_t  dcount[MAXDIMS];
-    size_t  dstart[MAXDIMS];
-    int     lon_var_id;
-    int     lat_var_id;
-    size_t  i;
-    double *dvar;
-
     ndims = options.COORD_DIMS_OUT;
     dstart[0] = 0;
     dstart[1] = 0;
 
-    // LON
     if (options.COORD_DIMS_OUT == 1) {
         dimids[0] = nc->ni_dimid;
 
@@ -260,7 +259,7 @@ initialize_history_file(nc_file_struct *nc)
         log_err("COORD_DIMS_OUT should be 1 or 2");
     }
 
-    // LON
+    // define the netcdf variable longitude
     status = nc_def_var(nc->nc_id, "lon", NC_DOUBLE, ndims,
                         dimids, &(lon_var_id));
     if (status != NC_NOERR) {
@@ -288,7 +287,7 @@ initialize_history_file(nc_file_struct *nc)
         dcount[0] = nc->nj_size;
     }
 
-    // LAT
+    // define the netcdf variable latitude
     status = nc_def_var(nc->nc_id, "lat", NC_DOUBLE, ndims,
                         dimids, &(lat_var_id));
     if (status != NC_NOERR) {
@@ -317,6 +316,7 @@ initialize_history_file(nc_file_struct *nc)
         log_err("Error leaving define mode for %s", nc->fname);
     }
 
+    // fill the netcdf variables lat/lon
     if (options.COORD_DIMS_OUT == 1) {
         dvar = (double *) malloc(nc->ni_size * sizeof(double));
 

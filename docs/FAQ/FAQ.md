@@ -32,15 +32,7 @@ Here are some commonly-asked questions and their answers. Another source of info
 
 6.  **How can I save VIC's screen output in a file?**
 
-    If you'd like to capture VIC's screen output in a log file, you can do (in C-shell):
-
-    `vicNl -g global_parameter_filename >& log.txt`
-
-    where
-
-    `global_parameter_filename` = name of the global parameter file corresponding to your project.
-
-    `log.txt` = name of a log file to contain VIC's screen output.
+    The Classic and Image drivers both include the option to write the runtime logs to file. To use this option, set the `LOG_DIR` variable in your *global parameter file*.
 
     This strategy also works for the routing model screen output.
 
@@ -54,7 +46,7 @@ Here are some commonly-asked questions and their answers. Another source of info
 
     1.  Check your input parameters and meteorological forcings - are they reasonable for this grid cell? Are they in the correct format?
     2.  Check your model time step or snow step - does the problem disappear if you reduce the time step length? (Note: currently VIC cannot support time step lengths < 1 hour)
-    3.  If your inputs are reasonable, consider setting TFALLBACK to TRUE in the [global parameter file](../Documentation/GlobalParam.md). Now, the simulation will continue using the previous time step's temperature value. The number of instances in which the previous step's T value was used will be reported at the end of each grid cell's simulation. In addition, several output variables are available to monitor when these instances occurred: OUT_TFOL_FBFLAG, OUT_TCAN_FBFLAG, OUT_SURFT_FBFLAG, OUT_SOILT_FBFLAG.
+    3.  If your inputs are reasonable, consider setting TFALLBACK to TRUE in the *global parameter file*. Now, the simulation will continue using the previous time step's temperature value. The number of instances in which the previous step's T value was used will be reported at the end of each grid cell's simulation. In addition, several output variables are available to monitor when these instances occurred: OUT_TFOL_FBFLAG, OUT_TCAN_FBFLAG, OUT_SURFT_FBFLAG, OUT_SOILT_FBFLAG.
     4.  If you use the TFALLBACK option, make sure to output the various temperatures simulated by the model (OUT_TFOLIAGE, OUT_TCANOPY, OUT_SURFT, OUT_SOILT) and check that these values look reasonable. In some cases, convergence failures occur long after the model has ventured into unphysical behavior, and using the previous time step's T value simply preserves these unphysical temperatures.
     5.  Check if these behaviors are a [known issue under investigation](../Development/ModelDevelopment.md). If you do not see the issue listed, please create an issue on Github[contact us](https://github.com/UW-Hydro/VIC/issues) and tell us about the issue.
 
@@ -88,4 +80,4 @@ Here are some commonly-asked questions and their answers. Another source of info
 
 13.  **I want to output a variable, but I don't see it listed in the output variable list. What should I do?**
 
-    As discussed [here](../Documentation/OutputFormatting.md), VIC allows users to select which output variables to write to their output files. Variables that can be selected are listed [here](../Documentation/OutputVarList.md) as well as in the VIC source code file vicNl_def.h (listed as "OUT_*"). However, not all variables that VIC simulates are available for output. And of course if you are changing VIC's physics, any new variables you add are also not available for output (yet). In either of these cases, please see the [instructions on how to add a new output variable to VIC](../Documentation/HowToAddNewOutputVars.md).
+    VIC allows users to select which output variables to write to their output files. Variables that can be selected are listed [here](../Documentation/OutputVarList.md) as well as in the VIC source code file `vic_def.h` (listed as `OUT_*`). However, not all variables that VIC simulates are available for output. And of course if you are changing VIC's physics, any new variables you add are also not available for output (yet). In either of these cases, please see the [instructions on how to add a new output variable to VIC](../Documentation/HowToAddNewOutputVars.md).

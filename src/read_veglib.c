@@ -157,7 +157,6 @@ veg_lib_struct *read_veglib(FILE *veglib, int *Ntype)
       if (options.VEGLIB_IRR) {
         for (j = 0; j < 12; j++) {
           fscanf(veglib, "%d", &temp[i].irr_active[j]);
-	  //fprintf(stderr,"class %d month %d irr_active %d\n",i,j,temp[i].irr_active[j]);
           if(temp[i].irr_active[j] != 0 && temp[i].irr_active[j] != 1) {
             sprintf(str,"Irrigation active flag must be either 0 or 1 (%d)", temp[i].irr_active[j]);
             nrerror(str);
@@ -167,12 +166,10 @@ veg_lib_struct *read_veglib(FILE *veglib, int *Ntype)
         if (!strcmp(tmpstr,"SAT")) temp[i].irr_sm_thresh = IRR_SAT;
         else if (!strcmp(tmpstr,"FC")) temp[i].irr_sm_thresh = IRR_FC;
         else if (!strcmp(tmpstr,"CR")) temp[i].irr_sm_thresh = IRR_CR;
-        //else if (!strcmp(tmpstr,"GSM")) temp[i].irr_sm_thresh = IRR_GSM; //ingjerd commented out for now
-        fscanf(veglib, "%s", tmpstr); /* irrigation soil moisture target */
+              fscanf(veglib, "%s", tmpstr); /* irrigation soil moisture target */
         if (!strcmp(tmpstr,"SAT")) temp[i].irr_sm_target = IRR_SAT;
         else if (!strcmp(tmpstr,"FC")) temp[i].irr_sm_target = IRR_FC;
         else if (!strcmp(tmpstr,"CR")) temp[i].irr_sm_target = IRR_CR;
-        //else if (!strcmp(tmpstr,"GSM")) temp[i].irr_sm_target = IRR_GSM; //ingjerd commented out for now
       }
       else {
         // Initialize but don't use

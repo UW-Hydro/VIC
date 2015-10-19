@@ -244,7 +244,6 @@
 #define IRR_SAT    0
 #define IRR_FC     1
 #define IRR_CR     2
-//#define IRR_GSM    3 //ingjerd commented out for now
 
 /***** Canopy resistance parametrizations *****/
 #define RC_JARVIS 0

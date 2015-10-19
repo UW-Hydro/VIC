@@ -20,14 +20,14 @@ int  full_energy(int                  gridcell,
 	full_energy	Keith Cherkauer		January 8, 1997
 
   This subroutine controls the model core, it solves both the energy
-  and water balance models, as well as frozen soils.  
+  and water balance models, as well as frozen soils.
 
   modifications:
-  07-98 restructured to fix problems with distributed precipitation, 
-        and to add the ability to solve the snow model at different 
+  07-98 restructured to fix problems with distributed precipitation,
+        and to add the ability to solve the snow model at different
 	elevation bands within a single grid cell.                 KAC
-  01-19-00 modified to work with the new atmosphere data structure 
-           implemented when the radiation forcing routines were 
+  01-19-00 modified to work with the new atmosphere data structure
+           implemented when the radiation forcing routines were
 	   updated.  Also modified to use the new simplified
 	   soil moisture storage for the frozen soil algorithm.    KAC
   12-01-00 modified to include the lakes and wetlands algorithm.   KAC
@@ -160,7 +160,7 @@ int  full_energy(int                  gridcell,
   double                 sum_baseflow;
   double                 tmp_wind[3];
   double                 gauge_correction[2];
-  int month2,layer; 
+  int month2,layer;
   float fraction_irrveg;
   double irrig_old;
   double irrig_new;
@@ -171,9 +171,9 @@ int  full_energy(int                  gridcell,
   double soilmoist_noirr_new;
   double soilmoist_irr_new;
   double irrig_est;
-  double irrig; 
-  double old_crop_frac; 
-  double new_crop_frac; 
+  double irrig;
+  double old_crop_frac;
+  double new_crop_frac;
   float 	         lag_one;
   float 	         sigma_slope;
   float  	         fetch;
@@ -198,7 +198,7 @@ int  full_energy(int                  gridcell,
   float moistlayer,moisttotal1,moisttotal2,moistnoncrop;
   int localextract,ivegdummy,recdummy; //ingjerd added. at the moment: water extracted, but not applied to fields, so doesn't really do any good!
   double Cvdummy,extractwaterdummy;
- 
+
 
   recdummy=153;
 
@@ -223,11 +223,11 @@ int  full_energy(int                  gridcell,
   /** Set Damping Depth **/
   dp        = soil_con->dp;
 
-  /* Compute gauge undercatch correction factors 
+  /* Compute gauge undercatch correction factors
      - this assumes that the gauge is free of vegetation effects, so gauge
      correction is constant for the entire grid cell */
-  if( options.CORRPREC && atmos->prec[NR] > 0 ) 
-    correct_precip(gauge_correction, atmos->wind[NR], gp->wind_h, 
+  if( options.CORRPREC && atmos->prec[NR] > 0 )
+    correct_precip(gauge_correction, atmos->wind[NR], gp->wind_h,
 		   soil_con->rough, soil_con->snow_rough);
   else {
     gauge_correction[0] = 1;
@@ -242,31 +242,16 @@ int  full_energy(int                  gridcell,
 
     if (rec >= 0) {
       for(iveg = 0; iveg < Nveg; iveg++){
-
-	/* ingjerd if(veg_con[iveg].crop_frac_active) { 
-	  for(lidx=0;lidx<options.Nlayer;lidx++) { 
-	    soil_con->Wcr[lidx] = soil_con->Wcr_irrig[lidx];
-	    soil_con->Wpwp[lidx] = soil_con->Wpwp_irrig[lidx];
-	  }
-	}
-	else {
-	  for(lidx=0;lidx<options.Nlayer;lidx++) { 
-	    soil_con->Wcr[lidx] = soil_con->Wcr_orig[lidx];
-	    soil_con->Wpwp[lidx] = soil_con->Wpwp_orig[lidx];
-	  }
-	  }*/
- 
 	if (veg_con[iveg].crop_frac_active) {
 	  veg_class = veg_con[iveg].veg_class;
 	  for ( band = 0; band < Nbands; band++ ) {
 	    if (rec == 0)
 	      old_crop_frac = veg_hist[rec][iveg].crop_frac[0];
-	    else 
+	    else
 	      old_crop_frac = veg_var[iveg][band].crop_frac;
 	    if(snow[iveg][band].swq<0.0001 && atmos->air_temp[NR]>7)  //ingjerd added. ok for all bands, veg types etc???? should be same air temp as below! (7 degrees)
 	      new_crop_frac = veg_hist[rec][iveg].crop_frac[0];
 	    else new_crop_frac = old_crop_frac;
-	    //fprintf(stderr,"full_energy berit rec %d init veg_class %d old_crop_frac %f new_crop_frac %f\n",rec,veg_class,old_crop_frac,new_crop_frac); 
 	    moistlayer=moisttotal1=moisttotal2=0.;
 	    if (new_crop_frac != old_crop_frac) {
 	      // The portion that grows needs to assimilate state variables
@@ -275,12 +260,10 @@ int  full_energy(int                  gridcell,
 		for(lidx=0;lidx<options.Nlayer;lidx++) {
 		  moistlayer=all_vars_crop->cell[0][band].layer[lidx].moist*(1-old_crop_frac)+all_vars_crop->cell[1][band].layer[lidx].moist*old_crop_frac;
 		  moisttotal1+=moistlayer;
-		  //fprintf(stderr,"full_energy moist old fallow %f crop %f total1 %f incl noncrop %f\n",all_vars_crop->cell[0][band].layer[lidx].moist,all_vars_crop->cell[1][band].layer[lidx].moist,moisttotal1,moisttotal1*0.5+moistnoncrop*0.5);
 		  all_vars_crop->cell[1][band].layer[lidx].moist = (all_vars_crop->cell[1][band].layer[lidx].moist*old_crop_frac+all_vars_crop->cell[0][band].layer[lidx].moist*(new_crop_frac-old_crop_frac))/new_crop_frac;
 		  all_vars_crop->cell[0][band].layer[lidx].moist = all_vars_crop->cell[0][band].layer[lidx].moist;
 		  moistlayer=all_vars_crop->cell[0][band].layer[lidx].moist*(1-new_crop_frac)+all_vars_crop->cell[1][band].layer[lidx].moist*new_crop_frac;
 		  moisttotal2+=moistlayer;
-		  //fprintf(stderr,"full_energy moist new fallow %f crop %f total2 %f diff %f incl noncrop %f\n",all_vars_crop->cell[0][band].layer[lidx].moist,all_vars_crop->cell[1][band].layer[lidx].moist,moisttotal2,moisttotal2-moisttotal1,moisttotal1*0.5+moistnoncrop*0.5);
 		  //all_vars_crop->snow[1][band].swq=(all_vars_crop->snow[1][band].swq*old_crop_frac+all_vars_crop->snow[0][band].swq*(new_crop_frac-old_crop_frac))/new_crop_frac;
 		  //all_vars_crop->snow[0][band].swq=all_vars_crop->snow[0][band].swq;
 		}
@@ -305,30 +288,25 @@ int  full_energy(int                  gridcell,
     // Loop over vegetated tiles
     for(iveg = 0; iveg < Nveg; iveg++){
       veg_class = veg_con[iveg].veg_class;
-      //printf("full_energy vegclass %d\n",veg_class); 
-     if (veg_hist[rec][iveg].vegcover[0] < MIN_VEGCOVER)
+        if (veg_hist[rec][iveg].vegcover[0] < MIN_VEGCOVER)
         veg_hist[rec][iveg].vegcover[0] = MIN_VEGCOVER;
       for ( band = 0; band < Nbands; band++ ) {
         veg_var[iveg][band].vegcover = veg_hist[rec][iveg].vegcover[0];
 	veg_var[iveg][band].albedo = veg_hist[rec][iveg].albedo[0];
         veg_var[iveg][band].LAI = veg_hist[rec][iveg].LAI[0];
- 	//fprintf(stderr,"vegcover %f albedo %f lai %f\n",veg_var[iveg][band].vegcover,veg_var[iveg][band].albedo,veg_var[iveg][band].LAI);
-       veg_var[iveg][band].Wdmax = veg_var[iveg][band].LAI*LAI_WATER_FACTOR;
+ 	       veg_var[iveg][band].Wdmax = veg_var[iveg][band].LAI*LAI_WATER_FACTOR;
         // Handle crop tiles (fallow and crop sub-tiles)
         if (options.CROPFRAC && veg_con[iveg].crop_frac_active) {
           for (cridx=veg_con[iveg].crop_frac_idx; cridx<veg_con[iveg].crop_frac_idx+2; cridx++) {
-            if (cridx % 2 == 0) { //fallow part 
+            if (cridx % 2 == 0) { //fallow part
               all_vars_crop->veg_var[cridx][band].vegcover = MIN_VEGCOVER;
               all_vars_crop->veg_var[cridx][band].albedo = BARE_SOIL_ALBEDO;
               all_vars_crop->veg_var[cridx][band].LAI = 0;
-	      //fprintf(stderr,"da var vi her %d iveg %d\n",cridx,iveg);
             }
             else { //crop part
               // Convert LAI from global to local
-	      //fprintf(stderr,"else er vi her %d iveg %d\n",cridx,iveg);
 	      //veg_var[iveg][band].vegcover=1;
               all_vars_crop->veg_var[cridx][band].vegcover = veg_var[iveg][band].vegcover/veg_var[iveg][band].crop_frac;
-	      //fprintf(stderr,"else er vi her også %d iveg %d vegcover %f %f %f\n",cridx,iveg,all_vars_crop->veg_var[cridx][band].vegcover,veg_var[iveg][band].vegcover,veg_var[iveg][band].crop_frac);
               if (all_vars_crop->veg_var[cridx][band].vegcover > 1) all_vars_crop->veg_var[cridx][band].vegcover = 1;
               if (all_vars_crop->veg_var[cridx][band].vegcover < MIN_VEGCOVER) all_vars_crop->veg_var[cridx][band].vegcover = MIN_VEGCOVER;
               all_vars_crop->veg_var[cridx][band].albedo = (veg_var[iveg][band].albedo - (1-veg_var[iveg][band].crop_frac)*BARE_SOIL_ALBEDO)/veg_var[iveg][band].crop_frac;
@@ -360,58 +338,35 @@ int  full_energy(int                  gridcell,
 
     if (rec >= 0) {
       for(iveg = 0; iveg < Nveg; iveg++){
-
-	/* ingjerd if(veg_con[iveg].crop_frac_active) { 
-	  for(lidx=0;lidx<options.Nlayer;lidx++) { 
-	    soil_con->Wcr[lidx] = soil_con->Wcr_irrig[lidx];
-	    soil_con->Wpwp[lidx] = soil_con->Wpwp_irrig[lidx];
-	  }
-	}
-	else {
-	  for(lidx=0;lidx<options.Nlayer;lidx++) { 
-	    soil_con->Wcr[lidx] = soil_con->Wcr_orig[lidx];
-	    soil_con->Wpwp[lidx] = soil_con->Wpwp_orig[lidx];
-	  }
-	  } */
- 
         for ( band = 0; band < Nbands; band++ ) {
-	  cell[iveg][band].irr_extract=0; //ingjerd added, for initializing. needed, or maybe not? 
-	  veg_class = veg_con[iveg].veg_class; //ingjerd added, må vel være med?
+	  cell[iveg][band].irr_extract=0; //ingjerd added, for initializing. needed, or maybe not?
+	  veg_class = veg_con[iveg].veg_class; //ingjerd added
 	  veg_var[iveg][band].irrig=0.; //ingjerd added for initialization. hm... not sure about this!
 	  if (options.CROPFRAC  && veg_con[iveg].crop_frac_active)
 	    all_vars_crop->veg_var[veg_con[iveg].crop_frac_idx+1][band].irrig=0.; //ingjerd added for initialization. hm... not sure about this!
-	  //fprintf(stderr,"rec %d sven iveg %d band %d estimating irrigation demand if needed, irrig %f vegvarirrig %f irractive %d\n",rec,iveg,band,irrig,veg_var[iveg][band].irrig,veg_lib[veg_class].irr_active[dmy[rec].month-1]);
-
-	  if(veg_lib[veg_class].irr_active[dmy[rec].month-1]) {  // only apply irrigation to specified crops
-	    //fprintf(stderr,"irr_active in month %d rec %d swq %f airtemp %f \n",dmy[rec].month,rec,snow[iveg][band].swq,atmos->air_temp[NR]);
-	    if(snow[iveg][band].swq<0.001 && atmos->air_temp[NR]>7) { 
-	      //fprintf(stderr,"warm and snow-free\n");
-	      
+	  	  if(veg_lib[veg_class].irr_active[dmy[rec].month-1]) {  // only apply irrigation to specified crops
+		    if(snow[iveg][band].swq<0.001 && atmos->air_temp[NR]>7) {
               thresh_idx = 0;
               target_idx = 0;
               if (options.CROPFRAC && veg_con[iveg].crop_frac_active) {
-	        moistfract=all_vars_crop->cell[veg_con[iveg].crop_frac_idx+1][band].layer[target_idx].moist;  
+	        moistfract=all_vars_crop->cell[veg_con[iveg].crop_frac_idx+1][band].layer[target_idx].moist;
 	      }
               else if (veg_con[iveg].crop_frac_active)
-	        moistfract=cell[iveg][band].layer[target_idx].moist;  
+	        moistfract=cell[iveg][band].layer[target_idx].moist;
               if (veg_lib[veg_class].irr_sm_thresh == IRR_SAT)
-                irr_sm_thresh=soil_con->max_moist[thresh_idx]; 
+                irr_sm_thresh=soil_con->max_moist[thresh_idx];
               else if (veg_lib[veg_class].irr_sm_thresh == IRR_FC)
-                irr_sm_thresh=soil_con->Wcr[thresh_idx]/0.7; 
+                irr_sm_thresh=soil_con->Wcr[thresh_idx]/0.7;
               else
                 irr_sm_thresh=soil_con->Wcr[thresh_idx]; // critical point in most cases
 	      if (irr_sm_thresh > soil_con->max_moist[thresh_idx])
                 irr_sm_thresh = soil_con->max_moist[thresh_idx];
               if (veg_lib[veg_class].irr_sm_target == IRR_SAT)
-                irr_sm_target=soil_con->max_moist[target_idx]; 
+                irr_sm_target=soil_con->max_moist[target_idx];
               else
                 irr_sm_target=soil_con->Wcr[target_idx]/0.7; // field capacity in most cases
-	      
-	      //fprintf(stderr,"full_energy A moist in layer in question (mm) %f iveg %d irr_active %d veg_class %d\n",moistfract,iveg,veg_lib[veg_class].irr_active[dmy[rec].month-1],veg_class);
-	      
                if (irr_sm_target > soil_con->max_moist[target_idx])
                 irr_sm_target = soil_con->max_moist[target_idx];
-	       //fprintf(stderr,"full_energy B thresh_idx %d target_idx %d thresh %f target %f\n",thresh_idx,target_idx,irr_sm_thresh,irr_sm_target);
               if (options.CROPFRAC && veg_con[iveg].crop_frac_active) {
                 if (moistfract < irr_sm_thresh)
                   all_vars_crop->veg_var[veg_con[iveg].crop_frac_idx+1][band].irr_apply = TRUE;
@@ -425,8 +380,8 @@ int  full_energy(int                  gridcell,
                 else if (moistfract >= irr_sm_target)
                   veg_var[iveg][band].irr_apply = FALSE;
              }
-	      
-              if(options.CROPFRAC && veg_con[iveg].crop_frac_active) { 
+
+              if(options.CROPFRAC && veg_con[iveg].crop_frac_active) {
                 irrig_est = (soil_con->max_moist[0]-all_vars_crop->cell[veg_con[iveg].crop_frac_idx+1][band].layer[target_idx].moist);
                 if (all_vars_crop->veg_var[veg_con[iveg].crop_frac_idx+1][band].irr_apply && atmos->prec[NR]<irrig_est)
                   all_vars_crop->veg_var[veg_con[iveg].crop_frac_idx+1][band].irrig = irrig_est-atmos->prec[NR];
@@ -437,9 +392,6 @@ int  full_energy(int                  gridcell,
                 Cv = veg_con[iveg].Cv;
                 Cv *= veg_var[iveg][0].crop_frac;
                 irrig += all_vars_crop->veg_var[veg_con[iveg].crop_frac_idx+1][band].irrig*Cv*soil_con->AreaFract[band];
-		//if(rec==recdummy) 
-		//	fprintf(stderr,"crop_frac_active maxmoist %.2f moist %.2f irrigwishcellaverage %.3f irrigwish(croptile) %.3f Cvirrig %.4f\n",soil_con->max_moist[0],all_vars_crop->cell[veg_con[iveg].crop_frac_idx+1][band].layer[target_idx].moist,irrig,all_vars_crop->veg_var[veg_con[iveg].crop_frac_idx+1][band].irrig,Cv);
-		//fprintf(stderr,"crop_frac_active irrig_est %f irrig %f allvarscropirrig %f moist0 %f\n",irrig_est,irrig,all_vars_crop->veg_var[veg_con[iveg].crop_frac_idx+1][band].irrig,all_vars_crop->cell[1][band].layer[0].moist);
               }
               else if (veg_con[iveg].crop_frac_active) { // veg_lib cropping calendar (irr can happen this month)
 		irrig_est = (soil_con->max_moist[0]-cell[iveg][band].layer[target_idx].moist);
@@ -450,19 +402,12 @@ int  full_energy(int                  gridcell,
                 Cv = veg_con[iveg].Cv;
                 irrig += veg_var[iveg][band].irrig*Cv*soil_con->AreaFract[band]; //mm (cell average)
 	      }
-	      //fprintf(stderr,"full_energy0 rec %d  iveg %d irrig %f vegvarirrig %f\n",rec,iveg,irrig,veg_var[iveg][band].irrig);
 	    }
-	    //if(rec==recdummy) 
-	    //fprintf(stderr,"full_energy1 rec %d band %d iveg %d irrig %f vegvarirrig %f\n",
-	    //      rec,band,iveg,irrig,veg_var[iveg][band].irrig);
-	  }
-	  //if(rec==recdummy)  
-	    //	    fprintf(stderr,"full_energy2 rec %d band %d iveg %d irrig %f moist0 %f \n",
-	    //    rec,band,iveg,irrig,all_vars_crop->cell[1][band].layer[0].moist);
-	}
+	    	  }
+		}
       }
     }
-    
+
   }
 
   /**************************************************
@@ -473,24 +418,7 @@ int  full_energy(int                  gridcell,
 
     /** Solve Veg Type only if Coverage Greater than 0% **/
     if (veg_con[iveg].Cv > 0.0) {
-
-      /*ingjerd  if(veg_con[iveg].crop_frac_active) { 
-       for(lidx=0;lidx<options.Nlayer;lidx++) { 
-	 soil_con->Wcr[lidx] = soil_con->Wcr_irrig[lidx];
-	 soil_con->Wpwp[lidx] = soil_con->Wpwp_irrig[lidx];
-       }
-     }
-     else {
-       for(lidx=0;lidx<options.Nlayer;lidx++) { 
-	 soil_con->Wcr[lidx] = soil_con->Wcr_orig[lidx];
-	 soil_con->Wpwp[lidx] = soil_con->Wpwp_orig[lidx];
-       }
-       }*/
-  
-
-      if(options.CROPFRAC && veg_con[iveg].crop_frac_active) { 
-
- 
+      if(options.CROPFRAC && veg_con[iveg].crop_frac_active) {
       for (cridx=veg_con[iveg].crop_frac_idx; cridx<veg_con[iveg].crop_frac_idx+2; cridx++) {
 
       Cv = veg_con[iveg].Cv;
@@ -520,8 +448,8 @@ int  full_energy(int                  gridcell,
 
       }
 
-     if(cridx % 2 == 0) Cv *= (1-veg_var[iveg][0].crop_frac); 
-     else Cv *= veg_var[iveg][0].crop_frac; 
+     if(cridx % 2 == 0) Cv *= (1-veg_var[iveg][0].crop_frac);
+     else Cv *= veg_var[iveg][0].crop_frac;
 
       /**************************************************
         Initialize Model Parameters
@@ -549,11 +477,10 @@ int  full_energy(int                  gridcell,
         out_rain[j] = 0;
         out_snow[j] = 0;
       }
-    
+
       /** Define vegetation class number **/
-      //veg_class = veg_con[cridx].veg_class; //ingjerd, orig deleted. dette må da være feil???
-      veg_class = veg_con[iveg].veg_class; 
- 
+      veg_class = veg_con[iveg].veg_class;
+
       /** Initialize other veg vars **/
       if (iveg < Nveg) {
 	for(band=0; band<Nbands; band++) {
@@ -580,7 +507,7 @@ int  full_energy(int                  gridcell,
       bare_albedo = all_vars_crop->veg_var[cridx][0].albedo;
 
       /*************************************
-	Compute the aerodynamic resistance 
+	Compute the aerodynamic resistance
 	for current veg cover and various
 	types of potential evap
       *************************************/
@@ -593,7 +520,7 @@ int  full_energy(int                  gridcell,
         tmp_wind[0] = atmos->wind[NR];
         tmp_wind[1] = -999.;
         tmp_wind[2] = -999.;
- 
+
         /* Set surface descriptive variables */
         if (p < N_PET_TYPES_NON_NAT) {
 	  pet_veg_class = veg_lib[0].NVegLibTypes+p;
@@ -618,21 +545,21 @@ int  full_energy(int                  gridcell,
         height = calc_veg_height(displacement[0]);
 
         /* Estimate reference height */
-        if(displacement[0] < wind_h) 
+        if(displacement[0] < wind_h)
           ref_height[0] = wind_h;
-        else 
+        else
           ref_height[0] = displacement[0] + wind_h + roughness[0];
 
         /* Compute aerodynamic resistance over various surface types */
         /* Do this not only for current veg but also all types of PET */
         ErrorFlag = CalcAerodynamic(overstory, height,
-		        veg_lib[pet_veg_class].trunk_ratio, 
-                        soil_con->snow_rough, soil_con->rough, 
+		        veg_lib[pet_veg_class].trunk_ratio,
+                        soil_con->snow_rough, soil_con->rough,
 		        veg_lib[pet_veg_class].wind_atten,
 			aero_resist[p], tmp_wind,
 		        displacement, ref_height,
 		        roughness);
-        if ( ErrorFlag == ERROR ) return ( ERROR );  
+        if ( ErrorFlag == ERROR ) return ( ERROR );
 
       }
 
@@ -643,7 +570,7 @@ int  full_energy(int                  gridcell,
           all_vars_crop->cell[cridx][band].aero_resist[1] = aero_resist[N_PET_TYPES][1];
         }
       }
- 
+
       /******************************
         Compute nitrogen scaling factors and initialize other veg vars
       ******************************/
@@ -673,7 +600,7 @@ int  full_energy(int                  gridcell,
       /******************************
         Solve ground surface fluxes (for crops = crop_active
       ******************************/
-  
+
       for ( band = 0; band < Nbands; band++ ) {
 	if( soil_con->AreaFract[band] > 0 ) {
 
@@ -686,11 +613,10 @@ int  full_energy(int                  gridcell,
 	    all_vars_crop->cell[cridx][band].pot_evap[p] = 0;
 
           // Limit irrigation to available water
-          if(options.IRRIGATION && veg_lib[veg_class].irr_active[dmy[rec].month-1] && (!options.CROPFRAC || cridx % 2 == 1) && !options.IRR_FREE && atmos->air_temp[NR]>7) { 
+          if(options.IRRIGATION && veg_lib[veg_class].irr_active[dmy[rec].month-1] && (!options.CROPFRAC || cridx % 2 == 1) && !options.IRR_FREE && atmos->air_temp[NR]>7) {
 
-	    //fprintf(stderr,"full_energy C2 crop_active rec %d iveg %d cridx %d irrig %f allvarscropirrig %f moist %f\n",rec,iveg,cridx,irrig,all_vars_crop->veg_var[cridx][band].irrig,all_vars_crop->cell[1][band].layer[0].moist); //still cell average
 	    all_vars_crop->veg_var[cridx][band].irrig = 0.; //initialize
- 
+
 	    // Extract irrigation from local water as necessary. Local water takes priority over irr_run and irr_with
 	    extract_water=0.; //cell average
 	    localextract=1;
@@ -716,14 +642,14 @@ int  full_energy(int                  gridcell,
 		    cell[ivegdummy][band].irr_extract += cell[ivegdummy][band].baseflow;
 		    cell[ivegdummy][band].baseflow = 0;
 		  }
-		  else if(extract_water<irrig) { 
-		    if(rec==recdummy) 
+		  else if(extract_water<irrig) {
+		    if(rec==recdummy)
 		      fprintf(stderr,"ivegdummyD %d Cvdummy %f missing %.3f base init average %f\n",
 		            ivegdummy,Cvdummy,irrig-extract_water,cell[ivegdummy][band].baseflow*Cvdummy*soil_con->AreaFract[band]);
 		    cell[ivegdummy][band].irr_extract += (irrig-extract_water)/(Cvdummy*soil_con->AreaFract[band]);
 		    cell[ivegdummy][band].baseflow -= (irrig-extract_water)/(Cvdummy*soil_con->AreaFract[band]);
-		    extract_water += (irrig-extract_water);		    
-		     if(rec==recdummy) 
+		    extract_water += (irrig-extract_water);
+		     if(rec==recdummy)
 		       fprintf(stderr,"\t missing %.3f base final average %f\n\n",
 			       irrig-extract_water,cell[ivegdummy][band].baseflow*Cvdummy*soil_con->AreaFract[band]);
 		  }
@@ -740,31 +666,25 @@ int  full_energy(int                  gridcell,
 	    all_vars_crop->veg_var[cridx][band].irrig = extract_water/(Cv*soil_con->AreaFract[band]); //local cridx tile, irrig possible
 
 	  } //options.irrigation limited
-	  
-	  //	  if(rec==recdummy)  fprintf(stderr,"full_energy I rec %d iveg %d cridx %d veg_class %d irrig_possible (cridx tile) %f irr_run %f\n",
-	  //		     rec,iveg,cridx,veg_class,all_vars_crop->veg_var[cridx][band].irrig,atmos->irr_run[NR]); 
 
-	  ErrorFlag = surface_fluxes(overstory, bare_albedo, height, ice0[band], moist0[band], 
-				     surf_atten, &(Melt[band*2]), &Le, 
+	  ErrorFlag = surface_fluxes(overstory, bare_albedo, height, ice0[band], moist0[band],
+				     surf_atten, &(Melt[band*2]), &Le,
 				     aero_resist,
 				     displacement, gauge_correction,
-				     &out_prec[band*2], 
+				     &out_prec[band*2],
 				     &out_rain[band*2], &out_snow[band*2],
-				     ref_height, roughness, 
-				     &snow_inflow[band], 
-				     tmp_wind, veg_con[iveg].root, Nbands, 
-				     options.Nlayer, Nveg, band, dp, iveg, rec, veg_class, 
-				     atmos, dmy, &(all_vars_crop->energy[cridx][band]), gp, 
+				     ref_height, roughness,
+				     &snow_inflow[band],
+				     tmp_wind, veg_con[iveg].root, Nbands,
+				     options.Nlayer, Nveg, band, dp, iveg, rec, veg_class,
+				     atmos, dmy, &(all_vars_crop->energy[cridx][band]), gp,
 				     &(all_vars_crop->cell[cridx][band]),
-				     &(all_vars_crop->snow[cridx][band]), 
-				     soil_con, &(all_vars_crop->veg_var[cridx][band]), 
+				     &(all_vars_crop->snow[cridx][band]),
+				     soil_con, &(all_vars_crop->veg_var[cridx][band]),
 				     lag_one, sigma_slope, fetch, veg_con[iveg].CanopLayerBnd);
 
-	  //fprintf(stderr,"full_energy D2 rec %d iveg %d cridx %d irrig_wish %f irrig_possible %f temp %f moist %f\n",rec,iveg,cridx,irrig,all_vars_crop->veg_var[cridx][band].irrig,atmos->air_temp[NR],all_vars_crop->cell[1][band].layer[0].moist);
-
-	  
 	  if ( ErrorFlag == ERROR ) return ( ERROR );
-	  
+
 	  atmos->out_prec += out_prec[band*2] * Cv * soil_con->AreaFract[band];
 	  atmos->out_rain += out_rain[band*2] * Cv * soil_con->AreaFract[band];
 	  atmos->out_snow += out_snow[band*2] * Cv * soil_con->AreaFract[band];
@@ -784,27 +704,16 @@ int  full_energy(int                  gridcell,
 
 	} /** End non-zero area band **/
 
-	//fprintf(stderr,"\nfull_energy rec %d cridx %d loop crop subtiles, irrig_wish %f moist %f moistirr %f\n",rec,cridx,irrig,all_vars_crop->cell[cridx][band].layer[0].moist,all_vars_crop->cell[1][band].layer[0].moist);
-
       } /** End Loop Through Elevation Bands **/
 
       } /** end loop over crop subtiles **/
-
-
-      //fprintf(stderr,"\nfull_energy rec %d da var vi ferdig med loop over crop subtiles, irrig_wish %f moist %f\n",rec,irrig,all_vars_crop->cell[1][0].layer[0].moist);
-
       // Transfer states and fluxes from crop subtiles back to original data structures
 
       for ( band = 0; band < Nbands; band++ ) {
 	if( soil_con->AreaFract[band] > 0 ) {
 
-	  //fprintf(stderr,"full_energy rec %d da begynner vi med backtracking iveg %d fract %f crop_frac %f irrig %f irrig_wish %f\n",rec,iveg,soil_con->AreaFract[band],veg_var[iveg][band].crop_frac,all_vars_crop->veg_var[0][band].irrig,irrig);	  
-
 	  //ingjerd added the below sentence, for wb tracking with irrigation and crop_frac included . more is needed?*/
 	  veg_var[iveg][band].irrig=all_vars_crop->veg_var[1][band].irrig*veg_var[iveg][band].crop_frac;
-
-	  //fprintf(stderr,"full_energy E ingjerd rec %d iveg %d veg_var.irrig %f allvars.irrig %f\n",rec,iveg,veg_var[iveg][band].irrig,all_vars_crop->veg_var[0][band].irrig);
-	  //fprintf(stderr,"full_energy F ingjerd moist0 %f \n",all_vars_crop->cell[1][band].layer[0].moist);
 
 	  // Copy veg_var state data
 	  veg_var[iveg][band].Wdew = (1-veg_var[iveg][band].crop_frac)*all_vars_crop->veg_var[0][band].Wdew + veg_var[iveg][band].crop_frac*all_vars_crop->veg_var[1][band].Wdew;
@@ -822,7 +731,7 @@ int  full_energy(int                  gridcell,
 	  veg_var[iveg][band].NPPfactor = (1-veg_var[iveg][band].crop_frac)*all_vars_crop->veg_var[0][band].NPPfactor + veg_var[iveg][band].crop_frac*all_vars_crop->veg_var[1][band].NPPfactor;
 	  veg_var[iveg][band].AnnualNPP = (1-veg_var[iveg][band].crop_frac)*all_vars_crop->veg_var[0][band].AnnualNPP + veg_var[iveg][band].crop_frac*all_vars_crop->veg_var[1][band].AnnualNPP;
 	  veg_var[iveg][band].AnnualNPPPrev = (1-veg_var[iveg][band].crop_frac)*all_vars_crop->veg_var[0][band].AnnualNPPPrev + veg_var[iveg][band].crop_frac*all_vars_crop->veg_var[1][band].AnnualNPPPrev;
-	  
+
 	  // Copy veg_var flux data
 	  veg_var[iveg][band].canopyevap = (1-veg_var[iveg][band].crop_frac)*all_vars_crop->veg_var[0][band].canopyevap + veg_var[iveg][band].crop_frac*all_vars_crop->veg_var[1][band].canopyevap;
 	  veg_var[iveg][band].throughfall = (1-veg_var[iveg][band].crop_frac)*all_vars_crop->veg_var[0][band].throughfall + veg_var[iveg][band].crop_frac*all_vars_crop->veg_var[1][band].throughfall;
@@ -857,12 +766,7 @@ int  full_energy(int                  gridcell,
 	    for ( frost_area = 0; frost_area < options.Nfrost; frost_area++ )
 	      cell[iveg][band].layer[lidx].ice[frost_area] = (1-veg_var[iveg][band].crop_frac)*all_vars_crop->cell[0][band].layer[lidx].ice[frost_area] + veg_var[iveg][band].crop_frac*all_vars_crop->cell[1][band].layer[lidx].ice[frost_area];
 
-	    //fprintf(stderr,"\nfull_energy rec %d debugging... lidx %d irrig_wish %f moist %f\n",rec,lidx,irrig,cell[3][0].layer[0].moist);
-	    //fprintf(stderr,"\nfull_energy rec %d debugging... lidx %d allvarmoist1 %f 2 %f\n",rec,lidx,all_vars_crop->cell[0][band].layer[lidx].moist,all_vars_crop->cell[1][band].layer[lidx].moist);
-
 	    cell[iveg][band].layer[lidx].moist = (1-veg_var[iveg][band].crop_frac)*all_vars_crop->cell[0][band].layer[lidx].moist + veg_var[iveg][band].crop_frac*all_vars_crop->cell[1][band].layer[lidx].moist;
-
-	    //fprintf(stderr,"\nfull_energy rec %d debugging... irrig_wish %f moist %f\n",rec,irrig,cell[3][0].layer[0].moist);
 
 	    cell[iveg][band].layer[lidx].phi = (1-veg_var[iveg][band].crop_frac)*all_vars_crop->cell[0][band].layer[lidx].phi + veg_var[iveg][band].crop_frac*all_vars_crop->cell[1][band].layer[lidx].phi;
 
@@ -870,7 +774,7 @@ int  full_energy(int                  gridcell,
 
 	    cell[iveg][band].layer[lidx].T = (1-veg_var[iveg][band].crop_frac)*all_vars_crop->cell[0][band].layer[lidx].T + veg_var[iveg][band].crop_frac*all_vars_crop->cell[1][band].layer[lidx].T;
 	  }
-   
+
 	  // Copy cell flux data
 	  cell[iveg][band].baseflow = (1-veg_var[iveg][band].crop_frac)*all_vars_crop->cell[0][band].baseflow + veg_var[iveg][band].crop_frac*all_vars_crop->cell[1][band].baseflow;
 	  for ( lidx = 0; lidx < options.Nlayer; lidx++ ) {
@@ -890,7 +794,7 @@ int  full_energy(int                  gridcell,
 	  cell[iveg][band].wetness = (1-veg_var[iveg][band].crop_frac)*all_vars_crop->cell[0][band].wetness + veg_var[iveg][band].crop_frac*all_vars_crop->cell[1][band].wetness;
 	  cell[iveg][band].zwt = (1-veg_var[iveg][band].crop_frac)*all_vars_crop->cell[0][band].zwt + veg_var[iveg][band].crop_frac*all_vars_crop->cell[1][band].zwt;
 	  cell[iveg][band].zwt_lumped = (1-veg_var[iveg][band].crop_frac)*all_vars_crop->cell[0][band].zwt_lumped + veg_var[iveg][band].crop_frac*all_vars_crop->cell[1][band].zwt_lumped;
-	  
+
 	  // Copy snow state data
 	  snow[iveg][band].albedo = (1-veg_var[iveg][band].crop_frac)*all_vars_crop->snow[0][band].albedo + veg_var[iveg][band].crop_frac*all_vars_crop->snow[1][band].albedo;
 	  snow[iveg][band].canopy_albedo = (1-veg_var[iveg][band].crop_frac)*all_vars_crop->snow[0][band].canopy_albedo + veg_var[iveg][band].crop_frac*all_vars_crop->snow[1][band].canopy_albedo;
@@ -915,7 +819,7 @@ int  full_energy(int                  gridcell,
 	  snow[iveg][band].swq = (1-veg_var[iveg][band].crop_frac)*all_vars_crop->snow[0][band].swq + veg_var[iveg][band].crop_frac*all_vars_crop->snow[1][band].swq;
 	  snow[iveg][band].snow_distrib_slope = (1-veg_var[iveg][band].crop_frac)*all_vars_crop->snow[0][band].snow_distrib_slope + veg_var[iveg][band].crop_frac*all_vars_crop->snow[1][band].snow_distrib_slope;
 	  snow[iveg][band].tmp_int_storage = (1-veg_var[iveg][band].crop_frac)*all_vars_crop->snow[0][band].tmp_int_storage + veg_var[iveg][band].crop_frac*all_vars_crop->snow[1][band].tmp_int_storage;
-	  
+
 	  // Copy snow flux data
 	  snow[iveg][band].blowing_flux = (1-veg_var[iveg][band].crop_frac)*all_vars_crop->snow[0][band].blowing_flux + veg_var[iveg][band].crop_frac*all_vars_crop->snow[1][band].blowing_flux;
 	  snow[iveg][band].canopy_vapor_flux = (1-veg_var[iveg][band].crop_frac)*all_vars_crop->snow[0][band].canopy_vapor_flux + veg_var[iveg][band].crop_frac*all_vars_crop->snow[1][band].canopy_vapor_flux;
@@ -925,7 +829,7 @@ int  full_energy(int                  gridcell,
 	  snow[iveg][band].surface_flux = (1-veg_var[iveg][band].crop_frac)*all_vars_crop->snow[0][band].surface_flux + veg_var[iveg][band].crop_frac*all_vars_crop->snow[1][band].surface_flux;
 	  snow[iveg][band].transport = (1-veg_var[iveg][band].crop_frac)*all_vars_crop->snow[0][band].transport + veg_var[iveg][band].crop_frac*all_vars_crop->snow[1][band].transport;
 	  snow[iveg][band].vapor_flux = (1-veg_var[iveg][band].crop_frac)*all_vars_crop->snow[0][band].vapor_flux + veg_var[iveg][band].crop_frac*all_vars_crop->snow[1][band].vapor_flux;
-	  
+
 	  // Copy energy state data
 	  energy[iveg][band].AlbedoLake = (1-veg_var[iveg][band].crop_frac)*all_vars_crop->energy[0][band].AlbedoLake + veg_var[iveg][band].crop_frac*all_vars_crop->energy[1][band].AlbedoLake;
 	  energy[iveg][band].AlbedoOver = (1-veg_var[iveg][band].crop_frac)*all_vars_crop->energy[0][band].AlbedoOver + veg_var[iveg][band].crop_frac*all_vars_crop->energy[1][band].AlbedoOver;
@@ -959,7 +863,7 @@ int  full_energy(int                  gridcell,
 	    energy[iveg][band].T_fbflag[lidx] = (1-veg_var[iveg][band].crop_frac)*all_vars_crop->energy[0][band].T_fbflag[lidx] + veg_var[iveg][band].crop_frac*all_vars_crop->energy[1][band].T_fbflag[lidx];
 	    energy[iveg][band].tdepth[lidx] = (1-veg_var[iveg][band].crop_frac)*all_vars_crop->energy[0][band].tdepth[lidx] + veg_var[iveg][band].crop_frac*all_vars_crop->energy[1][band].tdepth[lidx];
 	  }
-	  
+
 	  // Copy energy flux data
 	  energy[iveg][band].advected_sensible = (1-veg_var[iveg][band].crop_frac)*all_vars_crop->energy[0][band].advected_sensible + veg_var[iveg][band].crop_frac*all_vars_crop->energy[1][band].advected_sensible;
 	  energy[iveg][band].advection = (1-veg_var[iveg][band].crop_frac)*all_vars_crop->energy[0][band].advection + veg_var[iveg][band].crop_frac*all_vars_crop->energy[1][band].advection;
@@ -999,20 +903,14 @@ int  full_energy(int                  gridcell,
 	  energy[iveg][band].ShortOverIn = (1-veg_var[iveg][band].crop_frac)*all_vars_crop->energy[0][band].ShortOverIn + veg_var[iveg][band].crop_frac*all_vars_crop->energy[1][band].ShortOverIn;
 	  energy[iveg][band].ShortUnderIn = (1-veg_var[iveg][band].crop_frac)*all_vars_crop->energy[0][band].ShortUnderIn + veg_var[iveg][band].crop_frac*all_vars_crop->energy[1][band].ShortUnderIn;
 	  energy[iveg][band].snow_flux = (1-veg_var[iveg][band].crop_frac)*all_vars_crop->energy[0][band].snow_flux + veg_var[iveg][band].crop_frac*all_vars_crop->energy[1][band].snow_flux;
-	  
-	  
+
+
         }
       }
-
-      //fprintf(stderr,"full_energy still in loop irrig_wish %f for iveg %d (this should now have been something else???? still cell average) moist %f\n",irrig,iveg,cell[3][0].layer[0].moist);
-
 
       } //end irractive for veg type?
 
       else {
-      
-	//fprintf(stderr,"full_energy here only when irractive for iveg type %d = 0\n",iveg);
-
 
       Cv = veg_con[iveg].Cv;
       Nbands = options.SNOW_BAND;
@@ -1065,7 +963,7 @@ int  full_energy(int                  gridcell,
         out_rain[j] = 0;
         out_snow[j] = 0;
       }
-    
+
       /** Define vegetation class number **/
       veg_class = veg_con[iveg].veg_class;
 
@@ -1097,7 +995,7 @@ int  full_energy(int                  gridcell,
       }
 
       /*************************************
-	Compute the aerodynamic resistance 
+	Compute the aerodynamic resistance
 	for current veg cover and various
 	types of potential evap
       *************************************/
@@ -1110,7 +1008,7 @@ int  full_energy(int                  gridcell,
         tmp_wind[0] = atmos->wind[NR];
         tmp_wind[1] = -999.;
         tmp_wind[2] = -999.;
- 
+
         /* Set surface descriptive variables */
         if (p < N_PET_TYPES_NON_NAT) {
 	  pet_veg_class = veg_lib[0].NVegLibTypes+p;
@@ -1128,21 +1026,21 @@ int  full_energy(int                  gridcell,
         height = calc_veg_height(displacement[0]);
 
         /* Estimate reference height */
-        if(displacement[0] < wind_h) 
+        if(displacement[0] < wind_h)
           ref_height[0] = wind_h;
-        else 
+        else
           ref_height[0] = displacement[0] + wind_h + roughness[0];
 
         /* Compute aerodynamic resistance over various surface types */
         /* Do this not only for current veg but also all types of PET */
         ErrorFlag = CalcAerodynamic(overstory, height,
-		        veg_lib[pet_veg_class].trunk_ratio, 
-                        soil_con->snow_rough, soil_con->rough, 
+		        veg_lib[pet_veg_class].trunk_ratio,
+                        soil_con->snow_rough, soil_con->rough,
 		        veg_lib[pet_veg_class].wind_atten,
 			aero_resist[p], tmp_wind,
 		        displacement, ref_height,
 		        roughness);
-        if ( ErrorFlag == ERROR ) return ( ERROR );  
+        if ( ErrorFlag == ERROR ) return ( ERROR );
 
       }
 
@@ -1181,9 +1079,9 @@ int  full_energy(int                  gridcell,
       }
 
       /******************************
-        Solve ground surface fluxes 
+        Solve ground surface fluxes
       ******************************/
-  
+
       for ( band = 0; band < Nbands; band++ ) {
 	if( soil_con->AreaFract[band] > 0 ) {
 
@@ -1196,31 +1094,29 @@ int  full_energy(int                  gridcell,
 	    cell[iveg][band].pot_evap[p] = 0;
 
           // Limit irrigation to available water
-          if(options.IRRIGATION && veg_lib[veg_class].irr_active[dmy[rec].month-1] && !options.IRR_FREE) { 
+          if(options.IRRIGATION && veg_lib[veg_class].irr_active[dmy[rec].month-1] && !options.IRR_FREE) {
  	    if(irrig>(atmos->irr_run[NR]+atmos->irr_with[NR]) && atmos->air_temp[NR]>7)
-	    veg_var[iveg][band].irrig *= (atmos->irr_run[NR]+atmos->irr_with[NR])/irrig; 
+	    veg_var[iveg][band].irrig *= (atmos->irr_run[NR]+atmos->irr_with[NR])/irrig;
           }
 
-	  //fprintf(stdout,"full_energy når og hvor mange ganger kommer vi hit? full_energy G2 rec %d iveg %d irrig_wish %f irrig_possible (mm, incl precip) %f\n",rec,iveg,irrig,veg_var[iveg][band].irrig);
-
-	  ErrorFlag = surface_fluxes(overstory, bare_albedo, height, ice0[band], moist0[band], 
-				     surf_atten, &(Melt[band*2]), &Le, 
+	  ErrorFlag = surface_fluxes(overstory, bare_albedo, height, ice0[band], moist0[band],
+				     surf_atten, &(Melt[band*2]), &Le,
 				     aero_resist,
 				     displacement, gauge_correction,
-				     &out_prec[band*2], 
+				     &out_prec[band*2],
 				     &out_rain[band*2], &out_snow[band*2],
-				     ref_height, roughness, 
-				     &snow_inflow[band], 
-				     tmp_wind, veg_con[iveg].root, Nbands, 
-				     options.Nlayer, Nveg, band, dp, iveg, rec, veg_class, 
-				     atmos, dmy, &(energy[iveg][band]), gp, 
+				     ref_height, roughness,
+				     &snow_inflow[band],
+				     tmp_wind, veg_con[iveg].root, Nbands,
+				     options.Nlayer, Nveg, band, dp, iveg, rec, veg_class,
+				     atmos, dmy, &(energy[iveg][band]), gp,
 				     &(cell[iveg][band]),
-				     &(snow[iveg][band]), 
-				     soil_con, &(veg_var[iveg][band]), 
+				     &(snow[iveg][band]),
+				     soil_con, &(veg_var[iveg][band]),
 				     lag_one, sigma_slope, fetch, veg_con[iveg].CanopLayerBnd);
-	  
+
 	  if ( ErrorFlag == ERROR ) return ( ERROR );
-	  
+
 	  atmos->out_prec += out_prec[band*2] * Cv * soil_con->AreaFract[band];
 	  atmos->out_rain += out_rain[band*2] * Cv * soil_con->AreaFract[band];
 	  atmos->out_snow += out_snow[band*2] * Cv * soil_con->AreaFract[band];
@@ -1245,14 +1141,11 @@ int  full_energy(int                  gridcell,
 
     } /** end non-zero area veg tile **/
   } /** end of vegetation loop **/
-
-  // fprintf(stderr,"full_energy I rec %d iveg %d veg_class %d irrig_wish %f moist0 %f\n",rec,iveg,veg_class,irrig,cell[3][0].layer[0].moist);
-
   /* Convert LAI back to global */
   if (rec >= 0) {
     for(iveg = 0; iveg < Nveg; iveg++){
       for ( band = 0; band < Nbands; band++ ) {
-      // Handle non-crop tiles 
+      // Handle non-crop tiles
 	if (!options.CROPFRAC || !veg_con[iveg].crop_frac_active) {
           veg_var[iveg][band].LAI *= veg_var[iveg][band].vegcover;
           veg_var[iveg][band].Wdmax *= veg_var[iveg][band].vegcover;
@@ -1267,7 +1160,7 @@ int  full_energy(int                  gridcell,
   free((char *)aero_resist);
 
   /****************************
-     Run Lake Model           
+     Run Lake Model
   ****************************/
 
   /** Compute total runoff and baseflow for all vegetation types
@@ -1276,10 +1169,10 @@ int  full_energy(int                  gridcell,
 
     wetland_runoff = wetland_baseflow = 0;
     sum_runoff = sum_baseflow = 0;
-	
+
     // Loop through all vegetation tiles
     for ( iveg = 0; iveg <= Nveg; iveg++ ) {
-	  
+
       /** Solve Veg Tile only if Coverage Greater than 0% **/
       if (veg_con[iveg].Cv  > 0.) {
 
@@ -1293,7 +1186,7 @@ int  full_energy(int                  gridcell,
         // Loop through snow elevation bands
         for ( band = 0; band < Nbands; band++ ) {
           if ( soil_con->AreaFract[band] > 0 ) {
-	
+
             if (veg_con[iveg].LAKE) {
               wetland_runoff += ( cell[iveg][band].runoff
                           * Cv * soil_con->AreaFract[band] );
@@ -1323,7 +1216,7 @@ int  full_energy(int                  gridcell,
     lake_var->baseflow_in = (sum_baseflow * lake_con->rpercent + wetland_baseflow)*soil_con->cell_area*0.001; // m3
     lake_var->channel_in  = atmos->channel_in[NR]*soil_con->cell_area*0.001; // m3
     lake_var->prec        = atmos->prec[NR]*lake_var->sarea*0.001; // m3
-    rainonly = calc_rainonly(atmos->air_temp[NR], atmos->prec[NR], 
+    rainonly = calc_rainonly(atmos->air_temp[NR], atmos->prec[NR],
 			     gp->MAX_SNOW_TEMP, gp->MIN_RAIN_TEMP);
     if ( (int)rainonly == ERROR ) {
       return( ERROR );
@@ -1360,4 +1253,3 @@ int  full_energy(int                  gridcell,
 
   return (0);
 }
-

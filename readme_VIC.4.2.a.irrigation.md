@@ -25,7 +25,7 @@ Irrigation does not happen when snow is present or temperature is below 7 degree
 - surface_fluxes.c: ppt += veg_var->irrig (irrig water added to ppt)
 - read_veglib.c: Reading and initializing irrigation parameters/variables from veg_lib file.
 - alloc_veg_hist.c: Allocate and free memory, veg_hist[][].crop_frac
-- initialize_atmos.c: Initialize irr_run and irr_with. Assign crop area fraction from veg_lib or from (sub)daily crop_frac files if provided, normalize veg. Read information on available water for irrigation from external (forcing) files if provided.  
+- initialize_atmos.c: Initialize irr_run and irr_with. Assign crop area fraction from veg_lib or from (sub)daily crop_frac files if provided, normalize veg. Read information on available water for irrigation from external (forcing) files if provided.
 - vicNl.h: Argument all_vars_struct * added
 - initialize_model_state.c: Argument all_vars_struct in list of arguments. Crop structures initialized
 - vicNl.c: Crop variables added

@@ -44,7 +44,7 @@ VEGPARAM_LAI     TRUE
 LAI_SRC          LAI_FROM_VEGPARAM
 VEGLIB           {vic_params}
 SNOW_BAND        1
-RESULT_DIR       {rundir}/
+RESULT_DIR       {rundir}/vic.testing.h0.nc
 
 N_OUTFILES  1
 OUTFILE     fluxes 21

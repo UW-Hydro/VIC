@@ -236,10 +236,6 @@ CONTAINS
     vclock%stop_flag = .FALSE.
     vclock%calendar = Copy_s2a(calendar)
 
-    WRITE(iulog, '(1x,2a,4i8)') subname,' EClock current time ',year,month,day,seconds
-    WRITE(iulog, *) subname,' vclock current time:'
-    CALL print_vic_clock(vclock)
-
     !--- VIC global parameter file (namelist)
     ! commenting out because it was yielding a drv_in <-- need to rethink this
     !IF(PRESENT(NLFilename)) THEN
@@ -255,6 +251,9 @@ CONTAINS
        CALL shr_sys_abort(subname//' ERROR: vic_cesm_init returned a errno /= 0')
     ENDIF
 
+    nx_global = global_domain%n_nx
+    ny_global = global_domain%n_ny
+
     ! initialize the gsmap, inputs are
     !   gindex = 1d array of global indices on the local mpi task
     !   lsize = the size of gindex (the number of gridcells on this local mpi task)
@@ -262,7 +261,7 @@ CONTAINS
     !   mpicom_lnd and LNDID from cdata above
     ! outputs are gsmap_lnd
     lsize = local_domain%ncells
-    gsize = global_domain%n_nx * global_domain%n_ny
+    gsize = nx_global * ny_global
 
     ! allocate domain arrays
     ALLOCATE(gindex(lsize))
@@ -368,11 +367,6 @@ CONTAINS
     vclock%current_dayseconds = seconds
     vclock%state_flag = seq_timemgr_RestartAlarmIsOn(EClock)
     vclock%stop_flag = seq_timemgr_StopAlarmIsOn(EClock)
-
-    ! tcraig, just for testing, this should probably be turned off after initial validation
-    WRITE(iulog, '(1x,2a,4i8)') subname,' EClock current time ',year,month,day,seconds
-    WRITE(iulog, *) subname,' vclock current time:'
-    CALL print_vic_clock(vclock)
 
     !--- get time of next radiation calc for time dependent albedo calc.
     !--- needed for time (solar angle) dependent albedo calculations.
@@ -515,6 +509,8 @@ CONTAINS
     !--- Local Variables
     INTEGER  :: i, lsize
     CHARACTER(len=*), PARAMETER :: subname = '(lnd_import_mct)'
+
+    lsize = mct_avect_lsize(x2l)
 
     DO i = 1, lsize
        x2l_vic_ptr(i)%x2l_Sa_z = x2l%rAttr(index_x2l_Sa_z, i)
@@ -692,26 +688,6 @@ CONTAINS
   !--------------------------------------------------------------------------
   !> @brief   Unpack the VIC domain structure
   !--------------------------------------------------------------------------
-  INTEGER FUNCTION f_index(c_index, nx, ny)
-
-    !--- INPUT/OUTPUT PARAMETERS:
-    INTEGER(C_SIZE_T), INTENT(in)   :: c_index, nx, ny
-
-    !--- LOCAL VARIABLES:
-    INTEGER               :: row, col
-    CHARACTER(len=*), PARAMETER :: subname = '(f_index)'
-
-    !--- C to fortran index translation
-    row = INT(c_index / nx)
-    col = MOD(c_index, nx)
-    f_index = 1 + row + ny * col
-
-    RETURN
-  END FUNCTION f_index
-
-  !--------------------------------------------------------------------------
-  !> @brief   Unpack the VIC domain structure
-  !--------------------------------------------------------------------------
   SUBROUTINE unpack_vic_domain(gindex, lon_data, lat_data, area_data, &
                                mask_data, frac_data)
 
@@ -733,19 +709,9 @@ CONTAINS
     !--- Associate locations pointer in local_domain structure
     CALL c_f_pointer(local_domain%locations, locations, [local_domain%ncells])
 
-    WRITE(iulog, *) subname, 'global_domain%n_nx', global_domain%n_nx
-    WRITE(iulog, *) subname, 'global_domain%n_ny', global_domain%n_ny
-
-    if (global_domain%n_nx <= 0) then
-       WRITE(iulog, *) '[WARN]', subname, 'global domain is not filled, duct tape begins here'
-       global_domain%n_nx = 275
-       global_domain%n_ny = 205
-    endif
-
     !--- Get domain information for each cell in local domain
     DO i = 1, local_domain%ncells
-       gindex(i) = f_index(locations(i)%io_idx, &
-                           global_domain%n_nx, global_domain%n_ny)
+       gindex(i) = locations(i)%io_idx + 1
        lon_data(i) = locations(i)%longitude
        lat_data(i) = locations(i)%latitude
        area_data(i) = locations(i)%area

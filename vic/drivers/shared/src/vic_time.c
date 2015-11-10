@@ -27,11 +27,14 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  *****************************************************************************/
 
-#include <math.h>
+ #include <float.h>
+ #include <math.h>
 
 #include <vic_def.h>
 #include <vic_run.h>
 #include <vic_driver_shared.h>
+
+#define small_offset 0.00005  // Small offset to handle precision issues in rounding
 
 /******************************************************************************
  * @brief   Get fractional day of month from dmy structure.
@@ -122,6 +125,9 @@ julian_day_from_dmy(dmy_struct        *dmy,
 
     // adjust for Julian calendar if necessary
     jd += B;
+
+    // add eps
+    jd += max(DBL_EPSILON, DBL_EPSILON * jd);
 
     return jd;
 }
@@ -246,7 +252,7 @@ dmy_julian_day(double             julian,
     // get the day (Z) and the fraction of the day (F)
     // add 0.000005 which is 452 ms in case of jd being after
     // second 23:59:59 of a day we want to round to the next day
-    Z = (int) round(julian + 0.00005);
+    Z = (int) round(julian + small_offset);
     F = (double) (julian + 0.5 - Z);
     if (calendar == CALENDAR_STANDARD || calendar == CALENDAR_GREGORIAN) {
         alpha = (int) ((((double) Z - 1867216.0) - 0.25) / 36524.25);
@@ -275,7 +281,7 @@ dmy_julian_day(double             julian,
     E = (int) (((double) (B - D)) / 30.6001);
 
     // Convert to date
-    day = B - D - (int) (30.6001 * (double) E) + F;
+    day = floor(B - D - floor(30.6001 * (double) E) + F + small_offset);
     if (day < 1) {
         day = 1;
     }
@@ -304,17 +310,17 @@ dmy_julian_day(double             julian,
         dayofyr += 1;
     }
 
-    eps = 1e-12 * (double) abs(Z);
-    if (eps < 1e-12) {
-        eps = 1e-12;
-    }
+    eps = max(DBL_EPSILON, DBL_EPSILON * julian);
 
-    second = (int) round((double) F * (double) (SEC_PER_DAY) + eps);
+    second = (int) round((double) F * (double) SEC_PER_DAY - eps);
     if (second < 0) {
-        second = 0;
+        log_err("second (%d) is negative", second);
+    }
+    if (second > SEC_PER_DAY) {
+        log_err("second (%d) is greater than %d", second, SEC_PER_DAY);
     }
 
-    dmy->day = day;
+    dmy->day = (int) day;
     dmy->day_in_year = dayofyr;
     dmy->month = month;
     dmy->year = year;

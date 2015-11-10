@@ -115,7 +115,8 @@ void setup_logging(int id);
     exit(1);
 #else
 #define log_err(M, ...) print_trace(); fprintf(LOG_DEST, \
-                                               "[ERROR] %s:%d: errno: %s: " M "\n", __FILE__, __LINE__, \
+                                               "[ERROR] %s:%d: errno: %s: " M "\n", \
+                                               __FILE__, __LINE__, \
                                                clean_errno(), ## __VA_ARGS__); \
     exit(1);
 #endif

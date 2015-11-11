@@ -175,7 +175,7 @@ create_MPI_global_struct_type(MPI_Datatype *mpi_type)
     MPI_Datatype *mpi_types;
 
     // nitems has to equal the number of elements in global_param_struct
-    nitems = 34;
+    nitems = 33;
     blocklengths = malloc(nitems * sizeof(*blocklengths));
     if (blocklengths == NULL) {
         log_err("Memory allocation error in create_MPI_global_struct_type().")
@@ -199,10 +199,6 @@ create_MPI_global_struct_type(MPI_Datatype *mpi_type)
 
     // reset i
     i = 0;
-
-    // double measure_h;
-    offsets[i] = offsetof(global_param_struct, measure_h);
-    mpi_types[i++] = MPI_DOUBLE;
 
     // double wind_h;
     offsets[i] = offsetof(global_param_struct, wind_h);

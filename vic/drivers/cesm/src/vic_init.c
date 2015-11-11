@@ -69,8 +69,7 @@ vic_init(void)
     debug("In vic_init");
 
     // allocate memory for variables to be read
-    dvar = (double *) malloc(local_domain.ncells *
-                             sizeof(double));
+    dvar = malloc(local_domain.ncells * sizeof(*dvar));
     if (dvar == NULL) {
         log_err("Memory allocation error in vic_init().");
     }

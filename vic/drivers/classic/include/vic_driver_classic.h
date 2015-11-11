@@ -41,8 +41,6 @@ FILE  *check_state_file(char *, size_t, size_t, int *);
 void close_files(filep_struct *, out_data_file_struct *, filenames_struct *);
 out_data_struct *create_output_list();
 void free_atmos(int nrecs, atmos_data_struct **atmos);
-void free_out_data_files(out_data_file_struct **);
-void free_out_data(out_data_struct **);
 void free_veg_hist(int nrecs, int nveg, veg_hist_struct ***veg_hist);
 void free_veglib(veg_lib_struct **);
 void get_force_type(char *, int, int *);
@@ -80,8 +78,6 @@ veg_lib_struct *read_veglib(FILE *, size_t *);
 veg_con_struct *read_vegparam(FILE *, int, size_t);
 void set_max_min_sec(double *, size_t, double *, double *);
 out_data_file_struct *set_output_defaults(out_data_struct *);
-int set_output_var(out_data_file_struct *, int, int, out_data_struct *, char *,
-                   int, char *, int, double);
 void write_data(out_data_file_struct *, out_data_struct *, dmy_struct *,
                 double);
 void write_forcing_file(atmos_data_struct *, int, out_data_file_struct *,

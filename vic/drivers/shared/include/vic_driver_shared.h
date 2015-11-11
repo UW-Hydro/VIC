@@ -147,6 +147,7 @@ void compute_treeline(atmos_data_struct *, dmy_struct *, double, double *,
                       bool *);
 void cmd_proc(int argc, char **argv, char *globalfilename);
 void compress_files(char string[]);
+out_data_struct *create_output_list(void);
 void get_current_datetime(char *cdt);
 double date2num(double origin, dmy_struct *date, double tzoffset,
                 unsigned short int calendar, unsigned short int time_units);
@@ -161,9 +162,13 @@ void display_current_settings(int);
 double fractional_day_from_dmy(dmy_struct *dmy);
 void free_all_vars(all_vars_struct *all_vars, int Nveg);
 void free_dmy(dmy_struct **dmy);
+void free_out_data_files(out_data_file_struct **);
+void free_out_data(out_data_struct **);
 void free_vegcon(veg_con_struct **veg_con);
 double get_dist(double lat1, double long1, double lat2, double long2);
 void get_parameters(FILE *paramfile);
+void init_output_list(out_data_struct *out_data, int write, char *format,
+                      int type, double mult);
 void initialize_filenames(void);
 void initialize_fileps(void);
 void initialize_global(void);
@@ -220,6 +225,8 @@ void print_veg_lib(veg_lib_struct *vlib, char carbon);
 void print_veg_var(veg_var_struct *vvar, size_t ncanopy);
 void print_version(char *);
 void print_usage(char *);
+int set_output_var(out_data_file_struct *, int, int, out_data_struct *, char *,
+                   int, char *, int, double);
 void soil_moisture_from_water_table(soil_con_struct *soil_con, size_t nlayers);
 int valid_date(unsigned short int calendar, dmy_struct *dmy);
 void validate_parameters(void);

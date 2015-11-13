@@ -84,10 +84,9 @@ get_global_domain(char          *nc_name,
     }
 
     // if MASTER_PROC
-    global_domain->locations_grid = (location_grid_struct *)
-                                    malloc(
-        global_domain->n_ny * global_domain->n_nx *
-        sizeof(location_grid_struct));
+    global_domain->locations_grid = calloc(
+        global_domain->n_ny * global_domain->n_nx,
+        sizeof(*global_domain->locations_grid));
     if (global_domain->locations_grid == NULL) {
         log_err("Memory allocation error in get_global_domain().");
     }

@@ -318,19 +318,20 @@ initialize_history_file(nc_file_struct *nc)
 
     // fill the netcdf variables lat/lon
     if (options.COORD_DIMS_OUT == 1) {
-        dvar = (double *) malloc(nc->ni_size * sizeof(double));
+        dvar = calloc(nc->ni_size, sizeof(*dvar));
 
         dcount[0] = nc->ni_size;
         for (i = 0; i < nc->ni_size; i++) {
             dvar[i] = (double) global_domain.locations_grid[i].longitude;
         }
-        status = nc_put_vara_double(nc->nc_id, lon_var_id, dstart, dcount, dvar);
+        status =
+            nc_put_vara_double(nc->nc_id, lon_var_id, dstart, dcount, dvar);
         if (status != NC_NOERR) {
             log_err("Error adding data to lon in %s", nc->fname);
         }
         free(dvar);
 
-        dvar = (double *) malloc(nc->nj_size * sizeof(double));
+        dvar = calloc(nc->nj_size, sizeof(*dvar));
         dcount[0] = nc->nj_size;
         for (i = 0; i < nc->nj_size; i++) {
             dvar[i] =
@@ -340,19 +341,21 @@ initialize_history_file(nc_file_struct *nc)
                                                         1))].latitude;
         }
 
-        status = nc_put_vara_double(nc->nc_id, lat_var_id, dstart, dcount, dvar);
+        status =
+            nc_put_vara_double(nc->nc_id, lat_var_id, dstart, dcount, dvar);
         if (status != NC_NOERR) {
             log_err("Error adding data to lon in %s", nc->fname);
         }
         free(dvar);
     }
     else if (options.COORD_DIMS_OUT == 2) {
-        dvar = (double *) malloc(nc->nj_size * nc->ni_size * sizeof(double));
+        dvar = calloc(nc->nj_size * nc->ni_size, sizeof(*dvar));
 
         for (i = 0; i < nc->nj_size * nc->ni_size; i++) {
             dvar[i] = (double) global_domain.locations_grid[i].longitude;
         }
-        status = nc_put_vara_double(nc->nc_id, lon_var_id, dstart, dcount, dvar);
+        status =
+            nc_put_vara_double(nc->nc_id, lon_var_id, dstart, dcount, dvar);
         if (status != NC_NOERR) {
             log_err("Error adding data to lon in %s", nc->fname);
         }
@@ -360,7 +363,8 @@ initialize_history_file(nc_file_struct *nc)
         for (i = 0; i < nc->nj_size * nc->ni_size; i++) {
             dvar[i] = (double) global_domain.locations_grid[i].latitude;
         }
-        status = nc_put_vara_double(nc->nc_id, lat_var_id, dstart, dcount, dvar);
+        status =
+            nc_put_vara_double(nc->nc_id, lat_var_id, dstart, dcount, dvar);
         if (status != NC_NOERR) {
             log_err("Error adding data to lat in %s", nc->fname);
         }

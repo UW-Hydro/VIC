@@ -841,9 +841,6 @@ get_global_param(FILE *gp)
             else if (strcasecmp("N_OUTFILES", optstr) == 0) {
                 ; // do nothing
             }
-            else if (strcasecmp("COORD_DIMS_OUT", optstr) == 0) {
-                ; // do nothing
-            }
             else if (strcasecmp("OUTFILE", optstr) == 0) {
                 ; // do nothing
             }

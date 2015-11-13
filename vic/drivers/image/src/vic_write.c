@@ -42,7 +42,6 @@ vic_write(void)
     extern nc_var_struct       nc_vars[N_OUTVAR_TYPES];
     extern size_t              current;
     extern global_param_struct global_param;
-
     int                        dimids[MAXDIMS];
     size_t                     i;
     size_t                     j;
@@ -53,7 +52,7 @@ vic_write(void)
     size_t                     dcount[MAXDIMS];
     size_t                     dstart[MAXDIMS];
     int                        nc_time;
-    
+
     if ((current +
          1) %
         (global_param.model_steps_per_day /
@@ -64,12 +63,12 @@ vic_write(void)
             ((current +
               1) /
              (global_param.model_steps_per_day /
-         global_param.output_steps_per_day)) - 1;
+              global_param.output_steps_per_day)) - 1;
 
         grid_size = global_domain.n_ny * global_domain.n_nx;
 
         // allocate memory for variables to be stored
-        dvar = (double *) malloc(local_domain.ncells * sizeof(double));
+        dvar = calloc(local_domain.ncells, sizeof(*dvar));
         if (dvar == NULL) {
             log_err("Memory allocation error in vic_write().");
         }
@@ -146,7 +145,8 @@ vic_write(void)
         dcount[0] = 1;
 
         if (global_param.output_steps_per_day == 1) {
-            dvar[0] = (double) (current + 1) / 24 - 1;
+            dvar[0] = (double) (current + 1) /
+                      global_param.model_steps_per_day - 1;
         }
         else {
             dvar[0] = (double) current;

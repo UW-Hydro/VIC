@@ -35,7 +35,8 @@ void
 alloc_atmos(int                 nrecs,
             atmos_data_struct **atmos)
 {
-    int i;
+    extern option_struct options;
+    int                  i;
 
     *atmos = (atmos_data_struct *) calloc(nrecs, sizeof(atmos_data_struct));
     if (*atmos == NULL) {
@@ -47,32 +48,12 @@ alloc_atmos(int                 nrecs,
         if ((*atmos)[i].air_temp == NULL) {
             log_err("Memory allocation error in alloc_atmos().");
         }
-        (*atmos)[i].Catm = (double *) calloc(NR + 1, sizeof(double));
-        if ((*atmos)[i].Catm == NULL) {
-            log_err("Memory allocation error in alloc_atmos().");
-        }
-        (*atmos)[i].channel_in = (double *) calloc(NR + 1, sizeof(double));
-        if ((*atmos)[i].channel_in == NULL) {
-            log_err("Memory allocation error in alloc_atmos().");
-        }
-        (*atmos)[i].coszen = (double *) calloc(NR + 1, sizeof(double));
-        if ((*atmos)[i].coszen == NULL) {
-            log_err("Memory allocation error in alloc_atmos().");
-        }
         (*atmos)[i].density = (double *) calloc(NR + 1, sizeof(double));
         if ((*atmos)[i].density == NULL) {
             log_err("Memory allocation error in alloc_atmos().");
         }
-        (*atmos)[i].fdir = (double *) calloc(NR + 1, sizeof(double));
-        if ((*atmos)[i].fdir == NULL) {
-            log_err("Memory allocation error in alloc_atmos().");
-        }
         (*atmos)[i].longwave = (double *) calloc(NR + 1, sizeof(double));
         if ((*atmos)[i].longwave == NULL) {
-            log_err("Memory allocation error in alloc_atmos().");
-        }
-        (*atmos)[i].par = (double *) calloc(NR + 1, sizeof(double));
-        if ((*atmos)[i].par == NULL) {
             log_err("Memory allocation error in alloc_atmos().");
         }
         (*atmos)[i].prec = (double *) calloc(NR + 1, sizeof(double));
@@ -91,10 +72,6 @@ alloc_atmos(int                 nrecs,
         if ((*atmos)[i].snowflag == NULL) {
             log_err("Memory allocation error in alloc_atmos().");
         }
-        (*atmos)[i].tskc = (double *) calloc(NR + 1, sizeof(double));
-        if ((*atmos)[i].tskc == NULL) {
-            log_err("Memory allocation error in alloc_atmos().");
-        }
         (*atmos)[i].vp = (double *) calloc(NR + 1, sizeof(double));
         if ((*atmos)[i].vp == NULL) {
             log_err("Memory allocation error in alloc_atmos().");
@@ -107,6 +84,26 @@ alloc_atmos(int                 nrecs,
         if ((*atmos)[i].wind == NULL) {
             log_err("Memory allocation error in alloc_atmos().");
         }
+        if (options.LAKES) {
+            (*atmos)[i].channel_in = (double *) calloc(NR + 1, sizeof(double));
+            if ((*atmos)[i].channel_in == NULL) {
+                log_err("Memory allocation error in alloc_atmos().");
+            }
+        }
+        if (options.CARBON) {
+            (*atmos)[i].Catm = (double *) calloc(NR + 1, sizeof(double));
+            if ((*atmos)[i].Catm == NULL) {
+                log_err("Memory allocation error in alloc_atmos().");
+            }
+            (*atmos)[i].fdir = (double *) calloc(NR + 1, sizeof(double));
+            if ((*atmos)[i].fdir == NULL) {
+                log_err("Memory allocation error in alloc_atmos().");
+            }
+            (*atmos)[i].par = (double *) calloc(NR + 1, sizeof(double));
+            if ((*atmos)[i].par == NULL) {
+                log_err("Memory allocation error in alloc_atmos().");
+            }
+        }
     }
 }
 
@@ -117,7 +114,8 @@ void
 free_atmos(int                 nrecs,
            atmos_data_struct **atmos)
 {
-    int i;
+    extern option_struct options;
+    int                  i;
 
     if (*atmos == NULL) {
         return;
@@ -125,21 +123,23 @@ free_atmos(int                 nrecs,
 
     for (i = 0; i < nrecs; i++) {
         free((*atmos)[i].air_temp);
-        free((*atmos)[i].Catm);
-        free((*atmos)[i].channel_in);
-        free((*atmos)[i].coszen);
         free((*atmos)[i].density);
-        free((*atmos)[i].fdir);
         free((*atmos)[i].longwave);
-        free((*atmos)[i].par);
         free((*atmos)[i].prec);
         free((*atmos)[i].pressure);
         free((*atmos)[i].shortwave);
         free((*atmos)[i].snowflag);
-        free((*atmos)[i].tskc);
         free((*atmos)[i].vp);
         free((*atmos)[i].vpd);
         free((*atmos)[i].wind);
+        if (options.LAKES) {
+            free((*atmos)[i].channel_in);
+        }
+        if (options.CARBON) {
+            free((*atmos)[i].Catm);
+            free((*atmos)[i].fdir);
+            free((*atmos)[i].par);
+        }
     }
 
     free(*atmos);

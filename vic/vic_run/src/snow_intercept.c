@@ -133,7 +133,12 @@ snow_intercept(double             Dt,
     Press = atmos->pressure[hidx];
     Vpd = atmos->vpd[hidx];
     shortwave = atmos->shortwave[hidx];
-    Catm = atmos->Catm[hidx];
+    if (options.CARBON) {
+        Catm = atmos->Catm[hidx];
+    }
+    else {
+        Catm = MISSING;
+    }
 
     /* Initialize Tfoliage_fbflag */
     *Tfoliage_fbflag = 0;

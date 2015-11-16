@@ -170,7 +170,6 @@ create_output_list()
     strcpy(out_data[OUT_AERO_RESIST2].varname, "OUT_AERO_RESIST2");    /* overstory aerodynamic resistance [m/s] */
     strcpy(out_data[OUT_AIR_TEMP].varname, "OUT_AIR_TEMP");            /* air temperature [C] */
     strcpy(out_data[OUT_CATM].varname, "OUT_CATM");                    /* atmospheric CO2 concentration [ppm] */
-    strcpy(out_data[OUT_COSZEN].varname, "OUT_COSZEN");                /* cosine of solar zenith angle [fraction] */
     strcpy(out_data[OUT_DENSITY].varname, "OUT_DENSITY");              /* near-surface atmospheric density [kg/m3] */
     strcpy(out_data[OUT_FDIR].varname, "OUT_FDIR");                    /* fraction of incoming shortwave that is direct [fraction] */
     strcpy(out_data[OUT_LAI].varname, "OUT_LAI");                      /* leaf area index [m2/m2] */
@@ -181,7 +180,6 @@ create_output_list()
     strcpy(out_data[OUT_REL_HUMID].varname, "OUT_REL_HUMID");          /* relative humidity [fraction]*/
     strcpy(out_data[OUT_SHORTWAVE].varname, "OUT_SHORTWAVE");          /* incoming shortwave [W/m2] */
     strcpy(out_data[OUT_SURF_COND].varname, "OUT_SURF_COND");          /* surface conductance [m/s] */
-    strcpy(out_data[OUT_TSKC].varname, "OUT_TSKC");                    /* cloud cover fraction [fraction] */
     strcpy(out_data[OUT_VEGCOVER].varname, "OUT_VEGCOVER");            /* fractional area of plants within veg tile [fraction] */
     strcpy(out_data[OUT_VP].varname, "OUT_VP");                        /* near surface vapor pressure [kPa] */
     strcpy(out_data[OUT_VPD].varname, "OUT_VPD");                      /* near surface vapor pressure deficit [kPa] */

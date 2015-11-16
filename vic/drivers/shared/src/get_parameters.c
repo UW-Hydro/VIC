@@ -63,13 +63,6 @@ get_parameters(FILE *paramfile)
             else if (strcasecmp("GAUGE_HEIGHT", optstr) == 0) {
                 sscanf(cmdstr, "%*s %lf", &param.GAUGE_HEIGHT);
             }
-            // Default Wind Speed
-            else if (strcasecmp("WIND_SPEED_DEFAULT", optstr) == 0) {
-                sscanf(cmdstr, "%*s %lf", &param.WIND_SPEED_DEFAULT);
-            }
-            else if (strcasecmp("WIND_SPEED_MIN", optstr) == 0) {
-                sscanf(cmdstr, "%*s %lf", &param.WIND_SPEED_MIN);
-            }
             // Huge Resistance Term
             else if (strcasecmp("HUGE_RESIST", optstr) == 0) {
                 sscanf(cmdstr, "%*s %lf", &param.HUGE_RESIST);
@@ -123,55 +116,6 @@ get_parameters(FILE *paramfile)
             }
             else if (strcasecmp("CANOPY_VPDMINFACTOR", optstr) == 0) {
                 sscanf(cmdstr, "%*s %lf", &param.CANOPY_VPDMINFACTOR);
-            }
-            // MTCLIM Parameters
-            else if (strcasecmp("MTCLIM_SOLAR_CONSTANT", optstr) == 0) {
-                sscanf(cmdstr, "%*s %lf", &param.MTCLIM_SOLAR_CONSTANT);
-            }
-            else if (strcasecmp("MTCLIM_TDAYCOEF", optstr) == 0) {
-                sscanf(cmdstr, "%*s %lf", &param.MTCLIM_TDAYCOEF);
-            }
-            else if (strcasecmp("MTCLIM_SNOW_TCRIT", optstr) == 0) {
-                sscanf(cmdstr, "%*s %lf", &param.MTCLIM_SNOW_TCRIT);
-            }
-            else if (strcasecmp("MTCLIM_SNOW_TRATE", optstr) == 0) {
-                sscanf(cmdstr, "%*s %lf", &param.MTCLIM_SNOW_TRATE);
-            }
-            else if (strcasecmp("MTCLIM_TBASE", optstr) == 0) {
-                sscanf(cmdstr, "%*s %lf", &param.MTCLIM_TBASE);
-            }
-            else if (strcasecmp("MTCLIM_ABASE", optstr) == 0) {
-                sscanf(cmdstr, "%*s %lf", &param.MTCLIM_ABASE);
-            }
-            else if (strcasecmp("MTCLIM_C", optstr) == 0) {
-                sscanf(cmdstr, "%*s %lf", &param.MTCLIM_C);
-            }
-            else if (strcasecmp("MTCLIM_B0", optstr) == 0) {
-                sscanf(cmdstr, "%*s %lf", &param.MTCLIM_B0);
-            }
-            else if (strcasecmp("MTCLIM_B1", optstr) == 0) {
-                sscanf(cmdstr, "%*s %lf", &param.MTCLIM_B1);
-            }
-            else if (strcasecmp("MTCLIM_B2", optstr) == 0) {
-                sscanf(cmdstr, "%*s %lf", &param.MTCLIM_B2);
-            }
-            else if (strcasecmp("MTCLIM_RAIN_SCALAR", optstr) == 0) {
-                sscanf(cmdstr, "%*s %lf", &param.MTCLIM_RAIN_SCALAR);
-            }
-            else if (strcasecmp("MTCLIM_DIF_ALB", optstr) == 0) {
-                sscanf(cmdstr, "%*s %lf", &param.MTCLIM_DIF_ALB);
-            }
-            else if (strcasecmp("MTCLIM_SC_INT", optstr) == 0) {
-                sscanf(cmdstr, "%*s %lf", &param.MTCLIM_SC_INT);
-            }
-            else if (strcasecmp("MTCLIM_SC_SLOPE", optstr) == 0) {
-                sscanf(cmdstr, "%*s %lf", &param.MTCLIM_SC_SLOPE);
-            }
-            else if (strcasecmp("MTCLIM_SRADDT", optstr) == 0) {
-                sscanf(cmdstr, "%*s %lf", &param.MTCLIM_SRADDT);
-            }
-            else if (strcasecmp("MTCLIM_SW_PREC_THRESH", optstr) == 0) {
-                sscanf(cmdstr, "%*s %lf", &param.MTCLIM_SW_PREC_THRESH);
             }
             // Lake Parameters
             else if (strcasecmp("LAKE_TMELT", optstr) == 0) {
@@ -249,13 +193,6 @@ get_parameters(FILE *paramfile)
             }
             else if (strcasecmp("SVP_C", optstr) == 0) {
                 sscanf(cmdstr, "%*s %lf", &param.SVP_C);
-            }
-            // Carbon Parameters
-            else if (strcasecmp("CARBON_CATMCURRENT", optstr) == 0) {
-                sscanf(cmdstr, "%*s %lf", &param.CARBON_CATMCURRENT);
-            }
-            else if (strcasecmp("CARBON_SW2PAR", optstr) == 0) {
-                sscanf(cmdstr, "%*s %lf", &param.CARBON_SW2PAR);
             }
             // Photosynthesis Parameters
             else if (strcasecmp("PHOTO_OMEGA", optstr) == 0) {
@@ -581,14 +518,6 @@ validate_parameters()
     if (!(param.GAUGE_HEIGHT >= 0 && param.GAUGE_HEIGHT <= 100)) {
         log_err("GAUGE_HEIGHT must be defined on the interval [0,100] (m)")
     }
-    // Default Wind Speed
-    if (!param.WIND_SPEED_DEFAULT > 0.) {
-        log_err(
-            "WIND_SPEED_DEFAULT must be defined on the interval [0, inf) (m/s)");
-    }
-    if (!(param.WIND_SPEED_MIN >= 0.)) {
-        log_err("WIND_SPEED_MIN must be defined on the interval [0, inf) (m/s)");
-    }
     // Huge Resistance Term
     if (!(param.HUGE_RESIST >= 0.)) {
         log_err("HUGE_RESIST must be defined on the interval [0, inf) (s/m)");
@@ -649,39 +578,7 @@ validate_parameters()
         log_err(
             "CANOPY_VPDMINFACTOR must be defined on the interval [0, inf) (-)");
     }
-    // MTCLIM Parameters
-    if (!(param.MTCLIM_SOLAR_CONSTANT >= 0.)) {
-        log_err(
-            "MTCLIM_SNOW_TRATE must be defined on the interval [0, inf) (W/m2)");
-    }
-    // MTCLIM_TDAYCOEF - Currently, no constraints
-    // MTCLIM_SNOW_TCRIT - Currently, no constraints
-    // MTCLIM_SNOW_TRATE - Currently, no constraints
-    // MTCLIM_TBASE - Currently, no constraints
-    // MTCLIM_ABASE - Currently, no constraints
-    // MTCLIM_C - Currently, no constraints
-    // MTCLIM_B0 - Currently, no constraints
-    // MTCLIM_B1 - Currently, no constraints
-    // MTCLIM_B2 - Currently, no constraints
-    // MTCLIM_RAIN_SCALAR - Currently, no constraints
-    if (!(param.MTCLIM_DIF_ALB >= 0 && param.MTCLIM_DIF_ALB <= 1)) {
-        log_err("MTCLIM_DIF_ALB must be defined on the interval [0,1] (-)")
-    }
-    if (!(param.MTCLIM_DIF_ALB >= 0 && param.MTCLIM_DIF_ALB <= 1)) {
-        log_err("MTCLIM_DIF_ALB must be defined on the interval [0,1] (-)")
-    }
-    if (!(param.MTCLIM_SC_INT >= 0.)) {
-        log_err(
-            "MTCLIM_SC_INT must be defined on the interval [0, inf) (MJ/m2/day)");
-    }
-    // MTCLIM_SC_SLOPE - Currently, no constraints
-    if (!(param.MTCLIM_SRADDT >= 0 && param.MTCLIM_SRADDT <= SEC_PER_DAY)) {
-        log_err(
-            "MTCLIM_SRADDT must be defined on the interval [0, 86400) (seconds)");
-    }
-    if (!(param.MTCLIM_SW_PREC_THRESH >= 0.)) {
-        log_err("MTCLIM_SRADDT must be defined on the interval [0, inf) (mm)");
-    }
+
     // Lake Parameters
     // LAKE_TMELT - Currently, no constraints
     if (!(param.LAKE_MAX_SURFACE >= 0.)) {
@@ -723,14 +620,6 @@ validate_parameters()
     }
     if (!(param.SVP_C >= 0.)) {
         log_err("SVP_C must be defined on the interval [0, inf) (kPa)");
-    }
-    // Carbon Parameters
-    if (!(param.CARBON_CATMCURRENT >= 0.)) {
-        log_err(
-            "CARBON_CATMCURRENT must be defined on the interval [0, inf) (ppm)");
-    }
-    if (!(param.CARBON_SW2PAR >= 0.)) {
-        log_err("CARBON_SW2PAR must be defined on the interval [0, inf) (W/m2)");
     }
     // Photosynthesis Parameters
     // PHOTO_OMEGA - Currently, no constraints

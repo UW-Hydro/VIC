@@ -27,7 +27,6 @@ FORCEHOUR           00
 GRID_DECIMAL        4
 WIND_H              10.0
 MEASURE_H           2.0
-ALMA_INPUT          FALSE
 SOIL                $test_data_dir/Stehekin/parameters/soil_param.STEHE
 BASEFLOW            ARNO
 JULY_TAVG_SUPPLIED  FALSE

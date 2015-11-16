@@ -133,6 +133,7 @@ void alloc_atmos(atmos_data_struct *atmos);
 void alloc_veg_hist(veg_hist_struct *veg_hist);
 double air_density(double t, double p);
 double average(double *ar, size_t n);
+out_data_struct *create_output_list(void);
 void free_atmos(atmos_data_struct *atmos);
 void free_veg_hist(veg_hist_struct *veg_hist);
 size_t get_global_domain(char *fname, domain_struct *global_domain);
@@ -168,7 +169,6 @@ int put_nc_field_double(char *nc_name, bool *open, int *nc_id, double fillval,
 int put_nc_field_int(char *nc_name, bool *open, int *nc_id, int fillval,
                      int *dimids, int ndims, char *var_name, size_t *start,
                      size_t *count, int *var);
-double q_to_vp(double q, double p);
 void sprint_location(char *str, location_struct *loc);
 void vic_alloc(void);
 void vic_nc_info(nc_file_struct *nc_hist_file, out_data_struct **out_data,
@@ -182,7 +182,5 @@ void vic_restore(void);
 void vic_start(void);
 void vic_store(void);
 void vic_write(void);
-char will_it_snow(double *t, double t_offset, double max_snow_temp,
-                  double *prcp, size_t n);
 
 #endif

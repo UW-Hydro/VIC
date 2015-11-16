@@ -478,9 +478,6 @@ print_option(option_struct *option)
     fprintf(LOG_DEST, "\tJULY_TAVG_SUPPLIED   : %d\n",
             option->JULY_TAVG_SUPPLIED);
     fprintf(LOG_DEST, "\tLAKES                : %d\n", option->LAKES);
-    fprintf(LOG_DEST, "\tLW_CLOUD             : %d\n", option->LW_CLOUD);
-    fprintf(LOG_DEST, "\tLW_TYPE              : %d\n", option->LW_TYPE);
-    fprintf(LOG_DEST, "\tMTCLIM_SWE_CORR      : %d\n", option->MTCLIM_SWE_CORR);
     fprintf(LOG_DEST, "\tNcanopy              : %zu\n", option->Ncanopy);
     fprintf(LOG_DEST, "\tNfrost               : %zu\n", option->Nfrost);
     fprintf(LOG_DEST, "\tNlakenode            : %zu\n", option->Nlakenode);
@@ -488,7 +485,6 @@ print_option(option_struct *option)
     fprintf(LOG_DEST, "\tNnode                : %zu\n", option->Nnode);
     fprintf(LOG_DEST, "\tNOFLUX               : %d\n", option->NOFLUX);
     fprintf(LOG_DEST, "\tNVEGTYPES            : %zu\n", option->NVEGTYPES);
-    fprintf(LOG_DEST, "\tPLAPSE               : %d\n", option->PLAPSE);
     fprintf(LOG_DEST, "\tRC_MODE              : %d\n", option->RC_MODE);
     fprintf(LOG_DEST, "\tROOT_ZONES           : %zu\n", option->ROOT_ZONES);
     fprintf(LOG_DEST, "\tQUICK_FLUX           : %d\n", option->QUICK_FLUX);
@@ -500,14 +496,17 @@ print_option(option_struct *option)
     fprintf(LOG_DEST, "\tSPATIAL_FROST        : %d\n", option->SPATIAL_FROST);
     fprintf(LOG_DEST, "\tSPATIAL_SNOW         : %d\n", option->SPATIAL_SNOW);
     fprintf(LOG_DEST, "\tTFALLBACK            : %d\n", option->TFALLBACK);
-    fprintf(LOG_DEST, "\tVP_INTERP            : %d\n", option->VP_INTERP);
-    fprintf(LOG_DEST, "\tVP_ITER              : %d\n", option->VP_ITER);
-    fprintf(LOG_DEST, "\tALMA_INPUT           : %d\n", option->ALMA_INPUT);
     fprintf(LOG_DEST, "\tBASEFLOW             : %d\n", option->BASEFLOW);
     fprintf(LOG_DEST, "\tGRID_DECIMAL         : %d\n", option->GRID_DECIMAL);
     fprintf(LOG_DEST, "\tVEGLIB_PHOTO         : %d\n", option->VEGLIB_PHOTO);
+    fprintf(LOG_DEST, "\tVEGLIB_VEGCOVER      : %d\n", option->VEGLIB_VEGCOVER);
+    fprintf(LOG_DEST, "\tVEGPARAM_ALB         : %d\n", option->VEGPARAM_ALB);
     fprintf(LOG_DEST, "\tVEGPARAM_LAI         : %d\n", option->VEGPARAM_LAI);
+    fprintf(LOG_DEST, "\tVEGPARAM_VEGCOVER    : %d\n",
+            option->VEGPARAM_VEGCOVER);
+    fprintf(LOG_DEST, "\tALB_SRC              : %d\n", option->ALB_SRC);
     fprintf(LOG_DEST, "\tLAI_SRC              : %d\n", option->LAI_SRC);
+    fprintf(LOG_DEST, "\tVEGCOVER_SRC         : %d\n", option->VEGCOVER_SRC);
     fprintf(LOG_DEST, "\tLAKE_PROFILE         : %d\n", option->LAKE_PROFILE);
     fprintf(LOG_DEST, "\tORGANIC_FRACT        : %d\n", option->ORGANIC_FRACT);
     fprintf(LOG_DEST, "\tBINARY_STATE_FILE    : %d\n",
@@ -519,7 +518,6 @@ print_option(option_struct *option)
     fprintf(LOG_DEST, "\tCOMPRESS             : %d\n", option->COMPRESS);
     fprintf(LOG_DEST, "\tMOISTFRACT           : %d\n", option->MOISTFRACT);
     fprintf(LOG_DEST, "\tNoutfiles            : %zu\n", option->Noutfiles);
-    fprintf(LOG_DEST, "\tOUTPUT_FORCE         : %d\n", option->OUTPUT_FORCE);
     fprintf(LOG_DEST, "\tPRT_HEADER           : %d\n", option->PRT_HEADER);
     fprintf(LOG_DEST, "\tPRT_SNOW_BAND        : %d\n", option->PRT_SNOW_BAND);
 }
@@ -601,9 +599,6 @@ print_parameters(parameters_struct *param)
     fprintf(LOG_DEST, "parameters:\n");
     fprintf(LOG_DEST, "\tLAPSE_RATE: %.4f\n", param->LAPSE_RATE);
     fprintf(LOG_DEST, "\tGAUGE_HEIGHT: %.4f\n", param->GAUGE_HEIGHT);
-    fprintf(LOG_DEST, "\tWIND_SPEED_DEFAULT: %.4f\n",
-            param->WIND_SPEED_DEFAULT);
-    fprintf(LOG_DEST, "\tWIND_SPEED_MIN: %.4f\n", param->WIND_SPEED_MIN);
     fprintf(LOG_DEST, "\tHUGE_RESIST: %.4f\n", param->HUGE_RESIST);
     fprintf(LOG_DEST, "\tALBEDO_BARE_SOIL: %.4f\n", param->ALBEDO_BARE_SOIL);
     fprintf(LOG_DEST, "\tALBEDO_H20_SURF: %.4f\n", param->ALBEDO_H20_SURF);
@@ -625,25 +620,6 @@ print_parameters(parameters_struct *param)
     fprintf(LOG_DEST, "\tCANOPY_RSMAX: %.4f\n", param->CANOPY_RSMAX);
     fprintf(LOG_DEST, "\tCANOPY_VPDMINFACTOR: %.4f\n",
             param->CANOPY_VPDMINFACTOR);
-    fprintf(LOG_DEST, "\tMTCLIM_SOLAR_CONSTANT: %.4f\n",
-            param->MTCLIM_SOLAR_CONSTANT);
-    fprintf(LOG_DEST, "\tMTCLIM_TDAYCOEF: %.4f\n", param->MTCLIM_TDAYCOEF);
-    fprintf(LOG_DEST, "\tMTCLIM_SNOW_TCRIT: %.4f\n", param->MTCLIM_SNOW_TCRIT);
-    fprintf(LOG_DEST, "\tMTCLIM_SNOW_TRATE: %.4f\n", param->MTCLIM_SNOW_TRATE);
-    fprintf(LOG_DEST, "\tMTCLIM_TBASE: %.4f\n", param->MTCLIM_TBASE);
-    fprintf(LOG_DEST, "\tMTCLIM_ABASE: %.4f\n", param->MTCLIM_ABASE);
-    fprintf(LOG_DEST, "\tMTCLIM_C: %.4f\n", param->MTCLIM_C);
-    fprintf(LOG_DEST, "\tMTCLIM_B0: %.4f\n", param->MTCLIM_B0);
-    fprintf(LOG_DEST, "\tMTCLIM_B1: %.4f\n", param->MTCLIM_B1);
-    fprintf(LOG_DEST, "\tMTCLIM_B2: %.4f\n", param->MTCLIM_B2);
-    fprintf(LOG_DEST, "\tMTCLIM_RAIN_SCALAR: %.4f\n",
-            param->MTCLIM_RAIN_SCALAR);
-    fprintf(LOG_DEST, "\tMTCLIM_DIF_ALB: %.4f\n", param->MTCLIM_DIF_ALB);
-    fprintf(LOG_DEST, "\tMTCLIM_SC_INT: %.4f\n", param->MTCLIM_SC_INT);
-    fprintf(LOG_DEST, "\tMTCLIM_SC_SLOPE: %.4f\n", param->MTCLIM_SC_SLOPE);
-    fprintf(LOG_DEST, "\tMTCLIM_SRADDT: %.4f\n", param->MTCLIM_SRADDT);
-    fprintf(LOG_DEST, "\tMTCLIM_SW_PREC_THRESH: %.4f\n",
-            param->MTCLIM_SW_PREC_THRESH);
     fprintf(LOG_DEST, "\tLAKE_TMELT: %.4f\n", param->LAKE_TMELT);
     fprintf(LOG_DEST, "\tLAKE_MAX_SURFACE: %.4f\n", param->LAKE_MAX_SURFACE);
     fprintf(LOG_DEST, "\tLAKE_BETA: %.4f\n", param->LAKE_BETA);
@@ -669,9 +645,6 @@ print_parameters(parameters_struct *param)
     fprintf(LOG_DEST, "\tSVP_A: %.4f\n", param->SVP_A);
     fprintf(LOG_DEST, "\tSVP_B: %.4f\n", param->SVP_B);
     fprintf(LOG_DEST, "\tSVP_C: %.4f\n", param->SVP_C);
-    fprintf(LOG_DEST, "\tCARBON_CATMCURRENT: %.4f\n",
-            param->CARBON_CATMCURRENT);
-    fprintf(LOG_DEST, "\tCARBON_SW2PAR: %.4f\n", param->CARBON_SW2PAR);
     fprintf(LOG_DEST, "\tPHOTO_OMEGA: %.4f\n", param->PHOTO_OMEGA);
     fprintf(LOG_DEST, "\tPHOTO_LAIMAX: %.4f\n", param->PHOTO_LAIMAX);
     fprintf(LOG_DEST, "\tPHOTO_LAILIMIT: %.4f\n", param->PHOTO_LAILIMIT);

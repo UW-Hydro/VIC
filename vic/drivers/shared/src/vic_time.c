@@ -314,10 +314,7 @@ dmy_julian_day(double             julian,
 
     second = (int) round((double) F * (double) SEC_PER_DAY - eps);
     if (second < 0) {
-        log_err("second (%d) is negative", second);
-    }
-    if (second > SEC_PER_DAY) {
-        log_err("second (%d) is greater than %d", second, SEC_PER_DAY);
+        second = 0.;
     }
 
     dmy->day = (int) day;

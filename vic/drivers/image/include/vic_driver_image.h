@@ -131,9 +131,10 @@ typedef struct {
 void add_nveg_to_global_domain(char *nc_name, domain_struct *global_domain);
 void alloc_atmos(atmos_data_struct *atmos);
 void alloc_veg_hist(veg_hist_struct *veg_hist);
+double air_density(double t, double p);
+double average(double *ar, size_t n);
 out_data_struct *create_output_list(void);
 void free_atmos(atmos_data_struct *atmos);
-void free_out_data(out_data_struct **out_data);
 void free_veg_hist(veg_hist_struct *veg_hist);
 size_t get_global_domain(char *fname, domain_struct *global_domain);
 void get_global_param(FILE *);
@@ -144,8 +145,6 @@ int get_nc_field_float(char *nc_name, char *var_name, size_t *start,
                        size_t *count, float *var);
 int get_nc_field_int(char *nc_name, char *var_name, size_t *start,
                      size_t *count, int *var);
-void init_output_list(out_data_struct *out_data, int write, char *format,
-                      int type, double mult);
 void initialize_domain(domain_struct *domain);
 void initialize_energy(energy_bal_struct **energy, size_t nveg);
 void initialize_history_file(nc_file_struct *nc);

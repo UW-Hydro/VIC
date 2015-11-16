@@ -192,7 +192,7 @@ vic_force(void)
             // vapor pressure deficit
             atmos[i].vpd[j] = svp(atmos[i].air_temp[j]) - atmos[i].vp[j];
             // photosynthetically active radiation
-            atmos[i].par[j] = param.CARBON_SW2PAR * atmos[i].shortwave[j];
+            // atmos[i].par[j] = param.CARBON_SW2PAR * atmos[i].shortwave[j];
             // air density
             atmos[i].density[j] = air_density(atmos[i].air_temp[j],
                                               atmos[i].pressure[j]);
@@ -252,100 +252,6 @@ vic_force(void)
             }
         }
     }
-}
-
-/******************************************************************************
- * @brief    calculate 1d average
- *****************************************************************************/
-double
-average(double *ar,
-        size_t  n)
-{
-    size_t i;
-    double sum = 0.;
-
-    if (n <= 0) {
-        log_err("Error in calc_average: divide by zero or negative");
-    }
-    else if (n == 1) {
-        return ar[0];
-    }
-    else {
-        for (i = 0; i < n; i++) {
-            sum += ar[i];
-        }
-    }
-
-    return sum / n;
-}
-
-/******************************************************************************
- * @brief   convert specific humidity (q) to vapor pressure (vp) based on
- *          pressure (p)
- *
- * @param q specific humidity
- * @param p pressure
- *
- * @return vp vapor pressure (units are the same as p)
- *****************************************************************************/
-double
-q_to_vp(double q,
-        double p)
-{
-    double vp;
-
-    // full equation
-    // vp = q/(q+CONST_EPS*(1-q))*p;
-
-    // approximation used in VIC
-    vp = q * p / CONST_EPS;
-
-    return vp;
-}
-
-/******************************************************************************
- * @brief   convert surface pressure (kPa) to density (kg/m3) based on
- *          pressure (p), vapor pressure (vp), and temperature
- *
- * @param t temperature
- * @param p pressure
- *
- * @return rho surface pressure
- *****************************************************************************/
-double
-air_density(double t,
-            double p)
-{
-    double rho;
-
-    // full equation
-    // rho = (p*1000)/(Rd * *t+CONST_TKFRZ) + (pv*1000)/(Rv * *t+CONST_TKFRZ);
-
-    // approximation used in VIC
-    rho = 0.003486 * p / (275.0 + t);
-
-    return rho;
-}
-
-/******************************************************************************
- * @brief   return 1 if it will snow, otherwise return 0
- *****************************************************************************/
-char
-will_it_snow(double *t,
-             double  t_offset,
-             double  max_snow_temp,
-             double *prcp,
-             size_t  n)
-{
-    size_t i;
-
-    for (i = 0; i < n; i++) {
-        if ((t[i] + t_offset) < max_snow_temp && prcp[i] > 0.) {
-            return 1;
-        }
-    }
-
-    return 0;
 }
 
 /******************************************************************************

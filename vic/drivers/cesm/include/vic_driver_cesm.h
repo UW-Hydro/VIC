@@ -37,12 +37,9 @@ void add_nveg_to_global_domain(char *nc_name, domain_struct *global_domain);
 void advance_time(void);
 void alloc_atmos(atmos_data_struct *atmos);
 void alloc_veg_hist(veg_hist_struct *veg_hist);
-double air_density(double t, double p);
 void assert_time_insync(vic_clock *vclock, dmy_struct *dmy);
-double average(double *ar, size_t n);
 out_data_struct *create_output_list(void);
 void free_atmos(atmos_data_struct *atmos);
-void free_out_data(out_data_struct **out_data);
 void free_veg_hist(veg_hist_struct *veg_hist);
 size_t get_global_domain(char *fname, domain_struct *global_domain);
 void get_global_param(FILE *);
@@ -53,8 +50,6 @@ int get_nc_field_float(char *nc_name, char *var_name, size_t *start,
                        size_t *count, float *var);
 int get_nc_field_int(char *nc_name, char *var_name, size_t *start,
                      size_t *count, int *var);
-void init_output_list(out_data_struct *out_data, int write, char *format,
-                      int type, double mult);
 void initialize_cesm_time(void);
 void initialize_domain(domain_struct *domain);
 void initialize_energy(energy_bal_struct **energy, size_t nveg);
@@ -87,7 +82,6 @@ int put_nc_field_int(char *nc_name, bool *open, int *nc_id, int fillval,
                      int *dimids, int ndims, char *var_name, size_t *start,
                      size_t *count, int *var);
 void print_x2l_data(x2l_data_struct *x2l);
-double q_to_vp(double q, double p);
 void read_rpointer_file(char *fname);
 void sprint_location(char *str, location_struct *loc);
 unsigned short int start_type_from_char(char *start_str);
@@ -112,8 +106,6 @@ void vic_restore(char *runtype_str);
 void vic_start(vic_clock *vclock, case_metadata *cmeta);
 void vic_store(void);
 void vic_write(void);
-char will_it_snow(double *t, double t_offset, double max_snow_temp,
-                  double *prcp, size_t n);
 void write_rpointer_file(char *fname);
 
 #endif

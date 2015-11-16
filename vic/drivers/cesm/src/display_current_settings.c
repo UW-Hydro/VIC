@@ -177,30 +177,6 @@ display_current_settings(int mode)
     else if (options.GRND_FLUX_TYPE == GF_410) {
         fprintf(LOG_DEST, "GRND_FLUX_TYPE\t\tGF_410\n");
     }
-    if (options.LW_TYPE == LW_TVA) {
-        fprintf(LOG_DEST, "LW_TYPE\t\tLW_TVA\n");
-    }
-    else if (options.LW_TYPE == LW_ANDERSON) {
-        fprintf(LOG_DEST, "LW_TYPE\t\tLW_ANDERSON\n");
-    }
-    else if (options.LW_TYPE == LW_BRUTSAERT) {
-        fprintf(LOG_DEST, "LW_TYPE\t\tLW_BRUTSAERT\n");
-    }
-    else if (options.LW_TYPE == LW_SATTERLUND) {
-        fprintf(LOG_DEST, "LW_TYPE\t\tLW_SATTERLUND\n");
-    }
-    else if (options.LW_TYPE == LW_IDSO) {
-        fprintf(LOG_DEST, "LW_TYPE\t\tLW_IDSO\n");
-    }
-    else if (options.LW_TYPE == LW_PRATA) {
-        fprintf(LOG_DEST, "LW_TYPE\t\tLW_PRATA\n");
-    }
-    if (options.LW_CLOUD == LW_CLOUD_DEARDORFF) {
-        fprintf(LOG_DEST, "LW_CLOUD\t\tLW_CLOUD_DEARDORFF\n");
-    }
-    else {
-        fprintf(LOG_DEST, "LW_CLOUD\t\tLW_CLOUD_BRAS\n");
-    }
     if (options.IMPLICIT) {
         fprintf(LOG_DEST, "IMPLICIT\t\tTRUE\n");
     }
@@ -212,18 +188,6 @@ display_current_settings(int mode)
     }
     else {
         fprintf(LOG_DEST, "NOFLUX\t\t\tFALSE\n");
-    }
-    if (options.MTCLIM_SWE_CORR) {
-        fprintf(LOG_DEST, "MTCLIM_SWE_CORR\t\tTRUE\n");
-    }
-    else {
-        fprintf(LOG_DEST, "MTCLIM_SWE_CORR\t\tFALSE\n");
-    }
-    if (options.PLAPSE) {
-        fprintf(LOG_DEST, "PLAPSE\t\tTRUE\n");
-    }
-    else {
-        fprintf(LOG_DEST, "PLAPSE\t\tFALSE\n");
     }
     if (options.QUICK_FLUX) {
         fprintf(LOG_DEST, "QUICK_FLUX\t\tTRUE\n");
@@ -261,24 +225,6 @@ display_current_settings(int mode)
     }
     else {
         fprintf(LOG_DEST, "TFALLBACK\t\tFALSE\n");
-    }
-    if (options.VP_INTERP) {
-        fprintf(LOG_DEST, "VP_INTERP\t\tTRUE\n");
-    }
-    else {
-        fprintf(LOG_DEST, "VP_INTERP\t\tFALSE\n");
-    }
-    if (options.VP_ITER == VP_ITER_NONE) {
-        fprintf(LOG_DEST, "VP_ITER\t\tVP_ITER_NONE\n");
-    }
-    else if (options.VP_ITER == VP_ITER_ALWAYS) {
-        fprintf(LOG_DEST, "VP_ITER\t\tVP_ITER_ALWAYS\n");
-    }
-    else if (options.VP_ITER == VP_ITER_ANNUAL) {
-        fprintf(LOG_DEST, "VP_ITER\t\tVP_ITER_ANNUAL\n");
-    }
-    else if (options.VP_ITER == VP_ITER_CONVERGE) {
-        fprintf(LOG_DEST, "VP_ITER\t\tVP_ITER_CONVERGE\n");
     }
     fprintf(LOG_DEST, "WIND_H\t\t\t%f\n", global_param.wind_h);
     fprintf(LOG_DEST, "NODES\t\t\t%zu\n", options.Nnode);
@@ -328,12 +274,6 @@ display_current_settings(int mode)
         }
     }
     fprintf(LOG_DEST, "GRID_DECIMAL\t\t%hu\n", options.GRID_DECIMAL);
-    if (options.ALMA_INPUT) {
-        fprintf(LOG_DEST, "ALMA_INPUT\t\tTRUE\n");
-    }
-    else {
-        fprintf(LOG_DEST, "ALMA_INPUT\t\tFALSE\n");
-    }
 
     fprintf(LOG_DEST, "\n");
     fprintf(LOG_DEST, "Input Domain Data:\n");
@@ -477,12 +417,6 @@ display_current_settings(int mode)
     }
     else {
         fprintf(LOG_DEST, "MOISTFRACT\t\tFALSE\n");
-    }
-    if (options.OUTPUT_FORCE) {
-        fprintf(LOG_DEST, "OUTPUT_FORCE\t\tTRUE\n");
-    }
-    else {
-        fprintf(LOG_DEST, "OUTPUT_FORCE\t\tFALSE\n");
     }
     if (options.PRT_HEADER) {
         fprintf(LOG_DEST, "PRT_HEADER\t\tTRUE\n");

@@ -156,10 +156,8 @@ vic_nc_info(nc_file_struct   *nc_hist_file,
         case OUT_SURFT_FBFLAG:
         case OUT_TCAN_FBFLAG:
         case OUT_TFOL_FBFLAG:
-        case OUT_COSZEN:
         case OUT_FDIR:
         case OUT_REL_HUMID:
-        case OUT_TSKC:
         case OUT_ALBEDO_BAND:
         case OUT_SNOW_COVER_BAND:
             strncpy(nc_vars[i].nc_units, "-", MAXSTRING);

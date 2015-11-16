@@ -53,12 +53,8 @@ write_forcing_file(atmos_data_struct    *atmos,
     for (rec = 0; rec < nrecs; rec++) {
         for (j = 0; j < NF; j++) {
             out_data[OUT_AIR_TEMP].data[0] = atmos[rec].air_temp[j];
-            out_data[OUT_CATM].data[0] = atmos[rec].Catm[j] * 1e6;
-            out_data[OUT_COSZEN].data[0] = atmos[rec].coszen[j];
             out_data[OUT_DENSITY].data[0] = atmos[rec].density[j];
-            out_data[OUT_FDIR].data[0] = atmos[rec].fdir[j];
             out_data[OUT_LONGWAVE].data[0] = atmos[rec].longwave[j];
-            out_data[OUT_PAR].data[0] = atmos[rec].par[j];
             out_data[OUT_PREC].data[0] = atmos[rec].prec[j];
             out_data[OUT_PRESSURE].data[0] = atmos[rec].pressure[j] /
                                              PA_PER_KPA;
@@ -69,7 +65,6 @@ write_forcing_file(atmos_data_struct    *atmos,
                                               (atmos[rec].vp[j] +
                                                atmos[rec].vpd[j]);
             out_data[OUT_SHORTWAVE].data[0] = atmos[rec].shortwave[j];
-            out_data[OUT_TSKC].data[0] = atmos[rec].tskc[j];
             out_data[OUT_VP].data[0] = atmos[rec].vp[j] / PA_PER_KPA;
             out_data[OUT_VPD].data[0] = atmos[rec].vpd[j] / PA_PER_KPA;
             out_data[OUT_WIND].data[0] = atmos[rec].wind[j];
@@ -90,6 +85,17 @@ write_forcing_file(atmos_data_struct    *atmos,
                       param.SNOW_MIN_RAIN_TEMP)) * out_data[OUT_PREC].data[0];
                 out_data[OUT_SNOWF].data[0] = out_data[OUT_PREC].data[0] -
                                               out_data[OUT_RAINF].data[0];
+            }
+            if (options.CARBON) {
+                out_data[OUT_CATM].data[0] = atmos[rec].Catm[j] /
+                                             PPM_to_MIXRATIO;
+                out_data[OUT_FDIR].data[0] = atmos[rec].fdir[j];
+                out_data[OUT_PAR].data[0] = atmos[rec].par[j];
+            }
+            else {
+                out_data[OUT_CATM].data[0] = MISSING;
+                out_data[OUT_FDIR].data[0] = MISSING;
+                out_data[OUT_PAR].data[0] = MISSING;
             }
 
             for (v = 0; v < N_OUTVAR_TYPES; v++) {

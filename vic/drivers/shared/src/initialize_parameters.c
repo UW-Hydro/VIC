@@ -41,12 +41,8 @@ initialize_parameters()
     // Precipitation Guage Height
     param.GAUGE_HEIGHT = 1.0;
 
-    // Default Wind Speed
-    param.WIND_SPEED_DEFAULT = 3.0;
-    param.WIND_SPEED_MIN = 0.1;
-
     // Huge Resistance Term
-    param.HUGE_RESIST = 1.e20;
+    param.HUGE_RESIST = 1e20;
 
     // Surface Albedo Parameters
     param.ALBEDO_BARE_SOIL = 0.2;
@@ -72,24 +68,6 @@ initialize_parameters()
     param.CANOPY_CLOSURE = 4000.0;
     param.CANOPY_RSMAX = 5000.0;
     param.CANOPY_VPDMINFACTOR = 0.1;
-
-    // MTCLIM Parameters
-    param.MTCLIM_SOLAR_CONSTANT = 1368.0;
-    param.MTCLIM_TDAYCOEF = 0.45;
-    param.MTCLIM_SNOW_TCRIT = -6.0;
-    param.MTCLIM_SNOW_TRATE = 0.042;
-    param.MTCLIM_TBASE = 0.870;
-    param.MTCLIM_ABASE = -6.1e-5;
-    param.MTCLIM_C = 1.5;
-    param.MTCLIM_B0 = 0.031;
-    param.MTCLIM_B1 = 0.201;
-    param.MTCLIM_B2 = 0.185;
-    param.MTCLIM_RAIN_SCALAR = 0.75;
-    param.MTCLIM_DIF_ALB = 0.6;
-    param.MTCLIM_SC_INT = 1.32;
-    param.MTCLIM_SC_SLOPE = 0.096;
-    param.MTCLIM_SRADDT = 30.0;
-    param.MTCLIM_SW_PREC_THRESH = 0.0;
 
     // Lake Parameters
     param.LAKE_TMELT = 0.0;
@@ -119,10 +97,6 @@ initialize_parameters()
     param.SVP_A = 0.61078;
     param.SVP_B = 17.269;
     param.SVP_C = 237.3;
-
-    // Carbon Parameters
-    param.CARBON_CATMCURRENT = 383;
-    param.CARBON_SW2PAR = 0.45;
 
     // Photosynthesis Parameters
     param.PHOTO_OMEGA = 0.12;

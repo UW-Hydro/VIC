@@ -335,54 +335,6 @@ get_global_param(FILE *gp)
                     options.GRND_FLUX_TYPE = GF_410;
                 }
             }
-            else if (strcasecmp("LW_TYPE", optstr) == 0) {
-                sscanf(cmdstr, "%*s %s", flgstr);
-                if (strcasecmp("LW_TVA", flgstr) == 0) {
-                    options.LW_TYPE = LW_TVA;
-                }
-                else if (strcasecmp("LW_ANDERSON", flgstr) == 0) {
-                    options.LW_TYPE = LW_ANDERSON;
-                }
-                else if (strcasecmp("LW_BRUTSAERT", flgstr) == 0) {
-                    options.LW_TYPE = LW_BRUTSAERT;
-                }
-                else if (strcasecmp("LW_SATTERLUND", flgstr) == 0) {
-                    options.LW_TYPE = LW_SATTERLUND;
-                }
-                else if (strcasecmp("LW_IDSO", flgstr) == 0) {
-                    options.LW_TYPE = LW_IDSO;
-                }
-                else if (strcasecmp("LW_PRATA", flgstr) == 0) {
-                    options.LW_TYPE = LW_PRATA;
-                }
-            }
-            else if (strcasecmp("LW_CLOUD", optstr) == 0) {
-                sscanf(cmdstr, "%*s %s", flgstr);
-                if (strcasecmp("LW_CLOUD_DEARDORFF", flgstr) == 0) {
-                    options.LW_CLOUD = LW_CLOUD_DEARDORFF;
-                }
-                else {
-                    options.LW_CLOUD = LW_CLOUD_BRAS;
-                }
-            }
-            else if (strcasecmp("MTCLIM_SWE_CORR", optstr) == 0) {
-                sscanf(cmdstr, "%*s %s", flgstr);
-                if (strcasecmp("TRUE", flgstr) == 0) {
-                    options.MTCLIM_SWE_CORR = true;
-                }
-                else {
-                    options.MTCLIM_SWE_CORR = false;
-                }
-            }
-            else if (strcasecmp("PLAPSE", optstr) == 0) {
-                sscanf(cmdstr, "%*s %s", flgstr);
-                if (strcasecmp("FALSE", flgstr) == 0) {
-                    options.PLAPSE = false;
-                }
-                else {
-                    options.PLAPSE = true;
-                }
-            }
             else if (strcasecmp("SPATIAL_FROST", optstr) == 0) {
                 sscanf(cmdstr, "%*s %s %s", flgstr, flgstr2);
                 if (strcasecmp("TRUE", flgstr) == 0) {
@@ -409,33 +361,6 @@ get_global_param(FILE *gp)
                 }
                 else {
                     options.TFALLBACK = false;
-                }
-            }
-            else if (strcasecmp("VP_INTERP", optstr) == 0) {
-                sscanf(cmdstr, "%*s %s", flgstr);
-                if (strcasecmp("TRUE", flgstr) == 0) {
-                    options.VP_INTERP = true;
-                }
-                else {
-                    options.VP_INTERP = false;
-                }
-            }
-            else if (strcasecmp("VP_ITER", optstr) == 0) {
-                sscanf(cmdstr, "%*s %s", flgstr);
-                if (strcasecmp("VP_ITER_NONE", flgstr) == 0) {
-                    options.VP_ITER = VP_ITER_NONE;
-                }
-                if (strcasecmp("VP_ITER_ALWAYS", flgstr) == 0) {
-                    options.VP_ITER = VP_ITER_ALWAYS;
-                }
-                if (strcasecmp("VP_ITER_ANNUAL", flgstr) == 0) {
-                    options.VP_ITER = VP_ITER_ANNUAL;
-                }
-                if (strcasecmp("VP_ITER_CONVERGE", flgstr) == 0) {
-                    options.VP_ITER = VP_ITER_CONVERGE;
-                }
-                else {
-                    options.VP_INTERP = VP_ITER_ALWAYS;
                 }
             }
             else if (strcasecmp("SHARE_LAYER_MOIST", optstr) == 0) {
@@ -579,12 +504,6 @@ get_global_param(FILE *gp)
             }
             else if (strcasecmp("WIND_H", optstr) == 0) {
                 sscanf(cmdstr, "%*s %lf", &global_param.wind_h);
-            }
-            else if (strcasecmp("ALMA_INPUT", optstr) == 0) {
-                sscanf(cmdstr, "%*s %s", flgstr);
-                if (strcasecmp("TRUE", flgstr) == 0) {
-                    options.ALMA_INPUT = true;
-                }
             }
 
             /*************************************
@@ -1193,8 +1112,8 @@ get_global_param(FILE *gp)
                 "than 0, in the global control file.");
     }
     if (options.LAI_SRC == LAI_FROM_VEGPARAM && !options.VEGPARAM_LAI) {
-        log_err("\"LAI_SRC\" was specified as \"LAI_FROM_VEGPARAM\", "
-                "but \"VEGPARAM_LAI\" was set to \"FALSE\" in the global "
+        log_err("\"LAI_SRC\" was specified as \"LAI_FROM_VEGPARAM\", but "
+                "\"VEGPARAM_LAI\" was set to \"FALSE\" in the global "
                 "parameter file.  If you want VIC to read LAI values from "
                 "the vegparam file, you MUST make sure the veg param file "
                 "contains 1 line of 12 monthly LAI values for EACH veg "
@@ -1202,10 +1121,70 @@ get_global_param(FILE *gp)
                 "\"VEGPARAM_LAI\" as \"TRUE\" in the global parameter "
                 "file.  Alternatively, if you want VIC to read LAI values "
                 "from the veg library file, set \"LAI_SRC\" to "
-                "\"LAI_FROM_VEGLIB\" in the global parameter file.  "
-                "In either case, the setting of \"VEGPARAM_LAI\" must be "
-                "consistent with the contents of the veg param file "
-                "(i.e. whether or not it contains LAI values).");
+                "\"LAI_FROM_VEGLIB\" in the global parameter file.  In "
+                "either case, the setting of \"VEGPARAM_LAI\" must be "
+                "consistent with the contents of the veg param file (i.e. "
+                "whether or not it contains LAI values).");
+    }
+    if (options.LAI_SRC == FROM_VEGPARAM && !options.VEGPARAM_LAI) {
+        log_err("\"LAI_SRC\" was specified as \"FROM_VEGPARAM\", but "
+                "\"VEGPARAM_LAI\" was set to \"FALSE\" in the global "
+                "parameter file.  If you want VIC to read LAI values from "
+                "the vegparam file, you MUST make sure the veg param file "
+                "contains 1 line of 12 monthly LAI values for EACH veg "
+                "tile in EACH grid cell, and you MUST specify "
+                "\"VEGPARAM_LAI\" as \"TRUE\" in the global parameter "
+                "file.  Alternatively, if you want VIC to read LAI values "
+                "from the veg library file, set \"LAI_SRC\" to "
+                "\"FROM_VEGLIB\" in the global parameter file.  In "
+                "either case, the setting of \"VEGPARAM_LAI\" must be "
+                "consistent with the contents of the veg param file (i.e. "
+                "whether or not it contains LAI values).");
+    }
+    if (options.ALB_SRC == FROM_VEGPARAM && !options.VEGPARAM_ALB) {
+        log_err("\"ALB_SRC\" was specified as \"FROM_VEGPARAM\", but "
+                "\"VEGPARAM_ALB\" was set to \"FALSE\" in the global "
+                "parameter file.  If you want VIC to read albedo values from "
+                "the vegparam file, you MUST make sure the veg param file "
+                "contains 1 line of 12 monthly albedo values for EACH veg "
+                "tile in EACH grid cell, and you MUST specify "
+                "\"VEGPARAM_ALB\" as \"TRUE\" in the global parameter "
+                "file.  Alternatively, if you want VIC to read albedo values "
+                "from the veg library file, set \"ALB_SRC\" to "
+                "\"FROM_VEGLIB\" in the global parameter file.  In "
+                "either case, the setting of \"VEGPARAM_ALB\" must be "
+                "consistent with the contents of the veg param file (i.e. "
+                "whether or not it contains albedo values).");
+    }
+    if (options.VEGCOVER_SRC == FROM_VEGPARAM && !options.VEGPARAM_VEGCOVER) {
+        log_err("\"VEGCOVER_SRC\" was specified as \"FROM_VEGPARAM\", but "
+                "\"VEGPARAM_VEGCOVER\" was set to \"FALSE\" in the global "
+                "parameter file.  If you want VIC to read vegcover values from "
+                "the vegparam file, you MUST make sure the veg param file "
+                "contains 1 line of 12 monthly vegcover values for EACH veg "
+                "tile in EACH grid cell, and you MUST specify "
+                "\"VEGPARAM_VEGCOVER\" as \"TRUE\" in the global parameter "
+                "file.  Alternatively, if you want VIC to read vegcover values "
+                "from the veg library file, set \"VEGCOVER_SRC\" to "
+                "\"FROM_VEGLIB\" in the global parameter file.  In "
+                "either case, the setting of \"VEGPARAM_VEGCOVER\" must be "
+                "consistent with the contents of the veg param file (i.e. "
+                "whether or not it contains vegcover values).");
+    }
+    if (options.VEGCOVER_SRC == FROM_VEGLIB && !options.VEGLIB_VEGCOVER) {
+        log_err("\"VEGCOVER_SRC\" was specified as \"FROM_VEGLIB\", but "
+                "\"VEGLIB_VEGCOVER\" was set to \"FALSE\" in the global "
+                "parameter file.  If you want VIC to read vegcover values from "
+                "the veglib file, you MUST make sure the veg lib file "
+                "contains 1 line of 12 monthly vegcover values for EACH veg "
+                "class, and you MUST specify "
+                "\"VEGLIB_VEGCOVER\" as \"TRUE\" in the global parameter "
+                "file.  Alternatively, if you want VIC to read vegcover values "
+                "from the veg param file, set \"VEGCOVER_SRC\" to "
+                "\"FROM_VEGPARAM\" in the global parameter file.  In "
+                "either case, the setting of \"VEGLIB_VEGCOVER\" must be "
+                "consistent with the contents of the veg lib file (i.e. "
+                "whether or not it contains vegcover values).");
     }
 
     // Validate SPATIAL_FROST information

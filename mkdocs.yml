@@ -38,12 +38,10 @@ pages:
     # Classic Driver
     - 'DefaultOutputs': 'Documentation/Drivers/Classic/DefaultOutputs.md'
     - 'FluxOutputFiles': 'Documentation/Drivers/Classic/FluxOutputFiles.md'
-    - 'Force Type': 'Documentation/Drivers/Classic/FORCETYPE.md'
     - 'Forcing Data': 'Documentation/Drivers/Classic/ForcingData.md'
     - 'FrozenSoilOutputFile': 'Documentation/Drivers/Classic/FrozenSoilOutputFile.md'
     - 'GlobalParam': 'Documentation/Drivers/Classic/GlobalParam.md'
     - 'Inputs': 'Documentation/Drivers/Classic/Inputs.md'
-    - 'InputVarList': 'Documentation/Drivers/Classic/InputVarList.md'
     - 'LakeOutputFile': 'Documentation/Drivers/Classic/LakeOutputFile.md'
     - 'Lake Param': 'Documentation/Drivers/Classic/LakeParam.md'
     - 'Output Formatting': 'Documentation/Drivers/Classic/OutputFormatting.md'

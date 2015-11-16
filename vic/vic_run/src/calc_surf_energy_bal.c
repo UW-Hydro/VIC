@@ -205,7 +205,12 @@ calc_surf_energy_bal(double             Le,
     atmos_density = atmos->density[hidx];     // atmospheric density
     atmos_pressure = atmos->pressure[hidx];    // atmospheric pressure
     atmos_shortwave = atmos->shortwave[hidx];   // incoming shortwave radiation
-    atmos_Catm = atmos->Catm[hidx];        // CO2 mixing ratio
+    if (options.CARBON) {
+        atmos_Catm = atmos->Catm[hidx];        // CO2 mixing ratio
+    }
+    else {
+        atmos_Catm = MISSING;
+    }
     emissivity = 1.;        // longwave emissivity
     delta_t = dt;
     max_moist = soil_con->max_moist[0] / (soil_con->depth[0] * MM_PER_M);

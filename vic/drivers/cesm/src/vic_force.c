@@ -192,6 +192,7 @@ vic_force(void)
             // vapor pressure deficit
             atmos[i].vpd[j] = svp(atmos[i].air_temp[j]) - atmos[i].vp[j];
             // photosynthetically active radiation
+            // TODO: Add CARBON_SW2PAR back to the parameters structure
             // atmos[i].par[j] = param.CARBON_SW2PAR * atmos[i].shortwave[j];
             // air density
             atmos[i].density[j] = air_density(atmos[i].air_temp[j],

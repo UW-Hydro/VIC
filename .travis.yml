@@ -61,7 +61,7 @@ matrix:
         - mpich-bin
   - compiler: gcc
     os: osx
-    env: TESTID=cesm BREW_TAPS="homebrew/science" BREW_INSTALLS="gcc netcdf openmpi"
+    env: TESTID=cesm BREW_TAPS="homebrew/science" BREW_INSTALLS="gcc gfortran netcdf openmpi"
   # Python Driver
   - compiler: clang
     os: linux

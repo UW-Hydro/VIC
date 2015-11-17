@@ -261,7 +261,6 @@ int  full_energy(int                  gridcell,
 		  moistlayer=all_vars_crop->cell[0][band].layer[lidx].moist*(1-old_crop_frac)+all_vars_crop->cell[1][band].layer[lidx].moist*old_crop_frac;
 		  moisttotal1+=moistlayer;
 		  all_vars_crop->cell[1][band].layer[lidx].moist = (all_vars_crop->cell[1][band].layer[lidx].moist*old_crop_frac+all_vars_crop->cell[0][band].layer[lidx].moist*(new_crop_frac-old_crop_frac))/new_crop_frac;
-		  all_vars_crop->cell[0][band].layer[lidx].moist = all_vars_crop->cell[0][band].layer[lidx].moist;
 		  moistlayer=all_vars_crop->cell[0][band].layer[lidx].moist*(1-new_crop_frac)+all_vars_crop->cell[1][band].layer[lidx].moist*new_crop_frac;
 		  moisttotal2+=moistlayer;
 		  //all_vars_crop->snow[1][band].swq=(all_vars_crop->snow[1][band].swq*old_crop_frac+all_vars_crop->snow[0][band].swq*(new_crop_frac-old_crop_frac))/new_crop_frac;
@@ -302,6 +301,9 @@ int  full_energy(int                  gridcell,
               all_vars_crop->veg_var[cridx][band].vegcover = MIN_VEGCOVER;
               all_vars_crop->veg_var[cridx][band].albedo = BARE_SOIL_ALBEDO;
               all_vars_crop->veg_var[cridx][band].LAI = 0;
+              all_vars_crop->veg_var[cridx][band].Wdew = 0;
+              all_vars_crop->veg_var[cridx][band].Wdmax = 0;
+              all_vars_crop->snow[cridx][band].snow_canopy = 0;
             }
             else { //crop part
               // Convert LAI from global to local
@@ -338,11 +340,11 @@ int  full_energy(int                  gridcell,
 
     if (rec >= 0) {
       for(iveg = 0; iveg < Nveg; iveg++){
+          veg_class = veg_con[iveg].veg_class; //ingjerd added
         for ( band = 0; band < Nbands; band++ ) {
 	  cell[iveg][band].irr_extract=0; //ingjerd added, for initializing. needed, or maybe not?
-	  veg_class = veg_con[iveg].veg_class; //ingjerd added
 	  veg_var[iveg][band].irrig=0.; //ingjerd added for initialization. hm... not sure about this!
-	  if (options.CROPFRAC  && veg_con[iveg].crop_frac_active)
+    if (options.CROPFRAC  && veg_con[iveg].crop_frac_active)
 	    all_vars_crop->veg_var[veg_con[iveg].crop_frac_idx+1][band].irrig=0.; //ingjerd added for initialization. hm... not sure about this!
 	  	  if(veg_lib[veg_class].irr_active[dmy[rec].month-1]) {  // only apply irrigation to specified crops
 		    if(snow[iveg][band].swq<0.001 && atmos->air_temp[NR]>7) {

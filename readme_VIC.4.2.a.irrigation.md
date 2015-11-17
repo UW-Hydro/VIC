@@ -57,7 +57,7 @@ Irrigation does not happen when snow is present or when the temperature is below
 1.4460  4.2880  4.5380  2.4280  1.2810  0.3810  1.2810  1.2810  1.2810  1.2810  0.1330  0.6290
 ```
 
-- Crop fraction file: A crop fraction file is needed as an additional forcing file when the crop fraction changes over time. Similar to the climate forcing file, the crop fraction file is one file per grid cell, describing the fraction change (0-1) over time in the crop tile for each grid cell. Note that the fraction only represents the crop fraction in the crop tile, not in the entire grid cell.
+- Crop fraction file: A crop fraction file is needed as an additional forcing file when the crop fraction changes over time. Similar to the climate forcing file, the crop fraction file is one file per grid cell, describing the crop area fraction (0-1) as it changes over time in the crop tile for each grid cell. Note that the fraction only represents the crop fraction in the crop tile, not in the entire grid cell.
 
 - Vegetation library: There are 12 more columns (JAN-IRR to DEC-IRR) set to 0 or 1 for each veg type, indicating if this veg type will be irrigated when `IRRIGATION` is set to `TRUE` in global file.
 

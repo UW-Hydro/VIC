@@ -63,12 +63,12 @@ ARC_SOIL        FALSE
 BASEFLOW	ARNO
 JULY_TAVG_SUPPLIED	FALSE	
 ORGANIC_FRACT	FALSE	
-VEGLIB	        /samples.VIC.4.2.a.irrigation/viglib.421.irr
+VEGLIB	        /samples.VIC.4.2.a.irrigation/veglib.421.irr
 
 VEGLIB_VEGCOVER	TRUE
 VEGLIB_IRR	TRUE
 
-VEGPARAM        /samples.VIC.4.2.a.irrigation/global_veg_param_421.irr
+VEGPARAM        /samples.VIC.4.2.a.irrigation/veg_421.irr
 
 ROOT_ZONES      2	
 VEGPARAM_LAI 	  TRUE    

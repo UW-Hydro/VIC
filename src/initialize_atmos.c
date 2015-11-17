@@ -19,7 +19,7 @@ void initialize_atmos(atmos_data_struct        *atmos,
   This routine initializes atmospheric variables for both the model
   time step, and the time step used by the snow algorithm (if different).
   Air temperature is estimated using MTCLIM (see routine for reference),
-  atmospheric moisture is estimated using Kimball's algorithm (see 
+  atmospheric moisture is estimated using Kimball's algorithm (see
   routine for reference), and radiation is estimated using Bras's algorithms
   (see routines for reference).
 
@@ -33,10 +33,10 @@ void initialize_atmos(atmos_data_struct        *atmos,
   11-18-98  Removed variable array yearly_epot, since yearly potential
             evaporation is no longer used for estimating the dew
             point temperature from daily minimum temperature.   KAC
-  11-25-98  Added second check to make sure that the difference 
+  11-25-98  Added second check to make sure that the difference
             between tmax and tmin is positive, after being reset
             when it was equal to 0.                        DAG, EFW
-  12-1-98   Changed relative humidity computations so that they 
+  12-1-98   Changed relative humidity computations so that they
             use air temperature for the time step, instead of average
             daily temperature.  This allows relative humidity to
             change during the day, when the time step is less than
@@ -45,7 +45,7 @@ void initialize_atmos(atmos_data_struct        *atmos,
             estimated by Kimball's equations from becoming so low
             that svp() fails.							Bart
   9-4-99    Code was largely rewritten to change make use of the MTCLIM
-            meteorological preprocessor which estimates sub-daily 
+            meteorological preprocessor which estimates sub-daily
 	    met forcings for all time steps.  The atmos_data_struct was
 	    also reconfigured so that it has a new record for each
 	    model time step, but stores sub-time step forcing data
@@ -54,7 +54,7 @@ void initialize_atmos(atmos_data_struct        *atmos,
 	    previous versions of the model.					Bart and Greg
   01-17-01  Pressure and vapor pressure read from a forcing file are
             converted from kPa to Pa.  This preserves the original
-            format of the forcing files (where pressure was supposed 
+            format of the forcing files (where pressure was supposed
             to be in kPa, but allows VIC to use Pa internally, eliminating
             the need to convert to Pa every time it is used.			KAC
   03-12-03 Modifed to add AboveTreeLine to soil_con_struct so that
@@ -267,7 +267,7 @@ void initialize_atmos(atmos_data_struct        *atmos,
 
   /* compute number of full model time steps per day */
   stepspday = 24/global_param.dt;
- 
+
   /* Compute number of days for MTCLIM (in local time); for sub-daily, we must pad start and end with dummy records */
   Ndays_local = Ndays;
   if (hour_offset_int != 0) Ndays_local = Ndays + 1;
@@ -351,18 +351,18 @@ void initialize_atmos(atmos_data_struct        *atmos,
   daily_vp   = (double *) calloc(Ndays_local, sizeof(double));
   dailyrad   = (double *) calloc(Ndays_local, sizeof(double));
   fdir       = (double *) calloc(Ndays_local*24, sizeof(double));
-  
+
   if (hourlyrad == NULL || prec == NULL || tair == NULL || tmax == NULL ||
       tmaxhour == NULL || tmin == NULL || tminhour == NULL || tskc == NULL ||
       daily_vp == NULL || dailyrad == NULL || fdir == NULL)
     nrerror("Memory allocation failure in initialize_atmos()");
-  
+
   /*******************************
-    read in meteorological data 
+    read in meteorological data
   *******************************/
 
   forcing_data = read_forcing_data(infile, global_param, &veg_hist_data);
-  
+
   fprintf(stderr,"\nRead meteorological forcing file\n");
 
   /*************************************************
@@ -558,7 +558,7 @@ void initialize_atmos(atmos_data_struct        *atmos,
           if (global_param.starthour - hour_offset_int < 0) hour += 24;
           idx = (int)((float)hour/24.0);
           atmos[rec].channel_in[j] = local_forcing_data[CHANNEL_IN][idx] / (float)(NF*stepspday); // divide evenly over the day
-          atmos[rec].channel_in[j] *= 1000/cell_area; // convert to mm over grid cell 
+          atmos[rec].channel_in[j] *= 1000/cell_area; // convert to mm over grid cell
           sum += atmos[rec].channel_in[j];
         }
         if(NF>1) atmos[rec].channel_in[NR] = sum;
@@ -577,7 +577,7 @@ void initialize_atmos(atmos_data_struct        *atmos,
 	    atmos[rec].channel_in[i] += local_forcing_data[CHANNEL_IN][idx];
             hour++;
           }
-	  atmos[rec].channel_in[i] *= 1000/cell_area; // convert to mm over grid cell 
+	  atmos[rec].channel_in[i] *= 1000/cell_area; // convert to mm over grid cell
 	  sum += atmos[rec].channel_in[i];
         }
         if(NF>1) atmos[rec].channel_in[NR] = sum;
@@ -689,7 +689,7 @@ void initialize_atmos(atmos_data_struct        *atmos,
       for (i = 0; i < NF; i++) {
 	atmos[rec].wind[i] = DEFAULT_WIND_SPEED;
       }
-      atmos[rec].wind[NR] = DEFAULT_WIND_SPEED;	
+      atmos[rec].wind[NR] = DEFAULT_WIND_SPEED;
     }
   }
 
@@ -698,7 +698,7 @@ void initialize_atmos(atmos_data_struct        *atmos,
   *************************************************/
 
   /************************************************
-    Set maximum daily air temperature if provided 
+    Set maximum daily air temperature if provided
   ************************************************/
 
   if(param_set.TYPE[TMAX].SUPPLIED) {
@@ -717,7 +717,7 @@ void initialize_atmos(atmos_data_struct        *atmos,
   }
 
   /************************************************
-    Set minimum daily air temperature if provided 
+    Set minimum daily air temperature if provided
   ************************************************/
 
   if(param_set.TYPE[TMIN].SUPPLIED) {
@@ -1005,7 +1005,7 @@ void initialize_atmos(atmos_data_struct        *atmos,
   if(!param_set.TYPE[AIR_TEMP].SUPPLIED) {
 
     /**********************************************************************
-      Calculate the subdaily and daily temperature based on tmax and tmin 
+      Calculate the subdaily and daily temperature based on tmax and tmin
     **********************************************************************/
     HourlyT(1, Ndays_local, tmaxhour, tmax, tminhour, tmin, tair);
     for(rec = 0; rec < global_param.nrecs; rec++) {
@@ -1069,7 +1069,7 @@ void initialize_atmos(atmos_data_struct        *atmos,
   }
 
   /**************************************
-    Estimate Atmospheric Pressure (Pa) 
+    Estimate Atmospheric Pressure (Pa)
   **************************************/
 
   if(!param_set.TYPE[PRESSURE].SUPPLIED) {
@@ -1228,7 +1228,7 @@ void initialize_atmos(atmos_data_struct        *atmos,
       Either no observations of VP, QAIR, or REL_HUMID were supplied,
       in which case we will use MTCLIM's estimates of daily vapor pressure,
       or daily VP was supplied.
-      Now, calculate subdaily vapor pressure 
+      Now, calculate subdaily vapor pressure
     **************************************************/
 
     if (options.VP_INTERP) {
@@ -1266,7 +1266,7 @@ void initialize_atmos(atmos_data_struct        *atmos,
           }
         }
       }
- 
+
     }
     else {
       /* Hold VP constant throughout day */
@@ -1652,13 +1652,12 @@ void initialize_atmos(atmos_data_struct        *atmos,
     }
   }
 
-  /* HACK: if crop, and crop frac is active, normalize vegcover by crop_frac */
+  /* HACK: if crop, and crop frac is active, keep vegcover at 1 for crops */
   for (rec = 0; rec < global_param.nrecs; rec++) {
     for(v = 0; v < veg_con[0].vegetat_type_num; v++) {
       if (options.CROPFRAC && veg_con[v].crop_frac_active) {
         if (veg_hist[rec][v].crop_frac[0] > 0) {
           for (j = 0; j < NF; j++) {
-            veg_hist[rec][v].vegcover[j] /= veg_hist[rec][v].crop_frac[0];
 	    veg_hist[rec][v].vegcover[j] =1; //ingjerd added. keep vegcover at 1 for crops
          }
         }
@@ -1933,7 +1932,7 @@ void initialize_atmos(atmos_data_struct        *atmos,
   param_set.TYPE[PREC].SUPPLIED = save_prec_supplied;
   param_set.TYPE[WIND].SUPPLIED = save_wind_supplied;
   param_set.TYPE[VP].SUPPLIED = save_vp_supplied;
- 
+
   // Free temporary parameters
   free(hourlyrad);
   free(prec);

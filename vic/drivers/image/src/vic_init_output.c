@@ -246,31 +246,31 @@ initialize_history_file(nc_file_struct *nc)
     }
 
     // adding calendar attribute to time variable
-    if (global_param.calendar = CALENDAR_STANDARD) {
+    if (global_param.calendar == CALENDAR_STANDARD) {
         sprintf(strCalendar, "standard");
     }
-    else if (global_param.calendar = CALENDAR_GREGORIAN) {
+    else if (global_param.calendar == CALENDAR_GREGORIAN) {
         sprintf(strCalendar, "gregorian");
     }
-    else if (global_param.calendar = CALENDAR_PROLEPTIC_GREGORIAN) {
+    else if (global_param.calendar == CALENDAR_PROLEPTIC_GREGORIAN) {
         sprintf(strCalendar, "proleptic gregorian");
     }
-    else if (global_param.calendar = CALENDAR_NOLEAP) {
+    else if (global_param.calendar == CALENDAR_NOLEAP) {
         sprintf(strCalendar, "noleap");
     }
-    else if (global_param.calendar = CALENDAR_365_DAY) {
+    else if (global_param.calendar == CALENDAR_365_DAY) {
         sprintf(strCalendar, "365 day");
     }
-    else if (global_param.calendar = CALENDAR_360_DAY) {
+    else if (global_param.calendar == CALENDAR_360_DAY) {
         sprintf(strCalendar, "360 day");
     }
-    else if (global_param.calendar = CALENDAR_JULIAN) {
+    else if (global_param.calendar == CALENDAR_JULIAN) {
         sprintf(strCalendar, "julian");
     }
-    else if (global_param.calendar = CALENDAR_ALL_LEAP) {
+    else if (global_param.calendar == CALENDAR_ALL_LEAP) {
         sprintf(strCalendar, "all leap");
     }
-    else if (global_param.calendar = CALENDAR_366_DAY) {
+    else if (global_param.calendar == CALENDAR_366_DAY) {
         sprintf(strCalendar, "366 day");
     }
     else {

@@ -55,27 +55,6 @@ enum
 };
 enum
 {
-    VP_ITER_NONE,
-    VP_ITER_ALWAYS,
-    VP_ITER_ANNUAL,
-    VP_ITER_CONVERGE
-};
-enum
-{
-    LW_TVA,
-    LW_ANDERSON,
-    LW_BRUTSAERT,
-    LW_SATTERLUND,
-    LW_IDSO,
-    LW_PRATA
-};
-enum
-{
-    LW_CLOUD_BRAS,
-    LW_CLOUD_DEARDORFF
-};
-enum
-{
     FROM_VEGLIB,
     FROM_VEGPARAM
 };
@@ -105,30 +84,19 @@ enum
     ALBEDO,
     CATM,
     CHANNEL_IN,
-    CRAINF,
-    CSNOWF,
     DENSITY,
     FDIR,
     LAI_IN,
     LONGWAVE,
-    LSRAINF,
-    LSSNOWF,
     PAR,
     PREC,
     PRESSURE,
     QAIR,
-    RAINF,
     REL_HUMID,
     SHORTWAVE,
-    SNOWF,
-    TMAX,
-    TMIN,
-    TSKC,
     VEGCOVER,
     VP,
     WIND,
-    WIND_E,
-    WIND_N,
     SKIP,
     N_FORCING_TYPES
 };
@@ -399,9 +367,6 @@ typedef struct {
     _Bool IMPLICIT;
     _Bool JULY_TAVG_SUPPLIED;
     _Bool LAKES;
-    unsigned short int LW_CLOUD;
-    unsigned short int LW_TYPE;
-    _Bool MTCLIM_SWE_CORR;
     size_t Ncanopy;
     size_t Nfrost;
     size_t Nlakenode;
@@ -409,7 +374,6 @@ typedef struct {
     size_t Nnode;
     _Bool NOFLUX;
     size_t NVEGTYPES;
-    _Bool PLAPSE;
     unsigned short int RC_MODE;
     size_t ROOT_ZONES;
     _Bool QUICK_FLUX;
@@ -420,9 +384,6 @@ typedef struct {
     _Bool SPATIAL_FROST;
     _Bool SPATIAL_SNOW;
     _Bool TFALLBACK;
-    _Bool VP_INTERP;
-    unsigned short VP_ITER;
-    _Bool ALMA_INPUT;
     _Bool BASEFLOW;
     unsigned short int GRID_DECIMAL;
     _Bool VEGLIB_PHOTO;
@@ -443,7 +404,6 @@ typedef struct {
     _Bool COMPRESS;
     _Bool MOISTFRACT;
     size_t Noutfiles;
-    _Bool OUTPUT_FORCE;
     _Bool PRT_HEADER;
     _Bool PRT_SNOW_BAND;
 } option_struct;
@@ -485,8 +445,6 @@ typedef struct {
 typedef struct {
     double LAPSE_RATE;
     double GAUGE_HEIGHT;
-    double WIND_SPEED_DEFAULT;
-    double WIND_SPEED_MIN;
     double HUGE_RESIST;
     double ALBEDO_BARE_SOIL;
     double ALBEDO_H20_SURF;
@@ -503,22 +461,6 @@ typedef struct {
     double CANOPY_CLOSURE;
     double CANOPY_RSMAX;
     double CANOPY_VPDMINFACTOR;
-    double MTCLIM_TDAYCOEF;
-    double MTCLIM_SOLAR_CONSTANT;
-    double MTCLIM_SNOW_TCRIT;
-    double MTCLIM_SNOW_TRATE;
-    double MTCLIM_TBASE;
-    double MTCLIM_ABASE;
-    double MTCLIM_C;
-    double MTCLIM_B0;
-    double MTCLIM_B1;
-    double MTCLIM_B2;
-    double MTCLIM_RAIN_SCALAR;
-    double MTCLIM_DIF_ALB;
-    double MTCLIM_SC_INT;
-    double MTCLIM_SC_SLOPE;
-    double MTCLIM_SRADDT;
-    double MTCLIM_SW_PREC_THRESH;
     double LAKE_TMELT;
     double LAKE_MAX_SURFACE;
     double LAKE_BETA;
@@ -544,8 +486,6 @@ typedef struct {
     double SVP_A;
     double SVP_B;
     double SVP_C;
-    double CARBON_CATMCURRENT;
-    double CARBON_SW2PAR;
     double PHOTO_OMEGA;
     double PHOTO_LAIMAX;
     double PHOTO_LAILIMIT;
@@ -756,7 +696,6 @@ typedef struct {
     double *air_temp;
     double *Catm;
     double *channel_in;
-    double *coszen;
     double *density;
     double *fdir;
     double *longwave;
@@ -768,7 +707,6 @@ typedef struct {
     double *pressure;
     double *shortwave;
     _Bool *snowflag;
-    double *tskc;
     double *vp;
     double *vpd;
     double *wind;
@@ -1345,6 +1283,7 @@ void compute_treeline(atmos_data_struct *, dmy_struct *, double, double *,
                       _Bool *);
 void cmd_proc(int argc, char **argv, char *globalfilename);
 void compress_files(char string[]);
+out_data_struct *create_output_list(void);
 double date2num(double origin, dmy_struct *date, double tzoffset,
                 unsigned short int calendar, unsigned short int time_units);
 void dmy_all_30_day(double julian, dmy_struct *dmy);
@@ -1358,9 +1297,13 @@ void display_current_settings(int);
 double fractional_day_from_dmy(dmy_struct *dmy);
 void free_all_vars(all_vars_struct *all_vars, int Nveg);
 void free_dmy(dmy_struct **dmy);
+void free_out_data_files(out_data_file_struct **);
+void free_out_data(out_data_struct **);
 void free_vegcon(veg_con_struct **veg_con);
 double get_dist(double lat1, double long1, double lat2, double long2);
 void get_parameters(FILE *paramfile);
+void init_output_list(out_data_struct *out_data, int write, char *format,
+                      int type, double mult);
 void initialize_filenames(void);
 void initialize_fileps(void);
 void initialize_global(void);
@@ -1414,6 +1357,8 @@ void print_veg_lib(veg_lib_struct *vlib, char carbon);
 void print_veg_var(veg_var_struct *vvar, size_t ncanopy);
 void print_version(char *);
 void print_usage(char *);
+int set_output_var(out_data_file_struct *, int, int, out_data_struct *, char *,
+                   int, char *, int, double);
 void soil_moisture_from_water_table(soil_con_struct *soil_con, size_t nlayers);
 int valid_date(unsigned short int calendar, dmy_struct *dmy);
 void validate_parameters(void);

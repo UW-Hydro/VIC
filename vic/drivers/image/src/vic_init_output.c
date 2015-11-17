@@ -107,6 +107,7 @@ initialize_history_file(nc_file_struct *nc)
 
     char                       str[100];
     char                       strUnit[6];
+    char                       strCalendar[50];
 
     size_t                     i;
     size_t                     ndims;
@@ -208,7 +209,7 @@ initialize_history_file(nc_file_struct *nc)
     }
 
     // define the netcdf variable time
-    status = nc_def_var(nc->nc_id, "time", NC_INT, 1,
+    status = nc_def_var(nc->nc_id, "time", NC_DOUBLE, 1,
                         &(nc->time_dimid), &(time_var_id));
     if (status != NC_NOERR) {
         log_err("Error defining time variable in %s", nc->fname);
@@ -218,23 +219,65 @@ initialize_history_file(nc_file_struct *nc)
     if (status != NC_NOERR) {
         log_err("Error adding attribute in %s", nc->fname);
     }
-    if (global_param.output_steps_per_day == 1) {
+
+    // adding units attribute to time variable
+    if (global_param.time_units == TIME_UNITS_SECONDS) {
+        sprintf(strUnit, "seconds");
+    }
+    else if (global_param.time_units == TIME_UNITS_MINUTES) {
+        sprintf(strUnit, "minutes");
+    }
+    else if (global_param.time_units == TIME_UNITS_HOURS) {
+        sprintf(strUnit, "hours");
+    }
+    else if (global_param.time_units == TIME_UNITS_DAYS) {
         sprintf(strUnit, "days");
     }
     else {
-        sprintf(strUnit, "hours");
+        sprintf(strUnit, "-");
     }
-    sprintf(str, "%s since %i-%02i-%02i 00:00:00", strUnit,
-            global_param.startyear, global_param.startmonth,
-            global_param.startday);
+
+    sprintf(str, "%s since 0001-01-01 00:00:00", strUnit);
 
     status = nc_put_att_text(nc->nc_id, time_var_id, "units",
                              strlen(str), str);
     if (status != NC_NOERR) {
         log_err("Error adding attribute in %s", nc->fname);
     }
+
+    // adding calendar attribute to time variable
+    if (global_param.calendar = CALENDAR_STANDARD) {
+        sprintf(strCalendar, "standard");
+    }
+    else if (global_param.calendar = CALENDAR_GREGORIAN) {
+        sprintf(strCalendar, "gregorian");
+    }
+    else if (global_param.calendar = CALENDAR_PROLEPTIC_GREGORIAN) {
+        sprintf(strCalendar, "proleptic gregorian");
+    }
+    else if (global_param.calendar = CALENDAR_NOLEAP) {
+        sprintf(strCalendar, "noleap");
+    }
+    else if (global_param.calendar = CALENDAR_365_DAY) {
+        sprintf(strCalendar, "365 day");
+    }
+    else if (global_param.calendar = CALENDAR_360_DAY) {
+        sprintf(strCalendar, "360 day");
+    }
+    else if (global_param.calendar = CALENDAR_JULIAN) {
+        sprintf(strCalendar, "julian");
+    }
+    else if (global_param.calendar = CALENDAR_ALL_LEAP) {
+        sprintf(strCalendar, "all leap");
+    }
+    else if (global_param.calendar = CALENDAR_366_DAY) {
+        sprintf(strCalendar, "366 day");
+    }
+    else {
+        sprintf(strCalendar, "no calendar specified");
+    }
     status = nc_put_att_text(nc->nc_id, time_var_id, "calendar",
-                             strlen("standard"), "standard");
+                             strlen(strCalendar), strCalendar);
     if (status != NC_NOERR) {
         log_err("Error adding attribute in %s", nc->fname);
     }
@@ -308,7 +351,6 @@ initialize_history_file(nc_file_struct *nc)
     if (status != NC_NOERR) {
         log_err("Error adding attribute in %s", nc->fname);
     }
-
 
     // leave define mode
     status = nc_enddef(nc->nc_id);

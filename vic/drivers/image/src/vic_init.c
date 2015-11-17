@@ -68,6 +68,7 @@ vic_init(void)
     size_t                     d4start[4];
 
     // make_dmy()
+    initialize_time();
     dmy = make_dmy(&global_param);
 
     // allocate memory for variables to be read

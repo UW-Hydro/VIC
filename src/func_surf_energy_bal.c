@@ -300,6 +300,9 @@ double func_surf_energy_bal(double Ts, va_list ap)
   double tmp_displacement[3];
   double tmp_roughness[3];
   double tmp_ref_height[3];
+  double ga_veg;
+  double ga_bare;
+  double ga_average;
 
   /************************************
     Read variables from variable list 
@@ -688,6 +691,32 @@ double func_surf_energy_bal(double Ts, va_list ap)
   else
     Ra_used[0] = HUGE_RESIST;
   
+  if (veg_var->vegcover < 1) {
+    if (Ra_used[0] > 0) {
+      ga_veg = 1/Ra_used[0];
+      tmp_wind[0] = wind[0];
+      tmp_wind[1] = -999.;
+      tmp_wind[2] = -999.;
+      tmp_height = soil_con->rough/0.123;
+      tmp_displacement[0] = calc_veg_displacement(tmp_height);
+      tmp_roughness[0] = soil_con->rough;
+      tmp_ref_height[0] = 10;
+      Error = CalcAerodynamic(0,0,0,soil_con->snow_rough,soil_con->rough,0,Ra_bare,tmp_wind,tmp_displacement,tmp_ref_height,tmp_roughness);
+      Ra_bare[0] /= StabilityCorrection(tmp_ref_height[0], tmp_displacement[0], TMean, Tair, tmp_wind[0], tmp_roughness[0]);
+      if (Ra_bare[0] > 0) {
+        ga_bare = 1/Ra_bare[0];
+        ga_average = veg_var->vegcover*ga_veg + (1-veg_var->vegcover)*ga_bare;
+        Ra_used[0] = 1/ga_average;
+      }
+      else {
+        Ra_used[0] = 0;
+      }
+    }
+    else {
+      Ra_used[0] = 0;
+    }
+  }
+
   /*************************************************
     Compute Evapotranspiration if not snow covered
 
@@ -709,20 +738,11 @@ double func_surf_energy_bal(double Ts, va_list ap)
         transp[i] = layer[i].evap;
         layer[i].evap = 0;
       }
-      tmp_wind[0] = wind[0];
-      tmp_wind[1] = -999.;
-      tmp_wind[2] = -999.;
-      tmp_height = soil_con->rough/0.123;
-      tmp_displacement[0] = calc_veg_displacement(tmp_height);
-      tmp_roughness[0] = soil_con->rough;
-      tmp_ref_height[0] = 10;
-      Error = CalcAerodynamic(0,0,0,soil_con->snow_rough,soil_con->rough,0,Ra_bare,tmp_wind,tmp_displacement,tmp_ref_height,tmp_roughness);
-      Ra_bare[0] /= StabilityCorrection(tmp_ref_height[0], tmp_displacement[0], TMean, Tair, tmp_wind[0], tmp_roughness[0]);
       Evap *= veg_var->vegcover;
       Evap += (1-veg_var->vegcover)
 	       * arno_evap(layer, surf_atten*NetBareRad, Tair, vpd, 
 		       depth[0], max_moist * depth[0] * 1000., 
-		       elevation, b_infilt, Ra_bare[0], delta_t, 
+		       elevation, b_infilt, Ra_used[0], delta_t, 
 		       resid_moist[0], frost_fract);
       for (i=0; i<options.Nlayer; i++) {
         layer[i].evap = veg_var->vegcover*transp[i] + (1-veg_var->vegcover)*layer[i].evap;

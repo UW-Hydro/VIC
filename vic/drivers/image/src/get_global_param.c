@@ -699,6 +699,12 @@ get_global_param(FILE *gp)
             else if (strcasecmp("COORD_DIMS_OUT", optstr) == 0) {
                 sscanf(cmdstr, "%*s %zu", &options.COORD_DIMS_OUT);
             }
+            else if (strcasecmp("DOMAIN_LON_VAR", optstr) == 0) {
+                sscanf(cmdstr, "%*s %s", options.DOMAIN_LON_VAR);
+            }
+            else if (strcasecmp("DOMAIN_LAT_VAR", optstr) == 0) {
+                sscanf(cmdstr, "%*s %s", options.DOMAIN_LAT_VAR);
+            }
             else if (strcasecmp("COMPRESS", optstr) == 0) {
                 sscanf(cmdstr, "%*s %s", flgstr);
                 if (strcasecmp("TRUE", flgstr) == 0) {

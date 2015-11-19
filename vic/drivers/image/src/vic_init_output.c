@@ -175,12 +175,16 @@ initialize_history_file(nc_file_struct *nc)
         log_err("Error defining nlayer dimenension in %s", nc->fname);
     }
 
-    status = nc_def_dim(nc->nc_id, "lon", nc->ni_size, &(nc->ni_dimid));
+    status =
+        nc_def_dim(nc->nc_id, options.DOMAIN_LON_VAR, nc->ni_size,
+                   &(nc->ni_dimid));
     if (status != NC_NOERR) {
         log_err("Error defining ni dimenension in %s", nc->fname);
     }
 
-    status = nc_def_dim(nc->nc_id, "lat", nc->nj_size, &(nc->nj_dimid));
+    status =
+        nc_def_dim(nc->nc_id, options.DOMAIN_LAT_VAR, nc->nj_size,
+                   &(nc->nj_dimid));
     if (status != NC_NOERR) {
         log_err("Error defining nj dimenension in %s", nc->fname);
     }
@@ -234,7 +238,8 @@ initialize_history_file(nc_file_struct *nc)
         sprintf(strUnit, "days");
     }
     else {
-        sprintf(strUnit, "-");
+        log_err("Invalid value, or no value for OUT_TIME_UNITS (%d).",
+                global_param.time_units);
     }
 
     sprintf(str, "%s since 0001-01-01 00:00:00", strUnit);
@@ -274,7 +279,7 @@ initialize_history_file(nc_file_struct *nc)
         sprintf(strCalendar, "366 day");
     }
     else {
-        sprintf(strCalendar, "no calendar specified");
+        log_err("Invalid, or no calendar specified");
     }
     status = nc_put_att_text(nc->nc_id, time_var_id, "calendar",
                              strlen(strCalendar), strCalendar);
@@ -303,7 +308,7 @@ initialize_history_file(nc_file_struct *nc)
     }
 
     // define the netcdf variable longitude
-    status = nc_def_var(nc->nc_id, "lon", NC_DOUBLE, ndims,
+    status = nc_def_var(nc->nc_id, options.DOMAIN_LON_VAR, NC_DOUBLE, ndims,
                         dimids, &(lon_var_id));
     if (status != NC_NOERR) {
         log_err("Error defining lon variable in %s", nc->fname);
@@ -331,7 +336,7 @@ initialize_history_file(nc_file_struct *nc)
     }
 
     // define the netcdf variable latitude
-    status = nc_def_var(nc->nc_id, "lat", NC_DOUBLE, ndims,
+    status = nc_def_var(nc->nc_id, options.DOMAIN_LAT_VAR, NC_DOUBLE, ndims,
                         dimids, &(lat_var_id));
     if (status != NC_NOERR) {
         log_err("Error defining lat variable in %s", nc->fname);

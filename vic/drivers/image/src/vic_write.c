@@ -36,7 +36,6 @@ void
 vic_write(void)
 {
     extern out_data_struct   **out_data;
-    extern domain_struct       global_domain;
     extern domain_struct       local_domain;
     extern nc_file_struct      nc_hist_file;
     extern nc_var_struct       nc_vars[N_OUTVAR_TYPES];
@@ -47,17 +46,13 @@ vic_write(void)
     size_t                     i;
     size_t                     j;
     size_t                     k;
-    size_t                     grid_size;
     size_t                     ndims;
     double                    *dvar = NULL;
     size_t                     dcount[MAXDIMS];
     size_t                     dstart[MAXDIMS];
-    int                        nc_time;
-
-    grid_size = global_domain.n_ny * global_domain.n_nx;
 
     // allocate memory for variables to be stored
-    dvar = calloc(local_domain.ncells, sizeof(*dvar));
+    dvar = malloc(local_domain.ncells * sizeof(*dvar));
     if (dvar == NULL) {
         log_err("Memory allocation error in vic_write().");
     }
@@ -128,7 +123,6 @@ vic_write(void)
     }
 
     // ADD Time variable
-    ndims = 1;
     dimids[0] = nc_hist_file.time_dimid;
     dstart[0] = current;
     dcount[0] = 1;
@@ -140,7 +134,7 @@ vic_write(void)
     put_nc_field_double(nc_hist_file.fname, &(nc_hist_file.open),
                         &(nc_hist_file.nc_id),
                         nc_hist_file.d_fillvalue,
-                        dimids, ndims, "time",
+                        dimids, 1, "time",
                         dstart, dcount, dvar);
 
     // free memory

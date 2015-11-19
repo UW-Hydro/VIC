@@ -167,9 +167,12 @@ lake_con_struct read_lakeparam(FILE            *lakeparam,
       sprintf(tmpstr, "Lake area fraction (%f) for cell (%d) specified in the lake parameter file must be a fraction between 0 and 1.", temp.Cl[0], soil_con.gridcel);
       nrerror(tmpstr);
     }
-    if(temp.Cl[0] != veg_con[temp.lake_idx].Cv) {
+    if(fabs(1-temp.Cl[0]/veg_con[temp.lake_idx].Cv) > 0.01) {
       sprintf(tmpstr, "Lake area fraction at top of lake basin (%f) for cell (%d) specified in the lake parameter file must equal the area fraction of the veg tile containing it (%f).", temp.Cl[0], soil_con.gridcel,veg_con[temp.lake_idx].Cv);
       nrerror(tmpstr);
+    }
+    else {
+      temp.Cl[0] = veg_con[temp.lake_idx].Cv;
     }
     
     fgets(tmpstr, MAXSTRING, lakeparam);
@@ -208,9 +211,12 @@ lake_con_struct read_lakeparam(FILE            *lakeparam,
       if(i==0) {
         temp.maxdepth = temp.z[i];
         tempdz = (temp.maxdepth) / ((float) temp.numnod);
-        if(temp.Cl[0] != veg_con[temp.lake_idx].Cv) {
+        if(fabs(1-temp.Cl[0]/veg_con[temp.lake_idx].Cv) > 0.01) {
           sprintf(tmpstr, "Lake area fraction at top of lake basin (%f) for cell (%d) specified in the lake parameter file must equal the area fraction of the veg tile containing it (%f).", temp.Cl[0], soil_con.gridcel,veg_con[temp.lake_idx].Cv);
           nrerror(tmpstr);
+        }
+        else {
+          temp.Cl[0] = veg_con[temp.lake_idx].Cv;
         }
       }
 

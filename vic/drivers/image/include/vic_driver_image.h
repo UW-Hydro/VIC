@@ -43,6 +43,7 @@
  *           identical. The model is run over a list of cells.
  *****************************************************************************/
 typedef struct {
+    bool run; /**< TRUE: run grid cell. FALSE: do not run grid cell */
     double latitude; /**< latitude of grid cell center */
     double longitude; /**< longitude of grid cell center */
     double area; /**< area of grid cell */

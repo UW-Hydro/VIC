@@ -416,7 +416,7 @@ create_MPI_location_struct_type(MPI_Datatype *mpi_type)
     MPI_Datatype *mpi_types;
 
     // nitems has to equal the number of elements in global_param_struct
-    nitems = 8;
+    nitems = 9;
     blocklengths = (int *) malloc(nitems * sizeof(int));
     if (blocklengths == NULL) {
         log_err("Memory allocation error in create_MPI_location_struct_type().")
@@ -439,6 +439,10 @@ create_MPI_location_struct_type(MPI_Datatype *mpi_type)
 
     // reset i
     i = 0;
+
+    // size_t run;
+    offsets[i] = offsetof(location_struct, run);
+    mpi_types[i++] = MPI_C_BOOL;
 
     // double latitude;
     offsets[i] = offsetof(location_struct, latitude);

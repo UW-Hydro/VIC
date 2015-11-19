@@ -37,6 +37,7 @@ vic_start(void)
     int                        local_ncells;
     int                        status;
     location_struct           *mapped_locations = NULL;
+    location_struct           *active_locations = NULL;
     size_t                     i;
     extern size_t             *filter_active_cells;
     extern size_t             *mpi_map_mapping_array;
@@ -56,6 +57,9 @@ vic_start(void)
     extern int                 mpi_size;
     extern option_struct       options;
     extern parameters_struct   param;
+    size_t                     x;
+    size_t                     y;
+    size_t                     j;
 
     // Initialize global structures
     initialize_options();
@@ -101,8 +105,14 @@ vic_start(void)
         // get the indices for the active cells (used in reading and writing)
         filter_active_cells = (size_t *) malloc(global_domain.ncells *
                                                 sizeof(size_t));
-        for (i = 0; i < global_domain.ncells; i++) {
-            filter_active_cells[i] = global_domain.locations[i].io_idx;
+        j = 0;
+        for (y = 0, i = 0; y < global_domain.n_ny; y++) {
+            for (x = 0; x < global_domain.n_nx; x++, i++) {
+                if (global_domain.locations[i].run == 1) {
+                    filter_active_cells[j] = global_domain.locations[i].io_idx;
+                    j++;
+                }
+            }
         }
 
         // get dimensions (number of vegetation types, soil zones, etc)
@@ -181,8 +191,29 @@ vic_start(void)
         for (i = 0; i < global_domain.ncells; i++) {
             initialize_location(&(mapped_locations[i]));
         }
+
+        active_locations = (location_struct *) malloc(
+            global_domain.ncells * sizeof(location_struct));
+        if (active_locations == NULL) {
+            log_err("malloc error in vic_start()\n");
+        }
+        for (i = 0; i < global_domain.ncells; i++) {
+            initialize_location(&(active_locations[i]));
+        }
+
+        j = 0;
+        for (y = 0, i = 0; y < global_domain.n_ny; y++) {
+            for (x = 0; x < global_domain.n_nx; x++, i++) {
+                if (global_domain.locations[i].run == 1) {
+                    active_locations[j] = global_domain.locations[i];
+                    j++;
+                }
+            }
+        }
+
+
         map(sizeof(location_struct), global_domain.ncells,
-            mpi_map_mapping_array, NULL, global_domain.locations,
+            mpi_map_mapping_array, NULL, active_locations,
             mapped_locations);
     }
 
@@ -204,5 +235,6 @@ vic_start(void)
     // cleanup
     if (mpi_rank == 0) {
         free(mapped_locations);
+        free(active_locations);
     }
 }

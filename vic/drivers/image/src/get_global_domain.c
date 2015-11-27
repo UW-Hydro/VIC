@@ -54,8 +54,11 @@ get_global_domain(char          *nc_name,
     d2count[0] = global_domain->n_ny;
     d2count[1] = global_domain->n_nx;
 
+    // get total number of gridcells in domain
+    global_domain->ncells_total = global_domain->n_ny * global_domain->n_nx;
+    
     // allocate memory for cells to be run
-    run = (int *) malloc(global_domain->n_ny * global_domain->n_nx *
+    run = (int *) malloc(global_domain->ncells_total *
                          sizeof(int));
     if (run == NULL) {
         log_err("Memory allocation error in get_global_domain().");
@@ -65,8 +68,8 @@ get_global_domain(char          *nc_name,
 
     for (y = 0, i = 0; y < global_domain->n_ny; y++) {
         for (x = 0; x < global_domain->n_nx; x++, i++) {
-            if (run[i] == 1) {
-                global_domain->ncells++;
+            if (run[i] == true) {
+                global_domain->ncells_active++;
             }
         }
     }
@@ -77,12 +80,12 @@ get_global_domain(char          *nc_name,
     if (global_domain->locations == NULL) {
         log_err("Memory allocation error in get_global_domain().");
     }
-    for (i = 0; i < global_domain->n_ny * global_domain->n_nx; i++) {
+    for (i = 0; i < global_domain->ncells_total; i++) {
         initialize_location(&(global_domain->locations[i]));
     }
 
     // allocate memory for variables
-    var = malloc(global_domain->n_ny * global_domain->n_nx *
+    var = malloc(global_domain->ncells_total *
                  sizeof(*var));
     if (var == NULL) {
         log_err("Memory allocation error in get_global_domain().");
@@ -90,7 +93,7 @@ get_global_domain(char          *nc_name,
 
     for (y = 0, i = 0, j = 0; y < global_domain->n_ny; y++) {
         for (x = 0; x < global_domain->n_nx; x++, i++) {
-            if (run[i] == 1) {
+            if (run[i] == true) {
                 global_domain->locations[i].run = 1;
             }
         }
@@ -98,7 +101,7 @@ get_global_domain(char          *nc_name,
 
     for (y = 0, i = 0, j = 0; y < global_domain->n_ny; y++) {
         for (x = 0; x < global_domain->n_nx; x++, i++) {
-            if (run[i] == 1) {
+            if (run[i] == true) {
                 global_domain->locations[i].io_idx = i;
                 global_domain->locations[i].global_idx = j;
                 j++;
@@ -153,7 +156,7 @@ get_global_domain(char          *nc_name,
 
     // print_domain(global_domain, true);
 
-    return global_domain->ncells;
+    return global_domain->ncells_active;
 }
 
 /******************************************************************************
@@ -162,7 +165,8 @@ get_global_domain(char          *nc_name,
 void
 initialize_domain(domain_struct *domain)
 {
-    domain->ncells = 0;
+    domain->ncells_total = 0;
+    domain->ncells_active = 0;
     domain->n_nx = 0;
     domain->n_ny = 0;
     domain->locations = NULL;

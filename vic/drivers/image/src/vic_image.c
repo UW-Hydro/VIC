@@ -105,6 +105,14 @@ main(int    argc,
     // initialize model parameters from parameter files
     vic_init();
 
+    //////
+// double timetmp;
+// extern dmy_struct         *dmy;
+// timetmp = date2num(global_param.time_origin_num, &dmy[0], 0., global_param.calendar, global_param.time_units);
+// printf("Result: %f\t global_param.time_origin_num: %f\t calendar: %d\t time units: %d\n", timetmp, global_param.time_origin_num, global_param.calendar, global_param.time_units);
+////exit(0);
+    ///////
+
     // restore model state, either using a cold start or from a restart file
     vic_restore();
 

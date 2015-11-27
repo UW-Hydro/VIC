@@ -291,7 +291,7 @@ root_brent(double LowerBound,
             fc = fa;
         }
 
-        tol = 2 *DBL_EPSILON *fabs(b) + param.ROOT_BRENT_T;
+        tol = 2 * DBL_EPSILON * fabs(b) + param.ROOT_BRENT_T;
         m = 0.5 * (c - b);
 
         if (fabs(m) <= tol || fb == 0) {

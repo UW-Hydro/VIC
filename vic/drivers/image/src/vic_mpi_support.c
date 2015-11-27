@@ -1778,10 +1778,12 @@ gather_put_nc_field_double(char   *nc_name,
     }
     if (mpi_rank == 0) {
         // remap the array
-        map(sizeof(double), global_domain.ncells_active, NULL, mpi_map_mapping_array,
+        map(sizeof(double), global_domain.ncells_active, NULL,
+            mpi_map_mapping_array,
             dvar_gathered, dvar_remapped);
         // expand to full grid size
-        map(sizeof(double), global_domain.ncells_active, NULL, filter_active_cells,
+        map(sizeof(double), global_domain.ncells_active, NULL,
+            filter_active_cells,
             dvar_remapped, dvar);
         // write to file
         put_nc_field_double(nc_name, open, nc_id, fillval, dimids, ndims,
@@ -1859,7 +1861,8 @@ gather_put_nc_field_int(char   *nc_name,
 
     if (mpi_rank == 0) {
         // remap the array
-        map(sizeof(int), global_domain.ncells_active, NULL, mpi_map_mapping_array,
+        map(sizeof(int), global_domain.ncells_active, NULL,
+            mpi_map_mapping_array,
             ivar_gathered, ivar_remapped);
         // expand to full grid size
         map(sizeof(int), global_domain.ncells_active, NULL, filter_active_cells,
@@ -1916,10 +1919,12 @@ get_scatter_nc_field_double(char   *nc_name,
         }
         get_nc_field_double(nc_name, var_name, start, count, dvar);
         // filter the active cells only
-        map(sizeof(double), global_domain.ncells_active, filter_active_cells, NULL,
+        map(sizeof(double), global_domain.ncells_active, filter_active_cells,
+            NULL,
             dvar, dvar_filtered);
         // map to prepare for MPI_Scatterv
-        map(sizeof(double), global_domain.ncells_active, mpi_map_mapping_array, NULL,
+        map(sizeof(double), global_domain.ncells_active, mpi_map_mapping_array,
+            NULL,
             dvar_filtered, dvar_mapped);
         free(dvar);
         free(dvar_filtered);
@@ -1983,10 +1988,12 @@ get_scatter_nc_field_float(char   *nc_name,
         }
         get_nc_field_float(nc_name, var_name, start, count, fvar);
         // filter the active cells only
-        map(sizeof(float), global_domain.ncells_active, filter_active_cells, NULL,
+        map(sizeof(float), global_domain.ncells_active, filter_active_cells,
+            NULL,
             fvar, fvar_filtered);
         // map to prepare for MPI_Scatterv
-        map(sizeof(float), global_domain.ncells_active, mpi_map_mapping_array, NULL,
+        map(sizeof(float), global_domain.ncells_active, mpi_map_mapping_array,
+            NULL,
             fvar_filtered, fvar_mapped);
         free(fvar);
         free(fvar_filtered);
@@ -2053,7 +2060,8 @@ get_scatter_nc_field_int(char   *nc_name,
         map(sizeof(int), global_domain.ncells_active, filter_active_cells, NULL,
             ivar, ivar_filtered);
         // map to prepare for MPI_Scatterv
-        map(sizeof(int), global_domain.ncells_active, mpi_map_mapping_array, NULL,
+        map(sizeof(int), global_domain.ncells_active, mpi_map_mapping_array,
+            NULL,
             ivar_filtered, ivar_mapped);
         free(ivar);
         free(ivar_filtered);

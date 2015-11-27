@@ -56,7 +56,7 @@ get_global_domain(char          *nc_name,
 
     // get total number of gridcells in domain
     global_domain->ncells_total = global_domain->n_ny * global_domain->n_nx;
-    
+
     // allocate memory for cells to be run
     run = (int *) malloc(global_domain->ncells_total *
                          sizeof(int));

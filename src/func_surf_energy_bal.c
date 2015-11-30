@@ -690,28 +690,52 @@ double func_surf_energy_bal(double Ts, va_list ap)
 			    TMean, Tair, wind[UnderStory], roughness[UnderStory]);
   else
     Ra_used[0] = HUGE_RESIST;
-  
+
+  /*************************************************
+    Compute aerodynamic resistance for the case of exposed soil between
+    plants (or gaps in canopy).  Assume plants and exposed soil are well-
+    mixed, i.e., exposed soil is neither as disconnected from the
+    atmosphere as soil under veg or canopy, nor as exposed as a large
+    area of exposed soil.  Rather, it is subject to some wind attenuation
+    from the surrounding plants.  Thus, compute as the area-weighted
+    average of "pure" understory and "pure" exposed conditions.
+
+    NOTE: can't average the resistances; must convert to conductances,
+    average the conductances, and then convert the average conductance
+    to a resistance.
+  *************************************************/
   if (veg_var->vegcover < 1) {
+    /** If Ra_used (which pertains to under vegetation at this point)
+        is non-zero, use it to compute area-weighted average **/
     if (Ra_used[0] > 0) {
+      /** aerodynamic conductance under vegetation **/
       ga_veg = 1/Ra_used[0];
+      /** compute aerodynamic resistance over exposed soil (Ra_bare) **/
       tmp_wind[0] = wind[0];
-      tmp_wind[1] = -999.;
-      tmp_wind[2] = -999.;
-      tmp_height = soil_con->rough/0.123;
+      tmp_wind[1] = -999.; // unused
+      tmp_wind[2] = -999.; // unused
+      tmp_height = soil_con->rough/0.123; // eqn from calc_veg_roughness()
       tmp_displacement[0] = calc_veg_displacement(tmp_height);
       tmp_roughness[0] = soil_con->rough;
-      tmp_ref_height[0] = 10;
+      tmp_ref_height[0] = 10; // wind measurement height over bare soil
       Error = CalcAerodynamic(0,0,0,soil_con->snow_rough,soil_con->rough,0,Ra_bare,tmp_wind,tmp_displacement,tmp_ref_height,tmp_roughness);
       Ra_bare[0] /= StabilityCorrection(tmp_ref_height[0], tmp_displacement[0], TMean, Tair, tmp_wind[0], tmp_roughness[0]);
+      /** if Ra_bare is non-zero, compute area-weighted average
+          aerodynamic conductance **/
       if (Ra_bare[0] > 0) {
+        /** aerodynamic conductance over exposed soil **/
         ga_bare = 1/Ra_bare[0];
+        /** area-weighted average aerodynamic conductance **/
         ga_average = veg_var->vegcover*ga_veg + (1-veg_var->vegcover)*ga_bare;
+        /** aerodynamic resistance is inverse of conductance **/
         Ra_used[0] = 1/ga_average;
       }
+      /** else aerodynamic resistance is zero **/
       else {
         Ra_used[0] = 0;
       }
     }
+    /** else aerodynamic resistance is zero **/
     else {
       Ra_used[0] = 0;
     }
@@ -723,8 +747,8 @@ double func_surf_energy_bal(double Ts, va_list ap)
     Should evapotranspiration be active when the 
     ground is only partially covered with snow????
 
-    Use Arno Evap if LAI is set to zero (e.g. no
-    winter crop planted).
+    Use Arno Evap in the exposed soil portion, and/or
+    if LAI is zero.
   *************************************************/
   if ( VEG && !SNOWING && veg_var->vegcover > 0 ) {
     Evap = canopy_evap(layer, veg_var, TRUE, 

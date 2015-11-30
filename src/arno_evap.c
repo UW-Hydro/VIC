@@ -85,7 +85,9 @@ double arno_evap(layer_data_struct *layer,
   double max_infil;
   double Evap;
   double tmpsum;
-  double rarc_soil = 100.0;
+  /* best-fitting value of architectural resistance, determined from
+     evaluation of model performance at eddy covariane tower sites */
+  double rarc_soil = 100.0; // [s/m]
 
   Evap = 0;
 

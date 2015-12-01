@@ -239,45 +239,44 @@ int  full_energy(int                  gridcell,
 
   // Crop fraction
   if (options.CROPFRAC) { //true or false set in global file, default=false
-
     if (rec >= 0) {
       for(iveg = 0; iveg < Nveg; iveg++){
-	if (veg_con[iveg].crop_frac_active) {
-	  veg_class = veg_con[iveg].veg_class;
-	  for ( band = 0; band < Nbands; band++ ) {
-	    if (rec == 0)
-	      old_crop_frac = veg_hist[rec][iveg].crop_frac[0];
-	    else
-	      old_crop_frac = veg_var[iveg][band].crop_frac;
-	    if(snow[iveg][band].swq<0.0001 && atmos->air_temp[NR]>7)  //ingjerd added. ok for all bands, veg types etc???? should be same air temp as below! (7 degrees)
-	      new_crop_frac = veg_hist[rec][iveg].crop_frac[0];
-	    else new_crop_frac = old_crop_frac;
-	    moistlayer=moisttotal1=moisttotal2=0.;
-	    if (new_crop_frac != old_crop_frac) {
-	      // The portion that grows needs to assimilate state variables
-	      // from the portion that shrinks; canopy storages need to be rescaled
-	      if (new_crop_frac > old_crop_frac) { // crop fraction is growing
-		for(lidx=0;lidx<options.Nlayer;lidx++) {
-		  moistlayer=all_vars_crop->cell[0][band].layer[lidx].moist*(1-old_crop_frac)+all_vars_crop->cell[1][band].layer[lidx].moist*old_crop_frac;
-		  moisttotal1+=moistlayer;
-		  all_vars_crop->cell[1][band].layer[lidx].moist = (all_vars_crop->cell[1][band].layer[lidx].moist*old_crop_frac+all_vars_crop->cell[0][band].layer[lidx].moist*(new_crop_frac-old_crop_frac))/new_crop_frac;
-		  moistlayer=all_vars_crop->cell[0][band].layer[lidx].moist*(1-new_crop_frac)+all_vars_crop->cell[1][band].layer[lidx].moist*new_crop_frac;
-		  moisttotal2+=moistlayer;
-		  //all_vars_crop->snow[1][band].swq=(all_vars_crop->snow[1][band].swq*old_crop_frac+all_vars_crop->snow[0][band].swq*(new_crop_frac-old_crop_frac))/new_crop_frac;
-		  //all_vars_crop->snow[0][band].swq=all_vars_crop->snow[0][band].swq;
-		}
-	      }
-	      else { // fallow fraction is growing
-		for(lidx=0;lidx<options.Nlayer;lidx++) {
-		  all_vars_crop->cell[0][band].layer[lidx].moist = (all_vars_crop->cell[0][band].layer[lidx].moist*(1-old_crop_frac)+all_vars_crop->cell[1][band].layer[lidx].moist*(old_crop_frac-new_crop_frac))/(1-new_crop_frac);
-		}
-	      }
-	      all_vars_crop->veg_var[1][band].Wdew *= old_crop_frac/new_crop_frac;
-	      all_vars_crop->snow[1][band].snow_canopy *= old_crop_frac/new_crop_frac;
-	    }
-	    veg_var[iveg][band].crop_frac = new_crop_frac;
-	  }
-	}
+        if (veg_con[iveg].crop_frac_active) {
+          veg_class = veg_con[iveg].veg_class;
+          for ( band = 0; band < Nbands; band++ ) {
+            if (rec == 0)
+            old_crop_frac = veg_hist[rec][iveg].crop_frac[0];
+            else
+            old_crop_frac = veg_var[iveg][band].crop_frac;
+            if(snow[iveg][band].swq<0.0001 && atmos->air_temp[NR]>7)  //ingjerd added. ok for all bands, veg types etc???? should be same air temp as below! (7 degrees)
+            new_crop_frac = veg_hist[rec][iveg].crop_frac[0];
+            else new_crop_frac = old_crop_frac;
+            moistlayer=moisttotal1=moisttotal2=0.;
+            if (new_crop_frac != old_crop_frac) {
+              // The portion that grows needs to assimilate state variables
+              // from the portion that shrinks; canopy storages need to be rescaled
+              if (new_crop_frac > old_crop_frac) { // crop fraction is growing
+                for(lidx=0;lidx<options.Nlayer;lidx++) {
+                  moistlayer=all_vars_crop->cell[0][band].layer[lidx].moist*(1-old_crop_frac)+all_vars_crop->cell[1][band].layer[lidx].moist*old_crop_frac;
+                  moisttotal1+=moistlayer;
+                  all_vars_crop->cell[1][band].layer[lidx].moist = (all_vars_crop->cell[1][band].layer[lidx].moist*old_crop_frac+all_vars_crop->cell[0][band].layer[lidx].moist*(new_crop_frac-old_crop_frac))/new_crop_frac;
+                  moistlayer=all_vars_crop->cell[0][band].layer[lidx].moist*(1-new_crop_frac)+all_vars_crop->cell[1][band].layer[lidx].moist*new_crop_frac;
+                  moisttotal2+=moistlayer;
+                  //all_vars_crop->snow[1][band].swq=(all_vars_crop->snow[1][band].swq*old_crop_frac+all_vars_crop->snow[0][band].swq*(new_crop_frac-old_crop_frac))/new_crop_frac;
+                  //all_vars_crop->snow[0][band].swq=all_vars_crop->snow[0][band].swq;
+                }
+              }
+              else { // fallow fraction is growing
+                for(lidx=0;lidx<options.Nlayer;lidx++) {
+                  all_vars_crop->cell[0][band].layer[lidx].moist = (all_vars_crop->cell[0][band].layer[lidx].moist*(1-old_crop_frac)+all_vars_crop->cell[1][band].layer[lidx].moist*(old_crop_frac-new_crop_frac))/(1-new_crop_frac);
+                }
+              }
+              all_vars_crop->veg_var[1][band].Wdew *= old_crop_frac/new_crop_frac;
+              all_vars_crop->snow[1][band].snow_canopy *= old_crop_frac/new_crop_frac;
+            }
+            veg_var[iveg][band].crop_frac = new_crop_frac;
+          }
+        }
       }
     }
   }
@@ -287,13 +286,13 @@ int  full_energy(int                  gridcell,
     // Loop over vegetated tiles
     for(iveg = 0; iveg < Nveg; iveg++){
       veg_class = veg_con[iveg].veg_class;
-        if (veg_hist[rec][iveg].vegcover[0] < MIN_VEGCOVER)
-        veg_hist[rec][iveg].vegcover[0] = MIN_VEGCOVER;
+      if (veg_hist[rec][iveg].vegcover[0] < MIN_VEGCOVER)
+      veg_hist[rec][iveg].vegcover[0] = MIN_VEGCOVER;
       for ( band = 0; band < Nbands; band++ ) {
         veg_var[iveg][band].vegcover = veg_hist[rec][iveg].vegcover[0];
-	veg_var[iveg][band].albedo = veg_hist[rec][iveg].albedo[0];
+        veg_var[iveg][band].albedo = veg_hist[rec][iveg].albedo[0];
         veg_var[iveg][band].LAI = veg_hist[rec][iveg].LAI[0];
- 	       veg_var[iveg][band].Wdmax = veg_var[iveg][band].LAI*LAI_WATER_FACTOR;
+        veg_var[iveg][band].Wdmax = veg_var[iveg][band].LAI*LAI_WATER_FACTOR;
         // Handle crop tiles (fallow and crop sub-tiles)
         if (options.CROPFRAC && veg_con[iveg].crop_frac_active) {
           for (cridx=veg_con[iveg].crop_frac_idx; cridx<veg_con[iveg].crop_frac_idx+2; cridx++) {
@@ -307,7 +306,7 @@ int  full_energy(int                  gridcell,
             }
             else { //crop part
               // Convert LAI from global to local
-	      //veg_var[iveg][band].vegcover=1;
+              //veg_var[iveg][band].vegcover=1;
               all_vars_crop->veg_var[cridx][band].vegcover = veg_var[iveg][band].vegcover/veg_var[iveg][band].crop_frac;
               if (all_vars_crop->veg_var[cridx][band].vegcover > 1) all_vars_crop->veg_var[cridx][band].vegcover = 1;
               if (all_vars_crop->veg_var[cridx][band].vegcover < MIN_VEGCOVER) all_vars_crop->veg_var[cridx][band].vegcover = MIN_VEGCOVER;
@@ -337,58 +336,57 @@ int  full_energy(int                  gridcell,
   ******************************************/
   irrig = 0;
   if (options.IRRIGATION) {
-
     if (rec >= 0) {
       for(iveg = 0; iveg < Nveg; iveg++){
-          veg_class = veg_con[iveg].veg_class; //ingjerd added
+        veg_class = veg_con[iveg].veg_class; //ingjerd added
         for ( band = 0; band < Nbands; band++ ) {
-	  cell[iveg][band].irr_extract=0; //ingjerd added, for initializing. needed, or maybe not?
-	  veg_var[iveg][band].irrig=0.; //ingjerd added for initialization. hm... not sure about this!
-    if (options.CROPFRAC  && veg_con[iveg].crop_frac_active)
-	    all_vars_crop->veg_var[veg_con[iveg].crop_frac_idx+1][band].irrig=0.; //ingjerd added for initialization. hm... not sure about this!
-	  	  if(veg_lib[veg_class].irr_active[dmy[rec].month-1]) {  // only apply irrigation to specified crops
-		    if(snow[iveg][band].swq<0.001 && atmos->air_temp[NR]>7) {
+          cell[iveg][band].irr_extract=0; //ingjerd added, for initializing. needed, or maybe not?
+          veg_var[iveg][band].irrig=0.; //ingjerd added for initialization. hm... not sure about this!
+          if (options.CROPFRAC  && veg_con[iveg].crop_frac_active)
+          all_vars_crop->veg_var[veg_con[iveg].crop_frac_idx+1][band].irrig=0.; //ingjerd added for initialization. hm... not sure about this!
+          if(veg_lib[veg_class].irr_active[dmy[rec].month-1]) {  // only apply irrigation to specified crops
+            if(snow[iveg][band].swq<0.001 && atmos->air_temp[NR]>7) {
               thresh_idx = 0;
               target_idx = 0;
               if (options.CROPFRAC && veg_con[iveg].crop_frac_active) {
-	        moistfract=all_vars_crop->cell[veg_con[iveg].crop_frac_idx+1][band].layer[target_idx].moist;
-	      }
+                moistfract=all_vars_crop->cell[veg_con[iveg].crop_frac_idx+1][band].layer[target_idx].moist;
+              }
               else if (veg_con[iveg].crop_frac_active)
-	        moistfract=cell[iveg][band].layer[target_idx].moist;
+              moistfract=cell[iveg][band].layer[target_idx].moist;
               if (veg_lib[veg_class].irr_sm_thresh == IRR_SAT)
-                irr_sm_thresh=soil_con->max_moist[thresh_idx];
+              irr_sm_thresh=soil_con->max_moist[thresh_idx];
               else if (veg_lib[veg_class].irr_sm_thresh == IRR_FC)
-                irr_sm_thresh=soil_con->Wcr[thresh_idx]/0.7;
+              irr_sm_thresh=soil_con->Wcr[thresh_idx]/0.7;
               else
-                irr_sm_thresh=soil_con->Wcr[thresh_idx]; // critical point in most cases
-	      if (irr_sm_thresh > soil_con->max_moist[thresh_idx])
-                irr_sm_thresh = soil_con->max_moist[thresh_idx];
+              irr_sm_thresh=soil_con->Wcr[thresh_idx]; // critical point in most cases
+              if (irr_sm_thresh > soil_con->max_moist[thresh_idx])
+              irr_sm_thresh = soil_con->max_moist[thresh_idx];
               if (veg_lib[veg_class].irr_sm_target == IRR_SAT)
-                irr_sm_target=soil_con->max_moist[target_idx];
+              irr_sm_target=soil_con->max_moist[target_idx];
               else
-                irr_sm_target=soil_con->Wcr[target_idx]/0.7; // field capacity in most cases
-               if (irr_sm_target > soil_con->max_moist[target_idx])
-                irr_sm_target = soil_con->max_moist[target_idx];
+              irr_sm_target=soil_con->Wcr[target_idx]/0.7; // field capacity in most cases
+              if (irr_sm_target > soil_con->max_moist[target_idx])
+              irr_sm_target = soil_con->max_moist[target_idx];
               if (options.CROPFRAC && veg_con[iveg].crop_frac_active) {
                 if (moistfract < irr_sm_thresh)
-                  all_vars_crop->veg_var[veg_con[iveg].crop_frac_idx+1][band].irr_apply = TRUE;
+                all_vars_crop->veg_var[veg_con[iveg].crop_frac_idx+1][band].irr_apply = TRUE;
                 else if (moistfract >= irr_sm_target)
-                  all_vars_crop->veg_var[veg_con[iveg].crop_frac_idx+1][band].irr_apply = FALSE;
+                all_vars_crop->veg_var[veg_con[iveg].crop_frac_idx+1][band].irr_apply = FALSE;
                 all_vars_crop->veg_var[veg_con[iveg].crop_frac_idx][band].irr_apply = FALSE;
               }
               else if (veg_con[iveg].crop_frac_active) {
                 if (moistfract < irr_sm_thresh)
-                  veg_var[iveg][band].irr_apply = TRUE;
+                veg_var[iveg][band].irr_apply = TRUE;
                 else if (moistfract >= irr_sm_target)
-                  veg_var[iveg][band].irr_apply = FALSE;
-             }
+                veg_var[iveg][band].irr_apply = FALSE;
+              }
 
               if(options.CROPFRAC && veg_con[iveg].crop_frac_active) {
                 irrig_est = (soil_con->max_moist[0]-all_vars_crop->cell[veg_con[iveg].crop_frac_idx+1][band].layer[target_idx].moist);
                 if (all_vars_crop->veg_var[veg_con[iveg].crop_frac_idx+1][band].irr_apply && atmos->prec[NR]<irrig_est)
-                  all_vars_crop->veg_var[veg_con[iveg].crop_frac_idx+1][band].irrig = irrig_est-atmos->prec[NR];
+                all_vars_crop->veg_var[veg_con[iveg].crop_frac_idx+1][band].irrig = irrig_est-atmos->prec[NR];
                 else
-                  all_vars_crop->veg_var[veg_con[iveg].crop_frac_idx+1][band].irrig = 0;
+                all_vars_crop->veg_var[veg_con[iveg].crop_frac_idx+1][band].irrig = 0;
                 all_vars_crop->veg_var[veg_con[iveg].crop_frac_idx][band].irrig = 0;
 
                 Cv = veg_con[iveg].Cv;
@@ -396,17 +394,17 @@ int  full_energy(int                  gridcell,
                 irrig += all_vars_crop->veg_var[veg_con[iveg].crop_frac_idx+1][band].irrig*Cv*soil_con->AreaFract[band];
               }
               else if (veg_con[iveg].crop_frac_active) { // veg_lib cropping calendar (irr can happen this month)
-		irrig_est = (soil_con->max_moist[0]-cell[iveg][band].layer[target_idx].moist);
+                irrig_est = (soil_con->max_moist[0]-cell[iveg][band].layer[target_idx].moist);
                 if (veg_var[iveg][band].irr_apply && atmos->prec[NR]<irrig_est)
-                  veg_var[iveg][band].irrig = irrig_est-atmos->prec[NR]; //mm, irrigated area
+                veg_var[iveg][band].irrig = irrig_est-atmos->prec[NR]; //mm, irrigated area
                 else
-                  veg_var[iveg][band].irrig = 0;
+                veg_var[iveg][band].irrig = 0;
                 Cv = veg_con[iveg].Cv;
                 irrig += veg_var[iveg][band].irrig*Cv*soil_con->AreaFract[band]; //mm (cell average)
-	      }
-	    }
-	    	  }
-		}
+              }
+            }
+          }
+        }
       }
     }
 
@@ -417,7 +415,6 @@ int  full_energy(int                  gridcell,
     Vegetation Type
   **************************************************/
   for(iveg = 0; iveg <= Nveg; iveg++){
-
     /** Solve Veg Type only if Coverage Greater than 0% **/
     if (veg_con[iveg].Cv > 0.0) {
       if(options.CROPFRAC && veg_con[iveg].crop_frac_active) {
@@ -946,17 +943,17 @@ int  full_energy(int                  gridcell,
       **************************************************/
 
       for(band = 0; band < Nbands; band++) {
-	if(soil_con->AreaFract[band] > 0) {
+        if(soil_con->AreaFract[band] > 0) {
 
-	  /* Initialize energy balance variables */
-	  energy[iveg][band].shortwave = 0;
-	  energy[iveg][band].longwave  = 0.;
-	  /* Initialize snow variables */
-	  snow[iveg][band].vapor_flux        = 0.;
-	  snow[iveg][band].canopy_vapor_flux = 0.;
-	  snow_inflow[band]                  = 0.;
-	  Melt[band*2]                       = 0.;
-	}
+          /* Initialize energy balance variables */
+          energy[iveg][band].shortwave = 0;
+          energy[iveg][band].longwave  = 0.;
+          /* Initialize snow variables */
+          snow[iveg][band].vapor_flux        = 0.;
+          snow[iveg][band].canopy_vapor_flux = 0.;
+          snow_inflow[band]                  = 0.;
+          Melt[band*2]                       = 0.;
+        }
       }
 
       /* Initialize precipitation storage */
@@ -1147,11 +1144,11 @@ int  full_energy(int                  gridcell,
   if (rec >= 0) {
     for(iveg = 0; iveg < Nveg; iveg++){
       for ( band = 0; band < Nbands; band++ ) {
-      // Handle non-crop tiles
-	if (!options.CROPFRAC || !veg_con[iveg].crop_frac_active) {
+        // Handle non-crop tiles
+        if (!options.CROPFRAC || !veg_con[iveg].crop_frac_active) {
           veg_var[iveg][band].LAI *= veg_var[iveg][band].vegcover;
           veg_var[iveg][band].Wdmax *= veg_var[iveg][band].vegcover;
-	}
+        }
       }
     }
   }

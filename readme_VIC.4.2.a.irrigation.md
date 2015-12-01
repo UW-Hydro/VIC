@@ -39,7 +39,7 @@ Irrigation does not happen when snow is present or when the temperature is below
 `IRR_FREE        FALSE/TRUE`
 `IRRIGATION` indicates whether you want irrigation included (`TRUE`); `IRR_FREE` indicates whether the water for irrigation is freely available (`TRUE`) or not (`FALSE`). If `IRR_FREE` set to `FALSE`, two extra columns are needed in forcing files (`IRR_RUN` and `IRR_WITH`) describing the runoff and water availability in the current grid cell.
 
-- Vegetation parameter file: An example of a cell in the veg parameter file with irrigated vegetation. There is one extra flag (0 or 1) on the first line of each tile. In this case, the last tile (veg number 79, defined in the veg library file) has the flag set to 1, which means this tile will be irrigated and the varying crop fraction will be read from crop_frac forcing file.
+- Vegetation parameter file: An example of a cell in the veg parameter file with irrigated vegetation. There is one extra flag (0 or 1) on the first line of each tile. In this case, the last tile (veg number 79, defined in the veg library file) has the flag set to 1, which means this tile will be irrigated and the varying crop fraction will be read from crop_frac forcing file. Note: In order to clearly see the effects of the irrigation, the fraction of the crop tile (0.3229) is made 10 times larger than the real value in this example.   
 
 ```
 38597 6

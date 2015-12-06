@@ -330,8 +330,8 @@ int  full_energy(int                  gridcell,
 
         /* Initialize wind speeds */
         tmp_wind[0] = atmos->wind[NR];
-        tmp_wind[1] = -999.;
-        tmp_wind[2] = -999.;
+        tmp_wind[1] = ERROR;
+        tmp_wind[2] = ERROR;
  
         /* Set surface descriptive variables */
         if (p < N_PET_TYPES_NON_NAT) {

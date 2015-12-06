@@ -295,6 +295,7 @@ double func_surf_energy_bal(double Ts, va_list ap)
   double D1_plus;
   double *transp;
   double Ra_bare[3];
+  double Ra_veg[3];
   double tmp_wind[3];
   double tmp_height;
   double tmp_displacement[3];
@@ -703,21 +704,27 @@ double func_surf_energy_bal(double Ts, va_list ap)
     NOTE: can't average the resistances; must convert to conductances,
     average the conductances, and then convert the average conductance
     to a resistance.
+
+    NOTE 2: since a resistance of 0 corresponds to an infinite conductance,
+    if either Ra_veg (resistance under veg) or Ra_bare (resistance over
+    exposed soil) are 0, then Ra_used must necessarily be 0 as well.
   *************************************************/
   if (veg_var->vegcover < 1) {
-    /** If Ra_used (which pertains to under vegetation at this point)
-        is non-zero, use it to compute area-weighted average **/
-    if (Ra_used[0] > 0) {
+    Ra_veg[0] = Ra_used[0];
+    Ra_veg[1] = Ra_used[1];
+    Ra_veg[2] = Ra_used[2];
+    /** If Ra_veg is non-zero, use it to compute area-weighted average **/
+    if (Ra_veg[0] > 0) {
       /** aerodynamic conductance under vegetation **/
-      ga_veg = 1/Ra_used[0];
+      ga_veg = 1/Ra_veg[0];
       /** compute aerodynamic resistance over exposed soil (Ra_bare) **/
       tmp_wind[0] = wind[0];
-      tmp_wind[1] = -999.; // unused
-      tmp_wind[2] = -999.; // unused
-      tmp_height = soil_con->rough/0.123; // eqn from calc_veg_roughness()
+      tmp_wind[1] = ERROR; // unused
+      tmp_wind[2] = ERROR; // unused
+      tmp_height = soil_con->rough/RATIO_RL_HEIGHT_VEG;
       tmp_displacement[0] = calc_veg_displacement(tmp_height);
       tmp_roughness[0] = soil_con->rough;
-      tmp_ref_height[0] = 10; // wind measurement height over bare soil
+      tmp_ref_height[0] = WINDH_SOIL; // wind measurement height over bare soil
       Error = CalcAerodynamic(0,0,0,soil_con->snow_rough,soil_con->rough,0,Ra_bare,tmp_wind,tmp_displacement,tmp_ref_height,tmp_roughness);
       Ra_bare[0] /= StabilityCorrection(tmp_ref_height[0], tmp_displacement[0], TMean, Tair, tmp_wind[0], tmp_roughness[0]);
       /** if Ra_bare is non-zero, compute area-weighted average

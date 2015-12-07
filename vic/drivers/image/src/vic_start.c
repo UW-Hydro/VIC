@@ -57,8 +57,6 @@ vic_start(void)
     extern int                 mpi_size;
     extern option_struct       options;
     extern parameters_struct   param;
-    size_t                     x;
-    size_t                     y;
     size_t                     j;
 
     // Initialize global structures
@@ -200,7 +198,7 @@ vic_start(void)
             initialize_location(&(active_locations[i]));
         }
 
-        for (i = 0, j = 0; i < global_domain->ncells_total; i++) {
+        for (i = 0, j = 0; i < global_domain.ncells_total; i++) {
             if (global_domain.locations[i].run) {
                 active_locations[j] = global_domain.locations[i];
                 j++;

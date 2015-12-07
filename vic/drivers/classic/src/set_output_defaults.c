@@ -52,9 +52,7 @@ set_output_defaults(out_data_struct *out_data)
     if (options.LAKES) {
         options.Noutfiles++;
     }
-    out_data_files = (out_data_file_struct *) calloc(options.Noutfiles,
-                                                     sizeof(
-                                                         out_data_file_struct));
+    out_data_files = calloc(options.Noutfiles, sizeof(*out_data_files));
     filenum = 0;
     strcpy(out_data_files[filenum].prefix, "fluxes");
     if (options.FULL_ENERGY || options.FROZEN_SOIL) {
@@ -95,8 +93,9 @@ set_output_defaults(out_data_struct *out_data)
         out_data_files[filenum].nvars = 8;
     }
     for (filenum = 0; filenum < options.Noutfiles; filenum++) {
-        out_data_files[filenum].varid = (unsigned int *) calloc(
-            out_data_files[filenum].nvars, sizeof(unsigned int));
+        out_data_files[filenum].varid = calloc(
+            out_data_files[filenum].nvars,
+            sizeof(*(out_data_files[filenum].varid)));
     }
 
     // Variables in first file

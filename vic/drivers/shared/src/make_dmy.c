@@ -86,7 +86,7 @@ make_dmy(global_param_struct *global)
     }
 
     // allocate dmy struct
-    temp = (dmy_struct*) calloc(global->nrecs, sizeof(dmy_struct));
+    temp = calloc(global->nrecs, sizeof(*temp));
 
     /** Create Date Structure for each Modele Time Step **/
     for (i = 0, numdate = start_num;

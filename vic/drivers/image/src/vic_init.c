@@ -71,8 +71,7 @@ vic_init(void)
     dmy = make_dmy(&global_param);
 
     // allocate memory for variables to be read
-    dvar = (double *) malloc(local_domain.ncells_active *
-                             sizeof(double));
+    dvar = malloc(local_domain.ncells_active * sizeof(*dvar));
     if (dvar == NULL) {
         log_err("Memory allocation error in vic_init().");
     }
@@ -1059,7 +1058,7 @@ vic_init(void)
             for (j = 0; j < options.NVEGTYPES; j++) {
                 vidx = veg_con_map[i].vidx[j];
                 if (vidx != -1) {
-// veg_con[i][vidx].Cv /= veg_con[i][0].Cv_sum;
+                    veg_con[i][vidx].Cv /= veg_con[i][0].Cv_sum;
                 }
             }
             veg_con[i][0].Cv_sum = 1.;

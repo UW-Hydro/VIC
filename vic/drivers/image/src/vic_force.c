@@ -50,7 +50,7 @@ vic_force(void)
     extern parameters_struct   param;
 
     double                     t_offset;
-    float                     *fvar = NULL;
+    double                    *dvar = NULL;
     size_t                     i;
     size_t                     j;
     size_t                     v;
@@ -59,8 +59,8 @@ vic_force(void)
     size_t                     d3start[3];
 
     // allocate memory for variables to be read
-    fvar = (float *) malloc(local_domain.ncells_active * sizeof(float));
-    if (fvar == NULL) {
+    dvar = malloc(local_domain.ncells_active * sizeof(*dvar));
+    if (dvar == NULL) {
         log_err("Memory allocation error in vic_force().");
     }
 
@@ -84,70 +84,70 @@ vic_force(void)
     // Air temperature: tas
     for (j = 0; j < NF; j++) {
         d3start[0] = global_param.forceoffset[0] + j;
-        get_scatter_nc_field_float(filenames.forcing[0], "tas",
-                                   d3start, d3count, fvar);
+        get_scatter_nc_field_double(filenames.forcing[0], "tas",
+                                    d3start, d3count, dvar);
         for (i = 0; i < local_domain.ncells_active; i++) {
-            atmos[i].air_temp[j] = (double) fvar[i];
+            atmos[i].air_temp[j] = (double) dvar[i];
         }
     }
 
     // Precipitation: prcp
     for (j = 0; j < NF; j++) {
         d3start[0] = global_param.forceoffset[0] + j;
-        get_scatter_nc_field_float(filenames.forcing[0], "prcp",
-                                   d3start, d3count, fvar);
+        get_scatter_nc_field_double(filenames.forcing[0], "prcp",
+                                    d3start, d3count, dvar);
         for (i = 0; i < local_domain.ncells_active; i++) {
-            atmos[i].prec[j] = (double) fvar[i];
+            atmos[i].prec[j] = (double) dvar[i];
         }
     }
 
     // Downward solar radiation: dswrf
     for (j = 0; j < NF; j++) {
         d3start[0] = global_param.forceoffset[0] + j;
-        get_scatter_nc_field_float(filenames.forcing[0], "dswrf",
-                                   d3start, d3count, fvar);
+        get_scatter_nc_field_double(filenames.forcing[0], "dswrf",
+                                    d3start, d3count, dvar);
         for (i = 0; i < local_domain.ncells_active; i++) {
-            atmos[i].shortwave[j] = (double) fvar[i];
+            atmos[i].shortwave[j] = (double) dvar[i];
         }
     }
 
     // Downward longwave radiation: dlwrf
     for (j = 0; j < NF; j++) {
         d3start[0] = global_param.forceoffset[0] + j;
-        get_scatter_nc_field_float(filenames.forcing[0], "dlwrf",
-                                   d3start, d3count, fvar);
+        get_scatter_nc_field_double(filenames.forcing[0], "dlwrf",
+                                    d3start, d3count, dvar);
         for (i = 0; i < local_domain.ncells_active; i++) {
-            atmos[i].longwave[j] = (double) fvar[i];
+            atmos[i].longwave[j] = (double) dvar[i];
         }
     }
 
     // Wind speed: wind
     for (j = 0; j < NF; j++) {
         d3start[0] = global_param.forceoffset[0] + j;
-        get_scatter_nc_field_float(filenames.forcing[0], "wind",
-                                   d3start, d3count, fvar);
+        get_scatter_nc_field_double(filenames.forcing[0], "wind",
+                                    d3start, d3count, dvar);
         for (i = 0; i < local_domain.ncells_active; i++) {
-            atmos[i].wind[j] = (double) fvar[i];
+            atmos[i].wind[j] = (double) dvar[i];
         }
     }
 
     // Specific humidity: shum
     for (j = 0; j < NF; j++) {
         d3start[0] = global_param.forceoffset[0] + j;
-        get_scatter_nc_field_float(filenames.forcing[0], "shum",
-                                   d3start, d3count, fvar);
+        get_scatter_nc_field_double(filenames.forcing[0], "shum",
+                                    d3start, d3count, dvar);
         for (i = 0; i < local_domain.ncells_active; i++) {
-            atmos[i].vp[j] = (double) fvar[i];
+            atmos[i].vp[j] = (double) dvar[i];
         }
     }
 
     // Pressure: pressure
     for (j = 0; j < NF; j++) {
         d3start[0] = global_param.forceoffset[0] + j;
-        get_scatter_nc_field_float(filenames.forcing[0], "pres",
-                                   d3start, d3count, fvar);
+        get_scatter_nc_field_double(filenames.forcing[0], "pres",
+                                    d3start, d3count, dvar);
         for (i = 0; i < local_domain.ncells_active; i++) {
-            atmos[i].pressure[j] = (double) fvar[i];
+            atmos[i].pressure[j] = (double) dvar[i];
         }
     }
     // Optional inputs
@@ -163,28 +163,28 @@ vic_force(void)
         // Atmospheric CO2 mixing ratio
         for (j = 0; j < NF; j++) {
             d3start[0] = global_param.forceoffset[0] + j;
-            get_scatter_nc_field_float(filenames.forcing[0], "catm",
-                                       d3start, d3count, fvar);
+            get_scatter_nc_field_double(filenames.forcing[0], "catm",
+                                        d3start, d3count, dvar);
             for (i = 0; i < local_domain.ncells_active; i++) {
-                atmos[i].Catm[j] = (double) fvar[i];
+                atmos[i].Catm[j] = (double) dvar[i];
             }
         }
         // Fraction of shortwave that is direct
         for (j = 0; j < NF; j++) {
             d3start[0] = global_param.forceoffset[0] + j;
-            get_scatter_nc_field_float(filenames.forcing[0], "fdir",
-                                       d3start, d3count, fvar);
+            get_scatter_nc_field_double(filenames.forcing[0], "fdir",
+                                        d3start, d3count, dvar);
             for (i = 0; i < local_domain.ncells_active; i++) {
-                atmos[i].fdir[j] = (double) fvar[i];
+                atmos[i].fdir[j] = (double) dvar[i];
             }
         }
         // Photosynthetically active radiation
         for (j = 0; j < NF; j++) {
             d3start[0] = global_param.forceoffset[0] + j;
-            get_scatter_nc_field_float(filenames.forcing[0], "par",
-                                       d3start, d3count, fvar);
+            get_scatter_nc_field_double(filenames.forcing[0], "par",
+                                        d3start, d3count, dvar);
             for (i = 0; i < local_domain.ncells_active; i++) {
-                atmos[i].par[j] = (double) fvar[i];
+                atmos[i].par[j] = (double) dvar[i];
             }
         }
     }
@@ -277,5 +277,5 @@ vic_force(void)
 
 
     // cleanup
-    free(fvar);
+    free(dvar);
 }

@@ -53,12 +53,12 @@ read_vegparam(FILE  *vegparam,
     int                      NoOverstory;
     double                   depth_sum;
     double                   sum;
-    char                     str[500];
+    char                     str[MAX_VEGPARAM_LINE_LENGTH];
     char                     line[MAXSTRING];
     char                     tmpline[MAXSTRING];
     const char               delimiters[] = " \t";
     char                    *token;
-    char                    *vegarr[500];
+    char                    *vegarr[MAX_VEGPARAM_LINE_LENGTH];
     size_t                   length;
     size_t                   cidx;
     double                   tmp;
@@ -83,13 +83,13 @@ read_vegparam(FILE  *vegparam,
                     "is < 0.", vegetat_type_num, vegcel);
         }
         for (i = 0; i <= vegetat_type_num * skip; i++) {
-            if (fgets(str, 500, vegparam) == NULL) {
+            if (fgets(str, MAX_VEGPARAM_LINE_LENGTH, vegparam) == NULL) {
                 log_err("unexpected EOF for cell %i while reading root zones "
                         "and LAI", vegcel);
             }
         }
     }
-    fgets(str, 500, vegparam); // read newline at end of veg class line to advance to next line
+    fgets(str, MAX_VEGPARAM_LINE_LENGTH, vegparam); // read newline at end of veg class line to advance to next line
     if (vegcel != gridcel) {
         log_err("Grid cell %d not found", gridcel);
     }
@@ -108,17 +108,20 @@ read_vegparam(FILE  *vegparam,
     }
 
     /** Allocate memory for vegetation grid cell parameters **/
-    temp = (veg_con_struct*) calloc(MaxVeg, sizeof(veg_con_struct));
+    temp = calloc(MaxVeg, sizeof(*temp));
     temp[0].Cv_sum = 0.0;
 
     for (i = 0; i < vegetat_type_num; i++) {
-        temp[i].zone_depth = calloc(options.ROOT_ZONES, sizeof(double));
-        temp[i].zone_fract = calloc(options.ROOT_ZONES, sizeof(double));
+        temp[i].zone_depth = calloc(options.ROOT_ZONES,
+                                    sizeof(*(temp[i].zone_depth)));
+        temp[i].zone_fract = calloc(options.ROOT_ZONES,
+                                    sizeof(*(temp[i].zone_fract)));
         temp[i].vegetat_type_num = vegetat_type_num;
 
         /* Upper boundaries of canopy layers, expressed in terms of fraction of total LAI  */
         if (options.CARBON) {
-            temp[i].CanopLayerBnd = calloc(options.Ncanopy, sizeof(double));
+            temp[i].CanopLayerBnd = calloc(options.Ncanopy,
+                                           sizeof(*(temp[i].CanopLayerBnd)));
             for (cidx = 0; cidx < options.Ncanopy; cidx++) {
                 /* apportion LAI equally among layers */
                 temp[i].CanopLayerBnd[cidx] =
@@ -135,7 +138,8 @@ read_vegparam(FILE  *vegparam,
         ttrim(tmpline);
         token = strtok(tmpline, delimiters); /*  token => veg_class, move 'line' pointer to next field */
         Nfields = 0;
-        vegarr[Nfields] = calloc(500, sizeof(char));
+        vegarr[Nfields] =
+            calloc(MAX_VEGPARAM_LINE_LENGTH, sizeof(*(vegarr[Nfields])));
         strcpy(vegarr[Nfields], token);
         Nfields++;
 
@@ -144,7 +148,8 @@ read_vegparam(FILE  *vegparam,
             token = strtok(NULL, delimiters);
         }
         while (token != NULL) {
-            vegarr[Nfields] = calloc(500, sizeof(char));
+            vegarr[Nfields] = calloc(MAX_VEGPARAM_LINE_LENGTH,
+                                     sizeof(*(vegarr[Nfields])));
             strcpy(vegarr[Nfields], token);
             Nfields++;
             token = strtok(NULL, delimiters);
@@ -229,7 +234,8 @@ read_vegparam(FILE  *vegparam,
                         "vegetat_type_num %d", vegcel, vegetat_type_num);
             }
             Nfields = 0;
-            vegarr[Nfields] = calloc(500, sizeof(char));
+            vegarr[Nfields] = calloc(MAX_VEGPARAM_LINE_LENGTH,
+                                     sizeof(*(vegarr[Nfields])));
             strcpy(tmpline, line);
             ttrim(tmpline);
             token = strtok(tmpline, delimiters);
@@ -237,7 +243,8 @@ read_vegparam(FILE  *vegparam,
             Nfields++;
 
             while ((token = strtok(NULL, delimiters)) != NULL) {
-                vegarr[Nfields] = calloc(500, sizeof(char));
+                vegarr[Nfields] = calloc(MAX_VEGPARAM_LINE_LENGTH,
+                                         sizeof(*(vegarr[Nfields])));
                 strcpy(vegarr[Nfields], token);
                 Nfields++;
             }
@@ -281,7 +288,8 @@ read_vegparam(FILE  *vegparam,
                         "for vegetat_type_num %d", vegcel, vegetat_type_num);
             }
             Nfields = 0;
-            vegarr[Nfields] = calloc(500, sizeof(char));
+            vegarr[Nfields] = calloc(MAX_VEGPARAM_LINE_LENGTH,
+                                     sizeof(*(vegarr[Nfields])));
             strcpy(tmpline, line);
             ttrim(tmpline);
             token = strtok(tmpline, delimiters);
@@ -289,7 +297,8 @@ read_vegparam(FILE  *vegparam,
             Nfields++;
 
             while ((token = strtok(NULL, delimiters)) != NULL) {
-                vegarr[Nfields] = calloc(500, sizeof(char));
+                vegarr[Nfields] = calloc(MAX_VEGPARAM_LINE_LENGTH,
+                                         sizeof(*(vegarr[Nfields])));
                 strcpy(vegarr[Nfields], token);
                 Nfields++;
             }
@@ -319,7 +328,8 @@ read_vegparam(FILE  *vegparam,
                         "vegetat_type_num %d", vegcel, vegetat_type_num);
             }
             Nfields = 0;
-            vegarr[Nfields] = calloc(500, sizeof(char));
+            vegarr[Nfields] = calloc(MAX_VEGPARAM_LINE_LENGTH,
+                                     sizeof(*(vegarr[Nfields])));
             strcpy(tmpline, line);
             ttrim(tmpline);
             token = strtok(tmpline, delimiters);
@@ -327,7 +337,8 @@ read_vegparam(FILE  *vegparam,
             Nfields++;
 
             while ((token = strtok(NULL, delimiters)) != NULL) {
-                vegarr[Nfields] = calloc(500, sizeof(char));
+                vegarr[Nfields] = calloc(MAX_VEGPARAM_LINE_LENGTH,
+                                         sizeof(*(vegarr[Nfields])));
                 strcpy(vegarr[Nfields], token);
                 Nfields++;
             }

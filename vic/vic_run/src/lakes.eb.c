@@ -1858,8 +1858,8 @@ water_balance(lake_var_struct *lake,
 
     frost_fract = soil_con.frost_fract;
 
-    delta_moist = (double*) calloc(options.Nlayer, sizeof(double));
-    moist = (double*) calloc(options.Nlayer, sizeof(double));
+    delta_moist = calloc(options.Nlayer, sizeof(*delta_moist));
+    moist = calloc(options.Nlayer, sizeof(*moist));
 
     /**********************************************************************
     * 1. Preliminary stuff

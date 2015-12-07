@@ -54,7 +54,7 @@ vic_write(void)
     grid_size = global_domain.n_ny * global_domain.n_nx;
 
     // allocate memory for variables to be stored
-    dvar = (double *) malloc(local_domain.ncells_active * sizeof(double));
+    dvar = malloc(local_domain.ncells_active * sizeof(*dvar));
     if (dvar == NULL) {
         log_err("Memory allocation error in vic_write().");
     }

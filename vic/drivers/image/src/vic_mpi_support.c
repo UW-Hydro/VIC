@@ -83,17 +83,17 @@ create_MPI_global_struct_type(MPI_Datatype *mpi_type)
 
     // nitems has to equal the number of elements in global_param_struct
     nitems = 33;
-    blocklengths = (int *) malloc(nitems * sizeof(int));
+    blocklengths = malloc(nitems * sizeof(*blocklengths));
     if (blocklengths == NULL) {
         log_err("Memory allocation error in create_MPI_global_struct_type().")
     }
 
-    offsets = (MPI_Aint *) malloc(nitems * sizeof(MPI_Aint));
+    offsets = malloc(nitems * sizeof(*offsets));
     if (offsets == NULL) {
         log_err("Memory allocation error in create_MPI_global_struct_type().")
     }
 
-    mpi_types = (MPI_Datatype *) malloc(nitems * sizeof(MPI_Datatype));
+    mpi_types = malloc(nitems * sizeof(*mpi_types));
     if (mpi_types == NULL) {
         log_err("Memory allocation error in create_MPI_global_struct_type().")
     }
@@ -288,17 +288,17 @@ create_MPI_filenames_struct_type(MPI_Datatype *mpi_type)
 
     // nitems has to equal the number of elements in filenames_struct
     nitems = 14;
-    blocklengths = (int *) malloc(nitems * sizeof(int));
+    blocklengths = malloc(nitems * sizeof(*blocklengths));
     if (blocklengths == NULL) {
         log_err("Memory allocation error in create_MPI_filenames_struct_type().")
     }
 
-    offsets = (MPI_Aint *) malloc(nitems * sizeof(MPI_Aint));
+    offsets = malloc(nitems * sizeof(*offsets));
     if (offsets == NULL) {
         log_err("Memory allocation error in create_MPI_filenames_struct_type().")
     }
 
-    mpi_types = (MPI_Datatype *) malloc(nitems * sizeof(MPI_Datatype));
+    mpi_types = malloc(nitems * sizeof(*mpi_types));
     if (mpi_types == NULL) {
         log_err("Memory allocation error in create_MPI_filenames_struct_type().")
     }
@@ -417,17 +417,17 @@ create_MPI_location_struct_type(MPI_Datatype *mpi_type)
 
     // nitems has to equal the number of elements in global_param_struct
     nitems = 9;
-    blocklengths = (int *) malloc(nitems * sizeof(int));
+    blocklengths = malloc(nitems * sizeof(*blocklengths));
     if (blocklengths == NULL) {
         log_err("Memory allocation error in create_MPI_location_struct_type().")
     }
 
-    offsets = (MPI_Aint *) malloc(nitems * sizeof(MPI_Aint));
+    offsets = malloc(nitems * sizeof(*offsets));
     if (offsets == NULL) {
         log_err("Memory allocation error in create_MPI_location_struct_type().")
     }
 
-    mpi_types = (MPI_Datatype *) malloc(nitems * sizeof(MPI_Datatype));
+    mpi_types = malloc(nitems * sizeof(*mpi_types));
     if (mpi_types == NULL) {
         log_err("Memory allocation error in create_MPI_location_struct_type().")
     }
@@ -519,17 +519,17 @@ create_MPI_nc_file_struct_type(MPI_Datatype *mpi_type)
 
     // nitems has to equal the number of elements in nc_file_struct
     nitems = 27;
-    blocklengths = (int *) malloc(nitems * sizeof(int));
+    blocklengths = malloc(nitems * sizeof(*blocklengths));
     if (blocklengths == NULL) {
         log_err("Memory allocation error in create_MPI_nc_file_struct_type().")
     }
 
-    offsets = (MPI_Aint *) malloc(nitems * sizeof(MPI_Aint));
+    offsets = malloc(nitems * sizeof(*offsets));
     if (offsets == NULL) {
         log_err("Memory allocation error in create_MPI_nc_file_struct_type().")
     }
 
-    mpi_types = (MPI_Datatype *) malloc(nitems * sizeof(MPI_Datatype));
+    mpi_types = malloc(nitems * sizeof(*mpi_types));
     if (mpi_types == NULL) {
         log_err("Memory allocation error in create_MPI_nc_file_struct_type().")
     }
@@ -694,17 +694,17 @@ create_MPI_option_struct_type(MPI_Datatype *mpi_type)
 
     // nitems has to equal the number of elements in option_struct
     nitems = 60;
-    blocklengths = (int *) malloc(nitems * sizeof(int));
+    blocklengths = malloc(nitems * sizeof(*blocklengths));
     if (blocklengths == NULL) {
         log_err("Memory allocation error in create_MPI_option_struct_type().")
     }
 
-    offsets = (MPI_Aint *) malloc(nitems * sizeof(MPI_Aint));
+    offsets = malloc(nitems * sizeof(*offsets));
     if (offsets == NULL) {
         log_err("Memory allocation error in create_MPI_option_struct_type().")
     }
 
-    mpi_types = (MPI_Datatype *) malloc(nitems * sizeof(MPI_Datatype));
+    mpi_types = malloc(nitems * sizeof(*mpi_types));
     if (mpi_types == NULL) {
         log_err("Memory allocation error in create_MPI_option_struct_type().")
     }
@@ -999,17 +999,17 @@ create_MPI_param_struct_type(MPI_Datatype *mpi_type)
 
     // nitems has to equal the number of elements in parameters_struct
     nitems = 139;
-    blocklengths = (int *) malloc(nitems * sizeof(int));
+    blocklengths = malloc(nitems * sizeof(*blocklengths));
     if (blocklengths == NULL) {
         log_err("Memory allocation error in create_MPI_param_struct_type().")
     }
 
-    offsets = (MPI_Aint *) malloc(nitems * sizeof(MPI_Aint));
+    offsets = malloc(nitems * sizeof(*offsets));
     if (offsets == NULL) {
         log_err("Memory allocation error in create_MPI_param_struct_type().")
     }
 
-    mpi_types = (MPI_Datatype *) malloc(nitems * sizeof(MPI_Datatype));
+    mpi_types = malloc(nitems * sizeof(*mpi_types));
     if (mpi_types == NULL) {
         log_err("Memory allocation error in create_MPI_param_struct_type().")
     }
@@ -1685,9 +1685,12 @@ mpi_map_decomp_domain(size_t   ncells,
     size_t k;
     size_t n;
 
-    *mpi_map_local_array_sizes = (int *) calloc(mpi_size, sizeof(int));
-    *mpi_map_global_array_offsets = (int *) calloc(mpi_size, sizeof(int));
-    *mpi_map_mapping_array = (size_t *) calloc(ncells, sizeof(size_t));
+    *mpi_map_local_array_sizes = calloc(mpi_size,
+                                        sizeof(*(*mpi_map_local_array_sizes)));
+    *mpi_map_global_array_offsets = calloc(mpi_size,
+                                           sizeof(*(*
+                                                    mpi_map_global_array_offsets)));
+    *mpi_map_mapping_array = calloc(ncells, sizeof(*(*mpi_map_mapping_array)));
 
     // determine number of cells per node
     for (n = ncells, i = 0; n > 0; n--, i++) {
@@ -1746,7 +1749,7 @@ gather_put_nc_field_double(char   *nc_name,
 
     if (mpi_rank == 0) {
         grid_size = global_domain.n_nx * global_domain.n_ny;
-        dvar = (double *) malloc(sizeof(double) * grid_size);
+        dvar = malloc(grid_size * sizeof(*dvar));
         if (dvar == NULL) {
             log_err("Memory allocation error in gather_put_nc_field_double().");
         }
@@ -1754,14 +1757,14 @@ gather_put_nc_field_double(char   *nc_name,
             dvar[i] = fillval;
         }
 
-        dvar_gathered = (double *) malloc(sizeof(double) *
-                                          global_domain.ncells_active);
+        dvar_gathered =
+            malloc(global_domain.ncells_active * sizeof(*dvar_gathered));
         if (dvar_gathered == NULL) {
             log_err("Memory allocation error in gather_put_nc_field_double().");
         }
 
-        dvar_remapped = (double *) malloc(sizeof(double) *
-                                          global_domain.ncells_active);
+        dvar_remapped =
+            malloc(global_domain.ncells_active * sizeof(*dvar_remapped));
         if (dvar_remapped == NULL) {
             log_err("Memory allocation error in gather_put_nc_field_double().");
         }
@@ -1828,7 +1831,7 @@ gather_put_nc_field_int(char   *nc_name,
 
     if (mpi_rank == 0) {
         grid_size = global_domain.n_nx * global_domain.n_ny;
-        ivar = (int *) malloc(sizeof(int) * grid_size);
+        ivar = malloc(grid_size * sizeof(*ivar));
         if (ivar == NULL) {
             log_err("Memory allocation error in gather_put_nc_field_int().");
         }
@@ -1836,14 +1839,14 @@ gather_put_nc_field_int(char   *nc_name,
             ivar[i] = fillval;
         }
 
-        ivar_gathered = (int *) malloc(sizeof(int) *
-                                       global_domain.ncells_active);
+        ivar_gathered =
+            malloc(global_domain.ncells_active * sizeof(*ivar_gathered));
         if (ivar_gathered == NULL) {
             log_err("Memory allocation error in gather_put_nc_field_int().");
         }
 
-        ivar_remapped = (int *) malloc(sizeof(int) *
-                                       global_domain.ncells_active);
+        ivar_remapped =
+            malloc(global_domain.ncells_active * sizeof(*ivar_remapped));
         if (ivar_remapped == NULL) {
             log_err("Memory allocation error in gather_put_nc_field_int().");
         }
@@ -1902,18 +1905,17 @@ get_scatter_nc_field_double(char   *nc_name,
     extern size_t       *mpi_map_mapping_array;
 
     if (mpi_rank == 0) {
-        dvar = (double *) malloc(sizeof(double) *
-                                 global_domain.n_nx * global_domain.n_ny);
+        dvar = malloc(global_domain.ncells_total * sizeof(*dvar));
         if (dvar == NULL) {
             log_err("Memory allocation error in get_scatter_nc_field_double().");
         }
-        dvar_filtered = (double *) malloc(sizeof(double) *
-                                          global_domain.ncells_active);
+        dvar_filtered =
+            malloc(global_domain.ncells_active * sizeof(*dvar_filtered));
         if (dvar_filtered == NULL) {
             log_err("Memory allocation error in get_scatter_nc_field_double().");
         }
-        dvar_mapped = (double *) malloc(sizeof(double) *
-                                        global_domain.ncells_active);
+        dvar_mapped =
+            malloc(global_domain.ncells_active * sizeof(*dvar_mapped));
         if (dvar_mapped == NULL) {
             log_err("Memory allocation error in get_scatter_nc_field_double().");
         }
@@ -1971,18 +1973,17 @@ get_scatter_nc_field_float(char   *nc_name,
     extern size_t       *mpi_map_mapping_array;
 
     if (mpi_rank == 0) {
-        fvar = (float *) malloc(sizeof(float) *
-                                global_domain.n_nx * global_domain.n_ny);
+        fvar = malloc(global_domain.ncells_total * sizeof(*fvar));
         if (fvar == NULL) {
             log_err("Memory allocation error in get_scatter_nc_field_float().");
         }
-        fvar_filtered = (float *) malloc(sizeof(float) *
-                                         global_domain.ncells_active);
+        fvar_filtered =
+            malloc(global_domain.ncells_active * sizeof(*fvar_filtered));
         if (fvar_filtered == NULL) {
             log_err("Memory allocation error in get_scatter_nc_field_float().");
         }
-        fvar_mapped = (float *) malloc(sizeof(float) *
-                                       global_domain.ncells_active);
+        fvar_mapped =
+            malloc(global_domain.ncells_active * sizeof(*fvar_mapped));
         if (fvar_mapped == NULL) {
             log_err("Memory allocation error in get_scatter_nc_field_float().");
         }
@@ -2040,18 +2041,17 @@ get_scatter_nc_field_int(char   *nc_name,
     extern size_t       *mpi_map_mapping_array;
 
     if (mpi_rank == 0) {
-        ivar = (int *) malloc(sizeof(int) *
-                              global_domain.n_nx * global_domain.n_ny);
+        ivar = malloc(global_domain.ncells_total * sizeof(*ivar));
         if (ivar == NULL) {
             log_err("Memory allocation error in get_scatter_nc_field_int().");
         }
-        ivar_filtered = (int *) malloc(sizeof(int) *
-                                       global_domain.ncells_active);
+        ivar_filtered =
+            malloc(global_domain.ncells_active * sizeof(*ivar_filtered));
         if (ivar_filtered == NULL) {
             log_err("Memory allocation error in get_scatter_nc_field_int().");
         }
-        ivar_mapped = (int *) malloc(sizeof(int) *
-                                     global_domain.ncells_active);
+        ivar_mapped =
+            malloc(global_domain.ncells_active * sizeof(*ivar_mapped));
         if (ivar_mapped == NULL) {
             log_err("Memory allocation error in get_scatter_nc_field_int().");
         }

@@ -85,9 +85,6 @@ double arno_evap(layer_data_struct *layer,
   double max_infil;
   double Evap;
   double tmpsum;
-  /* best-fitting value of architectural resistance, determined from
-     evaluation of model performance at eddy covariane tower sites */
-  double rarc_soil = 100.0; // [s/m]
 
   Evap = 0;
 
@@ -100,7 +97,7 @@ double arno_evap(layer_data_struct *layer,
 
   /* Calculate the potential bare soil evaporation (mm/time step) */
   
-  Epot = penman(air_temp, elevation, rad, vpd, ra, 0.0, rarc_soil) * delta_t / SEC_PER_DAY;
+  Epot = penman(air_temp, elevation, rad, vpd, ra, 0.0, RARC_SOIL) * delta_t / SEC_PER_DAY;
   
   /**********************************************************************/
   /*  Compute temporary infiltration rate based on given soil_moist.    */

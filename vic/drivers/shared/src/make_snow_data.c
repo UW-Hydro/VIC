@@ -41,8 +41,7 @@ make_snow_data(size_t nveg)
     size_t               i;
     snow_data_struct   **temp = NULL;
 
-    temp =
-        (snow_data_struct **) calloc(nveg, sizeof(struct snow_data_struct *));
+    temp = calloc(nveg, sizeof(*temp));
 
     if (temp == NULL) {
         log_err("Memory allocation error in make_snow_data().");
@@ -50,8 +49,7 @@ make_snow_data(size_t nveg)
 
 
     for (i = 0; i < nveg; i++) {
-        temp[i] = (snow_data_struct *) calloc(options.SNOW_BAND,
-                                              sizeof(snow_data_struct));
+        temp[i] = calloc(options.SNOW_BAND, sizeof(*(temp[i])));
         if (temp[i] == NULL) {
             log_err("Memory allocation error in make_snow_data().");
         }

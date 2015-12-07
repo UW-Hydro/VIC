@@ -69,22 +69,22 @@ vic_store(void)
     grid_size = global_domain.n_ny * global_domain.n_nx;
 
     // allocate memory for variables to be stored
-    cvar = (char *) malloc(local_domain.ncells * sizeof(char));
+    cvar = malloc(local_domain.ncells * sizeof(*cvar));
     if (cvar == NULL) {
         log_err("Memory allocation error in vic_store().");
     }
 
-    ivar = (int *) malloc(local_domain.ncells * sizeof(int));
+    ivar = malloc(local_domain.ncells * sizeof(*ivar));
     if (ivar == NULL) {
         log_err("Memory allocation error in vic_store().");
     }
 
-    dvar = (double *) malloc(local_domain.ncells * sizeof(double));
+    dvar = malloc(local_domain.ncells * sizeof(*dvar));
     if (dvar == NULL) {
         log_err("Memory allocation error in vic_store().");
     }
 
-    fvar = (float *) malloc(local_domain.ncells * sizeof(float));
+    fvar = malloc(local_domain.ncells * sizeof(*fvar));
     if (fvar == NULL) {
         log_err("Memory allocation error in vic_store().");
     }

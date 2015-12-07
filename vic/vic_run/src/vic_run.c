@@ -103,9 +103,9 @@ vic_run(atmos_data_struct   *atmos,
     vic_run_veg_lib = veg_lib;
 
     /* Allocate aero_resist array */
-    aero_resist = (double**) calloc(N_PET_TYPES + 1, sizeof(double*));
+    aero_resist = calloc(N_PET_TYPES + 1, sizeof(*aero_resist));
     for (p = 0; p < N_PET_TYPES + 1; p++) {
-        aero_resist[p] = (double*) calloc(3, sizeof(double));
+        aero_resist[p] = calloc(3, sizeof(*(aero_resist[p])));
     }
 
     /* set local pointers */

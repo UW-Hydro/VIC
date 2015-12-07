@@ -99,8 +99,8 @@ vic_start(void)
                               &mpi_map_mapping_array);
 
         // get the indices for the active cells (used in reading and writing)
-        filter_active_cells = (size_t *) malloc(global_domain.ncells *
-                                                sizeof(size_t));
+        filter_active_cells = malloc(global_domain.ncells *
+                                     sizeof(*filter_active_cells));
         for (i = 0; i < global_domain.ncells; i++) {
             filter_active_cells[i] = global_domain.locations[i].io_idx;
         }
@@ -162,8 +162,8 @@ vic_start(void)
     }
 
     // Allocate memory for the local locations
-    local_domain.locations = (location_struct *) malloc(
-        local_domain.ncells * sizeof(location_struct));
+    local_domain.locations = malloc(local_domain.ncells *
+                                    sizeof(*local_domain.locations));
     if (local_domain.locations == NULL) {
         log_err("malloc error in vic_start()\n");
     }
@@ -173,8 +173,8 @@ vic_start(void)
 
     // map the location vector to a temporary array so they can be scattered
     if (mpi_rank == 0) {
-        mapped_locations = (location_struct *) malloc(
-            global_domain.ncells * sizeof(location_struct));
+        mapped_locations = malloc(global_domain.ncells *
+                                  sizeof(*mapped_locations));
         if (mapped_locations == NULL) {
             log_err("malloc error in vic_start()\n");
         }

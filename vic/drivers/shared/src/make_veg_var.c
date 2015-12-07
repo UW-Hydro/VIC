@@ -39,38 +39,37 @@ make_veg_var(size_t veg_type_num)
     size_t               i, j;
     veg_var_struct     **temp = NULL;
 
-    temp = (veg_var_struct **) calloc(veg_type_num, sizeof(veg_var_struct *));
+    temp = calloc(veg_type_num, sizeof(*temp));
     if (temp == NULL) {
         log_err("Memory allocation error in make_veg_var().");
     }
 
     for (i = 0; i < veg_type_num; i++) {
-        temp[i] =
-            (veg_var_struct *) calloc(options.SNOW_BAND,
-                                      sizeof(veg_var_struct));
+        temp[i] = calloc(options.SNOW_BAND, sizeof(*(temp[i])));
         if (temp[i] == NULL) {
             log_err("Memory allocation error in make_veg_var().");
         }
 
         if (options.CARBON) {
             for (j = 0; j < options.SNOW_BAND; j++) {
-                temp[i][j].NscaleFactor = (double *) calloc(options.Ncanopy,
-                                                            sizeof(double));
+                temp[i][j].NscaleFactor = calloc(options.Ncanopy,
+                                                 sizeof(*(temp[i][j].
+                                                          NscaleFactor)));
                 if (temp[i][j].NscaleFactor == NULL) {
                     log_err("Memory allocation error in make_veg_var().");
                 }
-                temp[i][j].aPARLayer =
-                    (double *) calloc(options.Ncanopy, sizeof(double));
+                temp[i][j].aPARLayer = calloc(options.Ncanopy,
+                                              sizeof(*(temp[i][j].aPARLayer)));
                 if (temp[i][j].aPARLayer == NULL) {
                     log_err("Memory allocation error in make_veg_var().");
                 }
-                temp[i][j].CiLayer =
-                    (double *) calloc(options.Ncanopy, sizeof(double));
+                temp[i][j].CiLayer = calloc(options.Ncanopy,
+                                            sizeof(*(temp[i][j].CiLayer)));
                 if (temp[i][j].CiLayer == NULL) {
                     log_err("Memory allocation error in make_veg_var().");
                 }
-                temp[i][j].rsLayer =
-                    (double *) calloc(options.Ncanopy, sizeof(double));
+                temp[i][j].rsLayer = calloc(options.Ncanopy,
+                                            sizeof(*(temp[i][j].rsLayer)));
                 if (temp[i][j].rsLayer == NULL) {
                     log_err("Memory allocation error in make_veg_var().");
                 }

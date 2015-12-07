@@ -362,7 +362,7 @@ func_surf_energy_bal(double  Ts,
 
     TMean = Ts;
 
-    transp = (double *) calloc(options.Nlayer, sizeof(double));
+    transp = calloc(options.Nlayer, sizeof(*transp));
     for (i = 0; i < options.Nlayer; i++) {
         transp[i] = 0.;
     }

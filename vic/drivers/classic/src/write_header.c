@@ -61,7 +61,7 @@ write_header(out_data_file_struct *out_data_files,
     }
 
     if (options.BINARY_OUTPUT) { // BINARY
-        tmp_str = (char *)calloc(256, sizeof(char));
+        tmp_str = calloc(BINHEADERSIZE, sizeof(*tmp_str));
 
         // Binary header format:
         //

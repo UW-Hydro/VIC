@@ -41,11 +41,9 @@ make_cell_data(size_t veg_type_num)
     size_t               i;
     cell_data_struct   **temp;
 
-    temp = (cell_data_struct**) calloc(veg_type_num,
-                                       sizeof(cell_data_struct*));
+    temp = calloc(veg_type_num, sizeof(*temp));
     for (i = 0; i < veg_type_num; i++) {
-        temp[i] = (cell_data_struct*) calloc(options.SNOW_BAND,
-                                             sizeof(cell_data_struct));
+        temp[i] = calloc(options.SNOW_BAND, sizeof(*(temp[i])));
     }
     return temp;
 }

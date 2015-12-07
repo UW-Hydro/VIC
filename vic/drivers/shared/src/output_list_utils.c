@@ -36,8 +36,7 @@ create_output_list()
     int                  v;
     out_data_struct     *out_data;
 
-    out_data =
-        (out_data_struct *) calloc(N_OUTVAR_TYPES, sizeof(out_data_struct));
+    out_data = calloc(N_OUTVAR_TYPES, sizeof(*out_data));
 
     // Build the list of supported output variables
 
@@ -351,9 +350,10 @@ create_output_list()
 
     // Allocate space for data
     for (v = 0; v < N_OUTVAR_TYPES; v++) {
-        out_data[v].data = (double *) calloc(out_data[v].nelem, sizeof(double));
+        out_data[v].data =
+            calloc(out_data[v].nelem, sizeof(*(out_data[v].data)));
         out_data[v].aggdata =
-            (double *) calloc(out_data[v].nelem, sizeof(double));
+            calloc(out_data[v].nelem, sizeof(*(out_data[v].aggdata)));
     }
 
     // Initialize data values

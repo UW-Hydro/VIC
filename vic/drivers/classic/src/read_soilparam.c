@@ -736,11 +736,11 @@ read_soilparam(FILE *soilparam,
            Allocate and Initialize Snow Band Parameters
         *************************************************/
         Nbands = options.SNOW_BAND;
-        temp.AreaFract = (double *) calloc(Nbands, sizeof(double));
-        temp.BandElev = (double *) calloc(Nbands, sizeof(double));
-        temp.Tfactor = (double *) calloc(Nbands, sizeof(double));
-        temp.Pfactor = (double *) calloc(Nbands, sizeof(double));
-        temp.AboveTreeLine = (bool *) calloc(Nbands, sizeof(bool));
+        temp.AreaFract = calloc(Nbands, sizeof(*(temp.AreaFract)));
+        temp.BandElev = calloc(Nbands, sizeof(*(temp.BandElev)));
+        temp.Tfactor = calloc(Nbands, sizeof(*(temp.Tfactor)));
+        temp.Pfactor = calloc(Nbands, sizeof(*(temp.Pfactor)));
+        temp.AboveTreeLine = calloc(Nbands, sizeof(*(temp.AboveTreeLine)));
 
         if (temp.Tfactor == NULL || temp.Pfactor == NULL ||
             temp.AreaFract == NULL) {

@@ -73,7 +73,7 @@ get_global_domain(char          *nc_name,
 
     // if MASTER_PROC
     global_domain->locations = malloc(global_domain->ncells *
-                                      sizeof(*global_domain->locations));
+                                      sizeof(*(global_domain->locations)));
     if (global_domain->locations == NULL) {
         log_err("Memory allocation error in get_global_domain().");
     }

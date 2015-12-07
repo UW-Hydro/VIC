@@ -1663,11 +1663,11 @@ mpi_map_decomp_domain(size_t   ncells,
     }
 
     *mpi_map_local_array_sizes = calloc(mpi_size,
-                                        sizeof(**mpi_map_local_array_sizes));
+                                        sizeof(*(*mpi_map_local_array_sizes)));
     *mpi_map_global_array_offsets = calloc(mpi_size,
-                                           sizeof(**mpi_map_global_array_offsets));
+                                           sizeof(*(*mpi_map_global_array_offsets)));
     *mpi_map_mapping_array = calloc(ncells,
-                                    sizeof(**mpi_map_mapping_array));
+                                    sizeof(*(*mpi_map_mapping_array)));
 
     // determine number of cells per node
     for (n = ncells, i = 0; n > 0; n--, i++) {
@@ -1813,12 +1813,12 @@ gather_put_nc_field_int(char   *nc_name,
             ivar[i] = fillval;
         }
 
-        ivar_gathered = malloc(sizeof(*ivar_gathered) * global_domain.ncells);
+        ivar_gathered = malloc(global_domain.ncells * sizeof(*ivar_gathered));
         if (ivar_gathered == NULL) {
             log_err("Memory allocation error in gather_put_nc_field_int().");
         }
 
-        ivar_remapped = malloc(sizeof(*ivar_remapped) * global_domain.ncells);
+        ivar_remapped = malloc(global_domain.ncells * sizeof(*ivar_remapped));
         if (ivar_remapped == NULL) {
             log_err("Memory allocation error in gather_put_nc_field_int().");
         }
@@ -1876,15 +1876,15 @@ get_scatter_nc_field_double(char   *nc_name,
     extern size_t       *mpi_map_mapping_array;
 
     if (mpi_rank == 0) {
-        dvar = malloc(sizeof(*dvar) * global_domain.n_nx * global_domain.n_ny);
+        dvar = malloc(global_domain.n_nx * global_domain.n_ny * sizeof(*dvar));
         if (dvar == NULL) {
             log_err("Memory allocation error in get_scatter_nc_field_double().");
         }
-        dvar_filtered = malloc(sizeof(*dvar_filtered) * global_domain.ncells);
+        dvar_filtered = malloc(global_domain.ncells * sizeof(*dvar_filtered));
         if (dvar_filtered == NULL) {
             log_err("Memory allocation error in get_scatter_nc_field_double().");
         }
-        dvar_mapped = malloc(sizeof(*dvar_mapped) * global_domain.ncells);
+        dvar_mapped = malloc(global_domain.ncells * sizeof(*dvar_mapped));
         if (dvar_mapped == NULL) {
             log_err("Memory allocation error in get_scatter_nc_field_double().");
         }
@@ -1940,15 +1940,15 @@ get_scatter_nc_field_float(char   *nc_name,
     extern size_t       *mpi_map_mapping_array;
 
     if (mpi_rank == 0) {
-        fvar = malloc(sizeof(*fvar) * global_domain.n_nx * global_domain.n_ny);
+        fvar = malloc(global_domain.n_nx * global_domain.n_ny * sizeof(*fvar));
         if (fvar == NULL) {
             log_err("Memory allocation error in get_scatter_nc_field_float().");
         }
-        fvar_filtered = malloc(sizeof(*fvar_filtered) * global_domain.ncells);
+        fvar_filtered = malloc(global_domain.ncells * sizeof(*fvar_filtered));
         if (fvar_filtered == NULL) {
             log_err("Memory allocation error in get_scatter_nc_field_float().");
         }
-        fvar_mapped = malloc(sizeof(*fvar_mapped) * global_domain.ncells);
+        fvar_mapped = malloc(global_domain.ncells * sizeof(*fvar_mapped));
         if (fvar_mapped == NULL) {
             log_err("Memory allocation error in get_scatter_nc_field_float().");
         }
@@ -2004,15 +2004,15 @@ get_scatter_nc_field_int(char   *nc_name,
     extern size_t       *mpi_map_mapping_array;
 
     if (mpi_rank == 0) {
-        ivar = malloc(sizeof(*ivar) * global_domain.n_nx * global_domain.n_ny);
+        ivar = malloc(global_domain.n_nx * global_domain.n_ny * sizeof(*ivar));
         if (ivar == NULL) {
             log_err("Memory allocation error in get_scatter_nc_field_int().");
         }
-        ivar_filtered = malloc(sizeof(*ivar_filtered) * global_domain.ncells);
+        ivar_filtered = malloc(global_domain.ncells * sizeof(*ivar_filtered));
         if (ivar_filtered == NULL) {
             log_err("Memory allocation error in get_scatter_nc_field_int().");
         }
-        ivar_mapped = malloc(sizeof(*ivar_mapped) * global_domain.ncells);
+        ivar_mapped = malloc(global_domain.ncells * sizeof(*ivar_mapped));
         if (ivar_mapped == NULL) {
             log_err("Memory allocation error in get_scatter_nc_field_int().");
         }

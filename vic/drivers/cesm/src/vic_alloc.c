@@ -129,27 +129,27 @@ vic_alloc(void)
 
         // snow band allocation
         soil_con[i].AreaFract = calloc(options.SNOW_BAND,
-                                       sizeof(*soil_con[i].AreaFract));
+                                       sizeof(*(soil_con[i].AreaFract)));
         if (soil_con[i].AreaFract == NULL) {
             log_err("Memory allocation error in vic_alloc().");
         }
         soil_con[i].BandElev = calloc(options.SNOW_BAND,
-                                      sizeof(*soil_con[i].BandElev));
+                                      sizeof(*(soil_con[i].BandElev)));
         if (soil_con[i].BandElev == NULL) {
             log_err("Memory allocation error in vic_alloc().");
         }
         soil_con[i].Tfactor = calloc(options.SNOW_BAND,
-                                     sizeof(*soil_con[i].Tfactor));
+                                     sizeof(*(soil_con[i].Tfactor)));
         if (soil_con[i].Tfactor == NULL) {
             log_err("Memory allocation error in vic_alloc().");
         }
         soil_con[i].Pfactor = calloc(options.SNOW_BAND,
-                                     sizeof(*soil_con[i].Pfactor));
+                                     sizeof(*(soil_con[i].Pfactor)));
         if (soil_con[i].Pfactor == NULL) {
             log_err("Memory allocation error in vic_alloc().");
         }
         soil_con[i].AboveTreeLine = calloc(options.SNOW_BAND,
-                                           sizeof(*soil_con[i].AboveTreeLine));
+                                           sizeof(*(soil_con[i].AboveTreeLine)));
         if (soil_con[i].AboveTreeLine == NULL) {
             log_err("Memory allocation error in vic_alloc().");
         }
@@ -161,12 +161,12 @@ vic_alloc(void)
         veg_con_map[i].nv_types = options.NVEGTYPES;
 
         veg_con_map[i].vidx = calloc(veg_con_map[i].nv_types,
-                                     sizeof(*veg_con_map[i].vidx));
+                                     sizeof(*(veg_con_map[i].vidx)));
         if (veg_con_map[i].vidx == NULL) {
             log_err("Memory allocation error in vic_alloc().");
         }
         veg_con_map[i].Cv = calloc(veg_con_map[i].nv_types,
-                                   sizeof(*veg_con_map[i].Cv));
+                                   sizeof(*(veg_con_map[i].Cv)));
         if (veg_con_map[i].Cv == NULL) {
             log_err("Memory allocation error in vic_alloc().");
         }
@@ -177,25 +177,25 @@ vic_alloc(void)
         }
 
         veg_con[i] = malloc((size_t) (veg_con_map[i].nv_active) *
-                            sizeof(*veg_con[i]));
+                            sizeof(*(veg_con[i])));
         if (veg_con[i] == NULL) {
             log_err("Memory allocation error in vic_alloc().");
         }
 
         for (j = 0; j < veg_con_map[i].nv_active; j++) {
             veg_con[i][j].zone_depth = calloc(options.ROOT_ZONES,
-                                              sizeof(*veg_con[i][j].zone_depth));
+                                              sizeof(*(veg_con[i][j].zone_depth)));
             if (veg_con[i][j].zone_depth == NULL) {
                 log_err("Memory allocation error in vic_alloc().");
             }
             veg_con[i][j].zone_fract = calloc(options.ROOT_ZONES,
-                                              sizeof(*veg_con[i][j].zone_fract));
+                                              sizeof(*(veg_con[i][j].zone_fract)));
             if (veg_con[i][j].zone_fract == NULL) {
                 log_err("Memory allocation error in vic_alloc().");
             }
             if (options.CARBON) {
                 veg_con[i][j].CanopLayerBnd = calloc(options.Ncanopy,
-                                                     sizeof(*veg_con[i][j].CanopLayerBnd));
+                                                     sizeof(*(veg_con[i][j].CanopLayerBnd)));
                 if (veg_con[i][j].CanopLayerBnd == NULL) {
                     log_err("Memory allocation error in vic_alloc().");
                 }
@@ -206,7 +206,7 @@ vic_alloc(void)
         // vegetation library allocation - there is a veg library for each
         // active grid cell
 
-        veg_lib[i] = calloc(options.NVEGTYPES, sizeof(*veg_lib[i]));
+        veg_lib[i] = calloc(options.NVEGTYPES, sizeof(*(veg_lib[i])));
         if (veg_lib[i] == NULL) {
             log_err("Memory allocation error in vic_alloc().");
         }
@@ -216,7 +216,7 @@ vic_alloc(void)
         out_data[i] = create_output_list();
 
         // allocate memory for veg_hist
-        veg_hist[i] = calloc(veg_con_map[i].nv_active, sizeof(*veg_hist[i]));
+        veg_hist[i] = calloc(veg_con_map[i].nv_active, sizeof(*(veg_hist[i])));
         for (j = 0; j < veg_con_map[i].nv_active; j++) {
             alloc_veg_hist(&(veg_hist[i][j]));
         }

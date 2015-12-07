@@ -39,8 +39,6 @@ get_global_domain(char          *nc_name,
     double *var = NULL;
     size_t  i;
     size_t  j;
-    size_t  x;
-    size_t  y;
     size_t  d2count[2];
     size_t  d2start[2];
 
@@ -65,11 +63,9 @@ get_global_domain(char          *nc_name,
 
     get_nc_field_int(nc_name, "run_cell", d2start, d2count, run);
 
-    for (y = 0, i = 0; y < global_domain->n_ny; y++) {
-        for (x = 0; x < global_domain->n_nx; x++, i++) {
-            if (run[i]) {
-                global_domain->ncells_active++;
-            }
+    for (i = 0; i < global_domain->ncells_total; i++) {
+        if (run[i]) {
+            global_domain->ncells_active++;
         }
     }
 
@@ -89,21 +85,17 @@ get_global_domain(char          *nc_name,
         log_err("Memory allocation error in get_global_domain().");
     }
 
-    for (y = 0, i = 0, j = 0; y < global_domain->n_ny; y++) {
-        for (x = 0; x < global_domain->n_nx; x++, i++) {
-            if (run[i]) {
-                global_domain->locations[i].run = 1;
-            }
+    for (i = 0; i < global_domain->ncells_total; i++) {
+        if (run[i]) {
+            global_domain->locations[i].run = true;
         }
     }
 
-    for (y = 0, i = 0, j = 0; y < global_domain->n_ny; y++) {
-        for (x = 0; x < global_domain->n_nx; x++, i++) {
-            if (run[i]) {
-                global_domain->locations[i].io_idx = i;
-                global_domain->locations[i].global_idx = j;
-                j++;
-            }
+    for (i = 0, j = 0; i < global_domain->ncells_total; i++) {
+        if (run[i]) {
+            global_domain->locations[i].io_idx = i;
+            global_domain->locations[i].global_idx = j;
+            j++;
         }
     }
 
@@ -111,15 +103,13 @@ get_global_domain(char          *nc_name,
     // TBD: read var id from file
     get_nc_field_double(nc_name, "xc",
                         d2start, d2count, var);
-    for (y = 0, i = 0; y < global_domain->n_ny; y++) {
-        for (x = 0; x < global_domain->n_nx; x++, i++) {
-            // rescale to [-180., 180]. Note that the if statement is not strictly
-            // needed, but it prevents -180 from turning into 180 and vice versa
-            if (var[i] < -180.f || var[i] > 180.f) {
-                var[i] -= round(var[i] / 360.f) * 360.f;
-            }
-            global_domain->locations[i].longitude = (double) var[i];
+    for (i = 0; i < global_domain->ncells_total; i++) {
+        // rescale to [-180., 180]. Note that the if statement is not strictly
+        // needed, but it prevents -180 from turning into 180 and vice versa
+        if (var[i] < -180.f || var[i] > 180.f) {
+            var[i] -= round(var[i] / 360.f) * 360.f;
         }
+        global_domain->locations[i].longitude = (double) var[i];
     }
 
     // get latitude

@@ -200,13 +200,10 @@ vic_start(void)
             initialize_location(&(active_locations[i]));
         }
 
-        j = 0;
-        for (y = 0, i = 0; y < global_domain.n_ny; y++) {
-            for (x = 0; x < global_domain.n_nx; x++, i++) {
-                if (global_domain.locations[i].run) {
-                    active_locations[j] = global_domain.locations[i];
-                    j++;
-                }
+        for (i = 0, j = 0; i < global_domain->ncells_total; i++) {
+            if (global_domain.locations[i].run) {
+                active_locations[j] = global_domain.locations[i];
+                j++;
             }
         }
 

@@ -1016,6 +1016,10 @@ typedef struct {
   float   fetch;            /* Average fetch length for each vegetation class. */
   int     LAKE;             /* TRUE = this tile is a lake/wetland tile */
   double *CanopLayerBnd;    /* Upper boundary of each canopy layer, expressed as fraction of total LAI */
+  double albedo[12];       /* climatological vegetation albedo (fraction) */
+  double LAI[12];          /* climatological leaf area index (m2/m2) */
+  double vegcover[12];     /* climatological fractional area covered by plants within the tile (fraction) */
+  double Wdmax[12];        /* climatological maximum dew holding capacity (mm) */
 } veg_con_struct;
 
 /******************************************************************

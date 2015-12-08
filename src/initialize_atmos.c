@@ -7,7 +7,6 @@ static char vcid[] = "$Id$";
 void initialize_atmos(atmos_data_struct        *atmos,
                       dmy_struct               *dmy,
 		      FILE                    **infile,
-		      veg_lib_struct           *veg_lib,
 		      veg_con_struct           *veg_con,
                       veg_hist_struct         **veg_hist,
 		      soil_con_struct          *soil_con,
@@ -1432,7 +1431,7 @@ void initialize_atmos(atmos_data_struct        *atmos,
     for (rec = 0; rec < global_param.nrecs; rec++) {
       for(v = 0; v < veg_con[0].vegetat_type_num; v++) {
         for (j = 0; j < NF; j++) {
-          veg_hist[rec][v].albedo[j] = veg_lib[veg_con[v].veg_class].albedo[dmy[rec].month-1];
+          veg_hist[rec][v].albedo[j] = veg_con[v].albedo[dmy[rec].month-1];
         }
       }
     }
@@ -1486,7 +1485,7 @@ void initialize_atmos(atmos_data_struct        *atmos,
     for (rec = 0; rec < global_param.nrecs; rec++) {
       for(v = 0; v < veg_con[0].vegetat_type_num; v++) {
         for (j = 0; j < NF; j++) {
-          veg_hist[rec][v].LAI[j] = veg_lib[veg_con[v].veg_class].LAI[dmy[rec].month-1];
+          veg_hist[rec][v].LAI[j] = veg_con[v].LAI[dmy[rec].month-1];
         }
       }
     }
@@ -1540,7 +1539,7 @@ void initialize_atmos(atmos_data_struct        *atmos,
     for (rec = 0; rec < global_param.nrecs; rec++) {
       for(v = 0; v < veg_con[0].vegetat_type_num; v++) {
         for (j = 0; j < NF; j++) {
-          veg_hist[rec][v].vegcover[j] = veg_lib[veg_con[v].veg_class].vegcover[dmy[rec].month-1];
+          veg_hist[rec][v].vegcover[j] = veg_con[v].vegcover[dmy[rec].month-1];
         }
       }
     }

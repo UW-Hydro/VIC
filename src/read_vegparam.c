@@ -239,16 +239,23 @@ veg_con_struct *read_vegparam(FILE *vegparam,
         nrerror(ErrStr);
       }
 
+      for ( j = 0; j < 12; j++ ) {
+        temp[i].albedo[j] = veg_lib[temp[i].veg_class].albedo[j];
+        temp[i].LAI[j] = veg_lib[temp[i].veg_class].LAI[j];
+        temp[i].vegcover[j] = veg_lib[temp[i].veg_class].vegcover[j];
+        temp[i].Wdmax[j] = veg_lib[temp[i].veg_class].Wdmax[j];
+      }
+
       if (options.LAI_SRC == FROM_VEGPARAM) {
         for ( j = 0; j < 12; j++ ) {
           tmp = atof( vegarr[j] );
           if (tmp != NODATA_VH)
-            veg_lib[temp[i].veg_class].LAI[j] = tmp;
-          if (veg_lib[temp[i].veg_class].overstory && veg_lib[temp[i].veg_class].LAI[j] == 0) {
+            temp[i].LAI[j] = tmp;
+          if (veg_lib[temp[i].veg_class].overstory && temp[i].LAI[j] == 0) {
             sprintf(ErrStr,"ERROR: cell %d, veg tile %d: the specified veg class (%d) is listed as an overstory class in the veg LIBRARY, but the LAI given in the veg PARAM FILE for this tile for month %d is 0.\n",gridcel, i+1, temp[i].veg_class+1, j+1);
             nrerror(ErrStr);
           }
-          veg_lib[temp[i].veg_class].Wdmax[j] = LAI_WATER_FACTOR * veg_lib[temp[i].veg_class].LAI[j];
+          temp[i].Wdmax[j] = LAI_WATER_FACTOR * temp[i].LAI[j];
         }
       }
       for(k=0; k<Nfields; k++)
@@ -284,7 +291,7 @@ veg_con_struct *read_vegparam(FILE *vegparam,
         for ( j = 0; j < 12; j++ ) {
           tmp = atof( vegarr[j] );
           if (tmp != NODATA_VH)
-            veg_lib[temp[i].veg_class].vegcover[j] = tmp;
+            temp[i].vegcover[j] = tmp;
         }
       }
       for(k=0; k<Nfields; k++)
@@ -320,7 +327,7 @@ veg_con_struct *read_vegparam(FILE *vegparam,
         for ( j = 0; j < 12; j++ ) {
           tmp = atof( vegarr[j] );
           if (tmp != NODATA_VH)
-            veg_lib[temp[i].veg_class].albedo[j] = tmp;
+            temp[i].albedo[j] = tmp;
         }
       }
       for(k=0; k<Nfields; k++)

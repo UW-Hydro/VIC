@@ -402,7 +402,7 @@ typedef struct {
  * @brief   This structure stores output information for one variable.
  *****************************************************************************/
 typedef struct {
-    char varname[20];        /**< name of variable */
+    char varname[30];        /**< name of variable */
     bool write;              /**< FALSE = don't write; TRUE = write */
     char format[10];         /**< format, when written to an ascii file;
                                 should match the desired fprintf format specifier, e.g. %.4f */

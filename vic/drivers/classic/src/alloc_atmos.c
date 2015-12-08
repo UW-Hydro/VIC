@@ -38,68 +38,86 @@ alloc_atmos(int                 nrecs,
     extern option_struct options;
     int                  i;
 
-    *atmos = (atmos_data_struct *) calloc(nrecs, sizeof(atmos_data_struct));
+    *atmos = calloc(nrecs, sizeof(atmos_data_struct));
     if (*atmos == NULL) {
         log_err("Memory allocation error in alloc_atmos().");
     }
 
     for (i = 0; i < nrecs; i++) {
-        (*atmos)[i].air_temp = (double *) calloc(NR + 1, sizeof(double));
+        (*atmos)[i].air_temp = calloc(NR + 1, sizeof(*(*atmos)[i].air_temp));
         if ((*atmos)[i].air_temp == NULL) {
             log_err("Memory allocation error in alloc_atmos().");
         }
-        (*atmos)[i].density = (double *) calloc(NR + 1, sizeof(double));
+        (*atmos)[i].Catm = calloc(NR + 1, sizeof(*(*atmos)[i].Catm));
+        if ((*atmos)[i].Catm == NULL) {
+            log_err("Memory allocation error in alloc_atmos().");
+        }
+        (*atmos)[i].channel_in =
+            calloc(NR + 1, sizeof(*(*atmos)[i].channel_in));
+        if ((*atmos)[i].channel_in == NULL) {
+            log_err("Memory allocation error in alloc_atmos().");
+        }
+        (*atmos)[i].density = calloc(NR + 1, sizeof(*(*atmos)[i].density));
         if ((*atmos)[i].density == NULL) {
             log_err("Memory allocation error in alloc_atmos().");
         }
-        (*atmos)[i].longwave = (double *) calloc(NR + 1, sizeof(double));
+        (*atmos)[i].fdir = calloc(NR + 1, sizeof(*(*atmos)[i].fdir));
+        if ((*atmos)[i].fdir == NULL) {
+            log_err("Memory allocation error in alloc_atmos().");
+        }
+        (*atmos)[i].longwave = calloc(NR + 1, sizeof(*(*atmos)[i].longwave));
         if ((*atmos)[i].longwave == NULL) {
             log_err("Memory allocation error in alloc_atmos().");
         }
-        (*atmos)[i].prec = (double *) calloc(NR + 1, sizeof(double));
+        (*atmos)[i].par = calloc(NR + 1, sizeof(*(*atmos)[i].par));
+        if ((*atmos)[i].par == NULL) {
+            log_err("Memory allocation error in alloc_atmos().");
+        }
+        (*atmos)[i].prec = calloc(NR + 1, sizeof(*(*atmos)[i].prec));
         if ((*atmos)[i].prec == NULL) {
             log_err("Memory allocation error in alloc_atmos().");
         }
-        (*atmos)[i].pressure = (double *) calloc(NR + 1, sizeof(double));
+        (*atmos)[i].pressure = calloc(NR + 1, sizeof(*(*atmos)[i].pressure));
         if ((*atmos)[i].pressure == NULL) {
             log_err("Memory allocation error in alloc_atmos().");
         }
-        (*atmos)[i].shortwave = (double *) calloc(NR + 1, sizeof(double));
+        (*atmos)[i].shortwave = calloc(NR + 1, sizeof(*(*atmos)[i].shortwave));
         if ((*atmos)[i].shortwave == NULL) {
             log_err("Memory allocation error in alloc_atmos().");
         }
-        (*atmos)[i].snowflag = (bool *) calloc(NR + 1, sizeof(bool));
+        (*atmos)[i].snowflag = calloc(NR + 1, sizeof(*(*atmos)[i].snowflag));
         if ((*atmos)[i].snowflag == NULL) {
             log_err("Memory allocation error in alloc_atmos().");
         }
-        (*atmos)[i].vp = (double *) calloc(NR + 1, sizeof(double));
+        (*atmos)[i].vp = calloc(NR + 1, sizeof(*(*atmos)[i].vp));
         if ((*atmos)[i].vp == NULL) {
             log_err("Memory allocation error in alloc_atmos().");
         }
-        (*atmos)[i].vpd = (double *) calloc(NR + 1, sizeof(double));
+        (*atmos)[i].vpd = calloc(NR + 1, sizeof(*(*atmos)[i].vpd));
         if ((*atmos)[i].vpd == NULL) {
             log_err("Memory allocation error in alloc_atmos().");
         }
-        (*atmos)[i].wind = (double *) calloc(NR + 1, sizeof(double));
+        (*atmos)[i].wind = calloc(NR + 1, sizeof(*(*atmos)[i].wind));
         if ((*atmos)[i].wind == NULL) {
             log_err("Memory allocation error in alloc_atmos().");
         }
         if (options.LAKES) {
-            (*atmos)[i].channel_in = (double *) calloc(NR + 1, sizeof(double));
+            (*atmos)[i].channel_in =
+                calloc(NR + 1, sizeof(*(*atmos)[i].channel_in));
             if ((*atmos)[i].channel_in == NULL) {
                 log_err("Memory allocation error in alloc_atmos().");
             }
         }
         if (options.CARBON) {
-            (*atmos)[i].Catm = (double *) calloc(NR + 1, sizeof(double));
+            (*atmos)[i].Catm = calloc(NR + 1, sizeof(*(*atmos)[i].Catm));
             if ((*atmos)[i].Catm == NULL) {
                 log_err("Memory allocation error in alloc_atmos().");
             }
-            (*atmos)[i].fdir = (double *) calloc(NR + 1, sizeof(double));
+            (*atmos)[i].fdir = calloc(NR + 1, sizeof(*(*atmos)[i].fdir));
             if ((*atmos)[i].fdir == NULL) {
                 log_err("Memory allocation error in alloc_atmos().");
             }
-            (*atmos)[i].par = (double *) calloc(NR + 1, sizeof(double));
+            (*atmos)[i].par = calloc(NR + 1, sizeof(*(*atmos)[i].par));
             if ((*atmos)[i].par == NULL) {
                 log_err("Memory allocation error in alloc_atmos().");
             }

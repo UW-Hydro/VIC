@@ -67,8 +67,8 @@ parse_output_info(FILE                  *gp,
                 sscanf(cmdstr, "%*s %d", &tmp_noutfiles);
                 free_out_data_files(out_data_files);
                 options.Noutfiles = tmp_noutfiles;
-                *out_data_files = (out_data_file_struct *) calloc(
-                    options.Noutfiles, sizeof(out_data_file_struct));
+                *out_data_files = calloc(options.Noutfiles,
+                                         sizeof(*(*out_data_files)));
                 outfilenum = -1;
                 init_output_list(out_data, false, "%.4f", OUT_TYPE_FLOAT, 1);
                 // PRT_SNOW_BAND is ignored if N_OUTFILES has been specified
@@ -90,8 +90,9 @@ parse_output_info(FILE                  *gp,
                        (*out_data_files)[outfilenum].prefix,
                        &((*out_data_files)[outfilenum].nvars));
                 (*out_data_files)[outfilenum].varid =
-                    (unsigned int *) calloc((*out_data_files)[outfilenum].nvars,
-                                            sizeof(unsigned int));
+                    calloc((*out_data_files)[outfilenum].nvars,
+                           sizeof(*((*
+                                     out_data_files)[outfilenum].varid)));
                 outvarnum = 0;
             }
             else if (strcasecmp("OUTVAR", optstr) == 0) {

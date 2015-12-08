@@ -56,8 +56,7 @@ get_global_domain(char          *nc_name,
     d2count[1] = global_domain->n_nx;
 
     // allocate memory for cells to be run
-    run = (int *) malloc(global_domain->n_ny * global_domain->n_nx *
-                         sizeof(int));
+    run = malloc(global_domain->n_ny * global_domain->n_nx * sizeof(*run));
     if (run == NULL) {
         log_err("Memory allocation error in get_global_domain().");
     }
@@ -73,9 +72,8 @@ get_global_domain(char          *nc_name,
     }
 
     // if MASTER_PROC
-    global_domain->locations = (location_struct *)
-                               malloc(global_domain->ncells *
-                                      sizeof(location_struct));
+    global_domain->locations =
+        malloc(global_domain->ncells * sizeof(*global_domain->locations));
     if (global_domain->locations == NULL) {
         log_err("Memory allocation error in get_global_domain().");
     }
@@ -95,8 +93,7 @@ get_global_domain(char          *nc_name,
     }
 
     // allocate memory for variables
-    var = (double *) malloc(global_domain->n_ny * global_domain->n_nx *
-                            sizeof(double));
+    var = malloc(global_domain->n_ny * global_domain->n_nx * sizeof(*var));
     if (var == NULL) {
         log_err("Memory allocation error in get_global_domain().");
     }
@@ -112,8 +109,7 @@ get_global_domain(char          *nc_name,
     }
 
     // get 1D indices used in mapping the netcdf fields to the locations
-    idx = (size_t *) malloc(global_domain->ncells *
-                            sizeof(size_t));
+    idx = malloc(global_domain->ncells * sizeof(*idx));
     if (idx == NULL) {
         log_err("Memory allocation error in vic_init().");
     }
@@ -228,8 +224,7 @@ add_nveg_to_global_domain(char          *nc_name,
     size_t  i;
     double *dvar = NULL;
 
-    dvar = (double *) malloc(global_domain->n_ny * global_domain->n_nx *
-                             sizeof(double));
+    dvar = malloc(global_domain->n_ny * global_domain->n_nx * sizeof(*dvar));
     if (dvar == NULL) {
         log_err("Memory allocation error in add_nveg_to_global_domain().");
     }

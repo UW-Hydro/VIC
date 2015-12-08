@@ -31,6 +31,9 @@
 
 #define VIC_DRIVER "Classic"
 
+#define BINHEADERSIZE 256
+#define MAX_VEGPARAM_LINE_LENGTH 500
+
 void alloc_atmos(int, atmos_data_struct **);
 void alloc_veg_hist(int nrecs, int nveg, veg_hist_struct ***veg_hist);
 void calc_netlongwave(double *, double, double, double);

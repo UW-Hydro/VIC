@@ -239,7 +239,7 @@ veg_con_struct *read_vegparam(FILE *vegparam,
         nrerror(ErrStr);
       }
 
-      for ( j = 0; j < 12; j++ ) {
+      for ( j = 0; j < MONTHSPERYEAR; j++ ) {
         temp[i].albedo[j] = veg_lib[temp[i].veg_class].albedo[j];
         temp[i].LAI[j] = veg_lib[temp[i].veg_class].LAI[j];
         temp[i].vegcover[j] = veg_lib[temp[i].veg_class].vegcover[j];

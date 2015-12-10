@@ -245,7 +245,7 @@ int main(int argc, char *argv[])
       fprintf(stderr,"Initializing Forcing Data\n");
 #endif /* VERBOSE */
 
-      initialize_atmos(atmos, dmy, filep.forcing, veg_lib, veg_con, veg_hist,
+      initialize_atmos(atmos, dmy, filep.forcing, veg_con, veg_hist,
 		       &soil_con, out_data_files, out_data); 
 
       if (!options.OUTPUT_FORCE) {

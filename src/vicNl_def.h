@@ -314,10 +314,18 @@ extern char ref_veg_ref_crop[];
 #define B_SVP 17.269
 #define C_SVP 237.3
 
+/* define constants for vegetation turbulence parameters */
+#define RATIO_RL_HEIGHT_VEG 0.123 /* Ratio of roughness length (m) to vegetation height (m) */
+#define RATIO_DH_HEIGHT_VEG 0.67  /* Ratio of displacement height (m) to vegetation height (m) */
+
 /* define constants for canopy resistance */
 #define CLOSURE 4000		/* Threshold vapor pressure deficit for stomatal closure (Pa) */
 #define RSMAX 5000              /* Maximum allowable resistance (s/m) */
 #define VPDMINFACTOR 0.1        /* Minimum allowable vapor pressure deficit factor */
+
+/* define constants for soil evaporation */
+#define RARC_SOIL 100.0         /* Architectural resistance (s/m) of soil when computing soil evaporation via Penman-Monteith eqn */
+#define WINDH_SOIL 10.0         /* Default wind measurement height over soil (m) */
 
 /* define constants for penman evaporation */
 #define CP_PM 1013		/* specific heat of moist air at constant pressure (J/kg/C)
@@ -1016,6 +1024,10 @@ typedef struct {
   float   fetch;            /* Average fetch length for each vegetation class. */
   int     LAKE;             /* TRUE = this tile is a lake/wetland tile */
   double *CanopLayerBnd;    /* Upper boundary of each canopy layer, expressed as fraction of total LAI */
+  double albedo[MONTHSPERYEAR];       /* climatological vegetation albedo (fraction) */
+  double LAI[MONTHSPERYEAR];          /* climatological leaf area index (m2/m2) */
+  double vegcover[MONTHSPERYEAR];     /* climatological fractional area covered by plants within the tile (fraction) */
+  double Wdmax[MONTHSPERYEAR];        /* climatological maximum dew holding capacity (mm) */
 } veg_con_struct;
 
 /******************************************************************

@@ -15,13 +15,14 @@ Create a [global parameter file](GlobalParam.md). Because VIC will not actually 
 *   `STARTYEAR`,` STARTMONTH`, `STARTDAY`, `STARTHOUR`: Set these to the start date for your disaggregated forcings
 *   `ENDYEAR`, `ENDMONTH`, `ENDDAY`: Set these to the end date for your disaggregated forcings
 *   All the variables in the forcing section should be the same as before, i.e. these describe the **input** (daily) forcings that you are **reading**: `FORCING1`, `FORCING2` (if applicable), `FORCE_FORMAT`, `FORCE_ENDIAN`, `N_TYPES`, `FORCE_TYPE` (there must be one of these for each input variable, e.g. PREC, TMAX, TMIN, WIND), `FORCE_DT`, `FORCEYEAR`, `FORCEMONTH`, `FORCEDAY`, `FORCEHOUR`, `GRID_DECIMAL`, `WIND_H`, `MEASURE_H`, and `ALMA_INPUT`
+*   `VEGLIB`,`VEGLIB_VEGCOVER`,`VEGPARAM`,`ROOT_ZONES`,`VEGPARAM_LAI`,`VEGPARAM_VEGCOVER`,`VEGPARAM_ALB`: Set to the same values as you would for a full VIC simulation
 *   `RESULT_DIR`: Set to the name of the directory where the disaggregated forcings should be written
 *   `OUT_STEP`: Set to 0
 *   `ALMA_OUTPUT`: For standard VIC forcings, set to FALSE; for ALMA-compliant forcings (often required by other models) set to TRUE
 *   `BINARY_OUTPUT`: Set this to FALSE to produce ASCII forcings, TRUE to produce BINARY forcings
 *   `SKIPYEAR`: We recommend setting this to 0
 *   `OUTPUT_FORCE`: This must be set to TRUE
-*   `N_OUTFILES`, `OUTFILE`, `OUTVAR`: These can be omitted; by default, VIC will produce 1 output file per grid cell, names "full_data__lat___lon_," where lat, lon = latitude and longitude of te grid cell's center. These default output files will contain the following variables:
+*   `N_OUTFILES`, `OUTFILE`, `OUTVAR`: These can be omitted; by default, VIC will produce 1 output file per grid cell, names "full_data_lat_lon_," where lat, lon = latitude and longitude of te grid cell's center. These default output files will contain the following variables:
 
 | Name          | Units (ALMA_OUTPUT FALSE)     | Units (ALMA_OUTPUT TRUE)  |
 |-----------    |---------------------------    |-------------------------- |

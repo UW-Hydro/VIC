@@ -23,9 +23,9 @@ void check_files(filep_struct     *filep,
   extern FILE          *open_file(char string[], char type[]);
 
   filep->soilparam   = open_file(fnames->soil, "r");
+  filep->veglib      = open_file(fnames->veglib, "r");
+  filep->vegparam    = open_file(fnames->veg, "r");
   if (!options.OUTPUT_FORCE) {
-    filep->veglib      = open_file(fnames->veglib, "r");
-    filep->vegparam    = open_file(fnames->veg, "r");
     if(options.SNOW_BAND>1)
       filep->snowband    = open_file(fnames->snowband, "r");
     if ( options.LAKES )

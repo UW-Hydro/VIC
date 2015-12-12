@@ -161,10 +161,8 @@ int main(int argc, char *argv[])
   /** Check and Open Files **/
   check_files(&filep, &filenames);
 
-  if (!options.OUTPUT_FORCE) {
-    /** Read Vegetation Library File **/
-    veg_lib = read_veglib(filep.veglib,&Nveg_type);
-  } /* !OUTPUT_FORCE */
+  /** Read Vegetation Library File **/
+  veg_lib = read_veglib(filep.veglib,&Nveg_type);
 
   /** Initialize Parameters **/
   cellnum = -1;
@@ -205,12 +203,12 @@ int main(int argc, char *argv[])
       NEWCELL=TRUE;
       cellnum++;
 
-      if (!options.OUTPUT_FORCE) {
+      /** Read Grid Cell Vegetation Parameters **/
+      veg_con = read_vegparam(filep.vegparam, soil_con.gridcel,
+                              Nveg_type);
+      calc_root_fractions(veg_con, &soil_con);
 
-        /** Read Grid Cell Vegetation Parameters **/
-        veg_con = read_vegparam(filep.vegparam, soil_con.gridcel,
-                                Nveg_type);
-        calc_root_fractions(veg_con, &soil_con);
+      if (!options.OUTPUT_FORCE) {
 
         if ( options.LAKES ) 
 	  lake_con = read_lakeparam(filep.lakeparam, soil_con, veg_con);
@@ -233,10 +231,10 @@ int main(int argc, char *argv[])
         /** Make Top-level Control Structure **/
         all_vars     = make_all_vars(veg_con[0].vegetat_type_num);
 
-        /** allocate memory for the veg_hist_struct **/
-        alloc_veg_hist(global_param.nrecs, veg_con[0].vegetat_type_num, &veg_hist);
-
       } /* !OUTPUT_FORCE */
+
+      /** allocate memory for the veg_hist_struct **/
+      alloc_veg_hist(global_param.nrecs, veg_con[0].vegetat_type_num, &veg_hist);
 
       /**************************************************
          Initialize Meteological Forcing Values That
@@ -247,7 +245,7 @@ int main(int argc, char *argv[])
       fprintf(stderr,"Initializing Forcing Data\n");
 #endif /* VERBOSE */
 
-      initialize_atmos(atmos, dmy, filep.forcing, veg_lib, veg_con, veg_hist,
+      initialize_atmos(atmos, dmy, filep.forcing, veg_con, veg_hist,
 		       &soil_con, out_data_files, out_data); 
 
       if (!options.OUTPUT_FORCE) {
@@ -340,11 +338,12 @@ int main(int argc, char *argv[])
 
       close_files(&filep,out_data_files,&filenames); 
 
+      free_veg_hist(global_param.nrecs, veg_con[0].vegetat_type_num, &veg_hist);
+      free_vegcon(&veg_con);
+
       if (!options.OUTPUT_FORCE) {
 
-        free_veg_hist(global_param.nrecs, veg_con[0].vegetat_type_num, &veg_hist);
         free_all_vars(&all_vars,veg_con[0].vegetat_type_num);
-        free_vegcon(&veg_con);
         free((char *)soil_con.AreaFract);
         free((char *)soil_con.BandElev);
         free((char *)soil_con.Tfactor);
@@ -362,10 +361,10 @@ int main(int argc, char *argv[])
   free_out_data_files(&out_data_files);
   free_out_data(&out_data);
   fclose(filep.soilparam);
+  free_veglib(&veg_lib);
+  fclose(filep.vegparam);
+  fclose(filep.veglib);
   if (!options.OUTPUT_FORCE) {
-    free_veglib(&veg_lib);
-    fclose(filep.vegparam);
-    fclose(filep.veglib);
     if (options.SNOW_BAND>1)
       fclose(filep.snowband);
     if (options.LAKES)

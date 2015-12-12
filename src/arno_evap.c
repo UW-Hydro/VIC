@@ -97,7 +97,7 @@ double arno_evap(layer_data_struct *layer,
 
   /* Calculate the potential bare soil evaporation (mm/time step) */
   
-  Epot = penman(air_temp, elevation, rad, vpd, ra, 0.0, 0.0) * delta_t / SEC_PER_DAY;
+  Epot = penman(air_temp, elevation, rad, vpd, ra, 0.0, RARC_SOIL) * delta_t / SEC_PER_DAY;
   
   /**********************************************************************/
   /*  Compute temporary infiltration rate based on given soil_moist.    */

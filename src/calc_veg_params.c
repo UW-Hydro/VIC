@@ -15,7 +15,7 @@ double calc_veg_displacement(double height) {
 
   double value;
 
-  value = 0.67 * height;
+  value = RATIO_DH_HEIGHT_VEG * height;
 
   return (value);
 
@@ -31,7 +31,7 @@ double calc_veg_height(double displacement) {
 
   double value;
 
-  value = displacement / 0.67;
+  value = displacement / RATIO_DH_HEIGHT_VEG;
 
   return (value);
 
@@ -48,7 +48,7 @@ double calc_veg_roughness(double height) {
 
   double value;
 
-  value = 0.123 * height;
+  value = RATIO_RL_HEIGHT_VEG * height;
 
   return (value);
 

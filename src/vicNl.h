@@ -307,7 +307,7 @@ void   HourlyT(int, int, int *, double *, int *, double *, double *);
 
 void   init_output_list(out_data_struct *, int, char *, int, float);
 void   initialize_atmos(atmos_data_struct *, dmy_struct *, FILE **,
-			veg_lib_struct *, veg_con_struct *, veg_hist_struct **,
+			veg_con_struct *, veg_hist_struct **,
 			soil_con_struct *, out_data_file_struct *, out_data_struct *);
 void   initialize_global();
 int   initialize_model_state(all_vars_struct *, dmy_struct,

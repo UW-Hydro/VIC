@@ -330,8 +330,8 @@ int  full_energy(int                  gridcell,
 
         /* Initialize wind speeds */
         tmp_wind[0] = atmos->wind[NR];
-        tmp_wind[1] = -999.;
-        tmp_wind[2] = -999.;
+        tmp_wind[1] = ERROR;
+        tmp_wind[2] = ERROR;
  
         /* Set surface descriptive variables */
         if (p < N_PET_TYPES_NON_NAT) {
@@ -388,7 +388,7 @@ int  full_energy(int                  gridcell,
           if (dmy->hour == 0) {
             calc_Nscale_factors(veg_lib[veg_class].NscaleFlag,
                                 veg_con[iveg].CanopLayerBnd,
-                                veg_lib[veg_class].LAI[dmy[rec].month-1],
+                                veg_con[iveg].LAI[dmy[rec].month-1],
                                 soil_con->lat,
                                 soil_con->lng,
                                 soil_con->time_zone_lng,
@@ -543,9 +543,11 @@ int  full_energy(int                  gridcell,
     oldsnow = lake_var->snow.swq;
     snowprec = gauge_correction[SNOW] * (atmos->prec[NR] - rainonly);
     rainprec = gauge_correction[SNOW] * rainonly;
-    atmos->out_prec += (snowprec + rainprec) * lake_con->Cl[0] * lakefrac;
-    atmos->out_rain += rainprec * lake_con->Cl[0] * lakefrac;
-    atmos->out_snow += snowprec * lake_con->Cl[0] * lakefrac;
+    Cv = veg_con[iveg].Cv;
+    Cv *= lakefrac;
+    atmos->out_prec += (snowprec + rainprec) * Cv;
+    atmos->out_rain += rainprec * Cv;
+    atmos->out_snow += snowprec * Cv;
 
     ErrorFlag = solve_lake(snowprec, rainprec, atmos->air_temp[NR],
                            atmos->wind[NR], atmos->vp[NR] / 1000.,

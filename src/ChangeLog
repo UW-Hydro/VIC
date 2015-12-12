@@ -24,6 +24,17 @@ Usage:
 
 
 
+ -------------------------------------------------------------------------------
+ ***** Description of changes between VIC 4.2.b and VIC 4.2.c *****
+ -------------------------------------------------------------------------------
+
+ Bug Fixes:
+ ----------
+
+Fixed water balance errors in lake model (Github Issues: #308, #316)
+Fixed OUTPUT_FORCE behavior related to veg_hist features (Github Issues: #305, #307)
+Updated bare soil evaporation behavior related to veg_hist update from 4.2 (Github Issues: #306, #315)
+
 
 -------------------------------------------------------------------------------
 ***** Description of changes between VIC 4.2.a and VIC 4.2.b *****
@@ -781,7 +792,7 @@ Incorrect handling of user-supplied tskc (cloud fraction) for LW_CLOUD==LW_CLOUD
 	Previous versions of VIC (before 4.1.2) used a full-sky longwave
 	formulation taken from two formulas in the Bras hydrology text.  For
 	the new Deardorff full-sky longwave formulation, the dependence on
-	cloud fraction is different from the old Bras formulation.   In 
+	cloud fraction is different from the old Bras formulation.   In
 	4.1.2 (and 4.1.2.a-b), the new Deardorff formulation did not account
 	for the possibility of user-supplied cloud fraction; if the user
 	supplied cloud fraction as an input forcing, the resulting longwave
@@ -6235,4 +6246,3 @@ soils in the upper Mississippi River basin, J. Geophys. Res., 104(D16),
 Thornton, P.E. and S.W. Running, An improved algorithm for estimating
 incident daily solar radiation from measurements of temperature, humidity,
 and precipitation, Ag. For. Met., 93, 211-228, 1999.
-

@@ -125,11 +125,13 @@ def test_all_30_day_from_dmy(feb3_noon, dmy_feb_3_noon):
 @pytest.mark.skipif(nctime_unavailable, reason=nc_reason)
 def test_date2num(feb3_noon, dmy_feb_3_noon):
     for cal, cal_num in calendars.items():
-        ut = utime(vic_default_units, calendar=cal)
-        expected = ut.date2num(feb3_noon)
-        actual = vic_lib.date2num(ut._jd0, dmy_feb_3_noon, 0,
-                                  cal_num, units['days'])
-        np.testing.assert_allclose(actual, expected)
+        for unit, unit_num in units.items():
+            unit_string = '{0} since 0001-01-01'.format(unit)
+            ut = utime(unit_string, calendar=cal)
+            expected = ut.date2num(feb3_noon)
+            actual = vic_lib.date2num(ut._jd0, dmy_feb_3_noon, 0,
+                                      cal_num, unit_num)
+            np.testing.assert_allclose(actual, expected)
 
 
 @pytest.mark.skipif(nctime_unavailable, reason=nc_reason)
@@ -240,14 +242,17 @@ def test_make_lastday():
 
 @pytest.mark.skipif(nctime_unavailable, reason=nc_reason)
 def test_initialize_time():
-    # default
     for cal, cal_num in calendars.items():
-        ut = utime(vic_default_units, calendar=cal)
-        vic_lib.global_param.calendar = cal_num
-        assert vic_lib.initialize_time() is None
-        assert vic_lib.global_param.time_origin_num != -99999
-        np.testing.assert_allclose(vic_lib.global_param.time_origin_num,
-                                   ut._jd0)
+        for unit, unit_num in units.items():
+            unit_string = '{0} since 0001-01-01'.format(unit)
+            ut = utime(unit_string, calendar=cal)
+            vic_lib.global_param.calendar = cal_num
+            vic_lib.global_param.time_units = unit_num
+            assert vic_lib.initialize_time() is None
+            assert vic_lib.global_param.time_origin_num != -99999
+            print(unit_string, cal)
+            np.testing.assert_allclose(vic_lib.global_param.time_origin_num,
+                                       ut._jd0)
 
 
 def test_valid_date(dmy_feb_3_noon, dmy_june31):

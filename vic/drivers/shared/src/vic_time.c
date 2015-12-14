@@ -535,13 +535,12 @@ date2num(double             origin,
         log_err("Unknown Calendar Flag: %hu", calendar);
     }
 
-
     // convert to desired units, add time zone offset.
     if (time_units == TIME_UNITS_SECONDS) {
-        jdelta = jdelta * (SEC_PER_DAY) + tzoffset * (SEC_PER_HOUR);
+        jdelta = jdelta * SEC_PER_DAY + tzoffset * SEC_PER_HOUR;
     }
     else if (time_units == TIME_UNITS_MINUTES) {
-        jdelta = jdelta * (MIN_PER_DAY) + tzoffset * MIN_PER_HOUR;
+        jdelta = jdelta * MIN_PER_DAY + tzoffset * MIN_PER_HOUR;
     }
     else if (time_units == TIME_UNITS_HOURS) {
         jdelta = jdelta * HOURS_PER_DAY + tzoffset;
@@ -696,12 +695,12 @@ initialize_time()
     dmy.dayseconds = 0;
 
     // Set origin using date2num with numeric origin of 0.
-    // This calculates the julian day (in units = global_param.time_units)
+    // This calculates the julian day (in units of days)
     // for 0001-01-01 for the given calendar
     // This is later used as the reference (origin for advancing numeric dates).
     // See make_dmy.c for more details on how global_param.time_origin_num is used.
     global_param.time_origin_num = date2num(0., &dmy, 0., global_param.calendar,
-                                            global_param.time_units);
+                                            TIME_UNITS_DAYS);
     return;
 }
 

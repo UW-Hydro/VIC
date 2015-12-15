@@ -10,7 +10,7 @@ For a list of known issues and their fixes (in bug-fix updates), visit the VIC G
 
 To check which release of VIC you are running:
 
-Type `vicNl -v`.
+Type `vicNl -v` or for VIC 5 and later, `vic_{driver}.exe -v`.
 
 ------------------------------
 
@@ -48,7 +48,7 @@ This is a major update from VIC 4. The VIC 5.0.0 release aims to have nearly ide
 
 7. Calendar Support ([GH#188](https://github.com/UW-Hydro/VIC/pull/188))
 
-	Earlier versions of VIC used the standard Gregorian calendar.  Because many modern climate models use non-standard calendars, we have implemented all [CF complient calendars](http://www.cgd.ucar.edu/cms/eaton/netcdf/CF-20010629.htm#cal). The standard calendar remains the VIC default.  See the documentation for individual drivers for how to set the calendar option.
+	Earlier versions of VIC used the standard Gregorian calendar.  Because many modern climate models use non-standard calendars, we have implemented all [CF compliant calendars](http://www.cgd.ucar.edu/cms/eaton/netcdf/CF-20010629.htm#cal). The standard calendar remains the VIC default.  See the documentation for individual drivers for how to set the calendar option.
 
 8. Sample Datasets
 
@@ -74,7 +74,7 @@ This is a major update from VIC 4. The VIC 5.0.0 release aims to have nearly ide
 
 #### Depreciated Features:
 
-1.  Removed unused global paramerer option `MEASURE_H` ([GH#284](https://github.com/UW-Hydro/VIC/pull/284).)
+1.  Removed unused global parameter option `MEASURE_H` ([GH#284](https://github.com/UW-Hydro/VIC/pull/284).)
 2.  Removed MTCLIM ([GH#288](https://github.com/UW-Hydro/VIC/pull/288)).
 
 	Previous versions of VIC used MTCLIM to generate missing forcing variables required to run VIC.  This led to confusion by many users and considerably more complex code in the Classic Driver. VIC forcings are now required to be provided at the same time frequency as the model will be run at (`SNOW_STEPS_PER_DAY` or `MODEL_STEPS_PER_DAY`). The following options have been removed from the Classic Driver:

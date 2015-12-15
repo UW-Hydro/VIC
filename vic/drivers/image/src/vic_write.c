@@ -36,7 +36,6 @@ void
 vic_write(void)
 {
     extern out_data_struct **out_data;
-    extern domain_struct     global_domain;
     extern domain_struct     local_domain;
     extern nc_file_struct    nc_hist_file;
     extern nc_var_struct     nc_vars[N_OUTVAR_TYPES];
@@ -45,13 +44,11 @@ vic_write(void)
     size_t                   i;
     size_t                   j;
     size_t                   k;
-    size_t                   grid_size;
     size_t                   ndims;
     double                  *dvar = NULL;
     size_t                   dcount[MAXDIMS];
     size_t                   dstart[MAXDIMS];
 
-    grid_size = global_domain.n_ny * global_domain.n_nx;
 
     // allocate memory for variables to be stored
     dvar = malloc(local_domain.ncells_active * sizeof(*dvar));

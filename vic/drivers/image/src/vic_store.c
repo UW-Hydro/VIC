@@ -49,7 +49,6 @@ vic_store(void)
     size_t                     k;
     size_t                     m;
     size_t                     p;
-    size_t                     grid_size;
     size_t                     ndims;
     char                      *cvar = NULL;
     int                       *ivar = NULL;
@@ -65,8 +64,6 @@ vic_store(void)
     size_t                     d6start[6];
 
     nc_file_struct             nc_state_file;
-
-    grid_size = global_domain.n_ny * global_domain.n_nx;
 
     // allocate memory for variables to be stored
     cvar = malloc(local_domain.ncells_active * sizeof(*cvar));

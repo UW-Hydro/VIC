@@ -57,7 +57,7 @@ vic_restore(void)
     }
 
     // run through the remaining VIC initialization routines
-    for (i = 0; i < local_domain.ncells; i++) {
+    for (i = 0; i < local_domain.ncells_active; i++) {
         // TBD: do something sensible for surf_temp
         surf_temp = 0.;
         nveg = veg_con[i][0].vegetat_type_num;

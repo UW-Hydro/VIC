@@ -72,7 +72,7 @@ vic_finalize(void)
         }
     }
 
-    for (i = 0; i < local_domain.ncells; i++) {
+    for (i = 0; i < local_domain.ncells_active; i++) {
         free_atmos(&(atmos[i]));
         free(soil_con[i].AreaFract);
         free(soil_con[i].BandElev);

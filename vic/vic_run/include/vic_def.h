@@ -60,7 +60,7 @@
 #define MIN_VEGCOVER    0.0001 /**< Minimum allowable vegcover fraction */
 
 /***** Define minimum and maximum values for model timesteps *****/
-#define MIN_SUBDAILY_STEPS_PER_DAY  4
+#define MIN_SUBDAILY_STEPS_PER_DAY  1
 #define MAX_SUBDAILY_STEPS_PER_DAY  1440
 
 /***** Potential Evap types *****/
@@ -342,7 +342,7 @@ typedef struct {
     bool COMPRESS;       /**< TRUE = Compress all output files */
     bool MOISTFRACT;     /**< TRUE = output soil moisture as fractional moisture content */
     size_t Noutfiles;    /**< Number of output files (not including state files) */
-    size_t COORD_DIMS_OUT;    /**< Number of output dimensions for lat and lon variables. COORD_DIMS_OUT 1 = lon(lon), lat(lat). COORD_DIMS_OUT 2 = lon(xc, yc), lat(xc, yc) */
+    int COORD_DIMS_OUT;    /**< Number of output dimensions for lat and lon variables. COORD_DIMS_OUT 1 = lon(lon), lat(lat). COORD_DIMS_OUT 2 = lon(xc, yc), lat(xc, yc) */
     char DOMAIN_LON_VAR[MAXSTRING];    /**< Name of the variable and the dimension of longitude in the output file */
     char DOMAIN_LAT_VAR[MAXSTRING];    /**< Name of the variable and the dimension of latitude in the output file */
     bool PRT_HEADER;     /**< TRUE = insert header at beginning of output file; FALSE = no header */

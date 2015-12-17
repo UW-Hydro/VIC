@@ -293,7 +293,6 @@ initialize_history_file(nc_file_struct *nc)
 
     if (options.COORD_DIMS_OUT == 1) {
         dimids[0] = nc->ni_dimid;
-
         dcount[0] = nc->ni_size;
     }
     else if (options.COORD_DIMS_OUT == 2) {
@@ -369,7 +368,7 @@ initialize_history_file(nc_file_struct *nc)
 
         dcount[0] = nc->ni_size;
         for (i = 0; i < nc->ni_size; i++) {
-            dvar[i] = (double) global_domain.locations_grid[i].longitude;
+            dvar[i] = (double) global_domain.locations[i].longitude;
         }
         status =
             nc_put_vara_double(nc->nc_id, lon_var_id, dstart, dcount, dvar);
@@ -382,10 +381,7 @@ initialize_history_file(nc_file_struct *nc)
         dcount[0] = nc->nj_size;
         for (i = 0; i < nc->nj_size; i++) {
             dvar[i] =
-                (double) global_domain.locations_grid[i +
-                                                      (i *
-                                                       (nc->ni_size -
-                                                        1))].latitude;
+                (double) global_domain.locations[i].latitude;
         }
 
         status =
@@ -399,7 +395,7 @@ initialize_history_file(nc_file_struct *nc)
         dvar = calloc(nc->nj_size * nc->ni_size, sizeof(*dvar));
 
         for (i = 0; i < nc->nj_size * nc->ni_size; i++) {
-            dvar[i] = (double) global_domain.locations_grid[i].longitude;
+            dvar[i] = (double) global_domain.locations[i].longitude;
         }
         status =
             nc_put_vara_double(nc->nc_id, lon_var_id, dstart, dcount, dvar);
@@ -408,7 +404,7 @@ initialize_history_file(nc_file_struct *nc)
         }
 
         for (i = 0; i < nc->nj_size * nc->ni_size; i++) {
-            dvar[i] = (double) global_domain.locations_grid[i].latitude;
+            dvar[i] = (double) global_domain.locations[i].latitude;
         }
         status =
             nc_put_vara_double(nc->nc_id, lat_var_id, dstart, dcount, dvar);

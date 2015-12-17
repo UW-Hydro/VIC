@@ -109,7 +109,6 @@ vic_finalize(void)
     if (mpi_rank == 0) {
         free(filter_active_cells);
         free(global_domain.locations);
-        free(global_domain.locations_grid);
         free(mpi_map_local_array_sizes);
         free(mpi_map_global_array_offsets);
         free(mpi_map_mapping_array);

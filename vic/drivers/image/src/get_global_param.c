@@ -562,8 +562,7 @@ get_global_param(FILE *gp)
                             "NIJSSEN2001\" in your global parameter file.");
                 }
                 else {
-                    log_err(
-                        "Please change \"ARNO_PARAMS FALSE\" to \"BASEFLOW "
+                    log_err("Please change \"ARNO_PARAMS FALSE\" to \"BASEFLOW "
                         "ARNO\" in your global parameter file.");
                 }
             }
@@ -696,9 +695,6 @@ get_global_param(FILE *gp)
             else if (strcasecmp("SKIPYEAR", optstr) == 0) {
                 sscanf(cmdstr, "%*s %hu", &global_param.skipyear);
             }
-            else if (strcasecmp("COORD_DIMS_OUT", optstr) == 0) {
-                sscanf(cmdstr, "%*s %zu", &options.COORD_DIMS_OUT);
-            }
             else if (strcasecmp("DOMAIN_LON_VAR", optstr) == 0) {
                 sscanf(cmdstr, "%*s %s", options.DOMAIN_LON_VAR);
             }
@@ -786,8 +782,7 @@ get_global_param(FILE *gp)
                Fail when depreciated options are used.
             *************************************/
             else if (strcasecmp("TIME_STEP", optstr) == 0) {
-                log_err(
-                    "TIME_STEP has been replaced with MODEL_STEPS_PER_DAY, "
+                log_err("TIME_STEP has been replaced with MODEL_STEPS_PER_DAY, "
                     "update your global parameter file accordingly");
             }
             else if (strcasecmp("SNOW_STEP", optstr) == 0) {
@@ -795,8 +790,7 @@ get_global_param(FILE *gp)
                         "update your global parameter file accordingly");
             }
             else if (strcasecmp("OUT_STEP", optstr) == 0) {
-                log_err(
-                    "OUT_STEP has been replaced with OUTPUT_STEPS_PER_DAY, "
+                log_err("OUT_STEP has been replaced with OUTPUT_STEPS_PER_DAY, "
                     "update your global parameter file accordingly");
             }
             else if (strcasecmp("FORCE_DT", optstr) == 0) {
@@ -808,8 +802,7 @@ get_global_param(FILE *gp)
                Fail when classic driver specific options are used
             *************************************/
             else if (strcasecmp("ATMOS_STEPS_PER_DAY", optstr) == 0) {
-                log_err(
-                    "ATMOS_STEPS_PER_DAY is not a valid option for this "
+                log_err("ATMOS_STEPS_PER_DAY is not a valid option for this "
                     "driver.  Update your global parameter file accordingly.");
             }
             else if (strcasecmp("OUTPUT_FORCE", optstr) == 0) {
@@ -1033,8 +1026,7 @@ get_global_param(FILE *gp)
         global_param.startsec = 0;
     }
     else if (global_param.startsec > SEC_PER_DAY) {
-        log_err(
-            "The specified simulation start second (%u) > 86400  Make sure "
+        log_err("The specified simulation start second (%u) > 86400  Make sure "
             "that the global file defines a positive integer "
             "for STARTSEC.",
             global_param.startsec);

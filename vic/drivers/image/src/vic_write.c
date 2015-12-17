@@ -35,21 +35,21 @@
 void
 vic_write(void)
 {
-    extern out_data_struct **out_data;
-    extern global_param_struct  global_param;
-    extern dmy_struct       *dmy;
-    extern domain_struct     local_domain;
-    extern nc_file_struct    nc_hist_file;
-    extern nc_var_struct     nc_vars[N_OUTVAR_TYPES];
-    extern size_t            current;
-    int                      dimids[MAXDIMS];
-    size_t                   i;
-    size_t                   j;
-    size_t                   k;
-    size_t                   ndims;
-    double                  *dvar = NULL;
-    size_t                   dcount[MAXDIMS];
-    size_t                   dstart[MAXDIMS];
+    extern out_data_struct   **out_data;
+    extern global_param_struct global_param;
+    extern dmy_struct         *dmy;
+    extern domain_struct       local_domain;
+    extern nc_file_struct      nc_hist_file;
+    extern nc_var_struct       nc_vars[N_OUTVAR_TYPES];
+    extern size_t              current;
+    int                        dimids[MAXDIMS];
+    size_t                     i;
+    size_t                     j;
+    size_t                     k;
+    size_t                     ndims;
+    double                    *dvar = NULL;
+    size_t                     dcount[MAXDIMS];
+    size_t                     dstart[MAXDIMS];
 
 
     // allocate memory for variables to be stored

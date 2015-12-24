@@ -240,6 +240,11 @@
 #define LAI_FROM_VEGLIB     0
 #define LAI_FROM_VEGPARAM   1
 
+/***** Irrigation Soil Moisture LEVELS *****/
+#define IRR_SAT    0
+#define IRR_FC     1
+#define IRR_CR     2
+
 /***** Canopy resistance parametrizations *****/
 #define RC_JARVIS 0
 #define RC_PHOTO  1
@@ -261,6 +266,7 @@ extern double ref_veg_rmin[];
 extern double ref_veg_lai[];
 extern double ref_veg_albedo[];
 extern double ref_veg_vegcover[];
+extern double ref_veg_crop_frac[];
 extern double ref_veg_rough[];
 extern double ref_veg_displ[];
 extern double ref_veg_wind_h[];
@@ -330,6 +336,9 @@ extern char ref_veg_ref_crop[];
 
 /***** Minimum allowable vegcover fraction *****/
 #define MIN_VEGCOVER 0.0001
+
+/***** Minimum allowable crop fraction *****/
+#define MIN_CROP_FRAC 0.05
 
 /***** Carbon Cycling constants *****/
 
@@ -442,7 +451,7 @@ extern char ref_veg_ref_crop[];
 
 
 /***** Forcing Variable Types *****/
-#define N_FORCING_TYPES 29
+#define N_FORCING_TYPES 32
 #define AIR_TEMP   0 /* air temperature per time step [C] (ALMA_INPUT: [K]) */
 #define ALBEDO     1 /* surface albedo [fraction] */
 #define CATM       2 /* atmospheric CO2 concentration [ppm] */
@@ -471,7 +480,10 @@ extern char ref_veg_ref_crop[];
 #define WIND      25 /* wind speed [m/s] */
 #define WIND_E    26 /* zonal component of wind speed [m/s] */
 #define WIND_N    27 /* meridional component of wind speed [m/s] */
-#define SKIP      28 /* place holder for unused data columns */
+#define CROP_FRAC 28 /* fractional area of crops (as opposed to fallow land) [fraction] */
+#define IRR_RUN   29 /* water available for irrigation from local runoff [mm] */
+#define IRR_WITH  30 /* water available for irrigation from external withdrawals [mm] */
+#define SKIP      31 /* place holder for unused data columns */
 
 /***** Output Variable Types *****/
 #define N_OUTVAR_TYPES 180
@@ -649,6 +661,16 @@ extern char ref_veg_ref_crop[];
 #define OUT_CLITTER        164  /* Carbon density in litter pool [g C/m2] */
 #define OUT_CINTER         165  /* Carbon density in intermediate pool [g C/m2] */
 #define OUT_CSLOW          166  /* Carbon density in slow pool [g C/m2] */
+#define OUT_IRRIG            167  /* Water needed for irrigation [mm] */
+#define OUT_IRR_RUN          168  /* Water available for irrigation from local stream network [mm] */
+#define OUT_IRR_RUN_USED     169  /* Water from local stream network actually used for irrigation [mm] */
+#define OUT_IRR_RUN_UNUSED   170  /* Water from local stream network not used for irrigation [mm] */
+#define OUT_IRR_WITH         171  /* Water available for irrigation from external withdrawals [mm] */
+#define OUT_IRR_WITH_USED    172  /* Water from external withdrawals actually used for irrigation [mm] */
+#define OUT_IRR_WITH_UNUSED  173  /* Water from external withdrawals not used for irrigation [mm] */
+#define OUT_IRR_EXTRACT      174  /* Water extracted from local runoff and baseflow for irrigation [mm] */
+#define OUT_IRR_APPLIED      175  /* Water actually used for irrigation [mm] */
+#define OUT_IRRIG_WITH_PREC      176  /* Water goes into the field (irrig + prec) [mm] */
 
 /***** Output BINARY format types *****/
 #define OUT_TYPE_DEFAULT 0 /* Default data type */
@@ -686,7 +708,7 @@ extern int NF;			/* array index loop counter limit for atmos
 
 /** file structures **/
 typedef struct {
-  FILE *forcing[2];     /* atmospheric forcing data files */
+  FILE *forcing[3];     /* atmospheric forcing data files */
   FILE *globalparam;    /* global parameters file */
   FILE *init_state;     /* initial model state file */
   FILE *lakeparam;      /* lake parameter file */
@@ -698,8 +720,8 @@ typedef struct {
 } filep_struct;
 
 typedef struct {
-  char  forcing[2][MAXSTRING];  /* atmospheric forcing data file names */
-  char  f_path_pfx[2][MAXSTRING];  /* path and prefix for atmospheric forcing data file names */
+  char  forcing[3][MAXSTRING];  /* atmospheric forcing data file names */
+  char  f_path_pfx[3][MAXSTRING];  /* path and prefix for atmospheric forcing data file names */
   char  global[MAXSTRING];      /* global control file name */
   char  init_state[MAXSTRING];  /* initial model state file name */
   char  lakeparam[MAXSTRING];   /* lake model constants file */
@@ -754,6 +776,7 @@ typedef struct {
 			      vegetation from higher elevations */
   char   CONTINUEONERROR;/* TRUE = VIC will continue to run after a cell has an error */
   char   CORRPREC;       /* TRUE = correct precipitation for gage undercatch */
+  char   CROPFRAC;       /* TRUE = account for fallow (non-planted) fraction */
   char   EQUAL_AREA;     /* TRUE = RESOLUTION stores grid cell area in km^2;
 			    FALSE = RESOLUTION stores grid cell side length in degrees */
   char   EXP_TRANS;      /* TRUE = Uses grid transform for exponential node 
@@ -765,6 +788,8 @@ typedef struct {
                             "GF_410"  = use formulas from VIC 4.1.0 */
   char   IMPLICIT;       /* TRUE = Use implicit solution when computing 
 			    soil thermal fluxes */
+  char   IRRIGATION;     /* TRUE = apply irrigation (to crop veg tiles) */ 
+  char   IRR_FREE;       /* TRUE = irrigation is NOT restricted to available water */ 
   char   JULY_TAVG_SUPPLIED; /* If TRUE and COMPUTE_TREELINE is also true,
 			        then average July air temperature will be read
 			        from soil file and used in calculating treeline */
@@ -832,9 +857,11 @@ typedef struct {
   char   ALMA_INPUT;     /* TRUE = input variables are in ALMA-compliant units; FALSE = standard VIC units */
   char   BASEFLOW;       /* ARNO: read Ds, Dm, Ws, c; NIJSSEN2001: read d1, d2, d3, d4 */
   int    GRID_DECIMAL;   /* Number of decimal places in grid file extensions */
+  char   VEGLIB_IRR;     /* TRUE = veg library contains irrigation parameters */
   char   VEGLIB_PHOTO;   /* TRUE = veg library contains photosynthesis parameters */
   char   VEGLIB_VEGCOVER;/* TRUE = veg library file contains monthly vegcover values */
   char   VEGPARAM_ALB;   /* TRUE = veg param file contains monthly albedo values */
+  char   VEGPARAM_CROPFRAC; /* TRUE = veg param file contains flag indicating whether to use crop fractions */
   char   VEGPARAM_LAI;   /* TRUE = veg param file contains monthly LAI values */
   char   VEGPARAM_VEGCOVER; /* TRUE = veg param file contains monthly vegcover values */
   char   ALB_SRC;        /* FROM_VEGLIB = use albedo values from veg library file
@@ -884,12 +911,12 @@ typedef struct {
   ******************************************************************/
 typedef struct {
   force_type_struct TYPE[N_FORCING_TYPES];
-  int  FORCE_DT[2];     /* forcing file time step */
-  int  FORCE_ENDIAN[2]; /* endian-ness of input file, used for
+  int  FORCE_DT[3];     /* forcing file time step */
+  int  FORCE_ENDIAN[3]; /* endian-ness of input file, used for
 			   DAILY_BINARY format */
-  int  FORCE_FORMAT[2]; /* ASCII or BINARY */
-  int  FORCE_INDEX[2][N_FORCING_TYPES];
-  int  N_TYPES[2];
+  int  FORCE_FORMAT[3]; /* ASCII or BINARY */
+  int  FORCE_INDEX[3][N_FORCING_TYPES];
+  int  N_TYPES[3];
 } param_set_struct;
 
 /*******************************************************
@@ -906,12 +933,12 @@ typedef struct {
   int    endday;     /* Last day of model simulation */
   int    endmonth;   /* Last month of model simulation */
   int    endyear;    /* Last year of model simulation */
-  int    forceday[2];   /* day forcing files starts */
-  int    forcehour[2];  /* hour forcing files starts */
-  int    forcemonth[2]; /* month forcing files starts */
-  int    forceskip[2];  /* number of model time steps to skip at the start of
+  int    forceday[3];   /* day forcing files starts */
+  int    forcehour[3];  /* hour forcing files starts */
+  int    forcemonth[3]; /* month forcing files starts */
+  int    forceskip[3];  /* number of model time steps to skip at the start of
 			the forcing file */
-  int    forceyear[2];  /* year forcing files start */
+  int    forceyear[3];  /* year forcing files start */
   int    nrecs;      /* Number of time steps simulated */
   int    skipyear;   /* Number of years to skip before writing output data */
   int    startday;   /* Starting day of the simulation */
@@ -940,6 +967,18 @@ typedef struct {
 					 affected moisture stress in the 
 					 soil (mm) */
   double   Wpwp[MAX_LAYERS];          /* soil moisture content at permanent 
+					 wilting point (mm) */
+  double   Wcr_orig[MAX_LAYERS];      /* critical moisture level for soil 
+					 layer, evaporation is no longer 
+					 affected moisture stress in the 
+					 soil (mm) */
+  double   Wpwp_orig[MAX_LAYERS];     /* soil moisture content at permanent 
+					 wilting point (mm) */
+  double   Wcr_irrig[MAX_LAYERS];     /* critical moisture level for soil 
+					 layer, evaporation is no longer 
+					 affected moisture stress in the 
+					 soil (mm) */
+  double   Wpwp_irrig[MAX_LAYERS];    /* soil moisture content at permanent 
 					 wilting point (mm) */
   double   Ws;                        /* fraction of maximum soil moisture */
   float    AlbedoPar;                 /* soil albedo in PAR range (400-700nm) */
@@ -1016,6 +1055,9 @@ typedef struct {
   float   fetch;            /* Average fetch length for each vegetation class. */
   int     LAKE;             /* TRUE = this tile is a lake/wetland tile */
   double *CanopLayerBnd;    /* Upper boundary of each canopy layer, expressed as fraction of total LAI */
+  int     crop_frac_active; /* TRUE = this tile should assume fractional crop coverage */
+  int     crop_frac_idx;    /* Index of this tile's fallow portion in the crop data structures */
+  int     Ncrop;            /* Total number of crop sub-tiles in the cell */
 } veg_con_struct;
 
 /******************************************************************
@@ -1025,11 +1067,17 @@ typedef struct {
   char   overstory;        /* TRUE = overstory present, important for snow 
 			      accumulation in canopy */
   double albedo[12];       /* vegetation albedo (fraction) */
+  double crop_frac[12];    /* crop area fraction within the tile (fraction) */
+  int    irr_active[12];   /* irrigation schedule; denotes which months have active irrigation (true/false) */
   double LAI[12];          /* leaf area index (m2/m2) */
   double vegcover[12];     /* fractional area covered by plants within the tile (fraction) */
   double Wdmax[12];        /* maximum dew holding capacity (mm) */
   double displacement[12]; /* vegetation displacement height (m) */
   double emissivity[12];   /* vegetation emissivity (fraction) */
+  char   irr_sm_thresh;    /* Irrigation soil moisture threshold; can be
+                              CR (critical point), FC (field capacity), or SAT (saturation) */
+  char   irr_sm_target;    /* Irrigation soil moisture target; can be
+                              CR (critical point), FC (field capacity), or SAT (saturation) */
   int    NVegLibTypes;     /* number of vegetation classes defined in library */
   double rad_atten;        /* radiation attenuation due to canopy, 
 			      default = 0.5 (N/A) */
@@ -1064,6 +1112,7 @@ typedef struct {
   ******************************************************************/
 typedef struct {
   double *albedo;    /* timeseries of vegetation albedo (fraction) */
+  double *crop_frac; /* timeseries of crop area fraction within veg tile (fraction) */
   double *LAI;       /* timeseries of leaf area index (m2/m2) */
   double *vegcover;  /* timeseries of fractional area of plants within veg tile (fraction) */
 } veg_hist_struct;
@@ -1098,6 +1147,8 @@ typedef struct {
   double *vp;        /* atmospheric vapor pressure (kPa) */
   double *vpd;       /* atmospheric vapor pressure deficit (kPa) */
   double *wind;      /* wind speed (m/s) */
+  double *irr_run;   /* water available for irrigation, taken from local channel (mm) */
+  double *irr_with;  /* water available for irrigation, taken from withdrawals external to cell (mm) */
 } atmos_data_struct;
 
 /*************************************************************************
@@ -1146,6 +1197,7 @@ typedef struct {
   double CLitter;                      /* carbon storage in litter pool [gC/m2] */
   double CInter;                       /* carbon storage in intermediate pool [gC/m2] */
   double CSlow;                        /* carbon storage in slow pool [gC/m2] */
+  double irr_extract;                  /* water extracted for local irrigation (mm) */
   double inflow;                       /* moisture that reaches the top of 
 					  the soil column (mm) */
   double pot_evap[N_PET_TYPES];        /* array of different types of potential evaporation (mm) */
@@ -1248,11 +1300,14 @@ typedef struct {
 typedef struct {
   double albedo;                /* current vegetation albedo (fraction) */
   double canopyevap;		/* evaporation from canopy (mm/TS) */
+  double crop_frac;             /* current crop area fraction within veg tile (fraction) */
   double LAI;                   /* current leaf area index (m2/m2) */
   double throughfall;		/* water that reaches the ground through the canopy (mm/TS) */
   double vegcover;              /* current fractional area of plants within veg tile (fraction) */
   double Wdew;			/* dew trapped on vegetation (mm) */
   double Wdmax;                 /* current maximum dew holding capacity (mm) */
+  double irrig;                 /* current irrigation water usage (mm) */
+  char   irr_apply;             /* flag indicating whether irrigation should be applied on this time step */
   double *NscaleFactor;         /* array of per-layer nitrogen scaling factors */
   double *aPARLayer;            /* array of per-layer absorbed PAR (mol(photons)/m2 leaf area s) */
   double *CiLayer;              /* array of per-layer leaf-internal CO2 mixing ratio (mol CO2/mol air) */

@@ -1,0 +1,122 @@
+#######################################################################
+# VIC Model Parameters - 4.2.a IRR
+#######################################################################
+# $Id: global.param.sample,v 5.7.2.28 2012/04/15 05:39:10 vicadmin Exp $
+#######################################################################
+# Simulation Parameters
+#######################################################################
+NLAYER		3	
+NODES		3	
+TIME_STEP 	24	
+SNOW_STEP	3	
+STARTYEAR	1901	
+STARTMONTH	01	
+STARTDAY	01 	
+STARTHOUR	00	
+ENDYEAR 	2001    
+ENDMONTH	12	
+ENDDAY		31      
+FULL_ENERGY 	FALSE	
+FROZEN_SOIL	FALSE	
+CROPFRAC        TRUE
+IRRIGATION      TRUE
+IRR_FREE        TRUE
+#######################################################################
+# Forcing Files and Parameters
+#######################################################################
+FORCING1	/samples.VIC.4.2.a.irrigation/forcings/forcings_
+FORCE_FORMAT	ASCII	
+FORCE_ENDIAN	LITTLE	
+N_TYPES		4	
+FORCE_TYPE	TMAX     SIGNED	100
+FORCE_TYPE	TMIN     SIGNED	100
+FORCE_TYPE	WIND	 SIGNED 100
+FORCE_TYPE	PREC	 UNSIGNED 100
+FORCE_DT	24	
+FORCEYEAR	1901	
+FORCEMONTH	01	
+FORCEDAY	01	
+FORCEHOUR	00	
+GRID_DECIMAL	2	
+WIND_H          10.0    
+MEASURE_H       2.0     
+ALMA_INPUT	TRUE	
+
+FORCING2        /samples.VIC.4.2.a.irrigation/forcings/crop_frac_  
+FORCE_FORMAT    ASCII   
+FORCE_ENDIAN    LITTLE  
+N_TYPES         4       
+FORCE_TYPE      SKIP
+FORCE_TYPE      SKIP
+FORCE_TYPE      SKIP
+FORCE_TYPE      CROP_FRAC   
+FORCE_DT        24      
+FORCEYEAR       1901    
+FORCEMONTH      01      
+FORCEDAY        01      
+FORCEHOUR       00      
+#######################################################################
+# Land Surface Files and Parameters
+#######################################################################
+SOIL            /samples.VIC.4.2.a.irrigation/soil_421.irr
+ARC_SOIL        FALSE   
+BASEFLOW	ARNO
+JULY_TAVG_SUPPLIED	FALSE	
+ORGANIC_FRACT	FALSE	
+VEGLIB	        /samples.VIC.4.2.a.irrigation/veglib.421.irr
+
+VEGLIB_VEGCOVER	TRUE
+VEGLIB_IRR	TRUE
+
+VEGPARAM        /samples.VIC.4.2.a.irrigation/veg_421.irr
+
+ROOT_ZONES      2	
+VEGPARAM_LAI 	  TRUE    
+VEGPARAM_VEGCOVER FALSE
+VEGPARAM_ALB	  FALSE
+VEGPARAM_CROPFRAC TRUE  
+ 
+LAI_SRC 	FROM_VEGPARAM
+VEGCOVER_SRC	FROM_VEGLIB
+ALB_SRC		FROM_VEGLIB
+SNOW_BAND	1	
+#######################################################################
+# Lake Simulation Parameters
+#######################################################################
+LAKES		FALSE 
+LAKE_PROFILE	FALSE
+#######################################################################
+# Output Files and Parameters
+#######################################################################
+RESULT_DIR      /samples.VIC.4.2.a.irrigation/output/ # Results directory path
+OUT_STEP        24       
+SKIPYEAR 	60	
+COMPRESS	FALSE	
+BINARY_OUTPUT	FALSE	
+ALMA_OUTPUT	FALSE	
+MOISTFRACT 	FALSE	
+PRT_HEADER	FALSE   
+PRT_SNOW_BAND   FALSE   
+#######################################################################
+# Output File Contents
+#######################################################################
+N_OUTFILES	1
+OUTFILE       fluxes        18
+OUTVAR		OUT_PREC		*	OUT_TYPE_FLOAT 1 
+OUTVAR		OUT_IRRIG_WITH_PREC		*	OUT_TYPE_FLOAT 1 
+OUTVAR		OUT_SNOWF		*	OUT_TYPE_FLOAT 1
+OUTVAR		OUT_EVAP		*	OUT_TYPE_FLOAT 1
+OUTVAR		OUT_RUNOFF	*	OUT_TYPE_FLOAT 1
+OUTVAR		OUT_BASEFLOW	*	OUT_TYPE_FLOAT 1 
+OUTVAR		OUT_SWE	*	OUT_TYPE_FLOAT 1
+OUTVAR		OUT_IRR_EXTRACT	  * 	OUT_TYPE_FLOAT 1
+OUTVAR		OUT_SOIL_MOIST	  * 	OUT_TYPE_USINT 10
+OUTVAR		OUT_LAKE_EVAP	  * 	OUT_TYPE_FLOAT 1
+OUTVAR		OUT_WIND          *       OUT_TYPE_USINT 1 
+OUTVAR		OUT_AIR_TEMP      *       OUT_TYPE_SINT  100
+OUTVAR		OUT_IRRIG	*	OUT_TYPE_FLOAT 1
+OUTVAR		OUT_IRR_RUN	*	OUT_TYPE_FLOAT 1
+OUTVAR		OUT_IRR_RUN_USED  *	OUT_TYPE_FLOAT 1
+OUTVAR		OUT_IRR_RUN_UNUSED	*	OUT_TYPE_FLOAT 1		
+OUTVAR		OUT_IRR_WITH_USED  *	OUT_TYPE_FLOAT 1
+OUTVAR		OUT_IRR_APPLIED   *	OUT_TYPE_FLOAT 1

@@ -121,6 +121,7 @@ double canopy_evap(layer_data_struct *layer,
   double             tmp_Wdew;
   double             layerevap[MAX_LAYERS];
   double             rc;
+  int flag_irr;
 
   Evap = 0;
 
@@ -140,8 +141,10 @@ double canopy_evap(layer_data_struct *layer,
     tmp_Wdew    = veg_var->Wdmax;
   }
 
+  flag_irr = veg_lib[veg_class].irr_active[month-1];
+
   rc = calc_rc((double)0.0, net_short, veg_lib[veg_class].RGL,
-               air_temp, vpd, veg_var->LAI, (double)1.0, FALSE);
+               air_temp, vpd, veg_var->LAI, (double)1.0, FALSE,flag_irr);
   if (veg_var->LAI > 0)
     canopyevap = pow((tmp_Wdew/veg_var->Wdmax),(2.0/3.0))
                  * penman(air_temp, elevation, rad, vpd, ra, rc, veg_lib[veg_class].rarc)
@@ -264,7 +267,7 @@ void transpiration(layer_data_struct *layer,
   double gc;
   double *gsLayer;
   int    cidx;
-
+  int flag_irr;
   /********************************************************************** 
      EVAPOTRANSPIRATION
 
@@ -276,7 +279,10 @@ void transpiration(layer_data_struct *layer,
 
      Re-written to allow for multi-layers.
   **********************************************************************/
- 
+
+
+  flag_irr = veg_lib[veg_class].irr_active[month-1];
+
   /**************************************************
     Set ice content in all individual layers
     **************************************************/
@@ -341,7 +347,7 @@ void transpiration(layer_data_struct *layer,
       /* Jarvis scheme, using resistance factors from Wigmosta et al., 1994 */
       veg_var->rc = calc_rc(veg_lib[veg_class].rmin, net_short,
 		   veg_lib[veg_class].RGL, air_temp, vpd,
-		   veg_var->LAI, gsm_inv, FALSE);
+			    veg_var->LAI, gsm_inv, FALSE,flag_irr);
       if (options.CARBON) {
         for (cidx=0; cidx<options.Ncanopy; cidx++) {
           if (veg_var->LAI > 0)
@@ -431,7 +437,7 @@ void transpiration(layer_data_struct *layer,
           /* Jarvis scheme, using resistance factors from Wigmosta et al., 1994 */
           veg_var->rc = calc_rc(veg_lib[veg_class].rmin, net_short,
 		       veg_lib[veg_class].RGL, air_temp, vpd,
-		       veg_var->LAI, gsm_inv, FALSE);
+				veg_var->LAI, gsm_inv, FALSE,flag_irr);
           if (options.CARBON) {
             for (cidx=0; cidx<options.Ncanopy; cidx++) {
               if (veg_var->LAI > 0)

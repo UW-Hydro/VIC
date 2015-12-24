@@ -153,6 +153,38 @@ veg_lib_struct *read_veglib(FILE *veglib, int *Ntype)
         temp[i].Wnpp_inhib = 1.0;
         temp[i].NPPfactor_sat = 1.0;
       }
+      /* Irrigation parameters */
+      if (options.VEGLIB_IRR) {
+        for (j = 0; j < 12; j++) {
+          fscanf(veglib, "%d", &temp[i].irr_active[j]);
+          if(temp[i].irr_active[j] != 0 && temp[i].irr_active[j] != 1) {
+            sprintf(str,"Irrigation active flag must be either 0 or 1 (%d)", temp[i].irr_active[j]);
+            nrerror(str);
+          }
+        }
+        fscanf(veglib, "%s", tmpstr); /* irrigation soil moisture threshold */
+        if (!strcmp(tmpstr,"SAT")) temp[i].irr_sm_thresh = IRR_SAT;
+        else if (!strcmp(tmpstr,"FC")) temp[i].irr_sm_thresh = IRR_FC;
+        else if (!strcmp(tmpstr,"CR")) temp[i].irr_sm_thresh = IRR_CR;
+              fscanf(veglib, "%s", tmpstr); /* irrigation soil moisture target */
+        if (!strcmp(tmpstr,"SAT")) temp[i].irr_sm_target = IRR_SAT;
+        else if (!strcmp(tmpstr,"FC")) temp[i].irr_sm_target = IRR_FC;
+        else if (!strcmp(tmpstr,"CR")) temp[i].irr_sm_target = IRR_CR;
+      }
+      else {
+        // Initialize but don't use
+        for (j = 0; j < 12; j++) {
+          temp[i].irr_active[j] = 0;
+        }
+        temp[i].irr_sm_thresh = IRR_SAT;
+        temp[i].irr_sm_target = IRR_SAT;
+      }
+
+      // Default crop fractions
+      for (j = 0; j < 12; j++) {
+        temp[i].crop_frac[j] = 1.0;
+      }
+
 
       fgets(str, MAXSTRING, veglib);	/* skip over end of line comments */
       i++;
@@ -178,6 +210,7 @@ veg_lib_struct *read_veglib(FILE *veglib, int *Ntype)
       temp[Nveg_type+i].roughness[j] = ref_veg_rough[i];
       temp[Nveg_type+i].displacement[j] = ref_veg_displ[i];
       temp[Nveg_type+i].vegcover[j] = ref_veg_vegcover[i];
+      temp[Nveg_type+i].crop_frac[j] = ref_veg_crop_frac[i];
     }
     temp[Nveg_type+i].wind_h = ref_veg_wind_h[i];
     temp[Nveg_type+i].RGL = ref_veg_RGL[i];

@@ -43,6 +43,7 @@ void compute_pot_evap(int veg_class,
   char ref_crop;
   double rc;
   double ra;
+  int flag_irr;
 
   /************************************************
   Estimate and store potential evap estimates using penman equation
@@ -64,10 +65,11 @@ void compute_pot_evap(int veg_class,
       RGL = veg_lib[veg_class].RGL;
       lai = veg_lib[veg_class].LAI[dmy[rec].month-1];
       albedo = veg_lib[veg_class].albedo[dmy[rec].month-1];
+      flag_irr = veg_lib[veg_class].irr_active[dmy[rec].month-1];
     }
     gsm_inv = 1.0;
     ref_crop = ref_veg_ref_crop[i];
-    rc = calc_rc(rs, net_short, RGL, tair, vpd, lai, gsm_inv, ref_crop);
+    rc = calc_rc(rs, net_short, RGL, tair, vpd, lai, gsm_inv, ref_crop,flag_irr);
     if (i < N_PET_TYPES_NON_NAT || !veg_lib[veg_class].overstory)
       ra = aero_resist[i][0];
     else

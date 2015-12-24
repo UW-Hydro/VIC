@@ -6,6 +6,7 @@
 static char vcid[] = "$Id$";
 
 int initialize_model_state(all_vars_struct     *all_vars,
+			   all_vars_struct     *all_vars_crop,
 			   dmy_struct           dmy,
 			   global_param_struct *global_param,
 			   filep_struct         filep,
@@ -132,7 +133,10 @@ int initialize_model_state(all_vars_struct     *all_vars,
   char     ErrStr[MAXSTRING];
   char     FIRST_VEG;
   int      i, j, ii, veg, index;
+  int      idx;
+  int      cidx;
   int      lidx;
+  int      nidx;
   double   tmp_moist[MAX_LAYERS];
   double   tmp_runoff;
   int      band;
@@ -650,6 +654,201 @@ int initialize_model_state(all_vars_struct     *all_vars,
       TreeAdjustFactor[band] = 1. / ( 1. - Cv );
     }
     else TreeAdjustFactor[band] = 1.;
+  }
+
+  // Initialize crop structures
+  for ( veg = 0 ; veg < veg_con[0].vegetat_type_num ; veg++ ) {
+    if (veg_con[veg].crop_frac_active) {
+      for ( band = 0; band < options.SNOW_BAND; band++ ) {
+      for (idx = veg_con[veg].crop_frac_idx; idx<veg_con[veg].crop_frac_idx+2; idx++) {
+
+        // Copy veg_var state data
+        if (idx % 2 == 0)
+          all_vars_crop->veg_var[idx][band].Wdew = 0;
+        else
+          all_vars_crop->veg_var[idx][band].Wdew = veg_var[veg][band].Wdew;
+        if (options.CARBON) {
+          for (cidx=0; cidx<options.Ncanopy; cidx++) {
+            all_vars_crop->veg_var[idx][band].NscaleFactor[cidx] = veg_var[veg][band].NscaleFactor[cidx];
+            all_vars_crop->veg_var[idx][band].aPARLayer[cidx] = veg_var[veg][band].aPARLayer[cidx];
+            all_vars_crop->veg_var[idx][band].CiLayer[cidx] = veg_var[veg][band].CiLayer[cidx];
+            all_vars_crop->veg_var[idx][band].rsLayer[cidx] = veg_var[veg][band].rsLayer[cidx];
+          }
+        }
+        all_vars_crop->veg_var[idx][band].Ci = veg_var[veg][band].Ci;
+        all_vars_crop->veg_var[idx][band].rc = veg_var[veg][band].rc;
+        all_vars_crop->veg_var[idx][band].NPPfactor = veg_var[veg][band].NPPfactor;
+        all_vars_crop->veg_var[idx][band].AnnualNPP = veg_var[veg][band].AnnualNPP;
+        all_vars_crop->veg_var[idx][band].AnnualNPPPrev = veg_var[veg][band].AnnualNPPPrev;
+
+        // Copy veg_var flux data
+        all_vars_crop->veg_var[idx][band].canopyevap = veg_var[veg][band].canopyevap;
+        all_vars_crop->veg_var[idx][band].throughfall = veg_var[veg][band].throughfall;
+        all_vars_crop->veg_var[idx][band].aPAR = veg_var[veg][band].aPAR;
+        all_vars_crop->veg_var[idx][band].GPP = veg_var[veg][band].GPP;
+        all_vars_crop->veg_var[idx][band].Rphoto = veg_var[veg][band].Rphoto;
+        all_vars_crop->veg_var[idx][band].Rdark = veg_var[veg][band].Rdark;
+        all_vars_crop->veg_var[idx][band].Rmaint = veg_var[veg][band].Rmaint;
+        all_vars_crop->veg_var[idx][band].Rgrowth = veg_var[veg][band].Rgrowth;
+        all_vars_crop->veg_var[idx][band].Raut = veg_var[veg][band].Raut;
+        all_vars_crop->veg_var[idx][band].NPP = veg_var[veg][band].NPP;
+        all_vars_crop->veg_var[idx][band].Litterfall = veg_var[veg][band].Litterfall;
+
+        // Copy cell state data
+	for ( lidx = 0; lidx < 2; lidx++ ) {
+          all_vars_crop->cell[idx][band].aero_resist[lidx] = cell[veg][band].aero_resist[lidx];
+        }
+        all_vars_crop->cell[idx][band].asat = cell[veg][band].asat;
+        all_vars_crop->cell[idx][band].CLitter = cell[veg][band].CLitter;
+        all_vars_crop->cell[idx][band].CInter = cell[veg][band].CInter;
+        all_vars_crop->cell[idx][band].CSlow = cell[veg][band].CSlow;
+	for ( lidx = 0; lidx < options.Nlayer; lidx++ ) {
+          all_vars_crop->cell[idx][band].layer[lidx].bare_evap_frac = cell[veg][band].layer[lidx].bare_evap_frac;
+          all_vars_crop->cell[idx][band].layer[lidx].Cs = cell[veg][band].layer[lidx].Cs;
+          all_vars_crop->cell[idx][band].layer[lidx].kappa = cell[veg][band].layer[lidx].kappa;
+          all_vars_crop->cell[idx][band].layer[lidx].moist = cell[veg][band].layer[lidx].moist;
+	  for ( frost_area = 0; frost_area < options.Nfrost; frost_area++ )
+            all_vars_crop->cell[idx][band].layer[lidx].ice[frost_area] = cell[veg][band].layer[lidx].ice[frost_area];
+          all_vars_crop->cell[idx][band].layer[lidx].phi = cell[veg][band].layer[lidx].phi;
+          all_vars_crop->cell[idx][band].layer[lidx].T = cell[veg][band].layer[lidx].T;
+          all_vars_crop->cell[idx][band].layer[lidx].zwt = cell[veg][band].layer[lidx].zwt;
+        }
+
+        // Copy cell flux data
+        all_vars_crop->cell[idx][band].baseflow = cell[veg][band].baseflow;
+	for ( lidx = 0; lidx < options.Nlayer; lidx++ ) {
+          all_vars_crop->cell[idx][band].layer[lidx].evap = cell[veg][band].layer[lidx].evap;
+        }
+        all_vars_crop->cell[idx][band].inflow = cell[veg][band].inflow;
+	for ( lidx = 0; lidx < N_PET_TYPES; lidx++ ) {
+          all_vars_crop->cell[idx][band].pot_evap[lidx] = cell[veg][band].pot_evap[lidx];
+        }
+        all_vars_crop->cell[idx][band].runoff = cell[veg][band].runoff;
+        all_vars_crop->cell[idx][band].RhLitter = cell[veg][band].RhLitter;
+        all_vars_crop->cell[idx][band].RhLitter2Atm = cell[veg][band].RhLitter2Atm;
+        all_vars_crop->cell[idx][band].RhInter = cell[veg][band].RhInter;
+        all_vars_crop->cell[idx][band].RhSlow = cell[veg][band].RhSlow;
+        all_vars_crop->cell[idx][band].RhTot = cell[veg][band].RhTot;
+        all_vars_crop->cell[idx][band].rootmoist = cell[veg][band].rootmoist;
+        all_vars_crop->cell[idx][band].wetness = cell[veg][band].wetness;
+        all_vars_crop->cell[idx][band].zwt = cell[veg][band].zwt;
+        all_vars_crop->cell[idx][band].zwt_lumped = cell[veg][band].zwt_lumped;
+
+        // Copy snow state data
+        all_vars_crop->snow[idx][band].albedo = snow[veg][band].albedo;
+        all_vars_crop->snow[idx][band].canopy_albedo = snow[veg][band].canopy_albedo;
+        all_vars_crop->snow[idx][band].coldcontent = snow[veg][band].coldcontent;
+        all_vars_crop->snow[idx][band].coverage = snow[veg][band].coverage;
+        all_vars_crop->snow[idx][band].density = snow[veg][band].density;
+        all_vars_crop->snow[idx][band].depth = snow[veg][band].depth;
+        all_vars_crop->snow[idx][band].last_snow = snow[veg][band].last_snow;
+        all_vars_crop->snow[idx][band].max_snow_depth = snow[veg][band].max_snow_depth;
+        all_vars_crop->snow[idx][band].MELTING = snow[veg][band].MELTING;
+        all_vars_crop->snow[idx][band].pack_temp = snow[veg][band].pack_temp;
+        all_vars_crop->snow[idx][band].pack_water = snow[veg][band].pack_water;
+        all_vars_crop->snow[idx][band].snow = snow[veg][band].snow;
+        if (idx % 2 == 0)
+          all_vars_crop->snow[idx][band].snow_canopy = 0;
+        else
+          all_vars_crop->snow[idx][band].snow_canopy = snow[veg][band].snow_canopy;
+        all_vars_crop->snow[idx][band].store_coverage = snow[veg][band].store_coverage;
+        all_vars_crop->snow[idx][band].store_snow = snow[veg][band].store_snow;
+        all_vars_crop->snow[idx][band].store_swq = snow[veg][band].store_swq;
+        all_vars_crop->snow[idx][band].surf_temp = snow[veg][band].surf_temp;
+        all_vars_crop->snow[idx][band].surf_temp_fbcount = snow[veg][band].surf_temp_fbcount;
+        all_vars_crop->snow[idx][band].surf_temp_fbflag = snow[veg][band].surf_temp_fbflag;
+        all_vars_crop->snow[idx][band].surf_water = snow[veg][band].surf_water;
+        all_vars_crop->snow[idx][band].swq = snow[veg][band].swq;
+        all_vars_crop->snow[idx][band].snow_distrib_slope = snow[veg][band].snow_distrib_slope;
+        all_vars_crop->snow[idx][band].tmp_int_storage = snow[veg][band].tmp_int_storage;
+
+        // Copy snow flux data
+        all_vars_crop->snow[idx][band].blowing_flux = snow[veg][band].blowing_flux;
+        all_vars_crop->snow[idx][band].canopy_vapor_flux = snow[veg][band].canopy_vapor_flux;
+        all_vars_crop->snow[idx][band].mass_error = snow[veg][band].mass_error;
+        all_vars_crop->snow[idx][band].melt = snow[veg][band].melt;
+        all_vars_crop->snow[idx][band].Qnet = snow[veg][band].Qnet;
+        all_vars_crop->snow[idx][band].surface_flux = snow[veg][band].surface_flux;
+        all_vars_crop->snow[idx][band].transport = snow[veg][band].transport;
+        all_vars_crop->snow[idx][band].vapor_flux = snow[veg][band].albedo;
+
+        // Copy energy state data
+        all_vars_crop->energy[idx][band].AlbedoLake = energy[veg][band].AlbedoLake;
+        all_vars_crop->energy[idx][band].AlbedoOver = energy[veg][band].AlbedoOver;
+        all_vars_crop->energy[idx][band].AlbedoUnder = energy[veg][band].AlbedoUnder;
+        all_vars_crop->energy[idx][band].frozen = energy[veg][band].frozen;
+        all_vars_crop->energy[idx][band].Nfrost = energy[veg][band].Nfrost;
+        all_vars_crop->energy[idx][band].Nthaw = energy[veg][band].Nthaw;
+        all_vars_crop->energy[idx][band].T1_index = energy[veg][band].T1_index;
+        all_vars_crop->energy[idx][band].Tcanopy = energy[veg][band].Tcanopy;
+        all_vars_crop->energy[idx][band].Tcanopy_fbcount = energy[veg][band].Tcanopy_fbcount;
+        all_vars_crop->energy[idx][band].Tcanopy_fbflag = energy[veg][band].Tcanopy_fbflag;
+        all_vars_crop->energy[idx][band].Tfoliage = energy[veg][band].Tfoliage;
+        all_vars_crop->energy[idx][band].Tfoliage_fbcount = energy[veg][band].Tfoliage_fbcount;
+        all_vars_crop->energy[idx][band].Tfoliage_fbflag = energy[veg][band].Tfoliage_fbflag;
+        all_vars_crop->energy[idx][band].Tsurf = energy[veg][band].Tsurf;
+        all_vars_crop->energy[idx][band].Tsurf_fbcount = energy[veg][band].Tsurf_fbcount;
+        all_vars_crop->energy[idx][band].Tsurf_fbflag = energy[veg][band].Tsurf_fbflag;
+        all_vars_crop->energy[idx][band].unfrozen = energy[veg][band].unfrozen;
+        for (lidx=0; lidx<2; lidx++) {
+          all_vars_crop->energy[idx][band].Cs[lidx] = energy[veg][band].Cs[lidx];
+          all_vars_crop->energy[idx][band].kappa[lidx] = energy[veg][band].kappa[lidx];
+        }
+        for (index=0; index<Nnodes; index++) {
+          all_vars_crop->energy[idx][band].Cs_node[index] = energy[veg][band].Cs_node[index];
+          all_vars_crop->energy[idx][band].fdepth[index] = energy[veg][band].fdepth[index];
+          all_vars_crop->energy[idx][band].ice[index] = energy[veg][band].ice[index];
+          all_vars_crop->energy[idx][band].kappa_node[index] = energy[veg][band].kappa_node[index];
+          all_vars_crop->energy[idx][band].moist[index] = energy[veg][band].moist[index];
+          all_vars_crop->energy[idx][band].T[index] = energy[veg][band].T[index];
+          all_vars_crop->energy[idx][band].T_fbcount[index] = energy[veg][band].T_fbcount[index];
+          all_vars_crop->energy[idx][band].T_fbflag[index] = energy[veg][band].T_fbflag[index];
+          all_vars_crop->energy[idx][band].tdepth[index] = energy[veg][band].tdepth[index];
+        }
+
+        // Copy energy flux data
+        all_vars_crop->energy[idx][band].advected_sensible = energy[veg][band].advected_sensible;
+        all_vars_crop->energy[idx][band].advection = energy[veg][band].advection;
+        all_vars_crop->energy[idx][band].AtmosError = energy[veg][band].AtmosError;
+        all_vars_crop->energy[idx][band].AtmosLatent = energy[veg][band].AtmosLatent;
+        all_vars_crop->energy[idx][band].AtmosLatentSub = energy[veg][band].AtmosLatentSub;
+        all_vars_crop->energy[idx][band].AtmosSensible = energy[veg][band].AtmosSensible;
+        all_vars_crop->energy[idx][band].canopy_advection = energy[veg][band].canopy_advection;
+        all_vars_crop->energy[idx][band].canopy_latent = energy[veg][band].canopy_latent;
+        all_vars_crop->energy[idx][band].canopy_latent_sub = energy[veg][band].canopy_latent_sub;
+        all_vars_crop->energy[idx][band].canopy_refreeze = energy[veg][band].canopy_refreeze;
+        all_vars_crop->energy[idx][band].canopy_sensible = energy[veg][band].canopy_sensible;
+        all_vars_crop->energy[idx][band].deltaCC = energy[veg][band].deltaCC;
+        all_vars_crop->energy[idx][band].deltaH = energy[veg][band].deltaH;
+        all_vars_crop->energy[idx][band].error = energy[veg][band].error;
+        all_vars_crop->energy[idx][band].fusion = energy[veg][band].fusion;
+        all_vars_crop->energy[idx][band].grnd_flux = energy[veg][band].grnd_flux;
+        all_vars_crop->energy[idx][band].latent = energy[veg][band].latent;
+        all_vars_crop->energy[idx][band].latent_sub = energy[veg][band].latent_sub;
+        all_vars_crop->energy[idx][band].longwave = energy[veg][band].longwave;
+        all_vars_crop->energy[idx][band].LongOverIn = energy[veg][band].LongOverIn;
+        all_vars_crop->energy[idx][band].LongUnderIn = energy[veg][band].LongUnderIn;
+        all_vars_crop->energy[idx][band].LongUnderOut = energy[veg][band].LongUnderOut;
+        all_vars_crop->energy[idx][band].melt_energy = energy[veg][band].melt_energy;
+        all_vars_crop->energy[idx][band].NetLongAtmos = energy[veg][band].NetLongAtmos;
+        all_vars_crop->energy[idx][band].NetLongOver = energy[veg][band].NetLongOver;
+        all_vars_crop->energy[idx][band].NetLongUnder = energy[veg][band].NetLongUnder;
+        all_vars_crop->energy[idx][band].NetShortAtmos = energy[veg][band].NetShortAtmos;
+        all_vars_crop->energy[idx][band].NetShortGrnd = energy[veg][band].NetShortGrnd;
+        all_vars_crop->energy[idx][band].NetShortOver = energy[veg][band].NetShortOver;
+        all_vars_crop->energy[idx][band].NetShortUnder = energy[veg][band].NetShortUnder;
+        all_vars_crop->energy[idx][band].out_long_canopy = energy[veg][band].out_long_canopy;
+        all_vars_crop->energy[idx][band].out_long_surface = energy[veg][band].out_long_surface;
+        all_vars_crop->energy[idx][band].refreeze_energy = energy[veg][band].refreeze_energy;
+        all_vars_crop->energy[idx][band].sensible = energy[veg][band].sensible;
+        all_vars_crop->energy[idx][band].shortwave = energy[veg][band].shortwave;
+        all_vars_crop->energy[idx][band].ShortOverIn = energy[veg][band].ShortOverIn;
+        all_vars_crop->energy[idx][band].ShortUnderIn = energy[veg][band].ShortUnderIn;
+        all_vars_crop->energy[idx][band].snow_flux = energy[veg][band].snow_flux;
+
+      }
+      }
+    }
   }
 
   return(0);

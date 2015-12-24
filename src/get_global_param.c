@@ -165,7 +165,7 @@ global_param_struct get_global_param(filenames_struct *names,
   global.MIN_RAIN_TEMP = -0.5;
   global.measure_h     = 2.0;
   global.wind_h        = 10.0;
-  for(i = 0; i < 2; i++) {
+  for(i = 0; i < 3; i++) {
     global.forceyear[i]  = MISSING;
     global.forcemonth[i] = 1;
     global.forceday[i]   = 1;
@@ -428,7 +428,21 @@ global_param_struct get_global_param(filenames_struct *names,
         if(strcasecmp("RC_PHOTO",flgstr)==0) options.RC_MODE=RC_PHOTO;
         else options.RC_MODE = RC_JARVIS;
       }
-
+      else if(strcasecmp("CROPFRAC",optstr)==0) {
+        sscanf(cmdstr,"%*s %s",flgstr);
+        if(strcasecmp("TRUE",flgstr)==0) options.CROPFRAC=TRUE;
+        else options.CROPFRAC = FALSE;
+      }
+      else if(strcasecmp("IRRIGATION",optstr)==0) {
+        sscanf(cmdstr,"%*s %s",flgstr);
+        if(strcasecmp("TRUE",flgstr)==0) options.IRRIGATION=TRUE;
+        else options.IRRIGATION = FALSE;
+      }
+      else if(strcasecmp("IRR_FREE",optstr)==0) {
+        sscanf(cmdstr,"%*s %s",flgstr);
+        if(strcasecmp("TRUE",flgstr)==0) options.IRR_FREE=TRUE;
+        else options.IRR_FREE = FALSE;
+      }
       /*************************************
        Define state files
       *************************************/
@@ -474,6 +488,13 @@ global_param_struct get_global_param(filenames_struct *names,
         if (strcasecmp("FALSE",names->f_path_pfx[1])==0)
           strcpy(names->f_path_pfx[1],"MISSING");
 	file_num = 1;
+	field=0;
+      }
+      else if(strcasecmp("FORCING3",optstr)==0) {
+        sscanf(cmdstr,"%*s %s", names->f_path_pfx[2]);
+        if (strcasecmp("FALSE",names->f_path_pfx[2])==0)
+          strcpy(names->f_path_pfx[2],"MISSING");
+	file_num = 2;
 	field=0;
       }
       else if (strcasecmp("FORCE_FORMAT",optstr)==0) {
@@ -581,6 +602,11 @@ global_param_struct get_global_param(filenames_struct *names,
       else if(strcasecmp("VEGLIB",optstr)==0) {
         sscanf(cmdstr,"%*s %s",names->veglib);
       }
+      else if(strcasecmp("VEGLIB_IRR",optstr)==0) {
+        sscanf(cmdstr,"%*s %s",flgstr);
+        if(strcasecmp("TRUE",flgstr)==0) options.VEGLIB_IRR=TRUE;
+        else options.VEGLIB_IRR = FALSE;
+      }
       else if(strcasecmp("VEGLIB_PHOTO",optstr)==0) {
         sscanf(cmdstr,"%*s %s",flgstr);
         if(strcasecmp("TRUE",flgstr)==0) options.VEGLIB_PHOTO=TRUE;
@@ -644,6 +670,11 @@ global_param_struct get_global_param(filenames_struct *names,
           options.ALB_SRC=FROM_VEGPARAM;
         else
           options.ALB_SRC=FROM_VEGLIB;
+      }
+      else if(strcasecmp("VEGPARAM_CROPFRAC",optstr)==0) {
+        sscanf(cmdstr,"%*s %s",flgstr);
+        if(strcasecmp("TRUE",flgstr)==0) options.VEGPARAM_CROPFRAC=TRUE;
+        else options.VEGPARAM_CROPFRAC = FALSE;
       }
       else if(strcasecmp("ROOT_ZONES",optstr)==0) {
 	sscanf(cmdstr,"%*s %d",&options.ROOT_ZONES);
@@ -836,7 +867,7 @@ global_param_struct get_global_param(filenames_struct *names,
   // Validate forcing files and variables
   if ( strcmp ( names->f_path_pfx[0], "MISSING" ) == 0 )
     nrerror("No forcing file has been defined.  Make sure that the global file defines FORCING1.");
-  for(i=0;i<2;i++) {
+  for(i=0;i<3;i++) {
     if ( i == 0 || (i == 1 && param_set.N_TYPES[i] != MISSING) ) {
       if (param_set.N_TYPES[i] == MISSING) {
         sprintf(ErrStr,"Need to specify the number forcing variables types in forcing file %d.", i);
@@ -862,6 +893,13 @@ global_param_struct get_global_param(filenames_struct *names,
     global.forceday[1] = global.forceday[0];
     global.forcehour[1] = global.forcehour[0];
     global.forceskip[1] = 0;
+  }
+  if(param_set.N_TYPES[2] != MISSING && global.forceyear[2] == MISSING) {
+    global.forceyear[2] = global.forceyear[0];
+    global.forcemonth[2] = global.forcemonth[0];
+    global.forceday[2] = global.forceday[0];
+    global.forcehour[2] = global.forcehour[0];
+    global.forceskip[2] = 0;
   }
 
   // Validate result directory

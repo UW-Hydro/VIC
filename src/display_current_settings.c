@@ -180,6 +180,10 @@ void display_current_settings(int                 mode,
     fprintf(stderr,"CORRPREC\t\tTRUE\n");
   else
     fprintf(stderr,"CORRPREC\t\tFALSE\n");
+  if (options.CROPFRAC)
+    fprintf(stderr,"CROPFRAC\t\tTRUE\n");
+  else
+    fprintf(stderr,"CROPFRAC\t\tFALSE\n");
   if (options.EXP_TRANS)
     fprintf(stderr,"EXP_TRANS\t\tTRUE\n");
   else
@@ -212,6 +216,14 @@ void display_current_settings(int                 mode,
     fprintf(stderr,"LW_CLOUD\t\tLW_CLOUD_DEARDORFF\n");
   else
     fprintf(stderr,"LW_CLOUD\t\tLW_CLOUD_BRAS\n");
+  if (options.IRRIGATION)
+    fprintf(stderr,"IRRIGATION\t\tTRUE\n");
+  else
+    fprintf(stderr,"IRRIGATION\t\tFALSE\n");
+  if (options.IRR_FREE)
+    fprintf(stderr,"IRR_FREE\t\tTRUE\n");
+  else
+    fprintf(stderr,"IRR_FREE\t\tFALSE\n");
   if (options.IMPLICIT)
     fprintf(stderr,"IMPLICIT\t\tTRUE\n");
   else
@@ -329,6 +341,10 @@ void display_current_settings(int                 mode,
   fprintf(stderr,"\n");
   fprintf(stderr,"Input Veg Data:\n");
   fprintf(stderr,"Veg library file\t%s\n",names->veglib);
+  if (options.VEGLIB_IRR == TRUE)
+    fprintf(stderr,"VEGLIB_IRR\t\tTRUE\n");
+  else
+    fprintf(stderr,"VEGLIB_IRR\t\tFALSE\n");
   if (options.VEGLIB_PHOTO == TRUE)
     fprintf(stderr,"VEGLIB_PHOTO\t\tTRUE\n");
   else
@@ -363,6 +379,10 @@ void display_current_settings(int                 mode,
     fprintf(stderr,"ALB_SRC\t\tFROM_VEGPARAM\n");
   else if (options.ALB_SRC == FROM_VEGLIB)
     fprintf(stderr,"ALB_SRC\t\tFROM_VEGLIB\n");
+  if (options.VEGPARAM_CROPFRAC)
+    fprintf(stderr,"VEGPARAM_CROPFRAC\t\tTRUE\n");
+  else
+    fprintf(stderr,"VEGPARAM_CROPFRAC\t\tFALSE\n");
 
   fprintf(stderr,"\n");
   fprintf(stderr,"Input Elevation Data:\n");

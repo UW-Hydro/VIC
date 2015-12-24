@@ -42,6 +42,9 @@ void alloc_veg_hist(int nrecs, int nveg, veg_hist_struct ***veg_hist)
       (*veg_hist)[i][j].albedo = (double *) calloc(NR+1, sizeof(double));
       if ((*veg_hist)[i][j].albedo == NULL)
         vicerror("Memory allocation error in alloc_veg_hist().");
+      (*veg_hist)[i][j].crop_frac = (double *) calloc(NR+1, sizeof(double));
+      if ((*veg_hist)[i][j].crop_frac == NULL)
+        vicerror("Memory allocation error in alloc_veg_hist().");
       (*veg_hist)[i][j].LAI = (double *) calloc(NR+1, sizeof(double));
       if ((*veg_hist)[i][j].LAI == NULL)
         vicerror("Memory allocation error in alloc_veg_hist().");
@@ -70,6 +73,7 @@ void free_veg_hist(int nrecs, int nveg, veg_hist_struct ***veg_hist)
   for (i = 0; i < nrecs; i++) {
     for (j = 0; j < nveg; j++) {
       free((*veg_hist)[i][j].albedo);
+      free((*veg_hist)[i][j].crop_frac);
       free((*veg_hist)[i][j].LAI);
       free((*veg_hist)[i][j].vegcover);
     }

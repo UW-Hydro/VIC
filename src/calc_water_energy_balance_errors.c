@@ -43,6 +43,12 @@ double calc_water_balance_error(int    rec,
       fprintf(stderr,"Maximum Moist Error:\t%i\t%.5f\t%.5f\n",
 	      rec,error,cum_error);
     }
+
+    if(fabs(error)>1e-7) { //ingjerd
+           fprintf(stderr,"calc_water Moist Error:\t%i\t%.7f\t%.7f\n",rec,error,cum_error);
+     fprintf(stderr,"calc_water Moist Error:\t%i inflow %.4f outflow %.4f storage %.3f last_storage %.3f\n",rec,inflow,outflow,storage,last_storage);
+    }
+
     if(rec==Nrecs-1) {
       fprintf(stderr,"Total Cumulative Water Error for Grid Cell = %.4f\n",
 	      cum_error);

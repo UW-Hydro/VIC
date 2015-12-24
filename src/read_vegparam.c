@@ -74,6 +74,7 @@ veg_con_struct *read_vegparam(FILE *vegparam,
   size_t	  length;
   int             cidx;
   double          tmp;
+  int             Ncrop=0;
 
   skip = 1;
   if(options.VEGPARAM_LAI) skip++;
@@ -156,6 +157,9 @@ veg_con_struct *read_vegparam(FILE *vegparam,
     if( options.BLOWING ){
       NfieldsMax += 3;
     }
+    if (options.VEGPARAM_CROPFRAC) {
+      NfieldsMax++;
+    }
     if ( Nfields != NfieldsMax ) {
       sprintf(ErrStr,"ERROR - cell %d - expecting %d fields but found %d in veg line %s\n",gridcel,NfieldsMax, Nfields, line);
       nrerror(ErrStr);
@@ -195,6 +199,18 @@ veg_con_struct *read_vegparam(FILE *vegparam,
       if( temp[i].fetch < 1.0  ) {
 	sprintf(str,"ERROR - BLOWING parameter fetch should be >> 1 but cell %i has fetch = %.2f\n", gridcel, temp[i].fetch );
         nrerror(str);
+      }
+    }
+
+    temp[i].crop_frac_active = 0;
+    temp[i].crop_frac_idx = -2;
+    if (options.VEGPARAM_CROPFRAC) {
+      j = 2 * options.ROOT_ZONES + 2;
+      if (options.BLOWING) j += 3;
+      temp[i].crop_frac_active = atoi(vegarr[j]);
+      if (temp[i].crop_frac_active) {
+        temp[i].crop_frac_idx += 2;
+        Ncrop += 2;
       }
     }
 
@@ -332,6 +348,9 @@ veg_con_struct *read_vegparam(FILE *vegparam,
       NoOverstory++;
 
   }
+
+  // Assign Ncrop
+  for(j=0;j<vegetat_type_num;j++) temp[j].Ncrop = Ncrop;
 
   // Determine if we have bare soil
   if(temp[0].Cv_sum>1.0){

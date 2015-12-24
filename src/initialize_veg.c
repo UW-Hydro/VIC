@@ -39,6 +39,7 @@ void initialize_veg(veg_var_struct      **veg_var,
       veg_var[i][j].Wdmax = 0.0;
       veg_var[i][j].vegcover = 0.0;
       veg_var[i][j].albedo = 0.0;
+      veg_var[i][j].crop_frac = 0.0;
     }
     if (options.CARBON) {
       for ( j = 0 ; j < options.SNOW_BAND ; j++ ) {
@@ -61,6 +62,10 @@ void initialize_veg(veg_var_struct      **veg_var,
           veg_var[i][j].rsLayer[k] = 0.0;
         }
       }
+    }
+    for ( j = 0 ; j < options.SNOW_BAND ; j++ ) {
+      veg_var[i][j].irrig = 0.0;
+      veg_var[i][j].irr_apply = FALSE;
     }
   }
 }

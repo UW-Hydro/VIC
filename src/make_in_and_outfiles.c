@@ -71,6 +71,17 @@ void make_in_and_outfiles(filep_struct         *filep,
     else 
       filep->forcing[1] = open_file(filenames->forcing[1], "r");
   }
+  filep->forcing[2] = NULL;
+  if(strcasecmp(filenames->f_path_pfx[2],"MISSING")!=0) {
+    strcpy(filenames->forcing[2], filenames->f_path_pfx[2]);
+    strcat(filenames->forcing[2], latchar);
+    strcat(filenames->forcing[2], "_");
+    strcat(filenames->forcing[2], lngchar);
+    if(param_set.FORCE_FORMAT[0] == BINARY) 
+      filep->forcing[2] = open_file(filenames->forcing[2], "rb");
+    else 
+      filep->forcing[2] = open_file(filenames->forcing[2], "r");
+  }
 
   /********************************
   Output Files

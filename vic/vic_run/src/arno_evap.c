@@ -50,6 +50,7 @@ arno_evap(layer_data_struct *layer,
           double             moist_resid,
           double            *frost_fract)
 {
+    extern parameters_struct param;
     extern option_struct options;
 
     int                  num_term;
@@ -81,7 +82,7 @@ arno_evap(layer_data_struct *layer,
 
     Epot =
         penman(air_temp, elevation, rad, vpd, ra, 0.0,
-               0.0) * delta_t / CONST_CDAY;
+               param.SOIL_RARC) * delta_t / CONST_CDAY;
 
     /**********************************************************************/
     /*  Compute temporary infiltration rate based on given soil_moist.    */

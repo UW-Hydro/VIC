@@ -75,7 +75,7 @@ canopy_assimilation(char    Ctype,
        temperature is equal air_temp */
     pz = CONST_PSTD * exp(-(double) elevation / h);
 
-    CiLayer = (double*)calloc(options.Ncanopy, sizeof(double));
+    CiLayer = calloc(options.Ncanopy, sizeof(*CiLayer));
 
     if (!strcasecmp(mode, "ci")) {
         /* Assume a default leaf-internal CO2; compute assimilation,

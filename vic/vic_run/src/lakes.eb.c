@@ -1858,8 +1858,8 @@ water_balance(lake_var_struct *lake,
 
     frost_fract = soil_con.frost_fract;
 
-    delta_moist = (double*) calloc(options.Nlayer, sizeof(double));
-    moist = (double*) calloc(options.Nlayer, sizeof(double));
+    delta_moist = calloc(options.Nlayer, sizeof(*delta_moist));
+    moist = calloc(options.Nlayer, sizeof(*moist));
 
     /**********************************************************************
     * 1. Preliminary stuff
@@ -2078,7 +2078,7 @@ water_balance(lake_var_struct *lake,
         lake->runoff_out = 0.0;
     }
     else {
-        circum = 2*CONST_PI*pow(surfacearea / CONST_PI, 0.5);
+        circum = 2 * CONST_PI * pow(surfacearea / CONST_PI, 0.5);
         lake->runoff_out = lake_con.wfrac * circum * dt *
                            1.6 * pow(ldepth - lake_con.mindepth, 1.5);
         if ((lake->volume - lake->ice_water_eq) >= lake->runoff_out) {

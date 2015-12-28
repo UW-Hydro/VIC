@@ -43,6 +43,7 @@
  *           identical. The model is run over a list of cells.
  *****************************************************************************/
 typedef struct {
+    bool run; /**< TRUE: run grid cell. FALSE: do not run grid cell */
     double latitude; /**< latitude of grid cell center */
     double longitude; /**< longitude of grid cell center */
     double area; /**< area of grid cell */
@@ -59,7 +60,8 @@ typedef struct {
  *           model is run on a single processor, then the two are identical.
  *****************************************************************************/
 typedef struct {
-    size_t ncells; /**< number of active grid cells on domain */
+    size_t ncells_total; /**< total number of grid cells on domain */
+    size_t ncells_active; /**< number of active grid cells on domain */
     size_t n_nx; /**< size of x-index; */
     size_t n_ny; /**< size of y-index */
     location_struct *locations; /**< locations structs for local domain */
@@ -135,19 +137,17 @@ double air_density(double t, double p);
 double average(double *ar, size_t n);
 out_data_struct *create_output_list(void);
 void free_atmos(atmos_data_struct *atmos);
-void free_out_data(out_data_struct **out_data);
 void free_veg_hist(veg_hist_struct *veg_hist);
 size_t get_global_domain(char *fname, domain_struct *global_domain);
 void get_global_param(FILE *);
 size_t get_nc_dimension(char *nc_name, char *dim_name);
+int get_nc_varndimensions(char *nc_name, char *var_name);
 int get_nc_field_double(char *nc_name, char *var_name, size_t *start,
                         size_t *count, double *var);
 int get_nc_field_float(char *nc_name, char *var_name, size_t *start,
                        size_t *count, float *var);
 int get_nc_field_int(char *nc_name, char *var_name, size_t *start,
                      size_t *count, int *var);
-void init_output_list(out_data_struct *out_data, int write, char *format,
-                      int type, double mult);
 void initialize_domain(domain_struct *domain);
 void initialize_energy(energy_bal_struct **energy, size_t nveg);
 void initialize_history_file(nc_file_struct *nc);
@@ -172,7 +172,6 @@ int put_nc_field_double(char *nc_name, bool *open, int *nc_id, double fillval,
 int put_nc_field_int(char *nc_name, bool *open, int *nc_id, int fillval,
                      int *dimids, int ndims, char *var_name, size_t *start,
                      size_t *count, int *var);
-double q_to_vp(double q, double p);
 void sprint_location(char *str, location_struct *loc);
 void vic_alloc(void);
 void vic_nc_info(nc_file_struct *nc_hist_file, out_data_struct **out_data,
@@ -186,7 +185,5 @@ void vic_restore(void);
 void vic_start(void);
 void vic_store(void);
 void vic_write(void);
-char will_it_snow(double *t, double t_offset, double max_snow_temp,
-                  double *prcp, size_t n);
 
 #endif

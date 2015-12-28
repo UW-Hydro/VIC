@@ -272,18 +272,18 @@ CalcBlowingSnow(double   Dt,
  *****************************************************************************/
 double
 qromb(double (*funcd)(),
-      double es,
-      double Wind,
-      double AirDens,
-      double ZO,
-      double EactAir,
-      double F,
-      double hsalt,
-      double phi_r,
-      double ushear,
-      double Zrh,
-      double a,
-      double b)
+      double   es,
+      double   Wind,
+      double   AirDens,
+      double   ZO,
+      double   EactAir,
+      double   F,
+      double   hsalt,
+      double   phi_r,
+      double   ushear,
+      double   Zrh,
+      double   a,
+      double   b)
 {
     extern parameters_struct param;
 
@@ -366,19 +366,19 @@ polint(double  xa[],
  *****************************************************************************/
 double
 trapzd(double (*funcd)(),
-       double es,
-       double Wind,
-       double AirDens,
-       double ZO,
-       double EactAir,
-       double F,
-       double hsalt,
-       double phi_r,
-       double ushear,
-       double Zrh,
-       double a,
-       double b,
-       int    n)
+       double   es,
+       double   Wind,
+       double   AirDens,
+       double   ZO,
+       double   EactAir,
+       double   F,
+       double   hsalt,
+       double   phi_r,
+       double   ushear,
+       double   Zrh,
+       double   a,
+       double   b,
+       int      n)
 {
     double        x, tnm, sum, del;
     static double s;
@@ -545,7 +545,7 @@ sub_with_height(double z,
     fluctuat_v = 0.005 * pow(Wind, 1.36);
 
     // Ventilation velocity for turbulent suspension Lee (1975)
-    Vtz = terminal_v + 3.*fluctuat_v*cos(CONST_PI / 4.);
+    Vtz = terminal_v + 3. * fluctuat_v * cos(CONST_PI / 4.);
 
     Re = 2. * Rmean * Vtz / param.BLOWING_KIN_VIS;
     Nu = 1.79 + 0.606 * pow(Re, 0.5);

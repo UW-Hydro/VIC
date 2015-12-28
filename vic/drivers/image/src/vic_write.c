@@ -35,32 +35,31 @@
 void
 vic_write(void)
 {
-    extern out_data_struct **out_data;
-    extern domain_struct     global_domain;
-    extern domain_struct     local_domain;
-    extern nc_file_struct    nc_hist_file;
-    extern nc_var_struct     nc_vars[N_OUTVAR_TYPES];
-    extern size_t            current;
-    int                      dimids[MAXDIMS];
-    size_t                   i;
-    size_t                   j;
-    size_t                   k;
-    size_t                   grid_size;
-    size_t                   ndims;
-    double                  *dvar = NULL;
-    size_t                   dcount[MAXDIMS];
-    size_t                   dstart[MAXDIMS];
+    extern out_data_struct   **out_data;
+    extern global_param_struct global_param;
+    extern dmy_struct         *dmy;
+    extern domain_struct       local_domain;
+    extern nc_file_struct      nc_hist_file;
+    extern nc_var_struct       nc_vars[N_OUTVAR_TYPES];
+    extern size_t              current;
+    int                        dimids[MAXDIMS];
+    size_t                     i;
+    size_t                     j;
+    size_t                     k;
+    size_t                     ndims;
+    double                    *dvar = NULL;
+    size_t                     dcount[MAXDIMS];
+    size_t                     dstart[MAXDIMS];
 
-    grid_size = global_domain.n_ny * global_domain.n_nx;
 
     // allocate memory for variables to be stored
-    dvar = (double *) malloc(local_domain.ncells * sizeof(double));
+    dvar = malloc(local_domain.ncells_active * sizeof(*dvar));
     if (dvar == NULL) {
         log_err("Memory allocation error in vic_write().");
     }
 
     // set missing values
-    for (i = 0; i < local_domain.ncells; i++) {
+    for (i = 0; i < local_domain.ncells_active; i++) {
         dvar[i] = nc_hist_file.d_fillvalue;
     }
 
@@ -91,7 +90,7 @@ vic_write(void)
         for (j = 0; j < out_data[0][k].nelem; j++) {
             // if there is more than one layer, then dstart needs to advance
             dstart[1] = j;
-            for (i = 0; i < local_domain.ncells; i++) {
+            for (i = 0; i < local_domain.ncells_active; i++) {
                 dvar[i] = (double) out_data[i][k].aggdata[j];
             }
             gather_put_nc_field_double(nc_hist_file.fname, &(nc_hist_file.open),
@@ -99,7 +98,7 @@ vic_write(void)
                                        nc_hist_file.d_fillvalue,
                                        dimids, ndims, nc_vars[k].nc_var_name,
                                        dstart, dcount, dvar);
-            for (i = 0; i < local_domain.ncells; i++) {
+            for (i = 0; i < local_domain.ncells_active; i++) {
                 dvar[i] = nc_hist_file.d_fillvalue;
             }
         }
@@ -115,11 +114,26 @@ vic_write(void)
     // reset the agg data
     for (k = 0; k < N_OUTVAR_TYPES; k++) {
         for (j = 0; j < out_data[0][k].nelem; j++) {
-            for (i = 0; i < local_domain.ncells; i++) {
+            for (i = 0; i < local_domain.ncells_active; i++) {
                 out_data[i][k].aggdata[j] = 0;
             }
         }
     }
+
+    // ADD Time variable
+    dimids[0] = nc_hist_file.time_dimid;
+    dstart[0] = current;
+    dcount[0] = 1;
+
+    dvar[0] = date2num(global_param.time_origin_num, &dmy[current], 0.,
+                       global_param.calendar, global_param.time_units);
+
+    // write to file
+    put_nc_field_double(nc_hist_file.fname, &(nc_hist_file.open),
+                        &(nc_hist_file.nc_id),
+                        nc_hist_file.d_fillvalue,
+                        dimids, 1, "time",
+                        dstart, dcount, dvar);
 
     // free memory
     free(dvar);

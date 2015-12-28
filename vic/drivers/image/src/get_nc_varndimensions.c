@@ -1,7 +1,7 @@
 /******************************************************************************
  * @section DESCRIPTION
  *
- * This routine opens files for soil, vegetation, and global parameters.
+ * Get netCDF dimension.
  *
  * @section LICENSE
  *
@@ -26,26 +26,44 @@
 
 #include <vic_def.h>
 #include <vic_run.h>
-#include <vic_driver_classic.h>
+#include <vic_driver_image.h>
 
 /******************************************************************************
- * @brief    This routine opens files for soil, vegetation, and global
- *           parameters.
+ * @brief    Get netCDF dimension.
  *****************************************************************************/
-void
-check_files(filep_struct     *filep,
-            filenames_struct *fnames)
+int
+get_nc_varndimensions(char *nc_name,
+                 char *var_name)
 {
-    extern option_struct options;
-    extern FILE          *open_file(char string[], char type[]);
+    int    nc_id;
+    int    var_id;
+    int    ndims;
+    int    status;
 
-    filep->soilparam = open_file(fnames->soil, "r");
-    filep->veglib = open_file(fnames->veglib, "r");
-    filep->vegparam = open_file(fnames->veg, "r");
-    if (options.SNOW_BAND > 1) {
-        filep->snowband = open_file(fnames->snowband, "r");
+    // open the netcdf file
+    status = nc_open(nc_name, NC_NOWRITE, &nc_id);
+    if (status != NC_NOERR) {
+        log_err("Error opening %s", nc_name);
     }
-    if (options.LAKES) {
-        filep->lakeparam = open_file(fnames->lakeparam, "r");
+
+    // get variable id
+    status = nc_inq_varid(nc_id, var_name, &var_id);
+    if (status != NC_NOERR) {
+        log_err("Error getting variable id %s in %s", var_name, nc_name);
     }
+
+    // get number of dimensions
+    status = nc_inq_varndims(nc_id, var_id, &ndims);
+    if (status != NC_NOERR) {
+        log_err("Error getting number of dimensions for var %s in %s", var_name,
+                nc_name);
+    }
+
+    // close the netcdf file
+    status = nc_close(nc_id);
+    if (status != NC_NOERR) {
+        log_err("Error closing %s", nc_name);
+    }
+
+    return ndims;
 }

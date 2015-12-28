@@ -207,7 +207,7 @@ read_lakeparam(FILE           *lakeparam,
             if (temp.Cl[i] < 0.0 || temp.Cl[i] > 1.0) {
                 log_err("Lake layer %d area fraction (%f) for cell (%d) "
                         "specified in the lake parameter file must be a "
-                        "fraction between 0 and 1.", i, temp.Cl[0],
+                        "fraction between 0 and 1.", (int)i, temp.Cl[0],
                         soil_con.gridcel);
             }
         }

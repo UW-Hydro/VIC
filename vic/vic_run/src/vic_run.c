@@ -332,7 +332,7 @@ vic_run(atmos_data_struct   *atmos,
                         calc_Nscale_factors(
                             vic_run_veg_lib[veg_class].NscaleFlag,
                             veg_con[iveg].CanopLayerBnd,
-                            vic_con[iveg].LAI[dmy->month - 1],
+                            veg_con[iveg].LAI[dmy->month - 1],
                             soil_con->lat,
                             soil_con->lng,
                             soil_con->time_zone_lng,

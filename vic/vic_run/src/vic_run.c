@@ -501,8 +501,7 @@ vic_run(atmos_data_struct   *atmos,
 
         snowprec = gauge_correction[SNOW] * (atmos->prec[NR] - rainonly);
         rainprec = gauge_correction[SNOW] * rainonly;
-        Cv = veg_con[iveg].Cv;
-        Cv *= lakefrac;
+        Cv = veg_con[iveg].Cv * lakefrac;
         atmos->out_prec += (snowprec + rainprec) * Cv;
         atmos->out_rain += rainprec * Cv;
         atmos->out_snow += snowprec * Cv;

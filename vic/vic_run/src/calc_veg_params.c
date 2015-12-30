@@ -37,7 +37,7 @@ calc_veg_displacement(double height)
 {
     extern parameters_struct param;
 
-    double value;
+    double                   value;
 
     value = param.VEG_RATIO_DH_HEIGHT * height;
 
@@ -53,7 +53,7 @@ calc_veg_height(double displacement)
 {
     extern parameters_struct param;
 
-    double value;
+    double                   value;
 
     value = displacement / param.VEG_RATIO_DH_HEIGHT;
 
@@ -70,7 +70,7 @@ calc_veg_roughness(double height)
 {
     extern parameters_struct param;
 
-    double value;
+    double                   value;
 
     value = param.VEG_RATIO_RL_HEIGHT * height;
 

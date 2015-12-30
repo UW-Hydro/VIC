@@ -722,6 +722,7 @@ func_surf_energy_bal(double  Ts,
                                               tmp_displacement[0], TMean,
                                               Tair, tmp_wind[0],
                                               tmp_roughness[0]);
+
             /** if Ra_bare is non-zero, compute area-weighted average
                 aerodynamic conductance **/
             if (Ra_bare[0] > 0) {

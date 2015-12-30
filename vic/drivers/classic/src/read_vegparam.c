@@ -227,7 +227,7 @@ read_vegparam(FILE  *vegparam,
             free(vegarr[k]);
         }
 
-        for ( j = 0; j < MONTHS_PER_YEAR; j++ ) {
+        for (j = 0; j < MONTHS_PER_YEAR; j++) {
             temp[i].albedo[j] = veg_lib[temp[i].veg_class].albedo[j];
             temp[i].LAI[j] = veg_lib[temp[i].veg_class].LAI[j];
             temp[i].vegcover[j] = veg_lib[temp[i].veg_class].vegcover[j];

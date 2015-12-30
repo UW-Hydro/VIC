@@ -51,19 +51,19 @@ arno_evap(layer_data_struct *layer,
           double            *frost_fract)
 {
     extern parameters_struct param;
-    extern option_struct options;
+    extern option_struct     options;
 
-    int                  num_term;
-    int                  i;
-    size_t               frost_area;
-    double               tmp, beta_asp, dummy;
-    double               ratio, as;
-    double               Epot; /* potential bare soil evaporation */
-    double               moist;
-    double               evap;
-    double               max_infil;
-    double               Evap;
-    double               tmpsum;
+    int                      num_term;
+    int                      i;
+    size_t                   frost_area;
+    double                   tmp, beta_asp, dummy;
+    double                   ratio, as;
+    double                   Epot; /* potential bare soil evaporation */
+    double                   moist;
+    double                   evap;
+    double                   max_infil;
+    double                   Evap;
+    double                   tmpsum;
 
     Evap = 0;
 

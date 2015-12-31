@@ -250,6 +250,13 @@ The following options are no longer supported.
 | MIN_LIQ       | string    | TRUE or FALSE     | Version 4.1.1 only. Options for handling minimum soil moisture in presence of ice (default is FALSE): <li>**FALSE** = Use residual moisture as lower bound on soil moisture in Brooks-Corey/Campbell and other relationships involving liquid water. <li>**TRUE** = Use (`residual moisture * unfrozen water fraction` as function of temperature) as lower bound on soil moisture in Brooks-Corey/Campbell and other relationships involving liquid water. |
 | GLOBAL_LAI    | string    | TRUE or FALSE     | If TRUE the vegetation parameter file contains an extra line for each vegetation type that defines monthly LAI values for each vegetation type for each grid cell. <br><br>*NOTE*: This option has been replaced by the two options LAI_SRC and VEGPARAM_LAI. |
 | OUTPUT_FORCE  | string    | TRUE or FALSE     | If TRUE, perform disaggregation of forcings, skip the simulation, and output the disaggregated forcings. |
+| PLAPSE        | string    | TRUE or FALSE     | If TRUE, set air pressure to sea level pressure, lapsed to grid cell average elevation. |
+| SW_PREC_THRESH | float    | mm                | Minimum daily precip that can cause dimming of incoming shortwave; default = 0. |
+| MTCLIM_SWE_CORR | string    | TRUE or FALSE     | If TRUE, adjust incoming shortwave for snow albedo effect. |
+| VP_ITER       | string    | VP_ITER_<i>type</i> | Where <i>type</i> is one of: NEVER (never iterate); ALWAYS (always iterate once); ANNUAL (always iterate in humid climates; iteration in arid climates depends on annual precipitation); CONVERGE (iterate until SW and VP values stabilize).  Default = VP_ITER_ALWAYS. |
+| VP_INTERP     | string    | TRUE or FALSE     | If TRUE, estimate sub-daily values of VP by interpolating between daily values at sunrise; if FALSE, hold VP constant over the day. Default = TRUE. |
+| LW_TYPE       | string    | LW_<i>type</i>     | Where <i>type</i> is one of: TVA (Tennessee Valley Authority, 1972); PRATA (Prata, 1996), or various other types listed in vicNl_def.h. Default = LW_PRATA. |
+| LW_CLOUD      | string    | LW_CLOUD_<i>type</i> | Where <i>type</i> is one of: BRAS (Bras, 1994); DEARDORFF (Deardorff, 1978). Default = LW_CLOUD_DEARDORFF. |
 | PRT_FLUX      | string    | TRUE or FALSE     | Versions 4.1.1 and earlier. If TRUE print energy fluxes debugging files .  |
 | PRT_BALANCE   | string    | TRUE or FALSE     | Versions 4.1.1 and earlier. If TRUE print water balance debugging files .  |
 | PRT_SOIL      | string    | TRUE or FALSE     | Versions 4.1.1 and earlier. If TRUE print soil parameter debugging files .  |

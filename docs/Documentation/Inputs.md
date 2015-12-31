@@ -15,6 +15,6 @@ And a few more are optional:
 *   [(Optional) Initial State File](StateFile.md): Moisture storages (soil moisture, snow pack, etc), energy storages (soil temperatures, etc) and other information describing the current state of the system. A state file saved from a previous VIC simulation may be used as the initial state for another run.
 *   [(Optional) Elevation Band File](SnowBand.md): File summarizing the distribution of elevations in each grid cell. By default, VIC assumes grid cells are flat.
 *   [(Optional) Lake/Wetland Parameter File](LakeParam.md): File containing lake model parameters. By default, VIC does not simulate lakes or other impoundment of surface water.
-*   [Vegetation Timeseries Files](ForcingData.md#VegHist): VIC can take daily timeseries of vegetation phenology variables (LAI, albedo, partial vegetation cover fraction) as inputs.
+*   [Vegetation Timeseries Files](ForcingData.md): VIC can take daily timeseries of vegetation phenology variables (LAI, albedo, partial vegetation cover fraction) as inputs.
 
 Typically a few key parameters in the [Soil Parameter File](SoilParam.md) are [calibrated](Calibration.md). Some parameters in the [Lake/Wetland Parameter File](LakeParam.md) are also [calibrated](Calibration.md).

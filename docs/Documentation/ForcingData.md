@@ -39,7 +39,7 @@ As of release 4.1.2, we have fixed inconsistencies (present in all previous rele
 
 Therefore, if mixing daily and sub-daily forcing inputs, it is important that any sub-daily forcing inputs be shifted as necessary to be in the time zone indicated by off_gmt.
 
-In all cases, the user must list the variables contained in the forcing files, by their names (listed below) and in the exact order in which they appear in the forcing files. This is done in the [global parameter file](GlobalParam.md) using the [FORCE_TYPE](FORCETYPE.md) parameter.
+In all cases, the user must list the variables contained in the forcing files, by their names ([listed here](InputVarList.md)) and in the exact order in which they appear in the forcing files. This is done in the [global parameter file](GlobalParam.md) using the [FORCE_TYPE](FORCETYPE.md) parameter.
 
 Forcing data files can be in short-int Binary or ASCII column formats. Details are below. Three examples of file type definitions are provided below using a standard daily input file containing precipitation, daily maximum and minimum air temperature and wind speed:
 

@@ -99,7 +99,7 @@ print_usage(char *executable)
     fprintf(stdout, "  v: display version information\n");
     fprintf(stdout,
             "  o: display compile-time options settings"
-            " (set in vicNl_def.h)\n");
+            " (set in .h files)\n");
     fprintf(stdout,
             "  g: read model parameters from <global_parameter_file>.\n");
     fprintf(stdout,

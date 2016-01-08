@@ -33,12 +33,12 @@
  *****************************************************************************/
 int
 get_nc_varndimensions(char *nc_name,
-                 char *var_name)
+                      char *var_name)
 {
-    int    nc_id;
-    int    var_id;
-    int    ndims;
-    int    status;
+    int nc_id;
+    int var_id;
+    int ndims;
+    int status;
 
     // open the netcdf file
     status = nc_open(nc_name, NC_NOWRITE, &nc_id);

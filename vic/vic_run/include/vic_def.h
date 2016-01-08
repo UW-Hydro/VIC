@@ -60,7 +60,7 @@
 #define MIN_VEGCOVER    0.0001 /**< Minimum allowable vegcover fraction */
 
 /***** Define minimum and maximum values for model timesteps *****/
-#define MIN_SUBDAILY_STEPS_PER_DAY  1
+#define MIN_SUBDAILY_STEPS_PER_DAY  4
 #define MAX_SUBDAILY_STEPS_PER_DAY  1440
 
 /***** Potential Evap types *****/

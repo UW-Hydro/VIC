@@ -175,16 +175,30 @@ initialize_history_file(nc_file_struct *nc)
         log_err("Error defining nlayer dimenension in %s", nc->fname);
     }
 
-    status =
-        nc_def_dim(nc->nc_id, options.DOMAIN_LON_VAR, nc->ni_size,
+    if (options.COORD_DIMS_OUT == 1) {
+        status =
+            nc_def_dim(nc->nc_id, "lon", nc->ni_size,
+                       &(nc->ni_dimid));
+    }
+    else {
+        nc_def_dim(nc->nc_id, "ni", nc->ni_size,
                    &(nc->ni_dimid));
+    }
+
     if (status != NC_NOERR) {
         log_err("Error defining ni dimenension in %s", nc->fname);
     }
 
-    status =
-        nc_def_dim(nc->nc_id, options.DOMAIN_LAT_VAR, nc->nj_size,
-                   &(nc->nj_dimid));
+    if (options.COORD_DIMS_OUT == 1) {
+        status =
+            nc_def_dim(nc->nc_id, "lat", nc->nj_size,
+                       &(nc->nj_dimid));
+    }
+    else {
+        status =
+            nc_def_dim(nc->nc_id, "nj", nc->nj_size,
+                       &(nc->nj_dimid));
+    }
     if (status != NC_NOERR) {
         log_err("Error defining nj dimenension in %s", nc->fname);
     }

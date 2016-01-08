@@ -42,6 +42,7 @@ vic_write(void)
     extern nc_file_struct      nc_hist_file;
     extern nc_var_struct       nc_vars[N_OUTVAR_TYPES];
     extern size_t              current;
+    extern int                 mpi_rank;
     int                        dimids[MAXDIMS];
     size_t                     i;
     size_t                     j;
@@ -129,11 +130,13 @@ vic_write(void)
                        global_param.calendar, global_param.time_units);
 
     // write to file
-    put_nc_field_double(nc_hist_file.fname, &(nc_hist_file.open),
-                        &(nc_hist_file.nc_id),
-                        nc_hist_file.d_fillvalue,
-                        dimids, 1, "time",
-                        dstart, dcount, dvar);
+    if (mpi_rank == 0) {
+        put_nc_field_double(nc_hist_file.fname, &(nc_hist_file.open),
+                            &(nc_hist_file.nc_id),
+                            nc_hist_file.d_fillvalue,
+                            dimids, 1, "time",
+                            dstart, dcount, dvar);
+    }
 
     // free memory
     free(dvar);

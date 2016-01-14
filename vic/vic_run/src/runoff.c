@@ -39,7 +39,6 @@ runoff(cell_data_struct  *cell,
        soil_con_struct   *soil_con,
        double             ppt,
        double            *frost_fract,
-       double             dt,
        int                Nnodes)
 {
     extern option_struct       options;
@@ -98,12 +97,15 @@ runoff(cell_data_struct  *cell,
     cell->baseflow = 0;
     cell->asat = 0;
 
+    runoff_steps_per_dt = global_param.runoff_steps_per_day /
+                          global_param.model_steps_per_day;
+
     for (frost_area = 0; frost_area < options.Nfrost; frost_area++) {
         baseflow[frost_area] = 0;
     }
 
     for (lindex = 0; lindex < options.Nlayer; lindex++) {
-        evap[lindex][0] = layer[lindex].evap / dt;
+        evap[lindex][0] = layer[lindex].evap / (double) runoff_steps_per_dt;
         org_moist[lindex] = layer[lindex].moist;
         layer[lindex].moist = 0;
         if (evap[lindex][0] > 0) { // if there is positive evaporation
@@ -190,14 +192,12 @@ runoff(cell_data_struct  *cell,
 
         // save dt_runoff based on initial runoff estimate,
         // since we will modify total runoff below for the case of completely saturated soil
-        tmp_dt_runoff[frost_area] = runoff[frost_area] / dt;
+        tmp_dt_runoff[frost_area] = runoff[frost_area] /
+                                    (double) runoff_steps_per_dt;
 
         /**************************************************
            Compute Flow Between Soil Layers ()
         **************************************************/
-
-        runoff_steps_per_dt = global_param.runoff_steps_per_day /
-                              global_param.model_steps_per_day;
 
         dt_inflow = inflow / (double) runoff_steps_per_dt;
 

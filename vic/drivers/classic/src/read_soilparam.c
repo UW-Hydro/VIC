@@ -258,7 +258,7 @@ read_soilparam(FILE *soilparam,
         /* round soil layer thicknesses to nearest mm */
         for (layer = 0; layer < options.Nlayer; layer++) {
             temp.depth[layer] =
-                round(temp.depth[layer] * MM_PER_M + 0.5) / MM_PER_M;
+                round(temp.depth[layer] * MM_PER_M) / MM_PER_M;
         }
 
         /* read average soil temperature */

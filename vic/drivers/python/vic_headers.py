@@ -453,11 +453,15 @@ typedef struct {
     double EMISS_ICE;
     double EMISS_SNOW;
     double EMISS_H2O;
+    double SOIL_RARC;
     double SOIL_RESID_MOIST;
     double SOIL_SLAB_MOIST_FRACT;
+    double SOIL_WINDH;
     double VEG_LAI_SNOW_MULTIPLIER;
     double VEG_MIN_INTERCEPTION_STORAGE;
     double VEG_LAI_WATER_FACTOR;
+    double VEG_RATIO_DH_HEIGHT;
+    double VEG_RATIO_RL_HEIGHT;
     double CANOPY_CLOSURE;
     double CANOPY_RSMAX;
     double CANOPY_VPDMINFACTOR;

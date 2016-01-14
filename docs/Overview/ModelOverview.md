@@ -89,7 +89,7 @@ These forcings must be provided at the timestep that the model will be run at (e
 
 ### Non-Meteorological Input Data
 
-Can read daily timeseries of land cover information such as albedo, LAI, and partial vegetation cover fraction as forcing variables ([Bohn and Vivoni, in review](../Documentation/References.md#other-historical-references)).
+Can read daily timeseries of land cover information such as albedo, LAI, and partial vegetation cover fraction as forcing variables ([Bohn and Vivoni, accepted](../Documentation/References.md#other-historical-references)).
 
 ### Elevation Bands
 

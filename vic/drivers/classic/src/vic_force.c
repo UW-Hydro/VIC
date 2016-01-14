@@ -36,7 +36,6 @@ void
 vic_force(atmos_data_struct *atmos,
           dmy_struct        *dmy,
           FILE             **infile,
-          veg_lib_struct    *veg_lib,
           veg_con_struct    *veg_con,
           veg_hist_struct  **veg_hist,
           soil_con_struct   *soil_con)
@@ -208,8 +207,11 @@ vic_force(atmos_data_struct *atmos,
         for (v = 0; v < veg_con[0].vegetat_type_num; v++) {
             for (i = 0; i < NF; i++) {
                 veg_hist[rec][v].albedo[i] =
-                    veg_lib[veg_con[v].veg_class].albedo[dmy[rec].month -
-                                                         1];
+                    veg_con[v].albedo[dmy[rec].month - 1];
+                veg_hist[rec][v].LAI[i] =
+                    veg_con[v].LAI[dmy[rec].month - 1];
+                veg_hist[rec][v].vegcover[i] =
+                    veg_con[v].vegcover[dmy[rec].month - 1];
             }
         }
     }

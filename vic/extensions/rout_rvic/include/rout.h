@@ -28,6 +28,8 @@
 
 #include <vic_def.h>
 
+#define EXT_ROUTING "RVIC"
+
 /******************************************************************************
  * @brief   Routing Structs
  *****************************************************************************/
@@ -47,8 +49,8 @@ typedef struct {
  * @brief   main routing Struct
  *****************************************************************************/
 typedef struct {
-    char                param_filename[MAXSTRING]; 
-    rout_param_struct   rout_param; 
+    char                param_filename[MAXSTRING];
+    rout_param_struct   rout_param;
     double             *ring;
 } rout_struct;
 

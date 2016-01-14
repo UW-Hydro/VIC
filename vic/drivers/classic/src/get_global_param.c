@@ -369,54 +369,6 @@ get_global_param(FILE *gp)
                     options.GRND_FLUX_TYPE = GF_410;
                 }
             }
-            else if (strcasecmp("LW_TYPE", optstr) == 0) {
-                sscanf(cmdstr, "%*s %s", flgstr);
-                if (strcasecmp("LW_TVA", flgstr) == 0) {
-                    options.LW_TYPE = LW_TVA;
-                }
-                else if (strcasecmp("LW_ANDERSON", flgstr) == 0) {
-                    options.LW_TYPE = LW_ANDERSON;
-                }
-                else if (strcasecmp("LW_BRUTSAERT", flgstr) == 0) {
-                    options.LW_TYPE = LW_BRUTSAERT;
-                }
-                else if (strcasecmp("LW_SATTERLUND", flgstr) == 0) {
-                    options.LW_TYPE = LW_SATTERLUND;
-                }
-                else if (strcasecmp("LW_IDSO", flgstr) == 0) {
-                    options.LW_TYPE = LW_IDSO;
-                }
-                else if (strcasecmp("LW_PRATA", flgstr) == 0) {
-                    options.LW_TYPE = LW_PRATA;
-                }
-            }
-            else if (strcasecmp("LW_CLOUD", optstr) == 0) {
-                sscanf(cmdstr, "%*s %s", flgstr);
-                if (strcasecmp("LW_CLOUD_DEARDORFF", flgstr) == 0) {
-                    options.LW_CLOUD = LW_CLOUD_DEARDORFF;
-                }
-                else {
-                    options.LW_CLOUD = LW_CLOUD_BRAS;
-                }
-            }
-            else if (strcasecmp("MTCLIM_SWE_CORR", optstr) == 0) {
-                sscanf(cmdstr, "%*s %s", flgstr);
-                if (strcasecmp("TRUE", flgstr) == 0) {
-                    options.MTCLIM_SWE_CORR = true;
-                }
-                else {
-                    options.MTCLIM_SWE_CORR = false;
-                }
-            }
-            else if (strcasecmp("PLAPSE", optstr) == 0) {
-                sscanf(cmdstr, "%*s %s", flgstr);
-                if (strcasecmp("FALSE", flgstr) == 0) {
-                    options.PLAPSE = false;
-                }
-                else {
-                    options.PLAPSE = true;
-                }
-            }
             else if (strcasecmp("SPATIAL_FROST", optstr) == 0) {
                 sscanf(cmdstr, "%*s %s %s", flgstr, flgstr2);
                 if (strcasecmp("TRUE", flgstr) == 0) {
@@ -443,33 +395,6 @@ get_global_param(FILE *gp)
                 }
                 else {
                     options.TFALLBACK = false;
-                }
-            }
-            else if (strcasecmp("VP_INTERP", optstr) == 0) {
-                sscanf(cmdstr, "%*s %s", flgstr);
-                if (strcasecmp("TRUE", flgstr) == 0) {
-                    options.VP_INTERP = true;
-                }
-                else {
-                    options.VP_INTERP = false;
-                }
-            }
-            else if (strcasecmp("VP_ITER", optstr) == 0) {
-                sscanf(cmdstr, "%*s %s", flgstr);
-                if (strcasecmp("VP_ITER_NONE", flgstr) == 0) {
-                    options.VP_ITER = VP_ITER_NONE;
-                }
-                if (strcasecmp("VP_ITER_ALWAYS", flgstr) == 0) {
-                    options.VP_ITER = VP_ITER_ALWAYS;
-                }
-                if (strcasecmp("VP_ITER_ANNUAL", flgstr) == 0) {
-                    options.VP_ITER = VP_ITER_ANNUAL;
-                }
-                if (strcasecmp("VP_ITER_CONVERGE", flgstr) == 0) {
-                    options.VP_ITER = VP_ITER_CONVERGE;
-                }
-                else {
-                    options.VP_INTERP = VP_ITER_ALWAYS;
                 }
             }
             else if (strcasecmp("SHARE_LAYER_MOIST", optstr) == 0) {
@@ -621,12 +546,6 @@ get_global_param(FILE *gp)
             }
             else if (strcasecmp("WIND_H", optstr) == 0) {
                 sscanf(cmdstr, "%*s %lf", &global_param.wind_h);
-            }
-            else if (strcasecmp("ALMA_INPUT", optstr) == 0) {
-                sscanf(cmdstr, "%*s %s", flgstr);
-                if (strcasecmp("TRUE", flgstr) == 0) {
-                    options.ALMA_INPUT = true;
-                }
             }
 
             /*************************************
@@ -873,15 +792,6 @@ get_global_param(FILE *gp)
                     options.MOISTFRACT = false;
                 }
             }
-            else if (strcasecmp("OUTPUT_FORCE", optstr) == 0) {
-                sscanf(cmdstr, "%*s %s", flgstr);
-                if (strcasecmp("TRUE", flgstr) == 0) {
-                    options.OUTPUT_FORCE = true;
-                }
-                else {
-                    options.OUTPUT_FORCE = false;
-                }
-            }
             else if (strcasecmp("PRT_HEADER", optstr) == 0) {
                 sscanf(cmdstr, "%*s %s", flgstr);
                 if (strcasecmp("TRUE", flgstr) == 0) {
@@ -1030,46 +940,44 @@ get_global_param(FILE *gp)
     }
 
     // Validate runoff time step
-    if (!options.OUTPUT_FORCE) {
-        if (global_param.runoff_steps_per_day == 0) {
-            log_err("Runoff time steps per day has not been defined.  Make "
-                    "sure that the global file defines RUNOFF_STEPS_PER_DAY.");
-        }
-        else if (global_param.runoff_steps_per_day <
-                 MIN_SUBDAILY_STEPS_PER_DAY) {
-            log_err("The specified number of runoff steps per day (%zu) < "
-                    "the minimum number of subdaily steps per day (%d).  Make "
-                    "sure that the global file defines RUNOFF_STEPS_PER_DAY of at "
-                    "least (%d).", global_param.runoff_steps_per_day,
-                    MIN_SUBDAILY_STEPS_PER_DAY,
-                    MIN_SUBDAILY_STEPS_PER_DAY);
-        }
-        else if (global_param.runoff_steps_per_day > HOURS_PER_DAY &&
-                 global_param.runoff_steps_per_day % HOURS_PER_DAY != 0) {
-            log_err("The specified number of runoff steps per day (%zu) is > "
-                    "24 and is not evenly divided by 24.",
-                    global_param.runoff_steps_per_day);
-        }
-        else if (global_param.runoff_steps_per_day >
-                 MAX_SUBDAILY_STEPS_PER_DAY) {
-            log_err("The specified number of runoff steps per day (%zu) > the "
-                    "the maximum number of subdaily steps per day (%d).  Make "
-                    "sure that the global file defines RUNOFF_STEPS_PER_DAY of at "
-                    "most (%d).", global_param.runoff_steps_per_day,
-                    MAX_SUBDAILY_STEPS_PER_DAY,
-                    MAX_SUBDAILY_STEPS_PER_DAY);
-        }
-        else if (global_param.runoff_steps_per_day %
-                 global_param.model_steps_per_day != 0) {
-            log_err("The specified number of runoff timesteps (%zu) must be "
-                    "evenly divisible by the number of model timesteps per day "
-                    "(%zu)", global_param.runoff_steps_per_day,
-                    global_param.model_steps_per_day);
-        }
-        else {
-            global_param.runoff_dt = SEC_PER_DAY /
-                                     (double) global_param.runoff_steps_per_day;
-        }
+    if (global_param.runoff_steps_per_day == 0) {
+        log_err("Runoff time steps per day has not been defined.  Make "
+                "sure that the global file defines RUNOFF_STEPS_PER_DAY.");
+    }
+    else if (global_param.runoff_steps_per_day <
+             MIN_SUBDAILY_STEPS_PER_DAY) {
+        log_err("The specified number of runoff steps per day (%zu) < "
+                "the minimum number of subdaily steps per day (%d).  Make "
+                "sure that the global file defines RUNOFF_STEPS_PER_DAY of at "
+                "least (%d).", global_param.runoff_steps_per_day,
+                MIN_SUBDAILY_STEPS_PER_DAY,
+                MIN_SUBDAILY_STEPS_PER_DAY);
+    }
+    else if (global_param.runoff_steps_per_day > HOURS_PER_DAY &&
+             global_param.runoff_steps_per_day % HOURS_PER_DAY != 0) {
+        log_err("The specified number of runoff steps per day (%zu) is > "
+                "24 and is not evenly divided by 24.",
+                global_param.runoff_steps_per_day);
+    }
+    else if (global_param.runoff_steps_per_day >
+             MAX_SUBDAILY_STEPS_PER_DAY) {
+        log_err("The specified number of runoff steps per day (%zu) > the "
+                "the maximum number of subdaily steps per day (%d).  Make "
+                "sure that the global file defines RUNOFF_STEPS_PER_DAY of at "
+                "most (%d).", global_param.runoff_steps_per_day,
+                MAX_SUBDAILY_STEPS_PER_DAY,
+                MAX_SUBDAILY_STEPS_PER_DAY);
+    }
+    else if (global_param.runoff_steps_per_day %
+             global_param.model_steps_per_day != 0) {
+        log_err("The specified number of runoff timesteps (%zu) must be "
+                "evenly divisible by the number of model timesteps per day "
+                "(%zu)", global_param.runoff_steps_per_day,
+                global_param.model_steps_per_day);
+    }
+    else {
+        global_param.runoff_dt = SEC_PER_DAY /
+                                 (double) global_param.runoff_steps_per_day;
     }
     // Validate atmos time step
     if (global_param.atmos_steps_per_day == 0) {
@@ -1279,6 +1187,10 @@ get_global_param(FILE *gp)
                         "defined.  Make sure that the global file defines "
                         "FORCE_STEPS_PER_DAY.", i);
             }
+            if (param_set.force_steps_per_day[i] !=
+                global_param.snow_steps_per_day) {
+                log_err("FORCE_STEPS_PER_DAY must match SNOW_STEPS_PER_DAY");
+            }
             else {
                 param_set.FORCE_DT[i] = SEC_PER_DAY /
                                         (double) param_set.force_steps_per_day[i
@@ -1310,252 +1222,310 @@ get_global_param(FILE *gp)
     }
 
     /*******************************************************************************
-       Validate parameters required for normal simulations but NOT for OUTPUT_FORCE
+       Validate parameters required for normal simulations
     *******************************************************************************/
 
-    if (!options.OUTPUT_FORCE) {
-        // Validate veg parameter information
-        if (strcmp(filenames.veg, "MISSING") == 0) {
-            log_err("No vegetation parameter file has been defined.  Make "
-                    "sure that the global file defines the vegetation "
-                    "parameter file on the line that begins with "
-                    "\"VEGPARAM\".");
+    // Validate veg parameter information
+    if (strcmp(filenames.veg, "MISSING") == 0) {
+        log_err("No vegetation parameter file has been defined.  Make "
+                "sure that the global file defines the vegetation "
+                "parameter file on the line that begins with "
+                "\"VEGPARAM\".");
+    }
+    if (strcmp(filenames.veglib, "MISSING") == 0) {
+        log_err(
+            "No vegetation library file has been defined.  Make sure that "
+            "the global file defines the vegetation library file on the "
+            "line that begins with \"VEGLIB\".");
+    }
+    if (options.ROOT_ZONES == 0) {
+        log_err("ROOT_ZONES must be defined to a positive integer greater "
+                "than 0, in the global control file.");
+    }
+    if (options.LAI_SRC == LAI_FROM_VEGPARAM && !options.VEGPARAM_LAI) {
+        log_err("\"LAI_SRC\" was specified as \"LAI_FROM_VEGPARAM\", but "
+                "\"VEGPARAM_LAI\" was set to \"FALSE\" in the global "
+                "parameter file.  If you want VIC to read LAI values from "
+                "the vegparam file, you MUST make sure the veg param file "
+                "contains 1 line of 12 monthly LAI values for EACH veg "
+                "tile in EACH grid cell, and you MUST specify "
+                "\"VEGPARAM_LAI\" as \"TRUE\" in the global parameter "
+                "file.  Alternatively, if you want VIC to read LAI values "
+                "from the veg library file, set \"LAI_SRC\" to "
+                "\"LAI_FROM_VEGLIB\" in the global parameter file.  In "
+                "either case, the setting of \"VEGPARAM_LAI\" must be "
+                "consistent with the contents of the veg param file (i.e. "
+                "whether or not it contains LAI values).");
+    }
+    if (options.LAI_SRC == FROM_VEGPARAM && !options.VEGPARAM_LAI) {
+        log_err("\"LAI_SRC\" was specified as \"FROM_VEGPARAM\", but "
+                "\"VEGPARAM_LAI\" was set to \"FALSE\" in the global "
+                "parameter file.  If you want VIC to read LAI values from "
+                "the vegparam file, you MUST make sure the veg param file "
+                "contains 1 line of 12 monthly LAI values for EACH veg "
+                "tile in EACH grid cell, and you MUST specify "
+                "\"VEGPARAM_LAI\" as \"TRUE\" in the global parameter "
+                "file.  Alternatively, if you want VIC to read LAI values "
+                "from the veg library file, set \"LAI_SRC\" to "
+                "\"FROM_VEGLIB\" in the global parameter file.  In "
+                "either case, the setting of \"VEGPARAM_LAI\" must be "
+                "consistent with the contents of the veg param file (i.e. "
+                "whether or not it contains LAI values).");
+    }
+    if (options.ALB_SRC == FROM_VEGPARAM && !options.VEGPARAM_ALB) {
+        log_err("\"ALB_SRC\" was specified as \"FROM_VEGPARAM\", but "
+                "\"VEGPARAM_ALB\" was set to \"FALSE\" in the global "
+                "parameter file.  If you want VIC to read albedo values from "
+                "the vegparam file, you MUST make sure the veg param file "
+                "contains 1 line of 12 monthly albedo values for EACH veg "
+                "tile in EACH grid cell, and you MUST specify "
+                "\"VEGPARAM_ALB\" as \"TRUE\" in the global parameter "
+                "file.  Alternatively, if you want VIC to read albedo values "
+                "from the veg library file, set \"ALB_SRC\" to "
+                "\"FROM_VEGLIB\" in the global parameter file.  In "
+                "either case, the setting of \"VEGPARAM_ALB\" must be "
+                "consistent with the contents of the veg param file (i.e. "
+                "whether or not it contains albedo values).");
+    }
+    if (options.VEGCOVER_SRC == FROM_VEGPARAM && !options.VEGPARAM_VEGCOVER) {
+        log_err("\"VEGCOVER_SRC\" was specified as \"FROM_VEGPARAM\", but "
+                "\"VEGPARAM_VEGCOVER\" was set to \"FALSE\" in the global "
+                "parameter file.  If you want VIC to read vegcover values from "
+                "the vegparam file, you MUST make sure the veg param file "
+                "contains 1 line of 12 monthly vegcover values for EACH veg "
+                "tile in EACH grid cell, and you MUST specify "
+                "\"VEGPARAM_VEGCOVER\" as \"TRUE\" in the global parameter "
+                "file.  Alternatively, if you want VIC to read vegcover values "
+                "from the veg library file, set \"VEGCOVER_SRC\" to "
+                "\"FROM_VEGLIB\" in the global parameter file.  In "
+                "either case, the setting of \"VEGPARAM_VEGCOVER\" must be "
+                "consistent with the contents of the veg param file (i.e. "
+                "whether or not it contains vegcover values).");
+    }
+    if (options.VEGCOVER_SRC == FROM_VEGLIB && !options.VEGLIB_VEGCOVER) {
+        log_err("\"VEGCOVER_SRC\" was specified as \"FROM_VEGLIB\", but "
+                "\"VEGLIB_VEGCOVER\" was set to \"FALSE\" in the global "
+                "parameter file.  If you want VIC to read vegcover values from "
+                "the veglib file, you MUST make sure the veg lib file "
+                "contains 1 line of 12 monthly vegcover values for EACH veg "
+                "class, and you MUST specify "
+                "\"VEGLIB_VEGCOVER\" as \"TRUE\" in the global parameter "
+                "file.  Alternatively, if you want VIC to read vegcover values "
+                "from the veg param file, set \"VEGCOVER_SRC\" to "
+                "\"FROM_VEGPARAM\" in the global parameter file.  In "
+                "either case, the setting of \"VEGLIB_VEGCOVER\" must be "
+                "consistent with the contents of the veg lib file (i.e. "
+                "whether or not it contains vegcover values).");
+    }
+
+    // Validate SPATIAL_FROST information
+    if (options.SPATIAL_FROST) {
+        if (options.Nfrost > MAX_FROST_AREAS) {
+            log_err("\"SPATIAL_FROST\" was specified with %zu frost "
+                    "subareas, which is greater than the maximum of %d.",
+                    options.Nfrost, MAX_FROST_AREAS);
         }
-        if (strcmp(filenames.veglib, "MISSING") == 0) {
+        if (options.Nfrost < 1) {
+            log_err("\"SPATIAL_FROST\" was specified with %zu frost "
+                    "subareas, which is less than the mainmum of 1.",
+                    options.Nfrost);
+        }
+    }
+
+    // Carbon-cycling options
+    if (!options.CARBON) {
+        if (options.RC_MODE == RC_PHOTO) {
+            log_warn("If CARBON==FALSE, RC_MODE must be set to "
+                     "RC_JARVIS.  Setting RC_MODE to set to RC_JARVIS.");
+            options.RC_MODE = RC_JARVIS;
+        }
+    }
+    else {
+        if (!options.VEGLIB_PHOTO) {
+            log_err("Currently, CARBON==TRUE and VEGLIB_PHOTO==FALSE.  If "
+                    "CARBON==TRUE, VEGLIB_PHOTO must be set to TRUE and "
+                    "carbon-specific veg parameters must be listed in "
+                    "your veg library file.");
+        }
+    }
+
+    // Validate the elevation band file information
+    if (options.SNOW_BAND > 1) {
+        if (strcmp(filenames.snowband, "MISSING") == 0) {
+            log_err("\"SNOW_BAND\" was specified with %zu elevation bands, "
+                    "but no elevation band file has been defined.  Make "
+                    "sure that the global file defines the elevation band "
+                    "file on the line that begins with \"SNOW_BAND\" "
+                    "(after the number of bands).", options.SNOW_BAND);
+        }
+        if (options.SNOW_BAND > MAX_BANDS) {
+            log_err("Global file wants more snow bands (%zu) than are "
+                    "defined by MAX_BANDS (%d).  Edit vic_run/include/vic_def.h "
+                    "and recompile.", options.SNOW_BAND,
+                    MAX_BANDS);
+        }
+    }
+    else if (options.SNOW_BAND <= 0) {
+        log_err("Invalid number of elevation bands specified in global "
+                "file (%zu).  Number of bands must be >= 1.",
+                options.SNOW_BAND);
+    }
+
+    // Validate the input state file information
+    if (options.INIT_STATE) {
+        if (strcmp(filenames.init_state, "MISSING") == 0) {
             log_err(
-                "No vegetation library file has been defined.  Make sure that "
-                "the global file defines the vegetation library file on the "
-                "line that begins with \"VEGLIB\".");
+                "\"INIT_STATE\" was specified, but no input state file "
+                "has been defined.  Make sure that the global file "
+                "defines the inputstate file on the line that begins with "
+                "\"INIT_STATE\".");
         }
-        if (options.ROOT_ZONES == 0) {
-            log_err("ROOT_ZONES must be defined to a positive integer greater "
-                    "than 0, in the global control file.");
-        }
-        if (options.LAI_SRC == LAI_FROM_VEGPARAM && !options.VEGPARAM_LAI) {
-            log_err("\"LAI_SRC\" was specified as \"LAI_FROM_VEGPARAM\", but "
-                    "\"VEGPARAM_LAI\" was set to \"FALSE\" in the global "
-                    "parameter file.  If you want VIC to read LAI values from "
-                    "the vegparam file, you MUST make sure the veg param file "
-                    "contains 1 line of 12 monthly LAI values for EACH veg "
-                    "tile in EACH grid cell, and you MUST specify "
-                    "\"VEGPARAM_LAI\" as \"TRUE\" in the global parameter "
-                    "file.  Alternatively, if you want VIC to read LAI values "
-                    "from the veg library file, set \"LAI_SRC\" ro "
-                    "\"LAI_FROM_VEGLIB\" in the global parameter file.  In "
-                    "either case, the setting of \"VEGPARAM_LAI\" must be "
-                    "consistent with the contents of the veg param file (i.e. "
-                    "whether or not it contains LAI values).");
-        }
+    }
 
-        // Validate SPATIAL_FROST information
-        if (options.SPATIAL_FROST) {
-            if (options.Nfrost > MAX_FROST_AREAS) {
-                log_err("\"SPATIAL_FROST\" was specified with %zu frost "
-                        "subareas, which is greater than the maximum of %d.",
-                        options.Nfrost, MAX_FROST_AREAS);
-            }
-            if (options.Nfrost < 1) {
-                log_err("\"SPATIAL_FROST\" was specified with %zu frost "
-                        "subareas, which is less than the mainmum of 1.",
-                        options.Nfrost);
-            }
+    // Validate the output state file information
+    if (options.SAVE_STATE) {
+        if (strcmp(filenames.statefile, "MISSING") == 0) {
+            log_err(
+                "\"SAVE_STATE\" was specified, but no output state file "
+                "has been defined.  Make sure that the global file "
+                "defines the output state file on the line that begins "
+                "with \"SAVE_STATE\".");
         }
+        if (global_param.stateyear == 0 || global_param.statemonth == 0 ||
+            global_param.stateday == 0) {
+            log_err("Incomplete specification of the date to save state "
+                    "for state file (%s).  Specified date (yyyy-mm-dd): "
+                    "%04d-%02d-%02d Make sure STATEYEAR, STATEMONTH, and "
+                    "STATEDAY are set correctly in your global parameter "
+                    "file.", filenames.statefile, global_param.stateyear,
+                    global_param.statemonth, global_param.stateday);
+        }
+        // Check for month, day in range
+        make_lastday(global_param.stateyear, global_param.calendar,
+                     lastday);
+        if (global_param.stateday > lastday[global_param.statemonth - 1] ||
+            global_param.statemonth > MONTHS_PER_YEAR ||
+            global_param.statemonth < 1 ||
+            global_param.stateday < 1) {
+            log_err("Unusual specification of the date to save state for "
+                    "state file (%s).  Specified date (yyyy-mm-dd): "
+                    "%04d-%02d-%02d Make sure STATEYEAR, STATEMONTH, and "
+                    "STATEDAY are set correctly in your global parameter "
+                    "file.", filenames.statefile, global_param.stateyear,
+                    global_param.statemonth, global_param.stateday);
+        }
+    }
+    // Set the statename here to be able to compare with INIT_STATE name
+    if (options.SAVE_STATE) {
+        sprintf(filenames.statefile, "%s_%04i%02i%02i", filenames.statefile,
+                global_param.stateyear, global_param.statemonth,
+                global_param.stateday);
+    }
+    if (options.INIT_STATE && options.SAVE_STATE &&
+        (strcmp(filenames.init_state, filenames.statefile) == 0)) {
+        log_err("The save state file (%s) has the same name as the "
+                "initialize state file (%s).  The initialize state file "
+                "will be destroyed when the save state file is opened.",
+                filenames.statefile, filenames.init_state);
+    }
 
-        // Carbon-cycling options
-        if (!options.CARBON) {
-            if (options.RC_MODE == RC_PHOTO) {
-                log_warn("If CARBON==FALSE, RC_MODE must be set to "
-                         "RC_JARVIS.  Setting RC_MODE to set to RC_JARVIS.");
-                options.RC_MODE = RC_JARVIS;
-            }
+    // Validate soil parameter/simulation mode combinations
+    if (options.QUICK_FLUX) {
+        if (options.Nnode != 3) {
+            log_warn("To run the model QUICK_FLUX=TRUE, you must "
+                     "define exactly 3 soil thermal nodes.  Currently "
+                     "Nnodes is set to %zu.  Setting Nnodes to 3.",
+                     options.Nnode);
+            options.Nnode = 3;
         }
-        else {
-            if (!options.VEGLIB_PHOTO) {
-                log_err("Currently, CARBON==TRUE and VEGLIB_PHOTO==FALSE.  If "
-                        "CARBON==TRUE, VEGLIB_PHOTO must be set to TRUE and "
-                        "carbon-specific veg parameters must be listed in "
-                        "your veg library file.");
-            }
+        if (options.IMPLICIT || options.EXP_TRANS) {
+            log_err("To run the model with QUICK_FLUX=TRUE, you cannot "
+                    "have IMPLICIT=TRUE or EXP_TRANS=TRUE.");
         }
+    }
+    else {
+        if (!options.FULL_ENERGY && !options.FROZEN_SOIL) {
+            log_err("To run the model in water balance mode (both "
+                    "FULL_ENERGY and FROZEN_SOIL are FALSE) you MUST set "
+                    "QUICK_FLUX to TRUE (or leave QUICK_FLUX out of your "
+                    "global parameter file).");
+        }
+    }
+    if (options.QUICK_SOLVE && !options.QUICK_FLUX) {
+        if (options.NOFLUX) {
+            log_err("NOFLUX must be set to FALSE when QUICK_SOLVE=TRUE "
+                    "and QUICK_FLUX=FALSE");
+        }
+        if (options.EXP_TRANS) {
+            log_err("EXP_TRANS must be set to FALSE when QUICK_SOLVE=TRUE "
+                    "and QUICK_FLUX=FALSE");
+        }
+    }
+    if ((options.FULL_ENERGY ||
+         options.FROZEN_SOIL) && options.Nlayer < 3) {
+        log_err("You must define at least 3 soil moisture layers to run "
+                "the model in FULL_ENERGY or FROZEN_SOIL modes.  "
+                "Currently Nlayers is set to %zu.", options.Nlayer);
+    }
+    if ((!options.FULL_ENERGY &&
+         !options.FROZEN_SOIL) && options.Nlayer < 1) {
+        log_err("You must define at least 1 soil moisture layer to run "
+                "the model.  Currently Nlayers is set to  %zu.",
+                options.Nlayer);
+    }
+    if (options.Nlayer > MAX_LAYERS) {
+        log_err("Global file wants more soil moisture layers (%zu) than "
+                "are defined by MAX_LAYERS (%d).  Edit vic_run/include/vic_def.h "
+                "and recompile.", options.Nlayer,
+                MAX_LAYERS);
+    }
+    if (options.Nnode > MAX_NODES) {
+        log_err("Global file wants more soil thermal nodes (%zu) than are "
+                "defined by MAX_NODES (%d).  Edit vic_run/include/vic_def.h and "
+                "recompile.", options.Nnode,
+                MAX_NODES);
+    }
+    if (!options.FULL_ENERGY && options.CLOSE_ENERGY) {
+        log_err("CLOSE_ENERGY is TRUE but FULL_ENERGY is FALSE. Set "
+                "FULL_ENERGY to TRUE to run CLOSE_ENERGY, or set "
+                "CLOSE_ENERGY to FALSE.");
+    }
+    if (options.COMPUTE_TREELINE && !options.JULY_TAVG_SUPPLIED) {
+        log_err("COMPUTE_TREELINE is TRUE but JULY_TAVG_SUPPLIED is "
+                "FALSE. Set JULY_TAVG_SUPPLIED to TRUE and include July "
+                "Average Temperature in the soil parameter file to run "
+                "COMPUTE_TREELINE, or set both to FALSE.");
+    }
+    // Validate lake parameter information
+    if (options.LAKES) {
+        if (!options.FULL_ENERGY) {
+            log_err("FULL_ENERGY must be TRUE if the lake model is to be "
+                    "run.");
+        }
+        if (strcmp(filenames.lakeparam, "MISSING") == 0) {
+            log_err("\"LAKES\" was specified, but no lake parameter file "
+                    "has been defined.  Make sure that the global file defines "
+                    "the lake parameter file on the line that begins with "
+                    "\"LAKES\".");
+        }
+        if (global_param.resolution == 0) {
+            log_err("The model grid cell resolution (RESOLUTION) must be "
+                    "defined in the global control file when the lake "
+                    "model is active.");
+        }
+        if (global_param.resolution > 360 && !options.EQUAL_AREA) {
+            log_err("For EQUAL_AREA=FALSE, the model grid cell resolution "
+                    "(RESOLUTION) must be set to the number of lat or lon "
+                    "degrees per grid cell.  This cannot exceed 360.");
+        }
+        if (options.COMPUTE_TREELINE) {
+            log_err("LAKES = TRUE and COMPUTE_TREELINE = TRUE are "
+                    "incompatible options.");
+        }
+    }
 
-        // Validate the elevation band file information
-        if (options.SNOW_BAND > 1) {
-            if (strcmp(filenames.snowband, "MISSING") == 0) {
-                log_err("\"SNOW_BAND\" was specified with %zu elevation bands, "
-                        "but no elevation band file has been defined.  Make "
-                        "sure that the global file defines the elevation band "
-                        "file on the line that begins with \"SNOW_BAND\" "
-                        "(after the number of bands).", options.SNOW_BAND);
-            }
-            if (options.SNOW_BAND > MAX_BANDS) {
-                log_err("Global file wants more snow bands (%zu) than are "
-                        "defined by MAX_BANDS (%d).  Edit vic_run/include/vic_def.h "
-                        "and recompile.", options.SNOW_BAND,
-                        MAX_BANDS);
-            }
-        }
-        else if (options.SNOW_BAND <= 0) {
-            log_err("Invalid number of elevation bands specified in global "
-                    "file (%zu).  Number of bands must be >= 1.",
-                    options.SNOW_BAND);
-        }
-
-        // Validate the input state file information
-        if (options.INIT_STATE) {
-            if (strcmp(filenames.init_state, "MISSING") == 0) {
-                log_err(
-                    "\"INIT_STATE\" was specified, but no input state file "
-                    "has been defined.  Make sure that the global file "
-                    "defines the inputstate file on the line that begins with "
-                    "\"INIT_STATE\".");
-            }
-        }
-
-        // Validate the output state file information
-        if (options.SAVE_STATE) {
-            if (strcmp(filenames.statefile, "MISSING") == 0) {
-                log_err(
-                    "\"SAVE_STATE\" was specified, but no output state file "
-                    "has been defined.  Make sure that the global file "
-                    "defines the output state file on the line that begins "
-                    "with \"SAVE_STATE\".");
-            }
-            if (global_param.stateyear == 0 || global_param.statemonth == 0 ||
-                global_param.stateday == 0) {
-                log_err("Incomplete specification of the date to save state "
-                        "for state file (%s).  Specified date (yyyy-mm-dd): "
-                        "%04d-%02d-%02d Make sure STATEYEAR, STATEMONTH, and "
-                        "STATEDAY are set correctly in your global parameter "
-                        "file.", filenames.statefile, global_param.stateyear,
-                        global_param.statemonth, global_param.stateday);
-            }
-            // Check for month, day in range
-            make_lastday(global_param.stateyear, global_param.calendar,
-                         lastday);
-            if (global_param.stateday > lastday[global_param.statemonth - 1] ||
-                global_param.statemonth > MONTHS_PER_YEAR ||
-                global_param.statemonth < 1 ||
-                global_param.stateday < 1) {
-                log_err("Unusual specification of the date to save state for "
-                        "state file (%s).  Specified date (yyyy-mm-dd): "
-                        "%04d-%02d-%02d Make sure STATEYEAR, STATEMONTH, and "
-                        "STATEDAY are set correctly in your global parameter "
-                        "file.", filenames.statefile, global_param.stateyear,
-                        global_param.statemonth, global_param.stateday);
-            }
-        }
-        // Set the statename here to be able to compare with INIT_STATE name
-        if (options.SAVE_STATE) {
-            sprintf(filenames.statefile, "%s_%04i%02i%02i", filenames.statefile,
-                    global_param.stateyear, global_param.statemonth,
-                    global_param.stateday);
-        }
-        if (options.INIT_STATE && options.SAVE_STATE &&
-            (strcmp(filenames.init_state, filenames.statefile) == 0)) {
-            log_err("The save state file (%s) has the same name as the "
-                    "initialize state file (%s).  The initialize state file "
-                    "will be destroyed when the save state file is opened.",
-                    filenames.statefile, filenames.init_state);
-        }
-
-        // Validate soil parameter/simulation mode combinations
-        if (options.QUICK_FLUX) {
-            if (options.Nnode != 3) {
-                log_warn("To run the model QUICK_FLUX=TRUE, you must "
-                         "define exactly 3 soil thermal nodes.  Currently "
-                         "Nnodes is set to %zu.  Setting Nnodes to 3.",
-                         options.Nnode);
-                options.Nnode = 3;
-            }
-            if (options.IMPLICIT || options.EXP_TRANS) {
-                log_err("To run the model with QUICK_FLUX=TRUE, you cannot "
-                        "have IMPLICIT=TRUE or EXP_TRANS=TRUE.");
-            }
-        }
-        else {
-            if (!options.FULL_ENERGY && !options.FROZEN_SOIL) {
-                log_err("To run the model in water balance mode (both "
-                        "FULL_ENERGY and FROZEN_SOIL are FALSE) you MUST set "
-                        "QUICK_FLUX to TRUE (or leave QUICK_FLUX out of your "
-                        "global parameter file).");
-            }
-        }
-        if (options.QUICK_SOLVE && !options.QUICK_FLUX) {
-            if (options.NOFLUX) {
-                log_err("NOFLUX must be set to FALSE when QUICK_SOLVE=TRUE "
-                        "and QUICK_FLUX=FALSE");
-            }
-            if (options.EXP_TRANS) {
-                log_err("EXP_TRANS must be set to FALSE when QUICK_SOLVE=TRUE "
-                        "and QUICK_FLUX=FALSE");
-            }
-        }
-        if ((options.FULL_ENERGY ||
-             options.FROZEN_SOIL) && options.Nlayer < 3) {
-            log_err("You must define at least 3 soil moisture layers to run "
-                    "the model in FULL_ENERGY or FROZEN_SOIL modes.  "
-                    "Currently Nlayers is set to %zu.", options.Nlayer);
-        }
-        if ((!options.FULL_ENERGY &&
-             !options.FROZEN_SOIL) && options.Nlayer < 1) {
-            log_err("You must define at least 1 soil moisture layer to run "
-                    "the model.  Currently Nlayers is set to  %zu.",
-                    options.Nlayer);
-        }
-        if (options.Nlayer > MAX_LAYERS) {
-            log_err("Global file wants more soil moisture layers (%zu) than "
-                    "are defined by MAX_LAYERS (%d).  Edit vic_run/include/vic_def.h "
-                    "and recompile.", options.Nlayer,
-                    MAX_LAYERS);
-        }
-        if (options.Nnode > MAX_NODES) {
-            log_err("Global file wants more soil thermal nodes (%zu) than are "
-                    "defined by MAX_NODES (%d).  Edit vic_run/include/vic_def.h and "
-                    "recompile.", options.Nnode,
-                    MAX_NODES);
-        }
-        if (!options.FULL_ENERGY && options.CLOSE_ENERGY) {
-            log_err("CLOSE_ENERGY is TRUE but FULL_ENERGY is FALSE. Set "
-                    "FULL_ENERGY to TRUE to run CLOSE_ENERGY, or set "
-                    "CLOSE_ENERGY to FALSE.");
-        }
-        if (options.COMPUTE_TREELINE && !options.JULY_TAVG_SUPPLIED) {
-            log_err("COMPUTE_TREELINE is TRUE but JULY_TAVG_SUPPLIED is "
-                    "FALSE. Set JULY_TAVG_SUPPLIED to TRUE and include July "
-                    "Average Temperature in the soil parameter file to run "
-                    "COMPUTE_TREELINE, or set both to FALSE.");
-        }
-        // Validate lake parameter information
-        if (options.LAKES) {
-            if (!options.FULL_ENERGY) {
-                log_err("FULL_ENERGY must be TRUE if the lake model is to be "
-                        "run.");
-            }
-            if (strcmp(filenames.lakeparam, "MISSING") == 0) {
-                log_err("\"LAKES\" was specified, but no lake parameter file "
-                        "has been defined.  Make sure that the global file defines "
-                        "the lake parameter file on the line that begins with "
-                        "\"LAKES\".");
-            }
-            if (global_param.resolution == 0) {
-                log_err("The model grid cell resolution (RESOLUTION) must be "
-                        "defined in the global control file when the lake "
-                        "model is active.");
-            }
-            if (global_param.resolution > 360 && !options.EQUAL_AREA) {
-                log_err("For EQUAL_AREA=FALSE, the model grid cell resolution "
-                        "(RESOLUTION) must be set to the number of lat or lon "
-                        "degrees per grid cell.  This cannot exceed 360.");
-            }
-            if (options.COMPUTE_TREELINE) {
-                log_err("LAKES = TRUE and COMPUTE_TREELINE = TRUE are "
-                        "incompatible options.");
-            }
-        }
-
-        /*********************************
-           Output major options
-        *********************************/
-        display_current_settings(DISP_VERSION);
-    } // !OUTPUT_FORCE
+    /*********************************
+       Output major options
+    *********************************/
+    display_current_settings(DISP_VERSION);
 }

@@ -111,8 +111,6 @@ For daily output timestep, "hour" is not written.
 
 If BINARY_OUTPUT is TRUE, these will all be written as type int (OUT_TYPE_INT).
 
-If OUTPUT_FORCE is TRUE, the date will NOT be written.
-
 **Multiple-valued variables:**
 
 Since variables like SOIL_MOIST have 1 value per soil layer, these variables will be written to multiple columns in the output file, one column per soil layer. Other multiple-valued variables are treated similarly.
@@ -227,5 +225,3 @@ For binary files, the output header has the following format:
 //   type      (char)*1            Code identifying variable type
 //   mult      (float)*1           Multiplier for variable
 ```
-
-To accommodate input forcing files that might have been produced via VIC's OUTPUT_FORCE option, and therefore could contain a header, `read_atmos_data.c` has been modified to detect and skip headers that follow the formats outlined above.

@@ -5,7 +5,7 @@ VIC input files may be constructed using various programs and datasets. Below ar
 To run VIC, several sets of input data are necessary:
 
 *   [Global Parameter File](GlobalParam.md): This is the main input file for VIC. It points VIC to the locations of the other input/output files and sets parameters that govern the simulation (e.g., start/end dates, modes of operation).
-*   [Meteorological Forcing Files](ForcingData.md): VIC can take daily or sub-daily timeseries of meteorological variables as inputs.
+*   [Meteorological Forcing Files](ForcingData.md): Meteorological forcing file(s).
 *   [Soil Parameter File](SoilParam.md): Cell ID numbers, lat/lon, soil texture and other characteristics.
 *   [Vegetation Library File](VegLib.md): Descriptions of the available land cover types
 *   [Vegetation Parameter File](VegParam.md): Landcover types, fractional areas, rooting depths, and seasonal LAIs of the various landcover tiles within each grid cell.

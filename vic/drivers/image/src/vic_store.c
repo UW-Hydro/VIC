@@ -49,7 +49,6 @@ vic_store(void)
     size_t                     k;
     size_t                     m;
     size_t                     p;
-    size_t                     grid_size;
     size_t                     ndims;
     char                      *cvar = NULL;
     int                       *ivar = NULL;
@@ -66,25 +65,23 @@ vic_store(void)
 
     nc_file_struct             nc_state_file;
 
-    grid_size = global_domain.n_ny * global_domain.n_nx;
-
     // allocate memory for variables to be stored
-    cvar = (char *) malloc(local_domain.ncells * sizeof(char));
+    cvar = malloc(local_domain.ncells_active * sizeof(*cvar));
     if (cvar == NULL) {
         log_err("Memory allocation error in vic_store().");
     }
 
-    ivar = (int *) malloc(local_domain.ncells * sizeof(int));
+    ivar = malloc(local_domain.ncells_active * sizeof(*ivar));
     if (ivar == NULL) {
         log_err("Memory allocation error in vic_store().");
     }
 
-    dvar = (double *) malloc(local_domain.ncells * sizeof(double));
+    dvar = malloc(local_domain.ncells_active * sizeof(*dvar));
     if (dvar == NULL) {
         log_err("Memory allocation error in vic_store().");
     }
 
-    fvar = (float *) malloc(local_domain.ncells * sizeof(float));
+    fvar = malloc(local_domain.ncells_active * sizeof(*fvar));
     if (fvar == NULL) {
         log_err("Memory allocation error in vic_store().");
     }
@@ -134,7 +131,7 @@ vic_store(void)
     initialize_state_file(&nc_state_file);
 
     // set missing values
-    for (i = 0; i < local_domain.ncells; i++) {
+    for (i = 0; i < local_domain.ncells_active; i++) {
         cvar[i] = nc_state_file.c_fillvalue;
         ivar[i] = nc_state_file.i_fillvalue;
         dvar[i] = nc_state_file.d_fillvalue;
@@ -153,7 +150,7 @@ vic_store(void)
     dimids[2] = nc_state_file.ni_dimid;
     for (j = 0; j < options.Nnode; j++) {
         d3start[0] = j;
-        for (i = 0; i < local_domain.ncells; i++) {
+        for (i = 0; i < local_domain.ncells_active; i++) {
             dvar[i] = (double) soil_con[i].dz_node[j];
         }
         gather_put_nc_field_double(nc_state_file.fname, &(nc_state_file.open),
@@ -161,7 +158,7 @@ vic_store(void)
                                    nc_state_file.d_fillvalue,
                                    dimids, ndims, "dz_node", d3start, d3count,
                                    dvar);
-        for (i = 0; i < local_domain.ncells; i++) {
+        for (i = 0; i < local_domain.ncells_active; i++) {
             dvar[i] = nc_state_file.d_fillvalue;
         }
     }
@@ -177,7 +174,7 @@ vic_store(void)
     dimids[2] = nc_state_file.ni_dimid;
     for (j = 0; j < options.Nnode; j++) {
         d3start[0] = j;
-        for (i = 0; i < local_domain.ncells; i++) {
+        for (i = 0; i < local_domain.ncells_active; i++) {
             dvar[i] = (double) soil_con[i].Zsum_node[j];
         }
         gather_put_nc_field_double(nc_state_file.fname, &(nc_state_file.open),
@@ -185,7 +182,7 @@ vic_store(void)
                                    nc_state_file.d_fillvalue,
                                    dimids, ndims, "Zsum_node", d3start, d3count,
                                    dvar);
-        for (i = 0; i < local_domain.ncells; i++) {
+        for (i = 0; i < local_domain.ncells_active; i++) {
             dvar[i] = nc_state_file.d_fillvalue;
         }
     }
@@ -206,7 +203,7 @@ vic_store(void)
             d5start[1] = k;
             for (j = 0; j < options.Nlayer; j++) {
                 d5start[2] = j;
-                for (i = 0; i < local_domain.ncells; i++) {
+                for (i = 0; i < local_domain.ncells_active; i++) {
                     v = veg_con_map[i].vidx[k];
                     if (v >= 0) {
                         dvar[i] = (double)
@@ -222,7 +219,7 @@ vic_store(void)
                                            nc_state_file.d_fillvalue,
                                            dimids, ndims, "Soil_moisture",
                                            d5start, d5count, dvar);
-                for (i = 0; i < local_domain.ncells; i++) {
+                for (i = 0; i < local_domain.ncells_active; i++) {
                     dvar[i] = nc_state_file.d_fillvalue;
                 }
             }
@@ -248,7 +245,7 @@ vic_store(void)
                 d6start[2] = j;
                 for (p = 0; p < options.Nfrost; p++) {
                     d6start[3] = p;
-                    for (i = 0; i < local_domain.ncells; i++) {
+                    for (i = 0; i < local_domain.ncells_active; i++) {
                         v = veg_con_map[i].vidx[k];
                         if (v >= 0) {
                             dvar[i] = (double)
@@ -264,7 +261,7 @@ vic_store(void)
                                                nc_state_file.d_fillvalue,
                                                dimids, ndims, "Ice_content",
                                                d6start, d6count, dvar);
-                    for (i = 0; i < local_domain.ncells; i++) {
+                    for (i = 0; i < local_domain.ncells_active; i++) {
                         dvar[i] = nc_state_file.d_fillvalue;
                     }
                 }
@@ -285,7 +282,7 @@ vic_store(void)
         d4start[0] = m;
         for (k = 0; k < options.NVEGTYPES; k++) {
             d4start[1] = k;
-            for (i = 0; i < local_domain.ncells; i++) {
+            for (i = 0; i < local_domain.ncells_active; i++) {
                 v = veg_con_map[i].vidx[k];
                 if (v >= 0) {
                     dvar[i] = (double)
@@ -301,7 +298,7 @@ vic_store(void)
                                        nc_state_file.d_fillvalue,
                                        dimids, ndims, "Wdew",
                                        d4start, d4count, dvar);
-            for (i = 0; i < local_domain.ncells; i++) {
+            for (i = 0; i < local_domain.ncells_active; i++) {
                 dvar[i] = nc_state_file.d_fillvalue;
             }
         }
@@ -321,7 +318,7 @@ vic_store(void)
             d4start[0] = m;
             for (k = 0; k < options.NVEGTYPES; k++) {
                 d4start[1] = k;
-                for (i = 0; i < local_domain.ncells; i++) {
+                for (i = 0; i < local_domain.ncells_active; i++) {
                     v = veg_con_map[i].vidx[k];
                     if (v >= 0) {
                         dvar[i] = (double)
@@ -337,7 +334,7 @@ vic_store(void)
                                            nc_state_file.d_fillvalue,
                                            dimids, ndims, "AnnualNPP",
                                            d4start, d4count, dvar);
-                for (i = 0; i < local_domain.ncells; i++) {
+                for (i = 0; i < local_domain.ncells_active; i++) {
                     dvar[i] = nc_state_file.d_fillvalue;
                 }
             }
@@ -356,7 +353,7 @@ vic_store(void)
             d4start[0] = m;
             for (k = 0; k < options.NVEGTYPES; k++) {
                 d4start[1] = k;
-                for (i = 0; i < local_domain.ncells; i++) {
+                for (i = 0; i < local_domain.ncells_active; i++) {
                     v = veg_con_map[i].vidx[k];
                     if (v >= 0) {
                         dvar[i] = (double)
@@ -372,7 +369,7 @@ vic_store(void)
                                            nc_state_file.d_fillvalue,
                                            dimids, ndims, "AnnualNPPPrev",
                                            d4start, d4count, dvar);
-                for (i = 0; i < local_domain.ncells; i++) {
+                for (i = 0; i < local_domain.ncells_active; i++) {
                     dvar[i] = nc_state_file.d_fillvalue;
                 }
             }
@@ -391,7 +388,7 @@ vic_store(void)
             d4start[0] = m;
             for (k = 0; k < options.NVEGTYPES; k++) {
                 d4start[1] = k;
-                for (i = 0; i < local_domain.ncells; i++) {
+                for (i = 0; i < local_domain.ncells_active; i++) {
                     v = veg_con_map[i].vidx[k];
                     if (v >= 0) {
                         dvar[i] = (double)
@@ -407,7 +404,7 @@ vic_store(void)
                                            nc_state_file.d_fillvalue,
                                            dimids, ndims, "CLitter",
                                            d4start, d4count, dvar);
-                for (i = 0; i < local_domain.ncells; i++) {
+                for (i = 0; i < local_domain.ncells_active; i++) {
                     dvar[i] = nc_state_file.d_fillvalue;
                 }
             }
@@ -426,7 +423,7 @@ vic_store(void)
             d4start[0] = m;
             for (k = 0; k < options.NVEGTYPES; k++) {
                 d4start[1] = k;
-                for (i = 0; i < local_domain.ncells; i++) {
+                for (i = 0; i < local_domain.ncells_active; i++) {
                     v = veg_con_map[i].vidx[k];
                     if (v >= 0) {
                         dvar[i] = (double)
@@ -442,7 +439,7 @@ vic_store(void)
                                            nc_state_file.d_fillvalue,
                                            dimids, ndims, "Cinter",
                                            d4start, d4count, dvar);
-                for (i = 0; i < local_domain.ncells; i++) {
+                for (i = 0; i < local_domain.ncells_active; i++) {
                     dvar[i] = nc_state_file.d_fillvalue;
                 }
             }
@@ -461,7 +458,7 @@ vic_store(void)
             d4start[0] = m;
             for (k = 0; k < options.NVEGTYPES; k++) {
                 d4start[1] = k;
-                for (i = 0; i < local_domain.ncells; i++) {
+                for (i = 0; i < local_domain.ncells_active; i++) {
                     v = veg_con_map[i].vidx[k];
                     if (v >= 0) {
                         dvar[i] = (double)
@@ -477,7 +474,7 @@ vic_store(void)
                                            nc_state_file.d_fillvalue,
                                            dimids, ndims, "CSlow",
                                            d4start, d4count, dvar);
-                for (i = 0; i < local_domain.ncells; i++) {
+                for (i = 0; i < local_domain.ncells_active; i++) {
                     dvar[i] = nc_state_file.d_fillvalue;
                 }
             }
@@ -497,7 +494,7 @@ vic_store(void)
         d4start[0] = m;
         for (k = 0; k < options.NVEGTYPES; k++) {
             d4start[1] = k;
-            for (i = 0; i < local_domain.ncells; i++) {
+            for (i = 0; i < local_domain.ncells_active; i++) {
                 v = veg_con_map[i].vidx[k];
                 if (v >= 0) {
                     ivar[i] = (int)
@@ -513,7 +510,7 @@ vic_store(void)
                                     nc_state_file.i_fillvalue,
                                     dimids, ndims, "Last_snow",
                                     d4start, d4count, ivar);
-            for (i = 0; i < local_domain.ncells; i++) {
+            for (i = 0; i < local_domain.ncells_active; i++) {
                 ivar[i] = nc_state_file.i_fillvalue;
             }
         }
@@ -532,7 +529,7 @@ vic_store(void)
         d4start[0] = m;
         for (k = 0; k < options.NVEGTYPES; k++) {
             d4start[1] = k;
-            for (i = 0; i < local_domain.ncells; i++) {
+            for (i = 0; i < local_domain.ncells_active; i++) {
                 v = veg_con_map[i].vidx[k];
                 if (v >= 0) {
                     ivar[i] = (int)
@@ -548,7 +545,7 @@ vic_store(void)
                                     nc_state_file.i_fillvalue,
                                     dimids, ndims, "Melt_state",
                                     d4start, d4count, ivar);
-            for (i = 0; i < local_domain.ncells; i++) {
+            for (i = 0; i < local_domain.ncells_active; i++) {
                 ivar[i] = nc_state_file.i_fillvalue;
             }
         }
@@ -567,7 +564,7 @@ vic_store(void)
         d4start[0] = m;
         for (k = 0; k < options.NVEGTYPES; k++) {
             d4start[1] = k;
-            for (i = 0; i < local_domain.ncells; i++) {
+            for (i = 0; i < local_domain.ncells_active; i++) {
                 v = veg_con_map[i].vidx[k];
                 if (v >= 0) {
                     dvar[i] = (double)
@@ -583,7 +580,7 @@ vic_store(void)
                                        nc_state_file.d_fillvalue,
                                        dimids, ndims, "Snow_coverage",
                                        d4start, d4count, dvar);
-            for (i = 0; i < local_domain.ncells; i++) {
+            for (i = 0; i < local_domain.ncells_active; i++) {
                 dvar[i] = nc_state_file.d_fillvalue;
             }
         }
@@ -602,7 +599,7 @@ vic_store(void)
         d4start[0] = m;
         for (k = 0; k < options.NVEGTYPES; k++) {
             d4start[1] = k;
-            for (i = 0; i < local_domain.ncells; i++) {
+            for (i = 0; i < local_domain.ncells_active; i++) {
                 v = veg_con_map[i].vidx[k];
                 if (v >= 0) {
                     dvar[i] = (double)
@@ -618,7 +615,7 @@ vic_store(void)
                                        nc_state_file.d_fillvalue,
                                        dimids, ndims, "Snow_water_equivalent",
                                        d4start, d4count, dvar);
-            for (i = 0; i < local_domain.ncells; i++) {
+            for (i = 0; i < local_domain.ncells_active; i++) {
                 dvar[i] = nc_state_file.d_fillvalue;
             }
         }
@@ -637,7 +634,7 @@ vic_store(void)
         d4start[0] = m;
         for (k = 0; k < options.NVEGTYPES; k++) {
             d4start[1] = k;
-            for (i = 0; i < local_domain.ncells; i++) {
+            for (i = 0; i < local_domain.ncells_active; i++) {
                 v = veg_con_map[i].vidx[k];
                 if (v >= 0) {
                     dvar[i] = (double)
@@ -653,7 +650,7 @@ vic_store(void)
                                        nc_state_file.d_fillvalue,
                                        dimids, ndims, "Snow_surf_temp",
                                        d4start, d4count, dvar);
-            for (i = 0; i < local_domain.ncells; i++) {
+            for (i = 0; i < local_domain.ncells_active; i++) {
                 dvar[i] = nc_state_file.d_fillvalue;
             }
         }
@@ -672,7 +669,7 @@ vic_store(void)
         d4start[0] = m;
         for (k = 0; k < options.NVEGTYPES; k++) {
             d4start[1] = k;
-            for (i = 0; i < local_domain.ncells; i++) {
+            for (i = 0; i < local_domain.ncells_active; i++) {
                 v = veg_con_map[i].vidx[k];
                 if (v >= 0) {
                     dvar[i] = (double)
@@ -688,7 +685,7 @@ vic_store(void)
                                        nc_state_file.d_fillvalue,
                                        dimids, ndims, "Snow_surf_water",
                                        d4start, d4count, dvar);
-            for (i = 0; i < local_domain.ncells; i++) {
+            for (i = 0; i < local_domain.ncells_active; i++) {
                 dvar[i] = nc_state_file.d_fillvalue;
             }
         }
@@ -707,7 +704,7 @@ vic_store(void)
         d4start[0] = m;
         for (k = 0; k < options.NVEGTYPES; k++) {
             d4start[1] = k;
-            for (i = 0; i < local_domain.ncells; i++) {
+            for (i = 0; i < local_domain.ncells_active; i++) {
                 v = veg_con_map[i].vidx[k];
                 if (v >= 0) {
                     dvar[i] = (double)
@@ -723,7 +720,7 @@ vic_store(void)
                                        nc_state_file.d_fillvalue,
                                        dimids, ndims, "Snow_pack_temp",
                                        d4start, d4count, dvar);
-            for (i = 0; i < local_domain.ncells; i++) {
+            for (i = 0; i < local_domain.ncells_active; i++) {
                 dvar[i] = nc_state_file.d_fillvalue;
             }
         }
@@ -742,7 +739,7 @@ vic_store(void)
         d4start[0] = m;
         for (k = 0; k < options.NVEGTYPES; k++) {
             d4start[1] = k;
-            for (i = 0; i < local_domain.ncells; i++) {
+            for (i = 0; i < local_domain.ncells_active; i++) {
                 v = veg_con_map[i].vidx[k];
                 if (v >= 0) {
                     dvar[i] = (double)
@@ -758,7 +755,7 @@ vic_store(void)
                                        nc_state_file.d_fillvalue,
                                        dimids, ndims, "Snow_pack_water",
                                        d4start, d4count, dvar);
-            for (i = 0; i < local_domain.ncells; i++) {
+            for (i = 0; i < local_domain.ncells_active; i++) {
                 dvar[i] = nc_state_file.d_fillvalue;
             }
         }
@@ -777,7 +774,7 @@ vic_store(void)
         d4start[0] = m;
         for (k = 0; k < options.NVEGTYPES; k++) {
             d4start[1] = k;
-            for (i = 0; i < local_domain.ncells; i++) {
+            for (i = 0; i < local_domain.ncells_active; i++) {
                 v = veg_con_map[i].vidx[k];
                 if (v >= 0) {
                     dvar[i] = (double)
@@ -793,7 +790,7 @@ vic_store(void)
                                        nc_state_file.d_fillvalue,
                                        dimids, ndims, "Snow_density",
                                        d4start, d4count, dvar);
-            for (i = 0; i < local_domain.ncells; i++) {
+            for (i = 0; i < local_domain.ncells_active; i++) {
                 dvar[i] = nc_state_file.d_fillvalue;
             }
         }
@@ -812,7 +809,7 @@ vic_store(void)
         d4start[0] = m;
         for (k = 0; k < options.NVEGTYPES; k++) {
             d4start[1] = k;
-            for (i = 0; i < local_domain.ncells; i++) {
+            for (i = 0; i < local_domain.ncells_active; i++) {
                 v = veg_con_map[i].vidx[k];
                 if (v >= 0) {
                     dvar[i] = (double)
@@ -828,7 +825,7 @@ vic_store(void)
                                        nc_state_file.d_fillvalue,
                                        dimids, ndims, "Snow_cold_content",
                                        d4start, d4count, dvar);
-            for (i = 0; i < local_domain.ncells; i++) {
+            for (i = 0; i < local_domain.ncells_active; i++) {
                 dvar[i] = nc_state_file.d_fillvalue;
             }
         }
@@ -847,7 +844,7 @@ vic_store(void)
         d4start[0] = m;
         for (k = 0; k < options.NVEGTYPES; k++) {
             d4start[1] = k;
-            for (i = 0; i < local_domain.ncells; i++) {
+            for (i = 0; i < local_domain.ncells_active; i++) {
                 v = veg_con_map[i].vidx[k];
                 if (v >= 0) {
                     dvar[i] = (double)
@@ -863,7 +860,7 @@ vic_store(void)
                                        nc_state_file.d_fillvalue,
                                        dimids, ndims, "Snow_canopy",
                                        d4start, d4count, dvar);
-            for (i = 0; i < local_domain.ncells; i++) {
+            for (i = 0; i < local_domain.ncells_active; i++) {
                 dvar[i] = nc_state_file.d_fillvalue;
             }
         }
@@ -885,7 +882,7 @@ vic_store(void)
             d5start[1] = k;
             for (j = 0; j < options.Nnode; j++) {
                 d5start[2] = j;
-                for (i = 0; i < local_domain.ncells; i++) {
+                for (i = 0; i < local_domain.ncells_active; i++) {
                     v = veg_con_map[i].vidx[k];
                     if (v >= 0) {
                         dvar[i] = (double)
@@ -901,7 +898,7 @@ vic_store(void)
                                            nc_state_file.d_fillvalue,
                                            dimids, ndims, "Node_temperature",
                                            d5start, d5count, dvar);
-                for (i = 0; i < local_domain.ncells; i++) {
+                for (i = 0; i < local_domain.ncells_active; i++) {
                     dvar[i] = nc_state_file.d_fillvalue;
                 }
             }

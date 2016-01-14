@@ -6,7 +6,7 @@ The VIC model ([Liang et al., 1994](../Documentation/References.md#primary-histo
 
 1. The land surface is modeled as a grid of large (>>1km), flat, uniform cells
     - Sub-grid heterogeneity (e.g. elevation, land cover) is handled via statistical distributions
-1. Inputs are time series of daily or sub-daily meteorological drivers (e.g. precipitation, air temperature, wind speed)
+1. Inputs are time series of sub-daily meteorological drivers (e.g. precipitation, air temperature, wind speed, radiation, etc.)
 1. Land-atmosphere fluxes, and the water and energy balances at the land surface, are simulated at a daily or sub-daily time step
 1. Water can only enter a grid cell via the atmosphere
     - Non-channel flow between grid cells is ignored
@@ -15,10 +15,7 @@ The VIC model ([Liang et al., 1994](../Documentation/References.md#primary-histo
 
 This last point has several consequences for VIC model implementation:
 
-1. Grid cells are simulated independently of each other
-    - Entire simulation is run for each grid cell separately, 1 grid cell at a time, rather than, for each time step, looping over all grid cells
-    - Meteorological input data for each grid cell (for the entire simulation period) are read from a file specific to that grid cell
-    - Time series of output variables for each grid cell (for the entire simulation period) are stored in files specific to that grid cell
+1. Grid cells are simulated independently of each other, there is no communication between grid cells
 2. Routing of stream flow is performed separately from the land surface simulation, using a separate model (typically the routing model of [Lohmann et al., 1996 and 1998](../Documentation/References.md#streamflow-routing-model-references))
 
 ## Land Cover and Soil
@@ -78,11 +75,17 @@ Figure 3.  VIC snow model.
 
 ### Meteorological Input Data
 
-VIC can use any combination of daily or sub-daily meteorological forcings, from point observations, gridded observations, or reanalysis fields.  At minimum, VIC requires daily {precipitation, max/min air temperature, and wind speed}.  VIC will derive all other needed forcings via the approach described in [Bohn et al., 2013a](../Documentation/References.md#other-historical-references), which includes:
+VIC requires the following meteorological forcing variables.
 
-- If incoming shortwave radiation or humidity are not supplied as forcings, VIC can estimate their daily average values via the algorithms of [Kimball et al. (1997)](../Documentation/References.md#other-references), [Thornton and Running (1999)](../Documentation/References.md#other-references), and [Thornton et al. (2000)](../Documentation/References.md#other-references). These algorithms are part of a stand-alone system called MTCLIM, produced by Steve Running's Numerical Terradynamics Simulation Group at U. Montana.
-- If incoming longwave radiation is not supplied, VIC can estimate this via the Tennessee Valley Authority algorithm ([TVA, 1972](../Documentation/References.md#other-references)) or the [Prata (1996)](../Documentation/References.md#other-references) algorithm, Prata is the default.
-- VIC can disaggregate daily forcings to sub-daily as needed, using a cubic spline to interpolate between min and max temperatures, and deriving the other variables from that ([Bohn et al., 2013a](../Documentation/References.md#other-historical-references))
+- Precipitation
+- Air temperature
+- Wind speed
+- Longwave radiation
+- Shortwave radiation
+- Atmospheric pressure
+- Specific humidity
+
+These forcings must be provided at the timestep that the model will be run at (e.g. `SNOW_STEPS_PER_DAY` or `MODEL_STEPS_PER_DAY`). Traditionally, VIC users have used the MTCLIM package to generate and disaggregate forcings variables. See [Bohn et al., 2013a](../Documentation/References.md#other-historical-references) for more information on how this has been done in the past.
 
 ### Non-Meteorological Input Data
 

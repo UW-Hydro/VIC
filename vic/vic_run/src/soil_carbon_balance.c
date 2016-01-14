@@ -73,10 +73,10 @@ soil_carbon_balance(soil_con_struct   *soil_con,
     if (soil_con->Zsum_node[i] > dZTot) {
         Nnodes--;
     }
-    dZ = (double*)calloc(Nnodes, sizeof(double));
-    dZCum = (double*) calloc(Nnodes, sizeof(double));
-    T = (double*) calloc(Nnodes, sizeof(double));
-    w = (double*) calloc(Nnodes, sizeof(double));
+    dZ = calloc(Nnodes, sizeof(*dZ));
+    dZCum = calloc(Nnodes, sizeof(*dZCum));
+    T = calloc(Nnodes, sizeof(*T));
+    w = calloc(Nnodes, sizeof(*w));
 
     // Assign node thicknesses and temperatures for subset
     dZTot = 0;

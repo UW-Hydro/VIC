@@ -62,11 +62,7 @@ initialize_options()
     options.IMPLICIT = true;
     options.LAKES = false;
     options.LAKE_PROFILE = false;
-    options.LW_CLOUD = LW_CLOUD_DEARDORFF;
-    options.LW_TYPE = LW_PRATA;
-    options.MTCLIM_SWE_CORR = false;
     options.NOFLUX = false;
-    options.PLAPSE = true;
     options.QUICK_FLUX = true;
     options.QUICK_SOLVE = false;
     options.RC_MODE = RC_JARVIS;
@@ -75,8 +71,6 @@ initialize_options()
     options.SPATIAL_FROST = false;
     options.SPATIAL_SNOW = false;
     options.TFALLBACK = true;
-    options.VP_INTERP = true;
-    options.VP_ITER = VP_ITER_ALWAYS;
     // Model dimensions
     options.Ncanopy = 3;
     options.Nfrost = 1;
@@ -107,7 +101,6 @@ initialize_options()
     options.COMPRESS = false;
     options.MOISTFRACT = false;
     options.Noutfiles = 2;
-    options.OUTPUT_FORCE = false;
     options.PRT_HEADER = false;
     options.PRT_SNOW_BAND = false;
 }

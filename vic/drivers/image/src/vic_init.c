@@ -821,6 +821,11 @@ vic_init(void)
                 veg_con_map[i].vidx[j] = k;
                 veg_con[i][k].Cv = veg_con_map[i].Cv[j];
                 veg_con[i][k].veg_class = j;
+                for (m = 0; m < MONTHS_PER_YEAR; m++) {
+                    veg_con[i][k].LAI[m] = veg_lib[i][j].LAI[m];
+                    veg_con[i][k].albedo[m] = veg_lib[i][j].albedo[m];
+                    veg_con[i][k].vegcover[m] = veg_lib[i][j].vegcover[m];
+                }
                 k++;
             }
             else {

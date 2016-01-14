@@ -35,9 +35,11 @@
 double
 calc_veg_displacement(double height)
 {
-    double value;
+    extern parameters_struct param;
 
-    value = 0.67 * height;
+    double                   value;
+
+    value = param.VEG_RATIO_DH_HEIGHT * height;
 
     return (value);
 }
@@ -49,9 +51,11 @@ calc_veg_displacement(double height)
 double
 calc_veg_height(double displacement)
 {
-    double value;
+    extern parameters_struct param;
 
-    value = displacement / 0.67;
+    double                   value;
+
+    value = displacement / param.VEG_RATIO_DH_HEIGHT;
 
     return (value);
 }
@@ -64,9 +68,11 @@ calc_veg_height(double displacement)
 double
 calc_veg_roughness(double height)
 {
-    double value;
+    extern parameters_struct param;
 
-    value = 0.123 * height;
+    double                   value;
+
+    value = param.VEG_RATIO_RL_HEIGHT * height;
 
     return (value);
 }

@@ -56,13 +56,17 @@ initialize_parameters()
     param.EMISS_H2O = 0.98;
 
     // Soil Constraints
+    param.SOIL_RARC = 100.0;
     param.SOIL_RESID_MOIST = 0.0;
     param.SOIL_SLAB_MOIST_FRACT = 1.0;
+    param.SOIL_WINDH = 10.0;
 
     // Vegetation Parameters
     param.VEG_LAI_SNOW_MULTIPLIER = 0.0005;
-    param.VEG_MIN_INTERCEPTION_STORAGE = 0.005;
     param.VEG_LAI_WATER_FACTOR = 0.1;
+    param.VEG_MIN_INTERCEPTION_STORAGE = 0.005;
+    param.VEG_RATIO_DH_HEIGHT = 0.67;
+    param.VEG_RATIO_RL_HEIGHT = 0.123;
 
     // Canopy Parameters
     param.CANOPY_CLOSURE = 4000.0;

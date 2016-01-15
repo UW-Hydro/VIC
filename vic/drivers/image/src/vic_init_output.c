@@ -55,7 +55,7 @@ vic_init_output(void)
     size_t                     i;
 
     // initialize the output data structures
-    for (i = 0; i < local_domain.ncells; i++) {
+    for (i = 0; i < local_domain.ncells_active; i++) {
         put_data(&(all_vars[i]), &(atmos[i]), &(soil_con[i]), veg_con[i],
                  veg_lib[i], &lake_con, out_data[i], &(save_data[i]),
                  -global_param.nrecs);

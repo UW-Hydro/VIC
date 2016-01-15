@@ -30,8 +30,11 @@
 #include <vic_mpi.h>
 #include <netcdf.h>
 #include <vic_driver_shared.h>
+// Extensions
+#include <rout.h>
 
 #define VIC_DRIVER "Image"
+
 
 #define MAXDIMS 10
 

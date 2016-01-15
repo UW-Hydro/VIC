@@ -49,61 +49,61 @@ vic_alloc(void)
     size_t                     j;
 
     // allocate memory for atmos structure
-    atmos = malloc(local_domain.ncells * sizeof(*atmos));
+    atmos = malloc(local_domain.ncells_active * sizeof(*atmos));
     if (atmos == NULL) {
         log_err("Memory allocation error in vic_alloc().");
     }
 
     // allocate memory for veg_hist structure
-    veg_hist = malloc(local_domain.ncells * sizeof(*veg_hist));
+    veg_hist = malloc(local_domain.ncells_active * sizeof(*veg_hist));
     if (veg_hist == NULL) {
         log_err("Memory allocation error in vic_alloc().");
     }
 
     // allocate memory for soil structure
-    soil_con = malloc(local_domain.ncells * sizeof(*soil_con));
+    soil_con = malloc(local_domain.ncells_active * sizeof(*soil_con));
     if (soil_con == NULL) {
         log_err("Memory allocation error in vic_alloc().");
     }
 
     // allocate memory for vegetation mapping structure
-    veg_con_map = malloc(local_domain.ncells * sizeof(*veg_con_map));
+    veg_con_map = malloc(local_domain.ncells_active * sizeof(*veg_con_map));
     if (veg_con_map == NULL) {
         log_err("Memory allocation error in vic_alloc().");
     }
 
     // allocate memory for vegetation structure
-    veg_con = malloc(local_domain.ncells * sizeof(*veg_con));
+    veg_con = malloc(local_domain.ncells_active * sizeof(*veg_con));
     if (veg_con == NULL) {
         log_err("Memory allocation error in vic_alloc().");
     }
 
     // allocate memory for vegetation structure
-    veg_lib = malloc(local_domain.ncells * sizeof(*veg_lib));
+    veg_lib = malloc(local_domain.ncells_active * sizeof(*veg_lib));
     if (veg_lib == NULL) {
         log_err("Memory allocation error in vic_alloc().");
     }
 
     // all_vars allocation
-    all_vars = malloc(local_domain.ncells * sizeof(*all_vars));
+    all_vars = malloc(local_domain.ncells_active * sizeof(*all_vars));
     if (all_vars == NULL) {
         log_err("Memory allocation error in vic_alloc().");
     }
 
     // out_data allocation
-    out_data = malloc(local_domain.ncells * sizeof(*out_data));
+    out_data = malloc(local_domain.ncells_active * sizeof(*out_data));
     if (out_data == NULL) {
         log_err("Memory allocation error in vic_alloc().");
     }
 
     // save_data allocation
-    save_data = malloc(local_domain.ncells * sizeof(*save_data));
+    save_data = malloc(local_domain.ncells_active * sizeof(*save_data));
     if (save_data == NULL) {
         log_err("Memory allocation error in vic_alloc().");
     }
 
     // allocate memory for individual grid cells
-    for (i = 0; i < local_domain.ncells; i++) {
+    for (i = 0; i < local_domain.ncells_active; i++) {
         // atmos allocation - allocate enough memory for NR+1 steps
         alloc_atmos(&(atmos[i]));
 

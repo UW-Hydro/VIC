@@ -17,12 +17,12 @@ The following options determine the type of simulation that wil3l be performed.
 |------------   |---------  |-------    |---------------------------------------------------------------------------------------------------------------------------------------    |
 | NLAYER        | integer   | N/A       | Number of moisture layers used by the model                                                                                               |
 | NODES         | integer   | N/A       | Number of thermal solution nodes in the soil column                                                                                       |
-| MODEL_STEPS_PER_DAY | integer   | steps     | Simulation time step length. NOTE: MODEL_STEPS_PER_DAY should be > 4 for FULL_ENERGY=TRUE or FROZEN_SOIL=TRUE.             |
-| SNOW_STEPS_PER_DAY  | integer   | steps     | Length of time step used to solve the snow model (if MODEL_STEPS_PER_DAY > 1, SNOW_STEPS_PER_DAY should = MODEL_STEPS_PER_DAY)                 |
+| MODEL_STEPS_PER_DAY | integer   | steps     | Number of simulation time steps per day. NOTE: MODEL_STEPS_PER_DAY should be > 4 for FULL_ENERGY=TRUE or FROZEN_SOIL=TRUE.             |
+| SNOW_STEPS_PER_DAY  | integer   | steps     | Number of time steps per day used to solve the snow model (if MODEL_STEPS_PER_DAY > 1, SNOW_STEPS_PER_DAY should = MODEL_STEPS_PER_DAY)                 |
+| RUNOFF_STEPS_PER_DAY  | integer   | steps     | Number of time steps per day used to solve the runoff model (should be >= MODEL_STEPS_PER_DAY)                 |
 | STARTYEAR     | integer   | year      | Year model simulation starts                                                                                                              |
 | STARTMONTH    | integer   | month     | Month model simulation starts                                                                                                             |
 | STARTDAY      | integer   | day       | Day model simulation starts                                                                                                               |
-| STARTHOUR     | integer   | hour      | Hour model simulation starts                                                                                                              |
 | EITHER:       |           |           | *Note:* **either** NRECS or ENDYEAR, ENDMONTH, and ENDDAY must be specified, but **not both**                                                       |
 | NRECS         | integer   | N/A       | Number of time steps over which to run model. ***NOTE: The number of records must be defined such that the model completes the last day.***     |
 | OR:           |           |           | *Note:* **either** NRECS or ENDYEAR, ENDMONTH, and ENDDAY must be specified, but **not both**                                                       |
@@ -147,7 +147,6 @@ All FORCING filenames are actually the pathname, and prefix for gridded data typ
 | (7) FORCEYEAR     | integer   | year                      | Year meteorological forcing files start                                                                                                                                                                                                                                                                                               |
 | (8) FORCEMONTH    | integer   | month                     | Month meteorological forcing files start                                                                                                                                                                                                                                                                                              |
 | (9) FORCEDAY      | integer   | day                       | Day meteorological forcing files start                                                                                                                                                                                                                                                                                                |
-| (10) FORCEHOUR    | integer   | hour                      | Hour meteorological forcing files start                                                                                                                                                                                                                                                                                               |
 | GRID_DECIMAL      | integer   | N/A                       | Number of decimals to use in gridded file name extensions                                                                                                                                                                                                                                                                             |
 | WIND_H            | float     | m                         | Height of wind speed measurement over bare soil and snow cover. ***Wind measurement height over vegetation is now read from the vegetation library file for all types, the value in the global file only controls the wind height over bare soil and over the snow pack when a vegetation canopy is not defined.***                   |
 | ALMA_INPUT        | string    | TRUE or FALSE             | This option tells VIC the units to expect for the input variables:  <li>**FALSE** = Use standard VIC units: for moisture fluxes, use cumulative mm over the time step; for temperature, use degrees C;  <li>**TRUE** = Use the units of the ALMA convention: for moisture fluxes, use the average rate in mm/s (or kg/m<sup>2</sup>s) over the time step; for temperature, use degrees K;  <br><br>Default = FALSE. |
@@ -193,7 +192,6 @@ where the 1, 2, and 3 correspond to the first, second, and third tiles listed in
     FORCEYEAR   1950
     FORCEMONTH  1
     FORCEDAY    1
-    FORCEHOUR   0
 
 NOTE that N_TYPES is 3 in the example above, not 9.  This is because N_TYPES only counts the number of different variable types, NOT the total number of columns.
 
@@ -260,10 +258,15 @@ The following options are no longer supported.
 
 | Name          | Type      | Units             | Description                                                                                                                                                                                                                                   |
 |-------------  |--------   |-----------------  |---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| TIME_STEP     | integer   | hour      | Simulation time step length        |
+| SNOW_STEP     | integer   | hour      | Snow model time step length        |
+| STARTHOUR     | integer   | hour      | Hour model simulation starts        |
 | GRND_FLUX     | string    | TRUE or FALSE     | Versions 4.1.1 and earlier. If TRUE, compute ground heat flux and energy balance; if FALSE, do not compute ground heat flux. Default: If FULL_ENERGY or FROZEN_SOIL are TRUE, GRND_FLUX is automatically set to TRUE; otherwise GRND_FLUX is automatically set to FALSE.  |
 | MIN_LIQ       | string    | TRUE or FALSE     | Version 4.1.1 only. Options for handling minimum soil moisture in presence of ice (default is FALSE): <li>**FALSE** = Use residual moisture as lower bound on soil moisture in Brooks-Corey/Campbell and other relationships involving liquid water. <li>**TRUE** = Use (`residual moisture * unfrozen water fraction` as function of temperature) as lower bound on soil moisture in Brooks-Corey/Campbell and other relationships involving liquid water. |
 | GLOBAL_LAI    | string    | TRUE or FALSE     | If TRUE the vegetation parameter file contains an extra line for each vegetation type that defines monthly LAI values for each vegetation type for each grid cell. <br><br>*NOTE*: This option has been replaced by the two options LAI_SRC and VEGPARAM_LAI. |
 | OUTPUT_FORCE  | string    | TRUE or FALSE     | If TRUE, perform disaggregation of forcings, skip the simulation, and output the disaggregated forcings. |
+| FORCEHOUR    | integer   | hour                      | Hour meteorological forcing files start                             |
+| MEASURE_H    | decimal   | m      | Height of humidity measurement        |
 | PRT_FLUX      | string    | TRUE or FALSE     | Versions 4.1.1 and earlier. If TRUE print energy fluxes debugging files .  |
 | PRT_BALANCE   | string    | TRUE or FALSE     | Versions 4.1.1 and earlier. If TRUE print water balance debugging files .  |
 | PRT_SOIL      | string    | TRUE or FALSE     | Versions 4.1.1 and earlier. If TRUE print soil parameter debugging files .  |
@@ -286,12 +289,12 @@ The following options are no longer supported.
 #######################################################################
 NLAYER      3   # number of soil layers
 NODES       10  # number of soil thermal nodes
-MODEL_STEPS_PER_DAY  8   # model time step in hours (set to 1 if FULL_ENERGY = FALSE, set to > 4 if FULL_ENERGY = TRUE)
-SNOW_STEPS_PER_DAY  8   # time step in hours for which to solve the snow model (should = MODEL_STEPS_PER_DAY if MODEL_STEPS_PER_DAY > 1)
+MODEL_STEPS_PER_DAY  8   # number of model time steps per day (set to 1 if FULL_ENERGY = FALSE, set to > 4 if FULL_ENERGY = TRUE)
+SNOW_STEPS_PER_DAY  8   # number of time steps per day for which to solve the snow model (should = MODEL_STEPS_PER_DAY if MODEL_STEPS_PER_DAY > 1)
+RUNOFF_STEPS_PER_DAY  8   # number of time steps per day for which to solve the runoff model (should be >= MODEL_STEPS_PER_DAY)
 STARTYEAR   2000    # year model simulation starts
 STARTMONTH  01  # month model simulation starts
 STARTDAY    01  # day model simulation starts
-STARTHOUR   00  # hour model simulation starts
 ENDYEAR     2000    # year model simulation ends
 ENDMONTH    12  # month model simulation ends
 ENDDAY      31  # day model simulation ends
@@ -424,7 +427,6 @@ FORCE_STEPS_PER_DAY    24  # Forcing time step length (hours)
 FORCEYEAR   2000    # Year of first forcing record
 FORCEMONTH  01  # Month of first forcing record
 FORCEDAY    01  # Day of first forcing record
-FORCEHOUR   00  # Hour of first forcing record
 GRID_DECIMAL    4   # Number of digits after decimal point in forcing file names
 WIND_H          10.0    # height of wind speed measurement (m)
 ALMA_INPUT  FALSE   # TRUE = ALMA-compliant input variable units; FALSE = standard VIC units

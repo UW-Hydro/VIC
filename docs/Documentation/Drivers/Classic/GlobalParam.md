@@ -188,7 +188,7 @@ where the 1, 2, and 3 correspond to the first, second, and third tiles listed in
     FORCE_TYPE  VEGCOVER
     FORCE_TYPE  ALBEDO
     FORCE_FORMAT    ASCII
-    FORCE_DT    24
+    FORCE_STEPS_PER_DAY    1
     FORCEYEAR   1950
     FORCEMONTH  1
     FORCEDAY    1
@@ -463,7 +463,7 @@ SNOW_BAND   1   # Number of snow bands; if number of snow bands > 1, you must in
 # Output Files and Parameters
 #######################################################################
 RESULT_DIR      (put the result directory path here)    # Results directory path
-OUTPUT_STEPS_PER_DAY         # Output interval (hours); if 0, OUT_STEP = MODEL_STEPS_PER_DAY
+OUTPUT_STEPS_PER_DAY   0      # Output interval (hours); if 0, OUT_STEP = MODEL_STEPS_PER_DAY
 SKIPYEAR    0   # Number of years of output to omit from the output files
 COMPRESS    FALSE   # TRUE = compress input and output files when done
 BINARY_OUTPUT   FALSE   # TRUE = binary output files

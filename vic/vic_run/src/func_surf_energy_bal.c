@@ -111,6 +111,7 @@ func_surf_energy_bal(double  Ts,
     double            *Wdew;
     double            *displacement;
     double            *ra;
+    double            *Ra_veg;
     double            *Ra_used;
     double             rainfall;
     double            *ref_height;
@@ -205,7 +206,6 @@ func_surf_energy_bal(double  Ts,
     double             D1_plus;
     double            *transp;
     double             Ra_bare[3];
-    double             Ra_veg[3];
     double             tmp_wind[3];
     double             tmp_height;
     double             tmp_displacement[3];
@@ -268,6 +268,7 @@ func_surf_energy_bal(double  Ts,
     Wdew = (double *) va_arg(ap, double *);
     displacement = (double *) va_arg(ap, double *);
     ra = (double *) va_arg(ap, double *);
+    Ra_veg = (double *) va_arg(ap, double *);
     Ra_used = (double *) va_arg(ap, double *);
     rainfall = (double) va_arg(ap, double);
     ref_height = (double *) va_arg(ap, double *);
@@ -664,22 +665,23 @@ func_surf_energy_bal(double  Ts,
 
     /** Compute atmospheric stability correction **/
     if (wind[UnderStory] > 0.0 && overstory && SNOWING) {
-        Ra_used[0] = ra[UnderStory] /
-                     StabilityCorrection(ref_height[UnderStory], 0., TMean,
-                                         Tair,
-                                         wind[UnderStory],
-                                         roughness[UnderStory]);
+        Ra_veg[0] = ra[UnderStory] /
+                    StabilityCorrection(ref_height[UnderStory], 0., TMean,
+                                        Tair,
+                                        wind[UnderStory],
+                                        roughness[UnderStory]);
     }
     else if (wind[UnderStory] > 0.0) {
-        Ra_used[0] = ra[UnderStory] /
-                     StabilityCorrection(ref_height[UnderStory],
-                                         displacement[UnderStory],
-                                         TMean, Tair, wind[UnderStory],
-                                         roughness[UnderStory]);
+        Ra_veg[0] = ra[UnderStory] /
+                    StabilityCorrection(ref_height[UnderStory],
+                                        displacement[UnderStory],
+                                        TMean, Tair, wind[UnderStory],
+                                        roughness[UnderStory]);
     }
     else {
-        Ra_used[0] = param.HUGE_RESIST;
+        Ra_veg[0] = param.HUGE_RESIST;
     }
+    Ra_used[0] = Ra_veg[0];
 
     /*************************************************
        Compute aerodynamic resistance for the case of exposed soil between
@@ -699,9 +701,6 @@ func_surf_energy_bal(double  Ts,
        exposed soil) are 0, then Ra_used must necessarily be 0 as well.
     *************************************************/
     if (veg_var->vegcover < 1) {
-        Ra_veg[0] = Ra_used[0];
-        Ra_veg[1] = Ra_used[1];
-        Ra_veg[2] = Ra_used[2];
         /** If Ra_veg is non-zero, use it to compute area-weighted average **/
         if (Ra_veg[0] > 0) {
             /** aerodynamic conductance under vegetation **/
@@ -757,7 +756,7 @@ func_surf_energy_bal(double  Ts,
     if (VEG && !SNOWING && veg_var->vegcover > 0) {
         Evap = canopy_evap(layer, veg_var, true,
                            veg_class, Wdew, delta_t, NetBareRad, vpd,
-                           NetShortBare, Tair, Ra_used[1], elevation, rainfall,
+                           NetShortBare, Tair, Ra_veg[1], elevation, rainfall,
                            Wmax, Wcr, Wpwp, frost_fract, root, dryFrac,
                            shortwave, Catm, CanopLayerBnd);
         if (veg_var->vegcover < 1) {

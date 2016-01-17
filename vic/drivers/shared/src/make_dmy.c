@@ -36,11 +36,14 @@
 dmy_struct *
 make_dmy(global_param_struct *global)
 {
-    dmy_struct  *temp;
-    dmy_struct   start_dmy, end_dmy;
-    size_t       i;
-    unsigned int offset;
-    double       dt_time_units, start_num, end_num, numdate;
+    extern param_set_struct param_set;
+
+    dmy_struct             *temp;
+    dmy_struct              start_dmy, end_dmy, force_dmy;
+    size_t                  i;
+    unsigned int            offset;
+    double                  dt_time_units, start_num, end_num, force_num,
+                            numdate;
 
     dt_seconds_to_time_units(global->time_units, global->dt, &dt_time_units);
 
@@ -85,10 +88,27 @@ make_dmy(global_param_struct *global)
         }
     }
 
+    /** Determine number of forcing records to skip before model start time **/
+    for (i = 0; i < 2; i++) {
+        if (param_set.force_steps_per_day[i] != 0) {
+            force_dmy.dayseconds = global->forcesec[i];
+            force_dmy.year = global->forceyear[i];
+            force_dmy.day = global->forceday[i];
+            force_dmy.month = global->forcemonth[i];
+
+            force_num = date2num(global->time_origin_num, &force_dmy, 0.,
+                                 global->calendar, global->time_units);
+
+            global->forceskip[i] =
+                (unsigned int) ((start_num - force_num) *
+                                (double) param_set.force_steps_per_day[i]);
+        }
+    }
+
     // allocate dmy struct
     temp = calloc(global->nrecs, sizeof(*temp));
 
-    /** Create Date Structure for each Modele Time Step **/
+    /** Create Date Structure for each Model Time Step **/
     for (i = 0, numdate = start_num;
          i < global->nrecs;
          i++, numdate += dt_time_units) {

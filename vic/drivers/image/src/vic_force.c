@@ -59,7 +59,7 @@ vic_force(void)
     size_t                     d3start[3];
 
     // allocate memory for variables to be read
-    dvar = malloc(local_domain.ncells * sizeof(*dvar));
+    dvar = malloc(local_domain.ncells_active * sizeof(*dvar));
     if (dvar == NULL) {
         log_err("Memory allocation error in vic_force().");
     }
@@ -86,7 +86,7 @@ vic_force(void)
         d3start[0] = global_param.forceoffset[0] + j;
         get_scatter_nc_field_double(filenames.forcing[0], "tas",
                                     d3start, d3count, dvar);
-        for (i = 0; i < local_domain.ncells; i++) {
+        for (i = 0; i < local_domain.ncells_active; i++) {
             atmos[i].air_temp[j] = (double) dvar[i];
         }
     }
@@ -96,7 +96,7 @@ vic_force(void)
         d3start[0] = global_param.forceoffset[0] + j;
         get_scatter_nc_field_double(filenames.forcing[0], "prcp",
                                     d3start, d3count, dvar);
-        for (i = 0; i < local_domain.ncells; i++) {
+        for (i = 0; i < local_domain.ncells_active; i++) {
             atmos[i].prec[j] = (double) dvar[i];
         }
     }
@@ -106,7 +106,7 @@ vic_force(void)
         d3start[0] = global_param.forceoffset[0] + j;
         get_scatter_nc_field_double(filenames.forcing[0], "dswrf",
                                     d3start, d3count, dvar);
-        for (i = 0; i < local_domain.ncells; i++) {
+        for (i = 0; i < local_domain.ncells_active; i++) {
             atmos[i].shortwave[j] = (double) dvar[i];
         }
     }
@@ -116,7 +116,7 @@ vic_force(void)
         d3start[0] = global_param.forceoffset[0] + j;
         get_scatter_nc_field_double(filenames.forcing[0], "dlwrf",
                                     d3start, d3count, dvar);
-        for (i = 0; i < local_domain.ncells; i++) {
+        for (i = 0; i < local_domain.ncells_active; i++) {
             atmos[i].longwave[j] = (double) dvar[i];
         }
     }
@@ -126,7 +126,7 @@ vic_force(void)
         d3start[0] = global_param.forceoffset[0] + j;
         get_scatter_nc_field_double(filenames.forcing[0], "wind",
                                     d3start, d3count, dvar);
-        for (i = 0; i < local_domain.ncells; i++) {
+        for (i = 0; i < local_domain.ncells_active; i++) {
             atmos[i].wind[j] = (double) dvar[i];
         }
     }
@@ -136,7 +136,7 @@ vic_force(void)
         d3start[0] = global_param.forceoffset[0] + j;
         get_scatter_nc_field_double(filenames.forcing[0], "shum",
                                     d3start, d3count, dvar);
-        for (i = 0; i < local_domain.ncells; i++) {
+        for (i = 0; i < local_domain.ncells_active; i++) {
             atmos[i].vp[j] = (double) dvar[i];
         }
     }
@@ -146,7 +146,7 @@ vic_force(void)
         d3start[0] = global_param.forceoffset[0] + j;
         get_scatter_nc_field_double(filenames.forcing[0], "pres",
                                     d3start, d3count, dvar);
-        for (i = 0; i < local_domain.ncells; i++) {
+        for (i = 0; i < local_domain.ncells_active; i++) {
             atmos[i].pressure[j] = (double) dvar[i];
         }
     }
@@ -154,7 +154,7 @@ vic_force(void)
     if (options.LAKES) {
         // Channel inflow to lake
         for (j = 0; j < NF; j++) {
-            for (i = 0; i < local_domain.ncells; i++) {
+            for (i = 0; i < local_domain.ncells_active; i++) {
                 atmos[i].channel_in[j] = 0;
             }
         }
@@ -165,7 +165,7 @@ vic_force(void)
             d3start[0] = global_param.forceoffset[0] + j;
             get_scatter_nc_field_double(filenames.forcing[0], "catm",
                                         d3start, d3count, dvar);
-            for (i = 0; i < local_domain.ncells; i++) {
+            for (i = 0; i < local_domain.ncells_active; i++) {
                 atmos[i].Catm[j] = (double) dvar[i];
             }
         }
@@ -174,7 +174,7 @@ vic_force(void)
             d3start[0] = global_param.forceoffset[0] + j;
             get_scatter_nc_field_double(filenames.forcing[0], "fdir",
                                         d3start, d3count, dvar);
-            for (i = 0; i < local_domain.ncells; i++) {
+            for (i = 0; i < local_domain.ncells_active; i++) {
                 atmos[i].fdir[j] = (double) dvar[i];
             }
         }
@@ -183,7 +183,7 @@ vic_force(void)
             d3start[0] = global_param.forceoffset[0] + j;
             get_scatter_nc_field_double(filenames.forcing[0], "par",
                                         d3start, d3count, dvar);
-            for (i = 0; i < local_domain.ncells; i++) {
+            for (i = 0; i < local_domain.ncells_active; i++) {
                 atmos[i].par[j] = (double) dvar[i];
             }
         }
@@ -199,7 +199,7 @@ vic_force(void)
         t_offset = 0;
     }
     // Convert forcings into what we need and calculate missing ones
-    for (i = 0; i < local_domain.ncells; i++) {
+    for (i = 0; i < local_domain.ncells_active; i++) {
         for (j = 0; j < NF; j++) {
             // temperature in Celsius
             atmos[i].air_temp[j] -= CONST_TKFRZ;
@@ -224,7 +224,7 @@ vic_force(void)
 
 
     // Put average value in NR field
-    for (i = 0; i < local_domain.ncells; i++) {
+    for (i = 0; i < local_domain.ncells_active; i++) {
         atmos[i].air_temp[NR] = average(atmos[i].air_temp, NF);
         // For precipitation put total
         atmos[i].prec[NR] = average(atmos[i].prec, NF) * NF;
@@ -252,7 +252,7 @@ vic_force(void)
 
     // Update the veg_hist structure with the current vegetation parameters.
     // Currently only implemented for climatological values in image mode
-    for (i = 0; i < local_domain.ncells; i++) {
+    for (i = 0; i < local_domain.ncells_active; i++) {
         for (v = 0; v < options.NVEGTYPES; v++) {
             vidx = veg_con_map[i].vidx[v];
             if (vidx != -1) {

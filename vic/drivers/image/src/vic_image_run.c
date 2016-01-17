@@ -50,7 +50,7 @@ vic_image_run(void)
 
     size_t                     i;
 
-    for (i = 0; i < local_domain.ncells; i++) {
+    for (i = 0; i < local_domain.ncells_active; i++) {
         vic_run(&(atmos[i]), &(all_vars[i]), &dmy[current], &global_param,
                 &lake_con, &(soil_con[i]), veg_con[i], veg_lib[i], veg_hist[i]);
         put_data(&(all_vars[i]), &(atmos[i]), &(soil_con[i]), veg_con[i],

@@ -397,10 +397,11 @@ typedef struct {
  * @brief   This structure stores output information for one variable.
  *****************************************************************************/
 typedef struct {
-    char varname[30];        /**< name of variable */
-    bool write;              /**< FALSE = don't write; TRUE = write */
-    char format[10];         /**< format, when written to an ascii file;
-                                should match the desired fprintf format specifier, e.g. %.4f */
+    char varname[MAXSTRING];  /**< name of variable */
+    bool write;               /**< FALSE = don't write; TRUE = write */
+    char format[MAXSTRING];   /**< format, when written to an ascii file;
+                                   should match the desired fprintf format
+                                   specifier, e.g. %.4f */
     unsigned short int type;  /**< type, when written to a binary file;
                                  OUT_TYPE_USunsigned short  = unsigned short int
                                  OUT_TYPE_SINT   = short int

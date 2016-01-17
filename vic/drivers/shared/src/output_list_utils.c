@@ -100,12 +100,7 @@ create_output_list()
     strcpy(out_data[OUT_LAKE_RO_IN_V].varname, "OUT_LAKE_RO_IN_V");    /* incoming volumetric runoff from lake catchment [m3] (ALMA_OUTPUT: [m3/s]) */
     strcpy(out_data[OUT_LAKE_VAPFLX].varname, "OUT_LAKE_VAPFLX");      /* sublimation from lake snow pack [mm] (ALMA_OUTPUT: [mm/s]) */
     strcpy(out_data[OUT_LAKE_VAPFLX_V].varname, "OUT_LAKE_VAPFLX_V");  /* volumetric sublimation from lake snow pack [m3] (ALMA_OUTPUT: [m3/s]) */
-    strcpy(out_data[OUT_PET_SATSOIL].varname, "OUT_PET_SATSOIL");      /* potential evap from saturated bare soil [mm] (ALMA_OUTPUT: [mm/s]) */
-    strcpy(out_data[OUT_PET_H2OSURF].varname, "OUT_PET_H2OSURF");      /* potential evap from open water [mm] (ALMA_OUTPUT: [mm/s]) */
-    strcpy(out_data[OUT_PET_SHORT].varname, "OUT_PET_SHORT");          /* potential evap from short reference crop (grass) [mm] (ALMA_OUTPUT: [mm/s]) */
-    strcpy(out_data[OUT_PET_TALL].varname, "OUT_PET_TALL");            /* potential evap from tall reference crop (alfalfa) [mm] (ALMA_OUTPUT: [mm/s]) */
-    strcpy(out_data[OUT_PET_NATVEG].varname, "OUT_PET_NATVEG");        /* potential evap from current vegetation and current canopy resistance [mm] (ALMA_OUTPUT: [mm/s]) */
-    strcpy(out_data[OUT_PET_VEGNOCR].varname, "OUT_PET_VEGNOCR");      /* potential evap from current vegetation and 0 canopy resistance bare soil [mm] (ALMA_OUTPUT: [mm/s]) */
+    strcpy(out_data[OUT_PET].varname, "OUT_PET");                      /* potential evap from current vegetation and current canopy resistance [mm] (ALMA_OUTPUT: [mm/s]) */
     strcpy(out_data[OUT_PREC].varname, "OUT_PREC");                    /* incoming precipitation [mm] (ALMA_OUTPUT: [mm/s]) */
     strcpy(out_data[OUT_RAINF].varname, "OUT_RAINF");                  /* rainfall [mm] (ALMA_OUTPUT: [mm/s]) */
     strcpy(out_data[OUT_REFREEZE].varname, "OUT_REFREEZE");            /* refreezing of water in the snow [mm] (ALMA_OUTPUT: [mm/s]) */
@@ -323,12 +318,7 @@ create_output_list()
     out_data[OUT_LAKE_RO_IN_V].aggtype = AGG_TYPE_SUM;
     out_data[OUT_LAKE_VAPFLX].aggtype = AGG_TYPE_SUM;
     out_data[OUT_LAKE_VAPFLX_V].aggtype = AGG_TYPE_SUM;
-    out_data[OUT_PET_SATSOIL].aggtype = AGG_TYPE_SUM;
-    out_data[OUT_PET_H2OSURF].aggtype = AGG_TYPE_SUM;
-    out_data[OUT_PET_SHORT].aggtype = AGG_TYPE_SUM;
-    out_data[OUT_PET_TALL].aggtype = AGG_TYPE_SUM;
-    out_data[OUT_PET_NATVEG].aggtype = AGG_TYPE_SUM;
-    out_data[OUT_PET_VEGNOCR].aggtype = AGG_TYPE_SUM;
+    out_data[OUT_PET].aggtype = AGG_TYPE_SUM;
     out_data[OUT_PREC].aggtype = AGG_TYPE_SUM;
     out_data[OUT_RAINF].aggtype = AGG_TYPE_SUM;
     out_data[OUT_REFREEZE].aggtype = AGG_TYPE_SUM;

@@ -75,9 +75,9 @@ double calc_surf_energy_bal(double, double, double, double, double, double,
                             double, double, double, double, double, double,
                             double, double, double, double, double, double,
                             double, double, double, double, double, double *,
-                            double *, double *, double *, double *, double,
-                            double *, double *, double, double *, double *, int,
-                            int, size_t, size_t, double, size_t,
+                            double *, double *, double *, double *, double *,
+                            double, double *, double *, double, double *,
+                            double *, int, int, size_t, size_t, double, size_t,
                             unsigned short int, int, unsigned short int,
                             double *, double *, atmos_data_struct *,
                             dmy_struct *, energy_bal_struct *,
@@ -108,8 +108,9 @@ double canopy_evap(layer_data_struct *, veg_var_struct *, bool,
 void colavg(double *, double *, double *, double, double *, int, double,
             double);
 double compute_coszen(double, double, double, unsigned short int, unsigned int);
-void compute_pot_evap(unsigned short int, dmy_struct *, double, double, double,
-                      double, double, double, double **, double *);
+void compute_pot_evap(double, double, double, double, double, double, double,
+                      double, double, double, double *, char, double, double,
+                      double, double *);
 void compute_runoff_and_asat(soil_con_struct *, double *, double, double *,
                              double *);
 void compute_soil_resp(int, double *, double, double, double *, double *,
@@ -279,7 +280,7 @@ double sub_with_height(double z, double es, double Wind, double AirDens,
                        double ZO, double EactAir, double F, double hsalt,
                        double phi_r, double ushear, double Zrh);
 int surface_fluxes(bool, double, double, double, double, double *, double *,
-                   double **, double *, double *, double *, double *, double *,
+                   double *, double *, double *, double *, double *, double *,
                    double *, double *, double *, double *, double *, size_t,
                    size_t, unsigned short int, double, unsigned short int,
                    unsigned short int, atmos_data_struct *, dmy_struct *,

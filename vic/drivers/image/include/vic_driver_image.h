@@ -43,6 +43,7 @@
  *           identical. The model is run over a list of cells.
  *****************************************************************************/
 typedef struct {
+    bool run; /**< TRUE: run grid cell. FALSE: do not run grid cell */
     double latitude; /**< latitude of grid cell center */
     double longitude; /**< longitude of grid cell center */
     double area; /**< area of grid cell */
@@ -59,7 +60,8 @@ typedef struct {
  *           model is run on a single processor, then the two are identical.
  *****************************************************************************/
 typedef struct {
-    size_t ncells; /**< number of active grid cells on domain */
+    size_t ncells_total; /**< total number of grid cells on domain */
+    size_t ncells_active; /**< number of active grid cells on domain */
     size_t n_nx; /**< size of x-index; */
     size_t n_ny; /**< size of y-index */
     location_struct *locations; /**< locations structs for local domain */

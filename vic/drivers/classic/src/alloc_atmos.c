@@ -48,29 +48,12 @@ alloc_atmos(int                 nrecs,
         if ((*atmos)[i].air_temp == NULL) {
             log_err("Memory allocation error in alloc_atmos().");
         }
-        (*atmos)[i].Catm = calloc(NR + 1, sizeof(*(*atmos)[i].Catm));
-        if ((*atmos)[i].Catm == NULL) {
-            log_err("Memory allocation error in alloc_atmos().");
-        }
-        (*atmos)[i].channel_in =
-            calloc(NR + 1, sizeof(*(*atmos)[i].channel_in));
-        if ((*atmos)[i].channel_in == NULL) {
-            log_err("Memory allocation error in alloc_atmos().");
-        }
         (*atmos)[i].density = calloc(NR + 1, sizeof(*(*atmos)[i].density));
         if ((*atmos)[i].density == NULL) {
             log_err("Memory allocation error in alloc_atmos().");
         }
-        (*atmos)[i].fdir = calloc(NR + 1, sizeof(*(*atmos)[i].fdir));
-        if ((*atmos)[i].fdir == NULL) {
-            log_err("Memory allocation error in alloc_atmos().");
-        }
         (*atmos)[i].longwave = calloc(NR + 1, sizeof(*(*atmos)[i].longwave));
         if ((*atmos)[i].longwave == NULL) {
-            log_err("Memory allocation error in alloc_atmos().");
-        }
-        (*atmos)[i].par = calloc(NR + 1, sizeof(*(*atmos)[i].par));
-        if ((*atmos)[i].par == NULL) {
             log_err("Memory allocation error in alloc_atmos().");
         }
         (*atmos)[i].prec = calloc(NR + 1, sizeof(*(*atmos)[i].prec));

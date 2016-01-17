@@ -421,13 +421,17 @@ typedef struct {
     double EMISS_H2O;  /**< Emissivity of open water surface */
 
     // Soil Constraints
+    double SOIL_RARC;  /**< Architectural resistance (s/m) of soil when computing soil evaporation via Penman-Monteith eqn */
     double SOIL_RESID_MOIST;  /**< Default residual moisture content of soil colum */
     double SOIL_SLAB_MOIST_FRACT;  /**< Volumetric moisture content (fraction of porosity) in the soil/rock below the bottom soil layer; this assumes that the soil below the bottom layer has the same texture as the bottom layer. */
+    double SOIL_WINDH;  /**< Default wind measurement height over soil (m) */
 
     // Vegetation Parameters
     double VEG_LAI_SNOW_MULTIPLIER;  /**< multiplier to calculate the amount of available snow interception as a function of LAI (m) */
-    double VEG_MIN_INTERCEPTION_STORAGE;  /**< the amount of snow on the canopy that can only be melted off. (m) */
     double VEG_LAI_WATER_FACTOR;  /**< Coefficient multiplied by the LAI to determine the amount of water that can be stored in the canopy */
+    double VEG_MIN_INTERCEPTION_STORAGE;  /**< the amount of snow on the canopy that can only be melted off. (m) */
+    double VEG_RATIO_DH_HEIGHT;  /**< Ratio of displacement height (m) to vegetation height (m) */
+    double VEG_RATIO_RL_HEIGHT;  /**< Ratio of roughness length (m) to vegetation height (m) */
 
     // Canopy Parameters
     double CANOPY_CLOSURE;  /**< Threshold vapor pressure deficit for stomatal closure (Pa) */
@@ -672,6 +676,10 @@ typedef struct {
     double fetch;           /**< Average fetch length for each vegetation class. */
     int LAKE;               /**< TRUE = this tile is a lake/wetland tile */
     double *CanopLayerBnd;  /**< Upper boundary of each canopy layer, expressed as fraction of total LAI */
+    double albedo[MONTHS_PER_YEAR];   /**< climatological vegetation albedo (fraction) */
+    double LAI[MONTHS_PER_YEAR];      /**< climatological leaf area index (m2/m2) */
+    double vegcover[MONTHS_PER_YEAR]; /**< climatological fractional area covered by plants within the tile (fraction) */
+    double Wdmax[MONTHS_PER_YEAR];    /**< climatological maximum dew holding capacity (mm) */
 } veg_con_struct;
 
 /******************************************************************************

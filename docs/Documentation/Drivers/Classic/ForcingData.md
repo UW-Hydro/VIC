@@ -1,8 +1,8 @@
 # VIC Forcings Files
 
-The VIC Classic Driver requires subdaily forcings.  The required forcing variables vary depending options set in the global parameter file.
+The VIC Classic Driver requires subdaily forcings (meteorological or other).  The required forcing variables vary depending options set in the global parameter file.
 
-#### Required in all simulations:
+#### Meteorological Forcings, Required in all simulations:
 
 | Variable   | Description                         | Units           |
 |------------|-------------------------------------|---------------- |
@@ -14,13 +14,21 @@ The VIC Classic Driver requires subdaily forcings.  The required forcing variabl
 | VP         | Vapor pressure                      | kPa             |
 | WIND       | Wind speed                          | m/s             |
 
-#### Required when LAKES is TRUE:
+#### Vegetation Timeseries Forcings (Optional):
+
+| Variable   | Description                                              | Units                       |
+|------------|----------------------------------------------------------|---------------------------- |
+| ALBEDO     | Surface Albedo                                           | fraction (between 0 and 1)  |
+| LAI_IN     | Leaf Area Index                                          | m<sup>2</sup>/m<sup>2</sup> |
+| VEGCOVER   | Partial veg cover fraction ( = 1 - canopy gap fraction ) | fraction (between 0 and 1)  |
+
+#### Lake Forcings, Required when LAKES is TRUE:
 
 | Variable   | Description                                              | Units           |
 |------------|----------------------------------------------------------|---------------- |
 | CHANNEL_IN | Incoming channel flow (total volume over the time step)  | m<sup>3</sup>   |
 
-#### Required when LAKES is TRUE:
+#### Carbon Cycle Forcings, Required when CARBON is TRUE:
 
 | Variable   | Description                                   | Units           |
 |------------|-----------------------------------------------|---------------- |

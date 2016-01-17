@@ -1131,7 +1131,7 @@ surface_fluxes(bool                 overstory,
     (*inflow) = ppt;
 
     ErrorFlag = runoff(cell, energy, soil_con, ppt, soil_con->frost_fract,
-                       gp->dt, options.Nnode);
+                       options.Nnode);
 
     return(ErrorFlag);
 }

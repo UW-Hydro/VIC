@@ -31,7 +31,8 @@
  * @brief    Compute potential evaporation.
  *****************************************************************************/
 void
-compute_pot_evap(double  rsmin,
+compute_pot_evap(size_t  model_steps_per_day,
+                 double  rsmin,
                  double  albedo,
                  double  shortwave,
                  double  net_longwave,
@@ -48,7 +49,6 @@ compute_pot_evap(double  rsmin,
                  double *pot_evap)
 {
     extern parameters_struct param;
-    extern global_param_struct global;
 
     double                   net_short;
     double                   gsm_inv;
@@ -76,11 +76,11 @@ compute_pot_evap(double  rsmin,
     }
     Epot_veg =
         penman(tair, elevation, net_rad, vpd, ra_veg, rc, rarc) /
-        global.model_steps_per_day;
+        model_steps_per_day;
 
     Epot_soil =
         penman(tair, elevation, net_rad, vpd, ra_soil, 0.0,
-               param.SOIL_RARC) / global.model_steps_per_day;
+               param.SOIL_RARC) / model_steps_per_day;
 
     *pot_evap = vegcover * Epot_veg + (1 - vegcover) * Epot_soil;
 }

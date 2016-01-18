@@ -108,9 +108,9 @@ double canopy_evap(layer_data_struct *, veg_var_struct *, bool,
 void colavg(double *, double *, double *, double, double *, int, double,
             double);
 double compute_coszen(double, double, double, unsigned short int, unsigned int);
-void compute_pot_evap(double, double, double, double, double, double, double,
-                      double, double, double *, char, double, double, double,
-                      double *);
+void compute_pot_evap(size_t, double, double, double, double, double, double,
+                      double, double, double, double *, char, double, double,
+                      double, double *);
 void compute_runoff_and_asat(soil_con_struct *, double *, double, double *,
                              double *);
 void compute_soil_resp(int, double *, double, double, double *, double *,

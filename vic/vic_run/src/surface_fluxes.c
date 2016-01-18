@@ -794,7 +794,7 @@ surface_fluxes(bool                 overstory,
            Compute Potential Evap
         **************************************/
 
-        compute_pot_evap(gp->dt, vic_run_veg_lib[veg_class].rmin,
+        compute_pot_evap(vic_run_veg_lib[veg_class].rmin,
                          iter_soil_veg_var.albedo, atmos->shortwave[hidx],
                          iter_soil_energy.NetLongAtmos,
                          vic_run_veg_lib[veg_class].RGL, Tair, VPDcanopy,

@@ -48,7 +48,7 @@ runoff(cell_data_struct  *cell,
     size_t                     time_step;
     int                        last_index;
     int                        tmplayer;
-    size_t                     fidx;
+    int                        fidx;
     int                        ErrorFlag;
     double                     A, frac;
     double                     tmp_runoff;

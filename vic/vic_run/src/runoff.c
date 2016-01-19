@@ -98,7 +98,7 @@ runoff(cell_data_struct  *cell,
     runoff_steps_per_dt = global_param.runoff_steps_per_day /
                           global_param.model_steps_per_day;
 
-    for (fidx = 0; fidx < options.Nfrost; fidx++) {
+    for (fidx = 0; fidx < (int)options.Nfrost; fidx++) {
         baseflow[fidx] = 0;
     }
 
@@ -109,7 +109,7 @@ runoff(cell_data_struct  *cell,
         if (evap[lindex][0] > 0) { // if there is positive evaporation
             sum_liq = 0;
             // compute available soil moisture for each frost sub area.
-            for (fidx = 0; fidx < options.Nfrost; fidx++) {
+            for (fidx = 0; fidx < (int)options.Nfrost; fidx++) {
                 avail_liq[lindex][fidx] =
                     (org_moist[lindex] - layer[lindex].ice[fidx] -
                      resid_moist[lindex]);
@@ -128,20 +128,20 @@ runoff(cell_data_struct  *cell,
             }
             // distribute evaporation between frost sub areas by percentage
             evap_sum = evap[lindex][0];
-            for (fidx = options.Nfrost - 1; fidx >= 0; fidx--) {
+            for (fidx = (int)options.Nfrost - 1; fidx >= 0; fidx--) {
                 evap[lindex][fidx] = avail_liq[lindex][fidx] * evap_fraction;
                 avail_liq[lindex][fidx] -= evap[lindex][fidx];
                 evap_sum -= evap[lindex][fidx] * frost_fract[fidx];
             }
         }
         else {
-            for (fidx = options.Nfrost - 1; fidx > 0; fidx--) {
+            for (fidx = (int)options.Nfrost - 1; fidx > 0; fidx--) {
                 evap[lindex][fidx] = evap[lindex][0];
             }
         }
     }
 
-    for (fidx = 0; fidx < options.Nfrost; fidx++) {
+    for (fidx = 0; fidx < (int)options.Nfrost; fidx++) {
         /** ppt = amount of liquid water coming to the surface **/
         inflow = ppt;
 

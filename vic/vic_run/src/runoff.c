@@ -175,7 +175,7 @@ runoff(cell_data_struct  *cell,
         // save dt_runoff based on initial runoff estimate,
         // since we will modify total runoff below for the case of completely saturated soil
         tmp_dt_runoff[fidx] = runoff[fidx] /
-                                    (double) runoff_steps_per_dt;
+                              (double) runoff_steps_per_dt;
 
         /**************************************************
            Compute Flow Between Soil Layers ()

@@ -72,7 +72,7 @@ This is a major update from VIC 4. The VIC 5.0.0 release aims to have nearly ide
 	- `OUT_DT` (int, units: hours) has been changed to `OUTPUT_STEPS_PER_DAY` (int)
 	- `FORCE_DT` (int, units: hours) has been changed to `FORCE_STEPS_PER_DAY` (int)
 
-3.  Classic Driver Output Variables ([GH#350](https://github.com/UW-Hydro/VIC/pull/350))
+3.  Classic Driver Output Variables ([GH#352](https://github.com/UW-Hydro/VIC/pull/352))
 
 	Computation of potential evapotranspiration (PET) has been simplified, reducing the number of output variables from 6 to 1.  The following output variables have been removed:
 

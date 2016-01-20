@@ -126,13 +126,13 @@ The following options control input and output of state files.
 | STATEDAY              | integer   | day               | Day at which model simulation state should be saved. State will be saved at the end of the final timestep on this day. <br><br>*NOTE*: if STATENAME is not specified, STATEDAY will be ignored.                                                                                                                                            |
 | BINARY_STATE_FILE     | string    | TRUE or FALSE     | If FALSE, VIC reads/writes the intial/output state files in ASCII format. If TRUE, VIC reads/writes intial/output state files in binary format. <br><br>*NOTE*: if INIT_STATE or STATENAME are not specified, BINARY_STATE_FILE will be ignored.                                                                                                                    |
 
-# Define Meteorological Forcing Files
+# Define Meteorological and Vegetation Forcing Files
 
-This section describes how to define the forcing files needed by the VIC model.
+This section describes how to define the forcing files needed by the VIC model.  VIC handles vegetation historical timeseries (LAI, albedo, partial vegetation cover fraction) similarly to meteorological forcings (except that they are only specified at a daily time step and are disaggregated to sub-daily by holding constant over the day).
 
-Unlike model parameters, for which 1 file contains data for all grid cells, the meteorological forcings are stored as a separate time series for each grid cell. If the input forcings are daily and VIC is running with a sub-daily model timestep, it will disaggregate the daily forcings to sub-daily, using the "mtclim" algorithm of Thornton and Running (ref?). However, VIC will not disaggregate sub-daily forcings from one time step length to another. If the input forcings are sub-daily, and VIC is running with a different sub-daily model timesetep, VIC will exit. Input files can be ASCII or Binary (signed or unsigned short ints) column formatted. Columns in the file must be in the same order as they are defined in the global control file.
+Unlike model parameters, for which 1 file contains data for all grid cells, the meteorological and vegetation forcings are stored as a separate time series for each grid cell. If the input forcings are daily and VIC is running with a sub-daily model timestep, it will disaggregate the daily forcings to sub-daily, using the algorithms described in [Bohn et al. (2013a)](../Documentation/References.md#other-historical-references). However, VIC will not disaggregate sub-daily forcings from one time step length to another. If the input forcings are sub-daily, and VIC is running with a different sub-daily model timesetep, VIC will exit. Input files can be ASCII or Binary (signed or unsigned short ints) column formatted. Columns in the file must be in the same order as they are defined in the global control file.
 
-VIC will allow forcing data to be stored in two different files per grid cell (e.g., precip and wind speed in one file, tmin and tmax in another file). Note that if you are using two forcing files per grid cell, the parameters for the first file must be defined before those for the second. **Bold** numbers indicate the order in which these values should be defined, after each forcing file (FORCING1 or FORCING2). Options that do not have a bold number apply to both forcing file types and should appear after the numbered options.
+VIC will allow forcing data to be stored in two different files per grid cell (e.g., precip and wind speed in one file, tmin and tmax in another file; or meteorological variables in one file, and vegetation timeseries in another file). Note that if you are using two forcing files per grid cell, the parameters for the first file must be defined before those for the second. **Bold** numbers indicate the order in which these values should be defined, after each forcing file (FORCING1 or FORCING2). Options that do not have a bold number apply to both forcing file types and should appear after the numbered options.
 
 All FORCING filenames are actually the pathname, and prefix for gridded data types: ex. DATA/forcing_YY.YYY_XX.XXX. Latitude and longitude index suffix is added by VIC based on GRID_DECIMAL parameter defined above, and the latitude and longitude values defined in the [soil parameter file](SoilParam.md).
 
@@ -142,8 +142,8 @@ All FORCING filenames are actually the pathname, and prefix for gridded data typ
 | (1*) FORCING2     | string    | pathname and file prefix  | Second forcing file name, or FALSE if only one file used. ***This must precede all other forcing parameters used to define the second forcing file, and follow those used to define the first forcing file.***                                                                                                                        |
 | (2) FORCE_FORMAT  | string    | BINARY or ASCII           | Defines the format type for the forcing files.                                                                                                                                                                                                                                                                                        |
 | (3)FORCE_ENDIAN   | string    | BIG or LITTLE             | Identifies the architecture of the machine on which the binary forcing files were created:  <li>**BIG** = big-endian (e.g. SUN).  <li>**LITTLE** = little-endian (e.g. PC/linux). Model will identify the endian of the current machine, and swap bytes if necessary. Required for binary forcing file, not used for ASCII forcing file. |
-| (4) N_TYPES       | int       | N/A                       | Number of columns in the current data file.                                                                                                                                                                                                                                                                                           |
-| (5) [FORCE_TYPE](InputVarList.md) | string<br>string<br>float | VarName<br>(un)signed<br>multiplier | Defines what forcing types are read from the file, and in what order. For ASCII file only the forcing type needs to be defined, but for Binary file each line must also define whether the column is SIGNED or UNSIGNED short int and by what factor values are multiplied before being written to output. [Click here for details.](InputVarList.md) |
+| (4) N_TYPES       | int       | N/A                       | Number of columns in the current data file, with the following exception: for the vegetation history variables ALBEDO, LAI_IN, and VEGCOVER, there must be multiple columns for these variables, one per vegetation tile. In this case, ALBEDO, LAI_IN, and VEGCOVER each count as only 1 variable despite covering multiple columns.    |
+| (5) [FORCE_TYPE](InputVarList.md) | string<br>string<br>float | VarName<br>(un)signed<br>multiplier | Defines what forcing types are read from the file, and in what order. For ASCII file only the forcing type needs to be defined, but for Binary file each line must also define whether the column is SIGNED or UNSIGNED short int and by what factor values are multiplied before being written to output. Note: Unlike other variables, ALBEDO, LAI_IN, and VEGCOVER, each span multiple columns, one column per veg tile.  This will generally vary from one grid cell to the next as the number of veg tiles varies.  However, ALBEDO, LAI_IN, and VEGCOVER should each have only one FORCE_TYPE entry.  [Click here for details.](InputVarList.md) |
 | (6) FORCE_DT      | integer   | hours                     | Time step length of the current input files in hours                                                                                                                                                                                                                                                                                  |
 | (7) FORCEYEAR     | integer   | year                      | Year meteorological forcing files start                                                                                                                                                                                                                                                                                               |
 | (8) FORCEMONTH    | integer   | month                     | Month meteorological forcing files start                                                                                                                                                                                                                                                                                              |
@@ -180,6 +180,28 @@ _Examples._ a standard four column daily forcing data file will be defined as:
     FORCE_FORMAT    BINARY
     FORCE_ENDIAN    LITTLE
     FORCE_DT    24
+
+## Vegetation Timeseries Variables
+
+For each variable, there must be a separate column for each vegetation tile in the grid cell (which generally will vary from one grid cell to the next).  For example, if there are 3 vegetation tiles in a particular grid cell; and you wish to supply VIC with LAI, partial vegetation cover fraction, and albedo; the input file for the given cell should look like:
+
+    LAI1 LAI2 LAI3 VEGCOVER1 VEGCOVER2 VEGCOVER3 ALBEDO1 ALBEDO2 ALBEDO3
+
+where the 1, 2, and 3 correspond to the first, second, and third tiles listed in the vegetation parameter file, respectively; and the file should be described in the global parameter file as:
+
+    FORCING2    FORCING_DATA/veg_hist/veg_hist__
+    N_TYPES     3
+    FORCE_TYPE  LAI_IN
+    FORCE_TYPE  VEGCOVER
+    FORCE_TYPE  ALBEDO
+    FORCE_FORMAT    ASCII
+    FORCE_DT    24
+    FORCEYEAR   1950
+    FORCEMONTH  1
+    FORCEDAY    1
+    FORCEHOUR   0
+
+NOTE that N_TYPES is 3 in the example above, not 9.  This is because N_TYPES only counts the number of different variable types, NOT the total number of columns.
 
 
 # Define Parameter Files
@@ -245,6 +267,7 @@ The following options are no longer supported.
 | GRND_FLUX     | string    | TRUE or FALSE     | Versions 4.1.1 and earlier. If TRUE, compute ground heat flux and energy balance; if FALSE, do not compute ground heat flux. Default: If FULL_ENERGY or FROZEN_SOIL are TRUE, GRND_FLUX is automatically set to TRUE; otherwise GRND_FLUX is automatically set to FALSE.  |
 | MIN_LIQ       | string    | TRUE or FALSE     | Version 4.1.1 only. Options for handling minimum soil moisture in presence of ice (default is FALSE): <li>**FALSE** = Use residual moisture as lower bound on soil moisture in Brooks-Corey/Campbell and other relationships involving liquid water. <li>**TRUE** = Use (`residual moisture * unfrozen water fraction` as function of temperature) as lower bound on soil moisture in Brooks-Corey/Campbell and other relationships involving liquid water. |
 | GLOBAL_LAI    | string    | TRUE or FALSE     | If TRUE the vegetation parameter file contains an extra line for each vegetation type that defines monthly LAI values for each vegetation type for each grid cell. <br><br>*NOTE*: This option has been replaced by the two options LAI_SRC and VEGPARAM_LAI. |
+| OUTPUT_FORCE  | string    | TRUE or FALSE     | If TRUE, perform disaggregation of forcings, skip the simulation, and output the disaggregated forcings. |
 | PRT_FLUX      | string    | TRUE or FALSE     | Versions 4.1.1 and earlier. If TRUE print energy fluxes debugging files .  |
 | PRT_BALANCE   | string    | TRUE or FALSE     | Versions 4.1.1 and earlier. If TRUE print water balance debugging files .  |
 | PRT_SOIL      | string    | TRUE or FALSE     | Versions 4.1.1 and earlier. If TRUE print soil parameter debugging files .  |

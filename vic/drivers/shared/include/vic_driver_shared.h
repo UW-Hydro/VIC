@@ -162,12 +162,7 @@ enum
     OUT_LAKE_RO_IN_V,     /**< incoming volumetric runoff from lake catchment [m3] (ALMA_OUTPUT: [m3/s]) */
     OUT_LAKE_VAPFLX,      /**< outgoing sublimation from snow on top of lake ice [mm] (ALMA_OUTPUT: [mm/s]) */
     OUT_LAKE_VAPFLX_V,    /**< outgoing volumetric sublimation from snow on top of lake ice [m3] (ALMA_OUTPUT: [m3/s]) */
-    OUT_PET_SATSOIL,      /**< potential evap from saturated bare soil [mm] (ALMA_OUTPUT: [mm/s]) */
-    OUT_PET_H2OSURF,      /**< potential evap from open water [mm] (ALMA_OUTPUT: [mm/s]) */
-    OUT_PET_SHORT,        /**< potential evap (transpiration only) from short reference crop (grass) [mm] (ALMA_OUTPUT: [mm/s]) */
-    OUT_PET_TALL,         /**< potential evap (transpiration only) from tall reference crop (alfalfa) [mm] (ALMA_OUTPUT: [mm/s]) */
-    OUT_PET_NATVEG,       /**< potential evap (transpiration only) from current vegetation and current canopy resistance [mm] (ALMA_OUTPUT: [mm/s]) */
-    OUT_PET_VEGNOCR,      /**< potential evap (transpiration only) from current vegetation and 0 canopy resistance [mm] (ALMA_OUTPUT: [mm/s]) */
+    OUT_PET,              /**< Potential evapotranspiration (= area-weighted sum of potential transpiration and potential soil evaporation).  Potential transpiration is computed using the Penman-Monteith eqn with architectural resistance and LAI of the current veg cover. [mm] (ALMA_OUTPUT: [mm/s]) */
     OUT_PREC,             /**< incoming precipitation [mm] (ALMA_OUTPUT: [mm/s]) */
     OUT_RAINF,            /**< rainfall  [mm] (ALMA_OUTPUT: [mm/s]) */
     OUT_REFREEZE,         /**< refreezing of water in the snow  [mm] (ALMA_OUTPUT: [mm/s]) */
@@ -511,8 +506,7 @@ FILE *open_file(char string[], char type[]);
 int put_data(all_vars_struct *, atmos_data_struct *, soil_con_struct *,
              veg_con_struct *, veg_lib_struct *veg_lib, lake_con_struct *,
              out_data_struct *, save_data_struct *, int);
-void print_cell_data(cell_data_struct *cell, size_t nlayers, size_t nfrost,
-                     size_t npet);
+void print_cell_data(cell_data_struct *cell, size_t nlayers, size_t nfrost);
 void print_dmy(dmy_struct *dmy);
 void print_energy_bal(energy_bal_struct *eb, size_t nnodes, size_t nfronts);
 void print_filenames(filenames_struct *fnames);
@@ -521,7 +515,7 @@ void print_force_type(force_type_struct *force_type);
 void print_global_param(global_param_struct *gp);
 void print_lake_con(lake_con_struct *lcon, size_t nlnodes);
 void print_lake_var(lake_var_struct *lvar, size_t nlnodes, size_t nfronts,
-                    size_t nlayers, size_t nnodes, size_t nfrost, size_t npet);
+                    size_t nlayers, size_t nnodes, size_t nfrost);
 void print_layer_data(layer_data_struct *ldata, size_t nfrost);
 void print_license(void);
 void print_option(option_struct *option);

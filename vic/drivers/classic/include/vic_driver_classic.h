@@ -60,7 +60,7 @@ void print_atmos_data(atmos_data_struct *atmos, size_t nr);
 void parse_output_info(FILE *, out_data_file_struct **, out_data_struct *);
 void read_atmos_data(FILE *, global_param_struct, int, int, double **,
                      double ***);
-double **read_forcing_data(FILE * *, global_param_struct, double ****);
+double **read_forcing_data(FILE **, global_param_struct, double ****);
 void read_initial_model_state(FILE *, all_vars_struct *, int, int, int,
                               soil_con_struct *);
 lake_con_struct read_lakeparam(FILE *, soil_con_struct, veg_con_struct *);

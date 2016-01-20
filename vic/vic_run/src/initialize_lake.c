@@ -293,9 +293,7 @@ initialize_lake(lake_var_struct  *lake,
     lake->soil.zwt = 0.0;
     lake->soil.zwt_lumped = 0.0;
     if (!skip_hydro) {
-        for (k = 0; k < N_PET_TYPES; k++) {
-            lake->soil.pot_evap[k] = 0.0;
-        }
+        lake->soil.pot_evap = 0.0;
     }
     if (options.CARBON) {
         lake->soil.RhLitter = 0.0;

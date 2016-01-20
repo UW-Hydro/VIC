@@ -146,6 +146,15 @@ read_lakeparam(FILE           *lakeparam,
                     "lake parameter file must be a fraction between 0 and 1.",
                     temp.Cl[0], soil_con.gridcel);
         }
+        if (fabs(1 - temp.Cl[0] / veg_con[temp.lake_idx].Cv) > 0.01) {
+            log_err("Lake area fraction at top of lake basin (%f) for cell "
+                    "(%d) specified in the lake parameter file must equal the "
+                    "area fraction of the veg tile containing it (%f).",
+                    temp.Cl[0], soil_con.gridcel, veg_con[temp.lake_idx].Cv);
+        }
+        else {
+            temp.Cl[0] = veg_con[temp.lake_idx].Cv;
+        }
 
         fgets(tmpstr, MAXSTRING, lakeparam);
 
@@ -182,12 +191,24 @@ read_lakeparam(FILE           *lakeparam,
             if (i == 0) {
                 temp.maxdepth = temp.z[i];
                 tempdz = (temp.maxdepth) / ((double) temp.numnod);
+                if (fabs(1 - temp.Cl[0] / veg_con[temp.lake_idx].Cv) > 0.01) {
+                    log_err("Lake area fraction at top of lake basin (%f) "
+                            "for cell (%d) specified in the lake parameter "
+                            "file must equal the area fraction of the veg "
+                            "tile containing it (%f).", temp.Cl[0],
+                            soil_con.gridcel,
+                            veg_con[temp.lake_idx].Cv);
+                }
+                else {
+                    temp.Cl[0] = veg_con[temp.lake_idx].Cv;
+                }
             }
 
-            if (temp.Cl[0] < 0.0 || temp.Cl[0] > 1.0) {
-                log_err("Lake area fraction (%f) for cell (%d) specified in "
-                        "the lake parameter file must be a fraction between 0 "
-                        "and 1.", temp.Cl[0], soil_con.gridcel);
+            if (temp.Cl[i] < 0.0 || temp.Cl[i] > 1.0) {
+                log_err("Lake layer %d area fraction (%f) for cell (%d) "
+                        "specified in the lake parameter file must be a "
+                        "fraction between 0 and 1.", (int)i, temp.Cl[0],
+                        soil_con.gridcel);
             }
         }
         temp.z[temp.numnod] = 0.0;

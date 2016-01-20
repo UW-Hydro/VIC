@@ -63,33 +63,6 @@
 #define MIN_SUBDAILY_STEPS_PER_DAY  4
 #define MAX_SUBDAILY_STEPS_PER_DAY  1440
 
-/***** Potential Evap types *****/
-#define N_PET_TYPES 6
-#define N_PET_TYPES_NON_NAT 4
-#define PET_SATSOIL 0
-#define PET_H2OSURF 1
-#define PET_SHORT   2
-#define PET_TALL    3
-#define N_PET_TYPES_NAT 2
-#define PET_NATVEG  4
-#define PET_VEGNOCR 5
-
-/***** Hard-coded veg class parameters (mainly for pot_evap) *****/
-extern bool   ref_veg_over[];
-extern double ref_veg_rarc[];
-extern double ref_veg_rmin[];
-extern double ref_veg_lai[];
-extern double ref_veg_albedo[];
-extern double ref_veg_vegcover[];
-extern double ref_veg_rough[];
-extern double ref_veg_displ[];
-extern double ref_veg_wind_h[];
-extern double ref_veg_RGL[];
-extern double ref_veg_rad_atten[];
-extern double ref_veg_wind_atten[];
-extern double ref_veg_trunk_ratio[];
-extern bool   ref_veg_ref_crop[];
-
 #ifndef WET
 #define WET 0
 #define DRY 1
@@ -421,13 +394,17 @@ typedef struct {
     double EMISS_H2O;  /**< Emissivity of open water surface */
 
     // Soil Constraints
+    double SOIL_RARC;  /**< Architectural resistance (s/m) of soil when computing soil evaporation via Penman-Monteith eqn */
     double SOIL_RESID_MOIST;  /**< Default residual moisture content of soil colum */
     double SOIL_SLAB_MOIST_FRACT;  /**< Volumetric moisture content (fraction of porosity) in the soil/rock below the bottom soil layer; this assumes that the soil below the bottom layer has the same texture as the bottom layer. */
+    double SOIL_WINDH;  /**< Default wind measurement height over soil (m) */
 
     // Vegetation Parameters
     double VEG_LAI_SNOW_MULTIPLIER;  /**< multiplier to calculate the amount of available snow interception as a function of LAI (m) */
-    double VEG_MIN_INTERCEPTION_STORAGE;  /**< the amount of snow on the canopy that can only be melted off. (m) */
     double VEG_LAI_WATER_FACTOR;  /**< Coefficient multiplied by the LAI to determine the amount of water that can be stored in the canopy */
+    double VEG_MIN_INTERCEPTION_STORAGE;  /**< the amount of snow on the canopy that can only be melted off. (m) */
+    double VEG_RATIO_DH_HEIGHT;  /**< Ratio of displacement height (m) to vegetation height (m) */
+    double VEG_RATIO_RL_HEIGHT;  /**< Ratio of roughness length (m) to vegetation height (m) */
 
     // Canopy Parameters
     double CANOPY_CLOSURE;  /**< Threshold vapor pressure deficit for stomatal closure (Pa) */
@@ -672,6 +649,10 @@ typedef struct {
     double fetch;           /**< Average fetch length for each vegetation class. */
     int LAKE;               /**< TRUE = this tile is a lake/wetland tile */
     double *CanopLayerBnd;  /**< Upper boundary of each canopy layer, expressed as fraction of total LAI */
+    double albedo[MONTHS_PER_YEAR];   /**< climatological vegetation albedo (fraction) */
+    double LAI[MONTHS_PER_YEAR];      /**< climatological leaf area index (m2/m2) */
+    double vegcover[MONTHS_PER_YEAR]; /**< climatological fractional area covered by plants within the tile (fraction) */
+    double Wdmax[MONTHS_PER_YEAR];    /**< climatological maximum dew holding capacity (mm) */
 } veg_con_struct;
 
 /******************************************************************************
@@ -805,7 +786,7 @@ typedef struct {
     double CSlow;                      /**< carbon storage in slow pool [gC/m2] */
     double inflow;                     /**< moisture that reaches the top of
                                           the soil column (mm) */
-    double pot_evap[N_PET_TYPES];      /**< array of different types of potential evaporation (mm) */
+    double pot_evap;                   /**< potential evaporation (mm) */
     double runoff;                     /**< runoff from current cell (mm/TS) */
     layer_data_struct layer[MAX_LAYERS]; /**< structure containing soil variables
                                             for each layer (see above) */

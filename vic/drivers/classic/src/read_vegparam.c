@@ -227,6 +227,13 @@ read_vegparam(FILE  *vegparam,
             free(vegarr[k]);
         }
 
+        for (j = 0; j < MONTHS_PER_YEAR; j++) {
+            temp[i].albedo[j] = veg_lib[temp[i].veg_class].albedo[j];
+            temp[i].LAI[j] = veg_lib[temp[i].veg_class].LAI[j];
+            temp[i].vegcover[j] = veg_lib[temp[i].veg_class].vegcover[j];
+            temp[i].Wdmax[j] = veg_lib[temp[i].veg_class].Wdmax[j];
+        }
+
         if (options.VEGPARAM_LAI) {
             // Read the LAI line
             if (fgets(line, MAXSTRING, vegparam) == NULL) {
@@ -258,10 +265,10 @@ read_vegparam(FILE  *vegparam,
                 for (j = 0; j < MONTHS_PER_YEAR; j++) {
                     tmp = atof(vegarr[j]);
                     if (tmp != NODATA_VH) {
-                        veg_lib[temp[i].veg_class].LAI[j] = tmp;
+                        temp[i].LAI[j] = tmp;
                     }
                     if (veg_lib[temp[i].veg_class].overstory &&
-                        veg_lib[temp[i].veg_class].LAI[j] == 0) {
+                        temp[i].LAI[j] == 0) {
                         log_err("cell %d, veg tile %d: the specified "
                                 "veg class (%d) is listed as an overstory "
                                 "class in the veg LIBRARY, but the LAI given "
@@ -269,11 +276,9 @@ read_vegparam(FILE  *vegparam,
                                 "month %zu is 0.", gridcel, i + 1,
                                 temp[i].veg_class + 1, j + 1);
                     }
-                    veg_lib[temp[i].veg_class].Wdmax[j] =
+                    temp[i].Wdmax[j] =
                         param.VEG_LAI_WATER_FACTOR *
-                        veg_lib[temp[i].
-                                veg_class].LAI
-                        [j];
+                        temp[i].LAI[j];
                 }
             }
             for (k = 0; k < Nfields; k++) {
@@ -312,7 +317,7 @@ read_vegparam(FILE  *vegparam,
                 for (j = 0; j < MONTHS_PER_YEAR; j++) {
                     tmp = atof(vegarr[j]);
                     if (tmp != NODATA_VH) {
-                        veg_lib[temp[i].veg_class].vegcover[j] = tmp;
+                        temp[i].vegcover[j] = tmp;
                     }
                 }
             }
@@ -352,7 +357,7 @@ read_vegparam(FILE  *vegparam,
                 for (j = 0; j < MONTHS_PER_YEAR; j++) {
                     tmp = atof(vegarr[j]);
                     if (tmp != NODATA_VH) {
-                        veg_lib[temp[i].veg_class].albedo[j] = tmp;
+                        temp[i].albedo[j] = tmp;
                     }
                 }
             }

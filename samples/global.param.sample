@@ -7,12 +7,12 @@
 #######################################################################
 NLAYER		3	# number of soil layers
 NODES		10	# number of soil thermal nodes
-MODEL_STEPS_PER_DAY 	3	# model time step in hours (set to 1 if FULL_ENERGY = FALSE, set to > 1 if FULL_ENERGY = TRUE)
-SNOW_STEPS_PER_DAY	3	# time step in hours for which to solve the snow model (should = MODEL_STEPS_PER_DAY if MODEL_STEPS_PER_DAY < 24)
+MODEL_STEPS_PER_DAY 	8	# number of model time steps per day (set to 1 if FULL_ENERGY = FALSE, set to > 1 if FULL_ENERGY = TRUE)
+SNOW_STEPS_PER_DAY	8	# number of time steps per day for which to solve the snow model (should = MODEL_STEPS_PER_DAY if MODEL_STEPS_PER_DAY > 1)
+RUNOFF_STEPS_PER_DAY	24	# time step in hours for which to solve the runoff model (should be >= MODEL_STEPS_PER_DAY)
 STARTYEAR	2000	# year model simulation starts
 STARTMONTH	01	# month model simulation starts
 STARTDAY	01 	# day model simulation starts
-STARTHOUR	00	# hour model simulation starts
 ENDYEAR 	2000	# year model simulation ends
 ENDMONTH	12	# month model simulation ends
 ENDDAY		31	# day model simulation ends
@@ -131,10 +131,8 @@ FORCE_STEPS_PER_DAY	24	# Forcing time step length (hours)
 FORCEYEAR	2000	# Year of first forcing record
 FORCEMONTH	01	# Month of first forcing record
 FORCEDAY	01	# Day of first forcing record
-FORCEHOUR	00	# Hour of first forcing record
 GRID_DECIMAL	4	# Number of digits after decimal point in forcing file names
 WIND_H          10.0    # height of wind speed measurement (m)
-MEASURE_H       2.0     # height of humidity measurement (m)
 
 #######################################################################
 # Land Surface Files and Parameters

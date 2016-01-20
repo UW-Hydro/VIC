@@ -10,7 +10,7 @@ For a list of known issues and their fixes (in bug-fix updates), visit the VIC G
 
 To check which release of VIC you are running:
 
-Type `vicNl -v`.
+Type `vicNl -v` or for VIC 5 and later, `vic_{driver}.exe -v`.
 
 ------------------------------
 
@@ -48,7 +48,7 @@ This is a major update from VIC 4. The VIC 5.0.0 release aims to have nearly ide
 
 7. Calendar Support ([GH#188](https://github.com/UW-Hydro/VIC/pull/188))
 
-	Earlier versions of VIC used the standard Gregorian calendar.  Because many modern climate models use non-standard calendars, we have implemented all [CF complient calendars](http://www.cgd.ucar.edu/cms/eaton/netcdf/CF-20010629.htm#cal). The standard calendar remains the VIC default.  See the documentation for individual drivers for how to set the calendar option.
+	Earlier versions of VIC used the standard Gregorian calendar.  Because many modern climate models use non-standard calendars, we have implemented all [CF compliant calendars](http://www.cgd.ucar.edu/cms/eaton/netcdf/CF-20010629.htm#cal). The standard calendar remains the VIC default.  See the documentation for individual drivers for how to set the calendar option.
 
 8. Sample Datasets
 
@@ -56,12 +56,12 @@ This is a major update from VIC 4. The VIC 5.0.0 release aims to have nearly ide
 
 #### Backwards Incompatible Changes:
 
-1.  Classic Driver I/O ([GH#227](https://github.com/UW-Hydro/VIC/pull/227) and ?)
+1.  Classic Driver I/O Formatting ([GH#227](https://github.com/UW-Hydro/VIC/pull/227) and ?)
 
 	The format of ASCII forcing and output files has changed in VIC 5. These changes were motivated by the desire to improve simulation metadata tracking and reproducibility of VIC simulations.
 
 	- Forcing files now require date stamps for each timestep and a header specifies the names of the forcing variables.   
-	- Output files now include a header with simulation metadata and variable names. The `PRT_HEADER` option has been depreciated.
+	- Output files now include a header with simulation metadata and variable names. The `PRT_HEADER` option has been deprecated.
 
 2.  Classic Driver Global Parameter Options:
 
@@ -72,9 +72,24 @@ This is a major update from VIC 4. The VIC 5.0.0 release aims to have nearly ide
 	- `OUT_DT` (int, units: hours) has been changed to `OUTPUT_STEPS_PER_DAY` (int)
 	- `FORCE_DT` (int, units: hours) has been changed to `FORCE_STEPS_PER_DAY` (int)
 
-#### Depreciated Features:
+3.  Classic Driver Output Variables ([GH#352](https://github.com/UW-Hydro/VIC/pull/352))
 
-1.  Removed unused global paramerer option `MEASURE_H` ([GH#284](https://github.com/UW-Hydro/VIC/pull/284).)
+	Computation of potential evapotranspiration (PET) has been simplified, reducing the number of output variables from 6 to 1.  The following output variables have been removed:
+
+        - 'OUT_PET_SATSOIL' (potential evap from saturated bare soil)
+        - 'OUT_PET_H2OSURF' (potential evap from open water)
+        - 'OUT_PET_SHORT' (potential evap (transpiration only) from short reference crop (grass))
+        - 'OUT_PET_TALL' (potential evap (transpiration only) from tall reference crop (alfalfa))
+        - 'OUT_PET_NATVEG' (potential evap (transpiration only) from current vegetation and current canopy resistance)
+        - 'OUT_PET_VEGNOCR' (potential evap (transpiration only) from current vegetation and 0 canopy resistance)
+
+        These have been replaced by:
+
+        - 'OUT_PET' (potential evapotranspiration, which = area-weighted sum of potential transpiration and potential soil evaporation; potential transpiration is computed using the Penman-Monteith eqn with architectural resistance and LAI of the current veg cover)
+
+#### Deprecated Features:
+
+1.  Removed unused global parameter option `MEASURE_H` ([GH#284](https://github.com/UW-Hydro/VIC/pull/284).)
 2.  Removed MTCLIM ([GH#288](https://github.com/UW-Hydro/VIC/pull/288)).
 
 	Previous versions of VIC used MTCLIM to generate missing forcing variables required to run VIC.  This led to confusion by many users and considerably more complex code in the Classic Driver. VIC forcings are now required to be provided at the same time frequency as the model will be run at (`SNOW_STEPS_PER_DAY` or `MODEL_STEPS_PER_DAY`). The following options have been removed from the Classic Driver:
@@ -230,7 +245,7 @@ This is a minor release from 4.1.2.  It includes several new features, bug fixes
 
  	VIC's soil thermal profile can extend well below its soil hydrologic layers.  Previously, the moisture content of these soil thermal nodes was set to that of the bottom soil layer.  Now, the moisture content can be set to a user-specified value, SLAB_MOIST_FRACT, defined in `vicNl_def.h`.
 
-#### Depreciated Features:
+#### Deprecated Features:
 
 1.  Removed the `DIST_PRCP` option.
 

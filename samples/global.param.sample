@@ -148,9 +148,9 @@ ROOT_ZONES      3	# Number of root zones (must match format of veg param file)
 #VEGPARAM_LAI 	TRUE    # TRUE = veg param file contains LAI information; FALSE = veg param file does NOT contain LAI information
 #VEGPARAM_ALB 	FALSE    # TRUE = veg param file contains albedo information; FALSE = veg param file does NOT contain albedo information
 #VEGPARAM_VEGCOVER 	FALSE    # TRUE = veg param file contains veg_cover information; FALSE = veg param file does NOT contain veg_cover information
-#LAI_SRC 	FROM_VEGLIB    # FROM_VEGPARAM = read LAI from veg param file; FROM_VEGLIB = read LAI from veg library file
-#ALB_SRC 	FROM_VEGLIB    # FROM_VEGPARAM = read albedo from veg param file; FROM_VEGLIB = read albedo from veg library file
-#VEGCOVER_SRC 	FROM_VEGLIB    # FROM_VEGPARAM = read veg_cover from veg param file; FROM_VEGLIB = read veg_cover from veg library file
+#LAI_SRC 	FROM_VEGLIB    # FROM_VEGPARAM = read LAI from veg param file; FROM_VEGLIB = read LAI from veg library file; FROM_VEGHIST = read LAI from veg_hist forcing files
+#ALB_SRC 	FROM_VEGLIB    # FROM_VEGPARAM = read ALBEDO from veg param file; FROM_VEGLIB = read ALBEDO from veg library file; FROM_VEGHIST = read ALBEDO from veg_hist forcing files
+#VEGCOVER_SRC 	FROM_DEFAULT    # FROM_DEFAULT = set VEGCOVER to 1.0 for all veg classes, all times, and all locations; FROM_VEGPARAM = read VEGCOVER from veg param file; FROM_VEGLIB = read VEGCOVER from veg library file; FROM_VEGHIST = read VEGCOVER from veg_hist forcing files
 SNOW_BAND	1	# Number of snow bands; if number of snow bands > 1, you must insert the snow band path/file after the number of bands (e.g. SNOW_BAND 5 my_path/my_snow_band_file)
 
 #######################################################################

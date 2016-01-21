@@ -55,13 +55,10 @@ enum
 };
 enum
 {
+    FROM_DEFAULT,
     FROM_VEGLIB,
-    FROM_VEGPARAM
-};
-enum
-{
-    LAI_FROM_VEGLIB,
-    LAI_FROM_VEGPARAM
+    FROM_VEGPARAM,
+    FROM_VEGHIST
 };
 enum
 {

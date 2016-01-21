@@ -249,11 +249,24 @@ vic_init(void)
         }
     }
 
-    // vegcover not implemented in image model
+    // vegcover
     for (j = 0; j < options.NVEGTYPES; j++) {
-        for (k = 0; k < MONTHS_PER_YEAR; k++) {
-            for (i = 0; i < local_domain.ncells_active; i++) {
-                veg_lib[i][j].vegcover[k] = 1.0;
+        if (options.VEGCOVER_SRC == FROM_DEFAULT) {
+            for (k = 0; k < MONTHS_PER_YEAR; k++) {
+                for (i = 0; i < local_domain.ncells_active; i++) {
+                    veg_lib[i][j].vegcover[k] = 1.0;
+                }
+            }
+        }
+        else {
+            d4start[0] = j;
+            for (k = 0; k < MONTHS_PER_YEAR; k++) {
+                d4start[1] = k;
+                get_scatter_nc_field_double(filenames.veglib, "vegcover",
+                                            d4start, d4count, dvar);
+                for (i = 0; i < local_domain.ncells_active; i++) {
+                    veg_lib[i][j].vegcover[k] = (double) dvar[i];
+                }
             }
         }
     }

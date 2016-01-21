@@ -49,6 +49,7 @@ read_veglib(FILE   *veglib,
     char                     str[MAXSTRING];
     double                   maxd;
     char                     tmpstr[MAXSTRING];
+    double                   tmp_double;
 
     rewind(veglib);
     fgets(str, MAXSTRING, veglib);
@@ -81,7 +82,7 @@ read_veglib(FILE   *veglib,
             fscanf(veglib, "%lf", &temp[i].rmin);
             for (j = 0; j < MONTHS_PER_YEAR; j++) {
                 fscanf(veglib, "%lf", &temp[i].LAI[j]);
-                if (options.LAI_SRC == LAI_FROM_VEGLIB && temp[i].overstory &&
+                if (options.LAI_SRC == FROM_VEGLIB && temp[i].overstory &&
                     temp[i].LAI[j] == 0) {
                     log_err("veg library: the specified veg class (%d) "
                             "is listed as an overstory class, but the LAI "
@@ -90,22 +91,22 @@ read_veglib(FILE   *veglib,
                 }
                 temp[i].Wdmax[j] = param.VEG_LAI_WATER_FACTOR * temp[i].LAI[j];
             }
+            /* Default values of vegcover */
+            for (j = 0; j < MONTHS_PER_YEAR; j++) {
+                temp[i].vegcover[j] = 1.00;
+            }
             if (options.VEGLIB_VEGCOVER) {
                 for (j = 0; j < MONTHS_PER_YEAR; j++) {
-                    fscanf(veglib, "%lf", &temp[i].vegcover[j]);
-                    if (temp[i].vegcover[j] < 0 || temp[i].vegcover[j] > 1) {
-                        log_err("Veg cover fraction must be between 0 and 1 "
-                                "(%f)",
+                    fscanf(veglib, "%lf", &tmp_double);
+                    if (options.VEGCOVER_SRC != FROM_DEFAULT) {
+                        temp[i].vegcover[j] = tmp_double;
+                        if (temp[i].vegcover[j] < 0 ||
+                            temp[i].vegcover[j] > 1) {
+                            log_err(
+                                "Veg cover fraction must be between 0 and 1 " "(%f)",
                                 temp[i].vegcover[j]);
+                        }
                     }
-                    if (temp[i].vegcover[j] < 0.01) {
-                        temp[i].vegcover[j] = 0.01;
-                    }
-                }
-            }
-            else {
-                for (j = 0; j < MONTHS_PER_YEAR; j++) {
-                    temp[i].vegcover[j] = 1.00;
                 }
             }
             for (j = 0; j < MONTHS_PER_YEAR; j++) {

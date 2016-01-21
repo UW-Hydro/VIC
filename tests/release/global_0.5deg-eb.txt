@@ -36,7 +36,7 @@ VEGLIB              {test_data_dir}/global_0.5deg/parameters/world_veg_lib.txt
 VEGPARAM            {test_data_dir}/global_0.5deg/parameters/veg_param.txt
 ROOT_ZONES          3
 VEGPARAM_LAI        TRUE
-LAI_SRC             LAI_FROM_VEGLIB
+LAI_SRC             FROM_VEGLIB
 SNOW_BAND           5    {test_data_dir}/global_0.5deg/parameters/snowbands.txt
 RESULT_DIR          {outdir}/{testname)/results/
 OUT_STEP            0

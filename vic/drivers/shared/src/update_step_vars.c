@@ -41,7 +41,6 @@ update_step_vars(all_vars_struct *all_vars,
 
     unsigned short       iveg;
     size_t               Nveg;
-    unsigned short       veg_class;
     unsigned short       band;
     size_t               Nbands;
     veg_var_struct     **veg_var;
@@ -56,7 +55,6 @@ update_step_vars(all_vars_struct *all_vars,
 
     /* Assign current veg characteristics */
     for (iveg = 0; iveg < Nveg; iveg++) {
-        veg_class = veg_con[iveg].veg_class;
         for (band = 0; band < Nbands; band++) {
             veg_var[iveg][band].vegcover = veg_hist[iveg].vegcover[0];
             veg_var[iveg][band].albedo = veg_hist[iveg].albedo[0];

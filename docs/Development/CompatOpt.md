@@ -1,10 +1,10 @@
-# Backwards Compatibility of 4.1.2 with Earlier Versions of VIC
+# Backwards Compatibility of 4.1.1 (and Later) with Earlier Versions of VIC
 
 VIC versions 4.1.1 and later should be able to run using the same input files used for versions 4.0.6 and later. However, VIC versions 4.1.1 and later will not necessarily reproduce the results of earlier versions, due to their new features and bug fixes. To reproduce the results of earlier versions, certain options (found either in the [global parameter file](../Documentation/GlobalParam.md)) must be set to the values listed below. This still will not exactly reproduce the results of earlier versions, but will be fairly close.
 
-## Options for compatibility with 4.1.1
+## Options for compatibility with 4.1.1 and later
 
-To reproduce results from VIC 4.1.1, use the following option settings:
+To reproduce results from VIC 4.1.1, and later use the following option settings:
 
 ### Global Parameter File
 | Name                      | Value                     |

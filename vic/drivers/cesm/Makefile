@@ -80,7 +80,7 @@ LIBRARY = -lm -L${NETCDFPATH}/lib -lnetcdf -L${MPIPATH}/lib -lmpi
 
 # Set compiler flags
 CFLAGS  =  ${INCLUDES} -ggdb -O0 -Wall -Wextra -fPIC
-FFLAGS  = ${INCLUDES}
+FFLAGS  = ${INCLUDES} -fPIC
 
 # Set the log level
 # To turn off warning statements, set LOG_LVL >= 30

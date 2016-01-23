@@ -141,16 +141,11 @@ SOIL            (put the soil parameter path/file here)	# Soil parameter path/fi
 BASEFLOW	ARNO	# ARNO = columns 5-8 are the standard VIC baseflow parameters; NIJSSEN2001 = columns 5-8 of soil file are baseflow parameters from Nijssen et al (2001)
 JULY_TAVG_SUPPLIED	FALSE	# TRUE = final column of the soil parameter file will contain average July air temperature, for computing treeline; this will be ignored if COMPUTE_TREELINE is FALSE; FALSE = compute the treeline based on the average July air temperature of the forcings over the simulation period
 ORGANIC_FRACT	FALSE	# TRUE = simulate organic soils; soil param file contains 3*Nlayer extra columns, listing for each layer the organic fraction, and the bulk density and soil particle density of the organic matter in the soil layer; FALSE = soil param file does not contain any information about organic soil, and organic fraction should be assumed to be 0
-VEGLIB	        (put the veg library path/file here)	# Veg library path/file
 VEGPARAM        (put the veg parameter path/file here)	# Veg parameter path/file
 ROOT_ZONES      3	# Number of root zones (must match format of veg param file)
-#VEGLIB_VEGCOVER	FALSE	# TRUE = veg lib file contains 12 monthly values of partial vegcover fraction for each veg class, between the LAI and albedo values
-#VEGPARAM_LAI 	TRUE    # TRUE = veg param file contains LAI information; FALSE = veg param file does NOT contain LAI information
-#VEGPARAM_ALB 	FALSE    # TRUE = veg param file contains albedo information; FALSE = veg param file does NOT contain albedo information
-#VEGPARAM_VEGCOVER 	FALSE    # TRUE = veg param file contains veg_cover information; FALSE = veg param file does NOT contain veg_cover information
-#LAI_SRC 	FROM_VEGLIB    # FROM_VEGPARAM = read LAI from veg param file; FROM_VEGLIB = read LAI from veg library file
-#ALB_SRC 	FROM_VEGLIB    # FROM_VEGPARAM = read albedo from veg param file; FROM_VEGLIB = read albedo from veg library file
-#VEGCOVER_SRC 	FROM_VEGLIB    # FROM_VEGPARAM = read veg_cover from veg param file; FROM_VEGLIB = read veg_cover from veg library file
+#LAI_SRC 	FROM_VEGPARAM    # FROM_VEGPARAM = read LAI from veg param file; FROM_VEGHIST = read LAI from veg_hist forcing file
+#ALB_SRC 	FROM_VEGPARAM    # FROM_VEGPARAM = read ALBEDO from veg param file; FROM_VEGHIST = read ALBEDO from veg_hist forcing file
+#VEGCOVER_SRC 	FROM_DEFAULT     # FROM_DEFAULT = set all vegcover values to 1.0; FROM_VEGPARAM = read VEGCOVER from veg param file; FROM_VEGHIST = read VEGCOVER from veg_hist forcing file
 SNOW_BAND	1	# Number of snow bands; if number of snow bands > 1, you must insert the snow band path/file after the number of bands (e.g. SNOW_BAND 5 my_path/my_snow_band_file)
 
 #######################################################################

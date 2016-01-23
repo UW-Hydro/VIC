@@ -221,12 +221,7 @@ vic_nc_info(nc_file_struct   *nc_hist_file,
         case OUT_LAKE_RCHRG:
         case OUT_LAKE_RO_IN:
         case OUT_LAKE_VAPFLX:
-        case OUT_PET_SATSOIL:
-        case OUT_PET_H2OSURF:
-        case OUT_PET_SHORT:
-        case OUT_PET_TALL:
-        case OUT_PET_NATVEG:
-        case OUT_PET_VEGNOCR:
+        case OUT_PET:
         case OUT_PREC:
         case OUT_RAINF:
         case OUT_REFREEZE:

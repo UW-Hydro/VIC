@@ -53,10 +53,8 @@ matrix:
     addons:
       apt_packages:
         - libnetcdf-dev
-        - mpich-bin
-  - compiler: gcc
-    os: osx
-    env: TESTID=cesm BREW_TAPS="homebrew/science" BREW_INSTALLS="gcc gfortran netcdf openmpi"
+        - gfortran
+        # open-mpi is built from source in image.travis
   # Python Driver
   - compiler: clang
     os: linux

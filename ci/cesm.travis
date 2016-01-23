@@ -31,7 +31,22 @@ function vic_before_install {
 		export TRAVIS_MPIPATH=/usr/local
     else
 		export TRAVIS_NETCDFPATH=/usr
-		export TRAVIS_MPIPATH=/usr
+		export TRAVIS_MPIPATH="${HOME}/mpich"
+
+        # Install MPICH
+        if [ ! -d ${TRAVIS_MPIPATH} ]; then
+            wget --no-check-certificate -q http://www.mpich.org/static/downloads/3.2/mpich-3.2.tar.gz
+            tar -xzf mpich-3.2.tar.gz
+            cd mpich-3.2
+            mkdir build && cd build
+            ../configure CC=$CC CXX=$CXX --prefix=${TRAVIS_MPIPATH}
+            make -j2
+            make install
+        else
+            echo "MPICH installed..."
+        fi
+        find ${TRAVIS_MPIPATH} -name mpiexec
+        find ${TRAVIS_MPIPATH} -name mpicc
 	fi
 
 }

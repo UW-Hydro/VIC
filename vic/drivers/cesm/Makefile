@@ -61,13 +61,13 @@ SHELL = /bin/bash
 
 # Set CC = your compiler here
 ifeq (true, ${TRAVIS})
-CC = mpicc
+CC = ${MPIPATH}/bin/mpicc
 else
 CC = mpicc-mpich-mp
 endif
 
 ifeq (true, ${TRAVIS})
-FC = mpif90
+CC = ${MPIPATH}/bin/mpif90
 else
 FC = mpifort-mpich-mp
 endif

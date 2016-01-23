@@ -321,12 +321,15 @@ vic_force(void)
                                                 param.SNOW_MAX_SNOW_TEMP,
                                                 &(atmos[i].prec[j]), 1);
         }
-        // Validate vegcover
+        // Check on vegcover
         for (v = 0; v < options.NVEGTYPES; v++) {
             vidx = veg_con_map[i].vidx[v];
             if (vidx != -1) {
                 for (j = 0; j < NF; j++) {
                     if (veg_hist[i][vidx].vegcover[j] < MIN_VEGCOVER) {
+                        log_warn(
+                            "cell %zu, veg %d substep %zu vegcover %f < minimum of %f; setting = %f\n", i, vidx, j,
+                            veg_hist[i][vidx].vegcover[j], MIN_VEGCOVER);
                         veg_hist[i][vidx].vegcover[j] = MIN_VEGCOVER;
                     }
                 }

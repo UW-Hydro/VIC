@@ -67,7 +67,7 @@ CC = mpicc-mpich-mp
 endif
 
 ifeq (true, ${TRAVIS})
-CC = ${MPIPATH}/bin/mpif90
+FC = ${MPIPATH}/bin/mpif90
 else
 FC = mpifort-mpich-mp
 endif

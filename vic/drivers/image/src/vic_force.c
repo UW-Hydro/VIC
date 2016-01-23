@@ -216,7 +216,7 @@ vic_force(void)
     // Read veg_hist file
     if (options.LAI_SRC == FROM_VEGHIST ||
         options.VEGCOVER_SRC == FROM_VEGHIST ||
-        options.ALBEDO_SRC == FROM_VEGHIST) {
+        options.ALB_SRC == FROM_VEGHIST) {
         // for now forcing file is determined by the year
         sprintf(filenames.forcing[1], "%s%4d.nc", filenames.f_path_pfx[1],
                 dmy[current].year);

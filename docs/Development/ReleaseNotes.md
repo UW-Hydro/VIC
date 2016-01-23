@@ -150,7 +150,7 @@ This is a bugfix update from 4.2.b.
 
 Source code is available here: [![VIC.4.2.b](https://img.shields.io/badge/VIC-4.2.b-blue.svg)](https://github.com/UW-Hydro/VIC/releases/tag/VIC.4.2.b)
 
-**Release date: (January 22, 2015)**
+**Release date: (December 12, 2015)**
 
 This is a bugfix update from 4.2.a.
 

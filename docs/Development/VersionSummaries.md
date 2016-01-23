@@ -4,7 +4,7 @@ The tables below compare features (and bug fixes) of current and previous versio
 
 * * *
 
-## VIC 4.2.0
+## VIC 4.2 (hotfix 4.2.c)
 
 * **Partial Vegetation Cover**
     *   Accounts for gaps in vegetative cover, through which bare soil evaporation can occur In terms of radiation attenuation and turbulence, the bare soil between plants is treated like understory, rather than a large open area of bare soil.
@@ -48,6 +48,35 @@ The tables below compare features (and bug fixes) of current and previous versio
     *   Removed EXCESS_ICE option
     *   Removed SUN1999 albedo option
     *   Require JULY_TAVG_SUPPLIED=TRUE when COMPUTE_TREELINE=TRUE
+
+## Bug Fixes in VIC 4.2.a-4.2.c
+
+* **Fixed uninitialized bare soil albedo**
+    *   Previously, bare_albedo was unset for the bare soil case (`iveg!=Nveg`). This fix sets the bare_albedo to the global variable value of `BARE_SOIL_ALBEDO`.
+
+* **Cleanup of frozen soil option constraints**
+    *   Removed hardcoded, behind the scenes checks for the `EXP_TRANS` and `NO_FLUX` global parameter values for case of `QUICK_SOLVE=TRUE` in `calc_surf_energy_bal`.
+
+* **Fixed memory error in `initialize_atmos` when OUTPUT_FORCE = TRUE* **
+    *   Previously, access to unitialized elements of the veg_con and veg_hist structure was attempted when OUTPUT_FORCE = TRUE, causing a memory error and the model to crash.  This fix sets these elements inside a `if (!options.OUTPUT_FORCE)` block allowing the OUTPUT_FORCE option to work as expected.
+
+* **Documented how VIC 4.2 needs user to specify veg_lib and veg_param files when OUTPUT_FORCE = TRUE**
+    *   Prior to release 4.2, a user could run VIC in OUTPUT_FORCE mode with only a soil parameter file and forcing files.  This functionality is now broken as of release 4.2 and will not be fixed.  Users must either supply veg_lib and veg_parameter files (which the user is likely to have anyway) or use the standalone forcing disaggregator under cevelopment for use with release 5.0.  The documentation was updated to describe this issue as of release 4.2.c.
+
+* **Added architectural resistance of 100 s/m for soil evaporation**
+    *   Testing at approx. 60 eddy covariance towers ([Bohn and Vivoni, 2016](../Documentation/References.md#other-historical-references)) has indicated that soil evaporation is too high with the prior architectural resistance of 0 s/m and too low with a value of 200 s/m.  Further refinement would be ideal but this is a good ballpark figure.
+
+* **Compute aerodynamic conductance of each veg tile as area-weighted average of conductances of vegetated and exposed soil fractions of the tile**
+    *   The prior formulation was not the final version used in [Bohn and Vivoni (2016)](../Documentation/References.md#other-historical-references), but was mistakenly added to the codebase instead of the formulation used here.  This fixes the mistake.
+
+* **Fix overwriting of veg_lib structure with values of current cell in veg_param file**
+    *   Previously, VIC overwrote the LAI, albedo, and vegcover values in the copy of the veg library stored in memory (which is supposed to be constant reference values that apply to all grid cells) with those from the veg_parameter file pertaining to the current grid cell.  Values for veg classes not present in the current grid cell therefore were those of the last grid cell that contained those veg classes.  This did not affect performance but interfered with diagnostics while debugging.
+
+* **Lake parameter validation**
+    *   Previously, there were minimal checks performed on the values of the depth-area relationship.  This allowed unphysical values to be specified, leading to all manner of unphysical behaviors.  This has been fixed.
+
+* **Fix lake water balance errors**
+    *   Previously, precipitation over the lake was scaled by the lake area fraction twice, resulting in water balance errors.  This has been fixed.
 
 
 ## VIC 4.1.2

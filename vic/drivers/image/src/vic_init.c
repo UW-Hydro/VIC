@@ -57,6 +57,7 @@ vic_init(void)
     size_t                     i;
     size_t                     j;
     size_t                     k;
+    size_t                     m;
     size_t                     nveg;
     int                        veg_class;
     int                        vidx;

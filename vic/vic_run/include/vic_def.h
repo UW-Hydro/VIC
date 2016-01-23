@@ -63,33 +63,6 @@
 #define MIN_SUBDAILY_STEPS_PER_DAY  4
 #define MAX_SUBDAILY_STEPS_PER_DAY  1440
 
-/***** Potential Evap types *****/
-#define N_PET_TYPES 6
-#define N_PET_TYPES_NON_NAT 4
-#define PET_SATSOIL 0
-#define PET_H2OSURF 1
-#define PET_SHORT   2
-#define PET_TALL    3
-#define N_PET_TYPES_NAT 2
-#define PET_NATVEG  4
-#define PET_VEGNOCR 5
-
-/***** Hard-coded veg class parameters (mainly for pot_evap) *****/
-extern bool   ref_veg_over[];
-extern double ref_veg_rarc[];
-extern double ref_veg_rmin[];
-extern double ref_veg_lai[];
-extern double ref_veg_albedo[];
-extern double ref_veg_vegcover[];
-extern double ref_veg_rough[];
-extern double ref_veg_displ[];
-extern double ref_veg_wind_h[];
-extern double ref_veg_RGL[];
-extern double ref_veg_rad_atten[];
-extern double ref_veg_wind_atten[];
-extern double ref_veg_trunk_ratio[];
-extern bool   ref_veg_ref_crop[];
-
 #ifndef WET
 #define WET 0
 #define DRY 1
@@ -813,7 +786,7 @@ typedef struct {
     double CSlow;                      /**< carbon storage in slow pool [gC/m2] */
     double inflow;                     /**< moisture that reaches the top of
                                           the soil column (mm) */
-    double pot_evap[N_PET_TYPES];      /**< array of different types of potential evaporation (mm) */
+    double pot_evap;                   /**< potential evaporation (mm) */
     double runoff;                     /**< runoff from current cell (mm/TS) */
     layer_data_struct layer[MAX_LAYERS]; /**< structure containing soil variables
                                             for each layer (see above) */

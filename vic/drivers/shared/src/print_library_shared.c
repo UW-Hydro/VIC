@@ -34,8 +34,7 @@
 void
 print_cell_data(cell_data_struct *cell,
                 size_t            nlayers,
-                size_t            nfrost,
-                size_t            npet)
+                size_t            nfrost)
 {
     size_t i;
 
@@ -51,11 +50,7 @@ print_cell_data(cell_data_struct *cell,
     fprintf(LOG_DEST, "\tCInter      : %.4f\n", cell->CInter);
     fprintf(LOG_DEST, "\tCSlow       : %.4f\n", cell->CSlow);
     fprintf(LOG_DEST, "\tinflow      : %.4f\n", cell->inflow);
-    fprintf(LOG_DEST, "\tpot_evap    :");
-    for (i = 0; i < npet; i++) {
-        fprintf(LOG_DEST, "\t%.4f", cell->pot_evap[i]);
-    }
-    fprintf(LOG_DEST, "\n");
+    fprintf(LOG_DEST, "\tpot_evap    : %.4f\n", cell->pot_evap);
     fprintf(LOG_DEST, "\trunoff      : %.4f\n", cell->runoff);
     for (i = 0; i < nlayers; i++) {
         fprintf(LOG_DEST, "\tlayer %zd   :\n", i);
@@ -358,8 +353,7 @@ print_lake_var(lake_var_struct *lvar,
                size_t           nfronts,
                size_t           nlayers,
                size_t           nnodes,
-               size_t           nfrost,
-               size_t           npet)
+               size_t           nfrost)
 {
     size_t i;
 
@@ -416,7 +410,7 @@ print_lake_var(lake_var_struct *lvar,
     fprintf(LOG_DEST, "\tvapor_flux     : %.4f\n", lvar->vapor_flux);
     print_snow_data(&(lvar->snow));
     print_energy_bal(&(lvar->energy), nnodes, nfronts);
-    print_cell_data(&(lvar->soil), nlayers, nfrost, npet);
+    print_cell_data(&(lvar->soil), nlayers, nfrost);
 }
 
 /******************************************************************************

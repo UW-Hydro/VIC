@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-DRIVER_PATH="vic/drivers/cesm/"
+DRIVER_PATH="./vic/drivers/cesm/"
 DRIVER_LIB="${DRIVER_PATH}lndlib.a"
 
 function vic_before_install {

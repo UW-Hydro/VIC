@@ -37,9 +37,6 @@ matrix:
   - compiler: gcc
     os: osx
     env: TESTID=classic
-  - compiler: gcc
-    os: osx
-    env: TESTID=classic BREW_INSTALLS="gcc"
   # Image Driver
   - compiler: gcc
     os: linux
@@ -47,10 +44,8 @@ matrix:
     addons:
       apt_packages:
         - libnetcdf-dev
-        - mpich-bin
-  - compiler: gcc
-    os: osx
-    env: TESTID=image BREW_TAPS="homebrew/science" BREW_INSTALLS="gcc netcdf openmpi"
+        - gfortran
+        # open-mpi is built from source in image.travis
   # Python Driver
   - compiler: clang
     os: linux
@@ -60,43 +55,10 @@ matrix:
     env: TESTID="python" TRAVIS_PYTHON=2.7
   - compiler: clang
     os: linux
-    env: TESTID="python" TRAVIS_PYTHON=3.4
-  - compiler: gcc
-    os: linux
-    env: TESTID="python" TRAVIS_PYTHON=3.4
-  - compiler: clang
-    os: linux
     env: TESTID="python" TRAVIS_PYTHON=3.5
   - compiler: gcc
     os: linux
     env: TESTID="python" TRAVIS_PYTHON=3.5
-  - compiler: gcc
-    os: osx
-    env: TESTID="python" TRAVIS_PYTHON=2.7
-  - compiler: gcc
-    os: osx
-    env: TESTID="python" TRAVIS_PYTHON=3.4
-  - compiler: gcc
-    os: osx
-    env: TESTID="python" TRAVIS_PYTHON=3.5
-  - compiler: clang
-    os: osx
-    env: TESTID="python" TRAVIS_PYTHON=2.7
-  - compiler: clang
-    os: osx
-    env: TESTID="python" TRAVIS_PYTHON=3.4
-  - compiler: clang
-    os: osx
-    env: TESTID="python" TRAVIS_PYTHON=3.5
-  allow_failures:
-  # Image Driver
-  - compiler: gcc
-    os: linux
-    env: TESTID='image'
-    addons:
-      apt_packages:
-        - libnetcdf-dev
-        - mpich-bin
 
 before_install:
   - source ci/${TESTID}.travis

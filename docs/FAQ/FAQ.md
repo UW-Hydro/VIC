@@ -52,7 +52,7 @@ Here are some commonly-asked questions and their answers. Another source of info
 
 9.  **Why does actual evapotranspiration (ET) sometimes exceed potential evapotranspiration (PET)?**
 
-    VIC's actual evapotranspiration is the sum of canopy evaporation, transpiration, bare soil evaporation, canopy snow sublimation, and ground snow sublimation, averaged over the grid cell. Standard definitions of PET (such as the ones used in VIC) only apply to a specific water source: generally either pan evaporation or transpiration in the absence of moisture limitation. Therefore, in winter, sublimation can drive VIC's ET higher than any of VIC's PET variables. Vegetation-related PET should only be compared to transpiration and/or canopy evaporation.
+    VIC's actual evapotranspiration is the sum of canopy evaporation, transpiration, soil evaporation, canopy snow sublimation, and ground snow sublimation, averaged over the grid cell.  VIC's OUT_PET (release 5.0 onwards; OUT_PET_NATVEG for releases 4.1-4.2) computes PET as the ET that the current landscape (with its current vegetation, architectural resistance, and LAI) would produce in the absence of limitations from soil moisture, vapor pressure deficit, temperature, or insolation.  But VIC's canopy evaporation and sublimation are computed using a canopy resistance of 0, which allows for much higher ET rates than when architectural resistance and LAI are taken into account.  Thus, when there is water stored in the canopy, actual ET can exceed OUT_PET.  This generally happens during a small fraction of the time of a simulation (immediately following rain events, for example).
 
 10.  **Relative humidity from VIC 4.0.x sometimes exceeds 1.0 (100%) - what can I do?**
 

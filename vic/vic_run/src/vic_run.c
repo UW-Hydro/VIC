@@ -48,7 +48,7 @@ vic_run(atmos_data_struct   *atmos,
     extern parameters_struct param;
 
     char                     overstory;
-    int                      j, p;
+    int                      j;
     size_t                   lidx;
     unsigned short           iveg;
     size_t                   Nveg;
@@ -68,7 +68,7 @@ vic_run(atmos_data_struct   *atmos,
     double                   displacement[3];
     double                   roughness[3];
     double                   ref_height[3];
-    double                 **aero_resist;
+    double                  *aero_resist;
     double                   Cv;
     double                   Le;
     double                   Melt[2 * MAX_BANDS];
@@ -82,7 +82,6 @@ vic_run(atmos_data_struct   *atmos,
     double                   lag_one;
     double                   sigma_slope;
     double                   fetch;
-    int                      pet_veg_class;
     double                   lakefrac;
     double                   fraci;
     double                   wetland_runoff;
@@ -102,10 +101,7 @@ vic_run(atmos_data_struct   *atmos,
     vic_run_veg_lib = veg_lib;
 
     /* Allocate aero_resist array */
-    aero_resist = calloc(N_PET_TYPES + 1, sizeof(*aero_resist));
-    for (p = 0; p < N_PET_TYPES + 1; p++) {
-        aero_resist[p] = calloc(3, sizeof(*(aero_resist[p])));
-    }
+    aero_resist = calloc(3, sizeof(*aero_resist));
 
     /* set local pointers */
     cell = all_vars->cell;
@@ -245,68 +241,53 @@ vic_run(atmos_data_struct   *atmos,
 
             /*************************************
                Compute the aerodynamic resistance
-               for current veg cover and various
-               types of potential evap
             *************************************/
 
-            /* Loop over types of potential evap, plus current veg */
-            /* Current veg will be last */
-            for (p = 0; p < N_PET_TYPES + 1; p++) {
-                /* Initialize wind speeds */
-                tmp_wind[0] = atmos->wind[NR];
-                tmp_wind[1] = MISSING;
-                tmp_wind[2] = MISSING;
+            /* Initialize wind speeds */
+            tmp_wind[0] = atmos->wind[NR];
+            tmp_wind[1] = MISSING;
+            tmp_wind[2] = MISSING;
 
-                /* Set surface descriptive variables */
-                if (p < N_PET_TYPES_NON_NAT) {
-                    pet_veg_class = vic_run_veg_lib[0].NVegLibTypes + p;
-                }
-                else {
-                    pet_veg_class = veg_class;
-                }
-                displacement[0] =
-                    vic_run_veg_lib[pet_veg_class].displacement[dmy->month - 1];
-                roughness[0] =
-                    vic_run_veg_lib[pet_veg_class].roughness[dmy->month - 1];
-                overstory = vic_run_veg_lib[pet_veg_class].overstory;
-                if (p >= N_PET_TYPES_NON_NAT) {
-                    if (roughness[0] == 0) {
-                        roughness[0] = soil_con->rough;
-                    }
-                }
+            /* Set surface descriptive variables */
+            displacement[0] =
+                vic_run_veg_lib[veg_class].displacement[dmy->month - 1];
+            roughness[0] =
+                vic_run_veg_lib[veg_class].roughness[dmy->month - 1];
+            if (roughness[0] == 0) {
+                roughness[0] = soil_con->rough;
+            }
+            overstory = vic_run_veg_lib[veg_class].overstory;
 
-                /* Estimate vegetation height */
-                height = calc_veg_height(displacement[0]);
+            /* Estimate vegetation height */
+            height = calc_veg_height(displacement[0]);
 
-                /* Estimate reference height */
-                if (displacement[0] < wind_h) {
-                    ref_height[0] = wind_h;
-                }
-                else {
-                    ref_height[0] = displacement[0] + wind_h + roughness[0];
-                }
+            /* Estimate reference height */
+            if (displacement[0] < wind_h) {
+                ref_height[0] = wind_h;
+            }
+            else {
+                ref_height[0] = displacement[0] + wind_h + roughness[0];
+            }
 
-                /* Compute aerodynamic resistance over various surface types */
-                /* Do this not only for current veg but also all types of PET */
-                ErrorFlag = CalcAerodynamic(overstory, height,
-                                            vic_run_veg_lib[pet_veg_class].trunk_ratio,
-                                            soil_con->snow_rough, soil_con->rough,
-                                            vic_run_veg_lib[pet_veg_class].wind_atten,
-                                            aero_resist[p], tmp_wind,
-                                            displacement, ref_height,
-                                            roughness);
-                if (ErrorFlag == ERROR) {
-                    return (ERROR);
-                }
+            /* Compute aerodynamic resistance */
+            ErrorFlag = CalcAerodynamic(overstory, height,
+                                        vic_run_veg_lib[veg_class].trunk_ratio,
+                                        soil_con->snow_rough, soil_con->rough,
+                                        vic_run_veg_lib[veg_class].wind_atten,
+                                        aero_resist, tmp_wind,
+                                        displacement, ref_height,
+                                        roughness);
+            if (ErrorFlag == ERROR) {
+                return (ERROR);
             }
 
             /* Initialize final aerodynamic resistance values */
             for (band = 0; band < Nbands; band++) {
                 if (soil_con->AreaFract[band] > 0) {
                     cell[iveg][band].aero_resist[0] =
-                        aero_resist[N_PET_TYPES][0];
+                        aero_resist[0];
                     cell[iveg][band].aero_resist[1] =
-                        aero_resist[N_PET_TYPES][1];
+                        aero_resist[1];
                 }
             }
 
@@ -323,7 +304,7 @@ vic_run(atmos_data_struct   *atmos,
                         calc_Nscale_factors(
                             vic_run_veg_lib[veg_class].NscaleFlag,
                             veg_con[iveg].CanopLayerBnd,
-                            veg_con[iveg].LAI[dmy->month - 1],
+                            vic_run_veg_lib[veg_class].LAI[dmy->month - 1],
                             soil_con->lat,
                             soil_con->lng,
                             soil_con->time_zone_lng,
@@ -349,9 +330,7 @@ vic_run(atmos_data_struct   *atmos,
                     fetch = veg_con[iveg].fetch;
 
                     /* Initialize pot_evap */
-                    for (p = 0; p < N_PET_TYPES; p++) {
-                        cell[iveg][band].pot_evap[p] = 0;
-                    }
+                    cell[iveg][band].pot_evap = 0;
 
                     ErrorFlag = surface_fluxes(overstory, bare_albedo,
                                                ice0[band], moist0[band],
@@ -415,9 +394,6 @@ vic_run(atmos_data_struct   *atmos,
         }
     }
 
-    for (p = 0; p < N_PET_TYPES + 1; p++) {
-        free((char *) aero_resist[p]);
-    }
     free((char *) aero_resist);
 
     /****************************

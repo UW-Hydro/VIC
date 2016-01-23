@@ -72,7 +72,6 @@ put_data(all_vars_struct   *all_vars,
     double                     ThisTreeAdjust;
     int                        v;
     size_t                     i;
-    short                      j;
     double                     dt_sec;
     double                     out_dt_sec;
     unsigned int               out_step_ratio;
@@ -307,10 +306,8 @@ put_data(all_vars_struct   *all_vars,
                             lake_var.energy.ice[i] = energy[veg][band].ice[i];
                             lake_var.energy.T[i] = energy[veg][band].T[i];
                         }
-                        for (j = 0; j < N_PET_TYPES; j++) {
-                            lake_var.soil.pot_evap[j] =
-                                cell[veg][band].pot_evap[j];
-                        }
+                        lake_var.soil.pot_evap =
+                            cell[veg][band].pot_evap;
                         lake_var.soil.rootmoist = cell[veg][band].rootmoist;
                         lake_var.energy.deltaH = energy[veg][band].deltaH;
                         lake_var.energy.fusion = energy[veg][band].fusion;
@@ -741,12 +738,7 @@ collect_wb_terms(cell_data_struct cell,
     out_data[OUT_EVAP].data[0] += tmp_evap * AreaFactor;  // mm over gridcell
 
     /** record potential evap **/
-    out_data[OUT_PET_SATSOIL].data[0] += cell.pot_evap[0] * AreaFactor;
-    out_data[OUT_PET_H2OSURF].data[0] += cell.pot_evap[1] * AreaFactor;
-    out_data[OUT_PET_SHORT].data[0] += cell.pot_evap[2] * AreaFactor;
-    out_data[OUT_PET_TALL].data[0] += cell.pot_evap[3] * AreaFactor;
-    out_data[OUT_PET_NATVEG].data[0] += cell.pot_evap[4] * AreaFactor;
-    out_data[OUT_PET_VEGNOCR].data[0] += cell.pot_evap[5] * AreaFactor;
+    out_data[OUT_PET].data[0] += cell.pot_evap * AreaFactor;
 
     /** record saturated area fraction **/
     out_data[OUT_ASAT].data[0] += cell.asat * AreaFactor;

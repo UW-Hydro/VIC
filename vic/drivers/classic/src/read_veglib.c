@@ -43,7 +43,6 @@ read_veglib(FILE   *veglib,
 
     veg_lib_struct          *temp;
     size_t                   i, j;
-    int                      k;
     int                      tmpflag;
     size_t                   Nveg_type;
     char                     str[MAXSTRING];
@@ -63,7 +62,7 @@ read_veglib(FILE   *veglib,
     rewind(veglib);
 
     // +1 for bare soil
-    temp = calloc(Nveg_type + 1 + N_PET_TYPES_NON_NAT, sizeof(*temp));
+    temp = calloc(Nveg_type + 1, sizeof(*temp));
 
     fscanf(veglib, "%s", str);
     i = 0;
@@ -203,27 +202,6 @@ read_veglib(FILE   *veglib,
                 "the file has the right number of columns.");
     }
     *Ntype = Nveg_type;
-    for (k = 0; k < N_PET_TYPES_NON_NAT; k++) {
-        temp[Nveg_type + k].NVegLibTypes = Nveg_type;
-        temp[Nveg_type + k].veg_class = Nveg_type + k + 1;
-        temp[Nveg_type + k].overstory = ref_veg_over[k];
-        temp[Nveg_type + k].rarc = ref_veg_rarc[k];
-        temp[Nveg_type + k].rmin = ref_veg_rmin[k];
-        for (j = 0; j < MONTHS_PER_YEAR; j++) {
-            temp[Nveg_type + k].LAI[j] = ref_veg_lai[k];
-            temp[Nveg_type +
-                 k].Wdmax[j] = param.VEG_LAI_WATER_FACTOR * ref_veg_lai[k];
-            temp[Nveg_type + k].albedo[j] = ref_veg_albedo[k];
-            temp[Nveg_type + k].roughness[j] = ref_veg_rough[k];
-            temp[Nveg_type + k].displacement[j] = ref_veg_displ[k];
-            temp[Nveg_type + k].vegcover[j] = ref_veg_vegcover[k];
-        }
-        temp[Nveg_type + k].wind_h = ref_veg_wind_h[k];
-        temp[Nveg_type + k].RGL = ref_veg_RGL[k];
-        temp[Nveg_type + k].rad_atten = ref_veg_rad_atten[k];
-        temp[Nveg_type + k].wind_atten = ref_veg_wind_atten[k];
-        temp[Nveg_type + k].trunk_ratio = ref_veg_trunk_ratio[k];
-    }
 
     return temp;
 }

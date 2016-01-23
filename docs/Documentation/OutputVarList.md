@@ -66,12 +66,7 @@ Using options within the *global parameter file*, any combination of the variabl
 | OUT_LAKE_RO_IN_V       	| (release 4.1.2 and later) Incoming volumetric runoff from lake catchment                   	| m<sup>3</sup> (ALMA_OUTPUT: m<sup>3</sup>/s) 	|
 | OUT_LAKE_VAPFLX        	| (release 4.1.2 and later) Outgoing sublimation from snow on top of lake ice                	| mm (ALMA_OUTPUT: mm/s) 	|
 | OUT_LAKE_VAPFLX_V      	| (release 4.1.2 and later) Outgoing volumetric sublimation from snow on top of lake ice     	| m<sup>3</sup> (ALMA_OUTPUT: m<sup>3</sup>/s) 	|
-| OUT_PET_SATSOIL        	| Potential evap from saturated bare soil                                                   	| mm (ALMA_OUTPUT: mm/s) 	|
-| OUT_PET_H2OSURF        	| Potential evap from open water                                                            	| mm (ALMA_OUTPUT: mm/s) 	|
-| OUT_PET_SHORT          	| Potential evap (transpiration only) from short reference crop (grass)                     	| mm (ALMA_OUTPUT: mm/s) 	|
-| OUT_PET_TALL           	| Potential evap (transpiration only) from tall reference crop (alfalfa)                    	| mm (ALMA_OUTPUT: mm/s) 	|
-| OUT_PET_NATVEG         	| Potential evap (transpiration only) from current vegetation and current canopy resistance 	| mm (ALMA_OUTPUT: mm/s) 	|
-| OUT_PET_VEGNOCR        	| Potential evap (transpiration only) from current vegetation and 0 canopy resistance       	| mm (ALMA_OUTPUT: mm/s) 	|
+| OUT_PET                	| Potential evapotranspiration (= area-weighted sum of potential transpiration and potential soil evaporation).  Potential transpiration is computed using the Penman-Monteith eqn with architectural resistance and LAI of the current veg cover.  	| mm (ALMA_OUTPUT: mm/s) 	|
 | OUT_PREC               	| Incoming precipitation                                                                    	| mm (ALMA_OUTPUT: mm/s) 	|
 | OUT_RAINF              	| Rainfall                                                                                  	| mm (ALMA_OUTPUT: mm/s) 	|
 | OUT_REFREEZE           	| Refreezing of water in the snow                                                           	| mm (ALMA_OUTPUT: mm/s) 	|

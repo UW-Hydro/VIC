@@ -1203,7 +1203,7 @@ get_global_param(FILE *gp)
         }
         if (options.SNOW_BAND > MAX_BANDS) {
             log_err("Global file wants more snow bands (%zu) than are "
-                    "defined by MAX_BANDS (%d).  Edit vicNl_def.h and "
+                    "defined by MAX_BANDS (%d).  Edit vic_driver_shared.h and "
                     "recompile.", options.SNOW_BAND, MAX_BANDS);
         }
     }
@@ -1315,12 +1315,12 @@ get_global_param(FILE *gp)
     }
     if (options.Nlayer > MAX_LAYERS) {
         log_err("Global file wants more soil moisture layers (%zu) than "
-                "are defined by MAX_LAYERS (%d).  Edit vicNl_def.h and "
+                "are defined by MAX_LAYERS (%d).  Edit vic_driver_shared.h and "
                 "recompile.", options.Nlayer, MAX_LAYERS);
     }
     if (options.Nnode > MAX_NODES) {
         log_err("Global file wants more soil thermal nodes (%zu) than "
-                "are defined by MAX_NODES (%d).  Edit vicNl_def.h and "
+                "are defined by MAX_NODES (%d).  Edit vic_driver_shared.h and "
                 "recompile.", options.Nnode, MAX_NODES);
     }
     if (!options.FULL_ENERGY && options.CLOSE_ENERGY) {

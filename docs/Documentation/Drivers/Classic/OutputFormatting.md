@@ -45,7 +45,7 @@ _prefix_ = name of the output file, NOT including latitude and longitude
 
 _nvars_ = number of variables in the output file
 
-_varname_ = name of the variable (this must be one of the output variable names listed in `vicNl_def.h`.)
+_varname_ = name of the variable (this must be one of the output variable names listed in `vic_driver_shared.h`.)
 
 _format_, _type_, and _multiplier_ are optional.  For a given variable,
 you can specify either NONE of these, or ALL of these.  If these
@@ -117,7 +117,7 @@ Since variables like SOIL_MOIST have 1 value per soil layer, these variables wil
 
 **Snow band output:**
 
-To specify writing the values of variables in each snow band, append "BAND" to the variable name (this only works for some variables - see the list in vicNl_def.h). If you specify these variables, the value of the variable in each band will be written, one band per column. For example, for a cell having 2 snow bands:
+To specify writing the values of variables in each snow band, append "BAND" to the variable name (this only works for some variables - see the list in vic_driver_shared.h). If you specify these variables, the value of the variable in each band will be written, one band per column. For example, for a cell having 2 snow bands:
 
 ```
 OUTVAR	OUT_SWE_BAND
@@ -168,7 +168,7 @@ If the user sets ALMA_OUTPUT=TRUE in the global parameter file, then VIC will co
 
 More information on ALMA output variables is available at: [http://www.lmd.jussieu.fr/~polcher/ALMA/convention_output_3.html](http://www.lmd.jussieu.fr/~polcher/ALMA/convention_output_3.html).
 
-In addition, several more variables have been added to the list of available output variables. See `vicNl_def.h` for the complete list of available output variables.
+In addition, several more variables have been added to the list of available output variables. See `vic_driver_shared.h` for the complete list of available output variables.
 
 ## Specifying Output Time Step
 

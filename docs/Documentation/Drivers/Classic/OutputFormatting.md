@@ -27,12 +27,12 @@ VIC (4.0.6 and later) now allows the user to specify exactly which output files 
 # Output File Contents
 N_OUTFILES	_n_outfiles_
 
-OUTFILE	_prefix_	_nvars_
+OUTFILE	_prefix_
 OUTVAR	_varname_	[_format_	_type_	_multiplier_]
 OUTVAR	_varname_	[_format_	_type_	_multiplier_]
 OUTVAR	_varname_	[_format_	_type_	_multiplier_]
 
-OUTFILE	_prefix_	_nvars_
+OUTFILE	_prefix_
 OUTVAR	_varname_	[_format_	_type_	_multiplier_]
 OUTVAR	_varname_	[_format_	_type_	_multiplier_]
 OUTVAR	_varname_	[_format_	_type_	_multiplier_]
@@ -42,8 +42,6 @@ where
 _n_outfiles_ = number of output files
 
 _prefix_ = name of the output file, NOT including latitude and longitude
-
-_nvars_ = number of variables in the output file
 
 _varname_ = name of the variable (this must be one of the output variable names listed in `vic_driver_shared.h`.)
 
@@ -73,7 +71,7 @@ Here's an example. To specify 2 output files, named "wbal" and "ebal", and conta
 ```
 N_OUTFILES	2
 
-OUTFILE	wbal	6
+OUTFILE	wbal
 OUTVAR	OUT_PREC
 OUTVAR	OUT_EVAP
 OUTVAR	OUT_RUNOFF
@@ -81,7 +79,7 @@ OUTVAR	OUT_BASEFLOW
 OUTVAR	OUT_SWE
 OUTVAR	OUT_SOIL_MOIST
 
-OUTFILE	ebal	7
+OUTFILE	ebal
 OUTVAR	OUT_NET_SHORT
 OUTVAR	OUT_NET_LONG
 OUTVAR	OUT_LATENT

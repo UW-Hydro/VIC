@@ -202,12 +202,12 @@ PRT_SNOW_BAND   FALSE   # TRUE = write a "snowband" output file, containing band
 #
 #   N_OUTFILES    <n_outfiles>
 #
-#   OUTFILE       <prefix>        <nvars>
+#   OUTFILE       <prefix>
 #   OUTVAR        <varname>       [<format>        <type>  <multiplier>]
 #   OUTVAR        <varname>       [<format>        <type>  <multiplier>]
 #   OUTVAR        <varname>       [<format>        <type>  <multiplier>]
 #
-#   OUTFILE       <prefix>        <nvars>
+#   OUTFILE       <prefix>
 #   OUTVAR        <varname>       [<format>        <type>  <multiplier>]
 #   OUTVAR        <varname>       [<format>        <type>  <multiplier>]
 #   OUTVAR        <varname>       [<format>        <type>  <multiplier>]
@@ -217,7 +217,6 @@ PRT_SNOW_BAND   FALSE   # TRUE = write a "snowband" output file, containing band
 #   <n_outfiles> = number of output files
 #   <prefix>     = name of the output file, NOT including latitude
 #                  and longitude
-#   <nvars>      = number of variables in the output file
 #   <varname>    = name of the variable (this must be one of the
 #                  output variable names listed in vic_driver_shared.h.)
 #   <format>     = (for ascii output files) fprintf format string,

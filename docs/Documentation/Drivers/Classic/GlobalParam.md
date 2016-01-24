@@ -247,7 +247,7 @@ The following options describe the output files. Click [here](OutputFormatting.m
 | PRT_HEADER            | string    | TRUE or FALSE     | Options for output file headers (default is FALSE): <li>**FALSE** = output files contain no headers <li>**TRUE** = headers are inserted into the beginning of each output file, listing the names of the variables in each field of the file (if ASCII) and/or the variable data types (if BINARY) <br><br>[Click here for more information.](OutputFormatting.md)                                                                                                                                                          |
 | PRT_SNOW_BAND         | string    | TRUE or FALSE     | if TRUE then print snow variables for each snow band in a separate output file (`snow_band_*`). <br><br>*NOTE*: this option is ignored if output file contents are specified. |
 | N_OUTFILES\*            | integer   | N/A               | Number of output files per grid cell. [Click here for more information](OutputFormatting.md).                                                                                                                    |
-| OUTFILE\*               | <br> string <br> integer <br>| <br>prefix <br> nvars <br>| Information about this output file: <br>Prefix of the output file (to which the lat and lon will be appended)<br>Number of variables in the output file <br> This should be specified once for each output file. [Click here for more information.](OutputFormatting.md) |
+| OUTFILE\*               | <br> string <br>| <br>prefix <br>| Information about this output file: <br>Prefix of the output file (to which the lat and lon will be appended) <br> This should be specified once for each output file. [Click here for more information.](OutputFormatting.md) |
 | OUTVAR\*                | <br> string <br> string <br> string <br> integer <br> | <br> name <br> format <br> type <br> multiplier <br> | Information about this output variable:<br>Name (must match a name listed in vic_driver_shared.h) <br> Output format (C fprintf-style format code) <br>Data type (one of: OUT_TYPE_DEFAULT, OUT_TYPE_CHAR, OUT_TYPE_SINT, OUT_TYPE_USINT, OUT_TYPE_INT, OUT_TYPE_FLOAT,OUT_TYPE_DOUBLE) <br> Multiplier - number to multiply the data with in order to recover the original values (only valid with BINARY_OUTPUT=TRUE) <br><br> This should be specified once for each output variable. [Click here for more information.](OutputFormatting.md)|
 
 \* *Note: `N_OUTFILES`, `OUTFILE`, and `OUTVAR` are optional; if omitted, traditional output files are produced. [Click here for details on using these instructions](OutputFormatting.md).*
@@ -498,12 +498,12 @@ PRT_SNOW_BAND   FALSE   # TRUE = write a "snowband" output file, containing band
 #
 #   N_OUTFILES    <n_outfiles>
 #
-#   OUTFILE       <prefix>        <nvars>
+#   OUTFILE       <prefix>
 #   OUTVAR        <varname>       [<format>        <type>  <multiplier>]
 #   OUTVAR        <varname>       [<format>        <type>  <multiplier>]
 #   OUTVAR        <varname>       [<format>        <type>  <multiplier>]
 #
-#   OUTFILE       <prefix>        <nvars>
+#   OUTFILE       <prefix>
 #   OUTVAR        <varname>       [<format>        <type>  <multiplier>]
 #   OUTVAR        <varname>       [<format>        <type>  <multiplier>]
 #   OUTVAR        <varname>       [<format>        <type>  <multiplier>]
@@ -513,7 +513,6 @@ PRT_SNOW_BAND   FALSE   # TRUE = write a "snowband" output file, containing band
 #   <n_outfiles> = number of output files
 #   <prefix>     = name of the output file, NOT including latitude
 #                  and longitude
-#   <nvars>      = number of variables in the output file
 #   <varname>    = name of the variable (this must be one of the
 #                  output variable names listed in vic_driver_shared.h.)
 #   <format>     = (for ascii output files) fprintf format string,

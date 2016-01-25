@@ -39,7 +39,6 @@ runoff(cell_data_struct  *cell,
        soil_con_struct   *soil_con,
        double             ppt,
        double            *frost_fract,
-       double             dt,
        int                Nnodes)
 {
     extern option_struct       options;
@@ -49,7 +48,6 @@ runoff(cell_data_struct  *cell,
     size_t                     time_step;
     int                        last_index;
     int                        tmplayer;
-    size_t                     frost_area;
     int                        fidx;
     int                        ErrorFlag;
     double                     A, frac;
@@ -80,7 +78,6 @@ runoff(cell_data_struct  *cell,
     double                     sum_liq;
     double                     evap_fraction;
     double                     evap_sum;
-    double                     tmp_fract;
     layer_data_struct         *layer;
     layer_data_struct          tmp_layer;
     unsigned short             runoff_steps_per_dt;
@@ -98,26 +95,29 @@ runoff(cell_data_struct  *cell,
     cell->baseflow = 0;
     cell->asat = 0;
 
-    for (frost_area = 0; frost_area < options.Nfrost; frost_area++) {
-        baseflow[frost_area] = 0;
+    runoff_steps_per_dt = global_param.runoff_steps_per_day /
+                          global_param.model_steps_per_day;
+
+    for (fidx = 0; fidx < (int)options.Nfrost; fidx++) {
+        baseflow[fidx] = 0;
     }
 
     for (lindex = 0; lindex < options.Nlayer; lindex++) {
-        evap[lindex][0] = layer[lindex].evap / dt;
+        evap[lindex][0] = layer[lindex].evap / (double) runoff_steps_per_dt;
         org_moist[lindex] = layer[lindex].moist;
         layer[lindex].moist = 0;
         if (evap[lindex][0] > 0) { // if there is positive evaporation
             sum_liq = 0;
             // compute available soil moisture for each frost sub area.
-            for (frost_area = 0; frost_area < options.Nfrost; frost_area++) {
-                avail_liq[lindex][frost_area] =
-                    (org_moist[lindex] - layer[lindex].ice[frost_area] -
+            for (fidx = 0; fidx < (int)options.Nfrost; fidx++) {
+                avail_liq[lindex][fidx] =
+                    (org_moist[lindex] - layer[lindex].ice[fidx] -
                      resid_moist[lindex]);
-                if (avail_liq[lindex][frost_area] < 0) {
-                    avail_liq[lindex][frost_area] = 0;
+                if (avail_liq[lindex][fidx] < 0) {
+                    avail_liq[lindex][fidx] = 0;
                 }
-                sum_liq += avail_liq[lindex][frost_area] *
-                           frost_fract[frost_area];
+                sum_liq += avail_liq[lindex][fidx] *
+                           frost_fract[fidx];
             }
             // compute fraction of available soil moisture that is evaporated
             if (sum_liq > 0) {
@@ -128,36 +128,20 @@ runoff(cell_data_struct  *cell,
             }
             // distribute evaporation between frost sub areas by percentage
             evap_sum = evap[lindex][0];
-            for (fidx = options.Nfrost - 1; fidx >= 0; fidx--) {
+            for (fidx = (int)options.Nfrost - 1; fidx >= 0; fidx--) {
                 evap[lindex][fidx] = avail_liq[lindex][fidx] * evap_fraction;
                 avail_liq[lindex][fidx] -= evap[lindex][fidx];
                 evap_sum -= evap[lindex][fidx] * frost_fract[fidx];
             }
         }
         else {
-            for (fidx = options.Nfrost - 1; fidx > 0; fidx--) {
+            for (fidx = (int)options.Nfrost - 1; fidx > 0; fidx--) {
                 evap[lindex][fidx] = evap[lindex][0];
             }
         }
     }
 
-    // compute temperatures of frost subareas
-    for (lindex = 0; lindex < options.Nlayer; lindex++) {
-        for (frost_area = 0; frost_area < options.Nfrost; frost_area++) {
-            if (options.Nfrost > 1) {
-                if (frost_area == 0) {
-                    tmp_fract = frost_fract[0] / 2.;
-                }
-                else {
-                    tmp_fract +=
-                        (frost_fract[frost_area -
-                                     1] + frost_fract[frost_area]) / 2.;
-                }
-            }
-        }
-    }
-
-    for (frost_area = 0; frost_area < options.Nfrost; frost_area++) {
+    for (fidx = 0; fidx < (int)options.Nfrost; fidx++) {
         /** ppt = amount of liquid water coming to the surface **/
         inflow = ppt;
 
@@ -169,10 +153,10 @@ runoff(cell_data_struct  *cell,
                            global_param.runoff_steps_per_day;
 
             /** Set Layer Liquid Moisture Content **/
-            liq[lindex] = org_moist[lindex] - layer[lindex].ice[frost_area];
+            liq[lindex] = org_moist[lindex] - layer[lindex].ice[fidx];
 
             /** Set Layer Frozen Moisture Content **/
-            ice[lindex] = layer[lindex].ice[frost_area];
+            ice[lindex] = layer[lindex].ice[fidx];
 
             /** Set Layer Maximum Moisture Content **/
             max_moist[lindex] = soil_con->max_moist[lindex];
@@ -186,18 +170,16 @@ runoff(cell_data_struct  *cell,
             tmp_moist_for_runoff[lindex] = (liq[lindex] + ice[lindex]);
         }
         compute_runoff_and_asat(soil_con, tmp_moist_for_runoff, inflow, &A,
-                                &(runoff[frost_area]));
+                                &(runoff[fidx]));
 
         // save dt_runoff based on initial runoff estimate,
         // since we will modify total runoff below for the case of completely saturated soil
-        tmp_dt_runoff[frost_area] = runoff[frost_area] / dt;
+        tmp_dt_runoff[fidx] = runoff[fidx] /
+                              (double) runoff_steps_per_dt;
 
         /**************************************************
            Compute Flow Between Soil Layers ()
         **************************************************/
-
-        runoff_steps_per_dt = global_param.runoff_steps_per_day /
-                              global_param.model_steps_per_day;
 
         dt_inflow = inflow / (double) runoff_steps_per_dt;
 
@@ -213,7 +195,7 @@ runoff(cell_data_struct  *cell,
             for (lindex = 0; lindex < options.Nlayer - 1; lindex++) {
                 /** Brooks & Corey relation for hydraulic conductivity **/
 
-                if ((tmp_liq = liq[lindex] - evap[lindex][frost_area]) <
+                if ((tmp_liq = liq[lindex] - evap[lindex][fidx]) <
                     resid_moist[lindex]) {
                     tmp_liq = resid_moist[lindex];
                 }
@@ -239,7 +221,7 @@ runoff(cell_data_struct  *cell,
             last_index = 0;
             for (lindex = 0; lindex < options.Nlayer - 1; lindex++) {
                 if (lindex == 0) {
-                    dt_runoff = tmp_dt_runoff[frost_area];
+                    dt_runoff = tmp_dt_runoff[fidx];
                 }
                 else {
                     dt_runoff = 0;
@@ -252,7 +234,7 @@ runoff(cell_data_struct  *cell,
                 /** Update soil layer moisture content **/
                 liq[lindex] = liq[lindex] +
                               (inflow - dt_runoff) -
-                              (Q12[lindex] + evap[lindex][frost_area]);
+                              (Q12[lindex] + evap[lindex][fidx]);
 
                 /** Verify that soil layer moisture is less than maximum **/
                 if ((liq[lindex] + ice[lindex]) > max_moist[lindex]) {
@@ -270,7 +252,7 @@ runoff(cell_data_struct  *cell,
                             tmplayer--;
                             if (tmplayer < 0) {
                                 /** If top layer saturated, add to runoff **/
-                                runoff[frost_area] += tmp_inflow;
+                                runoff[fidx] += tmp_inflow;
                                 tmp_inflow = 0;
                             }
                             else {
@@ -343,7 +325,7 @@ runoff(cell_data_struct  *cell,
             /** Extract baseflow from the bottom soil layer **/
 
             liq[lindex] +=
-                Q12[lindex - 1] - (evap[lindex][frost_area] + dt_baseflow);
+                Q12[lindex - 1] - (evap[lindex][fidx] + dt_baseflow);
 
             /** Check Lower Sub-Layer Moistures **/
             tmp_moist = 0;
@@ -367,7 +349,7 @@ runoff(cell_data_struct  *cell,
                     tmplayer--;
                     if (tmplayer < 0) {
                         /** If top layer saturated, add to runoff **/
-                        runoff[frost_area] += tmp_moist;
+                        runoff[fidx] += tmp_moist;
                         tmp_moist = 0;
                     }
                     else {
@@ -387,13 +369,13 @@ runoff(cell_data_struct  *cell,
                 }
             }
 
-            baseflow[frost_area] += dt_baseflow;
+            baseflow[fidx] += dt_baseflow;
         } /* end of sub-dt time step loop */
 
         /** If negative baseflow, reduce evap accordingly **/
-        if (baseflow[frost_area] < 0) {
-            layer[lindex].evap += baseflow[frost_area];
-            baseflow[frost_area] = 0;
+        if (baseflow[fidx] < 0) {
+            layer[lindex].evap += baseflow[fidx];
+            baseflow[fidx] = 0;
         }
 
         /** Recompute Asat based on final moisture level of upper layers **/
@@ -406,11 +388,11 @@ runoff(cell_data_struct  *cell,
         /** Store tile-wide values **/
         for (lindex = 0; lindex < options.Nlayer; lindex++) {
             layer[lindex].moist +=
-                ((liq[lindex] + ice[lindex]) * frost_fract[frost_area]);
+                ((liq[lindex] + ice[lindex]) * frost_fract[fidx]);
         }
-        cell->asat += A * frost_fract[frost_area];
-        cell->runoff += runoff[frost_area] * frost_fract[frost_area];
-        cell->baseflow += baseflow[frost_area] * frost_fract[frost_area];
+        cell->asat += A * frost_fract[fidx];
+        cell->runoff += runoff[fidx] * frost_fract[fidx];
+        cell->baseflow += baseflow[fidx] * frost_fract[fidx];
     }
 
     /** Compute water table depth **/

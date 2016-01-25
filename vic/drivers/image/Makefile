@@ -60,7 +60,7 @@ SHELL = /bin/bash
 
 # Set CC = your compiler here
 ifeq (true, ${TRAVIS})
-CC = mpicc
+CC = ${MPIPATH}/bin/mpicc
 else
 CC = mpicc-mpich-mp
 endif

@@ -5,20 +5,6 @@ void get_current_datetime(char *cdt);
 void get_logname(const char *path, int id, char *filename);
 void initialize_log(void);
 void setup_logging(int id);
-extern _Bool ref_veg_over[];
-extern double ref_veg_rarc[];
-extern double ref_veg_rmin[];
-extern double ref_veg_lai[];
-extern double ref_veg_albedo[];
-extern double ref_veg_vegcover[];
-extern double ref_veg_rough[];
-extern double ref_veg_displ[];
-extern double ref_veg_wind_h[];
-extern double ref_veg_RGL[];
-extern double ref_veg_rad_atten[];
-extern double ref_veg_wind_atten[];
-extern double ref_veg_trunk_ratio[];
-extern _Bool ref_veg_ref_crop[];
 extern size_t NR;
 extern size_t NF;
 enum
@@ -55,13 +41,10 @@ enum
 };
 enum
 {
+    FROM_DEFAULT,
     FROM_VEGLIB,
-    FROM_VEGPARAM
-};
-enum
-{
-    LAI_FROM_VEGLIB,
-    LAI_FROM_VEGPARAM
+    FROM_VEGPARAM,
+    FROM_VEGHIST
 };
 enum
 {
@@ -159,12 +142,7 @@ enum
     OUT_LAKE_RO_IN_V,
     OUT_LAKE_VAPFLX,
     OUT_LAKE_VAPFLX_V,
-    OUT_PET_SATSOIL,
-    OUT_PET_H2OSURF,
-    OUT_PET_SHORT,
-    OUT_PET_TALL,
-    OUT_PET_NATVEG,
-    OUT_PET_VEGNOCR,
+    OUT_PET,
     OUT_PREC,
     OUT_RAINF,
     OUT_REFREEZE,
@@ -453,11 +431,15 @@ typedef struct {
     double EMISS_ICE;
     double EMISS_SNOW;
     double EMISS_H2O;
+    double SOIL_RARC;
     double SOIL_RESID_MOIST;
     double SOIL_SLAB_MOIST_FRACT;
+    double SOIL_WINDH;
     double VEG_LAI_SNOW_MULTIPLIER;
     double VEG_MIN_INTERCEPTION_STORAGE;
     double VEG_LAI_WATER_FACTOR;
+    double VEG_RATIO_DH_HEIGHT;
+    double VEG_RATIO_RL_HEIGHT;
     double CANOPY_CLOSURE;
     double CANOPY_RSMAX;
     double CANOPY_VPDMINFACTOR;
@@ -737,7 +719,7 @@ typedef struct {
     double CInter;
     double CSlow;
     double inflow;
-    double pot_evap[0];
+    double pot_evap;
     double runoff;
     layer_data_struct layer[3];
     double RhLitter;
@@ -1028,7 +1010,7 @@ double calc_surf_energy_bal(double, double, double, double, double, double,
                             double, double, double, double, double, double,
                             double, double, double, double, double, double,
                             double, double, double, double, double, double *,
-                            double *, double *, double *, double *, double,
+                            double *, double *, double *, double *, double *, double,
                             double *, double *, double, double *, double *, int,
                             int, size_t, size_t, double, size_t,
                             unsigned short int, int, int, unsigned short int,
@@ -1069,8 +1051,9 @@ void collect_wb_terms(cell_data_struct, veg_var_struct, snow_data_struct,
                       double, double, double, int, double, int, double *,
                       double *, out_data_struct *);
 double compute_coszen(double, double, double, unsigned short int, unsigned int);
-void compute_pot_evap(unsigned short int, dmy_struct *, size_t, double, double,
-                      double, double, double, double, double **, double *);
+void compute_pot_evap(double, double, double, double, double, double, double,
+                      double, double, double, double *, char, double, double,
+                      double, double *);
 void compute_runoff_and_asat(soil_con_struct *, double *, double, double *,
                              double *);
 void compute_soil_resp(int, double *, double, double, double *, double *,
@@ -1160,7 +1143,7 @@ void rescale_soil_veg_fluxes(double, double, cell_data_struct *,
 void rhoinit(double *, double);
 double rtnewt(double x1, double x2, double xacc, double Ur, double Zr);
 int runoff(cell_data_struct *, energy_bal_struct *, soil_con_struct *, double,
-           double *, double, int);
+           double *, int);
 void set_node_parameters(double *, double *, double *, double *, double *,
                          double *, double *, double *, double *, double *,
                          double *, int, int);
@@ -1217,7 +1200,7 @@ double sub_with_height(double z, double es, double Wind, double AirDens,
                        double ZO, double EactAir, double F, double hsalt,
                        double phi_r, double ushear, double Zrh);
 int surface_fluxes(_Bool, double, double, double, double, double *, double *,
-                   double **, double *, double *, double *, double *, double *,
+                   double *, double *, double *, double *, double *, double *,
                    double *, double *, double *, double *, double *, size_t,
                    size_t, unsigned short int, double, unsigned short int,
                    size_t, unsigned short int, atmos_data_struct *,
@@ -1329,8 +1312,7 @@ void num2date(double origin, double time_value, double tzoffset,
               unsigned short int calendar, unsigned short int time_units,
               dmy_struct *date);
 FILE *open_file(char string[], char type[]);
-void print_cell_data(cell_data_struct *cell, size_t nlayers, size_t nfrost,
-                     size_t npet);
+void print_cell_data(cell_data_struct *cell, size_t nlayers, size_t nfrost);
 void print_dmy(dmy_struct *dmy);
 void print_energy_bal(energy_bal_struct *eb, size_t nnodes, size_t nfronts);
 void print_filenames(filenames_struct *fnames);
@@ -1339,7 +1321,7 @@ void print_force_type(force_type_struct *force_type);
 void print_global_param(global_param_struct *gp);
 void print_lake_con(lake_con_struct *lcon, size_t nlnodes);
 void print_lake_var(lake_var_struct *lvar, size_t nlnodes, size_t nfronts,
-                    size_t nlayers, size_t nnodes, size_t nfrost, size_t npet);
+                    size_t nlayers, size_t nnodes, size_t nfrost);
 void print_layer_data(layer_data_struct *ldata, size_t nfrost);
 void print_license(void);
 void print_option(option_struct *option);

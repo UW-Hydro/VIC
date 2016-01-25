@@ -85,7 +85,7 @@ initialize_options()
     options.JULY_TAVG_SUPPLIED = false;
     options.LAI_SRC = FROM_VEGLIB;
     options.ORGANIC_FRACT = false;
-    options.VEGCOVER_SRC = FROM_VEGLIB;
+    options.VEGCOVER_SRC = FROM_DEFAULT;
     options.VEGLIB_PHOTO = false;
     options.VEGLIB_VEGCOVER = false;
     options.VEGPARAM_ALB = false;

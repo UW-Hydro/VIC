@@ -57,6 +57,7 @@ vic_init(void)
     size_t                     i;
     size_t                     j;
     size_t                     k;
+    size_t                     m;
     size_t                     nveg;
     int                        veg_class;
     int                        vidx;
@@ -250,11 +251,24 @@ vic_init(void)
         }
     }
 
-    // vegcover not implemented in image model
+    // vegcover
     for (j = 0; j < options.NVEGTYPES; j++) {
-        for (k = 0; k < MONTHS_PER_YEAR; k++) {
-            for (i = 0; i < local_domain.ncells_active; i++) {
-                veg_lib[i][j].vegcover[k] = 1.0;
+        if (options.VEGCOVER_SRC == FROM_DEFAULT) {
+            for (k = 0; k < MONTHS_PER_YEAR; k++) {
+                for (i = 0; i < local_domain.ncells_active; i++) {
+                    veg_lib[i][j].vegcover[k] = 1.0;
+                }
+            }
+        }
+        else {
+            d4start[0] = j;
+            for (k = 0; k < MONTHS_PER_YEAR; k++) {
+                d4start[1] = k;
+                get_scatter_nc_field_double(filenames.veglib, "vegcover",
+                                            d4start, d4count, dvar);
+                for (i = 0; i < local_domain.ncells_active; i++) {
+                    veg_lib[i][j].vegcover[k] = (double) dvar[i];
+                }
             }
         }
     }
@@ -822,6 +836,11 @@ vic_init(void)
                 veg_con_map[i].vidx[j] = k;
                 veg_con[i][k].Cv = veg_con_map[i].Cv[j];
                 veg_con[i][k].veg_class = j;
+                for (m = 0; m < MONTHS_PER_YEAR; m++) {
+                    veg_con[i][k].LAI[m] = veg_lib[i][j].LAI[m];
+                    veg_con[i][k].albedo[m] = veg_lib[i][j].albedo[m];
+                    veg_con[i][k].vegcover[m] = veg_lib[i][j].vegcover[m];
+                }
                 k++;
             }
             else {

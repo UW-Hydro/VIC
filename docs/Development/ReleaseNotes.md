@@ -56,12 +56,12 @@ This is a major update from VIC 4. The VIC 5.0.0 release aims to have nearly ide
 
 #### Backwards Incompatible Changes:
 
-1.  Classic Driver I/O ([GH#227](https://github.com/UW-Hydro/VIC/pull/227) and ?)
+1.  Classic Driver I/O Formatting ([GH#227](https://github.com/UW-Hydro/VIC/pull/227) and ?)
 
 	The format of ASCII forcing and output files has changed in VIC 5. These changes were motivated by the desire to improve simulation metadata tracking and reproducibility of VIC simulations.
 
 	- Forcing files now require date stamps for each timestep and a header specifies the names of the forcing variables.   
-	- Output files now include a header with simulation metadata and variable names. The `PRT_HEADER` option has been depreciated.
+	- Output files now include a header with simulation metadata and variable names. The `PRT_HEADER` option has been deprecated.
 
 2.  Classic Driver Global Parameter Options:
 
@@ -72,7 +72,22 @@ This is a major update from VIC 4. The VIC 5.0.0 release aims to have nearly ide
 	- `OUT_DT` (int, units: hours) has been changed to `OUTPUT_STEPS_PER_DAY` (int)
 	- `FORCE_DT` (int, units: hours) has been changed to `FORCE_STEPS_PER_DAY` (int)
 
-#### Depreciated Features:
+3.  Classic Driver Output Variables ([GH#352](https://github.com/UW-Hydro/VIC/pull/352))
+
+	Computation of potential evapotranspiration (PET) has been simplified, reducing the number of output variables from 6 to 1.  The following output variables have been removed:
+
+        - 'OUT_PET_SATSOIL' (potential evap from saturated bare soil)
+        - 'OUT_PET_H2OSURF' (potential evap from open water)
+        - 'OUT_PET_SHORT' (potential evap (transpiration only) from short reference crop (grass))
+        - 'OUT_PET_TALL' (potential evap (transpiration only) from tall reference crop (alfalfa))
+        - 'OUT_PET_NATVEG' (potential evap (transpiration only) from current vegetation and current canopy resistance)
+        - 'OUT_PET_VEGNOCR' (potential evap (transpiration only) from current vegetation and 0 canopy resistance)
+
+        These have been replaced by:
+
+        - 'OUT_PET' (potential evapotranspiration, which = area-weighted sum of potential transpiration and potential soil evaporation; potential transpiration is computed using the Penman-Monteith eqn with architectural resistance and LAI of the current veg cover)
+
+#### Deprecated Features:
 
 1.  Removed unused global parameter option `MEASURE_H` ([GH#284](https://github.com/UW-Hydro/VIC/pull/284).)
 2.  Removed MTCLIM ([GH#288](https://github.com/UW-Hydro/VIC/pull/288)).
@@ -92,6 +107,45 @@ This is a major update from VIC 4. The VIC 5.0.0 release aims to have nearly ide
 
 ------------------------------
 
+## VIC 4.2.c [![DOI](https://zenodo.org/badge/doi/10.5281/zenodo.35302.svg)](http://dx.doi.org/10.5281/zenodo.35302)
+
+Source code is available here: [![VIC.4.2.c](https://img.shields.io/badge/VIC-4.2.c-blue.svg)](https://github.com/UW-Hydro/VIC/releases/tag/VIC.4.2.c)
+
+**Release date: (December 12, 2015)**
+
+This is a bugfix update from 4.2.b.
+
+!!! Note "Note: Final Release of VIC 4 Development Track"
+	This is the last release of the VIC Version 4 development track.  The next release will be VIC.5.0 and will include backward incompatible changes.
+
+#### Bug Fixes:
+
+1.  Documented how VIC 4.2 needs user to specify veg_lib and veg_param files when OUTPUT_FORCE = TRUE. ([GH#305](https://github.com/UW-Hydro/VIC/issues/305))
+
+	Prior to release 4.2, a user could run VIC in OUTPUT_FORCE mode with only a soil parameter file and forcing files.  This functionality is now broken as of release 4.2 and will not be fixed.  Users must either supply veg_lib and veg_parameter files (which the user is likely to have anyway) or use the standalone forcing disaggregator under cevelopment for use with release 5.0.  The documentation was updated to describe this issue as of release 4.2.c.
+
+2. Added architectural resistance of 100 s/m for soil evaporation. ([GH#306](https://github.com/UW-Hydro/VIC/issues/306))
+
+	Testing at approx. 60 eddy covariance towers ([Bohn and Vivoni, 2016](../Documentation/References.md#other-historical-references)) has indicated that soil evaporation is too high with the prior architectural resistance of 0 s/m and too low with a value of 200 s/m.  Further refinement would be ideal but this is a good ballpark figure.
+
+3. Compute aerodynamic conductance of each veg tile as area-weighted average of conductances of vegetated and exposed soil fractions of the tile. ([GH#306](https://github.com/UW-Hydro/VIC/issues/306))
+
+	The prior formulation was not the final version used in [Bohn and Vivoni (2016)](../Documentation/References.md#other-historical-references), but was mistakenly added to the codebase instead of the formulation used here.  This fixes the mistake.
+
+4. Fix overwriting of veg_lib structure with values of current cell in veg_param file. ([GH#319](https://github.com/UW-Hydro/VIC/issues/319))
+
+	Previously, VIC overwrote the LAI, albedo, and vegcover values in the copy of the veg library stored in memory (which is supposed to be constant reference values that apply to all grid cells) with those from the veg_parameter file pertaining to the current grid cell.  Values for veg classes not present in the current grid cell therefore were those of the last grid cell that contained those veg classes.  This did not affect performance but interfered with diagnostics while debugging.
+
+5. Lake parameter validation. ([GH#308](https://github.com/UW-Hydro/VIC/issues/308))
+
+	Previously, there were minimal checks performed on the values of the depth-area relationship.  This allowed unphysical values to be specified, leading to all manner of unphysical behaviors.  This has been fixed.
+
+6. Fix lake water balance errors. ([GH#308](https://github.com/UW-Hydro/VIC/issues/308) and [GH#316](https://github.com/UW-Hydro/VIC/issues/316))
+
+	Previously, precipitation over the lake was scaled by the lake area fraction twice, resulting in water balance errors.  This has been fixed.
+
+------------------------------
+
 ## VIC 4.2.b [![DOI](https://zenodo.org/badge/doi/10.5281/zenodo.22307.svg)](http://dx.doi.org/10.5281/zenodo.22307)
 
 Source code is available here: [![VIC.4.2.b](https://img.shields.io/badge/VIC-4.2.b-blue.svg)](https://github.com/UW-Hydro/VIC/releases/tag/VIC.4.2.b)
@@ -99,9 +153,6 @@ Source code is available here: [![VIC.4.2.b](https://img.shields.io/badge/VIC-4.
 **Release date: (January 22, 2015)**
 
 This is a bugfix update from 4.2.a.
-
-!!! Note "Note: Final Release of VIC 4 Development Track"
-	This is the last release of the VIC Version 4 development track.  The next release will be VIC.5.0 and will include backward incompatible changes.
 
 #### Bug Fixes:
 
@@ -230,7 +281,7 @@ This is a minor release from 4.1.2.  It includes several new features, bug fixes
 
  	VIC's soil thermal profile can extend well below its soil hydrologic layers.  Previously, the moisture content of these soil thermal nodes was set to that of the bottom soil layer.  Now, the moisture content can be set to a user-specified value, SLAB_MOIST_FRACT, defined in `vicNl_def.h`.
 
-#### Depreciated Features:
+#### Deprecated Features:
 
 1.  Removed the `DIST_PRCP` option.
 

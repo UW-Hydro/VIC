@@ -192,8 +192,7 @@ main(int   argc,
                Have not Been Specifically Set
             **************************************************/
 
-            vic_force(atmos, dmy, filep.forcing, veg_lib, veg_con, veg_hist,
-                      &soil_con);
+            vic_force(atmos, dmy, filep.forcing, veg_con, veg_hist, &soil_con);
 
             /**************************************************
                Initialize Energy Balance and Snow Variables

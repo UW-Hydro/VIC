@@ -35,12 +35,15 @@ size_t
 get_global_domain(char          *nc_name,
                   domain_struct *global_domain)
 {
-    int    *run = NULL;
-    double *var = NULL;
-    size_t  i;
-    size_t  j;
-    size_t  d2count[2];
-    size_t  d2start[2];
+    int                 *run = NULL;
+    double              *var = NULL;
+    size_t               i;
+    size_t               j;
+    size_t               d2count[2];
+    size_t               d2start[2];
+    size_t               d1count[1];
+    size_t               d1start[1];
+    extern option_struct options;
 
     initialize_domain(global_domain);
 
@@ -99,25 +102,80 @@ get_global_domain(char          *nc_name,
         }
     }
 
-    // get longitude -
-    // TBD: read var id from file
-    get_nc_field_double(nc_name, "xc",
-                        d2start, d2count, var);
-    for (i = 0; i < global_domain->ncells_total; i++) {
-        // rescale to [-180., 180]. Note that the if statement is not strictly
-        // needed, but it prevents -180 from turning into 180 and vice versa
-        if (var[i] < -180.f || var[i] > 180.f) {
-            var[i] -= round(var[i] / 360.f) * 360.f;
-        }
-        global_domain->locations[i].longitude = (double) var[i];
+    // Get number of lat/lon dimensions.
+    options.COORD_DIMS_OUT = get_nc_varndimensions(nc_name,
+                                                   options.DOMAIN_LON_VAR);
+    if (options.COORD_DIMS_OUT !=
+        get_nc_varndimensions(nc_name, options.DOMAIN_LAT_VAR)) {
+        log_err("Un even number of dimensions for %s and %s in: %s",
+                options.DOMAIN_LON_VAR, options.DOMAIN_LAT_VAR, nc_name);
     }
 
-    // get latitude
-    // TBD: read var id from file
-    get_nc_field_double(nc_name, "yc",
-                        d2start, d2count, var);
-    for (i = 0; i < global_domain->ncells_total; i++) {
-        global_domain->locations[i].latitude = (double) var[i];
+    if (options.COORD_DIMS_OUT == 1) {
+        double *varLon = NULL;
+        double *varLat = NULL;
+
+        // allocate memory for variables
+        varLon = malloc(global_domain->n_nx * sizeof(*varLon));
+        if (varLon == NULL) {
+            log_err("Memory allocation error in get_global_domain().");
+        }
+        varLat = malloc(global_domain->n_ny * sizeof(*varLat));
+        if (varLat == NULL) {
+            log_err("Memory allocation error in get_global_domain().");
+        }
+
+        d1start[0] = 0;
+        d1count[0] = global_domain->n_nx;
+
+        // get longitude for unmasked grid
+        get_nc_field_double(nc_name, options.DOMAIN_LON_VAR,
+                            d1start, d1count, varLon);
+        for (i = 0; i < global_domain->n_nx; i++) {
+            // rescale to [-180., 180]. Note that the if statement is not strictly
+            // needed, but it prevents -180 from turning into 180 and vice versa
+            if (var[i] < -180.f || var[i] > 180.f) {
+                var[i] -= round(var[i] / 360.f) * 360.f;
+            }
+            global_domain->locations[i].longitude = (double) varLon[i];
+        }
+
+        d1start[0] = 0;
+        d1count[0] = global_domain->n_ny;
+
+        // get latitude for unmasked grid
+        get_nc_field_double(nc_name, options.DOMAIN_LAT_VAR,
+                            d1start, d1count, varLat);
+        for (i = 0; i < global_domain->n_ny; i++) {
+            global_domain->locations[i].latitude = (double) varLat[i];
+        }
+
+        free(varLon);
+        free(varLat);
+    }
+    else if (options.COORD_DIMS_OUT == 2) {
+        // get longitude for unmasked grid
+        get_nc_field_double(nc_name, options.DOMAIN_LON_VAR,
+                            d2start, d2count, var);
+        for (i = 0; i < global_domain->ncells_total; i++) {
+            // rescale to [-180., 180]. Note that the if statement is not strictly
+            // needed, but it prevents -180 from turning into 180 and vice versa
+            if (var[i] < -180.f || var[i] > 180.f) {
+                var[i] -= round(var[i] / 360.f) * 360.f;
+            }
+            global_domain->locations[i].longitude = (double) var[i];
+        }
+
+        // get latitude for unmasked grid
+        get_nc_field_double(nc_name, options.DOMAIN_LAT_VAR,
+                            d2start, d2count, var);
+        for (i = 0; i < global_domain->ncells_total; i++) {
+            global_domain->locations[i].latitude = (double) var[i];
+        }
+    }
+    else {
+        log_err("Number of dimensions for %s and %s should be 1 or 2 in: %s",
+                options.DOMAIN_LON_VAR, options.DOMAIN_LAT_VAR, nc_name);
     }
 
     // get area

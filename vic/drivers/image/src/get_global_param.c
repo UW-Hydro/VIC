@@ -538,7 +538,6 @@ get_global_param(FILE *gp)
             /*************************************
                Define parameter files
             *************************************/
-
             else if (strcasecmp("CONSTANTS", optstr) == 0) {
                 sscanf(cmdstr, "%*s %s", filenames.constants);
             }
@@ -710,6 +709,12 @@ get_global_param(FILE *gp)
             }
             else if (strcasecmp("SKIPYEAR", optstr) == 0) {
                 sscanf(cmdstr, "%*s %hu", &global_param.skipyear);
+            }
+            else if (strcasecmp("DOMAIN_LON_VAR", optstr) == 0) {
+                sscanf(cmdstr, "%*s %s", options.DOMAIN_LON_VAR);
+            }
+            else if (strcasecmp("DOMAIN_LAT_VAR", optstr) == 0) {
+                sscanf(cmdstr, "%*s %s", options.DOMAIN_LAT_VAR);
             }
             else if (strcasecmp("COMPRESS", optstr) == 0) {
                 sscanf(cmdstr, "%*s %s", flgstr);

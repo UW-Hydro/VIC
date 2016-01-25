@@ -10,3 +10,7 @@ RUN apt-get update -q && \
         openmpi-bin \
         git \
         make
+
+CMD git clone https://github.com/jhamman/VICp.git && \
+    cd VIC/vic/drivers/classic && \
+    make

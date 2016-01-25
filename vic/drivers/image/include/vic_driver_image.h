@@ -141,6 +141,7 @@ void free_veg_hist(veg_hist_struct *veg_hist);
 size_t get_global_domain(char *fname, domain_struct *global_domain);
 void get_global_param(FILE *);
 size_t get_nc_dimension(char *nc_name, char *dim_name);
+int get_nc_varndimensions(char *nc_name, char *var_name);
 int get_nc_field_double(char *nc_name, char *var_name, size_t *start,
                         size_t *count, double *var);
 int get_nc_field_float(char *nc_name, char *var_name, size_t *start,

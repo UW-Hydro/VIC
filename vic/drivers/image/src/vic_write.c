@@ -35,19 +35,22 @@
 void
 vic_write(void)
 {
-    extern out_data_struct **out_data;
-    extern domain_struct     local_domain;
-    extern nc_file_struct    nc_hist_file;
-    extern nc_var_struct     nc_vars[N_OUTVAR_TYPES];
-    extern size_t            current;
-    int                      dimids[MAXDIMS];
-    size_t                   i;
-    size_t                   j;
-    size_t                   k;
-    size_t                   ndims;
-    double                  *dvar = NULL;
-    size_t                   dcount[MAXDIMS];
-    size_t                   dstart[MAXDIMS];
+    extern out_data_struct   **out_data;
+    extern global_param_struct global_param;
+    extern dmy_struct         *dmy;
+    extern domain_struct       local_domain;
+    extern nc_file_struct      nc_hist_file;
+    extern nc_var_struct       nc_vars[N_OUTVAR_TYPES];
+    extern size_t              current;
+    extern int                 mpi_rank;
+    int                        dimids[MAXDIMS];
+    size_t                     i;
+    size_t                     j;
+    size_t                     k;
+    size_t                     ndims;
+    double                    *dvar = NULL;
+    size_t                     dcount[MAXDIMS];
+    size_t                     dstart[MAXDIMS];
 
 
     // allocate memory for variables to be stored
@@ -116,6 +119,23 @@ vic_write(void)
                 out_data[i][k].aggdata[j] = 0;
             }
         }
+    }
+
+    // ADD Time variable
+    dimids[0] = nc_hist_file.time_dimid;
+    dstart[0] = current;
+    dcount[0] = 1;
+
+    dvar[0] = date2num(global_param.time_origin_num, &dmy[current], 0.,
+                       global_param.calendar, global_param.time_units);
+
+    // write to file
+    if (mpi_rank == 0) {
+        put_nc_field_double(nc_hist_file.fname, &(nc_hist_file.open),
+                            &(nc_hist_file.nc_id),
+                            nc_hist_file.d_fillvalue,
+                            dimids, 1, "time",
+                            dstart, dcount, dvar);
     }
 
     // free memory

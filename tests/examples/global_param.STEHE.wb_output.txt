@@ -37,7 +37,7 @@ VEGLIB              $test_data_dir/Stehekin/parameters/veglib.LDAS
 VEGPARAM            $test_data_dir/Stehekin/parameters/veg_param.STEHE
 ROOT_ZONES          3
 VEGPARAM_LAI        TRUE
-LAI_SRC             LAI_FROM_VEGLIB
+LAI_SRC             FROM_VEGLIB
 SNOW_BAND           5    $test_data_dir/Stehekin/parameters/snowbands.STEHE
 RESULT_DIR          $result_dir
 OUT_STEP            0

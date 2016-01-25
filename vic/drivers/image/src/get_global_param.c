@@ -621,40 +621,55 @@ get_global_param(FILE *gp)
             else if (strcasecmp("VEGPARAM", optstr) == 0) {
                 sscanf(cmdstr, "%*s %s", filenames.veg);
             }
-            else if (strcasecmp("GLOBAL_LAI", optstr) == 0) {
-                log_warn("GLOBAL_LAI has been replaced by 2 new options: "
-                         "VEGPARAM_LAI (whether the vegparam file "
-                         "contains LAI values) and LAI_SRC (where to get LAI "
-                         "values).");
-                log_warn("\"GLOBAL_LAI  TRUE\" should now be: \"VEGPARAM_LAI "
-                         "TRUE\" and \"LAI_SRC  LAI_FROM_VEGPARAM\".");
-                log_warn("\"GLOBAL_LAI  FALSE\" should now be: \"LAI_SRC "
-                         "LAI_FROM_VEGLIB\".");
-                sscanf(cmdstr, "%*s %s", flgstr);
-                if (strcasecmp("TRUE", flgstr) == 0) {
-                    options.VEGPARAM_LAI = true;
-                    options.LAI_SRC = LAI_FROM_VEGPARAM;
-                }
-                else {
-                    options.LAI_SRC = LAI_FROM_VEGLIB;
-                }
-            }
-            else if (strcasecmp("VEGPARAM_LAI", optstr) == 0) {
-                sscanf(cmdstr, "%*s %s", flgstr);
-                if (strcasecmp("TRUE", flgstr) == 0) {
-                    options.VEGPARAM_LAI = true;
-                }
-                else {
-                    options.VEGPARAM_LAI = false;
-                }
-            }
             else if (strcasecmp("LAI_SRC", optstr) == 0) {
                 sscanf(cmdstr, "%*s %s", flgstr);
-                if (strcasecmp("LAI_FROM_VEGPARAM", flgstr) == 0) {
-                    options.LAI_SRC = LAI_FROM_VEGPARAM;
+                if (strcasecmp("FROM_VEGHIST", flgstr) == 0) {
+                    options.LAI_SRC = FROM_VEGHIST;
+                }
+                else if (strcasecmp("FROM_VEGPARAM", flgstr) == 0) {
+                    options.LAI_SRC = FROM_VEGPARAM;
+                }
+                else if (strcasecmp("FROM_VEGLIB", flgstr) == 0) {
+                    options.LAI_SRC = FROM_VEGLIB;
                 }
                 else {
-                    options.LAI_SRC = LAI_FROM_VEGLIB;
+                    log_err("Unrecognized value of LAI_SRC in the global "
+                            "control file.");
+                }
+            }
+            else if (strcasecmp("VEGCOVER_SRC", optstr) == 0) {
+                sscanf(cmdstr, "%*s %s", flgstr);
+                if (strcasecmp("FROM_VEGHIST", flgstr) == 0) {
+                    options.VEGCOVER_SRC = FROM_VEGHIST;
+                }
+                else if (strcasecmp("FROM_VEGPARAM", flgstr) == 0) {
+                    options.VEGCOVER_SRC = FROM_VEGPARAM;
+                }
+                else if (strcasecmp("FROM_VEGLIB", flgstr) == 0) {
+                    options.VEGCOVER_SRC = FROM_VEGLIB;
+                }
+                else if (strcasecmp("FROM_DEFAULT", flgstr) == 0) {
+                    options.VEGCOVER_SRC = FROM_DEFAULT;
+                }
+                else {
+                    log_err("Unrecognized value of VEGCOVER_SRC in the global "
+                            "control file.");
+                }
+            }
+            else if (strcasecmp("ALB_SRC", optstr) == 0) {
+                sscanf(cmdstr, "%*s %s", flgstr);
+                if (strcasecmp("FROM_VEGHIST", flgstr) == 0) {
+                    options.ALB_SRC = FROM_VEGHIST;
+                }
+                else if (strcasecmp("FROM_VEGPARAM", flgstr) == 0) {
+                    options.ALB_SRC = FROM_VEGPARAM;
+                }
+                else if (strcasecmp("FROM_VEGLIB", flgstr) == 0) {
+                    options.ALB_SRC = FROM_VEGLIB;
+                }
+                else {
+                    log_err("Unrecognized value of ALB_SRC in the global "
+                            "control file.");
                 }
             }
             else if (strcasecmp("ROOT_ZONES", optstr) == 0) {
@@ -1139,81 +1154,6 @@ get_global_param(FILE *gp)
     if (options.ROOT_ZONES == 0) {
         log_err("ROOT_ZONES must be defined to a positive integer greater "
                 "than 0, in the global control file.");
-    }
-    if (options.LAI_SRC == LAI_FROM_VEGPARAM && !options.VEGPARAM_LAI) {
-        log_err("\"LAI_SRC\" was specified as \"LAI_FROM_VEGPARAM\", but "
-                "\"VEGPARAM_LAI\" was set to \"FALSE\" in the global "
-                "parameter file.  If you want VIC to read LAI values from "
-                "the vegparam file, you MUST make sure the veg param file "
-                "contains 1 line of 12 monthly LAI values for EACH veg "
-                "tile in EACH grid cell, and you MUST specify "
-                "\"VEGPARAM_LAI\" as \"TRUE\" in the global parameter "
-                "file.  Alternatively, if you want VIC to read LAI values "
-                "from the veg library file, set \"LAI_SRC\" to "
-                "\"LAI_FROM_VEGLIB\" in the global parameter file.  In "
-                "either case, the setting of \"VEGPARAM_LAI\" must be "
-                "consistent with the contents of the veg param file (i.e. "
-                "whether or not it contains LAI values).");
-    }
-    if (options.LAI_SRC == FROM_VEGPARAM && !options.VEGPARAM_LAI) {
-        log_err("\"LAI_SRC\" was specified as \"FROM_VEGPARAM\", but "
-                "\"VEGPARAM_LAI\" was set to \"FALSE\" in the global "
-                "parameter file.  If you want VIC to read LAI values from "
-                "the vegparam file, you MUST make sure the veg param file "
-                "contains 1 line of 12 monthly LAI values for EACH veg "
-                "tile in EACH grid cell, and you MUST specify "
-                "\"VEGPARAM_LAI\" as \"TRUE\" in the global parameter "
-                "file.  Alternatively, if you want VIC to read LAI values "
-                "from the veg library file, set \"LAI_SRC\" to "
-                "\"FROM_VEGLIB\" in the global parameter file.  In "
-                "either case, the setting of \"VEGPARAM_LAI\" must be "
-                "consistent with the contents of the veg param file (i.e. "
-                "whether or not it contains LAI values).");
-    }
-    if (options.ALB_SRC == FROM_VEGPARAM && !options.VEGPARAM_ALB) {
-        log_err("\"ALB_SRC\" was specified as \"FROM_VEGPARAM\", but "
-                "\"VEGPARAM_ALB\" was set to \"FALSE\" in the global "
-                "parameter file.  If you want VIC to read albedo values from "
-                "the vegparam file, you MUST make sure the veg param file "
-                "contains 1 line of 12 monthly albedo values for EACH veg "
-                "tile in EACH grid cell, and you MUST specify "
-                "\"VEGPARAM_ALB\" as \"TRUE\" in the global parameter "
-                "file.  Alternatively, if you want VIC to read albedo values "
-                "from the veg library file, set \"ALB_SRC\" to "
-                "\"FROM_VEGLIB\" in the global parameter file.  In "
-                "either case, the setting of \"VEGPARAM_ALB\" must be "
-                "consistent with the contents of the veg param file (i.e. "
-                "whether or not it contains albedo values).");
-    }
-    if (options.VEGCOVER_SRC == FROM_VEGPARAM && !options.VEGPARAM_VEGCOVER) {
-        log_err("\"VEGCOVER_SRC\" was specified as \"FROM_VEGPARAM\", but "
-                "\"VEGPARAM_VEGCOVER\" was set to \"FALSE\" in the global "
-                "parameter file.  If you want VIC to read vegcover values from "
-                "the vegparam file, you MUST make sure the veg param file "
-                "contains 1 line of 12 monthly vegcover values for EACH veg "
-                "tile in EACH grid cell, and you MUST specify "
-                "\"VEGPARAM_VEGCOVER\" as \"TRUE\" in the global parameter "
-                "file.  Alternatively, if you want VIC to read vegcover values "
-                "from the veg library file, set \"VEGCOVER_SRC\" to "
-                "\"FROM_VEGLIB\" in the global parameter file.  In "
-                "either case, the setting of \"VEGPARAM_VEGCOVER\" must be "
-                "consistent with the contents of the veg param file (i.e. "
-                "whether or not it contains vegcover values).");
-    }
-    if (options.VEGCOVER_SRC == FROM_VEGLIB && !options.VEGLIB_VEGCOVER) {
-        log_err("\"VEGCOVER_SRC\" was specified as \"FROM_VEGLIB\", but "
-                "\"VEGLIB_VEGCOVER\" was set to \"FALSE\" in the global "
-                "parameter file.  If you want VIC to read vegcover values from "
-                "the veglib file, you MUST make sure the veg lib file "
-                "contains 1 line of 12 monthly vegcover values for EACH veg "
-                "class, and you MUST specify "
-                "\"VEGLIB_VEGCOVER\" as \"TRUE\" in the global parameter "
-                "file.  Alternatively, if you want VIC to read vegcover values "
-                "from the veg param file, set \"VEGCOVER_SRC\" to "
-                "\"FROM_VEGPARAM\" in the global parameter file.  In "
-                "either case, the setting of \"VEGLIB_VEGCOVER\" must be "
-                "consistent with the contents of the veg lib file (i.e. "
-                "whether or not it contains vegcover values).");
     }
 
     // Validate SPATIAL_FROST information

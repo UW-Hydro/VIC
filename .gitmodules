@@ -1,0 +1,3 @@
+[submodule "samples/VIC_sample_data"]
+	path = samples/VIC_sample_data
+	url = https://github.com/jhamman/VIC_sample_data

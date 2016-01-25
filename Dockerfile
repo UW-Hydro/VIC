@@ -11,6 +11,6 @@ RUN apt-get update -q && \
         git \
         make
 
-CMD git clone https://github.com/jhamman/VICp.git && \
+CMD git clone https://github.com/jhamman/VIC.git && \
     cd VIC/vic/drivers/classic && \
     make

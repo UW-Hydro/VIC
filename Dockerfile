@@ -1,5 +1,6 @@
 FROM ubuntu:trusty
 
+# Get the basic VIC dependencies
 RUN apt-get update -q && \
     apt-get install -y -q --no-install-recommends \
         ca-certificates \
@@ -12,8 +13,18 @@ RUN apt-get update -q && \
         git \
         make
 
-CMD git clone https://github.com/jhamman/VIC.git && \
+# Dedicated work directory for output
+RUN mkdir $HOME/workdir
+
+# Put the UW-Hydro version of VIC in the container
+RUN git clone https://github.com/UW-Hydro/VIC.git
+
+# Command to run when this image is "run", just build the classic and image drivers
+CMD git checkout develop && \
+    git pull origin develop && \
     cd VIC/vic/drivers/classic && \
     make && \
+    ./vic_classic.exe -o && \
     cd ../image && \
-    make
+    make && \
+    ./vic_image.exe -o

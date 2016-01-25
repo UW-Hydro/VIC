@@ -37,11 +37,15 @@ SHAREDPATH = ../shared
 # VIC RUN PATH
 VICPATH = ../../vic_run
 
+UNAME_S := $(shell uname -s)
+
 # NETCDF include .. change the path depending on travis or other location
 ifeq (true, ${TRAVIS})
 NETCDFPATH = ${TRAVIS_NETCDFPATH}
 else ifeq (hydro-c1, $(shell hostname))
 NETCDFPATH = /usr/local/netcdf-4.3.0+gcc-4.7.2
+else ifeq ($(UNAME_S), Linux)
+NETCDFPATH = /usr
 else
 NETCDFPATH = /opt/local
 endif
@@ -51,6 +55,8 @@ ifeq (true, ${TRAVIS})
 MPIPATH = ${TRAVIS_MPIPATH}
 else ifeq (hydro-c1, $(shell hostname))
 MPIPATH = /usr/local/netcdf-4.3.0+gcc-4.7.2
+else ifeq ($(UNAME_S), Linux)
+MPIPATH = /usr
 else
 MPIPATH = /opt/local
 endif
@@ -60,6 +66,8 @@ SHELL = /bin/bash
 
 # Set CC = your compiler here
 ifeq (true, ${TRAVIS})
+CC = ${MPIPATH}/bin/mpicc
+else ifeq ($(UNAME_S), Linux)
 CC = ${MPIPATH}/bin/mpicc
 else
 CC = mpicc-mpich-mp

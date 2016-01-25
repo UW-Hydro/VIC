@@ -73,6 +73,10 @@ initialize_lake(lake_var_struct  *lake,
     /********************************************************************/
 
     if (!skip_hydro) {
+        if (lake_con.depth_in > lake_con.z[0]) {
+            lake_con.depth_in = lake_con.z[0];
+        }
+
         lake->ldepth = lake_con.depth_in;
 
         if (lake->ldepth > param.LAKE_MAX_SURFACE && lake->ldepth < 2 *

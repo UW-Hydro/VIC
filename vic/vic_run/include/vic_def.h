@@ -258,7 +258,10 @@ typedef struct {
     size_t Nnode;        /**< Number of soil thermal nodes in the model */
     bool NOFLUX;         /**< TRUE = Use no flux lower bondary when computing
                             soil thermal fluxes */
-    size_t NVEGTYPES;    /**< number of vegetation types (used by image driver) */
+    size_t NVEGTYPES;    /**< number of vegetation types in veg_param file
+                            (used by image driver) */
+    size_t NLAKENODES;   /**< number of lake layers in lake_param file
+                            (used by image driver) */
     unsigned short int RC_MODE;        /**< RC_JARVIS = compute canopy resistance via Jarvis formulation (default)
                                           RC_PHOTO = compute canopy resistance based on photosynthetic activity */
     size_t ROOT_ZONES;   /**< Number of root zones used in simulation */

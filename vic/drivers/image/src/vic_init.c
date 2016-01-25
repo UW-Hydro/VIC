@@ -46,6 +46,7 @@ vic_init(void)
     extern veg_con_map_struct *veg_con_map;
     extern veg_con_struct    **veg_con;
     extern veg_lib_struct    **veg_lib;
+    extern lake_con_struct    *lake_con;
     extern parameters_struct   param;
 
     bool                       found;
@@ -54,11 +55,13 @@ vic_init(void)
     double                     mean;
     double                     sum;
     double                    *dvar = NULL;
+    int                       *ivar = NULL;
     size_t                     i;
     size_t                     j;
     size_t                     k;
     size_t                     m;
     size_t                     nveg;
+    size_t                     max_numnod;
     int                        veg_class;
     int                        vidx;
     size_t                     d2count[2];
@@ -255,7 +258,7 @@ vic_init(void)
         }
     }
 
-    // vegcover
+    // default value for vegcover
     for (j = 0; j < options.NVEGTYPES; j++) {
         if (options.VEGCOVER_SRC == FROM_DEFAULT) {
             for (k = 0; k < MONTHS_PER_YEAR; k++) {
@@ -1124,15 +1127,251 @@ vic_init(void)
         }
     }
 
-    // TBD: implement the blowing snow option
+    // read blowing snow parameters
     if (options.BLOWING) {
         log_warn("BLOWING option not yet implemented in vic_init()");
     }
 
-    // read_lakeparam()
-    // TBD: read lake parameters
+    // read_lake parameters
     if (options.LAKES) {
-        log_warn("LAKES option not yet implemented in vic_init()");
+        // allocate memory for variables to be read
+        ivar = malloc(local_domain.ncells_active * sizeof(*ivar));
+        if (ivar == NULL) {
+            log_err("Memory allocation error in vic_init().");
+        }
+
+        // lake_idx
+        get_scatter_nc_field_int(filenames.veglib, "lake_idx",
+                                 d2start, d2count, ivar);
+        for (i = 0; i < local_domain.ncells_active; i++) {
+            lake_con[i].lake_idx = (size_t) ivar[i];
+            if (!(lake_con[i].lake_idx >= -1 &&
+                  lake_con[i].lake_idx <
+                  (int) veg_con[i][0].vegetat_type_num)) {
+                log_err("cell %zu lake_idx is %d but we must have -1 "
+                        "<= lake_idx < Nveg (%zu).\n", i, lake_con[i].lake_idx,
+                        veg_con[i][0].vegetat_type_num);
+            }
+            if (lake_con[i].lake_idx != -1) {
+                veg_con[i][lake_con[i].lake_idx].LAKE = 1;
+            }
+        }
+
+        // numnod
+        get_scatter_nc_field_int(filenames.veglib, "numnod",
+                                 d2start, d2count, ivar);
+        max_numnod = 0;
+        for (i = 0; i < local_domain.ncells_active; i++) {
+            lake_con[i].numnod = (size_t) ivar[i];
+            if (lake_con[i].lake_idx == -1) {
+                if (lake_con[i].numnod != 0) {
+                    log_err("cell %zu lake_idx is %d (lake not present) "
+                            "which requires numnod to be 0, but numnod is "
+                            "%zu\n", i, lake_con[i].lake_idx,
+                            lake_con[i].numnod);
+                }
+            }
+            else if (!(lake_con[i].numnod > 0 &&
+                       lake_con[i].numnod < MAX_LAKE_NODES - 1)) {
+                log_err("cell %zu numnod is %zu but we must have 1 "
+                        "<= numnod < %d.\n", i, lake_con[i].numnod,
+                        MAX_LAKE_NODES - 1);
+            }
+            else if (!(lake_con[i].numnod < options.NLAKENODES)) {
+                log_err("cell %zu numnod is %zu but this exceeds "
+                        "the file lake_node dimension length of %zu.\n",
+                        i, lake_con[i].numnod, options.NLAKENODES);
+            }
+            if (lake_con[i].numnod > max_numnod) {
+                max_numnod = lake_con[i].numnod;
+            }
+        }
+
+        // mindepth (minimum depth for which channel outflow occurs)
+        get_scatter_nc_field_double(filenames.veglib, "mindepth",
+                                    d2start, d2count, dvar);
+        for (i = 0; i < local_domain.ncells_active; i++) {
+            lake_con[i].mindepth = (double) dvar[i];
+            if (lake_con[i].lake_idx == -1) {
+                if (lake_con[i].mindepth != 0) {
+                    log_err("cell %zu lake_idx is %d (lake not present) "
+                            "which requires mindepth to be 0, but mindepth "
+                            "is %f\n", i, lake_con[i].lake_idx,
+                            lake_con[i].mindepth);
+                }
+            }
+            else if (lake_con[i].lake_idx != -1 &&
+                     !(lake_con[i].mindepth >= 0)) {
+                log_err("cell %zu mindepth is %f but must be >= 0.\n",
+                        i, lake_con[i].mindepth);
+            }
+        }
+
+        // wfrac
+        get_scatter_nc_field_double(filenames.veglib, "wfrac",
+                                    d2start, d2count, dvar);
+        for (i = 0; i < local_domain.ncells_active; i++) {
+            lake_con[i].wfrac = (double) dvar[i];
+            if (lake_con[i].lake_idx == -1) {
+                if (lake_con[i].wfrac != 0) {
+                    log_err("cell %zu lake_idx is %d (lake not present) "
+                            "which requires wfrac to be 0, but wfrac is "
+                            "%f\n", i, lake_con[i].lake_idx, lake_con[i].wfrac);
+                }
+            }
+            else if (lake_con[i].lake_idx != -1 &&
+                     !(lake_con[i].wfrac >= 0 && lake_con[i].wfrac <= 1)) {
+                log_err("cell %zu wfrac is %f but we must have "
+                        "0 <= wfrac <= 1.\n", i, lake_con[i].wfrac);
+            }
+        }
+
+        // depth_in (initial depth for a cold start)
+        get_scatter_nc_field_double(filenames.veglib, "depth_in",
+                                    d2start, d2count, dvar);
+        for (i = 0; i < local_domain.ncells_active; i++) {
+            lake_con[i].depth_in = (double) dvar[i];
+            if (lake_con[i].lake_idx == -1) {
+                if (lake_con[i].depth_in != 0) {
+                    log_err("cell %zu lake_idx is %d (lake not present) "
+                            "which requires depth_in to be 0, but depth_in is "
+                            "%f\n", i, lake_con[i].lake_idx,
+                            lake_con[i].depth_in);
+                }
+            }
+            else if (lake_con[i].lake_idx != -1 &&
+                     !(lake_con[i].depth_in >= 0)) {
+                log_err("cell %zu depth_in is %f but must be >= 0.\n",
+                        i, lake_con[i].depth_in);
+            }
+        }
+
+        // rpercent
+        get_scatter_nc_field_double(filenames.veglib, "rpercent",
+                                    d2start, d2count, dvar);
+        for (i = 0; i < local_domain.ncells_active; i++) {
+            lake_con[i].rpercent = (double) dvar[i];
+            if (lake_con[i].lake_idx == -1) {
+                if (lake_con[i].rpercent != 0) {
+                    log_err("cell %zu lake_idx is %d (lake not present) "
+                            "which requires rpercent to be 0, but rpercent is "
+                            "%f\n", i, lake_con[i].lake_idx,
+                            lake_con[i].rpercent);
+                }
+            }
+            else if (lake_con[i].lake_idx != -1 &&
+                     !(lake_con[i].rpercent >= 0 &&
+                       lake_con[i].rpercent <= 1)) {
+                log_err("cell %zu rpercent is %f but we must have "
+                        "0 <= rpercent <= 1.\n", i, lake_con[i].rpercent);
+            }
+        }
+
+        // lake depth-area relationship
+        if (options.LAKE_PROFILE) {
+            for (j = 0; j < max_numnod; j++) {
+                d3start[0] = j;
+
+                // basin_depth
+                get_scatter_nc_field_double(filenames.veglib, "basin_depth",
+                                            d3start, d3count, dvar);
+                for (i = 0; i < local_domain.ncells_active; i++) {
+                    lake_con[i].z[j] = (double) dvar[i];
+                }
+
+                // basin_area
+                get_scatter_nc_field_double(filenames.veglib, "basin_area",
+                                            d3start, d3count, dvar);
+                for (i = 0; i < local_domain.ncells_active; i++) {
+                    lake_con[i].Cl[j] = (double) dvar[i];
+                }
+            }
+        }
+        else {
+            // basin_depth
+            get_scatter_nc_field_double(filenames.veglib, "basin_depth",
+                                        d2start, d2count, dvar);
+            for (i = 0; i < local_domain.ncells_active; i++) {
+                lake_con[i].z[0] = (double) dvar[i];
+            }
+
+            // basin_area
+            get_scatter_nc_field_double(filenames.veglib, "basin_area",
+                                        d2start, d2count, dvar);
+            for (i = 0; i < local_domain.ncells_active; i++) {
+                lake_con[i].Cl[0] = (double) dvar[i];
+            }
+        }
+
+        // validate depth-area relationship
+        for (i = 0; i < local_domain.ncells_active; i++) {
+            // validate top node
+            if (lake_con[i].lake_idx == 0) {
+                if (lake_con[i].z[0] > 0) {
+                    log_err("cell %zu lake_idx is %d (lake not present) "
+                            "which requires max depth to be 0, but max depth "
+                            "is %f\n", i, lake_con[i].lake_idx,
+                            lake_con[i].z[0]);
+                }
+                if (lake_con[i].Cl[0] > 0) {
+                    log_err("cell %zu lake_idx is %d (lake not present) "
+                            "which requires max area fraction to be 0, but "
+                            "max area fraction is %f\n", i,
+                            lake_con[i].lake_idx, lake_con[i].Cl[0]);
+                }
+            }
+            else {
+                if (!(lake_con[i].z[0] > 0)) {
+                    log_err("cell %zu lake basin max depth is %f but must "
+                            "be > 0.\n", i, lake_con[i].z[0]);
+                }
+                else if (!(lake_con[i].mindepth <= lake_con[i].z[0])) {
+                    log_err("cell %zu lake basin mindepth is %f but "
+                            "must be <= max depth of %f\n",
+                            i, lake_con[i].mindepth, lake_con[i].z[0]);
+                }
+                if (!(lake_con[i].Cl[0] > 0 && lake_con[i].Cl[0] <= 1)) {
+                    log_err("cell %zu lake basin max area fraction is %f but "
+                            "we must have 0 < max area fraction < 1\n", i,
+                            lake_con[i].Cl[0]);
+                }
+                if (fabs(1 - lake_con[i].Cl[0] /
+                         veg_con[i][lake_con[i].lake_idx].Cv) > 0.01) {
+                    log_err("cell %zu lake basin max area fraction is %f but "
+                            "must == area fraction of veg tile containing "
+                            "lake (%f)\n", i, lake_con[i].Cl[0],
+                            veg_con[i][lake_con[i].lake_idx].Cv);
+                }
+                else {
+                    lake_con[i].Cl[0] = veg_con[i][lake_con[i].lake_idx].Cv;
+                }
+            }
+
+            // valdate other nodes
+            if (options.LAKE_PROFILE) {
+                for (j = 1; j < lake_con[i].numnod; j++) {
+                    if (!(lake_con[i].z[j] > 0 &&
+                          lake_con[i].z[j] < lake_con[i].z[j - 1])) {
+                        log_err("cell %zu lake basin node %zu depth is %f "
+                                "but must be > 0 and < node %zu depth %f\n",
+                                i, j, lake_con[i].z[j], j - 1,
+                                lake_con[i].z[j - 1]);
+                    }
+                    if (!(lake_con[i].Cl[j] > 0 &&
+                          lake_con[i].Cl[j] < lake_con[i].Cl[j - 1])) {
+                        log_err("cell %zu lake basin node %zu area fraction "
+                                "is %f but must be > 0 and < node %zu area "
+                                "fraction %f\n", i, j, lake_con[i].Cl[j], j - 1,
+                                lake_con[i].Cl[j - 1]);
+                    }
+                }
+            }
+        }
+
+        // compute other lake parameters here
+        for (i = 0; i < local_domain.ncells_active; i++) {
+            compute_lake_params(&(lake_con[i]), soil_con[i]);
+        }
     }
 
     // initialize structures with default values
@@ -1142,7 +1381,10 @@ vic_init(void)
         initialize_soil(all_vars[i].cell, &(soil_con[i]), nveg);
         initialize_veg(all_vars[i].veg_var, nveg);
         if (options.LAKES) {
-            log_warn("LAKES option not yet implemented in vic_init()");
+            initialize_lake(&(all_vars[i].lake_var), lake_con[i],
+                            &(soil_con[i]),
+                            &(all_vars[i].cell[lake_con[i].lake_idx][0]),
+                            soil_con[i].avg_temp, 0);
         }
         initialize_energy(all_vars[i].energy, nveg);
     }

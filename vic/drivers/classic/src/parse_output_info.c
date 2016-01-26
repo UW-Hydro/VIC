@@ -42,12 +42,12 @@ parse_output_info(FILE                  *gp,
     char                 cmdstr[MAXSTRING];
     char                 optstr[MAXSTRING];
     short int            outfilenum;
-    char                 varname[20];
+    char                 varname[MAXSTRING];
     int                  outvarnum;
-    char                 format[10];
-    char                 typestr[20];
+    char                 format[MAXSTRING];
+    char                 typestr[MAXSTRING];
     int                  type;
-    char                 multstr[20];
+    char                 multstr[MAXSTRING];
     double               mult;
     int                  tmp_noutfiles;
 
@@ -86,13 +86,15 @@ parse_output_info(FILE                  *gp,
                             "defined in the global param file.",
                             options.Noutfiles);
                 }
-                sscanf(cmdstr, "%*s %s %zu",
-                       (*out_data_files)[outfilenum].prefix,
-                       &((*out_data_files)[outfilenum].nvars));
+                sscanf(cmdstr, "%*s %s", (*out_data_files)[outfilenum].prefix);
+
+                // determine how many variable will be in this file before
+                // allocating (GH: 209)
+                (*out_data_files)[outfilenum].nvars = count_outfile_nvars(gp);
+
                 (*out_data_files)[outfilenum].varid =
                     calloc((*out_data_files)[outfilenum].nvars,
-                           sizeof(*((*
-                                     out_data_files)[outfilenum].varid)));
+                           sizeof(*((*out_data_files)[outfilenum].varid)));
                 outvarnum = 0;
             }
             else if (strcasecmp("OUTVAR", optstr) == 0) {
@@ -145,4 +147,45 @@ parse_output_info(FILE                  *gp,
         fgets(cmdstr, MAXSTRING, gp);
     }
     fclose(gp);
+}
+
+size_t
+count_outfile_nvars(FILE *gp)
+{
+    size_t        nvars;
+    unsigned long start_position;
+    char          cmdstr[MAXSTRING];
+    char          optstr[MAXSTRING];
+    // Figure out where we are in the input file
+    fflush(gp);
+    start_position = ftell(gp);
+
+    // read the first line
+    fgets(cmdstr, MAXSTRING, gp);
+
+    // initalize nvars
+    nvars = 0;
+
+    // Loop through the lines
+    while (!feof(gp)) {
+        if (cmdstr[0] != '#' && cmdstr[0] != '\n' && cmdstr[0] != '\0') {
+            // line is not blank or a comment
+            sscanf(cmdstr, "%s", optstr);
+
+            // if the line starts with OUTFILE
+            if (strcasecmp("OUTVAR", optstr) == 0) {
+                nvars++;
+            }
+            // else we're done with this file so break out of loop
+            else {
+                break;
+            }
+        }
+        fgets(cmdstr, MAXSTRING, gp);
+    }
+
+    // put the position in the file back to where we started
+    fseek(gp, start_position, SEEK_SET);
+
+    return nvars;
 }

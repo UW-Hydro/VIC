@@ -416,7 +416,7 @@ set_output_var(out_data_file_struct *out_data_files,
         status = -1;
         log_err("set_output_var: \"%s\" was not found in the list of "
                 "supported output variable names.  Please use the exact name "
-                "listed in vicNl_def.h.", varname);
+                "listed in vic_driver_shared.h.", varname);
     }
     return status;
 }

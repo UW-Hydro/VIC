@@ -27,12 +27,12 @@ VIC (4.0.6 and later) now allows the user to specify exactly which output files 
 # Output File Contents
 N_OUTFILES	_n_outfiles_
 
-OUTFILE	_prefix_	_nvars_
+OUTFILE	_prefix_
 OUTVAR	_varname_	[_format_	_type_	_multiplier_]
 OUTVAR	_varname_	[_format_	_type_	_multiplier_]
 OUTVAR	_varname_	[_format_	_type_	_multiplier_]
 
-OUTFILE	_prefix_	_nvars_
+OUTFILE	_prefix_
 OUTVAR	_varname_	[_format_	_type_	_multiplier_]
 OUTVAR	_varname_	[_format_	_type_	_multiplier_]
 OUTVAR	_varname_	[_format_	_type_	_multiplier_]
@@ -43,9 +43,7 @@ _n_outfiles_ = number of output files
 
 _prefix_ = name of the output file, NOT including latitude and longitude
 
-_nvars_ = number of variables in the output file
-
-_varname_ = name of the variable (this must be one of the output variable names listed in `vicNl_def.h`.)
+_varname_ = name of the variable (this must be one of the output variable names listed in `vic_driver_shared.h`.)
 
 _format_, _type_, and _multiplier_ are optional.  For a given variable,
 you can specify either NONE of these, or ALL of these.  If these
@@ -73,7 +71,7 @@ Here's an example. To specify 2 output files, named "wbal" and "ebal", and conta
 ```
 N_OUTFILES	2
 
-OUTFILE	wbal	6
+OUTFILE	wbal
 OUTVAR	OUT_PREC
 OUTVAR	OUT_EVAP
 OUTVAR	OUT_RUNOFF
@@ -81,7 +79,7 @@ OUTVAR	OUT_BASEFLOW
 OUTVAR	OUT_SWE
 OUTVAR	OUT_SOIL_MOIST
 
-OUTFILE	ebal	7
+OUTFILE	ebal
 OUTVAR	OUT_NET_SHORT
 OUTVAR	OUT_NET_LONG
 OUTVAR	OUT_LATENT
@@ -117,7 +115,7 @@ Since variables like SOIL_MOIST have 1 value per soil layer, these variables wil
 
 **Snow band output:**
 
-To specify writing the values of variables in each snow band, append "BAND" to the variable name (this only works for some variables - see the list in vicNl_def.h). If you specify these variables, the value of the variable in each band will be written, one band per column. For example, for a cell having 2 snow bands:
+To specify writing the values of variables in each snow band, append "BAND" to the variable name (this only works for some variables - see the list in vic_driver_shared.h). If you specify these variables, the value of the variable in each band will be written, one band per column. For example, for a cell having 2 snow bands:
 
 ```
 OUTVAR	OUT_SWE_BAND
@@ -168,7 +166,7 @@ If the user sets ALMA_OUTPUT=TRUE in the global parameter file, then VIC will co
 
 More information on ALMA output variables is available at: [http://www.lmd.jussieu.fr/~polcher/ALMA/convention_output_3.html](http://www.lmd.jussieu.fr/~polcher/ALMA/convention_output_3.html).
 
-In addition, several more variables have been added to the list of available output variables. See `vicNl_def.h` for the complete list of available output variables.
+In addition, several more variables have been added to the list of available output variables. See `vic_driver_shared.h` for the complete list of available output variables.
 
 ## Specifying Output Time Step
 

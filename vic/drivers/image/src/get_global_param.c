@@ -509,9 +509,6 @@ get_global_param(FILE *gp)
                     log_err("FORCE_ENDIAN must be either BIG or LITTLE.");
                 }
             }
-            else if (strcasecmp("N_TYPES", optstr) == 0) {
-                sscanf(cmdstr, "%*s %zu", &param_set.N_TYPES[file_num]);
-            }
             else if (strcasecmp("FORCE_STEPS_PER_DAY", optstr) == 0) {
                 sscanf(cmdstr, "%*s %zu",
                        &param_set.force_steps_per_day[file_num]);
@@ -774,9 +771,6 @@ get_global_param(FILE *gp)
             /*************************************
                Define output file contents
             *************************************/
-            else if (strcasecmp("N_OUTFILES", optstr) == 0) {
-                ; // do nothing
-            }
             else if (strcasecmp("OUTFILE", optstr) == 0) {
                 ; // do nothing
             }

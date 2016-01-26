@@ -246,7 +246,8 @@ vic_force(atmos_data_struct *atmos,
                 if (veg_hist[rec][v].vegcover[i] < MIN_VEGCOVER) {
                     log_warn(
                         "rec %zu, veg %zu substep %zu vegcover %f < minimum of %f; setting = %f\n", rec, v, i,
-                        veg_hist[rec][v].vegcover[i], MIN_VEGCOVER);
+                        veg_hist[rec][v].vegcover[i], MIN_VEGCOVER,
+                        MIN_VEGCOVER);
                     veg_hist[rec][v].vegcover[i] = MIN_VEGCOVER;
                 }
             }

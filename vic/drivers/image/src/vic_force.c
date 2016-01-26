@@ -329,7 +329,8 @@ vic_force(void)
                     if (veg_hist[i][vidx].vegcover[j] < MIN_VEGCOVER) {
                         log_warn(
                             "cell %zu, veg %d substep %zu vegcover %f < minimum of %f; setting = %f\n", i, vidx, j,
-                            veg_hist[i][vidx].vegcover[j], MIN_VEGCOVER);
+                            veg_hist[i][vidx].vegcover[j], MIN_VEGCOVER,
+                            MIN_VEGCOVER);
                         veg_hist[i][vidx].vegcover[j] = MIN_VEGCOVER;
                     }
                 }

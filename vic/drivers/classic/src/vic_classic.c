@@ -242,12 +242,17 @@ main(int   argc,
 
             for (rec = startrec; rec < global_param.nrecs; rec++) {
                 /**************************************************
+                   Update data structures for current time step
+                **************************************************/
+                ErrorFlag = update_step_vars(&all_vars, veg_con,
+                                             veg_hist[rec]);
+
+                /**************************************************
                    Compute cell physics for 1 timestep
                 **************************************************/
                 ErrorFlag = vic_run(&atmos[rec], &all_vars,
                                     &(dmy[rec]), &global_param, &lake_con,
-                                    &soil_con, veg_con, veg_lib,
-                                    veg_hist[rec]);
+                                    &soil_con, veg_con, veg_lib);
 
                 /**************************************************
                    Calculate cell average values for current time step

@@ -701,14 +701,16 @@ typedef struct {
 } veg_lib_struct;
 
 /******************************************************************************
- * @brief   This structure stores historical timeseries of vegetation
- *          parameters for a given vegetation tile.  Structure is similar to
- *          atmos_data_struct.
+ * @brief   This structure stores vegetation parameter forcing data for each
+ * model time step for a single veg tile.  Each array stores the values for the
+ * SNOW_STEPs during the current model step and the value for the entire model
+ * step.  The latter is referred to by array[NR].  Looping over the SNOW_STEPs
+ * is done by for (i = 0; i < NF; i++)
  *****************************************************************************/
 typedef struct {
-    double *albedo;  /**< timeseries of vegetation albedo (fraction) */
-    double *LAI;     /**< timeseries of leaf area index (m2/m2) */
-    double *vegcover; /**< timeseries of fractional area of plants within veg tile (fraction) */
+    double *albedo;  /**< vegetation albedo (fraction) */
+    double *LAI;     /**< leaf area index (m2/m2) */
+    double *vegcover; /**< fractional area of plants within veg tile (fraction) */
 } veg_hist_struct;
 
 /******************************************************************************

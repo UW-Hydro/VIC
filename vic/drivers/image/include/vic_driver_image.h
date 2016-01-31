@@ -138,6 +138,7 @@ double average(double *ar, size_t n);
 out_data_struct *create_output_list(void);
 void free_atmos(atmos_data_struct *atmos);
 void free_veg_hist(veg_hist_struct *veg_hist);
+void get_force_type(char *cmdstr, int file_num, int *field);
 void get_forcing_file_info(param_set_struct *param_set, size_t file_num);
 size_t get_global_domain(char *fname, domain_struct *global_domain);
 void get_global_param(FILE *);

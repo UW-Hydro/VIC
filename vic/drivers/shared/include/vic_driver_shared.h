@@ -343,6 +343,7 @@ typedef struct {
     bool SIGNED;
     bool SUPPLIED;
     double multiplier;
+    char varname[MAXSTRING];
 } force_type_struct;
 
 /******************************************************************************

@@ -47,6 +47,7 @@ get_global_param(FILE *gp)
     char                       flgstr[MAXSTRING];
     char                       flgstr2[MAXSTRING];
     size_t                     file_num;
+    int                        field;
     unsigned int               tmpstartdate;
     unsigned int               tmpenddate;
     unsigned short int         lastday[MONTHS_PER_YEAR];
@@ -401,6 +402,7 @@ get_global_param(FILE *gp)
                 }
                 sscanf(cmdstr, "%*s %s", filenames.f_path_pfx[0]);
                 file_num = 0;
+                field = 0;
             }
             else if (strcasecmp("FORCING2", optstr) == 0) {
                 sscanf(cmdstr, "%*s %s", filenames.f_path_pfx[1]);
@@ -408,9 +410,10 @@ get_global_param(FILE *gp)
                     strcpy(filenames.f_path_pfx[1], "MISSING");
                 }
                 file_num = 1;
+                field = 0;
             }
-            else if (strcasecmp("N_TYPES", optstr) == 0) {
-                sscanf(cmdstr, "%*s %zu", &param_set.N_TYPES[file_num]);
+            else if (strcasecmp("FORCE_TYPE", optstr) == 0) {
+                get_force_type(cmdstr, file_num, &field);
             }
             else if (strcasecmp("WIND_H", optstr) == 0) {
                 sscanf(cmdstr, "%*s %lf", &global_param.wind_h);

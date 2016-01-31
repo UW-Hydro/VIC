@@ -116,54 +116,11 @@ get_global_param(FILE *gp)
             }
             else if (strcasecmp("CALENDAR", optstr) == 0) {
                 sscanf(cmdstr, "%*s %s", flgstr);
-                if (strcasecmp("STANDARD", flgstr) == 0) {
-                    global_param.calendar = CALENDAR_STANDARD;
-                }
-                else if (strcasecmp("GREGORIAN", flgstr) == 0) {
-                    global_param.calendar = CALENDAR_GREGORIAN;
-                }
-                else if (strcasecmp("PROLEPTIC_GREGORIAN", flgstr) == 0) {
-                    global_param.calendar = CALENDAR_PROLEPTIC_GREGORIAN;
-                }
-                else if (strcasecmp("NOLEAP", flgstr) == 0) {
-                    global_param.calendar = CALENDAR_NOLEAP;
-                }
-                else if (strcasecmp("365_DAY", flgstr) == 0) {
-                    global_param.calendar = CALENDAR_365_DAY;
-                }
-                else if (strcasecmp("360_DAY", flgstr) == 0) {
-                    global_param.calendar = CALENDAR_360_DAY;
-                }
-                else if (strcasecmp("JULIAN", flgstr) == 0) {
-                    global_param.calendar = CALENDAR_JULIAN;
-                }
-                else if (strcasecmp("ALL_LEAP", flgstr) == 0) {
-                    global_param.calendar = CALENDAR_ALL_LEAP;
-                }
-                else if (strcasecmp("366_DAY", flgstr) == 0) {
-                    global_param.calendar = CALENDAR_366_DAY;
-                }
-                else {
-                    log_err("Unknown calendar specified: %s", flgstr);
-                }
+                global_param.calendar = calendar_from_chars(flgstr);
             }
             else if (strcasecmp("OUT_TIME_UNITS", optstr) == 0) {
                 sscanf(cmdstr, "%*s %s", flgstr);
-                if (strcasecmp("SECONDS", flgstr) == 0) {
-                    global_param.time_units = TIME_UNITS_SECONDS;
-                }
-                else if (strcasecmp("MINUTES", flgstr) == 0) {
-                    global_param.time_units = TIME_UNITS_MINUTES;
-                }
-                else if (strcasecmp("HOURS", flgstr) == 0) {
-                    global_param.time_units = TIME_UNITS_HOURS;
-                }
-                else if (strcasecmp("DAYS", flgstr) == 0) {
-                    global_param.time_units = TIME_UNITS_DAYS;
-                }
-                else {
-                    log_err("Unknown time units specified: %s", flgstr);
-                }
+                global_param.time_units = timeunits_from_chars(flgstr);
             }
             else if (strcasecmp("FULL_ENERGY", optstr) == 0) {
                 sscanf(cmdstr, "%*s %s", flgstr);
@@ -427,12 +384,14 @@ get_global_param(FILE *gp)
                     options.RC_MODE = RC_JARVIS;
                 }
             }
+
             /*************************************
                Define log directory
             *************************************/
             else if (strcasecmp("LOG_DIR", optstr) == 0) {
                 sscanf(cmdstr, "%*s %s", filenames.log_path);
             }
+
             /*************************************
                Define state files
             *************************************/
@@ -468,6 +427,7 @@ get_global_param(FILE *gp)
                     options.BINARY_STATE_FILE = true;
                 }
             }
+
             /*************************************
                Define forcing files
             *************************************/
@@ -544,6 +504,7 @@ get_global_param(FILE *gp)
             else if (strcasecmp("WIND_H", optstr) == 0) {
                 sscanf(cmdstr, "%*s %lf", &global_param.wind_h);
             }
+
             /*************************************
                Define parameter files
             *************************************/
@@ -744,6 +705,7 @@ get_global_param(FILE *gp)
                     options.LAKE_PROFILE = true;
                 }
             }
+
             /*************************************
                Define output files
             *************************************/
@@ -810,6 +772,7 @@ get_global_param(FILE *gp)
                     options.PRT_SNOW_BAND = false;
                 }
             }
+
             /*************************************
                Define output file contents
             *************************************/
@@ -822,8 +785,9 @@ get_global_param(FILE *gp)
             else if (strcasecmp("OUTVAR", optstr) == 0) {
                 ; // do nothing
             }
+
             /*************************************
-               Fail when depreciated options are used.
+               Fail when deprecated options are used.
             *************************************/
             else if (strcasecmp("TIME_STEP", optstr) == 0) {
                 log_err("TIME_STEP has been replaced with MODEL_STEPS_PER_DAY, "
@@ -841,6 +805,7 @@ get_global_param(FILE *gp)
                 log_err("FORCE_DT has been replaced with FORCE_STEPS_PER_DAY, "
                         "update your global parameter file accordingly");
             }
+
             /***********************************
                Unrecognized Global Parameter Flag
             ***********************************/

@@ -280,6 +280,29 @@ vic_init(void)
 
     // read_soilparam()
 
+    // Nlayer
+    options.Nlayer = get_nc_dimension(filenames.soil, "nlayer");
+
+    // Validate Nlayer
+    if ((options.FULL_ENERGY ||
+         options.FROZEN_SOIL) && options.Nlayer < 3) {
+        log_err("You must define at least 3 soil moisture layers to run "
+                "the model in FULL_ENERGY or FROZEN_SOIL modes.  "
+                "Currently Nlayers is set to  %zu.", options.Nlayer);
+    }
+    if ((!options.FULL_ENERGY &&
+         !options.FROZEN_SOIL) && options.Nlayer < 1) {
+        log_err("You must define at least 1 soil moisture layer to run "
+                "the model.  Currently Nlayers is set to %zu.",
+                options.Nlayer);
+    }
+    if (options.Nlayer > MAX_LAYERS) {
+        log_err("Global file wants more soil moisture layers (%zu) than "
+                "are defined by MAX_LAYERS (%d).  Edit vic_driver_shared.h and "
+                "recompile.", options.Nlayer, MAX_LAYERS);
+    }
+
+
     // b_infilt
     get_scatter_nc_field_double(filenames.soil, "infilt",
                                 d2start, d2count, dvar);

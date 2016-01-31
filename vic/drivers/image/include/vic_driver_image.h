@@ -54,6 +54,19 @@ typedef struct {
     size_t local_idx; /**< index of grid cell in local list of grid cells */
 } location_struct;
 
+/******************************************************************************
+ * @brief    Structure to store information about the domain file.
+ *****************************************************************************/
+typedef struct {
+    char lat_var[MAXSTRING];
+    char lon_var[MAXSTRING];
+    char mask_var[MAXSTRING];
+    char area_var[MAXSTRING];
+    char frac_var[MAXSTRING];
+    char y_dim[MAXSTRING];
+    char x_dim[MAXSTRING];
+    size_t n_coord_dims;
+} domain_info_struct;
 
 /******************************************************************************
  * @brief    Structure to store local and global domain information. If the
@@ -65,6 +78,7 @@ typedef struct {
     size_t n_nx; /**< size of x-index; */
     size_t n_ny; /**< size of y-index */
     location_struct *locations; /**< locations structs for local domain */
+    domain_info_struct info; /**< structure storing domain file info */
 } domain_struct;
 
 /******************************************************************************
@@ -138,6 +152,7 @@ double average(double *ar, size_t n);
 out_data_struct *create_output_list(void);
 void free_atmos(atmos_data_struct *atmos);
 void free_veg_hist(veg_hist_struct *veg_hist);
+void get_domain_type(char *cmdstr);
 void get_forcing_file_info(param_set_struct *param_set, size_t file_num);
 size_t get_global_domain(char *fname, domain_struct *global_domain);
 void get_global_param(FILE *);
@@ -175,6 +190,7 @@ int put_nc_field_double(char *nc_name, bool *open, int *nc_id, double fillval,
 int put_nc_field_int(char *nc_name, bool *open, int *nc_id, int fillval,
                      int *dimids, int ndims, char *var_name, size_t *start,
                      size_t *count, int *var);
+void set_force_type(char *cmdstr, int file_num, int *field);
 void sprint_location(char *str, location_struct *loc);
 void vic_alloc(void);
 void vic_nc_info(nc_file_struct *nc_hist_file, out_data_struct **out_data,

@@ -54,7 +54,7 @@ write_forcing_file(atmos_data_struct    *atmos,
         for (j = 0; j < NF; j++) {
             out_data[OUT_AIR_TEMP].data[0] = atmos[rec].air_temp[j];
             out_data[OUT_DENSITY].data[0] = atmos[rec].density[j];
-            out_data[OUT_LONGWAVE].data[0] = atmos[rec].longwave[j];
+            out_data[OUT_LWDOWN].data[0] = atmos[rec].longwave[j];
             out_data[OUT_PREC].data[0] = atmos[rec].prec[j];
             out_data[OUT_PRESSURE].data[0] = atmos[rec].pressure[j] /
                                              PA_PER_KPA;
@@ -64,7 +64,7 @@ write_forcing_file(atmos_data_struct    *atmos,
                                               atmos[rec].vp[j] /
                                               (atmos[rec].vp[j] +
                                                atmos[rec].vpd[j]);
-            out_data[OUT_SHORTWAVE].data[0] = atmos[rec].shortwave[j];
+            out_data[OUT_SWDOWN].data[0] = atmos[rec].shortwave[j];
             out_data[OUT_VP].data[0] = atmos[rec].vp[j] / PA_PER_KPA;
             out_data[OUT_VPD].data[0] = atmos[rec].vpd[j] / PA_PER_KPA;
             out_data[OUT_WIND].data[0] = atmos[rec].wind[j];

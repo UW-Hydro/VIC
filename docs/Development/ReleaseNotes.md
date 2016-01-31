@@ -76,16 +76,16 @@ This is a major update from VIC 4. The VIC 5.0.0 release aims to have nearly ide
 
 	Computation of potential evapotranspiration (PET) has been simplified, reducing the number of output variables from 6 to 1.  The following output variables have been removed:
 
-        - 'OUT_PET_SATSOIL' (potential evap from saturated bare soil)
-        - 'OUT_PET_H2OSURF' (potential evap from open water)
-        - 'OUT_PET_SHORT' (potential evap (transpiration only) from short reference crop (grass))
-        - 'OUT_PET_TALL' (potential evap (transpiration only) from tall reference crop (alfalfa))
-        - 'OUT_PET_NATVEG' (potential evap (transpiration only) from current vegetation and current canopy resistance)
-        - 'OUT_PET_VEGNOCR' (potential evap (transpiration only) from current vegetation and 0 canopy resistance)
+    - `OUT_PET_SATSOIL` (potential evap from saturated bare soil)
+    - `OUT_PET_H2OSURF` (potential evap from open water)
+    - `OUT_PET_SHORT` (potential evap (transpiration only) from short reference crop (grass))
+    - `OUT_PET_TALL` (potential evap (transpiration only) from tall reference crop (alfalfa))
+    - `OUT_PET_NATVEG` (potential evap (transpiration only) from current vegetation and current canopy resistance)
+    - `OUT_PET_VEGNOCR` (potential evap (transpiration only) from current vegetation and 0 canopy resistance)
 
-        These have been replaced by:
+    These have been replaced by:
 
-        - 'OUT_PET' (potential evapotranspiration, which = area-weighted sum of potential transpiration and potential soil evaporation; potential transpiration is computed using the Penman-Monteith eqn with architectural resistance and LAI of the current veg cover)
+    - `OUT_PET` (potential evapotranspiration, which = area-weighted sum of potential transpiration and potential soil evaporation; potential transpiration is computed using the Penman-Monteith eqn with architectural resistance and LAI of the current veg cover)
 
 #### Deprecated Features:
 
@@ -102,6 +102,11 @@ This is a major update from VIC 4. The VIC 5.0.0 release aims to have nearly ide
 	- `OUTPUT_FORCE`
 
 	We are providing a stand-alone version of MTCLIM that produces subdaily VIC meteorological forcings.  That tool is available [here](http://mtclim.readthedocs.org).
+3. Removed `LONGWAVE` and `SHORTWAVE` forcing types ([GH#379](https://github.com/UW-Hydro/VIC/pull/379)).
+
+	Previous versions of VIC allowed users to specify either `LONGWAVE` or `LWDOWN` to denote the incoming longwave radiation flux and `SHORTWAVE` or `SWDOWN` to denote the incoming shorwave radiation flux. We have removed these duplicate options, standardizing on the more descriptive `LWDOWN` and `SWDOWN`.
+
+	Similarly, output variables `OUT_NET_LONG` and `OUT_NET_SHORT` have been replaced with `OUT_LWNET` and `OUT_SWNET`, respectively.
 
 3.  Changed the name of the variable VEGCOVER to FCANOPY, since this more accurately captures the meaning of the term (i.e., the fractional area of the plant canopy within the veg tile).  Similarly changed OUT_VEGCOVER to OUT_FCANOPY.
 

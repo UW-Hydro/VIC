@@ -47,8 +47,8 @@ get_global_domain(char          *nc_name,
 
     initialize_domain(global_domain);
 
-    global_domain->n_nx = get_nc_dimension(nc_name, "ni");
-    global_domain->n_ny = get_nc_dimension(nc_name, "nj");
+    global_domain->n_nx = get_nc_dimension(nc_name, "lon");
+    global_domain->n_ny = get_nc_dimension(nc_name, "lat");
 
     d2start[0] = 0;
     d2start[1] = 0;
@@ -64,7 +64,7 @@ get_global_domain(char          *nc_name,
         log_err("Memory allocation error in get_global_domain().");
     }
 
-    get_nc_field_int(nc_name, "run_cell", d2start, d2count, run);
+    get_nc_field_int(nc_name, "mask", d2start, d2count, run);
 
     for (i = 0; i < global_domain->ncells_total; i++) {
         if (run[i]) {

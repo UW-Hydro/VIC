@@ -1250,7 +1250,7 @@ typedef struct {
     _Bool SIGNED;
     _Bool SUPPLIED;
     double multiplier;
-    char varname[MAXSTRING];
+    char varname[2048];
 } force_type_struct;
 typedef struct {
     force_type_struct TYPE[N_FORCING_TYPES];

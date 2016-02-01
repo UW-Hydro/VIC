@@ -414,8 +414,8 @@ get_forcing_file_info(param_set_struct *param_set,
     double                     nc_time_origin;
     size_t                     start = 0;
     size_t                     count = 2;
-    char                       nc_unit_chars[MAXSTRING];
-    char                       calendar_char[MAXSTRING];
+    char                      *nc_unit_chars = NULL;
+    char                      *calendar_char = NULL;
     unsigned short int         time_units;
     unsigned short int         calendar;
     dmy_struct                 nc_origin_dmy;
@@ -423,8 +423,8 @@ get_forcing_file_info(param_set_struct *param_set,
 
     // read time info from netcdf file
     get_nc_field_double(filenames.forcing[0], "time", &start, &count, nc_times);
-    get_nc_var_attr(filenames.forcing[0], "time", "units", nc_unit_chars);
-    get_nc_var_attr(filenames.forcing[0], "time", "calendar", calendar_char);
+    get_nc_var_attr(filenames.forcing[0], "time", "units", &nc_unit_chars);
+    get_nc_var_attr(filenames.forcing[0], "time", "calendar", &calendar_char);
 
     // parse the calendar string and check to make sure it matches the global clock
     calendar = calendar_from_chars(calendar_char);
@@ -446,19 +446,19 @@ get_forcing_file_info(param_set_struct *param_set,
     // calculate timestep in forcing file
     if (time_units == TIME_UNITS_DAYS) {
         param_set->force_steps_per_day[file_num] =
-            (size_t) (1. / (nc_times[1] - nc_times[0]));
+            (size_t) nearbyint(1. / (nc_times[1] - nc_times[0]));
     }
     else if (time_units == TIME_UNITS_HOURS) {
         param_set->force_steps_per_day[file_num] =
-            (size_t) HOURS_PER_DAY / (nc_times[1] - nc_times[0]);
+            (size_t) nearbyint(HOURS_PER_DAY / (nc_times[1] - nc_times[0]));
     }
     else if (time_units == TIME_UNITS_MINUTES) {
         param_set->force_steps_per_day[file_num] =
-            (size_t) MIN_PER_DAY / (nc_times[1] - nc_times[0]);
+            (size_t) nearbyint(MIN_PER_DAY / (nc_times[1] - nc_times[0]));
     }
     else if (time_units == TIME_UNITS_SECONDS) {
         param_set->force_steps_per_day[file_num] =
-            (size_t) SEC_PER_DAY / (nc_times[1] - nc_times[0]);
+            (size_t) nearbyint(SEC_PER_DAY / (nc_times[1] - nc_times[0]));
     }
 
     // check that this forcing file will work
@@ -473,4 +473,9 @@ get_forcing_file_info(param_set_struct *param_set,
         log_err("Calendar in forcing file does not match the calendar of "
                 "VIC's clock: %s", calendar_char);
     }
+
+    // Free attribute character arrays
+    free(nc_unit_chars);
+    free(calendar_char);
+
 }

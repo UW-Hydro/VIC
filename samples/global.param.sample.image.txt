@@ -19,6 +19,18 @@ ENDDAY		31	# day model simulation ends
 # LOG_DIR (put the log directory path here)    # Log directory.  Default log output to stderr
 
 #######################################################################
+# DOMAIN INFO
+#######################################################################
+DOMAIN /Users/jhamman/Dropbox/data/VIC_test_data/datasets/Stehekin/vic5_setup/domain.stehekin.20151028.nc
+DOMAIN_TYPE    LAT     lat
+DOMAIN_TYPE    LON     lon
+DOMAIN_TYPE    MASK    mask
+DOMAIN_TYPE    AREA    area
+DOMAIN_TYPE    FRAC    frac
+DOMAIN_TYPE    YDIM    lat
+DOMAIN_TYPE    XDIM    lon
+
+#######################################################################
 # Simulation Parameters Namelist
 #######################################################################
 # CONSTANTS     (put the parameter namelist path here) # Update default model paramters.  Format is "PARAM VAL".

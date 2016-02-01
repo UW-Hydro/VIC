@@ -428,6 +428,9 @@ get_global_param(FILE *gp)
             else if (strcasecmp("DOMAIN", optstr) == 0) {
                 sscanf(cmdstr, "%*s %s", filenames.domain);
             }
+            else if (strcasecmp("DOMAIN_TYPE", optstr) == 0) {
+                get_domain_type(cmdstr);
+            }
             else if (strcasecmp("SOIL", optstr) == 0) {
                 sscanf(cmdstr, "%*s %s", filenames.soil);
             }
@@ -593,12 +596,6 @@ get_global_param(FILE *gp)
             }
             else if (strcasecmp("SKIPYEAR", optstr) == 0) {
                 sscanf(cmdstr, "%*s %hu", &global_param.skipyear);
-            }
-            else if (strcasecmp("DOMAIN_LON_VAR", optstr) == 0) {
-                sscanf(cmdstr, "%*s %s", options.DOMAIN_LON_VAR);
-            }
-            else if (strcasecmp("DOMAIN_LAT_VAR", optstr) == 0) {
-                sscanf(cmdstr, "%*s %s", options.DOMAIN_LAT_VAR);
             }
             else if (strcasecmp("ALMA_OUTPUT", optstr) == 0) {
                 sscanf(cmdstr, "%*s %s", flgstr);

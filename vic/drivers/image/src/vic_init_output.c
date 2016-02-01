@@ -175,7 +175,7 @@ initialize_history_file(nc_file_struct *nc)
         log_err("Error defining nlayer dimenension in %s", nc->fname);
     }
 
-    if (options.COORD_DIMS_OUT == 1) {
+    if (global_domain.info.n_coord_dims == 1) {
         status =
             nc_def_dim(nc->nc_id, "lon", nc->ni_size,
                        &(nc->ni_dimid));
@@ -189,7 +189,7 @@ initialize_history_file(nc_file_struct *nc)
         log_err("Error defining ni dimenension in %s", nc->fname);
     }
 
-    if (options.COORD_DIMS_OUT == 1) {
+    if (global_domain.info.n_coord_dims == 1) {
         status =
             nc_def_dim(nc->nc_id, "lat", nc->nj_size,
                        &(nc->nj_dimid));
@@ -301,15 +301,15 @@ initialize_history_file(nc_file_struct *nc)
         log_err("Error adding attribute in %s", nc->fname);
     }
 
-    ndims = options.COORD_DIMS_OUT;
+    ndims = global_domain.info.n_coord_dims;
     dstart[0] = 0;
     dstart[1] = 0;
 
-    if (options.COORD_DIMS_OUT == 1) {
+    if (global_domain.info.n_coord_dims == 1) {
         dimids[0] = nc->ni_dimid;
         dcount[0] = nc->ni_size;
     }
-    else if (options.COORD_DIMS_OUT == 2) {
+    else if (global_domain.info.n_coord_dims == 2) {
         dimids[0] = nc->nj_dimid;
         dcount[0] = nc->nj_size;
 
@@ -317,11 +317,11 @@ initialize_history_file(nc_file_struct *nc)
         dcount[1] = nc->ni_size;
     }
     else {
-        log_err("COORD_DIMS_OUT should be 1 or 2");
+        log_err("n_coord_dims should be 1 or 2");
     }
 
     // define the netcdf variable longitude
-    status = nc_def_var(nc->nc_id, options.DOMAIN_LON_VAR, NC_DOUBLE, ndims,
+    status = nc_def_var(nc->nc_id, global_domain.info.lon_var, NC_DOUBLE, ndims,
                         dimids, &(lon_var_id));
     if (status != NC_NOERR) {
         log_err("Error defining lon variable in %s", nc->fname);
@@ -343,13 +343,13 @@ initialize_history_file(nc_file_struct *nc)
         log_err("Error adding attribute in %s", nc->fname);
     }
 
-    if (options.COORD_DIMS_OUT == 1) {
+    if (global_domain.info.n_coord_dims == 1) {
         dimids[0] = nc->nj_dimid;
         dcount[0] = nc->nj_size;
     }
 
     // define the netcdf variable latitude
-    status = nc_def_var(nc->nc_id, options.DOMAIN_LAT_VAR, NC_DOUBLE, ndims,
+    status = nc_def_var(nc->nc_id, global_domain.info.lat_var, NC_DOUBLE, ndims,
                         dimids, &(lat_var_id));
     if (status != NC_NOERR) {
         log_err("Error defining lat variable in %s", nc->fname);
@@ -377,7 +377,7 @@ initialize_history_file(nc_file_struct *nc)
     }
 
     // fill the netcdf variables lat/lon
-    if (options.COORD_DIMS_OUT == 1) {
+    if (global_domain.info.n_coord_dims == 1) {
         dvar = calloc(nc->ni_size, sizeof(*dvar));
 
         dcount[0] = nc->ni_size;
@@ -405,7 +405,7 @@ initialize_history_file(nc_file_struct *nc)
         }
         free(dvar);
     }
-    else if (options.COORD_DIMS_OUT == 2) {
+    else if (global_domain.info.n_coord_dims == 2) {
         dvar = calloc(nc->nj_size * nc->ni_size, sizeof(*dvar));
 
         for (i = 0; i < nc->nj_size * nc->ni_size; i++) {
@@ -429,6 +429,6 @@ initialize_history_file(nc_file_struct *nc)
         free(dvar);
     }
     else {
-        log_err("COORD_DIMS_OUT should be 1 or 2");
+        log_err("n_coord_dims should be 1 or 2");
     }
 }

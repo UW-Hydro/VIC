@@ -14,7 +14,8 @@ RUN apt-get update -q && \
         make
 
 # Dedicated work directory for output
-RUN mkdir $HOME/workdir
+ENV WORKDIR $HOME/workdir
+RUN mkdir -p $WORKDIR
 
 # Put the UW-Hydro version of VIC in the container
 RUN git clone https://github.com/UW-Hydro/VIC.git

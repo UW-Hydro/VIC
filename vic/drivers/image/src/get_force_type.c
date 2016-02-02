@@ -43,9 +43,8 @@ get_force_type(char *cmdstr,
     char                    optstr[MAXSTRING];
     char                    flgstr[MAXSTRING];
     char                    ncvarname[MAXSTRING];
-    int                     type;
+    int                     type = SKIP;
 
-    type = SKIP;
     strcpy(ncvarname, "MISSING");
 
     /** Initialize flgstr **/
@@ -138,8 +137,9 @@ get_force_type(char *cmdstr,
         strcpy(param_set.TYPE[type].varname, ncvarname);
     }
     else {
-        log_err("Must suply netCDF variable name for %s forcing file number %d",
-                optstr, file_num + 1);
+        log_err(
+            "Must supply netCDF variable name for %s forcing file number %d",
+            optstr, file_num + 1);
     }
 
     param_set.TYPE[type].N_ELEM = 1;

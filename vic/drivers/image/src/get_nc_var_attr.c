@@ -32,9 +32,9 @@
  * @brief    Get netCDF dimension.
  *****************************************************************************/
 void
-get_nc_var_attr(char *nc_name,
-                char *var_name,
-                char *attr_name,
+get_nc_var_attr(char  *nc_name,
+                char  *var_name,
+                char  *attr_name,
                 char **attr)
 {
     int    nc_id;
@@ -57,7 +57,8 @@ get_nc_var_attr(char *nc_name,
     // get size of the attribute
     status = nc_inq_attlen(nc_id, var_id, attr_name, &attr_len);
     if (status != NC_NOERR) {
-        log_err("Error getting attribute length for %s:%s in %s", var_name, attr_name, nc_name);
+        log_err("Error getting attribute length for %s:%s in %s", var_name,
+                attr_name, nc_name);
     }
 
     // allocate memory for attribute

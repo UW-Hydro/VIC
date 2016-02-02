@@ -477,5 +477,4 @@ get_forcing_file_info(param_set_struct *param_set,
     // Free attribute character arrays
     free(nc_unit_chars);
     free(calendar_char);
-
 }

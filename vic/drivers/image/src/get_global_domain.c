@@ -35,14 +35,16 @@ size_t
 get_global_domain(char          *nc_name,
                   domain_struct *global_domain)
 {
-    int                 *run = NULL;
-    double              *var = NULL;
-    size_t               i;
-    size_t               j;
-    size_t               d2count[2];
-    size_t               d2start[2];
-    size_t               d1count[1];
-    size_t               d1start[1];
+    int    *run = NULL;
+    double *var = NULL;
+    double *var_lon = NULL;
+    double *var_lat = NULL;
+    size_t  i;
+    size_t  j;
+    size_t  d2count[2];
+    size_t  d2start[2];
+    size_t  d1count[1];
+    size_t  d1start[1];
 
     global_domain->n_nx = get_nc_dimension(nc_name, global_domain->info.x_dim);
     global_domain->n_ny = get_nc_dimension(nc_name, global_domain->info.y_dim);
@@ -61,7 +63,8 @@ get_global_domain(char          *nc_name,
         log_err("Memory allocation error in get_global_domain().");
     }
 
-    get_nc_field_int(nc_name, global_domain->info.mask_var, d2start, d2count, run);
+    get_nc_field_int(nc_name, global_domain->info.mask_var, d2start, d2count,
+                     run);
 
     for (i = 0; i < global_domain->ncells_total; i++) {
         if (run[i]) {
@@ -101,24 +104,22 @@ get_global_domain(char          *nc_name,
 
     // Get number of lat/lon dimensions.
     global_domain->info.n_coord_dims = get_nc_varndimensions(nc_name,
-                                                   global_domain->info.lon_var);
+                                                             global_domain->info.lon_var);
     if (global_domain->info.n_coord_dims !=
         (size_t) get_nc_varndimensions(nc_name, global_domain->info.lat_var)) {
         log_err("Un even number of dimensions for %s and %s in: %s",
-                global_domain->info.lon_var, global_domain->info.lat_var, nc_name);
+                global_domain->info.lon_var, global_domain->info.lat_var,
+                nc_name);
     }
 
     if (global_domain->info.n_coord_dims == 1) {
-        double *varLon = NULL;
-        double *varLat = NULL;
-
         // allocate memory for variables
-        varLon = malloc(global_domain->n_nx * sizeof(*varLon));
-        if (varLon == NULL) {
+        var_lon = malloc(global_domain->n_nx * sizeof(*var_lon));
+        if (var_lon == NULL) {
             log_err("Memory allocation error in get_global_domain().");
         }
-        varLat = malloc(global_domain->n_ny * sizeof(*varLat));
-        if (varLat == NULL) {
+        var_lat = malloc(global_domain->n_ny * sizeof(*var_lat));
+        if (var_lat == NULL) {
             log_err("Memory allocation error in get_global_domain().");
         }
 
@@ -127,14 +128,14 @@ get_global_domain(char          *nc_name,
 
         // get longitude for unmasked grid
         get_nc_field_double(nc_name, global_domain->info.lon_var,
-                            d1start, d1count, varLon);
+                            d1start, d1count, var_lon);
         for (i = 0; i < global_domain->n_nx; i++) {
             // rescale to [-180., 180]. Note that the if statement is not strictly
             // needed, but it prevents -180 from turning into 180 and vice versa
             if (var[i] < -180.f || var[i] > 180.f) {
                 var[i] -= round(var[i] / 360.f) * 360.f;
             }
-            global_domain->locations[i].longitude = (double) varLon[i];
+            global_domain->locations[i].longitude = (double) var_lon[i];
         }
 
         d1start[0] = 0;
@@ -142,13 +143,13 @@ get_global_domain(char          *nc_name,
 
         // get latitude for unmasked grid
         get_nc_field_double(nc_name, global_domain->info.lat_var,
-                            d1start, d1count, varLat);
+                            d1start, d1count, var_lat);
         for (i = 0; i < global_domain->n_ny; i++) {
-            global_domain->locations[i].latitude = (double) varLat[i];
+            global_domain->locations[i].latitude = (double) var_lat[i];
         }
 
-        free(varLon);
-        free(varLat);
+        free(var_lon);
+        free(var_lat);
     }
     else if (global_domain->info.n_coord_dims == 2) {
         // get longitude for unmasked grid
@@ -172,7 +173,8 @@ get_global_domain(char          *nc_name,
     }
     else {
         log_err("Number of dimensions for %s and %s should be 1 or 2 in: %s",
-                global_domain->info.lon_var, global_domain->info.lat_var, nc_name);
+                global_domain->info.lon_var, global_domain->info.lat_var,
+                nc_name);
     }
 
     // get area
@@ -276,9 +278,9 @@ get_domain_type(char *cmdstr)
 {
     extern domain_struct global_domain;
 
-    char                    optstr[MAXSTRING];
-    char                    ncvarname[MAXSTRING];
-    int                     type;
+    char                 optstr[MAXSTRING];
+    char                 ncvarname[MAXSTRING];
+    int                  type;
 
     type = SKIP;
     strcpy(ncvarname, "MISSING");
@@ -316,5 +318,4 @@ get_domain_type(char *cmdstr)
     else {
         log_err("Unrecognized domain variable: %s %s", optstr, ncvarname);
     }
-
 }

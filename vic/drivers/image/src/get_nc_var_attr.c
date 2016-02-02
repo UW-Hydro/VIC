@@ -61,7 +61,7 @@ get_nc_var_attr(char *nc_name,
     }
 
     // allocate memory for attribute
-    *attr = malloc((attr_len + 1) * sizeof **attr);
+    *attr = malloc((attr_len + 1) * sizeof(**attr));
 
     // read attribute text
     status = nc_get_att_text(nc_id, var_id, attr_name, *attr);

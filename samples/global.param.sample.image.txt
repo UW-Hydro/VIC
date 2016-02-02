@@ -167,8 +167,8 @@ PRT_SNOW_BAND   FALSE   # TRUE = write a "snowband" output file, containing band
 #
 # Output File Contents
 #
-# You can specify your output file names and contents # in the global param
-# file (see the VIC documentation file for more information).
+# Specify output file names and contents in the global param file (see the
+# VIC documentation file for more information).
 #
 # If you do not specify file names and contents in the global param
 # file, VIC will produce the same set of output files that it has

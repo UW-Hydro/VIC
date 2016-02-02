@@ -449,6 +449,7 @@ void collect_wb_terms(cell_data_struct, veg_var_struct, snow_data_struct,
                       double *, out_data_struct *);
 void compute_treeline(atmos_data_struct *, dmy_struct *, double, double *,
                       bool *);
+size_t count_force_vars(FILE *gp);
 void cmd_proc(int argc, char **argv, char *globalfilename);
 void compress_files(char string[]);
 out_data_struct *create_output_list(void);

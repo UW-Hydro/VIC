@@ -52,7 +52,9 @@ get_force_type(char *cmdstr,
     strcpy(flgstr, "NULL");
 
     if ((*field) >= (int) param_set.N_TYPES[file_num]) {
-        log_err("Too many variables defined for forcing file %i.", file_num);
+        log_err("Too many variables defined for forcing file %i., was "
+                "expecting at most %zu and got %d", file_num + 1,
+                param_set.N_TYPES[file_num], *field);
     }
 
     sscanf(cmdstr, "%*s %s %s", optstr, ncvarname);
@@ -126,7 +128,7 @@ get_force_type(char *cmdstr,
     /** Undefined variable type **/
     else {
         log_err("Undefined forcing variable type %s in file %i.",
-                optstr, file_num);
+                optstr, file_num + 1);
     }
 
     param_set.TYPE[type].SUPPLIED = file_num + 1;
@@ -137,7 +139,7 @@ get_force_type(char *cmdstr,
     }
     else {
         log_err("Must suply netCDF variable name for %s forcing file number %d",
-                optstr, file_num);
+                optstr, file_num + 1);
     }
 
     param_set.TYPE[type].N_ELEM = 1;

@@ -403,6 +403,8 @@ get_global_param(FILE *gp)
                 sscanf(cmdstr, "%*s %s", filenames.f_path_pfx[0]);
                 file_num = 0;
                 field = 0;
+                // count the number of forcing variables in this file
+                param_set.N_TYPES[file_num] = count_force_vars(gp);
             }
             else if (strcasecmp("FORCING2", optstr) == 0) {
                 sscanf(cmdstr, "%*s %s", filenames.f_path_pfx[1]);
@@ -411,6 +413,8 @@ get_global_param(FILE *gp)
                 }
                 file_num = 1;
                 field = 0;
+                // count the number of forcing variables in this file
+                param_set.N_TYPES[file_num] = count_force_vars(gp);
             }
             else if (strcasecmp("FORCE_TYPE", optstr) == 0) {
                 get_force_type(cmdstr, file_num, &field);

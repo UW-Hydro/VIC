@@ -122,7 +122,6 @@ FROZEN_SOIL	FALSE	# TRUE = calculate frozen soils.  Default = FALSE.
 FORCING1	(put the forcing path/prefix here)	# Forcing file path and prefix, ending in "_"
 FORCE_FORMAT	BINARY	# BINARY or ASCII
 FORCE_ENDIAN	LITTLE	# LITTLE (PC/Linux) or BIG (SUN)
-N_TYPES		4	# Number of variables (columns)
 FORCE_TYPE	PREC	UNSIGNED	40
 FORCE_TYPE	TMAX	SIGNED	100
 FORCE_TYPE	TMIN	SIGNED	100
@@ -173,7 +172,7 @@ BINARY_OUTPUT	FALSE	# TRUE = binary output files
 ALMA_OUTPUT	FALSE	# TRUE = ALMA-format output files; FALSE = standard VIC units
 MOISTFRACT 	FALSE	# TRUE = output soil moisture as volumetric fraction; FALSE = standard VIC units
 PRT_HEADER	FALSE   # TRUE = insert a header at the beginning of each output file; FALSE = no header
-PRT_SNOW_BAND   FALSE   # TRUE = write a "snowband" output file, containing band-specific values of snow variables; NOTE: this is ignored if N_OUTFILES is specified below.
+PRT_SNOW_BAND   FALSE   # TRUE = write a "snowband" output file, containing band-specific values of snow variables; NOTE: this is ignored if any OUTFILEs are specified below.
 
 #######################################################################
 #
@@ -200,8 +199,6 @@ PRT_SNOW_BAND   FALSE   # TRUE = write a "snowband" output file, containing band
 #
 # Format:
 #
-#   N_OUTFILES    <n_outfiles>
-#
 #   OUTFILE       <prefix>
 #   OUTVAR        <varname>       [<format>        <type>  <multiplier>]
 #   OUTVAR        <varname>       [<format>        <type>  <multiplier>]
@@ -214,7 +211,6 @@ PRT_SNOW_BAND   FALSE   # TRUE = write a "snowband" output file, containing band
 #
 #
 # where
-#   <n_outfiles> = number of output files
 #   <prefix>     = name of the output file, NOT including latitude
 #                  and longitude
 #   <varname>    = name of the variable (this must be one of the

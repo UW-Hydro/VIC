@@ -628,9 +628,6 @@ get_global_param(FILE *gp)
             /*************************************
                Define output file contents
             *************************************/
-            else if (strcasecmp("N_OUTFILES", optstr) == 0) {
-                ; // do nothing
-            }
             else if (strcasecmp("OUTFILE", optstr) == 0) {
                 ; // do nothing
             }

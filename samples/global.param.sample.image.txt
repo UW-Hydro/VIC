@@ -126,12 +126,12 @@ FROZEN_SOIL	FALSE	# TRUE = calculate frozen soils.  Default = FALSE.
 #######################################################################
 FORCING1      (put the forcing path/prefix here  # Forcing file path and prefix, ending in "_"
 FORCE_TYPE    AIR_TEMP 	   tas    # Average air temperature, C
-FORCE_TYPE    PREC 	   prcp   # Total precipitation (rain and snow), mm
+FORCE_TYPE    PREC 	       prcp   # Total precipitation (rain and snow), mm
 FORCE_TYPE    PRESSURE 	   pres   # Atmospheric pressure, kPa
 FORCE_TYPE    SHORTWAVE    dswrf  # Incoming shortwave, W/m2
 FORCE_TYPE    LONGWAVE 	   dslwr  # Incoming longwave radiation, W/m2
-FORCE_TYPE    QAIR 	   shum   # Vapor pressure, kPa
-FORCE_TYPE    WIND 	   wind   # Wind speed, m/s
+FORCE_TYPE    QAIR 	       shum   # Vapor pressure, kPa
+FORCE_TYPE    WIND 	       wind   # Wind speed, m/s
 WIND_H        10.0                # height of wind speed measurement (m)
 
 #######################################################################
@@ -163,14 +163,14 @@ OUTPUT_STEPS_PER_DAY        0       # Output interval (hours); if 0, OUTPUT_STEP
 SKIPYEAR 	0	# Number of years of output to omit from the output files
 ALMA_OUTPUT	FALSE	# TRUE = ALMA-format output files; FALSE = standard VIC units
 MOISTFRACT 	FALSE	# TRUE = output soil moisture as volumetric fraction; FALSE = standard VIC units
-PRT_SNOW_BAND   FALSE   # TRUE = write a "snowband" output file, containing band-specific values of snow variables; NOTE: this is ignored if N_OUTFILES is specified below.
+PRT_SNOW_BAND   FALSE   # TRUE = write a "snowband" output file, containing band-specific values of snow variables; NOTE: this is ignored if any OUTFILEs are specified below.
 
 #######################################################################
 #
 # Output File Contents
 #
-# You can specify your output file names and contents # in the global param
-# file (see the VIC documentation file for more information).
+# Specify output file names and contents in the global param file (see the
+# VIC documentation file for more information).
 #
 # If you do not specify file names and contents in the global param
 # file, VIC will produce the same set of output files that it has
@@ -184,8 +184,6 @@ PRT_SNOW_BAND   FALSE   # TRUE = write a "snowband" output file, containing band
 #
 # Format:
 #
-#   N_OUTFILES    <n_outfiles>
-#
 #   OUTFILE       <prefix>
 #   OUTVAR        <varname>
 #   OUTVAR        <varname>
@@ -198,7 +196,6 @@ PRT_SNOW_BAND   FALSE   # TRUE = write a "snowband" output file, containing band
 #
 #
 # where
-#   <n_outfiles> = number of output files
 #   <prefix>     = name of the output file, NOT including latitude
 #                  and longitude
 #   <varname>    = name of the variable (this must be one of the

@@ -25,8 +25,6 @@ VIC (4.0.6 and later) now allows the user to specify exactly which output files 
 
 ```
 # Output File Contents
-N_OUTFILES	_n_outfiles_
-
 OUTFILE	_prefix_
 OUTVAR	_varname_	[_format_	_type_	_multiplier_]
 OUTVAR	_varname_	[_format_	_type_	_multiplier_]
@@ -38,8 +36,6 @@ OUTVAR	_varname_	[_format_	_type_	_multiplier_]
 OUTVAR	_varname_	[_format_	_type_	_multiplier_]
 ```
 where
-
-_n_outfiles_ = number of output files
 
 _prefix_ = name of the output file, NOT including latitude and longitude
 
@@ -69,8 +65,6 @@ _multiplier_ = (for binary output files) factor to multiply the data by before w
 Here's an example. To specify 2 output files, named "wbal" and "ebal", and containing water balance and energy balance terms, respectively, you could do something like this:
 
 ```
-N_OUTFILES	2
-
 OUTFILE	wbal
 OUTVAR	OUT_PREC
 OUTVAR	OUT_EVAP

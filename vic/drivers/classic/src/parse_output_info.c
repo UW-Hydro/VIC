@@ -49,7 +49,6 @@ parse_output_info(FILE                  *gp,
     int                  type;
     char                 multstr[MAXSTRING];
     double               mult;
-    int                  tmp_noutfiles;
 
     strcpy(format, "*");
 
@@ -59,96 +58,106 @@ parse_output_info(FILE                  *gp,
 
     outfilenum = -1;
     outvarnum = 0;
-    while (!feof(gp)) {
-        if (cmdstr[0] != '#' && cmdstr[0] != '\n' && cmdstr[0] != '\0') {
-            sscanf(cmdstr, "%s", optstr);
 
-            if (strcasecmp("N_OUTFILES", optstr) == 0) {
-                sscanf(cmdstr, "%*s %d", &tmp_noutfiles);
-                free_out_data_files(out_data_files);
-                options.Noutfiles = tmp_noutfiles;
-                *out_data_files = calloc(options.Noutfiles,
-                                         sizeof(*(*out_data_files)));
-                outfilenum = -1;
-                init_output_list(out_data, false, "%.4f", OUT_TYPE_FLOAT, 1);
-                // PRT_SNOW_BAND is ignored if N_OUTFILES has been specified
-                options.PRT_SNOW_BAND = false;
-            }
-            else if (strcasecmp("OUTFILE", optstr) == 0) {
-                outfilenum++;
-                if (!options.Noutfiles) {
-                    log_err("in global param file: \"N_OUTFILES\" must be "
-                            "specified before you can specify \"OUTFILE\".");
-                }
-                if (outfilenum >= (short int)options.Noutfiles) {
-                    log_err("number of output files specified in N_OUTFILES "
-                            "(%zu) is less than actual number of output files "
-                            "defined in the global param file.",
-                            options.Noutfiles);
-                }
-                sscanf(cmdstr, "%*s %s", (*out_data_files)[outfilenum].prefix);
+    // Count the number of output files listed in the global param file
+    options.Noutfiles = count_n_outfiles(gp);
 
-                // determine how many variable will be in this file before
-                // allocating (GH: 209)
-                (*out_data_files)[outfilenum].nvars = count_outfile_nvars(gp);
+    // only parse the output info if there are output files to parse
+    if (options.Noutfiles > 0) {
+        free_out_data_files(out_data_files);
 
-                (*out_data_files)[outfilenum].varid =
-                    calloc((*out_data_files)[outfilenum].nvars,
-                           sizeof(*((*out_data_files)[outfilenum].varid)));
-                outvarnum = 0;
-            }
-            else if (strcasecmp("OUTVAR", optstr) == 0) {
-                if (outfilenum < 0) {
-                    log_err("Error in global param file: \"OUTFILE\" must be "
-                            "specified before you can specify \"OUTVAR\".");
-                }
-                strcpy(format, "");
-                strcpy(typestr, "");
-                strcpy(multstr, "");
-                sscanf(cmdstr, "%*s %s %s %s %s", varname, format, typestr,
-                       multstr);
-                if (strcasecmp("", format) == 0) {
-                    strcpy(format, "*");
-                    type = OUT_TYPE_DEFAULT;
-                    mult = 0; // 0 means default multiplier
-                }
-                else {
-                    if (strcasecmp("OUT_TYPE_USINT", typestr) == 0) {
-                        type = OUT_TYPE_USINT;
-                    }
-                    else if (strcasecmp("OUT_TYPE_SINT", typestr) == 0) {
-                        type = OUT_TYPE_SINT;
-                    }
-                    else if (strcasecmp("OUT_TYPE_FLOAT", typestr) == 0) {
-                        type = OUT_TYPE_FLOAT;
-                    }
-                    else if (strcasecmp("OUT_TYPE_DOUBLE", typestr) == 0) {
-                        type = OUT_TYPE_DOUBLE;
-                    }
-                    else {
-                        type = OUT_TYPE_DEFAULT;
-                    }
-                    if (strcmp("*", multstr) == 0) {
-                        mult = 0; // 0 means use default multiplier
-                    }
-                    else {
-                        mult = (double) atof(multstr);
-                    }
-                }
-                if (set_output_var((*out_data_files), true, outfilenum,
-                                   out_data, varname, outvarnum, format, type,
-                                   mult) != 0) {
-                    log_err("Invalid output variable specification.");
-                }
-                strcpy(format, "");
-                outvarnum++;
-            }
+        *out_data_files = calloc(options.Noutfiles, sizeof(*(*out_data_files)));
+        if (*out_data_files == NULL) {
+            log_err("Memory allocation error in parse_output_info().");
         }
-        fgets(cmdstr, MAXSTRING, gp);
+        init_output_list(out_data, false, "%.4g", OUT_TYPE_FLOAT, 1);
+
+        // PRT_SNOW_BAND is ignored if options.Noutfiles > 0
+        options.PRT_SNOW_BAND = false;
+
+        while (!feof(gp)) {
+            if (cmdstr[0] != '#' && cmdstr[0] != '\n' && cmdstr[0] != '\0') {
+                sscanf(cmdstr, "%s", optstr);
+
+                if (strcasecmp("OUTFILE", optstr) == 0) {
+                    outfilenum++;
+                    if (outfilenum >= (short int)options.Noutfiles) {
+                        log_err("Found too many output files, was expecting "
+                                "%zu but found %hu", options.Noutfiles,
+                                outfilenum);
+                    }
+                    sscanf(cmdstr, "%*s %s", (*out_data_files)[outfilenum].prefix);
+
+                    // determine how many variable will be in this file before
+                    // allocating (GH: 209)
+                    (*out_data_files)[outfilenum].nvars = count_outfile_nvars(gp);
+
+                    (*out_data_files)[outfilenum].varid =
+                        calloc((*out_data_files)[outfilenum].nvars,
+                               sizeof(*((*out_data_files)[outfilenum].varid)));
+                   if ((*out_data_files)[outfilenum].varid == NULL) {
+                       log_err("Memory allocation error in parse_output_info().");
+                   }
+                    outvarnum = 0;
+                }
+                else if (strcasecmp("OUTVAR", optstr) == 0) {
+                    if (outfilenum < 0) {
+                        log_err("Error in global param file: \"OUTFILE\" must be "
+                                "specified before you can specify \"OUTVAR\".");
+                    }
+                    strcpy(format, "");
+                    strcpy(typestr, "");
+                    strcpy(multstr, "");
+                    sscanf(cmdstr, "%*s %s %s %s %s", varname, format, typestr,
+                           multstr);
+                    if (strcasecmp("", format) == 0) {
+                        strcpy(format, "*");
+                        type = OUT_TYPE_DEFAULT;
+                        mult = 0; // 0 means default multiplier
+                    }
+                    else {
+                        if (strcasecmp("OUT_TYPE_USINT", typestr) == 0) {
+                            type = OUT_TYPE_USINT;
+                        }
+                        else if (strcasecmp("OUT_TYPE_SINT", typestr) == 0) {
+                            type = OUT_TYPE_SINT;
+                        }
+                        else if (strcasecmp("OUT_TYPE_FLOAT", typestr) == 0) {
+                            type = OUT_TYPE_FLOAT;
+                        }
+                        else if (strcasecmp("OUT_TYPE_DOUBLE", typestr) == 0) {
+                            type = OUT_TYPE_DOUBLE;
+                        }
+                        else {
+                            type = OUT_TYPE_DEFAULT;
+                        }
+                        if (strcmp("*", multstr) == 0) {
+                            mult = 0; // 0 means use default multiplier
+                        }
+                        else {
+                            mult = (double) atof(multstr);
+                        }
+                    }
+                    if (set_output_var((*out_data_files), true, outfilenum,
+                                       out_data, varname, outvarnum, format, type,
+                                       mult) != 0) {
+                        log_err("Invalid output variable specification.");
+                    }
+                    strcpy(format, "");
+                    outvarnum++;
+                }
+            }
+            fgets(cmdstr, MAXSTRING, gp);
+        }
     }
     fclose(gp);
 }
 
+
+/******************************************************************************
+ * @brief    This routine determines the counts the number of output variables
+             in each output file specified in the global parameter file.
+ *****************************************************************************/
 size_t
 count_outfile_nvars(FILE *gp)
 {
@@ -188,4 +197,50 @@ count_outfile_nvars(FILE *gp)
     fseek(gp, start_position, SEEK_SET);
 
     return nvars;
+}
+
+
+/******************************************************************************
+ * @brief    This routine determines the counts the number of output files
+             specified in the global parameter file.
+ *****************************************************************************/
+size_t
+count_n_outfiles(FILE *gp)
+{
+    size_t        n_outfiles;
+    unsigned long start_position;
+    char          cmdstr[MAXSTRING];
+    char          optstr[MAXSTRING];
+    // Figure out where we are in the input file
+    fflush(gp);
+    start_position = ftell(gp);
+
+    // read the first line
+    fgets(cmdstr, MAXSTRING, gp);
+
+    // initalize n_outfiles
+    n_outfiles = 0;
+
+    // Loop through the lines
+    while (!feof(gp)) {
+        if (cmdstr[0] != '#' && cmdstr[0] != '\n' && cmdstr[0] != '\0') {
+            // line is not blank or a comment
+            sscanf(cmdstr, "%s", optstr);
+
+            // if the line starts with OUTFILE
+            if (strcasecmp("OUTFILE", optstr) == 0) {
+                n_outfiles++;
+            }
+            // else we're done with this file so break out of loop
+            else {
+                break;
+            }
+        }
+        fgets(cmdstr, MAXSTRING, gp);
+    }
+
+    // put the position in the file back to where we started
+    fseek(gp, start_position, SEEK_SET);
+
+    return n_outfiles;
 }

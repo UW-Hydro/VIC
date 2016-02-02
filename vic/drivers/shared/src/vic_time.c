@@ -854,7 +854,8 @@ parse_nc_time_units(char               *nc_unit_chars,
     int  minutes = 0;
     int  seconds = 0;
 
-    // Format: time:units = "seconds since 1970-1-1";
+    // Parse standard netCDF time units string. Note that sscanf return the
+    // number of variables parsed and that not all variables will be parsed
     status = sscanf(nc_unit_chars, "%s since %d-%hu-%hu %d:%d:%d",
                     unit_chars, &dmy->year, &dmy->month, &dmy->day,
                     &hours, &minutes, &seconds);

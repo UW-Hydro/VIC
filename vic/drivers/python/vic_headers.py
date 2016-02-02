@@ -1022,6 +1022,7 @@ double calc_veg_displacement(double);
 double calc_veg_height(double);
 double calc_veg_roughness(double);
 double calc_water_balance_error(int, double, double, double);
+unsigned short int calendar_from_chars(char *cal_chars);
 int CalcAerodynamic(_Bool, double, double, double, double, double, double *,
                     double *, double *, double *, double *);
 double CalcBlowingSnow(double, double, unsigned int, double, double, double,
@@ -1312,6 +1313,8 @@ void num2date(double origin, double time_value, double tzoffset,
               unsigned short int calendar, unsigned short int time_units,
               dmy_struct *date);
 FILE *open_file(char string[], char type[]);
+void parse_nc_time_units(char *nc_unit_chars, unsigned short int *units,
+                         dmy_struct *dmy);
 void print_cell_data(cell_data_struct *cell, size_t nlayers, size_t nfrost);
 void print_dmy(dmy_struct *dmy);
 void print_energy_bal(energy_bal_struct *eb, size_t nnodes, size_t nfronts);
@@ -1342,6 +1345,7 @@ void print_usage(char *);
 int set_output_var(out_data_file_struct *, int, int, out_data_struct *, char *,
                    int, char *, int, double);
 void soil_moisture_from_water_table(soil_con_struct *soil_con, size_t nlayers);
+unsigned short int timeunits_from_chars(char *units_chars);
 int update_step_vars(all_vars_struct *, veg_con_struct *, veg_hist_struct *);
 int valid_date(unsigned short int calendar, dmy_struct *dmy);
 void validate_parameters(void);

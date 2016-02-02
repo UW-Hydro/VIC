@@ -776,3 +776,98 @@ dt_seconds_to_time_units(unsigned short int time_units,
         log_err("Unknown Time Units Flag: %hu", time_units);
     }
 }
+
+/******************************************************************************
+ * @brief  Parse chars of calendar and return calendar integer
+ * @return enum integer representing calendar
+ *****************************************************************************/
+unsigned short int
+calendar_from_chars(char *cal_chars)
+{
+    if (strcasecmp("STANDARD", cal_chars) == 0) {
+        return CALENDAR_STANDARD;
+    }
+    else if (strcasecmp("GREGORIAN", cal_chars) == 0) {
+        return CALENDAR_GREGORIAN;
+    }
+    else if (strcasecmp("PROLEPTIC_GREGORIAN", cal_chars) == 0) {
+        return CALENDAR_PROLEPTIC_GREGORIAN;
+    }
+    else if (strcasecmp("NOLEAP", cal_chars) == 0) {
+        return CALENDAR_NOLEAP;
+    }
+    else if (strcasecmp("365_DAY", cal_chars) == 0) {
+        return CALENDAR_365_DAY;
+    }
+    else if (strcasecmp("360_DAY", cal_chars) == 0) {
+        return CALENDAR_360_DAY;
+    }
+    else if (strcasecmp("JULIAN", cal_chars) == 0) {
+        return CALENDAR_JULIAN;
+    }
+    else if (strcasecmp("ALL_LEAP", cal_chars) == 0) {
+        return CALENDAR_ALL_LEAP;
+    }
+    else if (strcasecmp("366_DAY", cal_chars) == 0) {
+        return CALENDAR_366_DAY;
+    }
+    else {
+        log_err("Unknown calendar specified: %s", cal_chars);
+    }
+}
+
+/******************************************************************************
+ * @brief  Parse chars of time units and return time units integer
+ * @return enum integer representing time units
+ *****************************************************************************/
+unsigned short int
+timeunits_from_chars(char *units_chars)
+{
+    if (strcasecmp("SECONDS", units_chars) == 0) {
+        return TIME_UNITS_SECONDS;
+    }
+    else if (strcasecmp("MINUTES", units_chars) == 0) {
+        return TIME_UNITS_MINUTES;
+    }
+    else if (strcasecmp("HOURS", units_chars) == 0) {
+        return TIME_UNITS_HOURS;
+    }
+    else if (strcasecmp("DAYS", units_chars) == 0) {
+        return TIME_UNITS_DAYS;
+    }
+    else {
+        log_err("Unknown time units specified: %s", units_chars);
+    }
+}
+
+/******************************************************************************
+ * @brief  Parse units string in format of "<units> since <origin (YYYY-MM-DD)>"
+ *****************************************************************************/
+void
+parse_nc_time_units(char               *nc_unit_chars,
+                    unsigned short int *units,
+                    dmy_struct         *dmy)
+{
+    int  status;
+    char unit_chars[MAXSTRING];
+    int  hours = 0;
+    int  minutes = 0;
+    int  seconds = 0;
+
+    // Parse standard netCDF time units string. Note that sscanf return the
+    // number of variables parsed and that not all variables will be parsed
+    status = sscanf(nc_unit_chars, "%s since %d-%hu-%hu %d:%d:%d",
+                    unit_chars, &dmy->year, &dmy->month, &dmy->day,
+                    &hours, &minutes, &seconds);
+
+    if (status < 4) {
+        log_err("Unable to parse netcdf time units as specified: %s",
+                nc_unit_chars);
+    }
+
+    // dayseconds, this will be zero when the last part of the format
+    // string is not present
+    dmy->dayseconds = hours * SEC_PER_HOUR + minutes * SEC_PER_MIN + seconds;
+
+    *units = timeunits_from_chars(unit_chars);
+}

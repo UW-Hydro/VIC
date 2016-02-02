@@ -263,3 +263,32 @@ def test_dt_seconds_to_time_units():
         dt_time_units[0] = 0.
         vic_lib.dt_seconds_to_time_units(units[tu], 3600, dt_time_units)
         assert dt_time_units[0] > 0.
+
+
+def test_calendar_from_chars():
+    for cal, expected in calendars.items():
+        actual = vic_lib.calendar_from_chars(ffi.new('char[]', cal.lower().encode()))
+        assert actual == expected
+
+        actual = vic_lib.calendar_from_chars(ffi.new('char[]', cal.upper().encode()))
+        assert actual == expected
+
+
+def timeunits_from_chars():
+    for unit, expected in units.items():
+        actual = vic_lib.calendar_from_chars(ffi.new('char[]', unit.lower().encode()))
+        assert actual == expected
+        actual = vic_lib.calendar_from_chars(ffi.new('char[]', unit.upper().encode()))
+        assert actual == expected
+
+
+def test_parse_nc_time_units():
+    actual_unit = ffi.new('unsigned short int *')
+    actual_dmy = ffi.new('dmy_struct *')
+    unit_chars = ffi.new('char[]', b'days since 0001-01-01')
+    vic_lib.parse_nc_time_units(ffi.addressof(unit_chars), actual_unit, actual_dmy)
+    assert actual_unit[0] == units['days']
+    assert actual_dmy[0].year == 1
+    assert actual_dmy[0].month == 1
+    assert actual_dmy[0].day == 1
+    assert actual_dmy[0].dayseconds == 0

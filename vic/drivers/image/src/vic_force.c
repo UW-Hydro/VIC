@@ -385,3 +385,83 @@ vic_force(void)
     // cleanup
     free(dvar);
 }
+
+/******************************************************************************
+ * @brief    Determine timestep and start year, month, day, and seconds of forcing files
+ *****************************************************************************/
+void
+get_forcing_file_info(param_set_struct *param_set,
+                      size_t            file_num)
+{
+    extern global_param_struct global_param;
+    extern filenames_struct    filenames;
+
+    double                     nc_times[2];
+    double                     nc_time_origin;
+    size_t                     start = 0;
+    size_t                     count = 2;
+    char                      *nc_unit_chars = NULL;
+    char                      *calendar_char = NULL;
+    unsigned short int         time_units;
+    unsigned short int         calendar;
+    dmy_struct                 nc_origin_dmy;
+    dmy_struct                 nc_start_dmy;
+
+    // read time info from netcdf file
+    get_nc_field_double(filenames.forcing[0], "time", &start, &count, nc_times);
+    get_nc_var_attr(filenames.forcing[0], "time", "units", &nc_unit_chars);
+    get_nc_var_attr(filenames.forcing[0], "time", "calendar", &calendar_char);
+
+    // parse the calendar string and check to make sure it matches the global clock
+    calendar = calendar_from_chars(calendar_char);
+
+    // parse the time units
+    parse_nc_time_units(nc_unit_chars, &time_units, &nc_origin_dmy);
+
+    // Get date/time of the first entry in the forcing file.
+    nc_time_origin = date2num(0., &nc_origin_dmy, 0., calendar, time_units);
+    num2date(nc_time_origin, nc_times[0], 0., calendar, time_units,
+             &nc_start_dmy);
+
+    // Assign file start date/time
+    global_param.forceyear[file_num] = nc_start_dmy.year;
+    global_param.forcemonth[file_num] = nc_start_dmy.month;
+    global_param.forceday[file_num] = nc_start_dmy.day;
+    global_param.forcesec[file_num] = nc_start_dmy.dayseconds;
+
+    // calculate timestep in forcing file
+    if (time_units == TIME_UNITS_DAYS) {
+        param_set->force_steps_per_day[file_num] =
+            (size_t) nearbyint(1. / (nc_times[1] - nc_times[0]));
+    }
+    else if (time_units == TIME_UNITS_HOURS) {
+        param_set->force_steps_per_day[file_num] =
+            (size_t) nearbyint(HOURS_PER_DAY / (nc_times[1] - nc_times[0]));
+    }
+    else if (time_units == TIME_UNITS_MINUTES) {
+        param_set->force_steps_per_day[file_num] =
+            (size_t) nearbyint(MIN_PER_DAY / (nc_times[1] - nc_times[0]));
+    }
+    else if (time_units == TIME_UNITS_SECONDS) {
+        param_set->force_steps_per_day[file_num] =
+            (size_t) nearbyint(SEC_PER_DAY / (nc_times[1] - nc_times[0]));
+    }
+
+    // check that this forcing file will work
+    if (param_set->force_steps_per_day[file_num] !=
+        global_param.model_steps_per_day) {
+        log_err("Forcing file timestep must match the model timestep.  "
+                "Model timesteps per day is set to %zu and the forcing file "
+                "timestep is set to %zu", global_param.model_steps_per_day,
+                param_set->force_steps_per_day[file_num])
+    }
+    if (calendar != global_param.calendar) {
+        log_err("Calendar in forcing file does not match the calendar of "
+                "VIC's clock: %s", calendar_char);
+    }
+
+    // Free attribute character arrays
+    free(nc_unit_chars);
+    free(calendar_char);
+
+}

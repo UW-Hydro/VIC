@@ -138,9 +138,12 @@ double average(double *ar, size_t n);
 out_data_struct *create_output_list(void);
 void free_atmos(atmos_data_struct *atmos);
 void free_veg_hist(veg_hist_struct *veg_hist);
+void get_forcing_file_info(param_set_struct *param_set, size_t file_num);
 size_t get_global_domain(char *fname, domain_struct *global_domain);
 void get_global_param(FILE *);
 size_t get_nc_dimension(char *nc_name, char *dim_name);
+void get_nc_var_attr(char *nc_name, char *var_name, char *attr_name,
+                     char **attr);
 int get_nc_varndimensions(char *nc_name, char *var_name);
 int get_nc_field_double(char *nc_name, char *var_name, size_t *start,
                         size_t *count, double *var);

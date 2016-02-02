@@ -409,9 +409,6 @@ get_global_param(FILE *gp)
                 }
                 file_num = 1;
             }
-            else if (strcasecmp("N_TYPES", optstr) == 0) {
-                sscanf(cmdstr, "%*s %zu", &param_set.N_TYPES[file_num]);
-            }
             else if (strcasecmp("WIND_H", optstr) == 0) {
                 sscanf(cmdstr, "%*s %lf", &global_param.wind_h);
             }
@@ -628,9 +625,6 @@ get_global_param(FILE *gp)
             /*************************************
                Define output file contents
             *************************************/
-            else if (strcasecmp("N_OUTFILES", optstr) == 0) {
-                ; // do nothing
-            }
             else if (strcasecmp("OUTFILE", optstr) == 0) {
                 ; // do nothing
             }

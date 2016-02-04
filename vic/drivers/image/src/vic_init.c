@@ -1141,7 +1141,7 @@ vic_init(void)
         }
 
         // lake_idx
-        get_scatter_nc_field_int(filenames.veglib, "lake_idx",
+        get_scatter_nc_field_int(filenames.lake, "lake_idx",
                                  d2start, d2count, ivar);
         for (i = 0; i < local_domain.ncells_active; i++) {
             lake_con[i].lake_idx = (size_t) ivar[i];
@@ -1158,7 +1158,7 @@ vic_init(void)
         }
 
         // numnod
-        get_scatter_nc_field_int(filenames.veglib, "numnod",
+        get_scatter_nc_field_int(filenames.lake, "numnod",
                                  d2start, d2count, ivar);
         max_numnod = 0;
         for (i = 0; i < local_domain.ncells_active; i++) {
@@ -1188,7 +1188,7 @@ vic_init(void)
         }
 
         // mindepth (minimum depth for which channel outflow occurs)
-        get_scatter_nc_field_double(filenames.veglib, "mindepth",
+        get_scatter_nc_field_double(filenames.lake, "mindepth",
                                     d2start, d2count, dvar);
         for (i = 0; i < local_domain.ncells_active; i++) {
             lake_con[i].mindepth = (double) dvar[i];
@@ -1208,7 +1208,7 @@ vic_init(void)
         }
 
         // wfrac
-        get_scatter_nc_field_double(filenames.veglib, "wfrac",
+        get_scatter_nc_field_double(filenames.lake, "wfrac",
                                     d2start, d2count, dvar);
         for (i = 0; i < local_domain.ncells_active; i++) {
             lake_con[i].wfrac = (double) dvar[i];
@@ -1227,7 +1227,7 @@ vic_init(void)
         }
 
         // depth_in (initial depth for a cold start)
-        get_scatter_nc_field_double(filenames.veglib, "depth_in",
+        get_scatter_nc_field_double(filenames.lake, "depth_in",
                                     d2start, d2count, dvar);
         for (i = 0; i < local_domain.ncells_active; i++) {
             lake_con[i].depth_in = (double) dvar[i];
@@ -1247,7 +1247,7 @@ vic_init(void)
         }
 
         // rpercent
-        get_scatter_nc_field_double(filenames.veglib, "rpercent",
+        get_scatter_nc_field_double(filenames.lake, "rpercent",
                                     d2start, d2count, dvar);
         for (i = 0; i < local_domain.ncells_active; i++) {
             lake_con[i].rpercent = (double) dvar[i];
@@ -1273,14 +1273,14 @@ vic_init(void)
                 d3start[0] = j;
 
                 // basin_depth
-                get_scatter_nc_field_double(filenames.veglib, "basin_depth",
+                get_scatter_nc_field_double(filenames.lake, "basin_depth",
                                             d3start, d3count, dvar);
                 for (i = 0; i < local_domain.ncells_active; i++) {
                     lake_con[i].z[j] = (double) dvar[i];
                 }
 
                 // basin_area
-                get_scatter_nc_field_double(filenames.veglib, "basin_area",
+                get_scatter_nc_field_double(filenames.lake, "basin_area",
                                             d3start, d3count, dvar);
                 for (i = 0; i < local_domain.ncells_active; i++) {
                     lake_con[i].Cl[j] = (double) dvar[i];
@@ -1289,14 +1289,14 @@ vic_init(void)
         }
         else {
             // basin_depth
-            get_scatter_nc_field_double(filenames.veglib, "basin_depth",
+            get_scatter_nc_field_double(filenames.lake, "basin_depth",
                                         d2start, d2count, dvar);
             for (i = 0; i < local_domain.ncells_active; i++) {
                 lake_con[i].z[0] = (double) dvar[i];
             }
 
             // basin_area
-            get_scatter_nc_field_double(filenames.veglib, "basin_area",
+            get_scatter_nc_field_double(filenames.lake, "basin_area",
                                         d2start, d2count, dvar);
             for (i = 0; i < local_domain.ncells_active; i++) {
                 lake_con[i].Cl[0] = (double) dvar[i];

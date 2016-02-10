@@ -475,8 +475,6 @@ void init_output_list(out_data_struct *out_data, int write, char *format,
 void initialize_filenames(void);
 void initialize_fileps(void);
 void initialize_global(void);
-int initialize_lake(lake_var_struct *, lake_con_struct, soil_con_struct *,
-                    cell_data_struct *, double, int);
 void initialize_options(void);
 void initialize_parameters(void);
 void initialize_snow(snow_data_struct **snow, size_t veg_num);

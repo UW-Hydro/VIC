@@ -38,7 +38,6 @@ read_soilparam(FILE *soilparam,
 {
     void ttrim(char *string);
     extern option_struct       options;
-    extern global_param_struct global_param;
     extern veg_lib_struct     *veg_lib;
     extern parameters_struct   param;
 
@@ -52,13 +51,6 @@ read_soilparam(FILE *soilparam,
     double                     Wpwp_FRACT[MAX_LAYERS];
     double                     off_gmt;
     double                     tempdbl;
-    double                     lat;
-    double                     lng;
-    double                     start_lat;
-    double                     right_lng;
-    double                     left_lng;
-    double                     delta;
-    double                     dist;
     size_t                     length;
     int                        Nbands, band;
     int                        flag;
@@ -705,32 +697,7 @@ read_soilparam(FILE *soilparam,
         /*******************************************************************
            Calculate grid cell area.
          ******************************************************************/
-
-        if (options.EQUAL_AREA) {
-            temp.cell_area = global_param.resolution * M_PER_KM * M_PER_KM; /* Grid cell area in m^2. */
-        }
-        else {
-            lat = fabs(temp.lat);
-            lng = fabs(temp.lng);
-
-            start_lat = lat - global_param.resolution / 2;
-            right_lng = lng + global_param.resolution / 2;
-            left_lng = lng - global_param.resolution / 2;
-
-            delta = get_dist(lat, lng, lat + global_param.resolution / 10.,
-                             lng);
-
-            dist = 0.;
-
-            for (i = 0; i < 10; i++) {
-                dist +=
-                    get_dist(start_lat, left_lng, start_lat,
-                             right_lng) * delta;
-                start_lat += global_param.resolution / 10;
-            }
-
-            temp.cell_area = dist; /* Grid cell area in m^2. */
-        }
+        compute_cell_area(&temp);
 
         /*************************************************
            Allocate and Initialize Snow Band Parameters

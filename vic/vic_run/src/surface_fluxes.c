@@ -766,13 +766,13 @@ surface_fluxes(bool                 overstory,
                 iter_soil_veg_var.Raut *= dryFrac;
                 iter_soil_veg_var.NPP *= dryFrac;
                 /* Adjust by veg cover fraction */
-                iter_soil_veg_var.GPP *= iter_soil_veg_var.vegcover;
-                iter_soil_veg_var.Rdark *= iter_soil_veg_var.vegcover;
-                iter_soil_veg_var.Rphoto *= iter_soil_veg_var.vegcover;
-                iter_soil_veg_var.Rmaint *= iter_soil_veg_var.vegcover;
-                iter_soil_veg_var.Rgrowth *= iter_soil_veg_var.vegcover;
-                iter_soil_veg_var.Raut *= iter_soil_veg_var.vegcover;
-                iter_soil_veg_var.NPP *= iter_soil_veg_var.vegcover;
+                iter_soil_veg_var.GPP *= iter_soil_veg_var.fcanopy;
+                iter_soil_veg_var.Rdark *= iter_soil_veg_var.fcanopy;
+                iter_soil_veg_var.Rphoto *= iter_soil_veg_var.fcanopy;
+                iter_soil_veg_var.Rmaint *= iter_soil_veg_var.fcanopy;
+                iter_soil_veg_var.Rgrowth *= iter_soil_veg_var.fcanopy;
+                iter_soil_veg_var.Raut *= iter_soil_veg_var.fcanopy;
+                iter_soil_veg_var.NPP *= iter_soil_veg_var.fcanopy;
             }
             else {
                 iter_soil_veg_var.rc = param.HUGE_RESIST;
@@ -803,7 +803,7 @@ surface_fluxes(bool                 overstory,
                          iter_aero_resist_veg,
                          vic_run_veg_lib[veg_class].overstory,
                          vic_run_veg_lib[veg_class].rarc,
-                         iter_soil_veg_var.vegcover, iter_aero_resist_used[0],
+                         iter_soil_veg_var.fcanopy, iter_aero_resist_used[0],
                          &iter_pot_evap);
 
         /**************************************

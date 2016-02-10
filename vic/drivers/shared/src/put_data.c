@@ -760,8 +760,8 @@ collect_wb_terms(cell_data_struct cell,
     /** record LAI **/
     out_data[OUT_LAI].data[0] += veg_var.LAI * AreaFactor;
 
-    /** record vegcover **/
-    out_data[OUT_VEGCOVER].data[0] += veg_var.vegcover * AreaFactor;
+    /** record fcanopy **/
+    out_data[OUT_FCANOPY].data[0] += veg_var.fcanopy * AreaFactor;
 
     /** record aerodynamic conductance and resistance **/
     if (cell.aero_resist[0] > DBL_EPSILON) {

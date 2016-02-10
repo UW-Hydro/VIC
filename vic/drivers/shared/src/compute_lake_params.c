@@ -29,8 +29,8 @@
 #include <vic_run.h>
 
 /******************************************************************************
-* @brief        This subroutine controls the model core, it solves both the
-*               energy and water balance models, as well as frozen soils.
+* @brief        This subroutine computes dependent lake parameters from the
+*               specified lake parameters.
 ******************************************************************************/
 void
 compute_lake_params(lake_con_struct *lake_con,

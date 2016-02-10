@@ -148,7 +148,7 @@ read_atmos_data(FILE               *infile,
                                  global_param.nrecs * global_param.dt)) {
             for (i = 0; i < Nfields; i++) {
                 if (field_index[i] != ALBEDO && field_index[i] != LAI_IN &&
-                    field_index[i] != VEGCOVER) {
+                    field_index[i] != FCANOPY) {
                     if (param_set.TYPE[field_index[i]].SIGNED) {
                         fread(&stmp, sizeof(short int), 1, infile);
                         if (endian != param_set.FORCE_ENDIAN[file_num]) {
@@ -229,7 +229,7 @@ read_atmos_data(FILE               *infile,
                                  global_param.nrecs * global_param.dt)) {
             for (i = 0; i < Nfields; i++) {
                 if (field_index[i] != ALBEDO && field_index[i] != LAI_IN &&
-                    field_index[i] != VEGCOVER) {
+                    field_index[i] != FCANOPY) {
                     fscanf(infile, "%lf", &forcing_data[field_index[i]][rec]);
                 }
                 else {

@@ -57,7 +57,7 @@
 
 /***** Define minimum values for model parameters *****/
 #define MINSOILDEPTH    0.001  /**< Minimum layer depth with which model can work (m) */
-#define MIN_VEGCOVER    0.0001 /**< Minimum allowable vegcover fraction */
+#define MIN_FCANOPY    0.0001  /**< Minimum allowable canopy fraction */
 
 /***** Define minimum and maximum values for model timesteps *****/
 #define MIN_SUBDAILY_STEPS_PER_DAY  4
@@ -293,17 +293,17 @@ typedef struct {
     // input options
     bool BASEFLOW;       /**< ARNO: read Ds, Dm, Ws, c; NIJSSEN2001: read d1, d2, d3, d4 */
     unsigned short int GRID_DECIMAL; /**< Number of decimal places in grid file extensions */
+    bool VEGLIB_FCAN;    /**< TRUE = veg library file contains monthly fcanopy values */
     bool VEGLIB_PHOTO;   /**< TRUE = veg library contains photosynthesis parameters */
-    bool VEGLIB_VEGCOVER; /**< TRUE = veg library file contains monthly vegcover values */
     bool VEGPARAM_ALB;   /**< TRUE = veg param file contains monthly albedo values */
+    bool VEGPARAM_FCAN;  /**< TRUE = veg param file contains monthly fcanopy values */
     bool VEGPARAM_LAI;   /**< TRUE = veg param file contains monthly LAI values */
-    bool VEGPARAM_VEGCOVER; /**< TRUE = veg param file contains monthly vegcover values */
     unsigned short int ALB_SRC;        /**< FROM_VEGLIB = use albedo values from veg library file
                                           FROM_VEGPARAM = use albedo values from the veg param file */
+    unsigned short int FCAN_SRC;       /**< FROM_VEGLIB = use fcanopy values from veg library file
+                                          FROM_VEGPARAM = use fcanopy values from the veg param file */
     unsigned short int LAI_SRC;        /**< FROM_VEGLIB = use LAI values from veg library file
                                           FROM_VEGPARAM = use LAI values from the veg param file */
-    unsigned short int VEGCOVER_SRC;   /**< FROM_VEGLIB = use vegcover values from veg library file
-                                          FROM_VEGPARAM = use vegcover values from the veg param file */
     bool LAKE_PROFILE;   /**< TRUE = user-specified lake/area profile */
     bool ORGANIC_FRACT;  /**< TRUE = organic matter fraction of each layer is read from the soil parameter file; otherwise set to 0.0. */
 
@@ -657,7 +657,7 @@ typedef struct {
     double *CanopLayerBnd;  /**< Upper boundary of each canopy layer, expressed as fraction of total LAI */
     double albedo[MONTHS_PER_YEAR];   /**< climatological vegetation albedo (fraction) */
     double LAI[MONTHS_PER_YEAR];      /**< climatological leaf area index (m2/m2) */
-    double vegcover[MONTHS_PER_YEAR]; /**< climatological fractional area covered by plants within the tile (fraction) */
+    double fcanopy[MONTHS_PER_YEAR];  /**< climatological fractional area covered by plant canopy (fraction) */
     double Wdmax[MONTHS_PER_YEAR];    /**< climatological maximum dew holding capacity (mm) */
 } veg_con_struct;
 
@@ -668,7 +668,7 @@ typedef struct {
     bool overstory;        /**< TRUE = overstory present, important for snow
                               accumulation in canopy */
     double LAI[MONTHS_PER_YEAR];  /**< leaf area index */
-    double vegcover[MONTHS_PER_YEAR];  /**< fractional area covered by plants within the tile (fraction) */
+    double fcanopy[MONTHS_PER_YEAR];  /**< fractional area covered by plant canopy (fraction) */
     double Wdmax[MONTHS_PER_YEAR];  /**< maximum dew holding capacity (mm) */
     double albedo[MONTHS_PER_YEAR];  /**< vegetation albedo (added for full energy)
                                                            (fraction) */
@@ -713,7 +713,7 @@ typedef struct {
 typedef struct {
     double *albedo;  /**< vegetation albedo (fraction) */
     double *LAI;     /**< leaf area index (m2/m2) */
-    double *vegcover; /**< fractional area of plants within veg tile (fraction) */
+    double *fcanopy; /**< fractional area covered by plant canopy (fraction) */
 } veg_hist_struct;
 
 /******************************************************************************
@@ -896,7 +896,7 @@ typedef struct {
     double canopyevap;          /**< evaporation from canopy (mm/TS) */
     double LAI;                 /**< current leaf area index (m2/m2) */
     double throughfall;         /**< water that reaches the ground through the canopy (mm/TS) */
-    double vegcover;            /**< current fractional area of plants within veg tile (fraction) */
+    double fcanopy;             /**< current fractional area of plant canopy (fraction) */
     double Wdew;                /**< dew trapped on vegetation (mm) */
     double Wdmax;               /**< current maximum dew holding capacity (mm) */
     double *NscaleFactor;       /**< array of per-layer nitrogen scaling factors */

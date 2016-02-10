@@ -446,7 +446,6 @@ void collect_eb_terms(energy_bal_struct, snow_data_struct, cell_data_struct,
 void collect_wb_terms(cell_data_struct, veg_var_struct, snow_data_struct,
                       double, double, double, int, double, int, double *,
                       double *, out_data_struct *);
-void compute_cell_area(soil_con_struct *);
 void compute_lake_params(lake_con_struct *, soil_con_struct);
 void compute_treeline(atmos_data_struct *, dmy_struct *, double, double *,
                       bool *);
@@ -477,8 +476,6 @@ void init_output_list(out_data_struct *out_data, int write, char *format,
 void initialize_filenames(void);
 void initialize_fileps(void);
 void initialize_global(void);
-int initialize_lake(lake_var_struct *, lake_con_struct, soil_con_struct *,
-                    cell_data_struct *, double, int);
 void initialize_options(void);
 void initialize_parameters(void);
 void initialize_snow(snow_data_struct **snow, size_t veg_num);

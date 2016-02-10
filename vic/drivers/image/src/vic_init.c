@@ -1376,7 +1376,7 @@ vic_init(void)
 
         // compute other lake parameters here
         for (i = 0; i < local_domain.ncells_active; i++) {
-            compute_cell_area(&(soil_con[i]));
+            soil_con[i].cell_area = global_domain.locations[i].area;
             compute_lake_params(&(lake_con[i]), soil_con[i]);
         }
     }

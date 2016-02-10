@@ -182,6 +182,8 @@ double IceEnergyBalance(double, va_list);
 void iceform(double *, double *, double, double, double *, int, double, double,
              double, double *, double *, double *, double *, double);
 void icerad(double, double, double, double *, double *, double *);
+int initialize_lake(lake_var_struct *, lake_con_struct, soil_con_struct *,
+                    cell_data_struct *, double, int);
 int lakeice(double, double, double, double, double, double *, double, double *,
             double *, double, double);
 void latent_heat_from_snow(double, double, double, double, double, double,

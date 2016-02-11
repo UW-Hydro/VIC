@@ -1134,8 +1134,59 @@ vic_init(void)
 
     // read blowing snow parameters
     if (options.BLOWING) {
-        log_warn("BLOWING option not yet implemented in vic_init()");
+        // sigma_slope
+        for (j = 0; j < options.NVEGTYPES; j++) {
+            d3start[0] = j;
+            get_scatter_nc_field_double(filenames.veg, "sigma_slope",
+                                        d3start, d3count, dvar);
+            for (i = 0; i < local_domain.ncells_active; i++) {
+                vidx = veg_con_map[i].vidx[j];
+                if (vidx != -1) {
+                    veg_con[i][vidx].sigma_slope = (double) dvar[i];
+                    if (veg_con[i][vidx].sigma_slope <= 0) {
+                        log_err("cell %zu veg %d: deviation of terrain slope "
+                                "(sigma_slope) is %f but must be > 0.",
+                                i, vidx, veg_con[i][vidx].sigma_slope);
+                    }
+                }
+            }
+        }
+        // lag_one
+        for (j = 0; j < options.NVEGTYPES; j++) {
+            d3start[0] = j;
+            get_scatter_nc_field_double(filenames.veg, "lag_one",
+                                        d3start, d3count, dvar);
+            for (i = 0; i < local_domain.ncells_active; i++) {
+                vidx = veg_con_map[i].vidx[j];
+                if (vidx != -1) {
+                    veg_con[i][vidx].lag_one = (double) dvar[i];
+                    if (veg_con[i][vidx].lag_one <= 0) {
+                        log_err("cell %zu veg %d: lag_one is %f but "
+                                "must be > 0.",
+                                i, vidx, veg_con[i][vidx].lag_one);
+                    }
+                }
+            }
+        }
+        // fetch
+        for (j = 0; j < options.NVEGTYPES; j++) {
+            d3start[0] = j;
+            get_scatter_nc_field_double(filenames.veg, "fetch",
+                                        d3start, d3count, dvar);
+            for (i = 0; i < local_domain.ncells_active; i++) {
+                vidx = veg_con_map[i].vidx[j];
+                if (vidx != -1) {
+                    veg_con[i][vidx].fetch = (double) dvar[i];
+                    if (veg_con[i][vidx].fetch <= 1) {
+                        log_err("cell %zu veg %d: fetch is %f but "
+                                "must be > 1.",
+                                i, vidx, veg_con[i][vidx].fetch);
+                    }
+                }
+            }
+        }
     }
+
 
     // read_lake parameters
     if (options.LAKES) {

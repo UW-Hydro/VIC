@@ -469,7 +469,6 @@ void free_dmy(dmy_struct **dmy);
 void free_out_data_files(out_data_file_struct **);
 void free_out_data(out_data_struct **);
 void free_vegcon(veg_con_struct **veg_con);
-double get_dist(double lat1, double long1, double lat2, double long2);
 void get_parameters(FILE *paramfile);
 void init_output_list(out_data_struct *out_data, int write, char *format,
                       int type, double mult);

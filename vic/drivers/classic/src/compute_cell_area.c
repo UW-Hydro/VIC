@@ -26,7 +26,7 @@
 
 #include <vic_def.h>
 #include <vic_run.h>
-#include <vic_driver_shared.h>
+#include <vic_driver_classic.h>
 
 /******************************************************************************
 * @brief        This subroutine computes grid cell area.

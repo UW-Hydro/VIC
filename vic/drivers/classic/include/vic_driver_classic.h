@@ -49,6 +49,7 @@ out_data_struct *create_output_list();
 void free_atmos(int nrecs, atmos_data_struct **atmos);
 void free_veg_hist(int nrecs, int nveg, veg_hist_struct ***veg_hist);
 void free_veglib(veg_lib_struct **);
+double get_dist(double lat1, double long1, double lat2, double long2);
 void get_force_type(char *, int, int *);
 void get_global_param(FILE *);
 void init_output_list(out_data_struct *, int, char *, int, double);

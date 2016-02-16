@@ -84,9 +84,8 @@ get_force_type(char *cmdstr,
         type = LAI_IN;
     }
     /* type 6: incoming longwave radiation [W/m2] */
-    else if (strcasecmp("LONGWAVE",
-                        optstr) == 0 || strcasecmp("LWDOWN", optstr) == 0) {
-        type = LONGWAVE;
+    else if (strcasecmp("LWDOWN", optstr) == 0) {
+        type = LWDOWN;
     }
     /* type 7: photosynthetically active radiation [uE/m2s] */
     else if (strcasecmp("PAR", optstr) == 0) {
@@ -105,9 +104,8 @@ get_force_type(char *cmdstr,
         type = VP;
     }
     /* type 11: rainfall [mm] */
-    else if (strcasecmp("SHORTWAVE",
-                        optstr) == 0 || strcasecmp("SWDOWN", optstr) == 0) {
-        type = SHORTWAVE;
+    else if (strcasecmp("SWDOWN", optstr) == 0) {
+        type = SWDOWN;
     }
     /* type 12: vegetation cover fraction */
     else if (strcasecmp("VEGCOVER", optstr) == 0) {

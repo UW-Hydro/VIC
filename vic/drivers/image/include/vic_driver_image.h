@@ -153,7 +153,6 @@ out_data_struct *create_output_list(void);
 void free_atmos(atmos_data_struct *atmos);
 void free_veg_hist(veg_hist_struct *veg_hist);
 void get_domain_type(char *cmdstr);
-void get_force_type(char *cmdstr, int file_num, int *field);
 void get_forcing_file_info(param_set_struct *param_set, size_t file_num);
 size_t get_global_domain(char *fname, domain_struct *global_domain);
 void get_global_param(FILE *);
@@ -191,6 +190,7 @@ int put_nc_field_double(char *nc_name, bool *open, int *nc_id, double fillval,
 int put_nc_field_int(char *nc_name, bool *open, int *nc_id, int fillval,
                      int *dimids, int ndims, char *var_name, size_t *start,
                      size_t *count, int *var);
+void set_force_type(char *cmdstr, int file_num, int *field);
 void sprint_location(char *str, location_struct *loc);
 void vic_alloc(void);
 void vic_nc_info(nc_file_struct *nc_hist_file, out_data_struct **out_data,

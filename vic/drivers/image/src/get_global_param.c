@@ -417,7 +417,7 @@ get_global_param(FILE *gp)
                 param_set.N_TYPES[file_num] = count_force_vars(gp);
             }
             else if (strcasecmp("FORCE_TYPE", optstr) == 0) {
-                get_force_type(cmdstr, file_num, &field);
+                set_force_type(cmdstr, file_num, &field);
             }
             else if (strcasecmp("WIND_H", optstr) == 0) {
                 sscanf(cmdstr, "%*s %lf", &global_param.wind_h);

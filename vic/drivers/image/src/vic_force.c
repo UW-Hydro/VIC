@@ -110,7 +110,7 @@ vic_force(void)
     for (j = 0; j < NF; j++) {
         d3start[0] = global_param.forceoffset[0] + j;
         get_scatter_nc_field_double(filenames.forcing[0],
-                                    param_set.TYPE[SHORTWAVE].varname,
+                                    param_set.TYPE[SWDOWN].varname,
                                     d3start, d3count, dvar);
         for (i = 0; i < local_domain.ncells_active; i++) {
             atmos[i].shortwave[j] = (double) dvar[i];
@@ -121,7 +121,7 @@ vic_force(void)
     for (j = 0; j < NF; j++) {
         d3start[0] = global_param.forceoffset[0] + j;
         get_scatter_nc_field_double(filenames.forcing[0],
-                                    param_set.TYPE[LONGWAVE].varname,
+                                    param_set.TYPE[LWDOWN].varname,
                                     d3start, d3count, dvar);
         for (i = 0; i < local_domain.ncells_active; i++) {
             atmos[i].longwave[j] = (double) dvar[i];

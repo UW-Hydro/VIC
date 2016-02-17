@@ -27,14 +27,14 @@
 
 #include <vic_def.h>
 #include <vic_run.h>
-#include <vic_driver_classic.h>
+#include <vic_driver_image.h>
 
 /******************************************************************************
  * @brief    This routine determines the current forcing file data type and
  *           stores its location in the description of the current forcing file.
  *****************************************************************************/
 void
-get_force_type(char *cmdstr,
+set_force_type(char *cmdstr,
                int   file_num,
                int  *field)
 {
@@ -42,18 +42,21 @@ get_force_type(char *cmdstr,
 
     char                    optstr[MAXSTRING];
     char                    flgstr[MAXSTRING];
-    int                     type;
+    char                    ncvarname[MAXSTRING];
+    int                     type = SKIP;
 
-    type = SKIP;
+    strcpy(ncvarname, "MISSING");
 
     /** Initialize flgstr **/
     strcpy(flgstr, "NULL");
 
     if ((*field) >= (int) param_set.N_TYPES[file_num]) {
-        log_err("Too many variables defined for forcing file %i.", file_num);
+        log_err("Too many variables defined for forcing file %i., was "
+                "expecting at most %zu and got %d", file_num + 1,
+                param_set.N_TYPES[file_num], *field);
     }
 
-    sscanf(cmdstr, "%*s %s", optstr);
+    sscanf(cmdstr, "%*s %s %s", optstr, ncvarname);
 
     /***************************************
        Get meteorological data forcing info
@@ -122,25 +125,21 @@ get_force_type(char *cmdstr,
     /** Undefined variable type **/
     else {
         log_err("Undefined forcing variable type %s in file %i.",
-                optstr, file_num);
+                optstr, file_num + 1);
     }
 
     param_set.TYPE[type].SUPPLIED = file_num + 1;
     param_set.FORCE_INDEX[file_num][(*field)] = type;
-    if (type == SKIP) {
-        param_set.TYPE[type].multiplier = 1;
-        param_set.TYPE[type].SIGNED = false;
+
+    if (strcasecmp("MISSING", ncvarname) != 0) {
+        strcpy(param_set.TYPE[type].varname, ncvarname);
     }
     else {
-        sscanf(cmdstr, "%*s %*s %s %lf", flgstr,
-               &param_set.TYPE[type].multiplier);
-        if (strcasecmp("SIGNED", flgstr) == 0) {
-            param_set.TYPE[type].SIGNED = true;
-        }
-        else {
-            param_set.TYPE[type].SIGNED = false;
-        }
+        log_err(
+            "Must supply netCDF variable name for %s forcing file number %d",
+            optstr, file_num + 1);
     }
+
     param_set.TYPE[type].N_ELEM = 1;
 
     (*field)++;

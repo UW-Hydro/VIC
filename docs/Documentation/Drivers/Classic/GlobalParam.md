@@ -183,7 +183,6 @@ For each variable, there must be a separate column for each vegetation tile in t
 where the 1, 2, and 3 correspond to the first, second, and third tiles listed in the vegetation parameter file, respectively; and the file should be described in the global parameter file as:
 
     FORCING2    FORCING_DATA/veg_hist/veg_hist__
-    N_TYPES     3
     FORCE_TYPE  LAI_IN
     FORCE_TYPE  VEGCOVER
     FORCE_TYPE  ALBEDO
@@ -192,8 +191,6 @@ where the 1, 2, and 3 correspond to the first, second, and third tiles listed in
     FORCEYEAR   1950
     FORCEMONTH  1
     FORCEDAY    1
-
-NOTE that N_TYPES is 3 in the example above, not 9.  This is because N_TYPES only counts the number of different variable types, NOT the total number of columns.
 
 # Define Parameter Files
 
@@ -209,12 +206,12 @@ The following options describe the input parameter files.
 | VEGPARAM              | string    | path/filename     | Vegetation parameter file name                                                                                                                                                                                                                                                                            |
 | ROOT_ZONES            | integer   | N/A               | Number of defined root zones defined for root distribution.                                                                                                                                                                                                                                               |
 | VEGPARAM_ALBEDO       | string    | TRUE or FALSE     | If TRUE the vegetation parameter file contains an extra line for each vegetation type that defines monthly ALBEDO values for each vegetation type for each grid cell. <br><br>Default = FALSE. |
-| ALBEDO_SRC            | string    | N/A               | This option tells VIC where to look for ALBEDO values: <li>**FROM_VEGLIB** = Use the ALBEDO values listed in the vegetation library file. <li>**FROM_VEGPARAM** = Use the ALBEDO values listed in the vegetation parameter file. Note: for this to work, VEGPARAM_ALBEDO must be TRUE. <br><br>Default = FROM_VEGLIB. |
+| ALBEDO_SRC            | string    | N/A               | This option tells VIC where to look for ALBEDO values: <li>**FROM_VEGLIB** = Use the ALBEDO values listed in the vegetation library file. <li>**FROM_VEGPARAM** = Use the ALBEDO values listed in the vegetation parameter file. Note: for this to work, VEGPARAM_ALBEDO must be TRUE. <li>**FROM_VEGHIST** = Use the ALBEDO values listed in the veg_hist forcing files. Note: for this to work, ALBEDO must be supplied in the veg_hist files and listd in the global parameter file as one of the variables in the files. <br><br>Default = FROM_VEGLIB. |
 | VEGPARAM_LAI          | string    | TRUE or FALSE     | If TRUE the vegetation parameter file contains an extra line for each vegetation type that defines monthly LAI values for each vegetation type for each grid cell. <br><br>Default = FALSE. |
-| LAI_SRC               | string    | N/A               | This option tells VIC where to look for LAI values: <li>**FROM_VEGLIB** = Use the LAI values listed in the vegetation library file. <li>**FROM_VEGPARAM** = Use the LAI values listed in the vegetation parameter file. Note: for this to work, VEGPARAM_LAI must be TRUE. <br><br>Default = FROM_VEGLIB. |
+| LAI_SRC               | string    | N/A               | This option tells VIC where to look for LAI values: <li>**FROM_VEGLIB** = Use the LAI values listed in the vegetation library file. <li>**FROM_VEGPARAM** = Use the LAI values listed in the vegetation parameter file. Note: for this to work, VEGPARAM_LAI must be TRUE. <li>**FROM_VEGHIST** = Use the LAI values listed in the veg_hist forcing files. Note: for this to work, LAI_IN must be supplied in the veg_hist files and listd in the global parameter file as one of the variables in the files. <br><br>Default = FROM_VEGLIB. |
 | VEGLIB_VEGCOVER       | string    | TRUE or FALSE     | If TRUE the vegetation library file contains monthly VEGCOVER values for each vegetation type for each grid cell (between the LAI and ALBEDO values). <br><br>Default = FALSE. |
 | VEGPARAM_VEGCOVER     | string    | TRUE or FALSE     | If TRUE the vegetation parameter file contains an extra line for each vegetation type that defines monthly VEGCOVER values for each vegetation type for each grid cell. <br><br>Default = FALSE. |
-| VEGCOVER_SRC          | string    | N/A               | This option tells VIC where to look for VEGCOVER values: <li>**FROM_VEGLIB** = Use the VEGCOVER values listed in the vegetation library file. Note: for this to work, VEGLIB_VEGCOVER must be TRUE.. <li>**FROM_VEGPARAM** = Use the VEGCOVER values listed in the vegetation parameter file. Note: for this to work, VEGPARAM_VEGCOVER must be TRUE. <br><br>Default = FROM_VEGLIB. |
+| VEGCOVER_SRC          | string    | N/A               | This option tells VIC where to look for VEGCOVER values: <li>**FROM_DEFAULT** = Set VEGCOVER to 1.0 for all veg classes, all times, and all locations. <li>**FROM_VEGLIB** = Use the VEGCOVER values listed in the vegetation library file. Note: for this to work, VEGLIB_VEGCOVER must be TRUE.. <li>**FROM_VEGPARAM** = Use the VEGCOVER values listed in the vegetation parameter file. Note: for this to work, VEGPARAM_VEGCOVER must be TRUE. <li>**FROM_VEGHIST** = Use the VEGCOVER values listed in the veg_hist forcing files. Note: for this to work, VEGCOVER must be supplied in the veg_hist files and listd in the global parameter file as one of the variables in the files. <br><br>Default = FROM_DEFAULT. |
 | SNOW_BAND             | integer <br> [string] | N/A <br> [path/filename] | Maximum number of snow elevation bands to use, and the name (with path) of the snow elevation band file. For example: `SNOW_BAND 5 path/filename`.  To turn off this feature, set the number of snow bands to 1 and do not follow this with a snow elevation band file name.  <br><br>Default = 1. |
 | CONSTANTS             | string    | path/filename     | Constants / Parameters file name |
 
@@ -246,11 +243,10 @@ The following options describe the output files. Click [here](OutputFormatting.m
 | MOISTFRACT            | string    | TRUE or FALSE     | Options for output soil moisture units (default is FALSE): <li>**FALSE** = Standard VIC units. Soil moisture is in mm over the grid cell area <li>**TRUE** = Soil moisture is volume fraction                                                                                                                                                   |
 | PRT_HEADER            | string    | TRUE or FALSE     | Options for output file headers (default is FALSE): <li>**FALSE** = output files contain no headers <li>**TRUE** = headers are inserted into the beginning of each output file, listing the names of the variables in each field of the file (if ASCII) and/or the variable data types (if BINARY) <br><br>[Click here for more information.](OutputFormatting.md)                                                                                                                                                          |
 | PRT_SNOW_BAND         | string    | TRUE or FALSE     | if TRUE then print snow variables for each snow band in a separate output file (`snow_band_*`). <br><br>*NOTE*: this option is ignored if output file contents are specified. |
-| N_OUTFILES\*            | integer   | N/A               | Number of output files per grid cell. [Click here for more information](OutputFormatting.md).                                                                                                                    |
-| OUTFILE\*               | <br> string <br> integer <br>| <br>prefix <br> nvars <br>| Information about this output file: <br>Prefix of the output file (to which the lat and lon will be appended)<br>Number of variables in the output file <br> This should be specified once for each output file. [Click here for more information.](OutputFormatting.md) |
+| OUTFILE\*               | <br> string <br> | <br>prefix <br> | Information about this output file: <br>Prefix of the output file (to which the lat and lon will be appended) <br> This should be specified once for each output file. [Click here for more information.](OutputFormatting.md) |
 | OUTVAR\*                | <br> string <br> string <br> string <br> integer <br> | <br> name <br> format <br> type <br> multiplier <br> | Information about this output variable:<br>Name (must match a name listed in vicNl_def.h) <br> Output format (C fprintf-style format code) <br>Data type (one of: OUT_TYPE_DEFAULT, OUT_TYPE_CHAR, OUT_TYPE_SINT, OUT_TYPE_USINT, OUT_TYPE_INT, OUT_TYPE_FLOAT,OUT_TYPE_DOUBLE) <br> Multiplier - number to multiply the data with in order to recover the original values (only valid with BINARY_OUTPUT=TRUE) <br><br> This should be specified once for each output variable. [Click here for more information.](OutputFormatting.md)|
 
-\* *Note: `N_OUTFILES`, `OUTFILE`, and `OUTVAR` are optional; if omitted, traditional output files are produced. [Click here for details on using these instructions](OutputFormatting.md).*
+\* *Note: `OUTFILE`, and `OUTVAR` are optional; if omitted, traditional output files are produced. [Click here for details on using these instructions](OutputFormatting.md).*
 
 # Obsolete Options from Earlier Versions
 
@@ -368,7 +364,7 @@ FROZEN_SOIL FALSE   # TRUE = calculate frozen soils.  Default = FALSE.
 #VP_INTERP  TRUE    # This controls sub-daily humidity estimates; TRUE = interpolate daily VP estimates linearly between sunrise of one day to the next; FALSE = hold VP constant for entire day
 #LW_TYPE        LW_PRATA    # This controls the algorithm used to estimate clear-sky longwave radiation:
 #           # LW_TVA = Tennessee Valley Authority algorithm (1972) (this was traditional VIC algorithm)
-#           # other options listed in vicNl_def.h
+#           # other options listed in vic_driver_shared.h
 #           # default = LW_PRATA
 #LW_CLOUD   LW_CLOUD_DEARDORFF  # This controls the algorithm used to estimate the influence of clouds on total longwave:
 #           # LW_CLOUD_BRAS = method from Bras textbook (this was the traditional VIC algorithm)
@@ -469,7 +465,7 @@ COMPRESS    FALSE   # TRUE = compress input and output files when done
 BINARY_OUTPUT   FALSE   # TRUE = binary output files
 ALMA_OUTPUT FALSE   # TRUE = ALMA-format output files; FALSE = standard VIC units
 MOISTFRACT  FALSE   # TRUE = output soil moisture as volumetric fraction; FALSE = standard VIC units
-PRT_SNOW_BAND   FALSE   # TRUE = write a "snowband" output file, containing band-specific values of snow variables; NOTE: this is ignored if N_OUTFILES is specified below.
+PRT_SNOW_BAND   FALSE   # TRUE = write a "snowband" output file, containing band-specific values of snow variables.
 
 #######################################################################
 #
@@ -496,26 +492,22 @@ PRT_SNOW_BAND   FALSE   # TRUE = write a "snowband" output file, containing band
 #
 # Format:
 #
-#   N_OUTFILES    <n_outfiles>
-#
-#   OUTFILE       <prefix>        <nvars>
+#   OUTFILE       <prefix>
 #   OUTVAR        <varname>       [<format>        <type>  <multiplier>]
 #   OUTVAR        <varname>       [<format>        <type>  <multiplier>]
 #   OUTVAR        <varname>       [<format>        <type>  <multiplier>]
 #
-#   OUTFILE       <prefix>        <nvars>
+#   OUTFILE       <prefix>
 #   OUTVAR        <varname>       [<format>        <type>  <multiplier>]
 #   OUTVAR        <varname>       [<format>        <type>  <multiplier>]
 #   OUTVAR        <varname>       [<format>        <type>  <multiplier>]
 #
 #
 # where
-#   <n_outfiles> = number of output files
 #   <prefix>     = name of the output file, NOT including latitude
 #                  and longitude
-#   <nvars>      = number of variables in the output file
 #   <varname>    = name of the variable (this must be one of the
-#                  output variable names listed in vicNl_def.h.)
+#                  output variable names listed in vic_driver_shared.h.)
 #   <format>     = (for ascii output files) fprintf format string,
 #                  e.g.
 #                    %.4f = floating point with 4 decimal places

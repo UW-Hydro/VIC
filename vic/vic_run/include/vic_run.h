@@ -307,7 +307,7 @@ void tridia(int, double *, double *, double *, double *, double *);
 void tridiag(double *, double *, double *, double *, unsigned int);
 int vic_run(atmos_data_struct *, all_vars_struct *, dmy_struct *,
             global_param_struct *, lake_con_struct *, soil_con_struct *,
-            veg_con_struct *, veg_lib_struct *, veg_hist_struct *veg_hist);
+            veg_con_struct *, veg_lib_struct *);
 double volumetric_heat_capacity(double, double, double, double);
 int water_balance(lake_var_struct *, lake_con_struct, double, all_vars_struct *,
                   int, int, double, soil_con_struct, veg_con_struct);

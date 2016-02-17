@@ -59,17 +59,10 @@ enum
  *****************************************************************************/
 enum
 {
+    FROM_DEFAULT,
     FROM_VEGLIB,
-    FROM_VEGPARAM
-};
-
-/******************************************************************************
- * @brief   LAI sources (for backwards compatibility)
- *****************************************************************************/
-enum
-{
-    LAI_FROM_VEGLIB,
-    LAI_FROM_VEGPARAM
+    FROM_VEGPARAM,
+    FROM_VEGHIST
 };
 
 /******************************************************************************
@@ -83,12 +76,12 @@ enum
     CHANNEL_IN,  /**< incoming channel flow [m3] */
     FDIR,        /**< fraction of incoming shortwave that is direct [fraction] */
     LAI_IN,      /**< leaf area index [m2/m2] */
-    LONGWAVE,    /**< incoming longwave radiation [W/m2] */
+    LWDOWN,      /**< incoming longwave radiation [W/m2] */
     PAR,         /**< incoming photosynthetically active radiation [W/m2] */
     PREC,        /**< total precipitation (rain and snow) [mm] */
     PRESSURE,    /**< atmospheric pressure [kPa] */
     VP,          /**< vapor pressure [kPa] */
-    SHORTWAVE,   /**< incoming shortwave [W/m2] */
+    SWDOWN,      /**< incoming shortwave [W/m2] */
     VEGCOVER,    /**< fraction of each veg tile covered by plants [fraction] */
     WIND,        /**< wind speed [m/s] */
     SKIP,        /**< place holder for unused data columns */
@@ -208,8 +201,8 @@ enum
     OUT_LATENT,           /**< net upward latent heat flux [W/m2] */
     OUT_LATENT_SUB,       /**< net upward latent heat flux from sublimation [W/m2] */
     OUT_MELT_ENERGY,      /**< energy of fusion (melting) in snowpack [W/m2] */
-    OUT_NET_LONG,         /**< net downward longwave flux [W/m2] */
-    OUT_NET_SHORT,        /**< net downward shortwave flux [W/m2] */
+    OUT_LWNET,            /**< net downward longwave flux [W/m2] */
+    OUT_SWNET,            /**< net downward shortwave flux [W/m2] */
     OUT_R_NET,            /**< net downward radiation flux [W/m2] */
     OUT_RFRZ_ENERGY,      /**< net energy used to refreeze liquid water in snowpack [W/m2] */
     OUT_SENSIBLE,         /**< net upward sensible heat flux [W/m2] */
@@ -226,12 +219,12 @@ enum
     OUT_DENSITY,          /**< near-surface atmospheric density [kg/m3]*/
     OUT_FDIR,             /**< fraction of incoming shortwave that is direct [fraction]*/
     OUT_LAI,              /**< leaf area index [m2/m2] */
-    OUT_LONGWAVE,         /**< incoming longwave [W/m2] */
+    OUT_LWDOWN,           /**< incoming longwave [W/m2] */
     OUT_PAR,              /**< incoming photosynthetically active radiation [W/m2] */
     OUT_PRESSURE,         /**< near surface atmospheric pressure [kPa] (ALMA_OUTPUT: [Pa])*/
     OUT_QAIR,             /**< specific humidity [kg/kg] */
     OUT_REL_HUMID,        /**< relative humidity [%]*/
-    OUT_SHORTWAVE,        /**< incoming shortwave [W/m2] */
+    OUT_SWDOWN,           /**< incoming shortwave [W/m2] */
     OUT_SURF_COND,        /**< surface conductance [m/s] */
     OUT_VEGCOVER,         /**< fractional area of plants [fraction] */
     OUT_VP,               /**< near surface vapor pressure [kPa] (ALMA_OUTPUT: [Pa]) */
@@ -247,8 +240,8 @@ enum
     OUT_LATENT_BAND,      /**< net upward latent heat flux [W/m2] */
     OUT_LATENT_SUB_BAND,  /**< net upward latent heat flux due to sublimation [W/m2] */
     OUT_MELT_ENERGY_BAND, /**< energy of fusion (melting) in snowpack [W/m2] */
-    OUT_NET_LONG_BAND,    /**< net downward longwave flux [W/m2] */
-    OUT_NET_SHORT_BAND,   /**< net downward shortwave flux [W/m2] */
+    OUT_LWNET_BAND,       /**< net downward longwave flux [W/m2] */
+    OUT_SWNET_BAND,       /**< net downward shortwave flux [W/m2] */
     OUT_RFRZ_ENERGY_BAND, /**< net energy used to refreeze liquid water in snowpack [W/m2] */
     OUT_SENSIBLE_BAND,    /**< net upward sensible heat flux [W/m2] */
     OUT_SNOW_CANOPY_BAND, /**< snow interception storage in canopy [mm] */
@@ -350,6 +343,7 @@ typedef struct {
     bool SIGNED;
     bool SUPPLIED;
     double multiplier;
+    char varname[MAXSTRING];
 } force_type_struct;
 
 /******************************************************************************
@@ -445,6 +439,7 @@ double average(double *ar, size_t n);
 double calc_energy_balance_error(int, double, double, double, double, double);
 void calc_root_fractions(veg_con_struct *veg_con, soil_con_struct *soil_con);
 double calc_water_balance_error(int, double, double, double);
+unsigned short int calendar_from_chars(char *cal_chars);
 void collect_eb_terms(energy_bal_struct, snow_data_struct, cell_data_struct,
                       int *, int *, int *, int *, int *, double, double, double,
                       int, int, double, int, int, double *, double,
@@ -454,6 +449,7 @@ void collect_wb_terms(cell_data_struct, veg_var_struct, snow_data_struct,
                       double *, out_data_struct *);
 void compute_treeline(atmos_data_struct *, dmy_struct *, double, double *,
                       bool *);
+size_t count_force_vars(FILE *gp);
 void cmd_proc(int argc, char **argv, char *globalfilename);
 void compress_files(char string[]);
 out_data_struct *create_output_list(void);
@@ -503,6 +499,8 @@ void num2date(double origin, double time_value, double tzoffset,
               unsigned short int calendar, unsigned short int time_units,
               dmy_struct *date);
 FILE *open_file(char string[], char type[]);
+void parse_nc_time_units(char *nc_unit_chars, unsigned short int *units,
+                         dmy_struct *dmy);
 int put_data(all_vars_struct *, atmos_data_struct *, soil_con_struct *,
              veg_con_struct *, veg_lib_struct *veg_lib, lake_con_struct *,
              out_data_struct *, save_data_struct *, int);
@@ -537,6 +535,8 @@ double q_to_vp(double q, double p);
 int set_output_var(out_data_file_struct *, int, int, out_data_struct *, char *,
                    int, char *, int, double);
 void soil_moisture_from_water_table(soil_con_struct *soil_con, size_t nlayers);
+unsigned short int timeunits_from_chars(char *units_chars);
+int update_step_vars(all_vars_struct *, veg_con_struct *, veg_hist_struct *);
 int valid_date(unsigned short int calendar, dmy_struct *dmy);
 void validate_parameters(void);
 char will_it_snow(double *t, double t_offset, double max_snow_temp,

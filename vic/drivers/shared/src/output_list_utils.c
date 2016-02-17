@@ -148,8 +148,8 @@ create_output_list()
     strcpy(out_data[OUT_LATENT].varname, "OUT_LATENT");                /* net upward latent heat flux [W/m2] */
     strcpy(out_data[OUT_LATENT_SUB].varname, "OUT_LATENT_SUB");        /* net upward latent heat flux from sublimation [W/m2] */
     strcpy(out_data[OUT_MELT_ENERGY].varname, "OUT_MELT_ENERGY");      /* energy of fusion (melting) [W/m2] */
-    strcpy(out_data[OUT_NET_LONG].varname, "OUT_NET_LONG");            /* net downward longwave flux [W/m2] */
-    strcpy(out_data[OUT_NET_SHORT].varname, "OUT_NET_SHORT");          /* net downward shortwave flux [W/m2] */
+    strcpy(out_data[OUT_LWNET].varname, "OUT_LWNET");            /* net downward longwave flux [W/m2] */
+    strcpy(out_data[OUT_SWNET].varname, "OUT_SWNET");          /* net downward shortwave flux [W/m2] */
     strcpy(out_data[OUT_R_NET].varname, "OUT_R_NET");                  /* net downward radiation flux [W/m2] */
     strcpy(out_data[OUT_RFRZ_ENERGY].varname, "OUT_RFRZ_ENERGY");      /* net energy used to refreeze liquid water in snowpack [W/m2] */
     strcpy(out_data[OUT_SENSIBLE].varname, "OUT_SENSIBLE");            /* net upward sensible heat flux [W/m2] */
@@ -167,12 +167,12 @@ create_output_list()
     strcpy(out_data[OUT_DENSITY].varname, "OUT_DENSITY");              /* near-surface atmospheric density [kg/m3] */
     strcpy(out_data[OUT_FDIR].varname, "OUT_FDIR");                    /* fraction of incoming shortwave that is direct [fraction] */
     strcpy(out_data[OUT_LAI].varname, "OUT_LAI");                      /* leaf area index [m2/m2] */
-    strcpy(out_data[OUT_LONGWAVE].varname, "OUT_LONGWAVE");            /* incoming longwave [W/m2] */
+    strcpy(out_data[OUT_LWDOWN].varname, "OUT_LWDOWN");                /* incoming longwave [W/m2] */
     strcpy(out_data[OUT_PAR].varname, "OUT_PAR");                      /* incoming photosynthetically active radiation [W/m2] */
     strcpy(out_data[OUT_PRESSURE].varname, "OUT_PRESSURE");            /* near surface atmospheric pressure [kPa] */
     strcpy(out_data[OUT_QAIR].varname, "OUT_QAIR");                    /* specific humidity [kg/kg] */
     strcpy(out_data[OUT_REL_HUMID].varname, "OUT_REL_HUMID");          /* relative humidity [fraction]*/
-    strcpy(out_data[OUT_SHORTWAVE].varname, "OUT_SHORTWAVE");          /* incoming shortwave [W/m2] */
+    strcpy(out_data[OUT_SWDOWN].varname, "OUT_SWDOWN");                /* incoming shortwave [W/m2] */
     strcpy(out_data[OUT_SURF_COND].varname, "OUT_SURF_COND");          /* surface conductance [m/s] */
     strcpy(out_data[OUT_VEGCOVER].varname, "OUT_VEGCOVER");            /* fractional area of plants within veg tile [fraction] */
     strcpy(out_data[OUT_VP].varname, "OUT_VP");                        /* near surface vapor pressure [kPa] */
@@ -201,8 +201,8 @@ create_output_list()
     strcpy(out_data[OUT_LATENT_BAND].varname, "OUT_LATENT_BAND");                /* net upward latent heat flux [W/m2] */
     strcpy(out_data[OUT_LATENT_SUB_BAND].varname, "OUT_LATENT_SUB_BAND");        /* net upward latent heat flux from sublimation [W/m2] */
     strcpy(out_data[OUT_MELT_ENERGY_BAND].varname, "OUT_MELT_ENERGY_BAND");      /* energy of fusion (melting) [W/m2] */
-    strcpy(out_data[OUT_NET_LONG_BAND].varname, "OUT_NET_LONG_BAND");            /* net downward longwave flux [W/m2] */
-    strcpy(out_data[OUT_NET_SHORT_BAND].varname, "OUT_NET_SHORT_BAND");          /* net downward shortwave flux [W/m2] */
+    strcpy(out_data[OUT_LWNET_BAND].varname, "OUT_LWNET_BAND");            /* net downward longwave flux [W/m2] */
+    strcpy(out_data[OUT_SWNET_BAND].varname, "OUT_SWNET_BAND");          /* net downward shortwave flux [W/m2] */
     strcpy(out_data[OUT_RFRZ_ENERGY_BAND].varname, "OUT_RFRZ_ENERGY_BAND");      /* net energy used to refreeze liquid water in snowpack [W/m2] */
     strcpy(out_data[OUT_SENSIBLE_BAND].varname, "OUT_SENSIBLE_BAND");            /* net upward sensible heat flux [W/m2] */
     strcpy(out_data[OUT_SNOW_CANOPY_BAND].varname, "OUT_SNOW_CANOPY_BAND");      /* snow interception storage in canopy [mm] */
@@ -240,8 +240,8 @@ create_output_list()
     out_data[OUT_LATENT_BAND].nelem = options.SNOW_BAND;
     out_data[OUT_LATENT_SUB_BAND].nelem = options.SNOW_BAND;
     out_data[OUT_MELT_ENERGY_BAND].nelem = options.SNOW_BAND;
-    out_data[OUT_NET_LONG_BAND].nelem = options.SNOW_BAND;
-    out_data[OUT_NET_SHORT_BAND].nelem = options.SNOW_BAND;
+    out_data[OUT_LWNET_BAND].nelem = options.SNOW_BAND;
+    out_data[OUT_SWNET_BAND].nelem = options.SNOW_BAND;
     out_data[OUT_RFRZ_ENERGY_BAND].nelem = options.SNOW_BAND;
     out_data[OUT_SENSIBLE_BAND].nelem = options.SNOW_BAND;
     out_data[OUT_SNOW_CANOPY_BAND].nelem = options.SNOW_BAND;
@@ -416,7 +416,7 @@ set_output_var(out_data_file_struct *out_data_files,
         status = -1;
         log_err("set_output_var: \"%s\" was not found in the list of "
                 "supported output variable names.  Please use the exact name "
-                "listed in vicNl_def.h.", varname);
+                "listed in vic_driver_shared.h.", varname);
     }
     return status;
 }

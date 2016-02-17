@@ -41,13 +41,10 @@ enum
 };
 enum
 {
+    FROM_DEFAULT,
     FROM_VEGLIB,
-    FROM_VEGPARAM
-};
-enum
-{
-    LAI_FROM_VEGLIB,
-    LAI_FROM_VEGPARAM
+    FROM_VEGPARAM,
+    FROM_VEGHIST
 };
 enum
 {
@@ -73,13 +70,13 @@ enum
     DENSITY,
     FDIR,
     LAI_IN,
-    LONGWAVE,
+    LWDOWN,
     PAR,
     PREC,
     PRESSURE,
     QAIR,
     REL_HUMID,
-    SHORTWAVE,
+    SWDOWN,
     VEGCOVER,
     VP,
     WIND,
@@ -189,8 +186,8 @@ enum
     OUT_LATENT,
     OUT_LATENT_SUB,
     OUT_MELT_ENERGY,
-    OUT_NET_LONG,
-    OUT_NET_SHORT,
+    OUT_LWNET,
+    OUT_SWNET,
     OUT_R_NET,
     OUT_RFRZ_ENERGY,
     OUT_SENSIBLE,
@@ -207,12 +204,12 @@ enum
     OUT_DENSITY,
     OUT_FDIR,
     OUT_LAI,
-    OUT_LONGWAVE,
+    OUT_LWDOWN,
     OUT_PAR,
     OUT_PRESSURE,
     OUT_QAIR,
     OUT_REL_HUMID,
-    OUT_SHORTWAVE,
+    OUT_SWDOWN,
     OUT_SURF_COND,
     OUT_TSKC,
     OUT_VEGCOVER,
@@ -228,8 +225,8 @@ enum
     OUT_LATENT_BAND,
     OUT_LATENT_SUB_BAND,
     OUT_MELT_ENERGY_BAND,
-    OUT_NET_LONG_BAND,
-    OUT_NET_SHORT_BAND,
+    OUT_LWNET_BAND,
+    OUT_SWNET_BAND,
     OUT_RFRZ_ENERGY_BAND,
     OUT_SENSIBLE_BAND,
     OUT_SNOW_CANOPY_BAND,
@@ -1025,6 +1022,7 @@ double calc_veg_displacement(double);
 double calc_veg_height(double);
 double calc_veg_roughness(double);
 double calc_water_balance_error(int, double, double, double);
+unsigned short int calendar_from_chars(char *cal_chars);
 int CalcAerodynamic(_Bool, double, double, double, double, double, double *,
                     double *, double *, double *, double *);
 double CalcBlowingSnow(double, double, unsigned int, double, double, double,
@@ -1252,6 +1250,7 @@ typedef struct {
     _Bool SIGNED;
     _Bool SUPPLIED;
     double multiplier;
+    char varname[2048];
 } force_type_struct;
 typedef struct {
     force_type_struct TYPE[N_FORCING_TYPES];
@@ -1315,6 +1314,8 @@ void num2date(double origin, double time_value, double tzoffset,
               unsigned short int calendar, unsigned short int time_units,
               dmy_struct *date);
 FILE *open_file(char string[], char type[]);
+void parse_nc_time_units(char *nc_unit_chars, unsigned short int *units,
+                         dmy_struct *dmy);
 void print_cell_data(cell_data_struct *cell, size_t nlayers, size_t nfrost);
 void print_dmy(dmy_struct *dmy);
 void print_energy_bal(energy_bal_struct *eb, size_t nnodes, size_t nfronts);
@@ -1345,6 +1346,8 @@ void print_usage(char *);
 int set_output_var(out_data_file_struct *, int, int, out_data_struct *, char *,
                    int, char *, int, double);
 void soil_moisture_from_water_table(soil_con_struct *soil_con, size_t nlayers);
+unsigned short int timeunits_from_chars(char *units_chars);
+int update_step_vars(all_vars_struct *, veg_con_struct *, veg_hist_struct *);
 int valid_date(unsigned short int calendar, dmy_struct *dmy);
 void validate_parameters(void);
 int flag;

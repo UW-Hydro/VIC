@@ -5,7 +5,6 @@
 #######################################################################
 # Simulation Parameters
 #######################################################################
-NLAYER		3	# number of soil layers
 NODES		10	# number of soil thermal nodes
 MODEL_STEPS_PER_DAY 	8	# number of model time steps per day (set to 1 if FULL_ENERGY = FALSE, set to > 1 if FULL_ENERGY = TRUE)
 SNOW_STEPS_PER_DAY	8	# number of time steps per day for which to solve the snow model (should = MODEL_STEPS_PER_DAY if MODEL_STEPS_PER_DAY > 1)
@@ -18,6 +17,18 @@ ENDMONTH	12	# month model simulation ends
 ENDDAY		31	# day model simulation ends
 
 # LOG_DIR (put the log directory path here)    # Log directory.  Default log output to stderr
+
+#######################################################################
+# DOMAIN INFO
+#######################################################################
+DOMAIN /Users/jhamman/Dropbox/data/VIC_test_data/datasets/Stehekin/vic5_setup/domain.stehekin.20151028.nc
+DOMAIN_TYPE    LAT     lat
+DOMAIN_TYPE    LON     lon
+DOMAIN_TYPE    MASK    mask
+DOMAIN_TYPE    AREA    area
+DOMAIN_TYPE    FRAC    frac
+DOMAIN_TYPE    YDIM    lat
+DOMAIN_TYPE    XDIM    lon
 
 #######################################################################
 # Simulation Parameters Namelist
@@ -106,33 +117,22 @@ FROZEN_SOIL	FALSE	# TRUE = calculate frozen soils.  Default = FALSE.
 #######################################################################
 # Forcing Files and Parameters
 #
-#       All FORCING filenames are actually the pathname, and prefix
-#               for gridded data types: ex. DATA/forcing_
-#               Latitude and longitude index suffix is added by VIC
+#    All FORCING filenames are actually the pathname, and prefix
 #
-#	There must be 1 FORCE_TYPE entry for each variable (column) in the forcing file
+#    There must be 1 FORCE_TYPE entry for each variable in the forcing file, followed by the netCDF variable name.  For example:
 #
-#	If FORCE_TYPE is BINARY, each FORCE_TYPE must be followed by:
-#			SIGNED/UNSIGNED	SCALE_FACTOR
-#		For example (BINARY):
-#			FORCE_TYPE	PREC	UNSIGNED	40
-#		or (ASCII):
-#			FORCE_TYPE	PREC
+#    FORCING1	(put the forcing path/prefix here)	# Forcing file path and prefix, ending in "_"
+#    FORCE_TYPE	PREC         prcp
 #######################################################################
-FORCING1	(put the forcing path/prefix here)	# Forcing file path and prefix, ending in "_"
-FORCE_FORMAT	BINARY	# BINARY or ASCII
-FORCE_ENDIAN	LITTLE	# LITTLE (PC/Linux) or BIG (SUN)
-N_TYPES		4	# Number of variables (columns)
-FORCE_TYPE	PREC	UNSIGNED	40
-FORCE_TYPE	TMAX	SIGNED	100
-FORCE_TYPE	TMIN	SIGNED	100
-FORCE_TYPE	WIND	SIGNED	100
-FORCE_STEPS_PER_DAY	24	# Forcing time step length (hours)
-FORCEYEAR	2000	# Year of first forcing record
-FORCEMONTH	01	# Month of first forcing record
-FORCEDAY	01	# Day of first forcing record
-GRID_DECIMAL	4	# Number of digits after decimal point in forcing file names
-WIND_H          10.0    # height of wind speed measurement (m)
+FORCING1      (put the forcing path/prefix here  # Forcing file path and prefix, ending in "_"
+FORCE_TYPE    AIR_TEMP 	   tas    # Average air temperature, C
+FORCE_TYPE    PREC 	       prcp   # Total precipitation (rain and snow), mm
+FORCE_TYPE    PRESSURE 	   pres   # Atmospheric pressure, kPa
+FORCE_TYPE    SHORTWAVE    dswrf  # Incoming shortwave, W/m2
+FORCE_TYPE    LONGWAVE 	   dslwr  # Incoming longwave radiation, W/m2
+FORCE_TYPE    QAIR 	       shum   # Vapor pressure, kPa
+FORCE_TYPE    WIND 	       wind   # Wind speed, m/s
+WIND_H        10.0                # height of wind speed measurement (m)
 
 #######################################################################
 # Land Surface Files and Parameters
@@ -154,8 +154,6 @@ SNOW_BAND	1	# Number of snow bands; if number of snow bands > 1, you must insert
 #######################################################################
 #LAKES		(put lake parameter path/file here)	# Lake parameter path/file
 #LAKE_PROFILE	FALSE	# TRUE = User-specified depth-area parameters in lake parameter file; FALSE = VIC computes a parabolic depth-area profile
-#EQUAL_AREA	FALSE	# TRUE = grid cells are from an equal-area projection; FALSE = grid cells are on a regular lat-lon grid
-#RESOLUTION	0.125	# Grid cell resolution (degrees if EQUAL_AREA is FALSE, km^2 if EQUAL_AREA is TRUE); ignored if LAKES is FALSE
 
 #######################################################################
 # Output Files and Parameters
@@ -163,20 +161,16 @@ SNOW_BAND	1	# Number of snow bands; if number of snow bands > 1, you must insert
 RESULT_DIR      (put the result directory path here)	# Results directory path
 OUTPUT_STEPS_PER_DAY        0       # Output interval (hours); if 0, OUTPUT_STEPS_PER_DAY = MODEL_STEPS_PER_DAY
 SKIPYEAR 	0	# Number of years of output to omit from the output files
-COMPRESS	FALSE	# TRUE = compress input and output files when done
-BINARY_OUTPUT	FALSE	# TRUE = binary output files
 ALMA_OUTPUT	FALSE	# TRUE = ALMA-format output files; FALSE = standard VIC units
 MOISTFRACT 	FALSE	# TRUE = output soil moisture as volumetric fraction; FALSE = standard VIC units
-PRT_HEADER	FALSE   # TRUE = insert a header at the beginning of each output file; FALSE = no header
-PRT_SNOW_BAND   FALSE   # TRUE = write a "snowband" output file, containing band-specific values of snow variables; NOTE: this is ignored if N_OUTFILES is specified below.
+PRT_SNOW_BAND   FALSE   # TRUE = write a "snowband" output file, containing band-specific values of snow variables; NOTE: this is ignored if any OUTFILEs are specified below.
 
 #######################################################################
 #
 # Output File Contents
 #
-# As of VIC 4.0.6 and 4.1.0, you can specify your output file names and
-# contents # in the global param file (see the README.txt file for more
-# information).
+# Specify output file names and contents in the global param file (see the
+# VIC documentation file for more information).
 #
 # If you do not specify file names and contents in the global param
 # file, VIC will produce the same set of output files that it has
@@ -185,57 +179,25 @@ PRT_SNOW_BAND   FALSE   # TRUE = write a "snowband" output file, containing band
 # PRT_SNOW_BAND is TRUE.  These files will have the same contents and
 # format as in earlier versions.
 #
-# The OPTIMIZE and LDAS_OUTPUT options have been removed.  These
-# output configurations can be selected with the proper set of
-# instructions in the global param file.  (see the output.*.template
-# files included in this distribution for more information.)
-#
 # If you do specify the file names and contents in the global param file,
 # PRT_SNOW_BAND will have no effect.
 #
 # Format:
 #
-#   N_OUTFILES    <n_outfiles>
+#   OUTFILE       <prefix>
+#   OUTVAR        <varname>
+#   OUTVAR        <varname>
+#   OUTVAR        <varname>
 #
-#   OUTFILE       <prefix>        <nvars>
-#   OUTVAR        <varname>       [<format>        <type>  <multiplier>]
-#   OUTVAR        <varname>       [<format>        <type>  <multiplier>]
-#   OUTVAR        <varname>       [<format>        <type>  <multiplier>]
-#
-#   OUTFILE       <prefix>        <nvars>
-#   OUTVAR        <varname>       [<format>        <type>  <multiplier>]
-#   OUTVAR        <varname>       [<format>        <type>  <multiplier>]
-#   OUTVAR        <varname>       [<format>        <type>  <multiplier>]
+#   OUTFILE       <prefix>
+#   OUTVAR        <varname>
+#   OUTVAR        <varname>
+#   OUTVAR        <varname>
 #
 #
 # where
-#   <n_outfiles> = number of output files
 #   <prefix>     = name of the output file, NOT including latitude
 #                  and longitude
-#   <nvars>      = number of variables in the output file
 #   <varname>    = name of the variable (this must be one of the
-#                  output variable names listed in vicNl_def.h.)
-#   <format>     = (for ascii output files) fprintf format string,
-#                  e.g.
-#                    %.4f = floating point with 4 decimal places
-#                    %.7e = scientific notation w/ 7 decimal places
-#                    *    = use the default format for this variable
-#
-#   <format>, <type>, and <multiplier> are optional.  For a given
-#   variable, you can specify either NONE of these, or ALL of
-#   these.  If these are omitted, the default values will be used.
-#
-#   <type>       = (for binary output files) data type code.
-#                  Must be one of:
-#                    OUT_TYPE_DOUBLE = double-precision floating point
-#                    OUT_TYPE_FLOAT  = single-precision floating point
-#                    OUT_TYPE_INT    = integer
-#                    OUT_TYPE_USINT  = unsigned short integer
-#                    OUT_TYPE_SINT   = short integer
-#                    OUT_TYPE_CHAR   = char
-#                    *               = use the default type
-#   <multiplier> = (for binary output files) factor to multiply
-#                  the data by before writing, to increase precision.
-#                    *    = use the default multiplier for this variable
-#
+#                  output variable names listed in vic_driver_shared.h.)
 #######################################################################

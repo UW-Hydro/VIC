@@ -66,6 +66,9 @@ vic_start(void)
     initialize_filenames();
 
     if (mpi_rank == 0) {
+        // Initialize the global domain
+        initialize_domain(&global_domain);
+
         // read global settings
         filep.globalparam = open_file(filenames.global, "r");
         get_global_param(filep.globalparam);

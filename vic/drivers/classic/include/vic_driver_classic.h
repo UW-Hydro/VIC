@@ -41,6 +41,8 @@ double calc_netshort(double, int, double, double *);
 void check_files(filep_struct *, filenames_struct *);
 FILE  *check_state_file(char *, size_t, size_t, int *);
 void close_files(filep_struct *, out_data_file_struct *, filenames_struct *);
+size_t count_n_outfiles(FILE *gp);
+size_t count_outfile_nvars(FILE *gp);
 out_data_struct *create_output_list();
 void free_atmos(int nrecs, atmos_data_struct **atmos);
 void free_veg_hist(int nrecs, int nveg, veg_hist_struct ***veg_hist);

@@ -322,11 +322,47 @@ display_current_settings(int mode)
     else {
         fprintf(LOG_DEST, "VEGPARAM_LAI\t\tFALSE\n");
     }
-    if (options.LAI_SRC == LAI_FROM_VEGPARAM) {
-        fprintf(LOG_DEST, "LAI_SRC\t\tLAI_FROM_VEGPARAM\n");
+    if (options.LAI_SRC == FROM_VEGHIST) {
+        fprintf(LOG_DEST, "LAI_SRC\t\tFROM_VEGHIST\n");
     }
-    else if (options.LAI_SRC == LAI_FROM_VEGLIB) {
-        fprintf(LOG_DEST, "LAI_SRC\t\tLAI_FROM_VEGLIB\n");
+    else if (options.LAI_SRC == FROM_VEGPARAM) {
+        fprintf(LOG_DEST, "LAI_SRC\t\tFROM_VEGPARAM\n");
+    }
+    else if (options.LAI_SRC == FROM_VEGLIB) {
+        fprintf(LOG_DEST, "LAI_SRC\t\tFROM_VEGLIB\n");
+    }
+    if (options.VEGPARAM_VEGCOVER) {
+        fprintf(LOG_DEST, "VEGPARAM_VEGCOVER\t\tTRUE\n");
+    }
+    else {
+        fprintf(LOG_DEST, "VEGPARAM_VEGCOVER\t\tFALSE\n");
+    }
+    if (options.VEGCOVER_SRC == FROM_VEGHIST) {
+        fprintf(LOG_DEST, "VEGCOVER_SRC\t\tFROM_VEGHIST\n");
+    }
+    else if (options.VEGCOVER_SRC == FROM_VEGPARAM) {
+        fprintf(LOG_DEST, "VEGCOVER_SRC\t\tFROM_VEGPARAM\n");
+    }
+    else if (options.VEGCOVER_SRC == FROM_VEGLIB) {
+        fprintf(LOG_DEST, "VEGCOVER_SRC\t\tFROM_VEGLIB\n");
+    }
+    else if (options.VEGCOVER_SRC == FROM_DEFAULT) {
+        fprintf(LOG_DEST, "VEGCOVER_SRC\t\tFROM_DEFAULT\n");
+    }
+    if (options.VEGPARAM_ALB) {
+        fprintf(LOG_DEST, "VEGPARAM_ALB\t\tTRUE\n");
+    }
+    else {
+        fprintf(LOG_DEST, "VEGPARAM_ALB\t\tFALSE\n");
+    }
+    if (options.ALB_SRC == FROM_VEGHIST) {
+        fprintf(LOG_DEST, "ALB_SRC\t\tFROM_VEGHIST\n");
+    }
+    else if (options.ALB_SRC == FROM_VEGPARAM) {
+        fprintf(LOG_DEST, "ALB_SRC\t\tFROM_VEGPARAM\n");
+    }
+    else if (options.ALB_SRC == FROM_VEGLIB) {
+        fprintf(LOG_DEST, "ALB_SRC\t\tFROM_VEGLIB\n");
     }
 
     fprintf(LOG_DEST, "\n");

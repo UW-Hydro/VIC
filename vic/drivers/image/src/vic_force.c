@@ -57,6 +57,8 @@ vic_force(void)
     int                        vidx;
     size_t                     d3count[3];
     size_t                     d3start[3];
+    size_t                     d4count[4];
+    size_t                     d4start[4];
 
     // allocate memory for variables to be read
     dvar = malloc(local_domain.ncells_active * sizeof(*dvar));
@@ -192,6 +194,105 @@ vic_force(void)
     // Update the offset counter
     global_param.forceoffset[0] += NF;
 
+    // Initialize the veg_hist structure with the current climatological
+    // vegetation parameters.  This may be overwritten with the historical
+    // forcing time series.
+    for (i = 0; i < local_domain.ncells_active; i++) {
+        for (v = 0; v < options.NVEGTYPES; v++) {
+            vidx = veg_con_map[i].vidx[v];
+            if (vidx != -1) {
+                for (j = 0; j < NF; j++) {
+                    veg_hist[i][vidx].albedo[j] =
+                        veg_con[i][vidx].albedo[dmy[current].month - 1];
+                    veg_hist[i][vidx].LAI[j] =
+                        veg_con[i][vidx].LAI[dmy[current].month - 1];
+                    veg_hist[i][vidx].fcanopy[j] =
+                        veg_con[i][vidx].fcanopy[dmy[current].month - 1];
+                }
+            }
+        }
+    }
+
+    // Read veg_hist file
+    if (options.LAI_SRC == FROM_VEGHIST ||
+        options.FCAN_SRC == FROM_VEGHIST ||
+        options.ALB_SRC == FROM_VEGHIST) {
+        // for now forcing file is determined by the year
+        sprintf(filenames.forcing[1], "%s%4d.nc", filenames.f_path_pfx[1],
+                dmy[current].year);
+
+        // global_param.forceoffset[1] resets every year since the met file restarts
+        // every year
+        if (current > 1 && (dmy[current].year != dmy[current - 1].year)) {
+            global_param.forceoffset[1] = 0;
+        }
+
+        // only the time slice changes for the met file reads. The rest is constant
+        d4start[2] = 0;
+        d4start[3] = 0;
+        d4count[0] = 1;
+        d4count[1] = 1;
+        d4count[2] = global_domain.n_ny;
+        d4count[3] = global_domain.n_nx;
+
+        // Leaf Area Index: lai
+        if (options.LAI_SRC == FROM_VEGHIST) {
+            for (j = 0; j < NF; j++) {
+                d4start[0] = global_param.forceoffset[1] + j;
+                for (v = 0; v < options.NVEGTYPES; v++) {
+                    d4start[1] = v;
+                    get_scatter_nc_field_double(filenames.forcing[1], "lai",
+                                                d4start, d4count, dvar);
+                    for (i = 0; i < local_domain.ncells_active; i++) {
+                        vidx = veg_con_map[i].vidx[v];
+                        if (vidx != -1) {
+                            veg_hist[i][vidx].LAI[j] = (double) dvar[i];
+                        }
+                    }
+                }
+            }
+        }
+
+        // Partial veg cover fraction: fcov
+        if (options.FCAN_SRC == FROM_VEGHIST) {
+            for (j = 0; j < NF; j++) {
+                d4start[0] = global_param.forceoffset[1] + j;
+                for (v = 0; v < options.NVEGTYPES; v++) {
+                    d4start[1] = v;
+                    get_scatter_nc_field_double(filenames.forcing[1], "fcov",
+                                                d4start, d4count, dvar);
+                    for (i = 0; i < local_domain.ncells_active; i++) {
+                        vidx = veg_con_map[i].vidx[v];
+                        if (vidx != -1) {
+                            veg_hist[i][vidx].fcanopy[j] = (double) dvar[i];
+                        }
+                    }
+                }
+            }
+        }
+
+        // Albedo: alb
+        if (options.ALB_SRC == FROM_VEGHIST) {
+            for (j = 0; j < NF; j++) {
+                d4start[0] = global_param.forceoffset[1] + j;
+                for (v = 0; v < options.NVEGTYPES; v++) {
+                    d4start[1] = v;
+                    get_scatter_nc_field_double(filenames.forcing[1], "alb",
+                                                d4start, d4count, dvar);
+                    for (i = 0; i < local_domain.ncells_active; i++) {
+                        vidx = veg_con_map[i].vidx[v];
+                        if (vidx != -1) {
+                            veg_hist[i][vidx].albedo[j] = (double) dvar[i];
+                        }
+                    }
+                }
+            }
+        }
+
+        // Update the offset counter
+        global_param.forceoffset[1] += NF;
+    }
+
     if (options.SNOW_BAND > 1) {
         log_err("SNOW_BAND not implemented in vic_force()");
     }
@@ -220,6 +321,21 @@ vic_force(void)
                                                 param.SNOW_MAX_SNOW_TEMP,
                                                 &(atmos[i].prec[j]), 1);
         }
+        // Check on fcanopy
+        for (v = 0; v < options.NVEGTYPES; v++) {
+            vidx = veg_con_map[i].vidx[v];
+            if (vidx != -1) {
+                for (j = 0; j < NF; j++) {
+                    if (veg_hist[i][vidx].fcanopy[j] < MIN_FCANOPY) {
+                        log_warn(
+                            "cell %zu, veg %d substep %zu fcanopy %f < minimum of %f; setting = %f\n", i, vidx, j,
+                            veg_hist[i][vidx].fcanopy[j], MIN_FCANOPY,
+                            MIN_FCANOPY);
+                        veg_hist[i][vidx].fcanopy[j] = MIN_FCANOPY;
+                    }
+                }
+            }
+        }
     }
 
 
@@ -239,6 +355,21 @@ vic_force(void)
         atmos[i].snowflag[NR] = will_it_snow(atmos[i].air_temp, t_offset,
                                              param.SNOW_MAX_SNOW_TEMP,
                                              atmos[i].prec, NF);
+
+        for (v = 0; v < options.NVEGTYPES; v++) {
+            vidx = veg_con_map[i].vidx[v];
+            if (vidx != -1) {
+                // not the correct way to calculate average albedo in general,
+                // but leave for now (it's correct if albedo is constant over
+                // the model step)
+                veg_hist[i][vidx].albedo[NR] = average(veg_hist[i][vidx].albedo,
+                                                       NF);
+                veg_hist[i][vidx].LAI[NR] = average(veg_hist[i][vidx].LAI, NF);
+                veg_hist[i][vidx].fcanopy[NR] = average(
+                    veg_hist[i][vidx].fcanopy, NF);
+            }
+        }
+
         // Optional inputs
         if (options.LAKES) {
             atmos[i].channel_in[NR] = average(atmos[i].channel_in, NF) * NF;
@@ -250,32 +381,87 @@ vic_force(void)
         }
     }
 
-    // Update the veg_hist structure with the current vegetation parameters.
-    // Currently only implemented for climatological values in image mode
-    for (i = 0; i < local_domain.ncells_active; i++) {
-        for (v = 0; v < options.NVEGTYPES; v++) {
-            vidx = veg_con_map[i].vidx[v];
-            if (vidx != -1) {
-                for (j = 0; j < NF; j++) {
-                    veg_hist[i][vidx].albedo[j] =
-                        veg_con[i][vidx].albedo[dmy[current].month - 1];
-                    veg_hist[i][vidx].LAI[j] =
-                        veg_con[i][vidx].LAI[dmy[current].month - 1];
-                    veg_hist[i][vidx].vegcover[j] =
-                        veg_con[i][vidx].vegcover[dmy[current].month - 1];
-                }
-                // not the correct way to calculate average albedo, but leave
-                // for now
-                veg_hist[i][vidx].albedo[NR] = average(veg_hist[i][vidx].albedo,
-                                                       NF);
-                veg_hist[i][vidx].LAI[NR] = average(veg_hist[i][vidx].LAI, NF);
-                veg_hist[i][vidx].vegcover[NR] = average(
-                    veg_hist[i][vidx].vegcover, NF);
-            }
-        }
-    }
-
 
     // cleanup
     free(dvar);
+}
+
+/******************************************************************************
+ * @brief    Determine timestep and start year, month, day, and seconds of forcing files
+ *****************************************************************************/
+void
+get_forcing_file_info(param_set_struct *param_set,
+                      size_t            file_num)
+{
+    extern global_param_struct global_param;
+    extern filenames_struct    filenames;
+
+    double                     nc_times[2];
+    double                     nc_time_origin;
+    size_t                     start = 0;
+    size_t                     count = 2;
+    char                      *nc_unit_chars = NULL;
+    char                      *calendar_char = NULL;
+    unsigned short int         time_units;
+    unsigned short int         calendar;
+    dmy_struct                 nc_origin_dmy;
+    dmy_struct                 nc_start_dmy;
+
+    // read time info from netcdf file
+    get_nc_field_double(filenames.forcing[0], "time", &start, &count, nc_times);
+    get_nc_var_attr(filenames.forcing[0], "time", "units", &nc_unit_chars);
+    get_nc_var_attr(filenames.forcing[0], "time", "calendar", &calendar_char);
+
+    // parse the calendar string and check to make sure it matches the global clock
+    calendar = calendar_from_chars(calendar_char);
+
+    // parse the time units
+    parse_nc_time_units(nc_unit_chars, &time_units, &nc_origin_dmy);
+
+    // Get date/time of the first entry in the forcing file.
+    nc_time_origin = date2num(0., &nc_origin_dmy, 0., calendar, time_units);
+    num2date(nc_time_origin, nc_times[0], 0., calendar, time_units,
+             &nc_start_dmy);
+
+    // Assign file start date/time
+    global_param.forceyear[file_num] = nc_start_dmy.year;
+    global_param.forcemonth[file_num] = nc_start_dmy.month;
+    global_param.forceday[file_num] = nc_start_dmy.day;
+    global_param.forcesec[file_num] = nc_start_dmy.dayseconds;
+
+    // calculate timestep in forcing file
+    if (time_units == TIME_UNITS_DAYS) {
+        param_set->force_steps_per_day[file_num] =
+            (size_t) nearbyint(1. / (nc_times[1] - nc_times[0]));
+    }
+    else if (time_units == TIME_UNITS_HOURS) {
+        param_set->force_steps_per_day[file_num] =
+            (size_t) nearbyint(HOURS_PER_DAY / (nc_times[1] - nc_times[0]));
+    }
+    else if (time_units == TIME_UNITS_MINUTES) {
+        param_set->force_steps_per_day[file_num] =
+            (size_t) nearbyint(MIN_PER_DAY / (nc_times[1] - nc_times[0]));
+    }
+    else if (time_units == TIME_UNITS_SECONDS) {
+        param_set->force_steps_per_day[file_num] =
+            (size_t) nearbyint(SEC_PER_DAY / (nc_times[1] - nc_times[0]));
+    }
+
+    // check that this forcing file will work
+    if (param_set->force_steps_per_day[file_num] !=
+        global_param.model_steps_per_day) {
+        log_err("Forcing file timestep must match the model timestep.  "
+                "Model timesteps per day is set to %zu and the forcing file "
+                "timestep is set to %zu", global_param.model_steps_per_day,
+                param_set->force_steps_per_day[file_num])
+    }
+    if (calendar != global_param.calendar) {
+        log_err("Calendar in forcing file does not match the calendar of "
+                "VIC's clock: %s", calendar_char);
+    }
+
+    // Free attribute character arrays
+    free(nc_unit_chars);
+    free(calendar_char);
+
 }

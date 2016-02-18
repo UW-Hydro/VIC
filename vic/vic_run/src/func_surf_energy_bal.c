@@ -700,7 +700,7 @@ func_surf_energy_bal(double  Ts,
        if either Ra_veg (resistance under veg) or Ra_bare (resistance over
        exposed soil) are 0, then Ra_used must necessarily be 0 as well.
     *************************************************/
-    if (veg_var->vegcover < 1) {
+    if (veg_var->fcanopy < 1) {
         /** If Ra_veg is non-zero, use it to compute area-weighted average **/
         if (Ra_veg[0] > 0) {
             /** aerodynamic conductance under vegetation **/
@@ -728,8 +728,8 @@ func_surf_energy_bal(double  Ts,
                 /** aerodynamic conductance over exposed soil **/
                 ga_bare = 1 / Ra_bare[0];
                 /** area-weighted average aerodynamic conductance **/
-                ga_average = veg_var->vegcover * ga_veg +
-                             (1 - veg_var->vegcover) * ga_bare;
+                ga_average = veg_var->fcanopy * ga_veg +
+                             (1 - veg_var->fcanopy) * ga_bare;
                 /** aerodynamic resistance is inverse of conductance **/
                 Ra_used[0] = 1 / ga_average;
             }
@@ -753,29 +753,29 @@ func_surf_energy_bal(double  Ts,
        Use Arno Evap in the exposed soil portion, and/or
        if LAI is zero.
     *************************************************/
-    if (VEG && !SNOWING && veg_var->vegcover > 0) {
+    if (VEG && !SNOWING && veg_var->fcanopy > 0) {
         Evap = canopy_evap(layer, veg_var, true,
                            veg_class, Wdew, delta_t, NetBareRad, vpd,
                            NetShortBare, Tair, Ra_veg[1], elevation, rainfall,
                            Wmax, Wcr, Wpwp, frost_fract, root, dryFrac,
                            shortwave, Catm, CanopLayerBnd);
-        if (veg_var->vegcover < 1) {
+        if (veg_var->fcanopy < 1) {
             for (i = 0; i < options.Nlayer; i++) {
                 transp[i] = layer[i].evap;
                 layer[i].evap = 0.;
             }
-            Evap *= veg_var->vegcover;
-            Evap += (1 - veg_var->vegcover) *
+            Evap *= veg_var->fcanopy;
+            Evap += (1 - veg_var->fcanopy) *
                     arno_evap(layer, surf_atten * NetBareRad, Tair, vpd,
                               depth[0], max_moist * depth[0] * MM_PER_M,
                               elevation, b_infilt, Ra_used[0], delta_t,
                               resid_moist[0], frost_fract);
             for (i = 0; i < options.Nlayer; i++) {
-                layer[i].evap = veg_var->vegcover * transp[i] +
-                                (1 - veg_var->vegcover) * layer[i].evap;
+                layer[i].evap = veg_var->fcanopy * transp[i] +
+                                (1 - veg_var->fcanopy) * layer[i].evap;
                 if (layer[i].evap > 0.) {
                     layer[i].bare_evap_frac = 1 -
-                                              (veg_var->vegcover *
+                                              (veg_var->fcanopy *
                                                transp[i]) / layer[i].evap;
                 }
                 else {
@@ -784,10 +784,10 @@ func_surf_energy_bal(double  Ts,
             }
             veg_var->throughfall =
                 (1 -
-                 veg_var->vegcover) * rainfall + veg_var->vegcover *
+                 veg_var->fcanopy) * rainfall + veg_var->fcanopy *
                 veg_var->throughfall;
-            veg_var->canopyevap *= veg_var->vegcover;
-            veg_var->Wdew *= veg_var->vegcover;
+            veg_var->canopyevap *= veg_var->fcanopy;
+            veg_var->Wdew *= veg_var->fcanopy;
         }
         else {
             for (i = 0; i < options.Nlayer; i++) {

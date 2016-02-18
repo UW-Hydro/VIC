@@ -67,7 +67,7 @@ read_vegparam(FILE  *vegparam,
     if (options.VEGPARAM_LAI) {
         skip++;
     }
-    if (options.VEGPARAM_VEGCOVER) {
+    if (options.VEGPARAM_FCAN) {
         skip++;
     }
     if (options.VEGPARAM_ALB) {
@@ -230,7 +230,7 @@ read_vegparam(FILE  *vegparam,
         for (j = 0; j < MONTHS_PER_YEAR; j++) {
             temp[i].albedo[j] = veg_lib[temp[i].veg_class].albedo[j];
             temp[i].LAI[j] = veg_lib[temp[i].veg_class].LAI[j];
-            temp[i].vegcover[j] = veg_lib[temp[i].veg_class].vegcover[j];
+            temp[i].fcanopy[j] = veg_lib[temp[i].veg_class].fcanopy[j];
             temp[i].Wdmax[j] = veg_lib[temp[i].veg_class].Wdmax[j];
         }
 
@@ -286,10 +286,10 @@ read_vegparam(FILE  *vegparam,
             }
         }
 
-        if (options.VEGPARAM_VEGCOVER) {
-            // Read the vegcover line
+        if (options.VEGPARAM_FCAN) {
+            // Read the fcanopy line
             if (fgets(line, MAXSTRING, vegparam) == NULL) {
-                log_err("unexpected EOF for cell %i while reading vegcover "
+                log_err("unexpected EOF for cell %i while reading fcanopy "
                         "for vegetat_type_num %d", vegcel, vegetat_type_num);
             }
             Nfields = 0;
@@ -307,17 +307,17 @@ read_vegparam(FILE  *vegparam,
                 strcpy(vegarr[Nfields], token);
                 Nfields++;
             }
-            NfieldsMax = MONTHS_PER_YEAR; /* For vegcover */
+            NfieldsMax = MONTHS_PER_YEAR; /* For fcanopy */
             if (Nfields != NfieldsMax) {
-                log_err("cell %d - expecting %d vegcover values but found %d "
+                log_err("cell %d - expecting %d fcanopy values but found %d "
                         "in line %s", gridcel, NfieldsMax, Nfields, line);
             }
 
-            if (options.VEGCOVER_SRC == FROM_VEGPARAM) {
+            if (options.FCAN_SRC == FROM_VEGPARAM) {
                 for (j = 0; j < MONTHS_PER_YEAR; j++) {
                     tmp = atof(vegarr[j]);
                     if (tmp != NODATA_VH) {
-                        temp[i].vegcover[j] = tmp;
+                        temp[i].fcanopy[j] = tmp;
                     }
                 }
             }

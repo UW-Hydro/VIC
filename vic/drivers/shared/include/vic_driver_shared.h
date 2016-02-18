@@ -74,6 +74,7 @@ enum
     ALBEDO,      /**< surface albedo [fraction] */
     CATM,        /**< atmospheric CO2 concentration [ppm] */
     CHANNEL_IN,  /**< incoming channel flow [m3] */
+    FCANOPY,     /**< fractional area covered by plant canopy [fraction] */
     FDIR,        /**< fraction of incoming shortwave that is direct [fraction] */
     LAI_IN,      /**< leaf area index [m2/m2] */
     LONGWAVE,    /**< incoming longwave radiation [W/m2] */
@@ -82,7 +83,6 @@ enum
     PRESSURE,    /**< atmospheric pressure [kPa] */
     VP,          /**< vapor pressure [kPa] */
     SHORTWAVE,   /**< incoming shortwave [W/m2] */
-    VEGCOVER,    /**< fraction of each veg tile covered by plants [fraction] */
     WIND,        /**< wind speed [m/s] */
     SKIP,        /**< place holder for unused data columns */
     // Last value of enum - DO NOT ADD ANYTHING BELOW THIS LINE!!
@@ -217,6 +217,7 @@ enum
     OUT_AIR_TEMP,         /**< air temperature [C] (ALMA_OUTPUT: [K])*/
     OUT_CATM,             /**< atmospheric CO2 concentrtaion [ppm]*/
     OUT_DENSITY,          /**< near-surface atmospheric density [kg/m3]*/
+    OUT_FCANOPY,          /**< fractional area covered by plant canopy [fraction] */
     OUT_FDIR,             /**< fraction of incoming shortwave that is direct [fraction]*/
     OUT_LAI,              /**< leaf area index [m2/m2] */
     OUT_LONGWAVE,         /**< incoming longwave [W/m2] */
@@ -226,7 +227,6 @@ enum
     OUT_REL_HUMID,        /**< relative humidity [%]*/
     OUT_SHORTWAVE,        /**< incoming shortwave [W/m2] */
     OUT_SURF_COND,        /**< surface conductance [m/s] */
-    OUT_VEGCOVER,         /**< fractional area of plants [fraction] */
     OUT_VP,               /**< near surface vapor pressure [kPa] (ALMA_OUTPUT: [Pa]) */
     OUT_VPD,              /**< near surface vapor pressure deficit [kPa] (ALMA_OUTPUT: [Pa]) */
     OUT_WIND,             /**< near surface wind speed [m/s] */
@@ -438,7 +438,7 @@ double average(double *ar, size_t n);
 double calc_energy_balance_error(int, double, double, double, double, double);
 void calc_root_fractions(veg_con_struct *veg_con, soil_con_struct *soil_con);
 double calc_water_balance_error(int, double, double, double);
-unsigned short int calendar_from_char(char *cal_str);
+unsigned short int calendar_from_chars(char *cal_chars);
 void collect_eb_terms(energy_bal_struct, snow_data_struct, cell_data_struct,
                       int *, int *, int *, int *, int *, double, double, double,
                       int, int, double, int, int, double *, double,
@@ -446,6 +446,7 @@ void collect_eb_terms(energy_bal_struct, snow_data_struct, cell_data_struct,
 void collect_wb_terms(cell_data_struct, veg_var_struct, snow_data_struct,
                       double, double, double, int, double, int, double *,
                       double *, out_data_struct *);
+void compute_lake_params(lake_con_struct *, soil_con_struct);
 void compute_treeline(atmos_data_struct *, dmy_struct *, double, double *,
                       bool *);
 void cmd_proc(int argc, char **argv, char *globalfilename);
@@ -468,7 +469,6 @@ void free_dmy(dmy_struct **dmy);
 void free_out_data_files(out_data_file_struct **);
 void free_out_data(out_data_struct **);
 void free_vegcon(veg_con_struct **veg_con);
-double get_dist(double lat1, double long1, double lat2, double long2);
 void get_parameters(FILE *paramfile);
 void init_output_list(out_data_struct *out_data, int write, char *format,
                       int type, double mult);
@@ -497,6 +497,8 @@ void num2date(double origin, double time_value, double tzoffset,
               unsigned short int calendar, unsigned short int time_units,
               dmy_struct *date);
 FILE *open_file(char string[], char type[]);
+void parse_nc_time_units(char *nc_unit_chars, unsigned short int *units,
+                         dmy_struct *dmy);
 int put_data(all_vars_struct *, atmos_data_struct *, soil_con_struct *,
              veg_con_struct *, veg_lib_struct *veg_lib, lake_con_struct *,
              out_data_struct *, save_data_struct *, int);
@@ -531,6 +533,8 @@ double q_to_vp(double q, double p);
 int set_output_var(out_data_file_struct *, int, int, out_data_struct *, char *,
                    int, char *, int, double);
 void soil_moisture_from_water_table(soil_con_struct *soil_con, size_t nlayers);
+unsigned short int timeunits_from_chars(char *units_chars);
+int update_step_vars(all_vars_struct *, veg_con_struct *, veg_hist_struct *);
 int valid_date(unsigned short int calendar, dmy_struct *dmy);
 void validate_parameters(void);
 char will_it_snow(double *t, double t_offset, double max_snow_temp,

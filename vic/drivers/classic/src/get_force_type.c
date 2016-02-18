@@ -40,8 +40,8 @@ get_force_type(char *cmdstr,
 {
     extern param_set_struct param_set;
 
-    char                    optstr[50];
-    char                    flgstr[10];
+    char                    optstr[MAXSTRING];
+    char                    flgstr[MAXSTRING];
     int                     type;
 
     type = SKIP;
@@ -75,43 +75,43 @@ get_force_type(char *cmdstr,
     else if (strcasecmp("CHANNEL_IN", optstr) == 0) {
         type = CHANNEL_IN;
     }
-    /* type 4: direct fraction of shortwave [fraction] */
+    /* type 4: vegetation canopy cover fraction */
+    else if (strcasecmp("FCANOPY", optstr) == 0) {
+        type = FCANOPY;
+    }
+    /* type 5: direct fraction of shortwave [fraction] */
     else if (strcasecmp("FDIR", optstr) == 0) {
         type = FDIR;
     }
-    /* type 5: LAI [m2/m2] */
+    /* type 6: LAI [m2/m2] */
     else if (strcasecmp("LAI_IN", optstr) == 0) {
         type = LAI_IN;
     }
-    /* type 6: incoming longwave radiation [W/m2] */
+    /* type 7: incoming longwave radiation [W/m2] */
     else if (strcasecmp("LONGWAVE",
                         optstr) == 0 || strcasecmp("LWDOWN", optstr) == 0) {
         type = LONGWAVE;
     }
-    /* type 7: photosynthetically active radiation [uE/m2s] */
+    /* type 8: photosynthetically active radiation [uE/m2s] */
     else if (strcasecmp("PAR", optstr) == 0) {
         type = PAR;
     }
-    /* type 8: precipitation [mm] */
+    /* type 9: precipitation [mm] */
     else if (strcasecmp("PREC", optstr) == 0) {
         type = PREC;
     }
-    /* type 9: air pressure [kPa] */
+    /* type 10: air pressure [kPa] */
     else if (strcasecmp("PRESSURE", optstr) == 0) {
         type = PRESSURE;
     }
-    /* type 10: vapor pressure [kPa] */
+    /* type 11: vapor pressure [kPa] */
     else if (strcasecmp("VP", optstr) == 0) {
         type = VP;
     }
-    /* type 11: rainfall [mm] */
+    /* type 12: rainfall [mm] */
     else if (strcasecmp("SHORTWAVE",
                         optstr) == 0 || strcasecmp("SWDOWN", optstr) == 0) {
         type = SHORTWAVE;
-    }
-    /* type 12: vegetation cover fraction */
-    else if (strcasecmp("VEGCOVER", optstr) == 0) {
-        type = VEGCOVER;
     }
     /* type 13: wind speed [m/s] */
     else if (strcasecmp("WIND", optstr) == 0) {
@@ -146,4 +146,52 @@ get_force_type(char *cmdstr,
     param_set.TYPE[type].N_ELEM = 1;
 
     (*field)++;
+}
+
+
+/******************************************************************************
+ * @brief    This routine determines the counts the number of forcing variables
+             in each forcing file specified in the global parameter file.
+ *****************************************************************************/
+size_t
+count_force_vars(FILE *gp)
+{
+    size_t        nvars;
+    unsigned long start_position;
+    char          cmdstr[MAXSTRING];
+    char          optstr[MAXSTRING];
+
+    // Figure out where we are in the input file
+    fflush(gp);
+    start_position = ftell(gp);
+
+    // read the first line
+    fgets(cmdstr, MAXSTRING, gp);
+
+    // initalize nvars
+    nvars = 0;
+
+    // Loop through the lines
+    while (!feof(gp)) {
+        if (cmdstr[0] != '#' && cmdstr[0] != '\n' && cmdstr[0] != '\0') {
+            // line is not blank or a comment
+            sscanf(cmdstr, "%s", optstr);
+
+            // if the line starts with FORCE_TYPE
+            if (strcasecmp("FORCE_TYPE", optstr) == 0) {
+                nvars++;
+            }
+            // else if we arive at another forcing file break out of loop
+            else if (strcasecmp("FORCING1", optstr) == 0 ||
+                     strcasecmp("FORCING2", optstr) == 0) {
+                break;
+            }
+        }
+        fgets(cmdstr, MAXSTRING, gp);
+    }
+
+    // put the position in the file back to where we started
+    fseek(gp, start_position, SEEK_SET);
+
+    return nvars;
 }

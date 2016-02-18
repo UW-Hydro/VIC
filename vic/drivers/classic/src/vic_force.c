@@ -100,8 +100,8 @@ vic_force(atmos_data_struct *atmos,
     if (param_set.TYPE[LAI_IN].SUPPLIED) {
         param_set.TYPE[LAI_IN].N_ELEM = veg_con[0].vegetat_type_num;
     }
-    if (param_set.TYPE[VEGCOVER].SUPPLIED) {
-        param_set.TYPE[VEGCOVER].N_ELEM = veg_con[0].vegetat_type_num;
+    if (param_set.TYPE[FCANOPY].SUPPLIED) {
+        param_set.TYPE[FCANOPY].N_ELEM = veg_con[0].vegetat_type_num;
     }
 
     /*******************************
@@ -210,13 +210,13 @@ vic_force(atmos_data_struct *atmos,
                     veg_con[v].albedo[dmy[rec].month - 1];
                 veg_hist[rec][v].LAI[i] =
                     veg_con[v].LAI[dmy[rec].month - 1];
-                veg_hist[rec][v].vegcover[i] =
-                    veg_con[v].vegcover[dmy[rec].month - 1];
+                veg_hist[rec][v].fcanopy[i] =
+                    veg_con[v].fcanopy[dmy[rec].month - 1];
             }
         }
     }
 
-    /* Next, overwrite with timeseries */
+    /* Next, overwrite with veg_hist values, validate, and average */
     for (rec = 0; rec < global_param.nrecs; rec++) {
         for (v = 0; v < veg_con[0].vegetat_type_num; v++) {
             for (i = 0; i < NF; i++) {
@@ -235,20 +235,28 @@ vic_force(atmos_data_struct *atmos,
                             veg_hist_data[LAI_IN][v][uidx];
                     }
                 }
-                if (param_set.TYPE[VEGCOVER].SUPPLIED &&
-                    options.VEGCOVER_SRC == FROM_VEGHIST) {
-                    if (veg_hist_data[VEGCOVER][v][uidx] != NODATA_VH) {
-                        veg_hist[rec][v].vegcover[i] =
-                            veg_hist_data[VEGCOVER][v][uidx];
+                if (param_set.TYPE[FCANOPY].SUPPLIED &&
+                    options.FCAN_SRC == FROM_VEGHIST) {
+                    if (veg_hist_data[FCANOPY][v][uidx] != NODATA_VH) {
+                        veg_hist[rec][v].fcanopy[i] =
+                            veg_hist_data[FCANOPY][v][uidx];
                     }
+                }
+                // Check on fcanopy
+                if (veg_hist[rec][v].fcanopy[i] < MIN_FCANOPY) {
+                    log_warn(
+                        "rec %zu, veg %zu substep %zu fcanopy %f < minimum of %f; setting = %f\n", rec, v, i,
+                        veg_hist[rec][v].fcanopy[i], MIN_FCANOPY,
+                        MIN_FCANOPY);
+                    veg_hist[rec][v].fcanopy[i] = MIN_FCANOPY;
                 }
             }
             if (NF > 1) {
                 veg_hist[rec][v].albedo[NR] = average(veg_hist[rec][v].albedo,
                                                       NF);
                 veg_hist[rec][v].LAI[NR] = average(veg_hist[rec][v].LAI, NF);
-                veg_hist[rec][v].vegcover[NR] = average(
-                    veg_hist[rec][v].vegcover, NF);
+                veg_hist[rec][v].fcanopy[NR] = average(
+                    veg_hist[rec][v].fcanopy, NF);
             }
         }
     }
@@ -259,7 +267,7 @@ vic_force(atmos_data_struct *atmos,
 
     for (i = 0; i < N_FORCING_TYPES; i++) {
         if (param_set.TYPE[i].SUPPLIED) {
-            if (i != ALBEDO && i != LAI_IN && i != VEGCOVER) {
+            if (i != ALBEDO && i != LAI_IN && i != FCANOPY) {
                 free(forcing_data[i]);
             }
             else {

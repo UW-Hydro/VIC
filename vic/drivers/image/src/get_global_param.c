@@ -70,10 +70,7 @@ get_global_param(FILE *gp)
             /*************************************
                Get Model Global Parameters
             *************************************/
-            if (strcasecmp("NLAYER", optstr) == 0) {
-                sscanf(cmdstr, "%*s %zu", &options.Nlayer);
-            }
-            else if (strcasecmp("NODES", optstr) == 0) {
+            if (strcasecmp("NODES", optstr) == 0) {
                 sscanf(cmdstr, "%*s %zu", &options.Nnode);
             }
             else if (strcasecmp("MODEL_STEPS_PER_DAY", optstr) == 0) {
@@ -111,25 +108,11 @@ get_global_param(FILE *gp)
             }
             else if (strcasecmp("CALENDAR", optstr) == 0) {
                 sscanf(cmdstr, "%*s %s", flgstr);
-                global_param.calendar = calendar_from_char(flgstr);
+                global_param.calendar = calendar_from_chars(flgstr);
             }
             else if (strcasecmp("OUT_TIME_UNITS", optstr) == 0) {
                 sscanf(cmdstr, "%*s %s", flgstr);
-                if (strcasecmp("SECONDS", flgstr) == 0) {
-                    global_param.time_units = TIME_UNITS_SECONDS;
-                }
-                else if (strcasecmp("MINUTES", flgstr) == 0) {
-                    global_param.time_units = TIME_UNITS_MINUTES;
-                }
-                else if (strcasecmp("HOURS", flgstr) == 0) {
-                    global_param.time_units = TIME_UNITS_HOURS;
-                }
-                else if (strcasecmp("DAYS", flgstr) == 0) {
-                    global_param.time_units = TIME_UNITS_DAYS;
-                }
-                else {
-                    log_err("Unknown time units specified: %s", flgstr);
-                }
+                global_param.time_units = timeunits_from_chars(flgstr);
             }
             else if (strcasecmp("FULL_ENERGY", optstr) == 0) {
                 sscanf(cmdstr, "%*s %s", flgstr);
@@ -280,15 +263,6 @@ get_global_param(FILE *gp)
                     options.CLOSE_ENERGY = false;
                 }
             }
-            else if (strcasecmp("CONTINUEONERROR", optstr) == 0) {
-                sscanf(cmdstr, "%*s %s", flgstr);
-                if (strcasecmp("TRUE", flgstr) == 0) {
-                    options.CONTINUEONERROR = true;
-                }
-                else {
-                    options.CONTINUEONERROR = false;
-                }
-            }
             else if (strcasecmp("COMPUTE_TREELINE", optstr) == 0) {
                 sscanf(cmdstr, "%*s %s", flgstr);
                 if (strcasecmp("FALSE", flgstr) == 0) {
@@ -298,18 +272,6 @@ get_global_param(FILE *gp)
                     options.COMPUTE_TREELINE = true;
                     options.AboveTreelineVeg = atoi(flgstr);
                 }
-            }
-            else if (strcasecmp("EQUAL_AREA", optstr) == 0) {
-                sscanf(cmdstr, "%*s %s", flgstr);
-                if (strcasecmp("TRUE", flgstr) == 0) {
-                    options.EQUAL_AREA = true;
-                }
-                else {
-                    options.EQUAL_AREA = false;
-                }
-            }
-            else if (strcasecmp("RESOLUTION", optstr) == 0) {
-                sscanf(cmdstr, "%*s %lf", &global_param.resolution);
             }
             else if (strcasecmp("AERO_RESIST_CANSNOW", optstr) == 0) {
                 sscanf(cmdstr, "%*s %s", flgstr);
@@ -427,15 +389,6 @@ get_global_param(FILE *gp)
             else if (strcasecmp("STATEDAY", optstr) == 0) {
                 sscanf(cmdstr, "%*s %hu", &global_param.stateday);
             }
-            else if (strcasecmp("BINARY_STATE_FILE", optstr) == 0) {
-                sscanf(cmdstr, "%*s %s", flgstr);
-                if (strcasecmp("FALSE", flgstr) == 0) {
-                    options.BINARY_STATE_FILE = false;
-                }
-                else {
-                    options.BINARY_STATE_FILE = true;
-                }
-            }
 
             /*************************************
                Define forcing files
@@ -455,52 +408,6 @@ get_global_param(FILE *gp)
                     strcpy(filenames.f_path_pfx[1], "MISSING");
                 }
                 file_num = 1;
-            }
-            else if (strcasecmp("FORCE_FORMAT", optstr) == 0) {
-                sscanf(cmdstr, "%*s %s", flgstr);
-                if (strcasecmp(flgstr, "BINARY") == 0) {
-                    param_set.FORCE_FORMAT[file_num] = BINARY;
-                }
-                else if (strcasecmp(flgstr, "ASCII") == 0) {
-                    param_set.FORCE_FORMAT[file_num] = ASCII;
-                }
-                else {
-                    log_err("FORCE_FORMAT must be either ASCII or BINARY.");
-                }
-            }
-            else if (strcasecmp("FORCE_ENDIAN", optstr) == 0) {
-                sscanf(cmdstr, "%*s %s", flgstr);
-                if (strcasecmp(flgstr, "LITTLE") == 0) {
-                    param_set.FORCE_ENDIAN[file_num] = LITTLE;
-                }
-                else if (strcasecmp(flgstr, "BIG") == 0) {
-                    param_set.FORCE_ENDIAN[file_num] = BIG;
-                }
-                else {
-                    log_err("FORCE_ENDIAN must be either BIG or LITTLE.");
-                }
-            }
-            else if (strcasecmp("N_TYPES", optstr) == 0) {
-                sscanf(cmdstr, "%*s %zu", &param_set.N_TYPES[file_num]);
-            }
-            else if (strcasecmp("FORCE_STEPS_PER_DAY", optstr) == 0) {
-                sscanf(cmdstr, "%*s %zu",
-                       &param_set.force_steps_per_day[file_num]);
-            }
-            else if (strcasecmp("FORCEYEAR", optstr) == 0) {
-                sscanf(cmdstr, "%*s %hu", &global_param.forceyear[file_num]);
-            }
-            else if (strcasecmp("FORCEMONTH", optstr) == 0) {
-                sscanf(cmdstr, "%*s %hu", &global_param.forcemonth[file_num]);
-            }
-            else if (strcasecmp("FORCEDAY", optstr) == 0) {
-                sscanf(cmdstr, "%*s %hu", &global_param.forceday[file_num]);
-            }
-            else if (strcasecmp("FORCESEC", optstr) == 0) {
-                sscanf(cmdstr, "%*s %u", &global_param.forcesec[file_num]);
-            }
-            else if (strcasecmp("GRID_DECIMAL", optstr) == 0) {
-                sscanf(cmdstr, "%*s %hu", &options.GRID_DECIMAL);
             }
             else if (strcasecmp("WIND_H", optstr) == 0) {
                 sscanf(cmdstr, "%*s %lf", &global_param.wind_h);
@@ -607,22 +514,22 @@ get_global_param(FILE *gp)
                             "control file.");
                 }
             }
-            else if (strcasecmp("VEGCOVER_SRC", optstr) == 0) {
+            else if (strcasecmp("FCAN_SRC", optstr) == 0) {
                 sscanf(cmdstr, "%*s %s", flgstr);
                 if (strcasecmp("FROM_VEGHIST", flgstr) == 0) {
-                    options.VEGCOVER_SRC = FROM_VEGHIST;
+                    options.FCAN_SRC = FROM_VEGHIST;
                 }
                 else if (strcasecmp("FROM_VEGPARAM", flgstr) == 0) {
-                    options.VEGCOVER_SRC = FROM_VEGPARAM;
+                    options.FCAN_SRC = FROM_VEGPARAM;
                 }
                 else if (strcasecmp("FROM_VEGLIB", flgstr) == 0) {
-                    options.VEGCOVER_SRC = FROM_VEGLIB;
+                    options.FCAN_SRC = FROM_VEGLIB;
                 }
                 else if (strcasecmp("FROM_DEFAULT", flgstr) == 0) {
-                    options.VEGCOVER_SRC = FROM_DEFAULT;
+                    options.FCAN_SRC = FROM_DEFAULT;
                 }
                 else {
-                    log_err("Unrecognized value of VEGCOVER_SRC in the global "
+                    log_err("Unrecognized value of FCAN_SRC in the global "
                             "control file.");
                 }
             }
@@ -687,24 +594,6 @@ get_global_param(FILE *gp)
             else if (strcasecmp("DOMAIN_LAT_VAR", optstr) == 0) {
                 sscanf(cmdstr, "%*s %s", options.DOMAIN_LAT_VAR);
             }
-            else if (strcasecmp("COMPRESS", optstr) == 0) {
-                sscanf(cmdstr, "%*s %s", flgstr);
-                if (strcasecmp("TRUE", flgstr) == 0) {
-                    options.COMPRESS = true;
-                }
-                else {
-                    options.COMPRESS = false;
-                }
-            }
-            else if (strcasecmp("BINARY_OUTPUT", optstr) == 0) {
-                sscanf(cmdstr, "%*s %s", flgstr);
-                if (strcasecmp("TRUE", flgstr) == 0) {
-                    options.BINARY_OUTPUT = true;
-                }
-                else {
-                    options.BINARY_OUTPUT = false;
-                }
-            }
             else if (strcasecmp("ALMA_OUTPUT", optstr) == 0) {
                 sscanf(cmdstr, "%*s %s", flgstr);
                 if (strcasecmp("TRUE", flgstr) == 0) {
@@ -723,15 +612,6 @@ get_global_param(FILE *gp)
                     options.MOISTFRACT = false;
                 }
             }
-            else if (strcasecmp("PRT_HEADER", optstr) == 0) {
-                sscanf(cmdstr, "%*s %s", flgstr);
-                if (strcasecmp("TRUE", flgstr) == 0) {
-                    options.PRT_HEADER = true;
-                }
-                else {
-                    options.PRT_HEADER = false;
-                }
-            }
             else if (strcasecmp("PRT_SNOW_BAND", optstr) == 0) {
                 sscanf(cmdstr, "%*s %s", flgstr);
                 if (strcasecmp("TRUE", flgstr) == 0) {
@@ -745,9 +625,6 @@ get_global_param(FILE *gp)
             /*************************************
                Define output file contents
             *************************************/
-            else if (strcasecmp("N_OUTFILES", optstr) == 0) {
-                ; // do nothing
-            }
             else if (strcasecmp("OUTFILE", optstr) == 0) {
                 ; // do nothing
             }
@@ -759,13 +636,13 @@ get_global_param(FILE *gp)
             // mode, but that does not exist in image mode (yet)
             else if (strcasecmp("ALBEDO", optstr) == 0 ||
                      strcasecmp("LAI_IN", optstr) == 0 ||
-                     strcasecmp("VEGCOVER", optstr) == 0) {
+                     strcasecmp("FCANOPY", optstr) == 0) {
                 log_err("Time-varying vegetation parameters not implemented "
                         "in image mode");
             }
 
             /*************************************
-               Fail when depreciated options are used.
+               Fail when deprecated options are used.
             *************************************/
             else if (strcasecmp("TIME_STEP", optstr) == 0) {
                 log_err("TIME_STEP has been replaced with MODEL_STEPS_PER_DAY, "
@@ -782,6 +659,57 @@ get_global_param(FILE *gp)
             else if (strcasecmp("FORCE_DT", optstr) == 0) {
                 log_err("FORCE_DT has been replaced with FORCE_STEPS_PER_DAY, "
                         "update your global parameter file accordingly");
+            }
+            else if (strcasecmp("NLAYER", optstr) == 0) {
+                log_err("NLAYER has been deprecated in the image driver");
+            }
+            else if (strcasecmp("FORCE_FORMAT", optstr) == 0) {
+                log_err("FORCE_FORMAT has been deprecated in the image driver");
+            }
+            else if (strcasecmp("FORCE_ENDIAN", optstr) == 0) {
+                log_err("FORCE_ENDIAN has been deprecated in the image driver");
+            }
+            else if (strcasecmp("GRID_DECIMAL", optstr) == 0) {
+                log_err("GRID_DECIMAL has been deprecated in the image driver");
+            }
+            else if (strcasecmp("BINARY_STATE_FILE", optstr) == 0) {
+                log_err(
+                    "BINARY_STATE_FILE has been deprecated in the image driver");
+            }
+            else if (strcasecmp("RESOLUTION", optstr) == 0) {
+                log_err("RESOLUTION has been deprecated in the image driver");
+            }
+            else if (strcasecmp("EQUAL_AREA", optstr) == 0) {
+                log_err("EQUAL_AREA has been deprecated in the image driver");
+            }
+            else if (strcasecmp("CONTINUEONERROR", optstr) == 0) {
+                log_err(
+                    "CONTINUEONERROR has been deprecated in the image driver");
+            }
+            else if (strcasecmp("BINARY_OUTPUT", optstr) == 0) {
+                log_err("BINARY_OUTPUT has been deprecated in the image driver");
+            }
+            else if (strcasecmp("COMPRESS", optstr) == 0) {
+                log_err("COMPRESS has been deprecated in the image driver");
+            }
+            else if (strcasecmp("PRT_HEADER", optstr) == 0) {
+                log_err("PRT_HEADER has been deprecated in the image driver");
+            }
+            else if (strcasecmp("FORCE_STEPS_PER_DAY", optstr) == 0) {
+                log_err(
+                    "FORCE_STEPS_PER_DAY has been deprecated in the image driver");
+            }
+            else if (strcasecmp("FORCEYEAR", optstr) == 0) {
+                log_err("FORCEYEAR has been deprecated in the image driver");
+            }
+            else if (strcasecmp("FORCEMONTH", optstr) == 0) {
+                log_err("FORCEMONTH has been deprecated in the image driver");
+            }
+            else if (strcasecmp("FORCEDAY", optstr) == 0) {
+                log_err("FORCEDAY has been deprecated in the image driver");
+            }
+            else if (strcasecmp("FORCESEC", optstr) == 0) {
+                log_err("FORCESEC has been deprecated in the image driver");
             }
 
             /*************************************
@@ -1077,6 +1005,17 @@ get_global_param(FILE *gp)
         log_err("No forcing file has been defined.  Make sure that the global "
                 "file defines FORCING1.");
     }
+
+    // Get information from the forcing file(s)
+    sprintf(filenames.forcing[0], "%s%4d.nc", filenames.f_path_pfx[0],
+            global_param.startyear);
+    get_forcing_file_info(&param_set, 0);
+    if (param_set.N_TYPES[1] != MISSING) {
+        sprintf(filenames.forcing[1], "%s%4d.nc", filenames.f_path_pfx[1],
+                global_param.startyear);
+        get_forcing_file_info(&param_set, 1);
+    }
+
     if (param_set.N_TYPES[1] != MISSING && global_param.forceyear[1] == 0) {
         global_param.forceyear[1] = global_param.forceyear[0];
         global_param.forcemonth[1] = global_param.forcemonth[0];
@@ -1174,7 +1113,7 @@ get_global_param(FILE *gp)
         }
         if (options.SNOW_BAND > MAX_BANDS) {
             log_err("Global file wants more snow bands (%zu) than are "
-                    "defined by MAX_BANDS (%d).  Edit vicNl_def.h and "
+                    "defined by MAX_BANDS (%d).  Edit vic_driver_shared.h and "
                     "recompile.", options.SNOW_BAND, MAX_BANDS);
         }
     }
@@ -1272,26 +1211,9 @@ get_global_param(FILE *gp)
                     "and QUICK_FLUX=FALSE");
         }
     }
-    if ((options.FULL_ENERGY ||
-         options.FROZEN_SOIL) && options.Nlayer < 3) {
-        log_err("You must define at least 3 soil moisture layers to run "
-                "the model in FULL_ENERGY or FROZEN_SOIL modes.  "
-                "Currently Nlayers is set to  %zu.", options.Nlayer);
-    }
-    if ((!options.FULL_ENERGY &&
-         !options.FROZEN_SOIL) && options.Nlayer < 1) {
-        log_err("You must define at least 1 soil moisture layer to run "
-                "the model.  Currently Nlayers is set to  %zu.",
-                options.Nlayer);
-    }
-    if (options.Nlayer > MAX_LAYERS) {
-        log_err("Global file wants more soil moisture layers (%zu) than "
-                "are defined by MAX_LAYERS (%d).  Edit vicNl_def.h and "
-                "recompile.", options.Nlayer, MAX_LAYERS);
-    }
     if (options.Nnode > MAX_NODES) {
         log_err("Global file wants more soil thermal nodes (%zu) than "
-                "are defined by MAX_NODES (%d).  Edit vicNl_def.h and "
+                "are defined by MAX_NODES (%d).  Edit vic_driver_shared.h and "
                 "recompile.", options.Nnode, MAX_NODES);
     }
     if (!options.FULL_ENERGY && options.CLOSE_ENERGY) {
@@ -1318,16 +1240,6 @@ get_global_param(FILE *gp)
                     "file has been defined.  Make sure that the global "
                     "file defines the lake parameter file on the line that "
                     "begins with \"LAKES\".");
-        }
-        if (global_param.resolution == 0) {
-            log_err("The model grid cell resolution (RESOLUTION) must be "
-                    "defined in the global control file when the lake "
-                    "model is active.");
-        }
-        if (global_param.resolution > 360 && !options.EQUAL_AREA) {
-            log_err("For EQUAL_AREA=FALSE, the model grid cell resolution "
-                    "(RESOLUTION) must be set to the number of lat or lon "
-                    "degrees per grid cell.  This cannot exceed 360.");
         }
         if (options.COMPUTE_TREELINE) {
             log_err("LAKES = TRUE and COMPUTE_TREELINE = TRUE are "

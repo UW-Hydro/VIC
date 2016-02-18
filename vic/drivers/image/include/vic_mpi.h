@@ -28,6 +28,7 @@
 #define VIC_MPI_H
 
 #include <stddef.h> // used for offsetof() macro
+#include <stdbool.h>  // used for bool types
 #include <mpi.h>
 #include <stdbool.h>
 

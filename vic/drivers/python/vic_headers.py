@@ -68,6 +68,7 @@ enum
     CATM,
     CHANNEL_IN,
     DENSITY,
+    FCANOPY,
     FDIR,
     LAI_IN,
     LONGWAVE,
@@ -77,7 +78,6 @@ enum
     QAIR,
     REL_HUMID,
     SHORTWAVE,
-    VEGCOVER,
     VP,
     WIND,
     SKIP,
@@ -202,6 +202,7 @@ enum
     OUT_CATM,
     OUT_COSZEN,
     OUT_DENSITY,
+    OUT_FCANOPY,
     OUT_FDIR,
     OUT_LAI,
     OUT_LONGWAVE,
@@ -212,7 +213,6 @@ enum
     OUT_SHORTWAVE,
     OUT_SURF_COND,
     OUT_TSKC,
-    OUT_VEGCOVER,
     OUT_VP,
     OUT_VPD,
     OUT_WIND,
@@ -364,14 +364,14 @@ typedef struct {
     _Bool TFALLBACK;
     _Bool BASEFLOW;
     unsigned short int GRID_DECIMAL;
+    _Bool VEGLIB_FCAN;
     _Bool VEGLIB_PHOTO;
-    _Bool VEGLIB_VEGCOVER;
     _Bool VEGPARAM_ALB;
+    _Bool VEGPARAM_FCAN;
     _Bool VEGPARAM_LAI;
-    _Bool VEGPARAM_VEGCOVER;
     unsigned short int ALB_SRC;
+    unsigned short int FCAN_SRC;
     unsigned short int LAI_SRC;
-    unsigned short int VEGCOVER_SRC;
     _Bool LAKE_PROFILE;
     _Bool ORGANIC_FRACT;
     _Bool BINARY_STATE_FILE;
@@ -645,7 +645,7 @@ typedef struct {
 typedef struct {
     _Bool overstory;
     double LAI[12];
-    double vegcover[12];
+    double fcanopy[12];
     double Wdmax[12];
     double albedo[12];
     double displacement[12];
@@ -672,7 +672,7 @@ typedef struct {
 typedef struct {
     double *albedo;
     double *LAI;
-    double *vegcover;
+    double *fcanopy;
 } veg_hist_struct;
 typedef struct {
     double *air_temp;
@@ -805,7 +805,7 @@ typedef struct {
     double canopyevap;
     double LAI;
     double throughfall;
-    double vegcover;
+    double fcanopy;
     double Wdew;
     double Wdmax;
     double *NscaleFactor;
@@ -1022,6 +1022,7 @@ double calc_veg_displacement(double);
 double calc_veg_height(double);
 double calc_veg_roughness(double);
 double calc_water_balance_error(int, double, double, double);
+unsigned short int calendar_from_chars(char *cal_chars);
 int CalcAerodynamic(_Bool, double, double, double, double, double, double *,
                     double *, double *, double *, double *);
 double CalcBlowingSnow(double, double, unsigned int, double, double, double,
@@ -1312,6 +1313,8 @@ void num2date(double origin, double time_value, double tzoffset,
               unsigned short int calendar, unsigned short int time_units,
               dmy_struct *date);
 FILE *open_file(char string[], char type[]);
+void parse_nc_time_units(char *nc_unit_chars, unsigned short int *units,
+                         dmy_struct *dmy);
 void print_cell_data(cell_data_struct *cell, size_t nlayers, size_t nfrost);
 void print_dmy(dmy_struct *dmy);
 void print_energy_bal(energy_bal_struct *eb, size_t nnodes, size_t nfronts);
@@ -1342,6 +1345,8 @@ void print_usage(char *);
 int set_output_var(out_data_file_struct *, int, int, out_data_struct *, char *,
                    int, char *, int, double);
 void soil_moisture_from_water_table(soil_con_struct *soil_con, size_t nlayers);
+unsigned short int timeunits_from_chars(char *units_chars);
+int update_step_vars(all_vars_struct *, veg_con_struct *, veg_hist_struct *);
 int valid_date(unsigned short int calendar, dmy_struct *dmy);
 void validate_parameters(void);
 int flag;

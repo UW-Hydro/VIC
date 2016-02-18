@@ -127,7 +127,7 @@ The following options control input and output of state files.
 
 # Define Meteorological and Vegetation Forcing Files
 
-This section describes how to define the forcing files needed by the VIC model.  VIC handles vegetation historical timeseries (LAI, albedo, partial vegetation cover fraction) similarly to meteorological forcings (with some exceptions; see below).
+This section describes how to define the forcing files needed by the VIC model.  VIC handles vegetation historical timeseries (LAI, albedo, vegetation canopy cover fraction) similarly to meteorological forcings (with some exceptions; see below).
 
 Unlike model parameters, for which 1 file contains data for all grid cells, the meteorological forcings are stored as a separate time series for each grid cell. The time step length of the input forcings must match the time step length at which VIC is running. Input files can be ASCII or Binary (signed or unsigned short ints) column formatted. Columns in the file must be in the same order as they are defined in the global control file.
 
@@ -141,8 +141,8 @@ All FORCING filenames are actually the pathname, and prefix for gridded data typ
 | (1*) FORCING2     | string    | pathname and file prefix  | Second forcing file name, or FALSE if only one file used. ***This must precede all other forcing parameters used to define the second forcing file, and follow those used to define the first forcing file.***                                                                                                                        |
 | (2) FORCE_FORMAT  | string    | BINARY or ASCII           | Defines the format type for the forcing files.                                                                                                                                                                                                                                                                                        |
 | (3)FORCE_ENDIAN   | string    | BIG or LITTLE             | Identifies the architecture of the machine on which the binary forcing files were created:  <li>**BIG** = big-endian (e.g. SUN).  <li>**LITTLE** = little-endian (e.g. PC/linux). Model will identify the endian of the current machine, and swap bytes if necessary. Required for binary forcing file, not used for ASCII forcing file. |
-| (4) N_TYPES       | int       | N/A                       | Number of columns in the current data file, with the following exception: for the vegetation history variables ALBEDO, LAI_IN, and VEGCOVER, there must be multiple columns for these variables, one per vegetation tile. In this case, ALBEDO, LAI_IN, and VEGCOVER each count as only 1 variable despite covering multiple columns.    |
-| (5) [FORCE_TYPE](ForcingData.md) | string<br>string<br>float | VarName<br>(un)signed<br>multiplier | Defines what forcing types are read from the file, and in what order. For ASCII file only the forcing type needs to be defined, but for Binary file each line must also define whether the column is SIGNED or UNSIGNED short int and by what factor values are multiplied before being written to output. Note: Unlike other variables, ALBEDO, LAI_IN, and VEGCOVER, each span multiple columns, one column per veg tile.  This will generally vary from one grid cell to the next as the number of veg tiles varies.  However, ALBEDO, LAI_IN, and VEGCOVER should each have only one FORCE_TYPE entry.  [Click here for details.](ForcingData.md) |
+| (4) N_TYPES       | int       | N/A                       | Number of columns in the current data file, with the following exception: for the vegetation history variables ALBEDO, LAI_IN, and FCANOPY, there must be multiple columns for these variables, one per vegetation tile. In this case, ALBEDO, LAI_IN, and FCANOPY each count as only 1 variable despite covering multiple columns.    |
+| (5) [FORCE_TYPE](ForcingData.md) | string<br>string<br>float | VarName<br>(un)signed<br>multiplier | Defines what forcing types are read from the file, and in what order. For ASCII file only the forcing type needs to be defined, but for Binary file each line must also define whether the column is SIGNED or UNSIGNED short int and by what factor values are multiplied before being written to output. Note: Unlike other variables, ALBEDO, LAI_IN, and FCANOPY, each span multiple columns, one column per veg tile.  This will generally vary from one grid cell to the next as the number of veg tiles varies.  However, ALBEDO, LAI_IN, and FCANOPY should each have only one FORCE_TYPE entry.  [Click here for details.](ForcingData.md) |
 | (6) FORCE_STEPS_PER_DAY | integer   | steps                     | Number of timesteps per day in forcing file (must be >= 1)                                                                                                                                                                                                                                                                                  |
 | (7) FORCEYEAR     | integer   | year                      | Year meteorological forcing files start                                                                                                                                                                                                                                                                                               |
 | (8) FORCEMONTH    | integer   | month                     | Month meteorological forcing files start                                                                                                                                                                                                                                                                                              |
@@ -178,22 +178,19 @@ _Examples._ a standard four column daily forcing data file will be defined as:
 
 For each variable, there must be a separate column for each vegetation tile in the grid cell (which generally will vary from one grid cell to the next).  For example, if there are 3 vegetation tiles in a particular grid cell; and you wish to supply VIC with LAI, partial vegetation cover fraction, and albedo; the input file for the given cell should look like:
 
-    LAI1 LAI2 LAI3 VEGCOVER1 VEGCOVER2 VEGCOVER3 ALBEDO1 ALBEDO2 ALBEDO3
+    LAI1 LAI2 LAI3 FCANOPY1 FCANOPY2 FCANOPY3 ALBEDO1 ALBEDO2 ALBEDO3
 
 where the 1, 2, and 3 correspond to the first, second, and third tiles listed in the vegetation parameter file, respectively; and the file should be described in the global parameter file as:
 
     FORCING2    FORCING_DATA/veg_hist/veg_hist__
-    N_TYPES     3
     FORCE_TYPE  LAI_IN
-    FORCE_TYPE  VEGCOVER
+    FORCE_TYPE  FCANOPY
     FORCE_TYPE  ALBEDO
     FORCE_FORMAT    ASCII
     FORCE_STEPS_PER_DAY    1
     FORCEYEAR   1950
     FORCEMONTH  1
     FORCEDAY    1
-
-NOTE that N_TYPES is 3 in the example above, not 9.  This is because N_TYPES only counts the number of different variable types, NOT the total number of columns.
 
 # Define Parameter Files
 
@@ -212,9 +209,9 @@ The following options describe the input parameter files.
 | ALBEDO_SRC            | string    | N/A               | This option tells VIC where to look for ALBEDO values: <li>**FROM_VEGLIB** = Use the ALBEDO values listed in the vegetation library file. <li>**FROM_VEGPARAM** = Use the ALBEDO values listed in the vegetation parameter file. Note: for this to work, VEGPARAM_ALBEDO must be TRUE. <li>**FROM_VEGHIST** = Use the ALBEDO values listed in the veg_hist forcing files. Note: for this to work, ALBEDO must be supplied in the veg_hist files and listd in the global parameter file as one of the variables in the files. <br><br>Default = FROM_VEGLIB. |
 | VEGPARAM_LAI          | string    | TRUE or FALSE     | If TRUE the vegetation parameter file contains an extra line for each vegetation type that defines monthly LAI values for each vegetation type for each grid cell. <br><br>Default = FALSE. |
 | LAI_SRC               | string    | N/A               | This option tells VIC where to look for LAI values: <li>**FROM_VEGLIB** = Use the LAI values listed in the vegetation library file. <li>**FROM_VEGPARAM** = Use the LAI values listed in the vegetation parameter file. Note: for this to work, VEGPARAM_LAI must be TRUE. <li>**FROM_VEGHIST** = Use the LAI values listed in the veg_hist forcing files. Note: for this to work, LAI_IN must be supplied in the veg_hist files and listd in the global parameter file as one of the variables in the files. <br><br>Default = FROM_VEGLIB. |
-| VEGLIB_VEGCOVER       | string    | TRUE or FALSE     | If TRUE the vegetation library file contains monthly VEGCOVER values for each vegetation type for each grid cell (between the LAI and ALBEDO values). <br><br>Default = FALSE. |
-| VEGPARAM_VEGCOVER     | string    | TRUE or FALSE     | If TRUE the vegetation parameter file contains an extra line for each vegetation type that defines monthly VEGCOVER values for each vegetation type for each grid cell. <br><br>Default = FALSE. |
-| VEGCOVER_SRC          | string    | N/A               | This option tells VIC where to look for VEGCOVER values: <li>**FROM_DEFAULT** = Set VEGCOVER to 1.0 for all veg classes, all times, and all locations. <li>**FROM_VEGLIB** = Use the VEGCOVER values listed in the vegetation library file. Note: for this to work, VEGLIB_VEGCOVER must be TRUE.. <li>**FROM_VEGPARAM** = Use the VEGCOVER values listed in the vegetation parameter file. Note: for this to work, VEGPARAM_VEGCOVER must be TRUE. <li>**FROM_VEGHIST** = Use the VEGCOVER values listed in the veg_hist forcing files. Note: for this to work, VEGCOVER must be supplied in the veg_hist files and listd in the global parameter file as one of the variables in the files. <br><br>Default = FROM_DEFAULT. |
+| VEGLIB_FCAN       | string    | TRUE or FALSE     | If TRUE the vegetation library file contains monthly FCANOPY values for each vegetation type for each grid cell (between the LAI and ALBEDO values). <br><br>Default = FALSE. |
+| VEGPARAM_FCAN     | string    | TRUE or FALSE     | If TRUE the vegetation parameter file contains an extra line for each vegetation type that defines monthly FCANOPY values for each vegetation type for each grid cell. <br><br>Default = FALSE. |
+| FCAN_SRC          | string    | N/A               | This option tells VIC where to look for FCANOPY values: <li>**FROM_DEFAULT** = Set FCANOPY to 1.0 for all veg classes, all times, and all locations. <li>**FROM_VEGLIB** = Use the FCANOPY values listed in the vegetation library file. Note: for this to work, VEGLIB_FCANOPY must be TRUE.. <li>**FROM_VEGPARAM** = Use the FCANOPY values listed in the vegetation parameter file. Note: for this to work, VEGPARAM_FCANOPY must be TRUE. <li>**FROM_VEGHIST** = Use the FCANOPY values listed in the veg_hist forcing files. Note: for this to work, FCANOPY must be supplied in the veg_hist files and listd in the global parameter file as one of the variables in the files. <br><br>Default = FROM_DEFAULT. |
 | SNOW_BAND             | integer <br> [string] | N/A <br> [path/filename] | Maximum number of snow elevation bands to use, and the name (with path) of the snow elevation band file. For example: `SNOW_BAND 5 path/filename`.  To turn off this feature, set the number of snow bands to 1 and do not follow this with a snow elevation band file name.  <br><br>Default = 1. |
 | CONSTANTS             | string    | path/filename     | Constants / Parameters file name |
 
@@ -246,11 +243,10 @@ The following options describe the output files. Click [here](OutputFormatting.m
 | MOISTFRACT            | string    | TRUE or FALSE     | Options for output soil moisture units (default is FALSE): <li>**FALSE** = Standard VIC units. Soil moisture is in mm over the grid cell area <li>**TRUE** = Soil moisture is volume fraction                                                                                                                                                   |
 | PRT_HEADER            | string    | TRUE or FALSE     | Options for output file headers (default is FALSE): <li>**FALSE** = output files contain no headers <li>**TRUE** = headers are inserted into the beginning of each output file, listing the names of the variables in each field of the file (if ASCII) and/or the variable data types (if BINARY) <br><br>[Click here for more information.](OutputFormatting.md)                                                                                                                                                          |
 | PRT_SNOW_BAND         | string    | TRUE or FALSE     | if TRUE then print snow variables for each snow band in a separate output file (`snow_band_*`). <br><br>*NOTE*: this option is ignored if output file contents are specified. |
-| N_OUTFILES\*            | integer   | N/A               | Number of output files per grid cell. [Click here for more information](OutputFormatting.md).                                                                                                                    |
-| OUTFILE\*               | <br> string <br> integer <br>| <br>prefix <br> nvars <br>| Information about this output file: <br>Prefix of the output file (to which the lat and lon will be appended)<br>Number of variables in the output file <br> This should be specified once for each output file. [Click here for more information.](OutputFormatting.md) |
+| OUTFILE\*               | <br> string <br> | <br>prefix <br> | Information about this output file: <br>Prefix of the output file (to which the lat and lon will be appended) <br> This should be specified once for each output file. [Click here for more information.](OutputFormatting.md) |
 | OUTVAR\*                | <br> string <br> string <br> string <br> integer <br> | <br> name <br> format <br> type <br> multiplier <br> | Information about this output variable:<br>Name (must match a name listed in vicNl_def.h) <br> Output format (C fprintf-style format code) <br>Data type (one of: OUT_TYPE_DEFAULT, OUT_TYPE_CHAR, OUT_TYPE_SINT, OUT_TYPE_USINT, OUT_TYPE_INT, OUT_TYPE_FLOAT,OUT_TYPE_DOUBLE) <br> Multiplier - number to multiply the data with in order to recover the original values (only valid with BINARY_OUTPUT=TRUE) <br><br> This should be specified once for each output variable. [Click here for more information.](OutputFormatting.md)|
 
-\* *Note: `N_OUTFILES`, `OUTFILE`, and `OUTVAR` are optional; if omitted, traditional output files are produced. [Click here for details on using these instructions](OutputFormatting.md).*
+\* *Note: `OUTFILE`, and `OUTVAR` are optional; if omitted, traditional output files are produced. [Click here for details on using these instructions](OutputFormatting.md).*
 
 # Obsolete Options from Earlier Versions
 
@@ -368,7 +364,7 @@ FROZEN_SOIL FALSE   # TRUE = calculate frozen soils.  Default = FALSE.
 #VP_INTERP  TRUE    # This controls sub-daily humidity estimates; TRUE = interpolate daily VP estimates linearly between sunrise of one day to the next; FALSE = hold VP constant for entire day
 #LW_TYPE        LW_PRATA    # This controls the algorithm used to estimate clear-sky longwave radiation:
 #           # LW_TVA = Tennessee Valley Authority algorithm (1972) (this was traditional VIC algorithm)
-#           # other options listed in vicNl_def.h
+#           # other options listed in vic_driver_shared.h
 #           # default = LW_PRATA
 #LW_CLOUD   LW_CLOUD_DEARDORFF  # This controls the algorithm used to estimate the influence of clouds on total longwave:
 #           # LW_CLOUD_BRAS = method from Bras textbook (this was the traditional VIC algorithm)
@@ -441,13 +437,13 @@ ORGANIC_FRACT   FALSE   # TRUE = simulate organic soils; soil param file contain
 VEGLIB          (put the veg library path/file here)    # Veg library path/file
 VEGPARAM        (put the veg parameter path/file here)  # Veg parameter path/file
 ROOT_ZONES      3   # Number of root zones (must match format of veg param file)
-#VEGLIB_VEGCOVER    FALSE   # TRUE = veg lib file contains 12 monthly values of partial vegcover fraction for each veg class, between the LAI and albedo values
+#VEGLIB_FCAN    FALSE   # TRUE = veg lib file contains 12 monthly values of partial vegcover fraction for each veg class, between the LAI and albedo values
 #VEGPARAM_LAI   TRUE    # TRUE = veg param file contains LAI information; FALSE = veg param file does NOT contain LAI information
 #VEGPARAM_ALB   FALSE    # TRUE = veg param file contains albedo information; FALSE = veg param file does NOT contain albedo information
-#VEGPARAM_VEGCOVER  FALSE    # TRUE = veg param file contains veg_cover information; FALSE = veg param file does NOT contain veg_cover information
+#VEGPARAM_FCAN  FALSE    # TRUE = veg param file contains veg_cover information; FALSE = veg param file does NOT contain veg_cover information
 #LAI_SRC    FROM_VEGLIB    # FROM_VEGPARAM = read LAI from veg param file; FROM_VEGLIB = read LAI from veg library file
 #ALB_SRC    FROM_VEGLIB    # FROM_VEGPARAM = read albedo from veg param file; FROM_VEGLIB = read albedo from veg library file
-#VEGCOVER_SRC   FROM_VEGLIB    # FROM_VEGPARAM = read veg_cover from veg param file; FROM_VEGLIB = read veg_cover from veg library file
+#FCAN_SRC   FROM_VEGLIB    # FROM_VEGPARAM = read fcanopy from veg param file; FROM_VEGLIB = read fcanopy from veg library file
 SNOW_BAND   1   # Number of snow bands; if number of snow bands > 1, you must insert the snow band path/file after the number of bands (e.g. SNOW_BAND 5 my_path/my_snow_band_file)
 
 #######################################################################
@@ -469,7 +465,7 @@ COMPRESS    FALSE   # TRUE = compress input and output files when done
 BINARY_OUTPUT   FALSE   # TRUE = binary output files
 ALMA_OUTPUT FALSE   # TRUE = ALMA-format output files; FALSE = standard VIC units
 MOISTFRACT  FALSE   # TRUE = output soil moisture as volumetric fraction; FALSE = standard VIC units
-PRT_SNOW_BAND   FALSE   # TRUE = write a "snowband" output file, containing band-specific values of snow variables; NOTE: this is ignored if N_OUTFILES is specified below.
+PRT_SNOW_BAND   FALSE   # TRUE = write a "snowband" output file, containing band-specific values of snow variables.
 
 #######################################################################
 #
@@ -496,26 +492,22 @@ PRT_SNOW_BAND   FALSE   # TRUE = write a "snowband" output file, containing band
 #
 # Format:
 #
-#   N_OUTFILES    <n_outfiles>
-#
-#   OUTFILE       <prefix>        <nvars>
+#   OUTFILE       <prefix>
 #   OUTVAR        <varname>       [<format>        <type>  <multiplier>]
 #   OUTVAR        <varname>       [<format>        <type>  <multiplier>]
 #   OUTVAR        <varname>       [<format>        <type>  <multiplier>]
 #
-#   OUTFILE       <prefix>        <nvars>
+#   OUTFILE       <prefix>
 #   OUTVAR        <varname>       [<format>        <type>  <multiplier>]
 #   OUTVAR        <varname>       [<format>        <type>  <multiplier>]
 #   OUTVAR        <varname>       [<format>        <type>  <multiplier>]
 #
 #
 # where
-#   <n_outfiles> = number of output files
 #   <prefix>     = name of the output file, NOT including latitude
 #                  and longitude
-#   <nvars>      = number of variables in the output file
 #   <varname>    = name of the variable (this must be one of the
-#                  output variable names listed in vicNl_def.h.)
+#                  output variable names listed in vic_driver_shared.h.)
 #   <format>     = (for ascii output files) fprintf format string,
 #                  e.g.
 #                    %.4f = floating point with 4 decimal places

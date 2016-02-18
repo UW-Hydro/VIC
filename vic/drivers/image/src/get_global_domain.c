@@ -134,8 +134,8 @@ get_global_domain(char          *nc_name,
         for (i = 0; i < global_domain->n_nx; i++) {
             // rescale to [-180., 180]. Note that the if statement is not strictly
             // needed, but it prevents -180 from turning into 180 and vice versa
-            if (var[i] < -180.f || var[i] > 180.f) {
-                var[i] -= round(var[i] / 360.f) * 360.f;
+            if (varLon[i] < -180.f || varLon[i] > 180.f) {
+                varLon[i] -= round(varLon[i] / 360.f) * 360.f;
             }
             global_domain->locations[i].longitude = (double) varLon[i];
         }

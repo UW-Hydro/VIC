@@ -81,16 +81,16 @@ initialize_options()
     // input options
     options.ALB_SRC = FROM_VEGLIB;
     options.BASEFLOW = ARNO;
+    options.FCAN_SRC = FROM_DEFAULT;
     options.GRID_DECIMAL = 2;
     options.JULY_TAVG_SUPPLIED = false;
     options.LAI_SRC = FROM_VEGLIB;
     options.ORGANIC_FRACT = false;
-    options.VEGCOVER_SRC = FROM_DEFAULT;
+    options.VEGLIB_FCAN = false;
     options.VEGLIB_PHOTO = false;
-    options.VEGLIB_VEGCOVER = false;
     options.VEGPARAM_ALB = false;
+    options.VEGPARAM_FCAN = false;
     options.VEGPARAM_LAI = false;
-    options.VEGPARAM_VEGCOVER = false;
     // state options
     options.BINARY_STATE_FILE = false;
     options.INIT_STATE = false;

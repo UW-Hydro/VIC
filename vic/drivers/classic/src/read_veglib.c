@@ -90,20 +90,20 @@ read_veglib(FILE   *veglib,
                 }
                 temp[i].Wdmax[j] = param.VEG_LAI_WATER_FACTOR * temp[i].LAI[j];
             }
-            /* Default values of vegcover */
+            /* Default values of fcanopy */
             for (j = 0; j < MONTHS_PER_YEAR; j++) {
-                temp[i].vegcover[j] = 1.00;
+                temp[i].fcanopy[j] = 1.00;
             }
-            if (options.VEGLIB_VEGCOVER) {
+            if (options.VEGLIB_FCAN) {
                 for (j = 0; j < MONTHS_PER_YEAR; j++) {
                     fscanf(veglib, "%lf", &tmp_double);
-                    if (options.VEGCOVER_SRC != FROM_DEFAULT) {
-                        temp[i].vegcover[j] = tmp_double;
-                        if (temp[i].vegcover[j] < 0 ||
-                            temp[i].vegcover[j] > 1) {
+                    if (options.FCAN_SRC != FROM_DEFAULT) {
+                        temp[i].fcanopy[j] = tmp_double;
+                        if (temp[i].fcanopy[j] < 0 ||
+                            temp[i].fcanopy[j] > 1) {
                             log_err(
                                 "Veg cover fraction must be between 0 and 1 " "(%f)",
-                                temp[i].vegcover[j]);
+                                temp[i].fcanopy[j]);
                         }
                     }
                 }

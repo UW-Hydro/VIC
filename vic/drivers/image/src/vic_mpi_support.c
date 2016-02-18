@@ -881,8 +881,8 @@ create_MPI_option_struct_type(MPI_Datatype *mpi_type)
     offsets[i] = offsetof(option_struct, VEGLIB_PHOTO);
     mpi_types[i++] = MPI_C_BOOL;
 
-    // bool VEGLIB_VEGCOVER;
-    offsets[i] = offsetof(option_struct, VEGLIB_VEGCOVER);
+    // bool VEGLIB_FCAN;
+    offsets[i] = offsetof(option_struct, VEGLIB_FCAN);
     mpi_types[i++] = MPI_C_BOOL;
 
     // bool VEGPARAM_ALB;
@@ -893,8 +893,8 @@ create_MPI_option_struct_type(MPI_Datatype *mpi_type)
     offsets[i] = offsetof(option_struct, VEGPARAM_LAI);
     mpi_types[i++] = MPI_C_BOOL;
 
-    // bool VEGPARAM_VEGCOVER;
-    offsets[i] = offsetof(option_struct, VEGPARAM_VEGCOVER);
+    // bool VEGPARAM_FCAN;
+    offsets[i] = offsetof(option_struct, VEGPARAM_FCAN);
     mpi_types[i++] = MPI_C_BOOL;
 
     // unsigned short ALB_SRC;
@@ -905,8 +905,8 @@ create_MPI_option_struct_type(MPI_Datatype *mpi_type)
     offsets[i] = offsetof(option_struct, LAI_SRC);
     mpi_types[i++] = MPI_UNSIGNED_SHORT;
 
-    // unsigned short VEGCOVER_SRC;
-    offsets[i] = offsetof(option_struct, VEGCOVER_SRC);
+    // unsigned short FCAN_SRC;
+    offsets[i] = offsetof(option_struct, FCAN_SRC);
     mpi_types[i++] = MPI_UNSIGNED_SHORT;
 
     // bool LAKE_PROFILE;

@@ -42,8 +42,7 @@ vic_run(atmos_data_struct   *atmos,
         lake_con_struct     *lake_con,
         soil_con_struct     *soil_con,
         veg_con_struct      *veg_con,
-        veg_lib_struct      *veg_lib,
-        veg_hist_struct     *veg_hist)
+        veg_lib_struct      *veg_lib)
 {
     extern option_struct     options;
     extern parameters_struct param;
@@ -134,23 +133,15 @@ vic_run(atmos_data_struct   *atmos,
     atmos->out_rain = 0;
     atmos->out_snow = 0;
 
-    /* Assign current veg albedo and LAI */
-    // Loop over vegetated tiles
+    // Convert LAI from global to local
     for (iveg = 0; iveg < Nveg; iveg++) {
         veg_class = veg_con[iveg].veg_class;
-        if (veg_hist[iveg].vegcover[0] < MIN_VEGCOVER) {
-            veg_hist[iveg].vegcover[0] = MIN_VEGCOVER;
-        }
         for (band = 0; band < Nbands; band++) {
-            veg_var[iveg][band].vegcover = veg_hist[iveg].vegcover[0];
-            veg_var[iveg][band].albedo = veg_hist[iveg].albedo[0];
-            veg_var[iveg][band].LAI = veg_hist[iveg].LAI[0];
-            // Convert LAI from global to local
-            veg_var[iveg][band].LAI /= veg_var[iveg][band].vegcover;
-            veg_var[iveg][band].Wdew /= veg_var[iveg][band].vegcover;
+            veg_var[iveg][band].LAI /= veg_var[iveg][band].fcanopy;
+            veg_var[iveg][band].Wdew /= veg_var[iveg][band].fcanopy;
             veg_var[iveg][band].Wdmax = veg_var[iveg][band].LAI *
                                         param.VEG_LAI_WATER_FACTOR;
-            snow[iveg][band].snow_canopy /= veg_var[iveg][band].vegcover;
+            snow[iveg][band].snow_canopy /= veg_var[iveg][band].fcanopy;
         }
     }
 
@@ -232,8 +223,8 @@ vic_run(atmos_data_struct   *atmos,
             wind_h = vic_run_veg_lib[veg_class].wind_h;
 
             /** Compute Surface Attenuation due to Vegetation Coverage **/
-            surf_atten = (1 - veg_var[iveg][0].vegcover) * 1.0 +
-                         veg_var[iveg][0].vegcover *
+            surf_atten = (1 - veg_var[iveg][0].fcanopy) * 1.0 +
+                         veg_var[iveg][0].fcanopy *
                          exp(-vic_run_veg_lib[veg_class].rad_atten *
                              veg_var[iveg][0].LAI);
 
@@ -398,8 +389,8 @@ vic_run(atmos_data_struct   *atmos,
     /* Convert LAI back to global */
     for (iveg = 0; iveg < Nveg; iveg++) {
         for (band = 0; band < Nbands; band++) {
-            veg_var[iveg][band].LAI *= veg_var[iveg][band].vegcover;
-            veg_var[iveg][band].Wdmax *= veg_var[iveg][band].vegcover;
+            veg_var[iveg][band].LAI *= veg_var[iveg][band].fcanopy;
+            veg_var[iveg][band].Wdmax *= veg_var[iveg][band].fcanopy;
         }
     }
 

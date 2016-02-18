@@ -1,7 +1,7 @@
 /******************************************************************************
  * @section DESCRIPTION
  *
- * Allocate and free memory for the veg_hist data struct
+ * Get netCDF variable attribute.
  *
  * @section LICENSE
  *
@@ -29,36 +29,50 @@
 #include <vic_driver_image.h>
 
 /******************************************************************************
- * @brief
+ * @brief    Get netCDF dimension.
  *****************************************************************************/
 void
-alloc_veg_hist(veg_hist_struct *veg_hist)
+get_nc_var_attr(char *nc_name,
+                char *var_name,
+                char *attr_name,
+                char **attr)
 {
-    veg_hist->albedo = calloc(NR + 1, sizeof(*(veg_hist->albedo)));
-    if (veg_hist->albedo == NULL) {
-        log_err("Memory allocation error in alloc_veg_hist().");
-    }
-    veg_hist->LAI = calloc(NR + 1, sizeof(*(veg_hist->LAI)));
-    if (veg_hist->LAI == NULL) {
-        log_err("Memory allocation error in alloc_veg_hist().");
-    }
-    veg_hist->fcanopy = calloc(NR + 1, sizeof(*(veg_hist->fcanopy)));
-    if (veg_hist->fcanopy == NULL) {
-        log_err("Memory allocation error in alloc_veg_hist().");
-    }
-}
+    int    nc_id;
+    int    var_id;
+    int    status;
+    size_t attr_len;
 
-/******************************************************************************
- * @brief    Free veg hist structure.
- *****************************************************************************/
-void
-free_veg_hist(veg_hist_struct *veg_hist)
-{
-    if (veg_hist == NULL) {
-        return;
+    // open the netcdf file
+    status = nc_open(nc_name, NC_NOWRITE, &nc_id);
+    if (status != NC_NOERR) {
+        log_err("Error opening %s", nc_name);
     }
 
-    free(veg_hist->albedo);
-    free(veg_hist->LAI);
-    free(veg_hist->fcanopy);
+    // get variable id
+    status = nc_inq_varid(nc_id, var_name, &var_id);
+    if (status != NC_NOERR) {
+        log_err("Error getting variable id %s in %s", var_name, nc_name);
+    }
+
+    // get size of the attribute
+    status = nc_inq_attlen(nc_id, var_id, attr_name, &attr_len);
+    if (status != NC_NOERR) {
+        log_err("Error getting attribute length for %s:%s in %s", var_name, attr_name, nc_name);
+    }
+
+    // allocate memory for attribute
+    *attr = malloc((attr_len + 1) * sizeof(**attr));
+
+    // read attribute text
+    status = nc_get_att_text(nc_id, var_id, attr_name, *attr);
+    if (status != NC_NOERR) {
+        log_err("Error getting netCDF attribute %s for var %s in %s", attr_name,
+                var_name, nc_name);
+    }
+
+    // close the netcdf file
+    status = nc_close(nc_id);
+    if (status != NC_NOERR) {
+        log_err("Error closing %s", nc_name);
+    }
 }

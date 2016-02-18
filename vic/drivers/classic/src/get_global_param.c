@@ -590,14 +590,19 @@ get_global_param(FILE *gp)
                     options.VEGLIB_PHOTO = false;
                 }
             }
-            else if (strcasecmp("VEGLIB_VEGCOVER", optstr) == 0) {
+            else if (strcasecmp("VEGLIB_FCAN", optstr) == 0) {
                 sscanf(cmdstr, "%*s %s", flgstr);
                 if (strcasecmp("TRUE", flgstr) == 0) {
-                    options.VEGLIB_VEGCOVER = true;
+                    options.VEGLIB_FCAN = true;
                 }
                 else {
-                    options.VEGLIB_VEGCOVER = false;
+                    options.VEGLIB_FCAN = false;
                 }
+            }
+            else if(strcasecmp("VEGLIB_VEGCOVER",optstr)==0) {
+                log_err("The option VEGLIB_VEGCOVER has been replaced by "
+                        "VEGLIB_FCAN.  Please edit your global parameter "
+                        "file and re-run.");
             }
             else if (strcasecmp("VEGPARAM", optstr) == 0) {
                 sscanf(cmdstr, "%*s %s", filenames.veg);
@@ -627,31 +632,31 @@ get_global_param(FILE *gp)
                             "control file.");
                 }
             }
-            else if (strcasecmp("VEGPARAM_VEGCOVER", optstr) == 0) {
+            else if (strcasecmp("VEGPARAM_FCAN", optstr) == 0) {
                 sscanf(cmdstr, "%*s %s", flgstr);
                 if (strcasecmp("TRUE", flgstr) == 0) {
-                    options.VEGPARAM_VEGCOVER = true;
+                    options.VEGPARAM_FCAN = true;
                 }
                 else {
-                    options.VEGPARAM_VEGCOVER = false;
+                    options.VEGPARAM_FCAN = false;
                 }
             }
-            else if (strcasecmp("VEGCOVER_SRC", optstr) == 0) {
+            else if (strcasecmp("FCAN_SRC", optstr) == 0) {
                 sscanf(cmdstr, "%*s %s", flgstr);
                 if (strcasecmp("FROM_VEGHIST", flgstr) == 0) {
-                    options.VEGCOVER_SRC = FROM_VEGHIST;
+                    options.FCAN_SRC = FROM_VEGHIST;
                 }
                 else if (strcasecmp("FROM_VEGPARAM", flgstr) == 0) {
-                    options.VEGCOVER_SRC = FROM_VEGPARAM;
+                    options.FCAN_SRC = FROM_VEGPARAM;
                 }
                 else if (strcasecmp("FROM_VEGLIB", flgstr) == 0) {
-                    options.VEGCOVER_SRC = FROM_VEGLIB;
+                    options.FCAN_SRC = FROM_VEGLIB;
                 }
                 else if (strcasecmp("FROM_DEFAULT", flgstr) == 0) {
-                    options.VEGCOVER_SRC = FROM_DEFAULT;
+                    options.FCAN_SRC = FROM_DEFAULT;
                 }
                 else {
-                    log_err("Unrecognized value of VEGCOVER_SRC in the global "
+                    log_err("Unrecognized value of FCAN_SRC in the global "
                             "control file.");
                 }
             }
@@ -679,6 +684,16 @@ get_global_param(FILE *gp)
                     log_err("Unrecognized value of ALB_SRC in the global "
                             "control file.");
                 }
+            }
+            else if(strcasecmp("VEGPARAM_VEGCOVER",optstr)==0) {
+                log_err("The option VEGPARAM_VEGCOVER has been replaced by "
+                        "VEGPARAM_FCAN.  Please edit your global parameter "
+                        "file and re-run.");
+            }
+            else if(strcasecmp("VEGCOVER_SRC",optstr)==0) {
+                log_err("The option VEGCOVER_SRC has been replaced by "
+                        "FCAN_SRC.  Please edit your global parameter "
+                        "file and re-run.");
             }
             else if (strcasecmp("ROOT_ZONES", optstr) == 0) {
                 sscanf(cmdstr, "%*s %zu", &options.ROOT_ZONES);
@@ -1252,46 +1267,46 @@ get_global_param(FILE *gp)
                 "consistent with the contents of the veg param file (i.e. "
                 "whether or not it contains albedo values).");
     }
-    if (options.VEGCOVER_SRC == FROM_VEGHIST &&
-        !param_set.TYPE[VEGCOVER].SUPPLIED) {
-        log_err("\"VEGCOVER_SRC\" was specified as \"FROM_VEGHIST\", but "
-                "\"VEGCOVER\" was not specified as an input forcing in the "
-                "global parameter file.  If you want VIC to read VEGCOVER "
+    if (options.FCAN_SRC == FROM_VEGHIST &&
+        !param_set.TYPE[FCANOPY].SUPPLIED) {
+        log_err("\"FCAN_SRC\" was specified as \"FROM_VEGHIST\", but "
+                "\"FCANOPY\" was not specified as an input forcing in the "
+                "global parameter file.  If you want VIC to read FCANOPY "
                 "values from the veg_hist file, you MUST make sure the veg "
-                "hist file contains Nveg columns of VEGCOVER values, 1 for "
-                "each veg tile in the grid cell, AND specify VEGCOVER as a "
+                "hist file contains Nveg columns of FCANOPY values, 1 for "
+                "each veg tile in the grid cell, AND specify FCANOPY as a "
                 "forcing variable in the veg_hist forcing file in the "
                 "global parameter file.");
     }
-    if (options.VEGCOVER_SRC == FROM_VEGPARAM && !options.VEGPARAM_VEGCOVER) {
-        log_err("\"VEGCOVER_SRC\" was specified as \"FROM_VEGPARAM\", but "
-                "\"VEGPARAM_VEGCOVER\" was set to \"FALSE\" in the global "
-                "parameter file.  If you want VIC to read vegcover values from "
+    if (options.FCAN_SRC == FROM_VEGPARAM && !options.VEGPARAM_FCAN) {
+        log_err("\"FCAN_SRC\" was specified as \"FROM_VEGPARAM\", but "
+                "\"VEGPARAM_FCAN\" was set to \"FALSE\" in the global "
+                "parameter file.  If you want VIC to read fcanopy values from "
                 "the vegparam file, you MUST make sure the veg param file "
-                "contains 1 line of 12 monthly vegcover values for EACH veg "
+                "contains 1 line of 12 monthly fcanopy values for EACH veg "
                 "tile in EACH grid cell, and you MUST specify "
-                "\"VEGPARAM_VEGCOVER\" as \"TRUE\" in the global parameter "
-                "file.  Alternatively, if you want VIC to read vegcover values "
-                "from the veg library file, set \"VEGCOVER_SRC\" to "
+                "\"VEGPARAM_FCAN\" as \"TRUE\" in the global parameter "
+                "file.  Alternatively, if you want VIC to read fcanopy values "
+                "from the veg library file, set \"FCAN_SRC\" to "
                 "\"FROM_VEGLIB\" in the global parameter file.  In "
-                "either case, the setting of \"VEGPARAM_VEGCOVER\" must be "
+                "either case, the setting of \"VEGPARAM_FCAN\" must be "
                 "consistent with the contents of the veg param file (i.e. "
-                "whether or not it contains vegcover values).");
+                "whether or not it contains fcanopy values).");
     }
-    if (options.VEGCOVER_SRC == FROM_VEGLIB && !options.VEGLIB_VEGCOVER) {
-        log_err("\"VEGCOVER_SRC\" was specified as \"FROM_VEGLIB\", but "
-                "\"VEGLIB_VEGCOVER\" was set to \"FALSE\" in the global "
-                "parameter file.  If you want VIC to read vegcover values from "
+    if (options.FCAN_SRC == FROM_VEGLIB && !options.VEGLIB_FCAN) {
+        log_err("\"FCAN_SRC\" was specified as \"FROM_VEGLIB\", but "
+                "\"VEGLIB_FCAN\" was set to \"FALSE\" in the global "
+                "parameter file.  If you want VIC to read fcanopy values from "
                 "the veglib file, you MUST make sure the veg lib file "
-                "contains 1 line of 12 monthly vegcover values for EACH veg "
+                "contains 1 line of 12 monthly fcanopy values for EACH veg "
                 "class, and you MUST specify "
-                "\"VEGLIB_VEGCOVER\" as \"TRUE\" in the global parameter "
-                "file.  Alternatively, if you want VIC to read vegcover values "
-                "from the veg param file, set \"VEGCOVER_SRC\" to "
+                "\"VEGLIB_FCAN\" as \"TRUE\" in the global parameter "
+                "file.  Alternatively, if you want VIC to read fcanopy values "
+                "from the veg param file, set \"FCAN_SRC\" to "
                 "\"FROM_VEGPARAM\" in the global parameter file.  In "
-                "either case, the setting of \"VEGLIB_VEGCOVER\" must be "
+                "either case, the setting of \"VEGLIB_FCAN\" must be "
                 "consistent with the contents of the veg lib file (i.e. "
-                "whether or not it contains vegcover values).");
+                "whether or not it contains fcanopy values).");
     }
 
     // Validate SPATIAL_FROST information

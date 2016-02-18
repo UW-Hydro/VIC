@@ -45,6 +45,7 @@ vic_alloc(void)
     extern veg_con_struct    **veg_con;
     extern veg_hist_struct   **veg_hist;
     extern veg_lib_struct    **veg_lib;
+    extern lake_con_struct    *lake_con;
     size_t                     i;
     size_t                     j;
 
@@ -82,6 +83,14 @@ vic_alloc(void)
     veg_lib = malloc(local_domain.ncells_active * sizeof(*veg_lib));
     if (veg_lib == NULL) {
         log_err("Memory allocation error in vic_alloc().");
+    }
+
+    if (options.LAKES) {
+        // allocate memory for lake structure
+        lake_con = malloc(local_domain.ncells_active * sizeof(*lake_con));
+        if (lake_con == NULL) {
+            log_err("Memory allocation error in vic_alloc().");
+        }
     }
 
     // all_vars allocation
@@ -200,5 +209,6 @@ vic_alloc(void)
         for (j = 0; j < veg_con_map[i].nv_active; j++) {
             alloc_veg_hist(&(veg_hist[i][j]));
         }
+ 
     }
 }

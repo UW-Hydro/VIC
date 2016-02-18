@@ -123,6 +123,10 @@ vic_start(void)
                         "match parameter file");
             }
         }
+        if (options.LAKES) {
+            options.NLAKENODES = get_nc_dimension(filenames.lakeparam,
+                                                  "lake_node");
+        }
 
         // Check that model parameters are valid
         validate_parameters();

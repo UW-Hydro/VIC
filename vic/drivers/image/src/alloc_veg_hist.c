@@ -42,8 +42,8 @@ alloc_veg_hist(veg_hist_struct *veg_hist)
     if (veg_hist->LAI == NULL) {
         log_err("Memory allocation error in alloc_veg_hist().");
     }
-    veg_hist->vegcover = calloc(NR + 1, sizeof(*(veg_hist->vegcover)));
-    if (veg_hist->vegcover == NULL) {
+    veg_hist->fcanopy = calloc(NR + 1, sizeof(*(veg_hist->fcanopy)));
+    if (veg_hist->fcanopy == NULL) {
         log_err("Memory allocation error in alloc_veg_hist().");
     }
 }
@@ -60,5 +60,5 @@ free_veg_hist(veg_hist_struct *veg_hist)
 
     free(veg_hist->albedo);
     free(veg_hist->LAI);
-    free(veg_hist->vegcover);
+    free(veg_hist->fcanopy);
 }

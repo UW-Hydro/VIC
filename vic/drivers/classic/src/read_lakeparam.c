@@ -39,17 +39,13 @@ read_lakeparam(FILE           *lakeparam,
                soil_con_struct soil_con,
                veg_con_struct *veg_con)
 {
-    extern option_struct     options;
-    extern parameters_struct param;
+    extern option_struct options;
 
-    size_t                   i;
-    unsigned int             lakecel;
-    double                   tempdz;
-    double                   radius, x;
-    char                     tmpstr[MAXSTRING + 1];
-    int                      ErrFlag;
+    size_t               i;
+    unsigned int         lakecel;
+    char                 tmpstr[MAXSTRING + 1];
 
-    lake_con_struct          temp;
+    lake_con_struct      temp;
 
     /*******************************************************************/
     /* Read in general lake parameters.                           */
@@ -139,8 +135,6 @@ read_lakeparam(FILE           *lakeparam,
         log_info("LAKE PROFILE being computed.");
 
         fscanf(lakeparam, "%lf %lf", &temp.z[0], &temp.Cl[0]);
-        temp.maxdepth = temp.z[0];
-        tempdz = (temp.maxdepth) / ((double) temp.numnod);
         if (temp.Cl[0] < 0.0 || temp.Cl[0] > 1.0) {
             log_err("Lake area fraction (%f) for cell (%d) specified in the "
                     "lake parameter file must be a fraction between 0 and 1.",
@@ -157,40 +151,15 @@ read_lakeparam(FILE           *lakeparam,
         }
 
         fgets(tmpstr, MAXSTRING, lakeparam);
-
-        temp.basin[0] = temp.Cl[0] * soil_con.cell_area;
-
-        /**********************************************
-           Compute depth area relationship.
-        **********************************************/
-
-        radius = sqrt(temp.basin[0] / CONST_PI);
-
-        temp.maxvolume = 0.0;
-        for (i = 1; i <= temp.numnod; i++) {
-            temp.z[i] = (temp.numnod - i) * tempdz;
-            if (temp.z[i] < 0.0) {
-                temp.z[i] = 0.0;
-            }
-            x = pow(temp.z[i] / temp.maxdepth, param.LAKE_BETA) * radius;
-            temp.basin[i] = CONST_PI * x * x;
-            temp.maxvolume += (temp.basin[i] + temp.basin[i - 1]) * tempdz / 2.;
-        }
     }
     /* Read in basin area for each layer depth. */
     /* Assumes that the lake bottom area is zero. */
-
     else {
         log_info("Reading in the specified lake profile.");
-        temp.maxvolume = 0.0;
         temp.Cl[0] = 0; // initialize to 0 in case no lake is defined
         for (i = 0; i < temp.numnod; i++) {
             fscanf(lakeparam, "%lf %lf", &temp.z[i], &temp.Cl[i]);
-            temp.basin[i] = temp.Cl[i] * soil_con.cell_area;
-
             if (i == 0) {
-                temp.maxdepth = temp.z[i];
-                tempdz = (temp.maxdepth) / ((double) temp.numnod);
                 if (fabs(1 - temp.Cl[0] / veg_con[temp.lake_idx].Cv) > 0.01) {
                     log_err("Lake area fraction at top of lake basin (%f) "
                             "for cell (%d) specified in the lake parameter "
@@ -203,31 +172,17 @@ read_lakeparam(FILE           *lakeparam,
                     temp.Cl[0] = veg_con[temp.lake_idx].Cv;
                 }
             }
-
             if (temp.Cl[i] < 0.0 || temp.Cl[i] > 1.0) {
                 log_err("Lake layer %d area fraction (%f) for cell (%d) "
                         "specified in the lake parameter file must be a "
-                        "fraction between 0 and 1.", (int)i, temp.Cl[0],
+                        "fraction between 0 and 1.", (int)i, temp.Cl[i],
                         soil_con.gridcel);
             }
         }
-        temp.z[temp.numnod] = 0.0;
-        temp.basin[temp.numnod] = 0.0;
-        temp.Cl[temp.numnod] = 0.0;
-
-        for (i = 1; i <= temp.numnod; i++) {
-            temp.maxvolume +=
-                (temp.basin[i] +
-                 temp.basin[i - 1]) * (temp.z[i - 1] - temp.z[i]) / 2.;
-        }
     }
 
-    // Compute volume corresponding to mindepth
-    ErrFlag = get_volume(temp, temp.mindepth, &(temp.minvolume));
-    if (ErrFlag == ERROR) {
-        log_err("problem in get_volume(): depth %f volume %f rec %d",
-                temp.mindepth, temp.minvolume, 0);
-    }
+    // Compute other lake parameters
+    compute_lake_params(&temp, soil_con);
 
     // Make sure min < max
     if (temp.mindepth > temp.maxdepth) {

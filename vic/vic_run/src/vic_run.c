@@ -137,11 +137,11 @@ vic_run(atmos_data_struct   *atmos,
     for (iveg = 0; iveg < Nveg; iveg++) {
         veg_class = veg_con[iveg].veg_class;
         for (band = 0; band < Nbands; band++) {
-            veg_var[iveg][band].LAI /= veg_var[iveg][band].vegcover;
-            veg_var[iveg][band].Wdew /= veg_var[iveg][band].vegcover;
+            veg_var[iveg][band].LAI /= veg_var[iveg][band].fcanopy;
+            veg_var[iveg][band].Wdew /= veg_var[iveg][band].fcanopy;
             veg_var[iveg][band].Wdmax = veg_var[iveg][band].LAI *
                                         param.VEG_LAI_WATER_FACTOR;
-            snow[iveg][band].snow_canopy /= veg_var[iveg][band].vegcover;
+            snow[iveg][band].snow_canopy /= veg_var[iveg][band].fcanopy;
         }
     }
 
@@ -223,8 +223,8 @@ vic_run(atmos_data_struct   *atmos,
             wind_h = vic_run_veg_lib[veg_class].wind_h;
 
             /** Compute Surface Attenuation due to Vegetation Coverage **/
-            surf_atten = (1 - veg_var[iveg][0].vegcover) * 1.0 +
-                         veg_var[iveg][0].vegcover *
+            surf_atten = (1 - veg_var[iveg][0].fcanopy) * 1.0 +
+                         veg_var[iveg][0].fcanopy *
                          exp(-vic_run_veg_lib[veg_class].rad_atten *
                              veg_var[iveg][0].LAI);
 
@@ -389,8 +389,8 @@ vic_run(atmos_data_struct   *atmos,
     /* Convert LAI back to global */
     for (iveg = 0; iveg < Nveg; iveg++) {
         for (band = 0; band < Nbands; band++) {
-            veg_var[iveg][band].LAI *= veg_var[iveg][band].vegcover;
-            veg_var[iveg][band].Wdmax *= veg_var[iveg][band].vegcover;
+            veg_var[iveg][band].LAI *= veg_var[iveg][band].fcanopy;
+            veg_var[iveg][band].Wdmax *= veg_var[iveg][band].fcanopy;
         }
     }
 

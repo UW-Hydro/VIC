@@ -135,6 +135,7 @@ Using options within the *global parameter file*, any combination of the variabl
 | OUT_AERO_RESIST2 	| Overstory aerodynamic resistance                                                                                                 	| s/m                   	|
 | OUT_AIR_TEMP     	| Air temperature                                                                                                                  	| C (ALMA_OUTPUT: K)    	|
 | OUT_DENSITY      	| Near-surface atmospheric density                                                                                                 	| kg/m<sup>3</sup>                 	|
+| OUT_FCANOPY     	| Vegetation canopy cover fraction                                                                                                	| fraction              	|
 | OUT_FDIR         	| fraction of incoming shortwave that is direct                                                                                    	| fraction              	|
 | OUT_LAI          	| Leaf Area Index                                                                                                                  	| fraction              	|
 | OUT_LONGWAVE     	| Incoming longwave                                                                                                                	| W/m<sup>2</sup>                  	|
@@ -144,7 +145,6 @@ Using options within the *global parameter file*, any combination of the variabl
 | OUT_SHORTWAVE    	| Incoming shortwave                                                                                                               	| W/m<sup>2</sup>                  	|
 | OUT_SURF_COND    	| Surface conductance                                                                                                              	| m/s                   	|
 | OUT_TSKC         	| (release 4.1.2 and later)  Cloud fraction                                                                                       	| fraction              	|
-| OUT_VEGCOVER     	| Partial vegetation cover fraction                                                                                                	| fraction              	|
 | OUT_VP           	| Near surface vapor pressure                                                                                                      	| kPa (ALMA_OUTPUT: Pa) 	|
 | OUT_VPD          	| Near surface vapor pressure deficit                                                                                              	| kPa (ALMA_OUTPUT: Pa) 	|
 | OUT_WIND         	| Near surface wind speed                                                                                                          	| m/s                   	|

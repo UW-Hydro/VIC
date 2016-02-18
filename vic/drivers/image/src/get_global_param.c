@@ -514,22 +514,22 @@ get_global_param(FILE *gp)
                             "control file.");
                 }
             }
-            else if (strcasecmp("VEGCOVER_SRC", optstr) == 0) {
+            else if (strcasecmp("FCAN_SRC", optstr) == 0) {
                 sscanf(cmdstr, "%*s %s", flgstr);
                 if (strcasecmp("FROM_VEGHIST", flgstr) == 0) {
-                    options.VEGCOVER_SRC = FROM_VEGHIST;
+                    options.FCAN_SRC = FROM_VEGHIST;
                 }
                 else if (strcasecmp("FROM_VEGPARAM", flgstr) == 0) {
-                    options.VEGCOVER_SRC = FROM_VEGPARAM;
+                    options.FCAN_SRC = FROM_VEGPARAM;
                 }
                 else if (strcasecmp("FROM_VEGLIB", flgstr) == 0) {
-                    options.VEGCOVER_SRC = FROM_VEGLIB;
+                    options.FCAN_SRC = FROM_VEGLIB;
                 }
                 else if (strcasecmp("FROM_DEFAULT", flgstr) == 0) {
-                    options.VEGCOVER_SRC = FROM_DEFAULT;
+                    options.FCAN_SRC = FROM_DEFAULT;
                 }
                 else {
-                    log_err("Unrecognized value of VEGCOVER_SRC in the global "
+                    log_err("Unrecognized value of FCAN_SRC in the global "
                             "control file.");
                 }
             }
@@ -636,7 +636,7 @@ get_global_param(FILE *gp)
             // mode, but that does not exist in image mode (yet)
             else if (strcasecmp("ALBEDO", optstr) == 0 ||
                      strcasecmp("LAI_IN", optstr) == 0 ||
-                     strcasecmp("VEGCOVER", optstr) == 0) {
+                     strcasecmp("FCANOPY", optstr) == 0) {
                 log_err("Time-varying vegetation parameters not implemented "
                         "in image mode");
             }

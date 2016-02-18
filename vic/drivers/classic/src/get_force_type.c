@@ -75,43 +75,43 @@ get_force_type(char *cmdstr,
     else if (strcasecmp("CHANNEL_IN", optstr) == 0) {
         type = CHANNEL_IN;
     }
-    /* type 4: direct fraction of shortwave [fraction] */
+    /* type 4: vegetation canopy cover fraction */
+    else if (strcasecmp("FCANOPY", optstr) == 0) {
+        type = FCANOPY;
+    }
+    /* type 5: direct fraction of shortwave [fraction] */
     else if (strcasecmp("FDIR", optstr) == 0) {
         type = FDIR;
     }
-    /* type 5: LAI [m2/m2] */
+    /* type 6: LAI [m2/m2] */
     else if (strcasecmp("LAI_IN", optstr) == 0) {
         type = LAI_IN;
     }
-    /* type 6: incoming longwave radiation [W/m2] */
+    /* type 7: incoming longwave radiation [W/m2] */
     else if (strcasecmp("LONGWAVE",
                         optstr) == 0 || strcasecmp("LWDOWN", optstr) == 0) {
         type = LONGWAVE;
     }
-    /* type 7: photosynthetically active radiation [uE/m2s] */
+    /* type 8: photosynthetically active radiation [uE/m2s] */
     else if (strcasecmp("PAR", optstr) == 0) {
         type = PAR;
     }
-    /* type 8: precipitation [mm] */
+    /* type 9: precipitation [mm] */
     else if (strcasecmp("PREC", optstr) == 0) {
         type = PREC;
     }
-    /* type 9: air pressure [kPa] */
+    /* type 10: air pressure [kPa] */
     else if (strcasecmp("PRESSURE", optstr) == 0) {
         type = PRESSURE;
     }
-    /* type 10: vapor pressure [kPa] */
+    /* type 11: vapor pressure [kPa] */
     else if (strcasecmp("VP", optstr) == 0) {
         type = VP;
     }
-    /* type 11: rainfall [mm] */
+    /* type 12: rainfall [mm] */
     else if (strcasecmp("SHORTWAVE",
                         optstr) == 0 || strcasecmp("SWDOWN", optstr) == 0) {
         type = SHORTWAVE;
-    }
-    /* type 12: vegetation cover fraction */
-    else if (strcasecmp("VEGCOVER", optstr) == 0) {
-        type = VEGCOVER;
     }
     /* type 13: wind speed [m/s] */
     else if (strcasecmp("WIND", optstr) == 0) {

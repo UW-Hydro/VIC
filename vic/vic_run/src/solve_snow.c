@@ -190,7 +190,7 @@ solve_snow(char               overstory,
 
                 (*ShortUnderIn) *= (*surf_atten); // SW transmitted through canopy
                 ShortOverIn = (1. - (*surf_atten)) * shortwave; // canopy incident SW
-                ShortOverIn /= veg_var->vegcover;
+                ShortOverIn /= veg_var->fcanopy;
                 ErrorFlag = snow_intercept(dt, 1.,
                                            veg_var->LAI,
                                            (*Le), longwave, LongUnderOut,
@@ -254,27 +254,27 @@ solve_snow(char               overstory,
             /* Rescale veg terms back to whole tile (as opposed to just over plants) */
             veg_var->throughfall =
                 (1 -
-                 veg_var->vegcover) * (*out_prec) + veg_var->vegcover *
+                 veg_var->fcanopy) * (*out_prec) + veg_var->fcanopy *
                 veg_var->throughfall;
             *rainfall =
                 (1 -
-                 veg_var->vegcover) * (*out_rain) + veg_var->vegcover *
+                 veg_var->fcanopy) * (*out_rain) + veg_var->fcanopy *
                 (*rainfall);
             *snowfall =
                 (1 -
-                 veg_var->vegcover) * (*out_snow) + veg_var->vegcover *
+                 veg_var->fcanopy) * (*out_snow) + veg_var->fcanopy *
                 (*snowfall);
-            snow->canopy_vapor_flux *= veg_var->vegcover;
-            snow->snow_canopy *= veg_var->vegcover;
-            veg_var->Wdew *= veg_var->vegcover;
-            veg_var->canopyevap *= veg_var->vegcover;
-            energy->canopy_advection *= veg_var->vegcover;
-            energy->canopy_latent *= veg_var->vegcover;
-            energy->canopy_latent_sub *= veg_var->vegcover;
-            energy->canopy_sensible *= veg_var->vegcover;
-            energy->canopy_refreeze *= veg_var->vegcover;
-            energy->NetShortOver *= veg_var->vegcover;
-            energy->NetLongOver *= veg_var->vegcover;
+            snow->canopy_vapor_flux *= veg_var->fcanopy;
+            snow->snow_canopy *= veg_var->fcanopy;
+            veg_var->Wdew *= veg_var->fcanopy;
+            veg_var->canopyevap *= veg_var->fcanopy;
+            energy->canopy_advection *= veg_var->fcanopy;
+            energy->canopy_latent *= veg_var->fcanopy;
+            energy->canopy_latent_sub *= veg_var->fcanopy;
+            energy->canopy_sensible *= veg_var->fcanopy;
+            energy->canopy_refreeze *= veg_var->fcanopy;
+            energy->NetShortOver *= veg_var->fcanopy;
+            energy->NetLongOver *= veg_var->fcanopy;
         }
         else { /* no vegetation present */
             energy->NetLongOver = 0;

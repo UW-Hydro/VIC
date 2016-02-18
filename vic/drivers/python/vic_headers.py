@@ -68,6 +68,7 @@ enum
     CATM,
     CHANNEL_IN,
     DENSITY,
+    FCANOPY,
     FDIR,
     LAI_IN,
     LONGWAVE,
@@ -77,7 +78,6 @@ enum
     QAIR,
     REL_HUMID,
     SHORTWAVE,
-    VEGCOVER,
     VP,
     WIND,
     SKIP,
@@ -202,6 +202,7 @@ enum
     OUT_CATM,
     OUT_COSZEN,
     OUT_DENSITY,
+    OUT_FCANOPY,
     OUT_FDIR,
     OUT_LAI,
     OUT_LONGWAVE,
@@ -212,7 +213,6 @@ enum
     OUT_SHORTWAVE,
     OUT_SURF_COND,
     OUT_TSKC,
-    OUT_VEGCOVER,
     OUT_VP,
     OUT_VPD,
     OUT_WIND,
@@ -364,14 +364,14 @@ typedef struct {
     _Bool TFALLBACK;
     _Bool BASEFLOW;
     unsigned short int GRID_DECIMAL;
+    _Bool VEGLIB_FCAN;
     _Bool VEGLIB_PHOTO;
-    _Bool VEGLIB_VEGCOVER;
     _Bool VEGPARAM_ALB;
+    _Bool VEGPARAM_FCAN;
     _Bool VEGPARAM_LAI;
-    _Bool VEGPARAM_VEGCOVER;
     unsigned short int ALB_SRC;
+    unsigned short int FCAN_SRC;
     unsigned short int LAI_SRC;
-    unsigned short int VEGCOVER_SRC;
     _Bool LAKE_PROFILE;
     _Bool ORGANIC_FRACT;
     _Bool BINARY_STATE_FILE;
@@ -645,7 +645,7 @@ typedef struct {
 typedef struct {
     _Bool overstory;
     double LAI[12];
-    double vegcover[12];
+    double fcanopy[12];
     double Wdmax[12];
     double albedo[12];
     double displacement[12];
@@ -672,7 +672,7 @@ typedef struct {
 typedef struct {
     double *albedo;
     double *LAI;
-    double *vegcover;
+    double *fcanopy;
 } veg_hist_struct;
 typedef struct {
     double *air_temp;
@@ -805,7 +805,7 @@ typedef struct {
     double canopyevap;
     double LAI;
     double throughfall;
-    double vegcover;
+    double fcanopy;
     double Wdew;
     double Wdmax;
     double *NscaleFactor;

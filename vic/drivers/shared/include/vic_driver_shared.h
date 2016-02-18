@@ -74,6 +74,7 @@ enum
     ALBEDO,      /**< surface albedo [fraction] */
     CATM,        /**< atmospheric CO2 concentration [ppm] */
     CHANNEL_IN,  /**< incoming channel flow [m3] */
+    FCANOPY,     /**< fractional area covered by plant canopy [fraction] */
     FDIR,        /**< fraction of incoming shortwave that is direct [fraction] */
     LAI_IN,      /**< leaf area index [m2/m2] */
     LONGWAVE,    /**< incoming longwave radiation [W/m2] */
@@ -82,7 +83,6 @@ enum
     PRESSURE,    /**< atmospheric pressure [kPa] */
     VP,          /**< vapor pressure [kPa] */
     SHORTWAVE,   /**< incoming shortwave [W/m2] */
-    VEGCOVER,    /**< fraction of each veg tile covered by plants [fraction] */
     WIND,        /**< wind speed [m/s] */
     SKIP,        /**< place holder for unused data columns */
     // Last value of enum - DO NOT ADD ANYTHING BELOW THIS LINE!!
@@ -217,6 +217,7 @@ enum
     OUT_AIR_TEMP,         /**< air temperature [C] (ALMA_OUTPUT: [K])*/
     OUT_CATM,             /**< atmospheric CO2 concentrtaion [ppm]*/
     OUT_DENSITY,          /**< near-surface atmospheric density [kg/m3]*/
+    OUT_FCANOPY,          /**< fractional area covered by plant canopy [fraction] */
     OUT_FDIR,             /**< fraction of incoming shortwave that is direct [fraction]*/
     OUT_LAI,              /**< leaf area index [m2/m2] */
     OUT_LONGWAVE,         /**< incoming longwave [W/m2] */
@@ -226,7 +227,6 @@ enum
     OUT_REL_HUMID,        /**< relative humidity [%]*/
     OUT_SHORTWAVE,        /**< incoming shortwave [W/m2] */
     OUT_SURF_COND,        /**< surface conductance [m/s] */
-    OUT_VEGCOVER,         /**< fractional area of plants [fraction] */
     OUT_VP,               /**< near surface vapor pressure [kPa] (ALMA_OUTPUT: [Pa]) */
     OUT_VPD,              /**< near surface vapor pressure deficit [kPa] (ALMA_OUTPUT: [Pa]) */
     OUT_WIND,             /**< near surface wind speed [m/s] */
@@ -446,6 +446,7 @@ void collect_eb_terms(energy_bal_struct, snow_data_struct, cell_data_struct,
 void collect_wb_terms(cell_data_struct, veg_var_struct, snow_data_struct,
                       double, double, double, int, double, int, double *,
                       double *, out_data_struct *);
+void compute_lake_params(lake_con_struct *, soil_con_struct);
 void compute_treeline(atmos_data_struct *, dmy_struct *, double, double *,
                       bool *);
 void cmd_proc(int argc, char **argv, char *globalfilename);
@@ -468,7 +469,6 @@ void free_dmy(dmy_struct **dmy);
 void free_out_data_files(out_data_file_struct **);
 void free_out_data(out_data_struct **);
 void free_vegcon(veg_con_struct **veg_con);
-double get_dist(double lat1, double long1, double lat2, double long2);
 void get_parameters(FILE *paramfile);
 void init_output_list(out_data_struct *out_data, int write, char *format,
                       int type, double mult);

@@ -493,14 +493,14 @@ print_option(option_struct *option)
     fprintf(LOG_DEST, "\tBASEFLOW             : %d\n", option->BASEFLOW);
     fprintf(LOG_DEST, "\tGRID_DECIMAL         : %d\n", option->GRID_DECIMAL);
     fprintf(LOG_DEST, "\tVEGLIB_PHOTO         : %d\n", option->VEGLIB_PHOTO);
-    fprintf(LOG_DEST, "\tVEGLIB_VEGCOVER      : %d\n", option->VEGLIB_VEGCOVER);
+    fprintf(LOG_DEST, "\tVEGLIB_FCAN      : %d\n", option->VEGLIB_FCAN);
     fprintf(LOG_DEST, "\tVEGPARAM_ALB         : %d\n", option->VEGPARAM_ALB);
     fprintf(LOG_DEST, "\tVEGPARAM_LAI         : %d\n", option->VEGPARAM_LAI);
-    fprintf(LOG_DEST, "\tVEGPARAM_VEGCOVER    : %d\n",
-            option->VEGPARAM_VEGCOVER);
+    fprintf(LOG_DEST, "\tVEGPARAM_FCAN    : %d\n",
+            option->VEGPARAM_FCAN);
     fprintf(LOG_DEST, "\tALB_SRC              : %d\n", option->ALB_SRC);
     fprintf(LOG_DEST, "\tLAI_SRC              : %d\n", option->LAI_SRC);
-    fprintf(LOG_DEST, "\tVEGCOVER_SRC         : %d\n", option->VEGCOVER_SRC);
+    fprintf(LOG_DEST, "\tFCAN_SRC         : %d\n", option->FCAN_SRC);
     fprintf(LOG_DEST, "\tLAKE_PROFILE         : %d\n", option->LAKE_PROFILE);
     fprintf(LOG_DEST, "\tORGANIC_FRACT        : %d\n", option->ORGANIC_FRACT);
     fprintf(LOG_DEST, "\tBINARY_STATE_FILE    : %d\n",

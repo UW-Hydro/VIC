@@ -163,10 +163,10 @@ read_veglib(FILE   *veglib,
             /* Carbon-cycling parameters */
             if (options.VEGLIB_PHOTO) {
                 fscanf(veglib, "%s", tmpstr); /* photosynthetic pathway */
-                if (!strcmp(tmpstr, "0")) {
+                if (!strcmp(tmpstr, "0") || !strcmp(tmpstr, "C3")) {
                     temp[i].Ctype = PHOTO_C3;
                 }
-                else if (!strcmp(tmpstr, "1")) {
+                else if (!strcmp(tmpstr, "1") || !strcmp(tmpstr, "C4")) {
                     temp[i].Ctype = PHOTO_C4;
                 }
                 fscanf(veglib, "%lf", &temp[i].MaxCarboxRate); /* Maximum carboxylation rate at 25 deg C */

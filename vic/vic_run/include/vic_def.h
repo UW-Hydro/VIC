@@ -689,7 +689,7 @@ typedef struct {
                               will be no transpiration (ranges from
                               ~30 W/m^2 for trees to ~100 W/m^2 for crops) */
     unsigned short int veg_class; /**< vegetation class reference number */
-    char Ctype;              /**< Photosynthetic pathway; can be C3 or C4 */
+    char Ctype;            /**< Photosynthetic pathway; 0 = C3; 1 = C4 */
     double MaxCarboxRate;  /**< maximum carboxlyation rate at 25 deg C (mol(CO2)/m2s) */
     double MaxETransport;  /**< maximum electron transport rate at 25 deg C (mol(CO2)/m2s) (C3 plants) */
     double CO2Specificity; /**< CO2 specificity at 25 deg C (mol(CO2)/m2s) (C4 plants) */

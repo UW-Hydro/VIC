@@ -47,6 +47,7 @@ get_global_param(FILE *gp)
     char                       flgstr[MAXSTRING];
     char                       flgstr2[MAXSTRING];
     size_t                     file_num;
+    int                        field;
     unsigned int               tmpstartdate;
     unsigned int               tmpenddate;
     unsigned short int         lastday[MONTHS_PER_YEAR];
@@ -401,6 +402,9 @@ get_global_param(FILE *gp)
                 }
                 sscanf(cmdstr, "%*s %s", filenames.f_path_pfx[0]);
                 file_num = 0;
+                field = 0;
+                // count the number of forcing variables in this file
+                param_set.N_TYPES[file_num] = count_force_vars(gp);
             }
             else if (strcasecmp("FORCING2", optstr) == 0) {
                 sscanf(cmdstr, "%*s %s", filenames.f_path_pfx[1]);
@@ -408,6 +412,12 @@ get_global_param(FILE *gp)
                     strcpy(filenames.f_path_pfx[1], "MISSING");
                 }
                 file_num = 1;
+                field = 0;
+                // count the number of forcing variables in this file
+                param_set.N_TYPES[file_num] = count_force_vars(gp);
+            }
+            else if (strcasecmp("FORCE_TYPE", optstr) == 0) {
+                set_force_type(cmdstr, file_num, &field);
             }
             else if (strcasecmp("WIND_H", optstr) == 0) {
                 sscanf(cmdstr, "%*s %lf", &global_param.wind_h);
@@ -421,6 +431,9 @@ get_global_param(FILE *gp)
             }
             else if (strcasecmp("DOMAIN", optstr) == 0) {
                 sscanf(cmdstr, "%*s %s", filenames.domain);
+            }
+            else if (strcasecmp("DOMAIN_TYPE", optstr) == 0) {
+                get_domain_type(cmdstr);
             }
             else if (strcasecmp("SOIL", optstr) == 0) {
                 sscanf(cmdstr, "%*s %s", filenames.soil);
@@ -587,12 +600,6 @@ get_global_param(FILE *gp)
             }
             else if (strcasecmp("SKIPYEAR", optstr) == 0) {
                 sscanf(cmdstr, "%*s %hu", &global_param.skipyear);
-            }
-            else if (strcasecmp("DOMAIN_LON_VAR", optstr) == 0) {
-                sscanf(cmdstr, "%*s %s", options.DOMAIN_LON_VAR);
-            }
-            else if (strcasecmp("DOMAIN_LAT_VAR", optstr) == 0) {
-                sscanf(cmdstr, "%*s %s", options.DOMAIN_LAT_VAR);
             }
             else if (strcasecmp("ALMA_OUTPUT", optstr) == 0) {
                 sscanf(cmdstr, "%*s %s", flgstr);

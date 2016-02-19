@@ -71,13 +71,13 @@ enum
     FCANOPY,
     FDIR,
     LAI_IN,
-    LONGWAVE,
+    LWDOWN,
     PAR,
     PREC,
     PRESSURE,
     QAIR,
     REL_HUMID,
-    SHORTWAVE,
+    SWDOWN,
     VP,
     WIND,
     SKIP,
@@ -186,8 +186,8 @@ enum
     OUT_LATENT,
     OUT_LATENT_SUB,
     OUT_MELT_ENERGY,
-    OUT_NET_LONG,
-    OUT_NET_SHORT,
+    OUT_LWNET,
+    OUT_SWNET,
     OUT_R_NET,
     OUT_RFRZ_ENERGY,
     OUT_SENSIBLE,
@@ -205,12 +205,12 @@ enum
     OUT_FCANOPY,
     OUT_FDIR,
     OUT_LAI,
-    OUT_LONGWAVE,
+    OUT_LWDOWN,
     OUT_PAR,
     OUT_PRESSURE,
     OUT_QAIR,
     OUT_REL_HUMID,
-    OUT_SHORTWAVE,
+    OUT_SWDOWN,
     OUT_SURF_COND,
     OUT_TSKC,
     OUT_VP,
@@ -225,8 +225,8 @@ enum
     OUT_LATENT_BAND,
     OUT_LATENT_SUB_BAND,
     OUT_MELT_ENERGY_BAND,
-    OUT_NET_LONG_BAND,
-    OUT_NET_SHORT_BAND,
+    OUT_LWNET_BAND,
+    OUT_SWNET_BAND,
     OUT_RFRZ_ENERGY_BAND,
     OUT_SENSIBLE_BAND,
     OUT_SNOW_CANOPY_BAND,
@@ -1250,6 +1250,7 @@ typedef struct {
     _Bool SIGNED;
     _Bool SUPPLIED;
     double multiplier;
+    char varname[2048];
 } force_type_struct;
 typedef struct {
     force_type_struct TYPE[N_FORCING_TYPES];

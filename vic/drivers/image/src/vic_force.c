@@ -48,6 +48,7 @@ vic_force(void)
     extern veg_con_struct    **veg_con;
     extern veg_hist_struct   **veg_hist;
     extern parameters_struct   param;
+    extern param_set_struct    param_set;
 
     double                     t_offset;
     double                    *dvar = NULL;
@@ -86,7 +87,8 @@ vic_force(void)
     // Air temperature: tas
     for (j = 0; j < NF; j++) {
         d3start[0] = global_param.forceoffset[0] + j;
-        get_scatter_nc_field_double(filenames.forcing[0], "tas",
+        get_scatter_nc_field_double(filenames.forcing[0],
+                                    param_set.TYPE[AIR_TEMP].varname,
                                     d3start, d3count, dvar);
         for (i = 0; i < local_domain.ncells_active; i++) {
             atmos[i].air_temp[j] = (double) dvar[i];
@@ -96,7 +98,8 @@ vic_force(void)
     // Precipitation: prcp
     for (j = 0; j < NF; j++) {
         d3start[0] = global_param.forceoffset[0] + j;
-        get_scatter_nc_field_double(filenames.forcing[0], "prcp",
+        get_scatter_nc_field_double(filenames.forcing[0],
+                                    param_set.TYPE[PREC].varname,
                                     d3start, d3count, dvar);
         for (i = 0; i < local_domain.ncells_active; i++) {
             atmos[i].prec[j] = (double) dvar[i];
@@ -106,7 +109,8 @@ vic_force(void)
     // Downward solar radiation: dswrf
     for (j = 0; j < NF; j++) {
         d3start[0] = global_param.forceoffset[0] + j;
-        get_scatter_nc_field_double(filenames.forcing[0], "dswrf",
+        get_scatter_nc_field_double(filenames.forcing[0],
+                                    param_set.TYPE[SWDOWN].varname,
                                     d3start, d3count, dvar);
         for (i = 0; i < local_domain.ncells_active; i++) {
             atmos[i].shortwave[j] = (double) dvar[i];
@@ -116,7 +120,8 @@ vic_force(void)
     // Downward longwave radiation: dlwrf
     for (j = 0; j < NF; j++) {
         d3start[0] = global_param.forceoffset[0] + j;
-        get_scatter_nc_field_double(filenames.forcing[0], "dlwrf",
+        get_scatter_nc_field_double(filenames.forcing[0],
+                                    param_set.TYPE[LWDOWN].varname,
                                     d3start, d3count, dvar);
         for (i = 0; i < local_domain.ncells_active; i++) {
             atmos[i].longwave[j] = (double) dvar[i];
@@ -136,7 +141,8 @@ vic_force(void)
     // Specific humidity: shum
     for (j = 0; j < NF; j++) {
         d3start[0] = global_param.forceoffset[0] + j;
-        get_scatter_nc_field_double(filenames.forcing[0], "shum",
+        get_scatter_nc_field_double(filenames.forcing[0],
+                                    param_set.TYPE[VP].varname,
                                     d3start, d3count, dvar);
         for (i = 0; i < local_domain.ncells_active; i++) {
             atmos[i].vp[j] = (double) dvar[i];
@@ -146,7 +152,8 @@ vic_force(void)
     // Pressure: pressure
     for (j = 0; j < NF; j++) {
         d3start[0] = global_param.forceoffset[0] + j;
-        get_scatter_nc_field_double(filenames.forcing[0], "pres",
+        get_scatter_nc_field_double(filenames.forcing[0],
+                                    param_set.TYPE[PRESSURE].varname,
                                     d3start, d3count, dvar);
         for (i = 0; i < local_domain.ncells_active; i++) {
             atmos[i].pressure[j] = (double) dvar[i];
@@ -155,9 +162,13 @@ vic_force(void)
     // Optional inputs
     if (options.LAKES) {
         // Channel inflow to lake
+        d3start[0] = global_param.forceoffset[0] + j;
+        get_scatter_nc_field_double(filenames.forcing[0],
+                                    param_set.TYPE[CHANNEL_IN].varname,
+                                    d3start, d3count, dvar);
         for (j = 0; j < NF; j++) {
             for (i = 0; i < local_domain.ncells_active; i++) {
-                atmos[i].channel_in[j] = 0;
+                atmos[i].channel_in[j] = (double) dvar[i];
             }
         }
     }
@@ -165,7 +176,8 @@ vic_force(void)
         // Atmospheric CO2 mixing ratio
         for (j = 0; j < NF; j++) {
             d3start[0] = global_param.forceoffset[0] + j;
-            get_scatter_nc_field_double(filenames.forcing[0], "catm",
+            get_scatter_nc_field_double(filenames.forcing[0],
+                                        param_set.TYPE[CATM].varname,
                                         d3start, d3count, dvar);
             for (i = 0; i < local_domain.ncells_active; i++) {
                 atmos[i].Catm[j] = (double) dvar[i];
@@ -174,7 +186,8 @@ vic_force(void)
         // Fraction of shortwave that is direct
         for (j = 0; j < NF; j++) {
             d3start[0] = global_param.forceoffset[0] + j;
-            get_scatter_nc_field_double(filenames.forcing[0], "fdir",
+            get_scatter_nc_field_double(filenames.forcing[0],
+                                        param_set.TYPE[FDIR].varname,
                                         d3start, d3count, dvar);
             for (i = 0; i < local_domain.ncells_active; i++) {
                 atmos[i].fdir[j] = (double) dvar[i];
@@ -183,7 +196,8 @@ vic_force(void)
         // Photosynthetically active radiation
         for (j = 0; j < NF; j++) {
             d3start[0] = global_param.forceoffset[0] + j;
-            get_scatter_nc_field_double(filenames.forcing[0], "par",
+            get_scatter_nc_field_double(filenames.forcing[0],
+                                        param_set.TYPE[PAR].varname,
                                         d3start, d3count, dvar);
             for (i = 0; i < local_domain.ncells_active; i++) {
                 atmos[i].par[j] = (double) dvar[i];
@@ -463,5 +477,4 @@ get_forcing_file_info(param_set_struct *param_set,
     // Free attribute character arrays
     free(nc_unit_chars);
     free(calendar_char);
-
 }

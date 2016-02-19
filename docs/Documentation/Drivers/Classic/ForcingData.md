@@ -9,8 +9,8 @@ The VIC Classic Driver requires subdaily forcings (meteorological or other).  Th
 | AIR_TEMP   | Average air temperature             | C               |
 | PREC       | Total precipitation (rain and snow) | mm              |
 | PRESSURE   | Atmospheric pressure                | kPa             |
-| SHORTWAVE  | Incoming shortwave                  | W/m<sup>2</sup> |
-| LONGWAVE   | Incoming longwave radiation         | W/m<sup>2</sup> |
+| SWDOWN     | Incoming shortwave radiation        | W/m<sup>2</sup> |
+| LWDOWN     | Incoming longwave radiation         | W/m<sup>2</sup> |
 | VP         | Vapor pressure                      | kPa             |
 | WIND       | Wind speed                          | m/s             |
 

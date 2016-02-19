@@ -118,8 +118,8 @@ Using options within the *global parameter file*, any combination of the variabl
 | OUT_LATENT       	| Net upward latent heat flux                          	| W/m<sup>2</sup>                     	|
 | OUT_LATENT_SUB   	| Net upward latent heat flux from sublimation         	| W/m<sup>2</sup>                     	|
 | OUT_MELT_ENERGY  	| Energy of fusion (melting) in snowpack               	| W/m<sup>2</sup>                     	|
-| OUT_NET_LONG     	| Net downward longwave flux                           	| W/m<sup>2</sup>                     	|
-| OUT_NET_SHORT    	| Net downward shortwave flux                          	| W/m<sup>2</sup>                     	|
+| OUT_LWNET     	| Net downward longwave flux                           	| W/m<sup>2</sup>                     	|
+| OUT_SWNET    	| Net downward shortwave flux                          	| W/m<sup>2</sup>                     	|
 | OUT_R_NET        	| Net downward radiation flux                          	| W/m<sup>2</sup>                     	|
 | OUT_RFRZ_ENERGY  	| Net energy used to refreeze liquid water in snowpack 	| W/m<sup>2</sup>                     	|
 | OUT_SENSIBLE     	| Net upward sensible heat flux                        	| W/m<sup>2</sup>                     	|
@@ -138,11 +138,11 @@ Using options within the *global parameter file*, any combination of the variabl
 | OUT_FCANOPY     	| Vegetation canopy cover fraction                                                                                                	| fraction              	|
 | OUT_FDIR         	| fraction of incoming shortwave that is direct                                                                                    	| fraction              	|
 | OUT_LAI          	| Leaf Area Index                                                                                                                  	| fraction              	|
-| OUT_LONGWAVE     	| Incoming longwave                                                                                                                	| W/m<sup>2</sup>                  	|
+| OUT_LWDOWN     	| Incoming longwave                                                                                                                	| W/m<sup>2</sup>                  	|
 | OUT_PRESSURE     	| Near surface atmospheric pressure                                                                                                	| kPa (ALMA_OUTPUT: Pa) 	|
 | OUT_QAIR         	| Specific humidity                                                                                                                	| kg/kg                 	|
 | OUT_REL_HUMID    	| Relative humidity                                                                                                                	| fraction              	|
-| OUT_SHORTWAVE    	| Incoming shortwave                                                                                                               	| W/m<sup>2</sup>                  	|
+| OUT_SWDOWN    	| Incoming shortwave                                                                                                               	| W/m<sup>2</sup>                  	|
 | OUT_SURF_COND    	| Surface conductance                                                                                                              	| m/s                   	|
 | OUT_TSKC         	| (release 4.1.2 and later)  Cloud fraction                                                                                       	| fraction              	|
 | OUT_VP           	| Near surface vapor pressure                                                                                                      	| kPa (ALMA_OUTPUT: Pa) 	|
@@ -161,8 +161,8 @@ Using options within the *global parameter file*, any combination of the variabl
 | OUT_LATENT_BAND      	| Net upward latent heat flux                          	| W/m<sup>2</sup>               	|
 | OUT_LATENT_SUB_BAND  	| Net upward latent heat flux due to sublimation       	| W/m<sup>2</sup>               	|
 | OUT_MELT_ENERGY_BAND 	| Energy of fusion (melting) in snowpack               	| W/m<sup>2</sup>               	|
-| OUT_NET_LONG_BAND    	| Net downward longwave flux                           	| W/m<sup>2</sup>               	|
-| OUT_NET_SHORT_BAND   	| Net downward shortwave flux                          	| W/m<sup>2</sup>               	|
+| OUT_LWNET_BAND    	| Net downward longwave flux                           	| W/m<sup>2</sup>               	|
+| OUT_SWNET_BAND   	| Net downward shortwave flux                          	| W/m<sup>2</sup>               	|
 | OUT_RFRZ_ENERGY_BAND 	| Net energy used to refreeze liquid water in snowpack 	| W/m<sup>2</sup>               	|
 | OUT_SENSIBLE_BAND    	| Net upward sensible heat flux                        	| W/m<sup>2</sup>               	|
 | OUT_SNOW_CANOPY_BAND 	| Snow interception storage in canopy                  	| mm                 	|

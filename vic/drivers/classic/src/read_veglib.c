@@ -169,6 +169,11 @@ read_veglib(FILE   *veglib,
                 else if (!strcmp(tmpstr, "1") || !strcmp(tmpstr, "C4")) {
                     temp[i].Ctype = PHOTO_C4;
                 }
+                if (!strcmp(tmpstr, "C3") || !strcmp(tmpstr, "C4")) {
+                    log_warn("Use of strings \"C3\" and \"C4\" as values of "
+                             "Ctype is deprecated.  Please replace these with "
+                             "\"0\" and \"1\", respectively");
+                }
                 fscanf(veglib, "%lf", &temp[i].MaxCarboxRate); /* Maximum carboxylation rate at 25 deg C */
                 if (temp[i].Ctype == PHOTO_C3) {
                     fscanf(veglib, "%lf", &temp[i].MaxETransport); /* Maximum electron transport rate at 25 deg C */

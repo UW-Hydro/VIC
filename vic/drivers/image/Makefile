@@ -32,7 +32,8 @@
 DRIVERPATH = .
 
 # VIC RUN PATH
-SHAREDPATH = ../shared
+SHAREDPATH = ../shared_all
+SHAREDIMAGEPATH = ../shared_image
 
 # VIC RUN PATH
 VICPATH = ../../vic_run
@@ -70,7 +71,7 @@ CC = ${MPIPATH}/bin/mpicc
 else ifeq ($(UNAME_S), Linux)
 CC = ${MPIPATH}/bin/mpicc
 else
-CC = mpicc-mpich-mp
+CC = mpicc
 endif
 
 # Set the log level
@@ -84,7 +85,8 @@ endif
 LOG_LVL = 5
 
 # set includes
-INCLUDES = -I ${DRIVERPATH}/include -I ${VICPATH}/include -I ${SHAREDPATH}/include -I ${NETCDFPATH}/include -I ${MPIPATH}/include
+INCLUDES = -I ${DRIVERPATH}/include -I ${VICPATH}/include -I ${SHAREDPATH}/include \
+		   -I ${SHAREDIMAGEPATH}/include -I ${NETCDFPATH}/include -I ${MPIPATH}/include
 
 # Uncomment for normal optimized code flags (fastest run option)
 #CFLAGS  = -O3 -Wall -Wno-unused -DLOG_LVL=$(LOG_LVL)
@@ -112,12 +114,14 @@ EXT = .exe
 HDRS = \
 	$(wildcard ${VICPATH}/include/*.h) \
 	$(wildcard ${DRIVERPATH}/include/*.h) \
-	$(wildcard ${SHAREDPATH}/include/*.h)
+	$(wildcard ${SHAREDPATH}/include/*.h) \
+	$(wildcard ${SHAREDIMAGEPATH}/include/*.h)
 
 SRCS = \
 	$(wildcard ${VICPATH}/src/*.c) \
 	$(wildcard ${DRIVERPATH}/src/*.c) \
-	$(wildcard ${SHAREDPATH}/src/*.c)
+	$(wildcard ${SHAREDPATH}/src/*.c) \
+	$(wildcard ${SHAREDIMAGEPATH}/src/*.c)
 
 OBJS = $(SRCS:%.o=%.c)
 

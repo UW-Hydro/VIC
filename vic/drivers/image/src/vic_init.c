@@ -24,8 +24,6 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  *****************************************************************************/
 
-#include <vic_def.h>
-#include <vic_run.h>
 #include <vic_driver_image.h>
 
 /******************************************************************************
@@ -1304,7 +1302,6 @@ vic_init(void)
 
     // read_lake parameters
     if (options.LAKES) {
- 
         // lake_idx
         get_scatter_nc_field_int(filenames.lakeparam, "lake_idx",
                                  d2start, d2count, ivar);

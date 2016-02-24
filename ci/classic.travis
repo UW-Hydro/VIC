@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+set -e
+
 DRIVER_PATH="vic/drivers/classic/"
 DRIVER_EXE="${DRIVER_PATH}vic_classic.exe"
 

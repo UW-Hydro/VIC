@@ -24,9 +24,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  *****************************************************************************/
 
-#include <vic_def.h>
-#include <vic_run.h>
-#include <vic_driver_shared.h>
+#include <vic_driver_classic.h>
 
 /******************************************************************************
  * @brief    Allocate memory for veg his structure.
@@ -60,8 +58,8 @@ alloc_veg_hist(int                nrecs,
                 log_err("Memory allocation error in alloc_veg_hist().");
             }
             (*veg_hist)[i][j].fcanopy = calloc(NR + 1,
-                                                sizeof(*((*veg_hist)[i][j].
-                                                         fcanopy)));
+                                               sizeof(*((*veg_hist)[i][j].
+                                                        fcanopy)));
             if ((*veg_hist)[i][j].fcanopy == NULL) {
                 log_err("Memory allocation error in alloc_veg_hist().");
             }

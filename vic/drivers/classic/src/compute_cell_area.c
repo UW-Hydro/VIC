@@ -24,8 +24,6 @@
 * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 ******************************************************************************/
 
-#include <vic_def.h>
-#include <vic_run.h>
 #include <vic_driver_classic.h>
 
 /******************************************************************************
@@ -68,5 +66,4 @@ compute_cell_area(soil_con_struct *soil_con)
 
         soil_con->cell_area = area; /* Grid cell area in m^2. */
     }
-
 }

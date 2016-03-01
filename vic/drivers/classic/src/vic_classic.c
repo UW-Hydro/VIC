@@ -119,7 +119,7 @@ main(int   argc,
         if (out_data_files[filenum].nvars == 0) {
             log_err("No output variables were set in OUTFILE %zu. "
                     "Must set at least one output variable (OUTVAR) "
-                    "for each OUTFILE.", filenum+1);
+                    "for each OUTFILE.", filenum + 1);
         }
     }
 

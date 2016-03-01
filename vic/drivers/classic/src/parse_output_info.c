@@ -49,7 +49,7 @@ parse_output_info(FILE                  *gp,
     int                  type;
     char                 multstr[MAXSTRING];
     double               mult;
-    size_t               noutfiles;    
+    size_t               noutfiles;
 
     strcpy(format, "*");
 

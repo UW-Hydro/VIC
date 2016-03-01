@@ -67,6 +67,7 @@ main(int   argc,
     int                   cellnum;
     int                   startrec;
     int                   ErrorFlag;
+    unsigned int          filenum;
     dmy_struct           *dmy;
     atmos_data_struct    *atmos;
     veg_hist_struct     **veg_hist;
@@ -114,6 +115,11 @@ main(int   argc,
     fclose(filep.globalparam);
     filep.globalparam = open_file(filenames.global, "r");
     parse_output_info(filep.globalparam, &out_data_files, out_data);
+    for (filenum = 0; filenum < options.Noutfiles; filenum++) {
+        if (out_data_files[filenum].nvars == 0) {
+            log_err("Must specify at least one variable for each output file. Zero found.");
+        }
+    }
 
     /** Check and Open Files **/
     check_files(&filep, &filenames);

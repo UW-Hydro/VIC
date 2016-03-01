@@ -49,6 +49,7 @@ parse_output_info(FILE                  *gp,
     int                  type;
     char                 multstr[MAXSTRING];
     double               mult;
+    size_t               noutfiles;    
 
     strcpy(format, "*");
 
@@ -60,7 +61,13 @@ parse_output_info(FILE                  *gp,
     outvarnum = 0;
 
     // Count the number of output files listed in the global param file
-    options.Noutfiles = count_n_outfiles(gp);
+    noutfiles = count_n_outfiles(gp);
+    if (noutfiles > 0) {
+        options.Noutfiles = noutfiles;
+    }
+    else {
+        return;
+    }
 
     // only parse the output info if there are output files to parse
     if (options.Noutfiles > 0) {
@@ -232,10 +239,6 @@ count_n_outfiles(FILE *gp)
             // if the line starts with OUTFILE
             if (strcasecmp("OUTFILE", optstr) == 0) {
                 n_outfiles++;
-            }
-            // else we're done with this file so break out of loop
-            else {
-                break;
             }
         }
         fgets(cmdstr, MAXSTRING, gp);

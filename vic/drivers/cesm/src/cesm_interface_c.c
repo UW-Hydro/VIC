@@ -25,7 +25,6 @@
  *****************************************************************************/
 
 #include <vic_driver_cesm.h>
-#include <vic_cesm_def.h>
 
 size_t              NF, NR;
 size_t              current;
@@ -51,6 +50,7 @@ MPI_Datatype        mpi_param_struct_type;
 int                *mpi_map_local_array_sizes = NULL;
 int                *mpi_map_global_array_offsets = NULL;
 int                 mpi_rank;
+int                 mpi_size;
 nc_file_struct      nc_hist_file;
 nc_var_struct       nc_vars[N_OUTVAR_TYPES];
 option_struct       options;
@@ -109,7 +109,7 @@ vic_cesm_run(vic_clock *vclock)
     vic_force();
 
     // run vic over the domain
-    vic_cesm_run_model();
+    vic_image_run();
 
     // return fields to coupler
     vic_cesm_put_data();

@@ -36,9 +36,8 @@ void get_global_param(FILE *);
 void vic_alloc(void);
 void vic_finalize(void);
 void vic_force(void);
-void vic_image_run(void);
 void vic_init(void);
-void vic_init_output(void);
+void vic_restore(void);
 void vic_start(void);
 
 #endif

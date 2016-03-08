@@ -24,9 +24,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  *****************************************************************************/
 
-#include <ctype.h>
-#include <vic_def.h>
-#include <vic_run.h>
+#include <ctype.h>  // Do we need this line?
 #include <vic_driver_cesm.h>
 
 /******************************************************************************
@@ -55,6 +53,7 @@ vic_start(vic_clock     *vclock,
     extern int                *mpi_map_local_array_sizes;
     extern int                *mpi_map_global_array_offsets;
     extern int                 mpi_rank;
+    extern int                 mpi_size;
     extern option_struct       options;
     extern parameters_struct   param;
 
@@ -66,7 +65,7 @@ vic_start(vic_clock     *vclock,
         initialize_filenames();
 
         // read global settings
-        strcpy(filenames.global, "vic.globalconfig.txt");
+        strcpy(filenames.global, GLOBALPARAM);
 
         filep.globalparam = open_file(filenames.global, "r");
         get_global_param(filep.globalparam);
@@ -94,7 +93,7 @@ vic_start(vic_clock     *vclock,
         global_param.nrecs = 1;
 
         // Calendar
-        global_param.calendar = calendar_from_char(trim(vclock->calendar));
+        global_param.calendar = calendar_from_chars(trim(vclock->calendar));
         // set NR and NF
         NF = global_param.snow_steps_per_day / global_param.model_steps_per_day;
         if (NF == 1) {
@@ -118,15 +117,15 @@ vic_start(vic_clock     *vclock,
         add_nveg_to_global_domain(filenames.veglib, &global_domain);
 
         // decompose the mask
-        mpi_map_decomp_domain(global_domain.ncells,
+        mpi_map_decomp_domain(global_domain.ncells_active, mpi_size,
                               &mpi_map_local_array_sizes,
                               &mpi_map_global_array_offsets,
                               &mpi_map_mapping_array);
 
         // get the indices for the active cells (used in reading and writing)
-        filter_active_cells = malloc(global_domain.ncells *
+        filter_active_cells = malloc(global_domain.ncells_active *
                                      sizeof(*filter_active_cells));
-        for (i = 0; i < global_domain.ncells; i++) {
+        for (i = 0; i < global_domain.ncells_active; i++) {
             filter_active_cells[i] = global_domain.locations[i].io_idx;
         }
 
@@ -186,32 +185,32 @@ vic_start(vic_clock     *vclock,
     // First scatter the array sizes
     status = MPI_Scatter(mpi_map_local_array_sizes, 1, MPI_INT,
                          &local_ncells, 1, MPI_INT, 0, MPI_COMM_VIC);
-    local_domain.ncells = (size_t) local_ncells;
+    local_domain.ncells_active = (size_t) local_ncells;
     if (status != MPI_SUCCESS) {
         log_err("MPI error in vic_start(): %d\n", status);
     }
 
     // Allocate memory for the local locations
-    local_domain.locations = malloc(local_domain.ncells *
+    local_domain.locations = malloc(local_domain.ncells_active *
                                     sizeof(*local_domain.locations));
     if (local_domain.locations == NULL) {
         log_err("malloc error in vic_start()\n");
     }
-    for (i = 0; i < local_domain.ncells; i++) {
+    for (i = 0; i < local_domain.ncells_active; i++) {
         initialize_location(&(local_domain.locations[i]));
     }
 
     // map the location vector to a temporary array so they can be scattered
     if (mpi_rank == 0) {
-        mapped_locations = malloc(global_domain.ncells *
+        mapped_locations = malloc(global_domain.ncells_active *
                                   sizeof(*mapped_locations));
         if (mapped_locations == NULL) {
             log_err("malloc error in vic_start()\n");
         }
-        for (i = 0; i < global_domain.ncells; i++) {
+        for (i = 0; i < global_domain.ncells_active; i++) {
             initialize_location(&(mapped_locations[i]));
         }
-        map(sizeof(location_struct), global_domain.ncells,
+        map(sizeof(location_struct), global_domain.ncells_active,
             mpi_map_mapping_array, NULL, global_domain.locations,
             mapped_locations);
     }
@@ -220,14 +219,14 @@ vic_start(vic_clock     *vclock,
     status = MPI_Scatterv(mapped_locations, mpi_map_local_array_sizes,
                           mpi_map_global_array_offsets,
                           mpi_location_struct_type,
-                          local_domain.locations, local_domain.ncells,
+                          local_domain.locations, local_domain.ncells_active,
                           mpi_location_struct_type,
                           0, MPI_COMM_VIC);
     if (status != MPI_SUCCESS) {
         log_err("MPI error in vic_start(): %d\n", status);
     }
     // Set the local index value
-    for (i = 0; i < (size_t) local_domain.ncells; i++) {
+    for (i = 0; i < (size_t) local_domain.ncells_active; i++) {
         local_domain.locations[i].local_idx = i;
     }
 

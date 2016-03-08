@@ -24,8 +24,6 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  *****************************************************************************/
 
-#include <vic_def.h>
-#include <vic_run.h>
 #include <vic_driver_cesm.h>
 
 /******************************************************************************
@@ -71,7 +69,7 @@ vic_finalize(void)
         }
     }
 
-    for (i = 0; i < local_domain.ncells; i++) {
+    for (i = 0; i < local_domain.ncells_active; i++) {
         free_atmos(&(atmos[i]));
         free(soil_con[i].AreaFract);
         free(soil_con[i].BandElev);

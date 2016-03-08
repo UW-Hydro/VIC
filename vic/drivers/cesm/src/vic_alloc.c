@@ -24,8 +24,6 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  *****************************************************************************/
 
-#include <vic_def.h>
-#include <vic_run.h>
 #include <vic_driver_cesm.h>
 
 /******************************************************************************
@@ -53,7 +51,7 @@ vic_alloc(void)
     debug("In vic_alloc");
 
     // allocate memory for x2l_vic structure
-    x2l_vic = malloc(local_domain.ncells * sizeof(*x2l_vic));
+    x2l_vic = malloc(local_domain.ncells_active * sizeof(*x2l_vic));
     if (x2l_vic == NULL) {
         log_err("Memory allocation error in vic_alloc().");
     }
@@ -61,7 +59,7 @@ vic_alloc(void)
     initialize_x2l_data();
 
     // allocate memory for l2x_vic structure
-    l2x_vic = malloc(local_domain.ncells * sizeof(*l2x_vic));
+    l2x_vic = malloc(local_domain.ncells_active * sizeof(*l2x_vic));
     if (l2x_vic == NULL) {
         log_err("Memory allocation error in vic_alloc().");
     }
@@ -69,61 +67,61 @@ vic_alloc(void)
     initialize_l2x_data();
 
     // allocate memory for atmos structure
-    atmos = malloc(local_domain.ncells * sizeof(*atmos));
+    atmos = malloc(local_domain.ncells_active * sizeof(*atmos));
     if (atmos == NULL) {
         log_err("Memory allocation error in vic_alloc().");
     }
 
     // allocate memory for veg_hist structure
-    veg_hist = malloc(local_domain.ncells * sizeof(*veg_hist));
+    veg_hist = malloc(local_domain.ncells_active * sizeof(*veg_hist));
     if (veg_hist == NULL) {
         log_err("Memory allocation error in vic_alloc().");
     }
 
     // allocate memory for soil structure
-    soil_con = malloc(local_domain.ncells * sizeof(*soil_con));
+    soil_con = malloc(local_domain.ncells_active * sizeof(*soil_con));
     if (soil_con == NULL) {
         log_err("Memory allocation error in vic_alloc().");
     }
 
     // allocate memory for vegetation mapping structure
-    veg_con_map = malloc(local_domain.ncells * sizeof(*veg_con_map));
+    veg_con_map = malloc(local_domain.ncells_active * sizeof(*veg_con_map));
     if (veg_con_map == NULL) {
         log_err("Memory allocation error in vic_alloc().");
     }
 
     // allocate memory for vegetation structure
-    veg_con = malloc(local_domain.ncells * sizeof(*veg_con));
+    veg_con = malloc(local_domain.ncells_active * sizeof(*veg_con));
     if (veg_con == NULL) {
         log_err("Memory allocation error in vic_alloc().");
     }
 
     // allocate memory for vegetation structure
-    veg_lib = malloc(local_domain.ncells * sizeof(*veg_lib));
+    veg_lib = malloc(local_domain.ncells_active * sizeof(*veg_lib));
     if (veg_lib == NULL) {
         log_err("Memory allocation error in vic_alloc().");
     }
 
     // all_vars allocation
-    all_vars = malloc(local_domain.ncells * sizeof(*all_vars));
+    all_vars = malloc(local_domain.ncells_active * sizeof(*all_vars));
     if (all_vars == NULL) {
         log_err("Memory allocation error in vic_alloc().");
     }
 
     // out_data allocation
-    out_data = malloc(local_domain.ncells * sizeof(*out_data));
+    out_data = malloc(local_domain.ncells_active * sizeof(*out_data));
     if (out_data == NULL) {
         log_err("Memory allocation error in vic_alloc().");
     }
 
     // save_data allocation
-    save_data = malloc(local_domain.ncells * sizeof(*save_data));
+    save_data = malloc(local_domain.ncells_active * sizeof(*save_data));
     if (save_data == NULL) {
         log_err("Memory allocation error in vic_alloc().");
     }
 
     // allocate memory for individual grid cells
-    for (i = 0; i < local_domain.ncells; i++) {
+    for (i = 0; i < local_domain.ncells_active; i++) {
         // atmos allocation - allocate enough memory for NR+1 steps
         alloc_atmos(&(atmos[i]));
 
@@ -195,7 +193,8 @@ vic_alloc(void)
             }
             if (options.CARBON) {
                 veg_con[i][j].CanopLayerBnd = calloc(options.Ncanopy,
-                                                     sizeof(*(veg_con[i][j].CanopLayerBnd)));
+                                                     sizeof(*(veg_con[i][j].
+                                                              CanopLayerBnd)));
                 if (veg_con[i][j].CanopLayerBnd == NULL) {
                     log_err("Memory allocation error in vic_alloc().");
                 }

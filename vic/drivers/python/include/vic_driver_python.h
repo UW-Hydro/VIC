@@ -27,7 +27,7 @@
 #ifndef VIC_DRIVER_PYTHON_H
 #define VIC_DRIVER_PYTHON_H
 
-#include <vic_driver_shared.h>
+#include <vic_driver_shared_all.h>
 
 #define VIC_DRIVER "Python"
 

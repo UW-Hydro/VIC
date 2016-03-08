@@ -25,7 +25,6 @@
 * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 ******************************************************************************/
 
-#include <vic_def.h>
 #include <vic_run.h>
 
 veg_lib_struct *vic_run_veg_lib;

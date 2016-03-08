@@ -57,14 +57,14 @@ typedef struct {
  * @brief    Structure to store information about the domain file.
  *****************************************************************************/
 typedef struct {
-    char lat_var[MAXSTRING];
-    char lon_var[MAXSTRING];
-    char mask_var[MAXSTRING];
-    char area_var[MAXSTRING];
-    char frac_var[MAXSTRING];
-    char y_dim[MAXSTRING];
-    char x_dim[MAXSTRING];
-    size_t n_coord_dims;
+    char lat_var[MAXSTRING]; /**< latitude variable name in the domain file */
+    char lon_var[MAXSTRING];  /**< longitude variable name in the domain file */
+    char mask_var[MAXSTRING]; /**< mask variable name in the domain file */
+    char area_var[MAXSTRING]; /**< area variable name in the domain file */
+    char frac_var[MAXSTRING]; /**< fraction variable name in the domain file */
+    char y_dim[MAXSTRING]; /**< y dimension name in the domain file */
+    char x_dim[MAXSTRING]; /**< x dimension name in the domain file */
+    size_t n_coord_dims; /**< number of x/y coordinates */
 } domain_info_struct;
 
 /******************************************************************************
@@ -188,8 +188,6 @@ int put_nc_field_int(char *nc_name, bool *open, int *nc_id, int fillval,
                      size_t *count, int *var);
 void set_force_type(char *cmdstr, int file_num, int *field);
 void sprint_location(char *str, location_struct *loc);
-void vic_image_run(void);
-void vic_init_output(void);
 void vic_nc_info(nc_file_struct *nc_hist_file, out_data_struct **out_data,
                  nc_var_struct *nc_vars);
 void vic_store(void);

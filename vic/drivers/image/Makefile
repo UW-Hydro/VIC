@@ -85,24 +85,16 @@ endif
 LOG_LVL = 5
 
 # set includes
-INCLUDES = -I ${DRIVERPATH}/include -I ${VICPATH}/include -I ${SHAREDPATH}/include \
-		   -I ${SHAREDIMAGEPATH}/include -I ${NETCDFPATH}/include -I ${MPIPATH}/include
-
-# Uncomment for normal optimized code flags (fastest run option)
-#CFLAGS  = -O3 -Wall -Wno-unused -DLOG_LVL=$(LOG_LVL)
-# LIBRARY = -lm -L${NETCDFPATH}/lib -lnetcdf -L${MPIPATH}/lib -lmpi
+INCLUDES = -I ${DRIVERPATH}/include \
+		   -I ${VICPATH}/include \
+		   -I ${SHAREDPATH}/include \
+		   -I ${SHAREDIMAGEPATH}/include \
+		   -I ${NETCDFPATH}/include \
+		   -I ${MPIPATH}/include
 
 # Uncomment to include debugging information
 CFLAGS  =  ${INCLUDES} -ggdb -O0 -Wall -Wextra -std=c99 -DLOG_LVL=$(LOG_LVL)
 LIBRARY = -lm -L${NETCDFPATH}/lib -lnetcdf -L${MPIPATH}/lib -lmpi
-
-# Uncomment to include execution profiling information
-# CFLAGS  = ${INCLUDES} -O3 -pg -Wall -Wno-unused  -DLOG_LVL=$(LOG_LVL)
-# LIBRARY = -lm -L${NETCDFPATH}/lib -lnetcdf -L${MPIPATH}/lib -lmpi
-
-# Uncomment to debug memory problems using electric fence (man efence)
-#CFLAGS  = ${INCLUDES} -g -Wall -Wno-unused -DLOG_LVL=$(LOG_LVL)
-#LIBRARY = -lm -L${NETCDFPATH}/lib -lnetcdf -L${MPIPATH}/lib -lmpi -lefence -L/usr/local/lib
 
 COMPEXE = vic_image
 EXT = .exe

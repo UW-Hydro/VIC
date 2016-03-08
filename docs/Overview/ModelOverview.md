@@ -32,8 +32,8 @@ Figure 1.  VIC land cover tiles and soil column, with major water and energy flu
 - fluxes and storages from the tiles are averaged together (weighted by area fraction) to give grid-cell average for writing to output files.
 - for a given tile, jarvis-style veg stomatal response used in computing transpiration.
 - considers canopy energy balance separately from ground surface.
-- accounts for soil evaporation and different wind and radiation attenuation in spaces between individual plants (or gaps in the canopy); vegetated and non-vegetated area fractions are controlled by vegetated area fraction (fv) (Figure 2).  See [Bohn and Vivoni (in review)](../Documentation/References.md#other-historical-references) for more details.
-- supports optional input of daily timeseries of LAI, albedo, and vegetated area fraction from forcing files instead of using the monthly climatology specified in the veg library or veg parameter files.  See [Bohn and Vivoni (in review)](../Documentation/References.md#other-historical-references)for more details.
+- accounts for soil evaporation and different wind and radiation attenuation in spaces between individual plants (or gaps in the canopy); vegetated and non-vegetated area fractions are controlled by vegetated area fraction (fv) (Figure 2).  See [Bohn and Vivoni (accepted)](../Documentation/References.md#other-historical-references) for more details.
+- supports optional input of daily timeseries of LAI, albedo, and vegetated area fraction from forcing files instead of using the monthly climatology specified in the veg library or veg parameter files.  See [Bohn and Vivoni (accepted)](../Documentation/References.md#other-historical-references)for more details.
 
 ![Partial Vegetation Cover Schematic](../img/PartialVegCoverSchematic.bw.png)
 

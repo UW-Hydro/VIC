@@ -27,9 +27,6 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  *****************************************************************************/
 
- #include <float.h>
- #include <math.h>
-
 #include <vic_driver_shared_all.h>
 
 #define small_offset 0.00005  // Small offset to handle precision issues in rounding

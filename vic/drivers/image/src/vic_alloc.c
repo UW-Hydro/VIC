@@ -209,6 +209,6 @@ vic_alloc(void)
         for (j = 0; j < veg_con_map[i].nv_active; j++) {
             alloc_veg_hist(&(veg_hist[i][j]));
         }
- 
+
     }
 }

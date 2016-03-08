@@ -286,6 +286,120 @@ vic_init(void)
         }
     }
 
+    // read carbon cycle parameters
+    if (options.CARBON) {
+        // Ctype
+        for (j = 0; j < options.NVEGTYPES; j++) {
+            d3start[0] = j;
+            get_scatter_nc_field_int(filenames.veglib, "Ctype",
+                                     d3start, d3count, ivar);
+            for (i = 0; i < local_domain.ncells_active; i++) {
+                veg_lib[i][j].Ctype = ivar[i];
+                if (veg_lib[i][j].Ctype != PHOTO_C3 &&
+                    veg_lib[i][j].Ctype != PHOTO_C4) {
+                    log_err("cell %zu veg %zu: Ctype is %d but "
+                            "must be either %d (C3) or %d (C4).",
+                            i, j, veg_lib[i][j].Ctype,
+                            PHOTO_C3, PHOTO_C4);
+                }
+            }
+        }
+        // MaxCarboxRate
+        for (j = 0; j < options.NVEGTYPES; j++) {
+            d3start[0] = j;
+            get_scatter_nc_field_double(filenames.veglib, "MaxCarboxRate",
+                                        d3start, d3count, dvar);
+            for (i = 0; i < local_domain.ncells_active; i++) {
+                veg_lib[i][j].MaxCarboxRate = (double) dvar[i];
+                if (veg_lib[i][j].MaxCarboxRate < 0) {
+                    log_err("cell %zu veg %zu: MaxCarboxRate is %f "
+                            "but must be >= 0.",
+                            i, j, veg_lib[i][j].MaxCarboxRate);
+                }
+            }
+        }
+        // MaxETransport or CO2Specificity
+        for (j = 0; j < options.NVEGTYPES; j++) {
+            d3start[0] = j;
+            get_scatter_nc_field_double(filenames.veglib, "MaxiE_or_CO2Spec",
+                                        d3start, d3count, dvar);
+            for (i = 0; i < local_domain.ncells_active; i++) {
+                if (dvar[i] < 0) {
+                    log_err("cell %zu veg %zu: MaxE_of_CO2Spec is %f "
+                            "but must be >= 0.", i, j, dvar[i]);
+                }
+                if (veg_lib[i][j].Ctype == PHOTO_C3) {
+                    veg_lib[i][j].MaxCarboxRate = (double) dvar[i];
+                    veg_lib[i][j].CO2Specificity = 0;
+                }
+                else if (veg_lib[i][j].Ctype == PHOTO_C4) {
+                    veg_lib[i][j].MaxCarboxRate = 0;
+                    veg_lib[i][j].CO2Specificity = (double) dvar[i];
+                }
+            }
+        }
+        // LightUseEff
+        for (j = 0; j < options.NVEGTYPES; j++) {
+            d3start[0] = j;
+            get_scatter_nc_field_double(filenames.veglib, "LUE",
+                                        d3start, d3count, dvar);
+            for (i = 0; i < local_domain.ncells_active; i++) {
+                veg_lib[i][j].LightUseEff = (double) dvar[i];
+                if (veg_lib[i][j].LightUseEff < 0 ||
+                    veg_lib[i][j].LightUseEff > 1) {
+                    log_err("cell %zu veg %zu: LightUseEff is %f "
+                            "but must be between 0 and 1.",
+                            i, j, veg_lib[i][j].LightUseEff);
+                }
+            }
+        }
+        // Nscale flag
+        for (j = 0; j < options.NVEGTYPES; j++) {
+            d3start[0] = j;
+            get_scatter_nc_field_int(filenames.veglib, "Nscale",
+                                     d3start, d3count, ivar);
+            for (i = 0; i < local_domain.ncells_active; i++) {
+                veg_lib[i][j].NscaleFlag = ivar[i];
+                if (veg_lib[i][j].NscaleFlag != 0 &&
+                    veg_lib[i][j].NscaleFlag != 1) {
+                    log_err("cell %zu veg %zu: NscaleFlag is %d but "
+                            "must be either 0 or 1.",
+                            i, j, veg_lib[i][j].NscaleFlag);
+                }
+            }
+        }
+        // Wnpp_inhib
+        for (j = 0; j < options.NVEGTYPES; j++) {
+            d3start[0] = j;
+            get_scatter_nc_field_double(filenames.veglib, "Wnpp_inhib",
+                                        d3start, d3count, dvar);
+            for (i = 0; i < local_domain.ncells_active; i++) {
+                veg_lib[i][j].Wnpp_inhib = (double) dvar[i];
+                if (veg_lib[i][j].Wnpp_inhib < 0 ||
+                    veg_lib[i][j].Wnpp_inhib > 1) {
+                    log_err("cell %zu veg %zu: Wnpp_inhib is %f "
+                            "but must be between 0 and 1.",
+                            i, j, veg_lib[i][j].Wnpp_inhib);
+                }
+            }
+        }
+        // NPPfactor_sat
+        for (j = 0; j < options.NVEGTYPES; j++) {
+            d3start[0] = j;
+            get_scatter_nc_field_double(filenames.veglib, "NPPfactor_sat",
+                                        d3start, d3count, dvar);
+            for (i = 0; i < local_domain.ncells_active; i++) {
+                veg_lib[i][j].NPPfactor_sat = (double) dvar[i];
+                if (veg_lib[i][j].NPPfactor_sat < 0 ||
+                    veg_lib[i][j].NPPfactor_sat > 1) {
+                    log_err("cell %zu veg %zu: NPPfactor_sat is %f "
+                            "but must be between 0 and 1.",
+                            i, j, veg_lib[i][j].NPPfactor_sat);
+                }
+            }
+        }
+    }
+
     // read_soilparam()
 
     // Nlayer
@@ -1134,8 +1248,59 @@ vic_init(void)
 
     // read blowing snow parameters
     if (options.BLOWING) {
-        log_warn("BLOWING option not yet implemented in vic_init()");
+        // sigma_slope
+        for (j = 0; j < options.NVEGTYPES; j++) {
+            d3start[0] = j;
+            get_scatter_nc_field_double(filenames.veg, "sigma_slope",
+                                        d3start, d3count, dvar);
+            for (i = 0; i < local_domain.ncells_active; i++) {
+                vidx = veg_con_map[i].vidx[j];
+                if (vidx != -1) {
+                    veg_con[i][vidx].sigma_slope = (double) dvar[i];
+                    if (veg_con[i][vidx].sigma_slope <= 0) {
+                        log_err("cell %zu veg %d: deviation of terrain slope "
+                                "(sigma_slope) is %f but must be > 0.",
+                                i, vidx, veg_con[i][vidx].sigma_slope);
+                    }
+                }
+            }
+        }
+        // lag_one
+        for (j = 0; j < options.NVEGTYPES; j++) {
+            d3start[0] = j;
+            get_scatter_nc_field_double(filenames.veg, "lag_one",
+                                        d3start, d3count, dvar);
+            for (i = 0; i < local_domain.ncells_active; i++) {
+                vidx = veg_con_map[i].vidx[j];
+                if (vidx != -1) {
+                    veg_con[i][vidx].lag_one = (double) dvar[i];
+                    if (veg_con[i][vidx].lag_one <= 0) {
+                        log_err("cell %zu veg %d: lag_one is %f but "
+                                "must be > 0.",
+                                i, vidx, veg_con[i][vidx].lag_one);
+                    }
+                }
+            }
+        }
+        // fetch
+        for (j = 0; j < options.NVEGTYPES; j++) {
+            d3start[0] = j;
+            get_scatter_nc_field_double(filenames.veg, "fetch",
+                                        d3start, d3count, dvar);
+            for (i = 0; i < local_domain.ncells_active; i++) {
+                vidx = veg_con_map[i].vidx[j];
+                if (vidx != -1) {
+                    veg_con[i][vidx].fetch = (double) dvar[i];
+                    if (veg_con[i][vidx].fetch <= 1) {
+                        log_err("cell %zu veg %d: fetch is %f but "
+                                "must be > 1.",
+                                i, vidx, veg_con[i][vidx].fetch);
+                    }
+                }
+            }
+        }
     }
+
 
     // read_lake parameters
     if (options.LAKES) {

@@ -153,7 +153,7 @@ put_data(all_vars_struct   *all_vars,
     // Set output versions of input forcings
     out_data[OUT_AIR_TEMP].data[0] = atmos->air_temp[NR];
     out_data[OUT_DENSITY].data[0] = atmos->density[NR];
-    out_data[OUT_LONGWAVE].data[0] = atmos->longwave[NR];
+    out_data[OUT_LWDOWN].data[0] = atmos->longwave[NR];
     out_data[OUT_PREC].data[0] = atmos->out_prec;  // mm over grid cell
     out_data[OUT_PRESSURE].data[0] = atmos->pressure[NR] / PA_PER_KPA;
     out_data[OUT_QAIR].data[0] = CONST_EPS * atmos->vp[NR] /
@@ -167,7 +167,7 @@ put_data(all_vars_struct   *all_vars,
     else {
         out_data[OUT_LAKE_CHAN_IN].data[0] = 0;
     }
-    out_data[OUT_SHORTWAVE].data[0] = atmos->shortwave[NR];
+    out_data[OUT_SWDOWN].data[0] = atmos->shortwave[NR];
     out_data[OUT_SNOWF].data[0] = atmos->out_snow;   // mm over grid cell
     out_data[OUT_VP].data[0] = atmos->vp[NR] / PA_PER_KPA;
     out_data[OUT_VPD].data[0] = atmos->vpd[NR] / PA_PER_KPA;
@@ -541,8 +541,8 @@ put_data(all_vars_struct   *all_vars,
     // Energy terms
     out_data[OUT_REFREEZE].data[0] =
         (out_data[OUT_RFRZ_ENERGY].data[0] / CONST_LATICE) * dt_sec;
-    out_data[OUT_R_NET].data[0] = out_data[OUT_NET_SHORT].data[0] +
-                                  out_data[OUT_NET_LONG].data[0];
+    out_data[OUT_R_NET].data[0] = out_data[OUT_SWNET].data[0] +
+                                  out_data[OUT_LWNET].data[0];
 
     // Save current moisture state for use in next time step
     save_data->total_soil_moist = 0;
@@ -592,8 +592,8 @@ put_data(all_vars_struct   *all_vars,
     if (options.FULL_ENERGY) {
         out_data[OUT_ENERGY_ERROR].data[0] = \
             calc_energy_balance_error(rec,
-                                      out_data[OUT_NET_SHORT].data[0] +
-                                      out_data[OUT_NET_LONG].data[0],
+                                      out_data[OUT_SWNET].data[0] +
+                                      out_data[OUT_LWNET].data[0],
                                       out_data[OUT_LATENT].data[0] +
                                       out_data[OUT_LATENT_SUB].data[0],
                                       out_data[OUT_SENSIBLE].data[0] +
@@ -1004,10 +1004,10 @@ collect_eb_terms(energy_bal_struct energy,
     *Tcanopy_fbcount_total += energy.Tcanopy_fbcount;
 
     /** record net shortwave radiation **/
-    out_data[OUT_NET_SHORT].data[0] += energy.NetShortAtmos * AreaFactor;
+    out_data[OUT_SWNET].data[0] += energy.NetShortAtmos * AreaFactor;
 
     /** record net longwave radiation **/
-    out_data[OUT_NET_LONG].data[0] += energy.NetLongAtmos * AreaFactor;
+    out_data[OUT_LWNET].data[0] += energy.NetLongAtmos * AreaFactor;
 
     /** record incoming longwave radiation at ground surface (under veg) **/
     if (snow.snow && overstory) {
@@ -1134,11 +1134,11 @@ collect_eb_terms(energy_bal_struct energy,
                                                 lakefactor;
 
     /** record band net downwards shortwave radiation **/
-    out_data[OUT_NET_SHORT_BAND].data[band] += energy.NetShortAtmos * Cv *
+    out_data[OUT_SWNET_BAND].data[band] += energy.NetShortAtmos * Cv *
                                                lakefactor;
 
     /** record band net downwards longwave radiation **/
-    out_data[OUT_NET_LONG_BAND].data[band] += energy.NetLongAtmos * Cv *
+    out_data[OUT_LWNET_BAND].data[band] += energy.NetLongAtmos * Cv *
                                               lakefactor;
 
     /** record band albedo **/

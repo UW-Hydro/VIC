@@ -112,8 +112,7 @@ vic_nc_info(nc_file_struct   *nc_hist_file,
         case OUT_LATENT_BAND:
         case OUT_LATENT_SUB_BAND:
         case OUT_MELT_ENERGY_BAND:
-        case OUT_NET_LONG_BAND:
-        case OUT_NET_SHORT_BAND:
+        case OUT_LWNET_BAND:
         case OUT_RFRZ_ENERGY_BAND:
         case OUT_SENSIBLE_BAND:
         case OUT_SNOW_CANOPY_BAND:
@@ -318,15 +317,15 @@ vic_nc_info(nc_file_struct   *nc_hist_file,
         case OUT_LATENT:
         case OUT_LATENT_SUB:
         case OUT_MELT_ENERGY:
-        case OUT_NET_LONG:
-        case OUT_NET_SHORT:
+        case OUT_LWNET:
+        case OUT_SWNET:
         case OUT_R_NET:
         case OUT_RFRZ_ENERGY:
         case OUT_SENSIBLE:
         case OUT_SNOW_FLUX:
-        case OUT_LONGWAVE:
+        case OUT_LWDOWN:
         case OUT_PAR:
-        case OUT_SHORTWAVE:
+        case OUT_SWDOWN:
         case OUT_ADV_SENS_BAND:
         case OUT_ADVECTION_BAND:
         case OUT_DELTACC_BAND:
@@ -335,8 +334,7 @@ vic_nc_info(nc_file_struct   *nc_hist_file,
         case OUT_LATENT_BAND:
         case OUT_LATENT_SUB_BAND:
         case OUT_MELT_ENERGY_BAND:
-        case OUT_NET_LONG_BAND:
-        case OUT_NET_SHORT_BAND:
+        case OUT_SWNET_BAND:
         case OUT_RFRZ_ENERGY_BAND:
         case OUT_SENSIBLE_BAND:
         case OUT_SNOW_FLUX_BAND:

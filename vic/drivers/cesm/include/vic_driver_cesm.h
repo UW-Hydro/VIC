@@ -185,7 +185,7 @@ int vic_cesm_run(vic_clock *vclock);
 void vic_force(void);
 void vic_cesm_put_data(void);
 void vic_cesm_run_model(void);
-void vic_start(vic_clock *vclock, case_metadata *cmeta);
+void vic_cesm_start(vic_clock *vclock, case_metadata *cmeta);
 void vic_restore(char *runtype_str);
 void write_rpointer_file(char *fname);
 

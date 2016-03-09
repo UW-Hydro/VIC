@@ -96,7 +96,7 @@ main(int    argc,
     }
 
     // read global parameters
-    vic_start();
+    vic_image_start();
 
     // allocate memory
     vic_alloc();

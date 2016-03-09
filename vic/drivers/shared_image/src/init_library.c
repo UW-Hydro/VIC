@@ -166,3 +166,28 @@ initialize_domain_info(domain_info_struct *info)
     info->n_coord_dims = 0;
 
 }
+
+/******************************************************************************
+ * @brief    Initialize global structures
+ *****************************************************************************/
+void
+initialize_global_structures(void)
+{
+    extern filenames_struct    filenames;
+    extern filep_struct        filep;
+    extern domain_struct       global_domain;
+    extern domain_struct       local_domain;
+    extern global_param_struct global_param;
+    extern int                 mpi_rank;
+
+    initialize_domain_info(&local_domain.info);
+    if (mpi_rank == 0) {
+        initialize_options();
+        initialize_global();
+        initialize_parameters();
+        initialize_filenames();
+        initialize_domain_info(&global_domain.info);
+        initialize_domain(&global_domain);
+
+    }
+}

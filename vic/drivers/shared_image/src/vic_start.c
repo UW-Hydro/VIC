@@ -24,7 +24,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  *****************************************************************************/
 
-#include <vic_driver_image.h>
+#include <vic_driver_shared_image.h>
 
 /******************************************************************************
  * @brief    Wrapper function for VIC startup tasks.
@@ -44,6 +44,7 @@ vic_start(void)
     extern domain_struct       global_domain;
     extern domain_struct       local_domain;
     extern global_param_struct global_param;
+    extern MPI_Comm            MPI_COMM_VIC;
     extern MPI_Datatype        mpi_global_struct_type;
     extern MPI_Datatype        mpi_filenames_struct_type;
     extern MPI_Datatype        mpi_location_struct_type;
@@ -57,23 +58,8 @@ vic_start(void)
     extern parameters_struct   param;
     size_t                     j;
 
-    // Initialize global structures
-    initialize_options();
-    initialize_global();
-    initialize_parameters();
-    initialize_filenames();
-
-    if (mpi_rank == 0) {
-        // Initialize the global domain
-        initialize_domain(&global_domain);
-
-        // read global settings
-        filep.globalparam = open_file(filenames.global, "r");
-        get_global_param(filep.globalparam);
-    }
-
     status = MPI_Bcast(&filenames, 1, mpi_filenames_struct_type,
-                       0, MPI_COMM_WORLD);
+                       0, MPI_COMM_VIC);
     if (status != MPI_SUCCESS) {
         log_err("MPI error in vic_start(): %d\n", status);
     }
@@ -135,30 +121,30 @@ vic_start(void)
 
     // broadcast global, option, param structures as well as global valies
     // such as NF and NR
-    status = MPI_Bcast(&NF, 1, MPI_UNSIGNED_LONG, 0, MPI_COMM_WORLD);
+    status = MPI_Bcast(&NF, 1, MPI_UNSIGNED_LONG, 0, MPI_COMM_VIC);
     if (status != MPI_SUCCESS) {
         log_err("MPI error in vic_start(): %d\n", status);
     }
 
-    status = MPI_Bcast(&NR, 1, MPI_UNSIGNED_LONG, 0, MPI_COMM_WORLD);
+    status = MPI_Bcast(&NR, 1, MPI_UNSIGNED_LONG, 0, MPI_COMM_VIC);
     if (status != MPI_SUCCESS) {
         log_err("MPI error in vic_start(): %d\n", status);
     }
 
     status = MPI_Bcast(&global_param, 1, mpi_global_struct_type,
-                       0, MPI_COMM_WORLD);
+                       0, MPI_COMM_VIC);
     if (status != MPI_SUCCESS) {
         log_err("MPI error in vic_start(): %d\n", status);
     }
 
     status = MPI_Bcast(&options, 1, mpi_option_struct_type,
-                       0, MPI_COMM_WORLD);
+                       0, MPI_COMM_VIC);
     if (status != MPI_SUCCESS) {
         log_err("MPI error in vic_start(): %d\n", status);
     }
 
     status = MPI_Bcast(&param, 1, mpi_param_struct_type,
-                       0, MPI_COMM_WORLD);
+                       0, MPI_COMM_VIC);
     if (status != MPI_SUCCESS) {
         log_err("MPI error in vic_start(): %d\n", status);
     }
@@ -167,7 +153,7 @@ vic_start(void)
 
     // First scatter the array sizes
     status = MPI_Scatter(mpi_map_local_array_sizes, 1, MPI_INT,
-                         &local_ncells_active, 1, MPI_INT, 0, MPI_COMM_WORLD);
+                         &local_ncells_active, 1, MPI_INT, 0, MPI_COMM_VIC);
     local_domain.ncells_active = (size_t) local_ncells_active;
     if (status != MPI_SUCCESS) {
         log_err("MPI error in vic_start(): %d\n", status);
@@ -221,7 +207,7 @@ vic_start(void)
                           mpi_location_struct_type,
                           local_domain.locations, local_domain.ncells_active,
                           mpi_location_struct_type,
-                          0, MPI_COMM_WORLD);
+                          0, MPI_COMM_VIC);
     if (status != MPI_SUCCESS) {
         log_err("MPI error in vic_start(): %d\n", status);
     }

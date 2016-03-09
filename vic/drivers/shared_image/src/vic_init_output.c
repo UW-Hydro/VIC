@@ -38,6 +38,7 @@ vic_init_output(void)
     extern domain_struct       local_domain;
     extern filep_struct        filep;
     extern global_param_struct global_param;
+    extern MPI_Comm            MPI_COMM_VIC;
     extern MPI_Datatype        mpi_nc_file_struct_type;
     extern int                 mpi_rank;
     extern nc_file_struct      nc_hist_file;
@@ -70,7 +71,7 @@ vic_init_output(void)
     // broadcast which variables to write.
     for (i = 0; i < N_OUTVAR_TYPES; i++) {
         status = MPI_Bcast(&out_data[0][i].write, 1, MPI_C_BOOL,
-                           0, MPI_COMM_WORLD);
+                           0, MPI_COMM_VIC);
         if (status != MPI_SUCCESS) {
             log_err("MPI error in vic_init_output(): %d\n", status);
         }
@@ -80,7 +81,7 @@ vic_init_output(void)
     // but the slave processes need some of the information to initialize as
     // well (particularly which variables to write and dimension sizes)
     status = MPI_Bcast(&nc_hist_file, 1, mpi_nc_file_struct_type,
-                       0, MPI_COMM_WORLD);
+                       0, MPI_COMM_VIC);
     if (status != MPI_SUCCESS) {
         log_err("MPI error in vic_init_output(): %d\n", status);
     }

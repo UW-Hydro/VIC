@@ -336,6 +336,9 @@ get_global_param(FILE *gp)
             else if (strcasecmp("DOMAIN", optstr) == 0) {
                 sscanf(cmdstr, "%*s %s", filenames.domain);
             }
+            else if (strcasecmp("DOMAIN_TYPE", optstr) == 0) {
+                get_domain_type(cmdstr);
+            }
             else if (strcasecmp("SOIL", optstr) == 0) {
                 sscanf(cmdstr, "%*s %s", filenames.soil);
             }

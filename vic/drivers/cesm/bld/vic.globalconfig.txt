@@ -36,18 +36,28 @@ RC_MODE              RC_JARVIS
 
 # Input Files and PATHS
 CONSTANTS        {vic_constants}
-DOMAIN           {vic_domain}
 LOG_DIR          {rundir}/
 SOIL             {vic_params}
 VEGPARAM         {vic_params}
-VEGPARAM_LAI     TRUE
-LAI_SRC          LAI_FROM_VEGPARAM
+LAI_SRC          FROM_VEGPARAM
+ALB_SRC          FROM_VEGPARAM
+FCAN_SRC         FROM_DEFAULT
 VEGLIB           {vic_params}
 SNOW_BAND        1
 RESULT_DIR       {rundir}/vic.testing.h0.nc
 
-N_OUTFILES  1
-OUTFILE     fluxes 21
+# Domain File
+DOMAIN           {vic_domain}
+DOMAIN_TYPE      LAT     xc
+DOMAIN_TYPE      LON     yc
+DOMAIN_TYPE      MASK    mask
+DOMAIN_TYPE      AREA    area
+DOMAIN_TYPE      FRAC    frac
+DOMAIN_TYPE      YDIM    nj
+DOMAIN_TYPE      XDIM    ni
+
+N_OUTFILES
+OUTFILE     fluxes
 OUTVAR      OUT_PREC
 OUTVAR      OUT_RAINF
 OUTVAR      OUT_SNOWF

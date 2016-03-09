@@ -166,6 +166,7 @@ int get_nc_field_int(char *nc_name, char *var_name, size_t *start,
 void initialize_domain(domain_struct *domain);
 void initialize_domain_info(domain_info_struct *info);
 void initialize_energy(energy_bal_struct **energy, size_t nveg);
+void initialize_global_structures(void);
 void initialize_history_file(nc_file_struct *nc);
 void initialize_location(location_struct *location);
 int initialize_model_state(all_vars_struct *all_vars, size_t Nveg,
@@ -196,6 +197,7 @@ void vic_init(void);
 void vic_init_output(void);
 void vic_nc_info(nc_file_struct *nc_hist_file, out_data_struct **out_data,
                  nc_var_struct *nc_vars);
+void vic_start(void);
 void vic_store(void);
 void vic_write(void);
 

@@ -74,7 +74,7 @@ vic_cesm_init(vic_clock     *vclock,
               case_metadata *cmeta)
 {
     // read global parameters
-    vic_start(vclock, cmeta);
+    vic_cesm_start(vclock, cmeta);
 
     // Initialize time
     initialize_cesm_time();

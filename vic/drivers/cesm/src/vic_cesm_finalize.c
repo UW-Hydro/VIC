@@ -41,5 +41,4 @@ vic_cesm_finalize(void)
 
     vic_finalize();
 
-
 }

@@ -24,7 +24,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  *****************************************************************************/
 
-#include <vic_driver_image.h>
+#include <vic_driver_shared_image.h>
 
 /******************************************************************************
  * @brief    Initialize model parameters
@@ -34,7 +34,6 @@ vic_init(void)
 {
     extern all_vars_struct    *all_vars;
     extern size_t              current;
-    extern dmy_struct         *dmy;
     extern domain_struct       global_domain;
     extern domain_struct       local_domain;
     extern option_struct       options;
@@ -69,10 +68,6 @@ vic_init(void)
     size_t                     d4count[4];
     size_t                     d4start[4];
     int                        tmp_lake_idx;
-
-    // make_dmy()
-    initialize_time();
-    dmy = make_dmy(&global_param);
 
     // allocate memory for variables to be read
     dvar = malloc(local_domain.ncells_active * sizeof(*dvar));

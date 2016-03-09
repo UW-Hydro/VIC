@@ -46,6 +46,15 @@ matrix:
         - libnetcdf-dev
         - gfortran
         # open-mpi is built from source in image.travis
+  # CESM Driver
+  - compiler: gcc
+    os: linux
+    env: TESTID='cesm'
+    addons:
+      apt_packages:
+        - libnetcdf-dev
+        - gfortran
+        # open-mpi is built from source in image.travis
   # Python Driver
   - compiler: clang
     os: linux

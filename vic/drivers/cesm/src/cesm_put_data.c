@@ -36,16 +36,13 @@ vic_cesm_put_data()
     extern atmos_data_struct  *atmos;
     extern dmy_struct          dmy;
     extern domain_struct       local_domain;
-    // extern lake_con_struct     lake_con;
     extern soil_con_struct    *soil_con;
     extern veg_con_struct    **veg_con;
-    extern veg_hist_struct   **veg_hist;
     extern veg_lib_struct    **veg_lib;
     extern l2x_data_struct    *l2x_vic;
     extern x2l_data_struct    *x2l_vic;
     extern global_param_struct global_param;
     extern option_struct       options;
-    extern parameters_struct   param;
 
     bool                       IsWet = false; // TODO: add lake fraction
     bool                       overstory;

@@ -137,7 +137,7 @@ int
 vic_cesm_final()
 {
     // clean up
-    vic_finalize();
+    vic_cesm_finalize();
 
     return 0;
 }

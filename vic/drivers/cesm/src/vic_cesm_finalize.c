@@ -1,7 +1,7 @@
 /******************************************************************************
  * @section DESCRIPTION
  *
- * Header file for vic_driver_image routines
+ * Finalize VIC run by freeing memory and closing open files.
  *
  * @section LICENSE
  *
@@ -24,17 +24,22 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  *****************************************************************************/
 
-#ifndef VIC_DRIVER_IMAGE_H
-#define VIC_DRIVER_IMAGE_H
+#include <vic_driver_cesm.h>
 
-#include <vic_driver_shared_image.h>
+/******************************************************************************
+ * @brief    Finalize VIC run by freeing memory and closing open files.
+ *****************************************************************************/
+void
+vic_cesm_finalize(void)
+{
+    extern x2l_data_struct *x2l_vic;
+    extern l2x_data_struct *l2x_vic;
 
-#define VIC_DRIVER "Image"
+    // free VIC/CESM data structures
+    free(x2l_vic);
+    free(l2x_vic);
 
-void get_forcing_file_info(param_set_struct *param_set, size_t file_num);
-void get_global_param(FILE *);
-void vic_force(void);
-void vic_restore(void);
-void vic_start(void);
+    vic_finalize();
 
-#endif
+
+}

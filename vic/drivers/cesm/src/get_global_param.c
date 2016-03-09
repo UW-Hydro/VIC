@@ -509,9 +509,6 @@ get_global_param(FILE *gp)
             /*************************************
                Define output file contents
             *************************************/
-            else if (strcasecmp("N_OUTFILES", optstr) == 0) {
-                ; // do nothing
-            }
             else if (strcasecmp("OUTFILE", optstr) == 0) {
                 ; // do nothing
             }
@@ -523,7 +520,7 @@ get_global_param(FILE *gp)
             // mode, but that does not exist in image mode (yet)
             else if (strcasecmp("ALBEDO", optstr) == 0 ||
                      strcasecmp("LAI_IN", optstr) == 0 ||
-                     strcasecmp("VEGCOVER", optstr) == 0) {
+                     strcasecmp("FCANOPY", optstr) == 0) {
                 log_err("Time-varying vegetation parameters not implemented "
                         "in image mode");
             }

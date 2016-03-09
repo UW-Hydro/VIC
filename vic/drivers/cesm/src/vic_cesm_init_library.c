@@ -30,7 +30,7 @@
  * @brief    Initialize x2l_data_struct.
  *****************************************************************************/
 void
-initialize_x2l_data()
+initialize_x2l_data(void)
 {
     extern x2l_data_struct *x2l_vic;
     extern domain_struct    local_domain;
@@ -81,7 +81,7 @@ initialize_x2l_data()
  * @brief    Initialize l2x_data_struct.
  *****************************************************************************/
 void
-initialize_l2x_data()
+initialize_l2x_data(void)
 {
     extern l2x_data_struct *l2x_vic;
     extern domain_struct    local_domain;

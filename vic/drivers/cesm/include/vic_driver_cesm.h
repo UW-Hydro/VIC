@@ -161,7 +161,7 @@ void assert_time_insync(vic_clock *vclock, dmy_struct *dmy);
 void get_global_param(FILE *);
 void initialize_cesm_time(void);
 void initialize_l2x_data(void);
-void initialize_mpi();
+void initialize_mpi(void);
 void initialize_vic_cesm_mpi(MPI_Fint *MPI_COMM_VIC_F);
 void initialize_x2l_data(void);
 void make_dummy_forcings(x2l_data_struct *x2l);

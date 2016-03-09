@@ -38,17 +38,18 @@ initialize_mpi(void)
     extern MPI_Datatype mpi_nc_file_struct_type;
     extern MPI_Datatype mpi_option_struct_type;
     extern MPI_Datatype mpi_param_struct_type;
+    extern MPI_Comm     MPI_COMM_VIC;
     extern int          mpi_rank;
     extern int          mpi_size;
     int                 status;
 
     // get MPI mpi_rank and mpi_size
-    status = MPI_Comm_rank(MPI_COMM_WORLD, &mpi_rank);
+    status = MPI_Comm_rank(MPI_COMM_VIC, &mpi_rank);
     if (status != MPI_SUCCESS) {
         log_err("MPI error in initialize_mpi(): %d\n", status);
     }
 
-    status = MPI_Comm_size(MPI_COMM_WORLD, &mpi_size);
+    status = MPI_Comm_size(MPI_COMM_VIC, &mpi_size);
     if (status != MPI_SUCCESS) {
         log_err("MPI error in initialize_mpi(): %d\n", status);
     }
@@ -73,12 +74,13 @@ initialize_mpi(void)
 void
 create_MPI_global_struct_type(MPI_Datatype *mpi_type)
 {
-    int           nitems; // number of elements in struct
-    int           status;
-    int          *blocklengths;
-    size_t        i;
-    MPI_Aint     *offsets;
-    MPI_Datatype *mpi_types;
+    extern MPI_Comm MPI_COMM_VIC;
+    int             nitems; // number of elements in struct
+    int             status;
+    int            *blocklengths;
+    size_t          i;
+    MPI_Aint       *offsets;
+    MPI_Datatype   *mpi_types;
 
     // nitems has to equal the number of elements in global_param_struct
     nitems = 33;
@@ -989,12 +991,13 @@ create_MPI_option_struct_type(MPI_Datatype *mpi_type)
 void
 create_MPI_param_struct_type(MPI_Datatype *mpi_type)
 {
-    int           nitems; // number of elements in struct
-    int           status;
-    int          *blocklengths;
-    size_t        i;
-    MPI_Aint     *offsets;
-    MPI_Datatype *mpi_types;
+    extern MPI_Comm MPI_COMM_VIC;
+    int             nitems; // number of elements in struct
+    int             status;
+    int            *blocklengths;
+    size_t          i;
+    MPI_Aint       *offsets;
+    MPI_Datatype   *mpi_types;
 
     // nitems has to equal the number of elements in parameters_struct
     nitems = 139;
@@ -1732,12 +1735,7 @@ gather_put_nc_field_double(char   *nc_name,
                            size_t *count,
                            double *var)
 {
-    int                  status;
-    double              *dvar = NULL;
-    double              *dvar_gathered = NULL;
-    double              *dvar_remapped = NULL;
-    size_t               grid_size;
-    size_t               i;
+    extern MPI_Comm      MPI_COMM_VIC;
     extern domain_struct global_domain;
     extern domain_struct local_domain;
     extern int           mpi_rank;
@@ -1745,6 +1743,12 @@ gather_put_nc_field_double(char   *nc_name,
     extern int          *mpi_map_local_array_sizes;
     extern size_t       *filter_active_cells;
     extern size_t       *mpi_map_mapping_array;
+    int                  status;
+    double              *dvar = NULL;
+    double              *dvar_gathered = NULL;
+    double              *dvar_remapped = NULL;
+    size_t               grid_size;
+    size_t               i;
 
     if (mpi_rank == 0) {
         grid_size = global_domain.n_nx * global_domain.n_ny;
@@ -1773,7 +1777,7 @@ gather_put_nc_field_double(char   *nc_name,
     status = MPI_Gatherv(var, local_domain.ncells_active, MPI_DOUBLE,
                          dvar_gathered, mpi_map_local_array_sizes,
                          mpi_map_global_array_offsets, MPI_DOUBLE,
-                         0, MPI_COMM_WORLD);
+                         0, MPI_COMM_VIC);
     if (status != MPI_SUCCESS) {
         fprintf(stderr, "MPI error in main(): %d\n", status);
         exit(EXIT_FAILURE);
@@ -1814,12 +1818,7 @@ gather_put_nc_field_int(char   *nc_name,
                         size_t *count,
                         int    *var)
 {
-    int                  status;
-    int                 *ivar = NULL;
-    int                 *ivar_gathered = NULL;
-    int                 *ivar_remapped = NULL;
-    size_t               grid_size;
-    size_t               i;
+    extern MPI_Comm      MPI_COMM_VIC;
     extern domain_struct global_domain;
     extern domain_struct local_domain;
     extern int           mpi_rank;
@@ -1827,6 +1826,12 @@ gather_put_nc_field_int(char   *nc_name,
     extern int          *mpi_map_local_array_sizes;
     extern size_t       *filter_active_cells;
     extern size_t       *mpi_map_mapping_array;
+    int                  status;
+    int                 *ivar = NULL;
+    int                 *ivar_gathered = NULL;
+    int                 *ivar_remapped = NULL;
+    size_t               grid_size;
+    size_t               i;
 
     if (mpi_rank == 0) {
         grid_size = global_domain.n_nx * global_domain.n_ny;
@@ -1855,7 +1860,7 @@ gather_put_nc_field_int(char   *nc_name,
     status = MPI_Gatherv(var, local_domain.ncells_active, MPI_INT,
                          ivar_gathered, mpi_map_local_array_sizes,
                          mpi_map_global_array_offsets, MPI_INT,
-                         0, MPI_COMM_WORLD);
+                         0, MPI_COMM_VIC);
     if (status != MPI_SUCCESS) {
         fprintf(stderr, "MPI error in main(): %d\n", status);
         exit(EXIT_FAILURE);
@@ -1891,10 +1896,7 @@ get_scatter_nc_field_double(char   *nc_name,
                             size_t *count,
                             double *var)
 {
-    int                  status;
-    double              *dvar = NULL;
-    double              *dvar_filtered = NULL;
-    double              *dvar_mapped = NULL;
+    extern MPI_Comm      MPI_COMM_VIC;
     extern domain_struct global_domain;
     extern domain_struct local_domain;
     extern int           mpi_rank;
@@ -1902,6 +1904,10 @@ get_scatter_nc_field_double(char   *nc_name,
     extern int          *mpi_map_local_array_sizes;
     extern size_t       *filter_active_cells;
     extern size_t       *mpi_map_mapping_array;
+    int                  status;
+    double              *dvar = NULL;
+    double              *dvar_filtered = NULL;
+    double              *dvar_mapped = NULL;
 
     if (mpi_rank == 0) {
         dvar = malloc(global_domain.ncells_total * sizeof(*dvar));
@@ -1936,7 +1942,7 @@ get_scatter_nc_field_double(char   *nc_name,
     status = MPI_Scatterv(dvar_mapped, mpi_map_local_array_sizes,
                           mpi_map_global_array_offsets, MPI_DOUBLE,
                           var, local_domain.ncells_active, MPI_DOUBLE,
-                          0, MPI_COMM_WORLD);
+                          0, MPI_COMM_VIC);
     if (status != MPI_SUCCESS) {
         fprintf(stderr, "MPI error in main(): %d\n", status);
         exit(EXIT_FAILURE);
@@ -1959,10 +1965,7 @@ get_scatter_nc_field_float(char   *nc_name,
                            size_t *count,
                            float  *var)
 {
-    int                  status;
-    float               *fvar = NULL;
-    float               *fvar_filtered = NULL;
-    float               *fvar_mapped = NULL;
+    extern MPI_Comm      MPI_COMM_VIC;
     extern domain_struct global_domain;
     extern domain_struct local_domain;
     extern int           mpi_rank;
@@ -1970,6 +1973,10 @@ get_scatter_nc_field_float(char   *nc_name,
     extern int          *mpi_map_local_array_sizes;
     extern size_t       *filter_active_cells;
     extern size_t       *mpi_map_mapping_array;
+    int                  status;
+    float               *fvar = NULL;
+    float               *fvar_filtered = NULL;
+    float               *fvar_mapped = NULL;
 
     if (mpi_rank == 0) {
         fvar = malloc(global_domain.ncells_total * sizeof(*fvar));
@@ -2004,7 +2011,7 @@ get_scatter_nc_field_float(char   *nc_name,
     status = MPI_Scatterv(fvar_mapped, mpi_map_local_array_sizes,
                           mpi_map_global_array_offsets, MPI_FLOAT,
                           var, local_domain.ncells_active, MPI_FLOAT,
-                          0, MPI_COMM_WORLD);
+                          0, MPI_COMM_VIC);
     if (status != MPI_SUCCESS) {
         fprintf(stderr, "MPI error in main(): %d\n", status);
         exit(EXIT_FAILURE);
@@ -2027,10 +2034,7 @@ get_scatter_nc_field_int(char   *nc_name,
                          size_t *count,
                          int    *var)
 {
-    int                  status;
-    int                 *ivar = NULL;
-    int                 *ivar_filtered = NULL;
-    int                 *ivar_mapped = NULL;
+    extern MPI_Comm      MPI_COMM_VIC;
     extern domain_struct global_domain;
     extern domain_struct local_domain;
     extern int           mpi_rank;
@@ -2038,6 +2042,10 @@ get_scatter_nc_field_int(char   *nc_name,
     extern int          *mpi_map_local_array_sizes;
     extern size_t       *filter_active_cells;
     extern size_t       *mpi_map_mapping_array;
+    int                  status;
+    int                 *ivar = NULL;
+    int                 *ivar_filtered = NULL;
+    int                 *ivar_mapped = NULL;
 
     if (mpi_rank == 0) {
         ivar = malloc(global_domain.ncells_total * sizeof(*ivar));
@@ -2071,7 +2079,7 @@ get_scatter_nc_field_int(char   *nc_name,
     status = MPI_Scatterv(ivar_mapped, mpi_map_local_array_sizes,
                           mpi_map_global_array_offsets, MPI_INT,
                           var, local_domain.ncells_active, MPI_INT,
-                          0, MPI_COMM_WORLD);
+                          0, MPI_COMM_VIC);
     if (status != MPI_SUCCESS) {
         fprintf(stderr, "MPI error in main(): %d\n", status);
         exit(EXIT_FAILURE);
@@ -2152,11 +2160,11 @@ main(int    argc,
     if (status != MPI_SUCCESS) {
         log_err("MPI error in main(): %d\n", status);
     }
-    status = MPI_Comm_size(MPI_COMM_WORLD, &mpi_size);
+    status = MPI_Comm_size(MPI_COMM_VIC, &mpi_size);
     if (status != MPI_SUCCESS) {
         log_err("MPI error in main(): %d\n", status);
     }
-    status = MPI_Comm_rank(MPI_COMM_WORLD, &mpi_rank);
+    status = MPI_Comm_rank(MPI_COMM_VIC, &mpi_rank);
     if (status != MPI_SUCCESS) {
         log_err("MPI error in main(): %d\n", status);
     }
@@ -2204,31 +2212,31 @@ main(int    argc,
 
     // broadcast to the slaves
     status = MPI_Bcast(&global, 1, mpi_global_struct_type,
-                       0, MPI_COMM_WORLD);
+                       0, MPI_COMM_VIC);
     if (status != MPI_SUCCESS) {
         log_err("MPI error in main(): %d\n", status);
     }
 
     status = MPI_Bcast(&location, 1, mpi_location_struct_type,
-                       0, MPI_COMM_WORLD);
+                       0, MPI_COMM_VIC);
     if (status != MPI_SUCCESS) {
         log_err("MPI error in main(): %d\n", status);
     }
 
     status = MPI_Bcast(&ncfile, 1, mpi_nc_file_struct_type,
-                       0, MPI_COMM_WORLD);
+                       0, MPI_COMM_VIC);
     if (status != MPI_SUCCESS) {
         log_err("MPI error in main(): %d\n", status);
     }
 
     status = MPI_Bcast(&option, 1, mpi_option_struct_type,
-                       0, MPI_COMM_WORLD);
+                       0, MPI_COMM_VIC);
     if (status != MPI_SUCCESS) {
         log_err("MPI error in main(): %d\n", status);
     }
 
     status = MPI_Bcast(&param, 1, mpi_param_struct_type,
-                       0, MPI_COMM_WORLD);
+                       0, MPI_COMM_VIC);
     if (status != MPI_SUCCESS) {
         log_err("MPI error in main(): %d\n", status);
     }

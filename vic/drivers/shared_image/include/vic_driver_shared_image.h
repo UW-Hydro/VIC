@@ -188,8 +188,11 @@ int put_nc_field_int(char *nc_name, bool *open, int *nc_id, int fillval,
                      size_t *count, int *var);
 void set_force_type(char *cmdstr, int file_num, int *field);
 void sprint_location(char *str, location_struct *loc);
+void vic_alloc(void);
 void vic_nc_info(nc_file_struct *nc_hist_file, out_data_struct **out_data,
                  nc_var_struct *nc_vars);
+void vic_image_run(void);
+void vic_init_output(void);
 void vic_store(void);
 void vic_write(void);
 

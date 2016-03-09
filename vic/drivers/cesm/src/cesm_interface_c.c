@@ -41,8 +41,10 @@ domain_struct       global_domain;
 domain_struct       local_domain;
 global_param_struct global_param;
 lake_con_struct     lake_con;
+MPI_Comm            MPI_COMM_VIC;
 MPI_Datatype        mpi_domain_struct_type;
 MPI_Datatype        mpi_global_struct_type;
+MPI_Datatype        mpi_filenames_struct_type;
 MPI_Datatype        mpi_location_struct_type;
 MPI_Datatype        mpi_nc_file_struct_type;
 MPI_Datatype        mpi_option_struct_type;
@@ -78,7 +80,7 @@ vic_cesm_init(vic_clock     *vclock,
     initialize_cesm_time();
 
     // allocate memory
-    vic_alloc();
+    vic_cesm_alloc();
 
     // initialize model parameters from parameter files
     vic_init();

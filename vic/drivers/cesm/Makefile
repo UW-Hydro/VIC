@@ -74,8 +74,12 @@ FC = mpifort
 endif
 
 # set includes
-INCLUDES = -I ${DRIVERPATH}/include -I ${VICPATH}/include -I ${SHAREDPATH}/include \
-		   -I ${SHAREDIMAGEPATH}/include -I ${NETCDFPATH}/include -I ${MPIPATH}/include
+INCLUDES = -I ${DRIVERPATH}/include \
+		   -I ${VICPATH}/include \
+		   -I ${SHAREDPATH}/include \
+		   -I ${SHAREDIMAGEPATH}/include \
+		   -I ${NETCDFPATH}/include \
+		   -I ${MPIPATH}/include \
 
 # Set libraries
 LIBRARY = -lm -L${NETCDFPATH}/lib -lnetcdf -L${MPIPATH}/lib -lmpi

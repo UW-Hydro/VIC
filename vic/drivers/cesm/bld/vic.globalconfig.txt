@@ -48,8 +48,8 @@ RESULT_DIR       {rundir}/vic.testing.h0.nc
 
 # Domain File
 DOMAIN           {vic_domain}
-DOMAIN_TYPE      LAT     xc
-DOMAIN_TYPE      LON     yc
+DOMAIN_TYPE      LAT     yc
+DOMAIN_TYPE      LON     xc
 DOMAIN_TYPE      MASK    mask
 DOMAIN_TYPE      AREA    area
 DOMAIN_TYPE      FRAC    frac

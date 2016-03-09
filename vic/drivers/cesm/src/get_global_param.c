@@ -651,21 +651,6 @@ validate_global_param(global_param_struct *gp)
 void
 validate_options(option_struct *options)
 {
-    if (options->LAI_SRC == FROM_VEGPARAM && !options->VEGPARAM_LAI) {
-        log_err("\"LAI_SRC\" was specified as \"LAI_FROM_VEGPARAM\", "
-                "but \"VEGPARAM_LAI\" was set to \"FALSE\" in the global "
-                "parameter file.  If you want VIC to read LAI values from "
-                "the vegparam file, you MUST make sure the veg param file "
-                "contains 1 line of 12 monthly LAI values for EACH veg "
-                "tile in EACH grid cell, and you MUST specify "
-                "\"VEGPARAM_LAI\" as \"TRUE\" in the global parameter "
-                "file.  Alternatively, if you want VIC to read LAI values "
-                "from the veg library file, set \"LAI_SRC\" to "
-                "\"LAI_FROM_VEGLIB\" in the global parameter file.  "
-                "In either case, the setting of \"VEGPARAM_LAI\" must be "
-                "consistent with the contents of the veg param file "
-                "(i.e. whether or not it contains LAI values).");
-    }
 
     // Validate SPATIAL_FROST information
     if (options->SPATIAL_FROST) {

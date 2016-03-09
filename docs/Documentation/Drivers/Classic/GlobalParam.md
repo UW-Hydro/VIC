@@ -174,23 +174,6 @@ _Examples._ a standard four column daily forcing data file will be defined as:
     FORCE_ENDIAN    LITTLE
     FORCE_STEPS_PER_DAY    24
 
-## Vegetation Timeseries Variables
-
-For each variable, there must be a separate column for each vegetation tile in the grid cell (which generally will vary from one grid cell to the next).  For example, if there are 3 vegetation tiles in a particular grid cell; and you wish to supply VIC with LAI, partial vegetation cover fraction, and albedo; the input file for the given cell should look like:
-
-    LAI1 LAI2 LAI3 FCANOPY1 FCANOPY2 FCANOPY3 ALBEDO1 ALBEDO2 ALBEDO3
-
-where the 1, 2, and 3 correspond to the first, second, and third tiles listed in the vegetation parameter file, respectively; and the file should be described in the global parameter file as:
-
-    FORCING2    FORCING_DATA/veg_hist/veg_hist__
-    FORCE_TYPE  LAI_IN
-    FORCE_TYPE  FCANOPY
-    FORCE_TYPE  ALBEDO
-    FORCE_FORMAT    ASCII
-    FORCE_STEPS_PER_DAY    1
-    FORCEYEAR   1950
-    FORCEMONTH  1
-    FORCEDAY    1
 
 # Define Parameter Files
 

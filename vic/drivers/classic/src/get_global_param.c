@@ -25,8 +25,6 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  *****************************************************************************/
 
-#include <vic_def.h>
-#include <vic_run.h>
 #include <vic_driver_classic.h>
 
 /******************************************************************************
@@ -599,7 +597,7 @@ get_global_param(FILE *gp)
                     options.VEGLIB_FCAN = false;
                 }
             }
-            else if(strcasecmp("VEGLIB_VEGCOVER",optstr)==0) {
+            else if (strcasecmp("VEGLIB_VEGCOVER", optstr) == 0) {
                 log_err("The option VEGLIB_VEGCOVER has been replaced by "
                         "VEGLIB_FCAN.  Please edit your global parameter "
                         "file and re-run.");
@@ -685,12 +683,12 @@ get_global_param(FILE *gp)
                             "control file.");
                 }
             }
-            else if(strcasecmp("VEGPARAM_VEGCOVER",optstr)==0) {
+            else if (strcasecmp("VEGPARAM_VEGCOVER", optstr) == 0) {
                 log_err("The option VEGPARAM_VEGCOVER has been replaced by "
                         "VEGPARAM_FCAN.  Please edit your global parameter "
                         "file and re-run.");
             }
-            else if(strcasecmp("VEGCOVER_SRC",optstr)==0) {
+            else if (strcasecmp("VEGCOVER_SRC", optstr) == 0) {
                 log_err("The option VEGCOVER_SRC has been replaced by "
                         "FCAN_SRC.  Please edit your global parameter "
                         "file and re-run.");

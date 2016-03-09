@@ -149,3 +149,20 @@ initialize_veg_con(veg_con_struct *veg_con)
         }
     }
 }
+
+/******************************************************************************
+ * @brief    Initialize domain info stucture
+ *****************************************************************************/
+void
+initialize_domain_info(domain_info_struct *info)
+{
+    strcpy(info->lat_var, "MISSING");
+    strcpy(info->lon_var, "MISSING");
+    strcpy(info->mask_var, "MISSING");
+    strcpy(info->area_var, "MISSING");
+    strcpy(info->frac_var, "MISSING");
+    strcpy(info->y_dim, "MISSING");
+    strcpy(info->x_dim, "MISSING");
+    info->n_coord_dims = 0;
+
+}

@@ -27,7 +27,7 @@
 #include <vic_driver_cesm.h>
 
 /******************************************************************************
- * @brief   Wrapper around VIC's initial mpi function, first translating the
+ * @brief   Wrapper around VIC's initialize mpi function, first translating the
             Fortran MPI Communicator to C.
  *****************************************************************************/
 void

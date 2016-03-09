@@ -164,6 +164,7 @@ int get_nc_field_float(char *nc_name, char *var_name, size_t *start,
 int get_nc_field_int(char *nc_name, char *var_name, size_t *start,
                      size_t *count, int *var);
 void initialize_domain(domain_struct *domain);
+void initialize_domain_info(domain_info_struct *info);
 void initialize_energy(energy_bal_struct **energy, size_t nveg);
 void initialize_history_file(nc_file_struct *nc);
 void initialize_location(location_struct *location);

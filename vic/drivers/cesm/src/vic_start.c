@@ -58,12 +58,15 @@ vic_start(vic_clock     *vclock,
     extern option_struct       options;
     extern parameters_struct   param;
 
+    initialize_domain_info(&local_domain.info);
+
     if (mpi_rank == 0) {
         // Initialize global structures
         initialize_options();
         initialize_global();
         initialize_parameters();
         initialize_filenames();
+        initialize_domain_info(&global_domain.info);
 
         // read global settings
         strcpy(filenames.global, GLOBALPARAM);

@@ -63,8 +63,10 @@ vic_start(void)
     initialize_global();
     initialize_parameters();
     initialize_filenames();
+    initialize_domain_info(&local_domain.info);
 
     if (mpi_rank == 0) {
+        initialize_domain_info(&global_domain.info);
         // Initialize the global domain
         initialize_domain(&global_domain);
 

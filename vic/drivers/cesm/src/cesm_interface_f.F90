@@ -34,7 +34,7 @@ MODULE vic_cesm_interface
   ! Public interfaces
   !--------------------------------------------------------------------------
   PUBLIC :: initialize_log
-  PUBLIC :: initialize_vic_cesm_mpi 
+  PUBLIC :: initialize_vic_cesm_mpi
   PUBLIC :: vic_cesm_init
   PUBLIC :: vic_cesm_run
   PUBLIC :: vic_cesm_final

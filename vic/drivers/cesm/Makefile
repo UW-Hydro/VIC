@@ -33,7 +33,8 @@
 DRIVERPATH = .
 
 # VIC RUN PATH
-SHAREDPATH = ../shared
+SHAREDPATH = ../shared_all
+SHAREDIMAGEPATH = ../shared_image
 
 # VIC RUN PATH
 VICPATH = ../../vic_run
@@ -63,17 +64,22 @@ SHELL = /bin/bash
 ifeq (true, ${TRAVIS})
 CC = ${MPIPATH}/bin/mpicc
 else
-CC = mpicc-mpich-mp
+CC = mpicc
 endif
 
 ifeq (true, ${TRAVIS})
 FC = ${MPIPATH}/bin/mpif90
 else
-FC = mpifort-mpich-mp
+FC = mpifort
 endif
 
 # set includes
-INCLUDES = -I ${DRIVERPATH}/include -I ${VICPATH}/include -I ${SHAREDPATH}/include -I ${NETCDFPATH}/include -I ${MPIPATH}/include
+INCLUDES = -I ${DRIVERPATH}/include \
+		   -I ${VICPATH}/include \
+		   -I ${SHAREDPATH}/include \
+		   -I ${SHAREDIMAGEPATH}/include \
+		   -I ${NETCDFPATH}/include \
+		   -I ${MPIPATH}/include \
 
 # Set libraries
 LIBRARY = -lm -L${NETCDFPATH}/lib -lnetcdf -L${MPIPATH}/lib -lmpi
@@ -105,12 +111,14 @@ LDFLAGGS = -shared
 HDRS = \
 	$(wildcard ${VICPATH}/include/*.h) \
 	$(wildcard ${DRIVERPATH}/include/*.h) \
-	$(wildcard ${SHAREDPATH}/include/*.h)
+	$(wildcard ${SHAREDPATH}/include/*.h) \
+	$(wildcard ${SHAREDIMAGEPATH}/include/*.h)
 
 CSRCS = \
 	$(wildcard ${VICPATH}/src/*.c) \
 	$(wildcard ${DRIVERPATH}/src/*.c) \
-	$(wildcard ${SHAREDPATH}/src/*.c)
+	$(wildcard ${SHAREDPATH}/src/*.c) \
+	$(wildcard ${SHAREDIMAGEPATH}/src/*.c)
 
 FSRCS = \
 	$(wildcard ${DRIVERPATH}/src/*.F90)
@@ -133,13 +141,7 @@ full:
 	make model
 
 clean::
-	rm -f ${DRIVERPATH}/src/*.o
-	rm -f ${SHAREDPATH}/src/*.o
-	rm -f ${VICPATH}/src/*.o
-	rm -f core log
-	rm -f ${DRIVERPATH}/src/*~ ${SHAREDPATH}/src/*.~ ${VICPATH}/src/*~
-	rm -rf ${COMPLIB}${EXT} ${COMPLIB}.dSYM
-	rm -f *.mod
+	\rm -f .depend
 
 model: $(OBJS)
 	$(FC) $(LDFLAGGS) $(COBJS) $(FOBJS) $(FFLAGS) $(LIBRARY) -o ${COMPLIB}${EXT}

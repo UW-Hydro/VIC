@@ -184,7 +184,7 @@ CONTAINS
     CALL MPI_COMM_RANK(mpicom_lnd, mytask, ierr)
 
     !--- copy/hand the mpicom from the driver to the vic model
-    CALL initialize_mpi(mpicom_lnd)
+    CALL initialize_vic_cesm_mpi(mpicom_lnd)
 
     !--- get unit number for vic log file
     !--- setup vic log file

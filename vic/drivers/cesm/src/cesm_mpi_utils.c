@@ -1,7 +1,7 @@
 /******************************************************************************
  * @section DESCRIPTION
  *
- * Allocate and free memory for the veg_hist data struct
+ * MPI support routines for VIC's CESM driver
  *
  * @section LICENSE
  *
@@ -24,41 +24,18 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  *****************************************************************************/
 
-#include <vic_def.h>
-#include <vic_run.h>
 #include <vic_driver_cesm.h>
 
 /******************************************************************************
- * @brief
+ * @brief   Wrapper around VIC's initial mpi function, first translating the
+            Fortran MPI Communicator to C.
  *****************************************************************************/
 void
-alloc_veg_hist(veg_hist_struct *veg_hist)
+initialize_vic_cesm_mpi(MPI_Fint *MPI_COMM_VIC_F)
 {
-    veg_hist->albedo = calloc(NR + 1, sizeof(*(veg_hist->albedo)));
-    if (veg_hist->albedo == NULL) {
-        log_err("Memory allocation error in alloc_veg_hist().");
-    }
-    veg_hist->LAI = calloc(NR + 1, sizeof(*(veg_hist->LAI)));
-    if (veg_hist->LAI == NULL) {
-        log_err("Memory allocation error in alloc_veg_hist().");
-    }
-    veg_hist->vegcover = calloc(NR + 1, sizeof(*(veg_hist->vegcover)));
-    if (veg_hist->vegcover == NULL) {
-        log_err("Memory allocation error in alloc_veg_hist().");
-    }
-}
+    extern MPI_Comm MPI_COMM_VIC;
 
-/******************************************************************************
- * @brief    Free veg hist structure.
- *****************************************************************************/
-void
-free_veg_hist(veg_hist_struct *veg_hist)
-{
-    if (veg_hist == NULL) {
-        return;
-    }
+    MPI_COMM_VIC = MPI_Comm_f2c(*MPI_COMM_VIC_F);
 
-    free(veg_hist->albedo);
-    free(veg_hist->LAI);
-    free(veg_hist->vegcover);
+    initialize_mpi();
 }

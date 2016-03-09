@@ -27,85 +27,169 @@
 #ifndef VIC_DRIVER_CESM_H
 #define VIC_DRIVER_CESM_H
 
-#include <stdbool.h>
-#include <vic_mpi.h>
-#include <netcdf.h>
-#include <vic_driver_shared.h>
-#include <vic_cesm_def.h>
+#include <vic_driver_shared_image.h>
 
-void add_nveg_to_global_domain(char *nc_name, domain_struct *global_domain);
+#define VIC_DRIVER "CESM"
+
+#define MAXDIMS 10
+#define GLOBALPARAM "vic.globalconfig.txt"
+#define RPOINTER "rpointer.lnd"
+#define SHR_CONST_SPVAL 1.0e30
+
+/******************************************************************************
+ * @brief   CESM run types
+ *****************************************************************************/
+enum
+{
+    CESM_RUNTYPE_CLEANSTART,
+    CESM_RUNTYPE_RESTART,
+    CESM_RUNTYPE_BRANCH
+};
+
+/******************************************************************************
+ * @brief   This structure stores clock information. See also ESMF_Clock.
+ *          Order is important and any changes here must be echoed in
+ *          vic_cesm_def_mod_f.F90
+ *****************************************************************************/
+typedef struct {
+    int timestep;       // timestep in seconds
+    short int current_year;  // current year
+    short int current_month;  // current month
+    short int current_day;  // current day
+    int current_dayseconds;        // current dayseconds
+    bool state_flag;      // state flag
+    bool stop_flag;      // stop flag
+    char calendar[MAXSTRING];      // calendar
+} vic_clock;
+
+
+/******************************************************************************
+ * @brief   This structure stores clock information. See also ESMF_Clock.
+ *          Order is important and any changes here must be echoed in
+ *          vic_cesm_def_mod_f.F90
+ *****************************************************************************/
+typedef struct {
+    char caseid[MAXSTRING];
+    char casedesc[MAXSTRING];
+    char starttype[MAXSTRING];
+    char model_version[MAXSTRING];
+    char hostname[MAXSTRING];
+    char username[MAXSTRING];
+} case_metadata;
+
+/******************************************************************************
+ * @brief   This structure is a c type container for the x2l fields.
+ *          Order is important and any changes here must be echoed in
+ *          vic_cesm_def_mod_f.F90
+ *****************************************************************************/
+typedef struct {
+    double x2l_Sa_z;  /** bottom atm level height */
+    double x2l_Sa_u;  /** bottom atm level zon wind */
+    double x2l_Sa_v;  /** bottom atm level mer wind */
+    double x2l_Sa_ptem;  /** bottom atm level pot temp */
+    double x2l_Sa_shum;  /** bottom atm level spec hum */
+    double x2l_Sa_pbot;  /** bottom atm level pressure */
+    double x2l_Sa_tbot;  /** bottom atm level temp */
+    double x2l_Faxa_lwdn;  /** downward lw heat flux */
+    double x2l_Faxa_rainc;  /** prec: liquid "convective" */
+    double x2l_Faxa_rainl;  /** prec: liquid "large scale" */
+    double x2l_Faxa_snowc;  /** prec: frozen "convective" */
+    double x2l_Faxa_snowl;  /** prec: frozen "large scale" */
+    double x2l_Faxa_swndr;  /** sw: nir direct  downward */
+    double x2l_Faxa_swvdr;  /** sw: vis direct  downward */
+    double x2l_Faxa_swndf;  /** sw: nir diffuse downward */
+    double x2l_Faxa_swvdf;  /** sw: vis diffuse downward */
+    double x2l_Sa_co2prog;  /** bottom atm level prognostic co2 */
+    double x2l_Sa_co2diag;  /** bottom atm level diagnostic co2 */
+    double x2l_Faxa_bcphidry;  /** flux: Black Carbon hydrophilic dry deposition */
+    double x2l_Faxa_bcphodry;  /** flux: Black Carbon hydrophobic dry deposition */
+    double x2l_Faxa_bcphiwet;  /** flux: Black Carbon hydrophilic wet deposition */
+    double x2l_Faxa_ocphidry;  /** flux: Organic Carbon hydrophilic dry deposition */
+    double x2l_Faxa_ocphodry;  /** flux: Organic Carbon hydrophobic dry deposition */
+    double x2l_Faxa_ocphiwet;  /** flux: Organic Carbon hydrophilic dry deposition */
+    double x2l_Faxa_dstwet1;  /** flux: Size 1 dust -- wet deposition */
+    double x2l_Faxa_dstwet2;  /** flux: Size 2 dust -- wet deposition */
+    double x2l_Faxa_dstwet3;  /** flux: Size 3 dust -- wet deposition */
+    double x2l_Faxa_dstwet4;  /** flux: Size 4 dust -- wet deposition */
+    double x2l_Faxa_dstdry1;  /** flux: Size 1 dust -- dry deposition */
+    double x2l_Faxa_dstdry2;  /** flux: Size 2 dust -- dry deposition */
+    double x2l_Faxa_dstdry3;  /** flux: Size 3 dust -- dry deposition */
+    double x2l_Faxa_dstdry4;  /** flux: Size 4 dust -- dry deposition */
+    double x2l_Flrr_flood;  /** rtm->lnd rof (flood) flux */
+    bool x2l_vars_set; /** x2l set flag */
+} x2l_data_struct;
+
+/******************************************************************************
+ * @brief   This structure is a c type container for the l2x fields.
+ *          Order is important and any changes here must be echoed in
+ *          vic_cesm_def_mod_f.F90
+ *****************************************************************************/
+typedef struct {
+    double l2x_Sl_t;  /**< temperature */
+    double l2x_Sl_tref;  /**< 2m reference temperature */
+    double l2x_Sl_qref;  /**< 2m reference specific humidity */
+    double l2x_Sl_avsdr;  /**< albedo: direct , visible */
+    double l2x_Sl_anidr;  /**< albedo: direct , near-ir */
+    double l2x_Sl_avsdf;  /**< albedo: diffuse, visible */
+    double l2x_Sl_anidf;  /**< albedo: diffuse, near-ir */
+    double l2x_Sl_snowh;  /**< snow height */
+    double l2x_Sl_u10;  /**< 10m wind */
+    double l2x_Sl_ddvel;  /**< dry deposition velocities (optional) */
+    double l2x_Sl_fv;  /**< friction velocity */
+    double l2x_Sl_ram1;  /**< aerodynamical resistance */
+    double l2x_Sl_logz0;  /**< log z0 */
+    double l2x_Fall_taux;  /**< wind stress, zonal */
+    double l2x_Fall_tauy;  /**< wind stress, meridional */
+    double l2x_Fall_lat;  /**< latent heat flux */
+    double l2x_Fall_sen;  /**< sensible heat flux */
+    double l2x_Fall_lwup;  /**< upward longwave heat flux */
+    double l2x_Fall_evap;  /**< evaporation water flux */
+    double l2x_Fall_swnet;  /**< heat flux shortwave net */
+    double l2x_Fall_fco2_lnd;  /**< co2 flux **For testing set to 0 */
+    double l2x_Fall_flxdst1;  /**< dust flux size bin 1 */
+    double l2x_Fall_flxdst2;  /**< dust flux size bin 2 */
+    double l2x_Fall_flxdst3;  /**< dust flux size bin 3 */
+    double l2x_Fall_flxdst4;  /**< dust flux size bin 4 */
+    double l2x_Fall_flxvoc;  /**< MEGAN fluxes */
+    double l2x_Flrl_rofliq;  /**< lnd->rtm input fluxes */
+    double l2x_Flrl_rofice;  /**< lnd->rtm input fluxes */
+    bool l2x_vars_set; /** l2x set flag */
+} l2x_data_struct;
+
 void advance_time(void);
-void alloc_atmos(atmos_data_struct *atmos);
-void alloc_veg_hist(veg_hist_struct *veg_hist);
 void assert_time_insync(vic_clock *vclock, dmy_struct *dmy);
-out_data_struct *create_output_list(void);
-void free_atmos(atmos_data_struct *atmos);
-void free_veg_hist(veg_hist_struct *veg_hist);
-size_t get_global_domain(char *fname, domain_struct *global_domain);
 void get_global_param(FILE *);
-size_t get_nc_dimension(char *nc_name, char *dim_name);
-int get_nc_field_double(char *nc_name, char *var_name, size_t *start,
-                        size_t *count, double *var);
-int get_nc_field_float(char *nc_name, char *var_name, size_t *start,
-                       size_t *count, float *var);
-int get_nc_field_int(char *nc_name, char *var_name, size_t *start,
-                     size_t *count, int *var);
 void initialize_cesm_time(void);
-void initialize_domain(domain_struct *domain);
-void initialize_energy(energy_bal_struct **energy, size_t nveg);
-void initialize_history_file(nc_file_struct *nc);
 void initialize_l2x_data(void);
-void initialize_location(location_struct *location);
-int initialize_model_state(all_vars_struct *all_vars, size_t Nveg,
-                           size_t Nnodes, double surf_temp,
-                           soil_con_struct *soil_con, veg_con_struct *veg_con);
-void initialize_soil_con(soil_con_struct *soil_con);
-void initialize_state_file(nc_file_struct *nc);
-void initialize_veg_con(veg_con_struct *veg_con);
+void initialize_mpi(void);
+void initialize_vic_cesm_mpi(MPI_Fint *MPI_COMM_VIC_F);
 void initialize_x2l_data(void);
 void make_dummy_forcings(x2l_data_struct *x2l);
 FILE *open_file(char *string, char *type);
 int parse_output_info(FILE *gp, out_data_struct **out_data);
 void print_atmos_data(atmos_data_struct *atmos);
 void print_case_metadata(case_metadata *cmeta);
-void print_domain(domain_struct *domain, bool print_loc);
 void print_l2x_data(l2x_data_struct *l2x);
-void print_location(location_struct *location);
-void print_nc_file(nc_file_struct *nc);
-void print_nc_var(nc_var_struct *nc_var, size_t ndims);
 void print_vic_clock(vic_clock *vclock);
-void print_veg_con_map(veg_con_map_struct *veg_con_map);
-int put_nc_field_double(char *nc_name, bool *open, int *nc_id, double fillval,
-                        int *dimids, int ndims, char *var_name, size_t *start,
-                        size_t *count, double *var);
-int put_nc_field_int(char *nc_name, bool *open, int *nc_id, int fillval,
-                     int *dimids, int ndims, char *var_name, size_t *start,
-                     size_t *count, int *var);
 void print_x2l_data(x2l_data_struct *x2l);
 void read_rpointer_file(char *fname);
-void sprint_location(char *str, location_struct *loc);
 unsigned short int start_type_from_char(char *start_str);
 char *trim(char *str);
 void validate_filenames(filenames_struct *filenames);
 void validate_global_param(global_param_struct *global_param);
 void validate_options(option_struct *options);
-void vic_alloc(void);
+void vic_cesm_alloc(void);
 int vic_cesm_init_mpi(int MPI_COMM_VIC_F);
 int vic_cesm_init(vic_clock *vclock, case_metadata *cmeta);
 int vic_cesm_final(void);
 int vic_cesm_run(vic_clock *vclock);
-void vic_nc_info(nc_file_struct *nc_hist_file, out_data_struct **out_data,
-                 nc_var_struct *nc_vars);
 void vic_finalize(void);
 void vic_force(void);
 void vic_cesm_put_data(void);
 void vic_cesm_run_model(void);
 void vic_init(void);
-void vic_init_output(void);
-void vic_restore(char *runtype_str);
 void vic_start(vic_clock *vclock, case_metadata *cmeta);
-void vic_store(void);
-void vic_write(void);
+void vic_restore(char *runtype_str);
 void write_rpointer_file(char *fname);
 
 #endif

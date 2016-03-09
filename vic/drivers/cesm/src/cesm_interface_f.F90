@@ -34,7 +34,7 @@ MODULE vic_cesm_interface
   ! Public interfaces
   !--------------------------------------------------------------------------
   PUBLIC :: initialize_log
-  PUBLIC :: initialize_mpi 
+  PUBLIC :: initialize_vic_cesm_mpi 
   PUBLIC :: vic_cesm_init
   PUBLIC :: vic_cesm_run
   PUBLIC :: vic_cesm_final
@@ -53,11 +53,11 @@ MODULE vic_cesm_interface
   !> @brief   Init MPI Interface
   !--------------------------------------------------------------------------
   INTERFACE
-     SUBROUTINE initialize_mpi(MPI_COMM_VIC_F) BIND(C, name='initialize_mpi')
+     SUBROUTINE initialize_vic_cesm_mpi(MPI_COMM_VIC_F) BIND(C, name='initialize_vic_cesm_mpi')
        USE, INTRINSIC :: ISO_C_BINDING
        IMPLICIT NONE
        INTEGER, INTENT(inout) :: MPI_COMM_VIC_F
-     END SUBROUTINE initialize_mpi
+     END SUBROUTINE initialize_vic_cesm_mpi
   END INTERFACE
 
   !--------------------------------------------------------------------------

@@ -25,7 +25,6 @@
  *****************************************************************************/
 
 #include <vic_driver_cesm.h>
-#include <vic_cesm_def.h>
 
 size_t              NF, NR;
 size_t              current;
@@ -42,8 +41,10 @@ domain_struct       global_domain;
 domain_struct       local_domain;
 global_param_struct global_param;
 lake_con_struct     lake_con;
+MPI_Comm            MPI_COMM_VIC;
 MPI_Datatype        mpi_domain_struct_type;
 MPI_Datatype        mpi_global_struct_type;
+MPI_Datatype        mpi_filenames_struct_type;
 MPI_Datatype        mpi_location_struct_type;
 MPI_Datatype        mpi_nc_file_struct_type;
 MPI_Datatype        mpi_option_struct_type;
@@ -51,6 +52,7 @@ MPI_Datatype        mpi_param_struct_type;
 int                *mpi_map_local_array_sizes = NULL;
 int                *mpi_map_global_array_offsets = NULL;
 int                 mpi_rank;
+int                 mpi_size;
 nc_file_struct      nc_hist_file;
 nc_var_struct       nc_vars[N_OUTVAR_TYPES];
 option_struct       options;
@@ -78,7 +80,7 @@ vic_cesm_init(vic_clock     *vclock,
     initialize_cesm_time();
 
     // allocate memory
-    vic_alloc();
+    vic_cesm_alloc();
 
     // initialize model parameters from parameter files
     vic_init();
@@ -109,7 +111,7 @@ vic_cesm_run(vic_clock *vclock)
     vic_force();
 
     // run vic over the domain
-    vic_cesm_run_model();
+    vic_image_run();
 
     // return fields to coupler
     vic_cesm_put_data();

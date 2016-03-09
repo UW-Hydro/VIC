@@ -24,20 +24,18 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  *****************************************************************************/
 
-#include <vic_def.h>
-#include <vic_run.h>
-#include <vic_driver_cesm.h>
+#include <vic_driver_shared_image.h>
 
 /******************************************************************************
  * @brief    Run VIC for one timestep and store output data
  *****************************************************************************/
 void
-vic_cesm_run_model()
+vic_image_run(void)
 {
     extern size_t              current;
     extern all_vars_struct    *all_vars;
     extern atmos_data_struct  *atmos;
-    extern dmy_struct          dmy;
+    extern dmy_struct         *dmy;
     extern domain_struct       local_domain;
     extern global_param_struct global_param;
     extern lake_con_struct     lake_con;
@@ -50,9 +48,10 @@ vic_cesm_run_model()
 
     size_t                     i;
 
-    for (i = 0; i < local_domain.ncells; i++) {
-        vic_run(&(atmos[i]), &(all_vars[i]), &dmy, &global_param,
-                &lake_con, &(soil_con[i]), veg_con[i], veg_lib[i], veg_hist[i]);
+    for (i = 0; i < local_domain.ncells_active; i++) {
+        update_step_vars(&(all_vars[i]), veg_con[i], veg_hist[i]);
+        vic_run(&(atmos[i]), &(all_vars[i]), &dmy[current], &global_param,
+                &lake_con, &(soil_con[i]), veg_con[i], veg_lib[i]);
         put_data(&(all_vars[i]), &(atmos[i]), &(soil_con[i]), veg_con[i],
                  veg_lib[i], &lake_con, out_data[i], &(save_data[i]),
                  current);

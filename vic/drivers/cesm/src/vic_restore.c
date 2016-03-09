@@ -64,7 +64,7 @@ vic_restore(char *runtype_str)
     }
     else if (runtype == CESM_RUNTYPE_CLEANSTART) {
         // run type is clean start
-        for (i = 0; i < local_domain.ncells; i++) {
+        for (i = 0; i < local_domain.ncells_active; i++) {
             // TBD: do something sensible for surf_temp
             surf_temp = 0.;
             nveg = veg_con[i][0].vegetat_type_num;

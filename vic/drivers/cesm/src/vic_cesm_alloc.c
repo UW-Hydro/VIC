@@ -1,7 +1,7 @@
 /******************************************************************************
  * @section DESCRIPTION
  *
- * Get netCDF dimension.
+ * Allocate memory for VIC structures.
  *
  * @section LICENSE
  *
@@ -24,46 +24,36 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  *****************************************************************************/
 
-#include <vic_def.h>
-#include <vic_run.h>
 #include <vic_driver_cesm.h>
 
 /******************************************************************************
- * @brief    Get netCDF dimension.
+ * @brief    Allocate memory for VIC structures.
  *****************************************************************************/
-size_t
-get_nc_dimension(char *nc_name,
-                 char *dim_name)
+void
+vic_cesm_alloc(void)
 {
-    int    nc_id;
-    int    dim_id;
-    size_t dim_size;
-    int    status;
+    extern x2l_data_struct *x2l_vic;
+    extern l2x_data_struct *l2x_vic;
+    extern domain_struct    local_domain;
 
-    // open the netcdf file
-    status = nc_open(nc_name, NC_NOWRITE, &nc_id);
-    if (status != NC_NOERR) {
-        log_err("Error opening %s", nc_name);
+    debug("In vic_alloc");
+
+    // allocate memory for x2l_vic structure
+    x2l_vic = malloc(local_domain.ncells_active * sizeof(*x2l_vic));
+    if (x2l_vic == NULL) {
+        log_err("Memory allocation error in vic_alloc().");
     }
+    // initialize x2l data
+    initialize_x2l_data();
 
-    // get dimension id
-    status = nc_inq_dimid(nc_id, dim_name, &dim_id);
-    if (status != NC_NOERR) {
-        log_err("Error getting dimension id %s in %s", dim_name, nc_name);
+    // allocate memory for l2x_vic structure
+    l2x_vic = malloc(local_domain.ncells_active * sizeof(*l2x_vic));
+    if (l2x_vic == NULL) {
+        log_err("Memory allocation error in vic_alloc().");
     }
+    // initialize l2x data
+    initialize_l2x_data();
 
-    // get dimension size
-    status = nc_inq_dimlen(nc_id, dim_id, &dim_size);
-    if (status != NC_NOERR) {
-        log_err("Error getting dimension size for dim %s in %s", dim_name,
-                nc_name);
-    }
-
-    // close the netcdf file
-    status = nc_close(nc_id);
-    if (status != NC_NOERR) {
-        log_err("Error closing %s", nc_name);
-    }
-
-    return dim_size;
+    // allocate the rest of the image mode structures
+    vic_alloc();
 }

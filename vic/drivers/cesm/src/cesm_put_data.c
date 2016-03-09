@@ -71,7 +71,7 @@ vic_cesm_put_data()
     snow_data_struct           snow;
     veg_var_struct             veg_var;
 
-    for (i = 0; i < local_domain.ncells; i++) {
+    for (i = 0; i < local_domain.ncells_active; i++) {
         // Zero l2x vars (leave unused fields as MISSING values)
         l2x_vic[i].l2x_Sl_t = 0;
         l2x_vic[i].l2x_Sl_tref = 0;

@@ -24,7 +24,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  *****************************************************************************/
 
- #include <vic_driver_cesm.h>
+#include <vic_driver_cesm.h>
 
 double dt_time_units = MISSING;
 double numdate = MISSING;

@@ -24,8 +24,6 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  *****************************************************************************/
 
-#include <vic_def.h>
-#include <vic_run.h>
 #include <vic_driver_cesm.h>
 
 /******************************************************************************
@@ -57,7 +55,7 @@ vic_force(void)
     int                        vidx;
 
     // Check to make sure variables have been set by coupler
-    for (i = 0; i < local_domain.ncells; i++) {
+    for (i = 0; i < local_domain.ncells_active; i++) {
         if (!x2l_vic[i].x2l_vars_set) {
             if (current == 0) {
                 make_dummy_forcings(&x2l_vic[i]);
@@ -70,7 +68,7 @@ vic_force(void)
 
     // Air temperature
     for (j = 0; j < NF; j++) {
-        for (i = 0; i < local_domain.ncells; i++) {
+        for (i = 0; i < local_domain.ncells_active; i++) {
             // CESM units: K
             // VIC units: C
             atmos[i].air_temp[j] = x2l_vic[i].x2l_Sa_tbot - CONST_TKFRZ;
@@ -79,7 +77,7 @@ vic_force(void)
 
     // Precipitation
     for (j = 0; j < NF; j++) {
-        for (i = 0; i < local_domain.ncells; i++) {
+        for (i = 0; i < local_domain.ncells_active; i++) {
             // CESM units: km m-2 s-1
             // VIC units: mm / timestep
             // Note: VIC does not use liquid/solid precip partitioning
@@ -93,7 +91,7 @@ vic_force(void)
 
     // Downward solar radiation
     for (j = 0; j < NF; j++) {
-        for (i = 0; i < local_domain.ncells; i++) {
+        for (i = 0; i < local_domain.ncells_active; i++) {
             // CESM units: W m-2
             // VIC units: W m-2
             // Note: VIC does not use partitioned shortwave fluxes.
@@ -106,7 +104,7 @@ vic_force(void)
 
     // Fraction of incoming shortwave that is direct
     for (j = 0; j < NF; j++) {
-        for (i = 0; i < local_domain.ncells; i++) {
+        for (i = 0; i < local_domain.ncells_active; i++) {
             // CESM units: n/a (calculated from SW fluxes)
             // VIC units: fraction
             if (atmos[i].shortwave[j] != 0.) {
@@ -123,7 +121,7 @@ vic_force(void)
 
     // Downward longwave radiation
     for (j = 0; j < NF; j++) {
-        for (i = 0; i < local_domain.ncells; i++) {
+        for (i = 0; i < local_domain.ncells_active; i++) {
             // CESM units: W m-2
             // VIC units: W m-2
             atmos[i].longwave[j] = x2l_vic[i].x2l_Faxa_lwdn;
@@ -132,7 +130,7 @@ vic_force(void)
 
     // Wind speed
     for (j = 0; j < NF; j++) {
-        for (i = 0; i < local_domain.ncells; i++) {
+        for (i = 0; i < local_domain.ncells_active; i++) {
             // CESM units: m s-1
             // VIC units: m s-1
             // Note: VIC does not use partitioned wind speeds
@@ -143,7 +141,7 @@ vic_force(void)
 
     // Pressure
     for (j = 0; j < NF; j++) {
-        for (i = 0; i < local_domain.ncells; i++) {
+        for (i = 0; i < local_domain.ncells_active; i++) {
             // CESM units: Pa
             // VIC units: kPa
             atmos[i].pressure[j] = x2l_vic[i].x2l_Sa_pbot / PA_PER_KPA;
@@ -152,7 +150,7 @@ vic_force(void)
 
     // Vapor Pressure
     for (j = 0; j < NF; j++) {
-        for (i = 0; i < local_domain.ncells; i++) {
+        for (i = 0; i < local_domain.ncells_active; i++) {
             // CESM units: shum is specific humidity (g/g)
             // VIC units: kPa
             atmos[i].vp[j] = q_to_vp(x2l_vic[i].x2l_Sa_shum,
@@ -162,7 +160,7 @@ vic_force(void)
 
     //
     for (j = 0; j < NF; j++) {
-        for (i = 0; i < local_domain.ncells; i++) {
+        for (i = 0; i < local_domain.ncells_active; i++) {
             // CESM units: 1e-6 mol/mol
             // VIC units: mol CO2/ mol air
             atmos[i].Catm[j] = 1e6 * x2l_vic[i].x2l_Sa_co2prog;
@@ -171,7 +169,7 @@ vic_force(void)
 
     // incoming channel inflow
     for (j = 0; j < NF; j++) {
-        for (i = 0; i < local_domain.ncells; i++) {
+        for (i = 0; i < local_domain.ncells_active; i++) {
             // CESM units: kg m-2 s-1
             // VIC units: mm
             atmos[i].channel_in[j] = x2l_vic[i].x2l_Flrr_flood *
@@ -187,7 +185,7 @@ vic_force(void)
     }
 
     // Convert forcings into what we need and calculate missing ones
-    for (i = 0; i < local_domain.ncells; i++) {
+    for (i = 0; i < local_domain.ncells_active; i++) {
         for (j = 0; j < NF; j++) {
             // vapor pressure deficit
             atmos[i].vpd[j] = svp(atmos[i].air_temp[j]) - atmos[i].vp[j];
@@ -207,7 +205,7 @@ vic_force(void)
 
 
     // Put average value in NR field
-    for (i = 0; i < local_domain.ncells; i++) {
+    for (i = 0; i < local_domain.ncells_active; i++) {
         atmos[i].air_temp[NR] = average(atmos[i].air_temp, NF);
         // For precipitation put total
         atmos[i].prec[NR] = average(atmos[i].prec, NF) * NF;
@@ -231,7 +229,7 @@ vic_force(void)
 
     // Update the veg_hist structure with the current vegetation parameters.
     // Currently only implemented for climatological values in image mode
-    for (i = 0; i < local_domain.ncells; i++) {
+    for (i = 0; i < local_domain.ncells_active; i++) {
         for (v = 0; v < options.NVEGTYPES; v++) {
             vidx = veg_con_map[i].vidx[v];
             if (vidx != -1) {
@@ -240,16 +238,16 @@ vic_force(void)
                         veg_lib[i][v].albedo[dmy.month - 1];
                     veg_hist[i][vidx].LAI[j] =
                         veg_lib[i][v].LAI[dmy.month - 1];
-                    veg_hist[i][vidx].vegcover[j] =
-                        veg_lib[i][v].vegcover[dmy.month - 1];
+                    veg_hist[i][vidx].fcanopy[j] =
+                        veg_lib[i][v].fcanopy[dmy.month - 1];
                 }
                 // not the correct way to calculate average albedo, but leave
                 // for now
                 veg_hist[i][vidx].albedo[NR] = average(veg_hist[i][vidx].albedo,
                                                        NF);
                 veg_hist[i][vidx].LAI[NR] = average(veg_hist[i][vidx].LAI, NF);
-                veg_hist[i][vidx].vegcover[NR] = average(
-                    veg_hist[i][vidx].vegcover, NF);
+                veg_hist[i][vidx].fcanopy[NR] = average(
+                    veg_hist[i][vidx].fcanopy, NF);
             }
         }
     }

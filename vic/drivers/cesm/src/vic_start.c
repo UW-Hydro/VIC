@@ -45,6 +45,7 @@ vic_start(vic_clock     *vclock,
     extern domain_struct       global_domain;
     extern domain_struct       local_domain;
     extern global_param_struct global_param;
+    extern MPI_Comm            MPI_COMM_VIC;
     extern MPI_Datatype        mpi_domain_struct_type;
     extern MPI_Datatype        mpi_global_struct_type;
     extern MPI_Datatype        mpi_location_struct_type;

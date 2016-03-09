@@ -36,9 +36,6 @@
 #define RPOINTER "rpointer.lnd"
 #define SHR_CONST_SPVAL 1.0e30
 
-// Component MPI Communicator
-MPI_Comm MPI_COMM_VIC;
-
 /******************************************************************************
  * @brief   CESM run types
  *****************************************************************************/

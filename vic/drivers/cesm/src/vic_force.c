@@ -102,23 +102,6 @@ vic_force(void)
         }
     }
 
-    // Fraction of incoming shortwave that is direct
-    for (j = 0; j < NF; j++) {
-        for (i = 0; i < local_domain.ncells_active; i++) {
-            // CESM units: n/a (calculated from SW fluxes)
-            // VIC units: fraction
-            if (atmos[i].shortwave[j] != 0.) {
-                atmos[i].fdir[j] = (x2l_vic[i].x2l_Faxa_swndr +
-                                    x2l_vic[i].x2l_Faxa_swvdr) /
-                                   (x2l_vic[i].x2l_Faxa_swndf +
-                                    x2l_vic[i].x2l_Faxa_swvdf);
-            }
-            else {
-                atmos[i].fdir[j] = 0.;
-            }
-        }
-    }
-
     // Downward longwave radiation
     for (j = 0; j < NF; j++) {
         for (i = 0; i < local_domain.ncells_active; i++) {
@@ -158,22 +141,43 @@ vic_force(void)
         }
     }
 
-    //
-    for (j = 0; j < NF; j++) {
-        for (i = 0; i < local_domain.ncells_active; i++) {
-            // CESM units: 1e-6 mol/mol
-            // VIC units: mol CO2/ mol air
-            atmos[i].Catm[j] = 1e6 * x2l_vic[i].x2l_Sa_co2prog;
+    if (options.CARBON) {
+        // Fraction of incoming shortwave that is direct
+        for (j = 0; j < NF; j++) {
+            for (i = 0; i < local_domain.ncells_active; i++) {
+                // CESM units: n/a (calculated from SW fluxes)
+                // VIC units: fraction
+                if (atmos[i].shortwave[j] != 0.) {
+                    atmos[i].fdir[j] = (x2l_vic[i].x2l_Faxa_swndr +
+                                        x2l_vic[i].x2l_Faxa_swvdr) /
+                                       (x2l_vic[i].x2l_Faxa_swndf +
+                                        x2l_vic[i].x2l_Faxa_swvdf);
+                }
+                else {
+                    atmos[i].fdir[j] = 0.;
+                }
+            }
+        }
+
+        // Concentration of CO2
+        for (j = 0; j < NF; j++) {
+            for (i = 0; i < local_domain.ncells_active; i++) {
+                // CESM units: 1e-6 mol/mol
+                // VIC units: mol CO2/ mol air
+                atmos[i].Catm[j] = 1e6 * x2l_vic[i].x2l_Sa_co2prog;
+            }
         }
     }
 
-    // incoming channel inflow
-    for (j = 0; j < NF; j++) {
-        for (i = 0; i < local_domain.ncells_active; i++) {
-            // CESM units: kg m-2 s-1
-            // VIC units: mm
-            atmos[i].channel_in[j] = x2l_vic[i].x2l_Flrr_flood *
-                                     global_param.snow_dt;
+    if (options.LAKES) {
+        // incoming channel inflow
+        for (j = 0; j < NF; j++) {
+            for (i = 0; i < local_domain.ncells_active; i++) {
+                // CESM units: kg m-2 s-1
+                // VIC units: mm
+                atmos[i].channel_in[j] = x2l_vic[i].x2l_Flrr_flood *
+                                         global_param.snow_dt;
+            }
         }
     }
 

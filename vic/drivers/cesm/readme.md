@@ -39,11 +39,20 @@ The CESM driver for VIC can be built in two ways.
   # get vic5 rasm repo
   git clone git@github.com:UW-Hydro/VIC.git vic
   cd vic
-  git checkout driver/cesm
+  git checkout develop
 
   # follow typical steps to build RASM
   cd $HOME/rasm_vic5/scripts
-  ./create_case ...
+  today=$(date +'%Y%m%d')
+  compset='RI'
+  mach='spirit_intel'
+  case=vic5.${compset}.test.${today}a
+  create_newcase -case ${case} -res w5a_a94 -compset ${compset} -mach ${mach}
+  cd ${case}
+  ./cesm_setup
+  # change debug option
+  ./${case}.build
+  qsub ${case}.run
   ```
 
   ** Supported Machines **

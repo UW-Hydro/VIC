@@ -6,6 +6,7 @@ import shutil
 try:
     from ConfigParser import SafeConfigParser
 except ImportError:
+    # ConfigParser was renamed to configparser in Python 3
     from configparser import SafeConfigParser
 
 
@@ -134,7 +135,7 @@ def read_config(config_file):
 
 
 def copy_clean_vic_config(src, dst, header=None, **kwargs):
-    """Copy VIC style ASCII configuratoin file from src to dst
+    """Copy VIC style ASCII configuration file from src to dst
 
         remove comments and empty lines
     """

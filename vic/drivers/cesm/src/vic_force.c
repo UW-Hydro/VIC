@@ -272,8 +272,8 @@ make_dummy_forcings(x2l_data_struct *x2l)
     x2l->x2l_Sa_ptem = 1.;  /** bottom atm level pot temp */
     x2l->x2l_Sa_shum = 0.02;  /** bottom atm level spec hum */
     x2l->x2l_Sa_pbot = 101325.;  /** bottom atm level pressure */
-    x2l->x2l_Sa_tbot = 1.;  /** bottom atm level temp */
-    x2l->x2l_Faxa_lwdn = 50;  /** downward lw heat flux */
+    x2l->x2l_Sa_tbot = 275.0;  /** bottom atm level temp */
+    x2l->x2l_Faxa_lwdn = 50.;  /** downward lw heat flux */
     x2l->x2l_Faxa_rainc = 0.;  /** prec: liquid "convective" */
     x2l->x2l_Faxa_rainl = 0.;  /** prec: liquid "large scale" */
     x2l->x2l_Faxa_snowc = 0.;  /** prec: frozen "convective" */

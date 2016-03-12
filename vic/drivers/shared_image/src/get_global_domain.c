@@ -248,10 +248,10 @@ add_nveg_to_global_domain(char          *nc_name,
     size_t  d2count[2];
     size_t  d2start[2];
     size_t  i;
-    double *dvar = NULL;
+    int    *ivar = NULL;
 
-    dvar = malloc(global_domain->ncells_total * sizeof(*dvar));
-    if (dvar == NULL) {
+    ivar = malloc(global_domain->ncells_total * sizeof(*ivar));
+    if (ivar == NULL) {
         log_err("Memory allocation error in add_nveg_to_global_domain().");
     }
 
@@ -259,13 +259,13 @@ add_nveg_to_global_domain(char          *nc_name,
     d2start[1] = 0;
     d2count[0] = global_domain->n_ny;
     d2count[1] = global_domain->n_nx;
-    get_nc_field_double(nc_name, "Nveg", d2start, d2count, dvar);
+    get_nc_field_int(nc_name, "Nveg", d2start, d2count, ivar);
 
     for (i = 0; i < global_domain->ncells_total; i++) {
-        global_domain->locations[i].nveg = (size_t) dvar[i];
+        global_domain->locations[i].nveg = (size_t) ivar[i];
     }
 
-    free(dvar);
+    free(ivar);
 }
 
 /******************************************************************************

@@ -245,10 +245,10 @@ void
 add_nveg_to_global_domain(char          *nc_name,
                           domain_struct *global_domain)
 {
-    size_t  d2count[2];
-    size_t  d2start[2];
-    size_t  i;
-    int    *ivar = NULL;
+    size_t d2count[2];
+    size_t d2start[2];
+    size_t i;
+    int   *ivar = NULL;
 
     ivar = malloc(global_domain->ncells_total * sizeof(*ivar));
     if (ivar == NULL) {

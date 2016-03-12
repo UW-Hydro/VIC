@@ -164,7 +164,6 @@ initialize_domain_info(domain_info_struct *info)
     strcpy(info->y_dim, "MISSING");
     strcpy(info->x_dim, "MISSING");
     info->n_coord_dims = 0;
-
 }
 
 /******************************************************************************
@@ -188,6 +187,5 @@ initialize_global_structures(void)
         initialize_filenames();
         initialize_domain_info(&global_domain.info);
         initialize_domain(&global_domain);
-
     }
 }

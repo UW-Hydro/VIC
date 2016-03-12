@@ -651,7 +651,6 @@ validate_global_param(global_param_struct *gp)
 void
 validate_options(option_struct *options)
 {
-
     // Validate SPATIAL_FROST information
     if (options->SPATIAL_FROST) {
         if (options->Nfrost > MAX_FROST_AREAS) {

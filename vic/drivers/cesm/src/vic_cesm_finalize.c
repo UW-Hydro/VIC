@@ -40,5 +40,4 @@ vic_cesm_finalize(void)
     free(l2x_vic);
 
     vic_finalize();
-
 }

@@ -44,15 +44,15 @@ The CESM driver for VIC can be built in two ways.
   # follow typical steps to build RASM
   cd $HOME/rasm_vic5/scripts
   today=$(date +'%Y%m%d')
-  compset='RI'
-  mach='spirit_intel'
-  case=vic5.${compset}.test.${today}a
-  create_newcase -case ${case} -res w5a_a94 -compset ${compset} -mach ${mach}
-  cd ${case}
+  compset=RI
+  mach=spirit_intel
+  case_name=vic5.${compset}.test.${today}a
+  create_newcase -case ${case_name} -res w5a_a94 -compset ${compset} -mach ${mach}
+  cd ${case_name}
   ./cesm_setup
-  # change debug option
-  ./${case}.build
-  qsub ${case}.run
+  ./xmlchange -file env_build.xml -id DEBUG -val TRUE
+  ./${case_name}.build
+  qsub ${case_name}.run
   ```
 
   ** Supported Machines **

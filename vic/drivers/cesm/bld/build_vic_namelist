@@ -99,7 +99,7 @@ def copy_to_rundir(grid_config, caseid, rundir, casedocs):
         # change permissions to read only
         set_readonly(dst_file)
 
-        if casedocs:
+        if casedocs and os.path.isdir(casedocs):
             doc_file = os.path.join(casedocs, fname)
             if os.path.isfile(doc_file):
                 os.remove(doc_file)

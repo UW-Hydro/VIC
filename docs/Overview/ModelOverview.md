@@ -32,12 +32,14 @@ Figure 1.  VIC land cover tiles and soil column, with major water and energy flu
 - fluxes and storages from the tiles are averaged together (weighted by area fraction) to give grid-cell average for writing to output files.
 - for a given tile, jarvis-style veg stomatal response used in computing transpiration.
 - considers canopy energy balance separately from ground surface.
-- accounts for soil evaporation and different wind and radiation attenuation in spaces between individual plants (or gaps in the canopy); vegetated and non-vegetated area fractions are controlled by vegetated area fraction (fv) (Figure 2).  See [Bohn and Vivoni (in review)](../Documentation/References.md#other-historical-references) for more details.
-- supports optional input of daily timeseries of LAI, albedo, and vegetated area fraction from forcing files instead of using the monthly climatology specified in the veg library or veg parameter files.  See [Bohn and Vivoni (in review)](../Documentation/References.md#other-historical-references)for more details.
+- accounts for soil evaporation and different wind and radiation attenuation in spaces between individual plants (or gaps in the canopy); vegetated and non-vegetated area fractions are controlled by vegetated area fraction (fv) (Figure 2).  See [Bohn and Vivoni (accepted)](../Documentation/References.md#other-historical-references) for more details.
+- supports optional input of daily timeseries of LAI, albedo, and vegetated area fraction from forcing files instead of using the monthly climatology specified in the veg library or veg parameter files.  See [Bohn and Vivoni (accepted)](../Documentation/References.md#other-historical-references)for more details.
 
 ![Partial Vegetation Cover Schematic](../img/PartialVegCoverSchematic.bw.png)
 
 Figure 2. Schematic of the big leaf (pre-VIC 4.2) and clumped (4.2 and later) vegetation schemes. The spatial average leaf area index (LAI) within a given vegetation tile is assumed uniformly distributed in the big leaf scheme, but is rescaled by the vegetated area fraction (fv) to estimate a plant-specific LAI in the clumped scheme. Transpiration (T) and evaporation of canopy interception (Ecan) is complemented by soil evaporation (Esoil) in the clumped scheme.
+
+- computes potential evapotranspiration as the area-weighted sum of potential transpiration and potential soil evaporation.  Potential transpiration is computed for the current vegetation, using its current architectural resistance and LAI to compute canopy resistance in the absence of limitation from soil moisture, vapor pressure deficit, temperature, or insolation.
 
 !!!Note "Regarding Evapotranspiration and Time Step"
     In order to compensate for the inaccuracies in simulating canopy interception and evaporation at a 24-hour time step, VIC makes an exception for the 24-hour case: in this case, canopy evaporation is allowed to encompass not only the water in the canopy at the beginning of the time step, but also any precipitation, up to the atmospheric demand for water.  At smaller time steps, canopy evaporation is limited to just the amount of water stored in the canopy at the beginning of the time step.  This can result in a) inaccurate apportioning of total ET between canopy evaporation and transpiration, and b) different behavior between VIC simulations at 24 hour time steps and simulations at smaller time steps (with the biggest differences occurring between 12-hour and 24-hour time steps).  For more information, see [Haddeland et al (2006a)](../Documentation/References.md#selected-application-references).
@@ -89,7 +91,7 @@ These forcings must be provided at the timestep that the model will be run at (e
 
 ### Non-Meteorological Input Data
 
-Can read daily timeseries of land cover information such as albedo, LAI, and partial vegetation cover fraction as forcing variables ([Bohn and Vivoni, in review](../Documentation/References.md#other-historical-references)).
+Can read daily timeseries of land cover information such as albedo, LAI, and vegetation canopy cover fraction as forcing variables ([Bohn and Vivoni, accepted](../Documentation/References.md#other-historical-references)).
 
 ### Elevation Bands
 

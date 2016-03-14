@@ -107,11 +107,11 @@ rout_alloc(void)
         log_err("Memory allocation error in rout.rout_param.unit_hydrograph().");
     }
     rout.rout_param.aggrunin =
-        (double *)malloc(local_domain.ncells * sizeof(double));
+        (double *)malloc(local_domain.ncells_active * sizeof(double));
     if (rout.rout_param.aggrunin == NULL) {
         log_err("Memory allocation error in rout.rout_param.aggrunin().");
     }
-    rout.discharge = (double *)malloc(local_domain.ncells * sizeof(double));
+    rout.discharge = (double *)malloc(local_domain.ncells_active * sizeof(double));
     if (rout.discharge == NULL) {
         log_err("Memory allocation error in rout.rout_param.discharge().");
     }

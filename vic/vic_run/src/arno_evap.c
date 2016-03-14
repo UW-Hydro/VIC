@@ -30,7 +30,6 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  *****************************************************************************/
 
-#include <vic_def.h>
 #include <vic_run.h>
 
 /******************************************************************************
@@ -50,19 +49,20 @@ arno_evap(layer_data_struct *layer,
           double             moist_resid,
           double            *frost_fract)
 {
-    extern option_struct options;
+    extern parameters_struct param;
+    extern option_struct     options;
 
-    int                  num_term;
-    int                  i;
-    size_t               frost_area;
-    double               tmp, beta_asp, dummy;
-    double               ratio, as;
-    double               Epot; /* potential bare soil evaporation */
-    double               moist;
-    double               evap;
-    double               max_infil;
-    double               Evap;
-    double               tmpsum;
+    int                      num_term;
+    int                      i;
+    size_t                   frost_area;
+    double                   tmp, beta_asp, dummy;
+    double                   ratio, as;
+    double                   Epot; /* potential bare soil evaporation */
+    double                   moist;
+    double                   evap;
+    double                   max_infil;
+    double                   Evap;
+    double                   tmpsum;
 
     Evap = 0;
 
@@ -81,7 +81,7 @@ arno_evap(layer_data_struct *layer,
 
     Epot =
         penman(air_temp, elevation, rad, vpd, ra, 0.0,
-               0.0) * delta_t / CONST_CDAY;
+               param.SOIL_RARC) * delta_t / CONST_CDAY;
 
     /**********************************************************************/
     /*  Compute temporary infiltration rate based on given soil_moist.    */

@@ -24,8 +24,6 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  *****************************************************************************/
 
-#include <vic_def.h>
-#include <vic_run.h>
 #include <vic_driver_image.h>
 
 /******************************************************************************
@@ -66,6 +64,9 @@ vic_start(void)
     initialize_filenames();
 
     if (mpi_rank == 0) {
+        // Initialize the global domain
+        initialize_domain(&global_domain);
+
         // read global settings
         filep.globalparam = open_file(filenames.global, "r");
         get_global_param(filep.globalparam);
@@ -122,6 +123,10 @@ vic_start(void)
                 log_err("Number of snow bands in global file does not "
                         "match parameter file");
             }
+        }
+        if (options.LAKES) {
+            options.NLAKENODES = get_nc_dimension(filenames.lakeparam,
+                                                  "lake_node");
         }
 
         // Check that model parameters are valid

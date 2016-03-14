@@ -25,8 +25,6 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  *****************************************************************************/
 
-#include <vic_def.h>
-#include <vic_run.h>
 #include <vic_driver_image.h>
 
 /******************************************************************************
@@ -71,7 +69,7 @@ display_current_settings(int mode)
     fprintf(LOG_DEST, "MAX_VEG\t\t\t%2d\n", MAX_VEG);
     fprintf(LOG_DEST, "\n");
     fprintf(LOG_DEST, "MINSOILDEPTH\t\t%f\n", MINSOILDEPTH);
-    fprintf(LOG_DEST, "MIN_VEGCOVER\t\t%f\n", MIN_VEGCOVER);
+    fprintf(LOG_DEST, "MIN_FCANOPY\t\t%f\n", MIN_FCANOPY);
     fprintf(LOG_DEST, "\n");
     fprintf(LOG_DEST, "MIN_SUBDAILY_STEPS_PER_DAY %d\n",
             MIN_SUBDAILY_STEPS_PER_DAY);
@@ -322,11 +320,47 @@ display_current_settings(int mode)
     else {
         fprintf(LOG_DEST, "VEGPARAM_LAI\t\tFALSE\n");
     }
-    if (options.LAI_SRC == LAI_FROM_VEGPARAM) {
-        fprintf(LOG_DEST, "LAI_SRC\t\tLAI_FROM_VEGPARAM\n");
+    if (options.LAI_SRC == FROM_VEGHIST) {
+        fprintf(LOG_DEST, "LAI_SRC\t\tFROM_VEGHIST\n");
     }
-    else if (options.LAI_SRC == LAI_FROM_VEGLIB) {
-        fprintf(LOG_DEST, "LAI_SRC\t\tLAI_FROM_VEGLIB\n");
+    else if (options.LAI_SRC == FROM_VEGPARAM) {
+        fprintf(LOG_DEST, "LAI_SRC\t\tFROM_VEGPARAM\n");
+    }
+    else if (options.LAI_SRC == FROM_VEGLIB) {
+        fprintf(LOG_DEST, "LAI_SRC\t\tFROM_VEGLIB\n");
+    }
+    if (options.VEGPARAM_FCAN) {
+        fprintf(LOG_DEST, "VEGPARAM_FCAN\t\tTRUE\n");
+    }
+    else {
+        fprintf(LOG_DEST, "VEGPARAM_FCAN\t\tFALSE\n");
+    }
+    if (options.FCAN_SRC == FROM_VEGHIST) {
+        fprintf(LOG_DEST, "FCAN_SRC\t\tFROM_VEGHIST\n");
+    }
+    else if (options.FCAN_SRC == FROM_VEGPARAM) {
+        fprintf(LOG_DEST, "FCAN_SRC\t\tFROM_VEGPARAM\n");
+    }
+    else if (options.FCAN_SRC == FROM_VEGLIB) {
+        fprintf(LOG_DEST, "FCAN_SRC\t\tFROM_VEGLIB\n");
+    }
+    else if (options.FCAN_SRC == FROM_DEFAULT) {
+        fprintf(LOG_DEST, "FCAN_SRC\t\tFROM_DEFAULT\n");
+    }
+    if (options.VEGPARAM_ALB) {
+        fprintf(LOG_DEST, "VEGPARAM_ALB\t\tTRUE\n");
+    }
+    else {
+        fprintf(LOG_DEST, "VEGPARAM_ALB\t\tFALSE\n");
+    }
+    if (options.ALB_SRC == FROM_VEGHIST) {
+        fprintf(LOG_DEST, "ALB_SRC\t\tFROM_VEGHIST\n");
+    }
+    else if (options.ALB_SRC == FROM_VEGPARAM) {
+        fprintf(LOG_DEST, "ALB_SRC\t\tFROM_VEGPARAM\n");
+    }
+    else if (options.ALB_SRC == FROM_VEGLIB) {
+        fprintf(LOG_DEST, "ALB_SRC\t\tFROM_VEGLIB\n");
     }
 
     fprintf(LOG_DEST, "\n");

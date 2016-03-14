@@ -66,12 +66,7 @@ Using options within the *global parameter file*, any combination of the variabl
 | OUT_LAKE_RO_IN_V       	| (release 4.1.2 and later) Incoming volumetric runoff from lake catchment                   	| m<sup>3</sup> (ALMA_OUTPUT: m<sup>3</sup>/s) 	|
 | OUT_LAKE_VAPFLX        	| (release 4.1.2 and later) Outgoing sublimation from snow on top of lake ice                	| mm (ALMA_OUTPUT: mm/s) 	|
 | OUT_LAKE_VAPFLX_V      	| (release 4.1.2 and later) Outgoing volumetric sublimation from snow on top of lake ice     	| m<sup>3</sup> (ALMA_OUTPUT: m<sup>3</sup>/s) 	|
-| OUT_PET_SATSOIL        	| Potential evap from saturated bare soil                                                   	| mm (ALMA_OUTPUT: mm/s) 	|
-| OUT_PET_H2OSURF        	| Potential evap from open water                                                            	| mm (ALMA_OUTPUT: mm/s) 	|
-| OUT_PET_SHORT          	| Potential evap (transpiration only) from short reference crop (grass)                     	| mm (ALMA_OUTPUT: mm/s) 	|
-| OUT_PET_TALL           	| Potential evap (transpiration only) from tall reference crop (alfalfa)                    	| mm (ALMA_OUTPUT: mm/s) 	|
-| OUT_PET_NATVEG         	| Potential evap (transpiration only) from current vegetation and current canopy resistance 	| mm (ALMA_OUTPUT: mm/s) 	|
-| OUT_PET_VEGNOCR        	| Potential evap (transpiration only) from current vegetation and 0 canopy resistance       	| mm (ALMA_OUTPUT: mm/s) 	|
+| OUT_PET                	| Potential evapotranspiration (= area-weighted sum of potential transpiration and potential soil evaporation).  Potential transpiration is computed using the Penman-Monteith eqn with architectural resistance and LAI of the current veg cover.  	| mm (ALMA_OUTPUT: mm/s) 	|
 | OUT_PREC               	| Incoming precipitation                                                                    	| mm (ALMA_OUTPUT: mm/s) 	|
 | OUT_RAINF              	| Rainfall                                                                                  	| mm (ALMA_OUTPUT: mm/s) 	|
 | OUT_REFREEZE           	| Refreezing of water in the snow                                                           	| mm (ALMA_OUTPUT: mm/s) 	|
@@ -123,8 +118,8 @@ Using options within the *global parameter file*, any combination of the variabl
 | OUT_LATENT       	| Net upward latent heat flux                          	| W/m<sup>2</sup>                     	|
 | OUT_LATENT_SUB   	| Net upward latent heat flux from sublimation         	| W/m<sup>2</sup>                     	|
 | OUT_MELT_ENERGY  	| Energy of fusion (melting) in snowpack               	| W/m<sup>2</sup>                     	|
-| OUT_NET_LONG     	| Net downward longwave flux                           	| W/m<sup>2</sup>                     	|
-| OUT_NET_SHORT    	| Net downward shortwave flux                          	| W/m<sup>2</sup>                     	|
+| OUT_LWNET     	| Net downward longwave flux                           	| W/m<sup>2</sup>                     	|
+| OUT_SWNET    	| Net downward shortwave flux                          	| W/m<sup>2</sup>                     	|
 | OUT_R_NET        	| Net downward radiation flux                          	| W/m<sup>2</sup>                     	|
 | OUT_RFRZ_ENERGY  	| Net energy used to refreeze liquid water in snowpack 	| W/m<sup>2</sup>                     	|
 | OUT_SENSIBLE     	| Net upward sensible heat flux                        	| W/m<sup>2</sup>                     	|
@@ -140,16 +135,16 @@ Using options within the *global parameter file*, any combination of the variabl
 | OUT_AERO_RESIST2 	| Overstory aerodynamic resistance                                                                                                 	| s/m                   	|
 | OUT_AIR_TEMP     	| Air temperature                                                                                                                  	| C (ALMA_OUTPUT: K)    	|
 | OUT_DENSITY      	| Near-surface atmospheric density                                                                                                 	| kg/m<sup>3</sup>                 	|
+| OUT_FCANOPY     	| Vegetation canopy cover fraction                                                                                                	| fraction              	|
 | OUT_FDIR         	| fraction of incoming shortwave that is direct                                                                                    	| fraction              	|
 | OUT_LAI          	| Leaf Area Index                                                                                                                  	| fraction              	|
-| OUT_LONGWAVE     	| Incoming longwave                                                                                                                	| W/m<sup>2</sup>                  	|
+| OUT_LWDOWN     	| Incoming longwave                                                                                                                	| W/m<sup>2</sup>                  	|
 | OUT_PRESSURE     	| Near surface atmospheric pressure                                                                                                	| kPa (ALMA_OUTPUT: Pa) 	|
 | OUT_QAIR         	| Specific humidity                                                                                                                	| kg/kg                 	|
 | OUT_REL_HUMID    	| Relative humidity                                                                                                                	| fraction              	|
-| OUT_SHORTWAVE    	| Incoming shortwave                                                                                                               	| W/m<sup>2</sup>                  	|
+| OUT_SWDOWN    	| Incoming shortwave                                                                                                               	| W/m<sup>2</sup>                  	|
 | OUT_SURF_COND    	| Surface conductance                                                                                                              	| m/s                   	|
 | OUT_TSKC         	| (release 4.1.2 and later)  Cloud fraction                                                                                       	| fraction              	|
-| OUT_VEGCOVER     	| Partial vegetation cover fraction                                                                                                	| fraction              	|
 | OUT_VP           	| Near surface vapor pressure                                                                                                      	| kPa (ALMA_OUTPUT: Pa) 	|
 | OUT_VPD          	| Near surface vapor pressure deficit                                                                                              	| kPa (ALMA_OUTPUT: Pa) 	|
 | OUT_WIND         	| Near surface wind speed                                                                                                          	| m/s                   	|
@@ -166,8 +161,8 @@ Using options within the *global parameter file*, any combination of the variabl
 | OUT_LATENT_BAND      	| Net upward latent heat flux                          	| W/m<sup>2</sup>               	|
 | OUT_LATENT_SUB_BAND  	| Net upward latent heat flux due to sublimation       	| W/m<sup>2</sup>               	|
 | OUT_MELT_ENERGY_BAND 	| Energy of fusion (melting) in snowpack               	| W/m<sup>2</sup>               	|
-| OUT_NET_LONG_BAND    	| Net downward longwave flux                           	| W/m<sup>2</sup>               	|
-| OUT_NET_SHORT_BAND   	| Net downward shortwave flux                          	| W/m<sup>2</sup>               	|
+| OUT_LWNET_BAND    	| Net downward longwave flux                           	| W/m<sup>2</sup>               	|
+| OUT_SWNET_BAND   	| Net downward shortwave flux                          	| W/m<sup>2</sup>               	|
 | OUT_RFRZ_ENERGY_BAND 	| Net energy used to refreeze liquid water in snowpack 	| W/m<sup>2</sup>               	|
 | OUT_SENSIBLE_BAND    	| Net upward sensible heat flux                        	| W/m<sup>2</sup>               	|
 | OUT_SNOW_CANOPY_BAND 	| Snow interception storage in canopy                  	| mm                 	|

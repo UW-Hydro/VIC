@@ -26,8 +26,6 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  *****************************************************************************/
 
-#include <vic_def.h>
-#include <vic_run.h>
 #include <vic_driver_classic.h>
 
 /******************************************************************************
@@ -50,7 +48,7 @@ read_forcing_data(FILE              **infile,
     (*veg_hist_data) = calloc(N_FORCING_TYPES, sizeof(*(*veg_hist_data)));
     for (i = 0; i < N_FORCING_TYPES; i++) {
         if (param_set.TYPE[i].SUPPLIED) {
-            if (i != ALBEDO && i != LAI_IN && i != VEGCOVER) {
+            if (i != ALBEDO && i != LAI_IN && i != FCANOPY) {
                 forcing_data[i] = calloc(global_param.nrecs * NF,
                                          sizeof(*(forcing_data[i])));
             }

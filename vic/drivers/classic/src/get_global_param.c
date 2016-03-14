@@ -25,8 +25,6 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  *****************************************************************************/
 
-#include <vic_def.h>
-#include <vic_run.h>
 #include <vic_driver_classic.h>
 
 /******************************************************************************
@@ -116,54 +114,11 @@ get_global_param(FILE *gp)
             }
             else if (strcasecmp("CALENDAR", optstr) == 0) {
                 sscanf(cmdstr, "%*s %s", flgstr);
-                if (strcasecmp("STANDARD", flgstr) == 0) {
-                    global_param.calendar = CALENDAR_STANDARD;
-                }
-                else if (strcasecmp("GREGORIAN", flgstr) == 0) {
-                    global_param.calendar = CALENDAR_GREGORIAN;
-                }
-                else if (strcasecmp("PROLEPTIC_GREGORIAN", flgstr) == 0) {
-                    global_param.calendar = CALENDAR_PROLEPTIC_GREGORIAN;
-                }
-                else if (strcasecmp("NOLEAP", flgstr) == 0) {
-                    global_param.calendar = CALENDAR_NOLEAP;
-                }
-                else if (strcasecmp("365_DAY", flgstr) == 0) {
-                    global_param.calendar = CALENDAR_365_DAY;
-                }
-                else if (strcasecmp("360_DAY", flgstr) == 0) {
-                    global_param.calendar = CALENDAR_360_DAY;
-                }
-                else if (strcasecmp("JULIAN", flgstr) == 0) {
-                    global_param.calendar = CALENDAR_JULIAN;
-                }
-                else if (strcasecmp("ALL_LEAP", flgstr) == 0) {
-                    global_param.calendar = CALENDAR_ALL_LEAP;
-                }
-                else if (strcasecmp("366_DAY", flgstr) == 0) {
-                    global_param.calendar = CALENDAR_366_DAY;
-                }
-                else {
-                    log_err("Unknown calendar specified: %s", flgstr);
-                }
+                global_param.calendar = calendar_from_chars(flgstr);
             }
             else if (strcasecmp("OUT_TIME_UNITS", optstr) == 0) {
                 sscanf(cmdstr, "%*s %s", flgstr);
-                if (strcasecmp("SECONDS", flgstr) == 0) {
-                    global_param.time_units = TIME_UNITS_SECONDS;
-                }
-                else if (strcasecmp("MINUTES", flgstr) == 0) {
-                    global_param.time_units = TIME_UNITS_MINUTES;
-                }
-                else if (strcasecmp("HOURS", flgstr) == 0) {
-                    global_param.time_units = TIME_UNITS_HOURS;
-                }
-                else if (strcasecmp("DAYS", flgstr) == 0) {
-                    global_param.time_units = TIME_UNITS_DAYS;
-                }
-                else {
-                    log_err("Unknown time units specified: %s", flgstr);
-                }
+                global_param.time_units = timeunits_from_chars(flgstr);
             }
             else if (strcasecmp("FULL_ENERGY", optstr) == 0) {
                 sscanf(cmdstr, "%*s %s", flgstr);
@@ -484,6 +439,8 @@ get_global_param(FILE *gp)
                 sscanf(cmdstr, "%*s %s", filenames.f_path_pfx[0]);
                 file_num = 0;
                 field = 0;
+                // count the number of forcing variables in this file
+                param_set.N_TYPES[file_num] = count_force_vars(gp);
             }
             else if (strcasecmp("FORCING2", optstr) == 0) {
                 sscanf(cmdstr, "%*s %s", filenames.f_path_pfx[1]);
@@ -492,6 +449,8 @@ get_global_param(FILE *gp)
                 }
                 file_num = 1;
                 field = 0;
+                // count the number of forcing variables in this file
+                param_set.N_TYPES[file_num] = count_force_vars(gp);
             }
             else if (strcasecmp("FORCE_FORMAT", optstr) == 0) {
                 sscanf(cmdstr, "%*s %s", flgstr);
@@ -516,9 +475,6 @@ get_global_param(FILE *gp)
                 else {
                     log_err("FORCE_ENDIAN must be either BIG or LITTLE.");
                 }
-            }
-            else if (strcasecmp("N_TYPES", optstr) == 0) {
-                sscanf(cmdstr, "%*s %zu", &param_set.N_TYPES[file_num]);
             }
             else if (strcasecmp("FORCE_TYPE", optstr) == 0) {
                 get_force_type(cmdstr, file_num, &field);
@@ -632,34 +588,22 @@ get_global_param(FILE *gp)
                     options.VEGLIB_PHOTO = false;
                 }
             }
-            else if (strcasecmp("VEGLIB_VEGCOVER", optstr) == 0) {
+            else if (strcasecmp("VEGLIB_FCAN", optstr) == 0) {
                 sscanf(cmdstr, "%*s %s", flgstr);
                 if (strcasecmp("TRUE", flgstr) == 0) {
-                    options.VEGLIB_VEGCOVER = true;
+                    options.VEGLIB_FCAN = true;
                 }
                 else {
-                    options.VEGLIB_VEGCOVER = false;
+                    options.VEGLIB_FCAN = false;
                 }
+            }
+            else if (strcasecmp("VEGLIB_VEGCOVER", optstr) == 0) {
+                log_err("The option VEGLIB_VEGCOVER has been replaced by "
+                        "VEGLIB_FCAN.  Please edit your global parameter "
+                        "file and re-run.");
             }
             else if (strcasecmp("VEGPARAM", optstr) == 0) {
                 sscanf(cmdstr, "%*s %s", filenames.veg);
-            }
-            else if (strcasecmp("GLOBAL_LAI", optstr) == 0) {
-                log_warn("GLOBAL_LAI has been replaced by 2 new options: "
-                         "VEGPARAM_LAI (whether the vegparam file contains LAI "
-                         "values) and LAI_SRC (where to get LAI values).");
-                log_warn("\"GLOBAL_LAI  TRUE\" should now be: \"VEGPARAM_LAI  "
-                         "TRUE\" and \"LAI_SRC  FROM_VEGPARAM\"");
-                log_warn("\"GLOBAL_LAI  FALSE\" should now be: \"LAI_SRC  "
-                         "FROM_VEGLIB\".");
-                sscanf(cmdstr, "%*s %s", flgstr);
-                if (strcasecmp("TRUE", flgstr) == 0) {
-                    options.VEGPARAM_LAI = true;
-                    options.LAI_SRC = FROM_VEGPARAM;
-                }
-                else {
-                    options.LAI_SRC = FROM_VEGLIB;
-                }
             }
             else if (strcasecmp("VEGPARAM_LAI", optstr) == 0) {
                 sscanf(cmdstr, "%*s %s", flgstr);
@@ -672,31 +616,46 @@ get_global_param(FILE *gp)
             }
             else if (strcasecmp("LAI_SRC", optstr) == 0) {
                 sscanf(cmdstr, "%*s %s", flgstr);
-                if (strcasecmp("FROM_VEGPARAM",
-                               flgstr) == 0 ||
-                    strcasecmp("LAI_FROM_VEGPARAM", flgstr) == 0) {
+                if (strcasecmp("FROM_VEGHIST", flgstr) == 0) {
+                    options.LAI_SRC = FROM_VEGHIST;
+                }
+                else if (strcasecmp("FROM_VEGPARAM", flgstr) == 0) {
                     options.LAI_SRC = FROM_VEGPARAM;
                 }
-                else {
+                else if (strcasecmp("FROM_VEGLIB", flgstr) == 0) {
                     options.LAI_SRC = FROM_VEGLIB;
                 }
+                else {
+                    log_err("Unrecognized value of LAI_SRC in the global "
+                            "control file.");
+                }
             }
-            else if (strcasecmp("VEGPARAM_VEGCOVER", optstr) == 0) {
+            else if (strcasecmp("VEGPARAM_FCAN", optstr) == 0) {
                 sscanf(cmdstr, "%*s %s", flgstr);
                 if (strcasecmp("TRUE", flgstr) == 0) {
-                    options.VEGPARAM_VEGCOVER = true;
+                    options.VEGPARAM_FCAN = true;
                 }
                 else {
-                    options.VEGPARAM_VEGCOVER = false;
+                    options.VEGPARAM_FCAN = false;
                 }
             }
-            else if (strcasecmp("VEGCOVER_SRC", optstr) == 0) {
+            else if (strcasecmp("FCAN_SRC", optstr) == 0) {
                 sscanf(cmdstr, "%*s %s", flgstr);
-                if (strcasecmp("FROM_VEGPARAM", flgstr) == 0) {
-                    options.VEGCOVER_SRC = FROM_VEGPARAM;
+                if (strcasecmp("FROM_VEGHIST", flgstr) == 0) {
+                    options.FCAN_SRC = FROM_VEGHIST;
+                }
+                else if (strcasecmp("FROM_VEGPARAM", flgstr) == 0) {
+                    options.FCAN_SRC = FROM_VEGPARAM;
+                }
+                else if (strcasecmp("FROM_VEGLIB", flgstr) == 0) {
+                    options.FCAN_SRC = FROM_VEGLIB;
+                }
+                else if (strcasecmp("FROM_DEFAULT", flgstr) == 0) {
+                    options.FCAN_SRC = FROM_DEFAULT;
                 }
                 else {
-                    options.VEGCOVER_SRC = FROM_VEGLIB;
+                    log_err("Unrecognized value of FCAN_SRC in the global "
+                            "control file.");
                 }
             }
             else if (strcasecmp("VEGPARAM_ALB", optstr) == 0) {
@@ -710,12 +669,29 @@ get_global_param(FILE *gp)
             }
             else if (strcasecmp("ALB_SRC", optstr) == 0) {
                 sscanf(cmdstr, "%*s %s", flgstr);
-                if (strcasecmp("FROM_VEGPARAM", flgstr) == 0) {
+                if (strcasecmp("FROM_VEGHIST", flgstr) == 0) {
+                    options.ALB_SRC = FROM_VEGHIST;
+                }
+                else if (strcasecmp("FROM_VEGPARAM", flgstr) == 0) {
                     options.ALB_SRC = FROM_VEGPARAM;
                 }
-                else {
+                else if (strcasecmp("FROM_VEGLIB", flgstr) == 0) {
                     options.ALB_SRC = FROM_VEGLIB;
                 }
+                else {
+                    log_err("Unrecognized value of ALB_SRC in the global "
+                            "control file.");
+                }
+            }
+            else if (strcasecmp("VEGPARAM_VEGCOVER", optstr) == 0) {
+                log_err("The option VEGPARAM_VEGCOVER has been replaced by "
+                        "VEGPARAM_FCAN.  Please edit your global parameter "
+                        "file and re-run.");
+            }
+            else if (strcasecmp("VEGCOVER_SRC", optstr) == 0) {
+                log_err("The option VEGCOVER_SRC has been replaced by "
+                        "FCAN_SRC.  Please edit your global parameter "
+                        "file and re-run.");
             }
             else if (strcasecmp("ROOT_ZONES", optstr) == 0) {
                 sscanf(cmdstr, "%*s %zu", &options.ROOT_ZONES);
@@ -814,9 +790,6 @@ get_global_param(FILE *gp)
             /*************************************
                Define output file contents
             *************************************/
-            else if (strcasecmp("N_OUTFILES", optstr) == 0) {
-                ; // do nothing
-            }
             else if (strcasecmp("OUTFILE", optstr) == 0) {
                 ; // do nothing
             }
@@ -825,7 +798,7 @@ get_global_param(FILE *gp)
             }
 
             /*************************************
-               Fail when depreciated options are used.
+               Fail when deprecated options are used.
             *************************************/
             else if (strcasecmp("TIME_STEP", optstr) == 0) {
                 log_err("TIME_STEP has been replaced with MODEL_STEPS_PER_DAY, "
@@ -1242,20 +1215,15 @@ get_global_param(FILE *gp)
         log_err("ROOT_ZONES must be defined to a positive integer greater "
                 "than 0, in the global control file.");
     }
-    if (options.LAI_SRC == LAI_FROM_VEGPARAM && !options.VEGPARAM_LAI) {
-        log_err("\"LAI_SRC\" was specified as \"LAI_FROM_VEGPARAM\", but "
-                "\"VEGPARAM_LAI\" was set to \"FALSE\" in the global "
-                "parameter file.  If you want VIC to read LAI values from "
-                "the vegparam file, you MUST make sure the veg param file "
-                "contains 1 line of 12 monthly LAI values for EACH veg "
-                "tile in EACH grid cell, and you MUST specify "
-                "\"VEGPARAM_LAI\" as \"TRUE\" in the global parameter "
-                "file.  Alternatively, if you want VIC to read LAI values "
-                "from the veg library file, set \"LAI_SRC\" to "
-                "\"LAI_FROM_VEGLIB\" in the global parameter file.  In "
-                "either case, the setting of \"VEGPARAM_LAI\" must be "
-                "consistent with the contents of the veg param file (i.e. "
-                "whether or not it contains LAI values).");
+    if (options.LAI_SRC == FROM_VEGHIST && !param_set.TYPE[LAI_IN].SUPPLIED) {
+        log_err("\"LAI_SRC\" was specified as \"FROM_VEGHIST\", but "
+                "\"LAI_IN\" was not specified as an input forcing in the "
+                "global parameter file.  If you want VIC to read LAI "
+                "values from the veg_hist file, you MUST make sure the veg "
+                "hist file contains Nveg columns of LAI_IN values, 1 for "
+                "each veg tile in the grid cell, AND specify LAI_IN as a "
+                "forcing variable in the veg_hist forcing file in the "
+                "global parameter file.");
     }
     if (options.LAI_SRC == FROM_VEGPARAM && !options.VEGPARAM_LAI) {
         log_err("\"LAI_SRC\" was specified as \"FROM_VEGPARAM\", but "
@@ -1272,6 +1240,16 @@ get_global_param(FILE *gp)
                 "consistent with the contents of the veg param file (i.e. "
                 "whether or not it contains LAI values).");
     }
+    if (options.ALB_SRC == FROM_VEGHIST && !param_set.TYPE[ALBEDO].SUPPLIED) {
+        log_err("\"ALB_SRC\" was specified as \"FROM_VEGHIST\", but "
+                "\"ALBEDO\" was not specified as an input forcing in the "
+                "global parameter file.  If you want VIC to read ALBEDO "
+                "values from the veg_hist file, you MUST make sure the veg "
+                "hist file contains Nveg columns of ALBEDO values, 1 for "
+                "each veg tile in the grid cell, AND specify ALBEDO as a "
+                "forcing variable in the veg_hist forcing file in the "
+                "global parameter file.");
+    }
     if (options.ALB_SRC == FROM_VEGPARAM && !options.VEGPARAM_ALB) {
         log_err("\"ALB_SRC\" was specified as \"FROM_VEGPARAM\", but "
                 "\"VEGPARAM_ALB\" was set to \"FALSE\" in the global "
@@ -1287,35 +1265,46 @@ get_global_param(FILE *gp)
                 "consistent with the contents of the veg param file (i.e. "
                 "whether or not it contains albedo values).");
     }
-    if (options.VEGCOVER_SRC == FROM_VEGPARAM && !options.VEGPARAM_VEGCOVER) {
-        log_err("\"VEGCOVER_SRC\" was specified as \"FROM_VEGPARAM\", but "
-                "\"VEGPARAM_VEGCOVER\" was set to \"FALSE\" in the global "
-                "parameter file.  If you want VIC to read vegcover values from "
-                "the vegparam file, you MUST make sure the veg param file "
-                "contains 1 line of 12 monthly vegcover values for EACH veg "
-                "tile in EACH grid cell, and you MUST specify "
-                "\"VEGPARAM_VEGCOVER\" as \"TRUE\" in the global parameter "
-                "file.  Alternatively, if you want VIC to read vegcover values "
-                "from the veg library file, set \"VEGCOVER_SRC\" to "
-                "\"FROM_VEGLIB\" in the global parameter file.  In "
-                "either case, the setting of \"VEGPARAM_VEGCOVER\" must be "
-                "consistent with the contents of the veg param file (i.e. "
-                "whether or not it contains vegcover values).");
+    if (options.FCAN_SRC == FROM_VEGHIST &&
+        !param_set.TYPE[FCANOPY].SUPPLIED) {
+        log_err("\"FCAN_SRC\" was specified as \"FROM_VEGHIST\", but "
+                "\"FCANOPY\" was not specified as an input forcing in the "
+                "global parameter file.  If you want VIC to read FCANOPY "
+                "values from the veg_hist file, you MUST make sure the veg "
+                "hist file contains Nveg columns of FCANOPY values, 1 for "
+                "each veg tile in the grid cell, AND specify FCANOPY as a "
+                "forcing variable in the veg_hist forcing file in the "
+                "global parameter file.");
     }
-    if (options.VEGCOVER_SRC == FROM_VEGLIB && !options.VEGLIB_VEGCOVER) {
-        log_err("\"VEGCOVER_SRC\" was specified as \"FROM_VEGLIB\", but "
-                "\"VEGLIB_VEGCOVER\" was set to \"FALSE\" in the global "
-                "parameter file.  If you want VIC to read vegcover values from "
+    if (options.FCAN_SRC == FROM_VEGPARAM && !options.VEGPARAM_FCAN) {
+        log_err("\"FCAN_SRC\" was specified as \"FROM_VEGPARAM\", but "
+                "\"VEGPARAM_FCAN\" was set to \"FALSE\" in the global "
+                "parameter file.  If you want VIC to read fcanopy values from "
+                "the vegparam file, you MUST make sure the veg param file "
+                "contains 1 line of 12 monthly fcanopy values for EACH veg "
+                "tile in EACH grid cell, and you MUST specify "
+                "\"VEGPARAM_FCAN\" as \"TRUE\" in the global parameter "
+                "file.  Alternatively, if you want VIC to read fcanopy values "
+                "from the veg library file, set \"FCAN_SRC\" to "
+                "\"FROM_VEGLIB\" in the global parameter file.  In "
+                "either case, the setting of \"VEGPARAM_FCAN\" must be "
+                "consistent with the contents of the veg param file (i.e. "
+                "whether or not it contains fcanopy values).");
+    }
+    if (options.FCAN_SRC == FROM_VEGLIB && !options.VEGLIB_FCAN) {
+        log_err("\"FCAN_SRC\" was specified as \"FROM_VEGLIB\", but "
+                "\"VEGLIB_FCAN\" was set to \"FALSE\" in the global "
+                "parameter file.  If you want VIC to read fcanopy values from "
                 "the veglib file, you MUST make sure the veg lib file "
-                "contains 1 line of 12 monthly vegcover values for EACH veg "
+                "contains 1 line of 12 monthly fcanopy values for EACH veg "
                 "class, and you MUST specify "
-                "\"VEGLIB_VEGCOVER\" as \"TRUE\" in the global parameter "
-                "file.  Alternatively, if you want VIC to read vegcover values "
-                "from the veg param file, set \"VEGCOVER_SRC\" to "
+                "\"VEGLIB_FCAN\" as \"TRUE\" in the global parameter "
+                "file.  Alternatively, if you want VIC to read fcanopy values "
+                "from the veg param file, set \"FCAN_SRC\" to "
                 "\"FROM_VEGPARAM\" in the global parameter file.  In "
-                "either case, the setting of \"VEGLIB_VEGCOVER\" must be "
+                "either case, the setting of \"VEGLIB_FCAN\" must be "
                 "consistent with the contents of the veg lib file (i.e. "
-                "whether or not it contains vegcover values).");
+                "whether or not it contains fcanopy values).");
     }
 
     // Validate SPATIAL_FROST information

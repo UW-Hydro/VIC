@@ -25,8 +25,6 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  *****************************************************************************/
 
-#include <vic_def.h>
-#include <vic_run.h>
 #include <vic_driver_classic.h>
 
 /******************************************************************************
@@ -36,7 +34,6 @@ void
 vic_force(atmos_data_struct *atmos,
           dmy_struct        *dmy,
           FILE             **infile,
-          veg_lib_struct    *veg_lib,
           veg_con_struct    *veg_con,
           veg_hist_struct  **veg_hist,
           soil_con_struct   *soil_con)
@@ -69,10 +66,10 @@ vic_force(atmos_data_struct *atmos,
     if (!param_set.TYPE[PREC].SUPPLIED) {
         log_err("Precipitation must be supplied as a forcing");
     }
-    if (!param_set.TYPE[SHORTWAVE].SUPPLIED) {
+    if (!param_set.TYPE[SWDOWN].SUPPLIED) {
         log_err("Downward shortwave radiation must be supplied as a forcing");
     }
-    if (!param_set.TYPE[LONGWAVE].SUPPLIED) {
+    if (!param_set.TYPE[LWDOWN].SUPPLIED) {
         log_err("Downward longwave radiation must be supplied as a forcing");
     }
     if (!param_set.TYPE[PRESSURE].SUPPLIED) {
@@ -101,8 +98,8 @@ vic_force(atmos_data_struct *atmos,
     if (param_set.TYPE[LAI_IN].SUPPLIED) {
         param_set.TYPE[LAI_IN].N_ELEM = veg_con[0].vegetat_type_num;
     }
-    if (param_set.TYPE[VEGCOVER].SUPPLIED) {
-        param_set.TYPE[VEGCOVER].N_ELEM = veg_con[0].vegetat_type_num;
+    if (param_set.TYPE[FCANOPY].SUPPLIED) {
+        param_set.TYPE[FCANOPY].N_ELEM = veg_con[0].vegetat_type_num;
     }
 
     /*******************************
@@ -132,9 +129,9 @@ vic_force(atmos_data_struct *atmos,
             // precipitation in mm/period
             atmos[rec].prec[i] = forcing_data[PREC][uidx];
             // downward shortwave in W/m2
-            atmos[rec].shortwave[i] = forcing_data[SHORTWAVE][uidx];
+            atmos[rec].shortwave[i] = forcing_data[SWDOWN][uidx];
             // downward longwave in W/m2
-            atmos[rec].longwave[i] = forcing_data[LONGWAVE][uidx];
+            atmos[rec].longwave[i] = forcing_data[LWDOWN][uidx];
             // pressure in kPa
             atmos[rec].pressure[i] = forcing_data[PRESSURE][uidx] * PA_PER_KPA;
             // vapor pressure in kPa
@@ -208,42 +205,56 @@ vic_force(atmos_data_struct *atmos,
         for (v = 0; v < veg_con[0].vegetat_type_num; v++) {
             for (i = 0; i < NF; i++) {
                 veg_hist[rec][v].albedo[i] =
-                    veg_lib[veg_con[v].veg_class].albedo[dmy[rec].month -
-                                                         1];
+                    veg_con[v].albedo[dmy[rec].month - 1];
+                veg_hist[rec][v].LAI[i] =
+                    veg_con[v].LAI[dmy[rec].month - 1];
+                veg_hist[rec][v].fcanopy[i] =
+                    veg_con[v].fcanopy[dmy[rec].month - 1];
             }
         }
     }
 
-    /* Next, overwrite with timeseries */
+    /* Next, overwrite with veg_hist values, validate, and average */
     for (rec = 0; rec < global_param.nrecs; rec++) {
         for (v = 0; v < veg_con[0].vegetat_type_num; v++) {
             for (i = 0; i < NF; i++) {
                 uidx = rec * NF + i;
-                if (param_set.TYPE[ALBEDO].SUPPLIED) {
+                if (param_set.TYPE[ALBEDO].SUPPLIED &&
+                    options.ALB_SRC == FROM_VEGHIST) {
                     if (veg_hist_data[ALBEDO][v][uidx] != NODATA_VH) {
                         veg_hist[rec][v].albedo[i] =
                             veg_hist_data[ALBEDO][v][uidx];
                     }
                 }
-                if (param_set.TYPE[LAI_IN].SUPPLIED) {
+                if (param_set.TYPE[LAI_IN].SUPPLIED &&
+                    options.LAI_SRC == FROM_VEGHIST) {
                     if (veg_hist_data[LAI_IN][v][uidx] != NODATA_VH) {
                         veg_hist[rec][v].LAI[i] =
                             veg_hist_data[LAI_IN][v][uidx];
                     }
                 }
-                if (param_set.TYPE[VEGCOVER].SUPPLIED) {
-                    if (veg_hist_data[VEGCOVER][v][uidx] != NODATA_VH) {
-                        veg_hist[rec][v].vegcover[i] =
-                            veg_hist_data[VEGCOVER][v][uidx];
+                if (param_set.TYPE[FCANOPY].SUPPLIED &&
+                    options.FCAN_SRC == FROM_VEGHIST) {
+                    if (veg_hist_data[FCANOPY][v][uidx] != NODATA_VH) {
+                        veg_hist[rec][v].fcanopy[i] =
+                            veg_hist_data[FCANOPY][v][uidx];
                     }
+                }
+                // Check on fcanopy
+                if (veg_hist[rec][v].fcanopy[i] < MIN_FCANOPY) {
+                    log_warn(
+                        "rec %zu, veg %zu substep %zu fcanopy %f < minimum of %f; setting = %f\n", rec, v, i,
+                        veg_hist[rec][v].fcanopy[i], MIN_FCANOPY,
+                        MIN_FCANOPY);
+                    veg_hist[rec][v].fcanopy[i] = MIN_FCANOPY;
                 }
             }
             if (NF > 1) {
                 veg_hist[rec][v].albedo[NR] = average(veg_hist[rec][v].albedo,
                                                       NF);
                 veg_hist[rec][v].LAI[NR] = average(veg_hist[rec][v].LAI, NF);
-                veg_hist[rec][v].vegcover[NR] = average(
-                    veg_hist[rec][v].vegcover, NF);
+                veg_hist[rec][v].fcanopy[NR] = average(
+                    veg_hist[rec][v].fcanopy, NF);
             }
         }
     }
@@ -254,7 +265,7 @@ vic_force(atmos_data_struct *atmos,
 
     for (i = 0; i < N_FORCING_TYPES; i++) {
         if (param_set.TYPE[i].SUPPLIED) {
-            if (i != ALBEDO && i != LAI_IN && i != VEGCOVER) {
+            if (i != ALBEDO && i != LAI_IN && i != FCANOPY) {
                 free(forcing_data[i]);
             }
             else {

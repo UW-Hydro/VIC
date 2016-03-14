@@ -24,8 +24,6 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  *****************************************************************************/
 
-#include <vic_def.h>
-#include <vic_run.h>
 #include <vic_driver_classic.h>
 
 // global variables
@@ -67,6 +65,7 @@ main(int   argc,
     int                   cellnum;
     int                   startrec;
     int                   ErrorFlag;
+    size_t                filenum;
     dmy_struct           *dmy;
     atmos_data_struct    *atmos;
     veg_hist_struct     **veg_hist;
@@ -114,6 +113,13 @@ main(int   argc,
     fclose(filep.globalparam);
     filep.globalparam = open_file(filenames.global, "r");
     parse_output_info(filep.globalparam, &out_data_files, out_data);
+    for (filenum = 0; filenum < options.Noutfiles; filenum++) {
+        if (out_data_files[filenum].nvars == 0) {
+            log_err("No output variables were set in OUTFILE %zu. "
+                    "Must set at least one output variable (OUTVAR) "
+                    "for each OUTFILE.", filenum + 1);
+        }
+    }
 
     /** Check and Open Files **/
     check_files(&filep, &filenames);
@@ -192,8 +198,7 @@ main(int   argc,
                Have not Been Specifically Set
             **************************************************/
 
-            vic_force(atmos, dmy, filep.forcing, veg_lib, veg_con, veg_hist,
-                      &soil_con);
+            vic_force(atmos, dmy, filep.forcing, veg_con, veg_hist, &soil_con);
 
             /**************************************************
                Initialize Energy Balance and Snow Variables
@@ -243,12 +248,17 @@ main(int   argc,
 
             for (rec = startrec; rec < global_param.nrecs; rec++) {
                 /**************************************************
+                   Update data structures for current time step
+                **************************************************/
+                ErrorFlag = update_step_vars(&all_vars, veg_con,
+                                             veg_hist[rec]);
+
+                /**************************************************
                    Compute cell physics for 1 timestep
                 **************************************************/
                 ErrorFlag = vic_run(&atmos[rec], &all_vars,
                                     &(dmy[rec]), &global_param, &lake_con,
-                                    &soil_con, veg_con, veg_lib,
-                                    veg_hist[rec]);
+                                    &soil_con, veg_con, veg_lib);
 
                 /**************************************************
                    Calculate cell average values for current time step

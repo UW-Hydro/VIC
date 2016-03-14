@@ -35,6 +35,7 @@
 #include <string.h>
 #include <strings.h>
 #include <stdbool.h>
+#include <stddef.h>
 
 #include <vic_physical_constants.h>
 #include <vic_log.h>
@@ -57,38 +58,11 @@
 
 /***** Define minimum values for model parameters *****/
 #define MINSOILDEPTH    0.001  /**< Minimum layer depth with which model can work (m) */
-#define MIN_VEGCOVER    0.0001 /**< Minimum allowable vegcover fraction */
+#define MIN_FCANOPY    0.0001  /**< Minimum allowable canopy fraction */
 
 /***** Define minimum and maximum values for model timesteps *****/
-#define MIN_SUBDAILY_STEPS_PER_DAY  1
+#define MIN_SUBDAILY_STEPS_PER_DAY  4
 #define MAX_SUBDAILY_STEPS_PER_DAY  1440
-
-/***** Potential Evap types *****/
-#define N_PET_TYPES 6
-#define N_PET_TYPES_NON_NAT 4
-#define PET_SATSOIL 0
-#define PET_H2OSURF 1
-#define PET_SHORT   2
-#define PET_TALL    3
-#define N_PET_TYPES_NAT 2
-#define PET_NATVEG  4
-#define PET_VEGNOCR 5
-
-/***** Hard-coded veg class parameters (mainly for pot_evap) *****/
-extern bool   ref_veg_over[];
-extern double ref_veg_rarc[];
-extern double ref_veg_rmin[];
-extern double ref_veg_lai[];
-extern double ref_veg_albedo[];
-extern double ref_veg_vegcover[];
-extern double ref_veg_rough[];
-extern double ref_veg_displ[];
-extern double ref_veg_wind_h[];
-extern double ref_veg_RGL[];
-extern double ref_veg_rad_atten[];
-extern double ref_veg_wind_atten[];
-extern double ref_veg_trunk_ratio[];
-extern bool   ref_veg_ref_crop[];
 
 #ifndef WET
 #define WET 0
@@ -285,7 +259,10 @@ typedef struct {
     size_t Nnode;        /**< Number of soil thermal nodes in the model */
     bool NOFLUX;         /**< TRUE = Use no flux lower bondary when computing
                             soil thermal fluxes */
-    size_t NVEGTYPES;    /**< number of vegetation types (used by image driver) */
+    size_t NVEGTYPES;    /**< number of vegetation types in veg_param file
+                            (used by image driver) */
+    size_t NLAKENODES;   /**< number of lake layers in lake_param file
+                            (used by image driver) */
     unsigned short int RC_MODE;        /**< RC_JARVIS = compute canopy resistance via Jarvis formulation (default)
                                           RC_PHOTO = compute canopy resistance based on photosynthetic activity */
     size_t ROOT_ZONES;   /**< Number of root zones used in simulation */
@@ -317,17 +294,17 @@ typedef struct {
     // input options
     bool BASEFLOW;       /**< ARNO: read Ds, Dm, Ws, c; NIJSSEN2001: read d1, d2, d3, d4 */
     unsigned short int GRID_DECIMAL; /**< Number of decimal places in grid file extensions */
+    bool VEGLIB_FCAN;    /**< TRUE = veg library file contains monthly fcanopy values */
     bool VEGLIB_PHOTO;   /**< TRUE = veg library contains photosynthesis parameters */
-    bool VEGLIB_VEGCOVER; /**< TRUE = veg library file contains monthly vegcover values */
     bool VEGPARAM_ALB;   /**< TRUE = veg param file contains monthly albedo values */
+    bool VEGPARAM_FCAN;  /**< TRUE = veg param file contains monthly fcanopy values */
     bool VEGPARAM_LAI;   /**< TRUE = veg param file contains monthly LAI values */
-    bool VEGPARAM_VEGCOVER; /**< TRUE = veg param file contains monthly vegcover values */
     unsigned short int ALB_SRC;        /**< FROM_VEGLIB = use albedo values from veg library file
                                           FROM_VEGPARAM = use albedo values from the veg param file */
+    unsigned short int FCAN_SRC;       /**< FROM_VEGLIB = use fcanopy values from veg library file
+                                          FROM_VEGPARAM = use fcanopy values from the veg param file */
     unsigned short int LAI_SRC;        /**< FROM_VEGLIB = use LAI values from veg library file
                                           FROM_VEGPARAM = use LAI values from the veg param file */
-    unsigned short int VEGCOVER_SRC;   /**< FROM_VEGLIB = use vegcover values from veg library file
-                                          FROM_VEGPARAM = use vegcover values from the veg param file */
     bool LAKE_PROFILE;   /**< TRUE = user-specified lake/area profile */
     bool ORGANIC_FRACT;  /**< TRUE = organic matter fraction of each layer is read from the soil parameter file; otherwise set to 0.0. */
 
@@ -342,9 +319,6 @@ typedef struct {
     bool COMPRESS;       /**< TRUE = Compress all output files */
     bool MOISTFRACT;     /**< TRUE = output soil moisture as fractional moisture content */
     size_t Noutfiles;    /**< Number of output files (not including state files) */
-    int COORD_DIMS_OUT;    /**< Number of output dimensions for lat and lon variables. COORD_DIMS_OUT 1 = lon(lon), lat(lat). COORD_DIMS_OUT 2 = lon(xc, yc), lat(xc, yc) */
-    char DOMAIN_LON_VAR[MAXSTRING];    /**< Name of the variable and the dimension of longitude in the output file */
-    char DOMAIN_LAT_VAR[MAXSTRING];    /**< Name of the variable and the dimension of latitude in the output file */
     bool PRT_HEADER;     /**< TRUE = insert header at beginning of output file; FALSE = no header */
     bool PRT_SNOW_BAND;  /**< TRUE = print snow parameters for each snow band. This is only used when default
                                    output files are used (for backwards-compatibility); if outfiles and
@@ -424,13 +398,17 @@ typedef struct {
     double EMISS_H2O;  /**< Emissivity of open water surface */
 
     // Soil Constraints
+    double SOIL_RARC;  /**< Architectural resistance (s/m) of soil when computing soil evaporation via Penman-Monteith eqn */
     double SOIL_RESID_MOIST;  /**< Default residual moisture content of soil colum */
     double SOIL_SLAB_MOIST_FRACT;  /**< Volumetric moisture content (fraction of porosity) in the soil/rock below the bottom soil layer; this assumes that the soil below the bottom layer has the same texture as the bottom layer. */
+    double SOIL_WINDH;  /**< Default wind measurement height over soil (m) */
 
     // Vegetation Parameters
     double VEG_LAI_SNOW_MULTIPLIER;  /**< multiplier to calculate the amount of available snow interception as a function of LAI (m) */
-    double VEG_MIN_INTERCEPTION_STORAGE;  /**< the amount of snow on the canopy that can only be melted off. (m) */
     double VEG_LAI_WATER_FACTOR;  /**< Coefficient multiplied by the LAI to determine the amount of water that can be stored in the canopy */
+    double VEG_MIN_INTERCEPTION_STORAGE;  /**< the amount of snow on the canopy that can only be melted off. (m) */
+    double VEG_RATIO_DH_HEIGHT;  /**< Ratio of displacement height (m) to vegetation height (m) */
+    double VEG_RATIO_RL_HEIGHT;  /**< Ratio of roughness length (m) to vegetation height (m) */
 
     // Canopy Parameters
     double CANOPY_CLOSURE;  /**< Threshold vapor pressure deficit for stomatal closure (Pa) */
@@ -675,6 +653,10 @@ typedef struct {
     double fetch;           /**< Average fetch length for each vegetation class. */
     int LAKE;               /**< TRUE = this tile is a lake/wetland tile */
     double *CanopLayerBnd;  /**< Upper boundary of each canopy layer, expressed as fraction of total LAI */
+    double albedo[MONTHS_PER_YEAR];   /**< climatological vegetation albedo (fraction) */
+    double LAI[MONTHS_PER_YEAR];      /**< climatological leaf area index (m2/m2) */
+    double fcanopy[MONTHS_PER_YEAR];  /**< climatological fractional area covered by plant canopy (fraction) */
+    double Wdmax[MONTHS_PER_YEAR];    /**< climatological maximum dew holding capacity (mm) */
 } veg_con_struct;
 
 /******************************************************************************
@@ -684,7 +666,7 @@ typedef struct {
     bool overstory;        /**< TRUE = overstory present, important for snow
                               accumulation in canopy */
     double LAI[MONTHS_PER_YEAR];  /**< leaf area index */
-    double vegcover[MONTHS_PER_YEAR];  /**< fractional area covered by plants within the tile (fraction) */
+    double fcanopy[MONTHS_PER_YEAR];  /**< fractional area covered by plant canopy (fraction) */
     double Wdmax[MONTHS_PER_YEAR];  /**< maximum dew holding capacity (mm) */
     double albedo[MONTHS_PER_YEAR];  /**< vegetation albedo (added for full energy)
                                                            (fraction) */
@@ -705,7 +687,7 @@ typedef struct {
                               will be no transpiration (ranges from
                               ~30 W/m^2 for trees to ~100 W/m^2 for crops) */
     unsigned short int veg_class; /**< vegetation class reference number */
-    char Ctype;              /**< Photosynthetic pathway; can be C3 or C4 */
+    char Ctype;            /**< Photosynthetic pathway; 0 = C3; 1 = C4 */
     double MaxCarboxRate;  /**< maximum carboxlyation rate at 25 deg C (mol(CO2)/m2s) */
     double MaxETransport;  /**< maximum electron transport rate at 25 deg C (mol(CO2)/m2s) (C3 plants) */
     double CO2Specificity; /**< CO2 specificity at 25 deg C (mol(CO2)/m2s) (C4 plants) */
@@ -720,14 +702,16 @@ typedef struct {
 } veg_lib_struct;
 
 /******************************************************************************
- * @brief   This structure stores historical timeseries of vegetation
- *          parameters for a given vegetation tile.  Structure is similar to
- *          atmos_data_struct.
+ * @brief   This structure stores vegetation parameter forcing data for each
+ * model time step for a single veg tile.  Each array stores the values for the
+ * SNOW_STEPs during the current model step and the value for the entire model
+ * step.  The latter is referred to by array[NR].  Looping over the SNOW_STEPs
+ * is done by for (i = 0; i < NF; i++)
  *****************************************************************************/
 typedef struct {
-    double *albedo;  /**< timeseries of vegetation albedo (fraction) */
-    double *LAI;     /**< timeseries of leaf area index (m2/m2) */
-    double *vegcover; /**< timeseries of fractional area of plants within veg tile (fraction) */
+    double *albedo;  /**< vegetation albedo (fraction) */
+    double *LAI;     /**< leaf area index (m2/m2) */
+    double *fcanopy; /**< fractional area covered by plant canopy (fraction) */
 } veg_hist_struct;
 
 /******************************************************************************
@@ -808,7 +792,7 @@ typedef struct {
     double CSlow;                      /**< carbon storage in slow pool [gC/m2] */
     double inflow;                     /**< moisture that reaches the top of
                                           the soil column (mm) */
-    double pot_evap[N_PET_TYPES];      /**< array of different types of potential evaporation (mm) */
+    double pot_evap;                   /**< potential evaporation (mm) */
     double runoff;                     /**< runoff from current cell (mm/TS) */
     layer_data_struct layer[MAX_LAYERS]; /**< structure containing soil variables
                                             for each layer (see above) */
@@ -910,7 +894,7 @@ typedef struct {
     double canopyevap;          /**< evaporation from canopy (mm/TS) */
     double LAI;                 /**< current leaf area index (m2/m2) */
     double throughfall;         /**< water that reaches the ground through the canopy (mm/TS) */
-    double vegcover;            /**< current fractional area of plants within veg tile (fraction) */
+    double fcanopy;             /**< current fractional area of plant canopy (fraction) */
     double Wdew;                /**< dew trapped on vegetation (mm) */
     double Wdmax;               /**< current maximum dew holding capacity (mm) */
     double *NscaleFactor;       /**< array of per-layer nitrogen scaling factors */

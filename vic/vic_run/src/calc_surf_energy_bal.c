@@ -24,7 +24,6 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  *****************************************************************************/
 
-#include <vic_def.h>
 #include <vic_run.h>
 
 /******************************************************************************
@@ -59,6 +58,7 @@ calc_surf_energy_bal(double             Le,
                      double             BareAlbedo,
                      double             surf_atten,
                      double            *aero_resist,
+                     double            *aero_resist_veg,
                      double            *aero_resist_used,
                      double            *displacement,
                      double            *melt,
@@ -164,7 +164,7 @@ calc_surf_energy_bal(double             Le,
     }
 
     if (iveg != Nveg) {
-        if (veg_var->vegcover > 0.0) {
+        if (veg_var->fcanopy > 0.0) {
             VEG = true;
         }
         else {
@@ -308,7 +308,8 @@ calc_surf_energy_bal(double             Le,
                            atmos_pressure, emissivity, LongBareIn, LongSnowIn,
                            surf_atten, VPcanopy, VPDcanopy, atmos_shortwave,
                            atmos_Catm, dryFrac, &Wdew, displacement,
-                           aero_resist, aero_resist_used, rainfall, ref_height,
+                           aero_resist, aero_resist_veg, aero_resist_used,
+                           rainfall, ref_height,
                            roughness, wind, Le, energy->advection, OldTSurf,
                            Tsnow_surf, kappa_snow, melt_energy, snow_coverage,
                            snow->density, snow->swq, snow->surf_water,
@@ -369,6 +370,7 @@ calc_surf_energy_bal(double             Le,
                                                    dryFrac,
                                                    &Wdew, displacement,
                                                    aero_resist,
+                                                   aero_resist_veg,
                                                    aero_resist_used,
                                                    rainfall, ref_height,
                                                    roughness,
@@ -428,7 +430,8 @@ calc_surf_energy_bal(double             Le,
                                atmos_pressure, emissivity, LongBareIn,
                                LongSnowIn, surf_atten, VPcanopy, VPDcanopy,
                                atmos_shortwave, atmos_Catm, dryFrac, &Wdew,
-                               displacement, aero_resist, aero_resist_used,
+                               displacement, aero_resist, aero_resist_veg,
+                               aero_resist_used,
                                rainfall, ref_height, roughness, wind, Le,
                                energy->advection, OldTSurf, Tsnow_surf,
                                kappa_snow, melt_energy, snow_coverage,
@@ -490,6 +493,7 @@ calc_surf_energy_bal(double             Le,
                                                        atmos_Catm, dryFrac,
                                                        &Wdew, displacement,
                                                        aero_resist,
+                                                       aero_resist_veg,
                                                        aero_resist_used,
                                                        rainfall, ref_height,
                                                        roughness, wind, Le,
@@ -557,7 +561,8 @@ calc_surf_energy_bal(double             Le,
                                   LongBareIn, LongSnowIn, surf_atten, VPcanopy,
                                   VPDcanopy, atmos_shortwave, atmos_Catm,
                                   dryFrac, &Wdew, displacement, aero_resist,
-                                  aero_resist_used, rainfall, ref_height,
+                                  aero_resist_veg, aero_resist_used, rainfall,
+                                  ref_height,
                                   roughness, wind, Le, energy->advection,
                                   OldTSurf, Tsnow_surf, kappa_snow,
                                   melt_energy, snow_coverage, snow->density,
@@ -855,6 +860,7 @@ error_print_surf_energy_bal(double  Ts,
     double            *Wdew;
     double            *displacement;
     double            *ra;
+    double            *ra_veg;
     double            *ra_used;
     double             rainfall;
     double            *ref_height;
@@ -999,6 +1005,7 @@ error_print_surf_energy_bal(double  Ts,
     Wdew = (double *) va_arg(ap, double *);
     displacement = (double *) va_arg(ap, double *);
     ra = (double *) va_arg(ap, double *);
+    ra_veg = (double *) va_arg(ap, double *);
     ra_used = (double *) va_arg(ap, double *);
     rainfall = (double) va_arg(ap, double);
     ref_height = (double *) va_arg(ap, double *);
@@ -1142,6 +1149,7 @@ error_print_surf_energy_bal(double  Ts,
     fprintf(LOG_DEST, "*Wdew = %f\n", *Wdew);
     fprintf(LOG_DEST, "*displacement = %f\n", *displacement);
     fprintf(LOG_DEST, "*ra = %f\n", *ra);
+    fprintf(LOG_DEST, "*ra_veg = %f\n", *ra_veg);
     fprintf(LOG_DEST, "*ra_used = %f\n", *ra_used);
     fprintf(LOG_DEST, "*rainfall = %f\n", rainfall);
     fprintf(LOG_DEST, "*ref_height = %f\n", *ref_height);

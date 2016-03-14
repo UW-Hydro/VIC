@@ -25,7 +25,6 @@
 * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 ******************************************************************************/
 
-#include <vic_def.h>
 #include <vic_run.h>
 
 veg_lib_struct *vic_run_veg_lib;
@@ -42,14 +41,13 @@ vic_run(atmos_data_struct   *atmos,
         lake_con_struct     *lake_con,
         soil_con_struct     *soil_con,
         veg_con_struct      *veg_con,
-        veg_lib_struct      *veg_lib,
-        veg_hist_struct     *veg_hist)
+        veg_lib_struct      *veg_lib)
 {
     extern option_struct     options;
     extern parameters_struct param;
 
     char                     overstory;
-    int                      j, p;
+    int                      j;
     size_t                   lidx;
     unsigned short           iveg;
     size_t                   Nveg;
@@ -69,7 +67,7 @@ vic_run(atmos_data_struct   *atmos,
     double                   displacement[3];
     double                   roughness[3];
     double                   ref_height[3];
-    double                 **aero_resist;
+    double                  *aero_resist;
     double                   Cv;
     double                   Le;
     double                   Melt[2 * MAX_BANDS];
@@ -83,7 +81,6 @@ vic_run(atmos_data_struct   *atmos,
     double                   lag_one;
     double                   sigma_slope;
     double                   fetch;
-    int                      pet_veg_class;
     double                   lakefrac;
     double                   fraci;
     double                   wetland_runoff;
@@ -103,10 +100,7 @@ vic_run(atmos_data_struct   *atmos,
     vic_run_veg_lib = veg_lib;
 
     /* Allocate aero_resist array */
-    aero_resist = calloc(N_PET_TYPES + 1, sizeof(*aero_resist));
-    for (p = 0; p < N_PET_TYPES + 1; p++) {
-        aero_resist[p] = calloc(3, sizeof(*(aero_resist[p])));
-    }
+    aero_resist = calloc(3, sizeof(*aero_resist));
 
     /* set local pointers */
     cell = all_vars->cell;
@@ -138,23 +132,15 @@ vic_run(atmos_data_struct   *atmos,
     atmos->out_rain = 0;
     atmos->out_snow = 0;
 
-    /* Assign current veg albedo and LAI */
-    // Loop over vegetated tiles
+    // Convert LAI from global to local
     for (iveg = 0; iveg < Nveg; iveg++) {
         veg_class = veg_con[iveg].veg_class;
-        if (veg_hist[iveg].vegcover[0] < MIN_VEGCOVER) {
-            veg_hist[iveg].vegcover[0] = MIN_VEGCOVER;
-        }
         for (band = 0; band < Nbands; band++) {
-            veg_var[iveg][band].vegcover = veg_hist[iveg].vegcover[0];
-            veg_var[iveg][band].albedo = veg_hist[iveg].albedo[0];
-            veg_var[iveg][band].LAI = veg_hist[iveg].LAI[0];
-            // Convert LAI from global to local
-            veg_var[iveg][band].LAI /= veg_var[iveg][band].vegcover;
-            veg_var[iveg][band].Wdew /= veg_var[iveg][band].vegcover;
+            veg_var[iveg][band].LAI /= veg_var[iveg][band].fcanopy;
+            veg_var[iveg][band].Wdew /= veg_var[iveg][band].fcanopy;
             veg_var[iveg][band].Wdmax = veg_var[iveg][band].LAI *
                                         param.VEG_LAI_WATER_FACTOR;
-            snow[iveg][band].snow_canopy /= veg_var[iveg][band].vegcover;
+            snow[iveg][band].snow_canopy /= veg_var[iveg][band].fcanopy;
         }
     }
 
@@ -236,8 +222,8 @@ vic_run(atmos_data_struct   *atmos,
             wind_h = vic_run_veg_lib[veg_class].wind_h;
 
             /** Compute Surface Attenuation due to Vegetation Coverage **/
-            surf_atten = (1 - veg_var[iveg][0].vegcover) * 1.0 +
-                         veg_var[iveg][0].vegcover *
+            surf_atten = (1 - veg_var[iveg][0].fcanopy) * 1.0 +
+                         veg_var[iveg][0].fcanopy *
                          exp(-vic_run_veg_lib[veg_class].rad_atten *
                              veg_var[iveg][0].LAI);
 
@@ -254,68 +240,53 @@ vic_run(atmos_data_struct   *atmos,
 
             /*************************************
                Compute the aerodynamic resistance
-               for current veg cover and various
-               types of potential evap
             *************************************/
 
-            /* Loop over types of potential evap, plus current veg */
-            /* Current veg will be last */
-            for (p = 0; p < N_PET_TYPES + 1; p++) {
-                /* Initialize wind speeds */
-                tmp_wind[0] = atmos->wind[NR];
-                tmp_wind[1] = MISSING;
-                tmp_wind[2] = MISSING;
+            /* Initialize wind speeds */
+            tmp_wind[0] = atmos->wind[NR];
+            tmp_wind[1] = MISSING;
+            tmp_wind[2] = MISSING;
 
-                /* Set surface descriptive variables */
-                if (p < N_PET_TYPES_NON_NAT) {
-                    pet_veg_class = vic_run_veg_lib[0].NVegLibTypes + p;
-                }
-                else {
-                    pet_veg_class = veg_class;
-                }
-                displacement[0] =
-                    vic_run_veg_lib[pet_veg_class].displacement[dmy->month - 1];
-                roughness[0] =
-                    vic_run_veg_lib[pet_veg_class].roughness[dmy->month - 1];
-                overstory = vic_run_veg_lib[pet_veg_class].overstory;
-                if (p >= N_PET_TYPES_NON_NAT) {
-                    if (roughness[0] == 0) {
-                        roughness[0] = soil_con->rough;
-                    }
-                }
+            /* Set surface descriptive variables */
+            displacement[0] =
+                vic_run_veg_lib[veg_class].displacement[dmy->month - 1];
+            roughness[0] =
+                vic_run_veg_lib[veg_class].roughness[dmy->month - 1];
+            if (roughness[0] == 0) {
+                roughness[0] = soil_con->rough;
+            }
+            overstory = vic_run_veg_lib[veg_class].overstory;
 
-                /* Estimate vegetation height */
-                height = calc_veg_height(displacement[0]);
+            /* Estimate vegetation height */
+            height = calc_veg_height(displacement[0]);
 
-                /* Estimate reference height */
-                if (displacement[0] < wind_h) {
-                    ref_height[0] = wind_h;
-                }
-                else {
-                    ref_height[0] = displacement[0] + wind_h + roughness[0];
-                }
+            /* Estimate reference height */
+            if (displacement[0] < wind_h) {
+                ref_height[0] = wind_h;
+            }
+            else {
+                ref_height[0] = displacement[0] + wind_h + roughness[0];
+            }
 
-                /* Compute aerodynamic resistance over various surface types */
-                /* Do this not only for current veg but also all types of PET */
-                ErrorFlag = CalcAerodynamic(overstory, height,
-                                            vic_run_veg_lib[pet_veg_class].trunk_ratio,
-                                            soil_con->snow_rough, soil_con->rough,
-                                            vic_run_veg_lib[pet_veg_class].wind_atten,
-                                            aero_resist[p], tmp_wind,
-                                            displacement, ref_height,
-                                            roughness);
-                if (ErrorFlag == ERROR) {
-                    return (ERROR);
-                }
+            /* Compute aerodynamic resistance */
+            ErrorFlag = CalcAerodynamic(overstory, height,
+                                        vic_run_veg_lib[veg_class].trunk_ratio,
+                                        soil_con->snow_rough, soil_con->rough,
+                                        vic_run_veg_lib[veg_class].wind_atten,
+                                        aero_resist, tmp_wind,
+                                        displacement, ref_height,
+                                        roughness);
+            if (ErrorFlag == ERROR) {
+                return (ERROR);
             }
 
             /* Initialize final aerodynamic resistance values */
             for (band = 0; band < Nbands; band++) {
                 if (soil_con->AreaFract[band] > 0) {
                     cell[iveg][band].aero_resist[0] =
-                        aero_resist[N_PET_TYPES][0];
+                        aero_resist[0];
                     cell[iveg][band].aero_resist[1] =
-                        aero_resist[N_PET_TYPES][1];
+                        aero_resist[1];
                 }
             }
 
@@ -358,9 +329,7 @@ vic_run(atmos_data_struct   *atmos,
                     fetch = veg_con[iveg].fetch;
 
                     /* Initialize pot_evap */
-                    for (p = 0; p < N_PET_TYPES; p++) {
-                        cell[iveg][band].pot_evap[p] = 0;
-                    }
+                    cell[iveg][band].pot_evap = 0;
 
                     ErrorFlag = surface_fluxes(overstory, bare_albedo,
                                                ice0[band], moist0[band],
@@ -419,14 +388,11 @@ vic_run(atmos_data_struct   *atmos,
     /* Convert LAI back to global */
     for (iveg = 0; iveg < Nveg; iveg++) {
         for (band = 0; band < Nbands; band++) {
-            veg_var[iveg][band].LAI *= veg_var[iveg][band].vegcover;
-            veg_var[iveg][band].Wdmax *= veg_var[iveg][band].vegcover;
+            veg_var[iveg][band].LAI *= veg_var[iveg][band].fcanopy;
+            veg_var[iveg][band].Wdmax *= veg_var[iveg][band].fcanopy;
         }
     }
 
-    for (p = 0; p < N_PET_TYPES + 1; p++) {
-        free((char *) aero_resist[p]);
-    }
     free((char *) aero_resist);
 
     /****************************
@@ -501,9 +467,10 @@ vic_run(atmos_data_struct   *atmos,
 
         snowprec = gauge_correction[SNOW] * (atmos->prec[NR] - rainonly);
         rainprec = gauge_correction[SNOW] * rainonly;
-        atmos->out_prec += (snowprec + rainprec) * lake_con->Cl[0] * lakefrac;
-        atmos->out_rain += rainprec * lake_con->Cl[0] * lakefrac;
-        atmos->out_snow += snowprec * lake_con->Cl[0] * lakefrac;
+        Cv = veg_con[iveg].Cv * lakefrac;
+        atmos->out_prec += (snowprec + rainprec) * Cv;
+        atmos->out_rain += rainprec * Cv;
+        atmos->out_snow += snowprec * Cv;
 
         ErrorFlag = solve_lake(snowprec, rainprec, atmos->air_temp[NR],
                                atmos->wind[NR], atmos->vp[NR] / PA_PER_KPA,

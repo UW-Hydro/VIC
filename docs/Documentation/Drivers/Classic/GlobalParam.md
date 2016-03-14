@@ -17,12 +17,12 @@ The following options determine the type of simulation that wil3l be performed.
 |------------   |---------  |-------    |---------------------------------------------------------------------------------------------------------------------------------------    |
 | NLAYER        | integer   | N/A       | Number of moisture layers used by the model                                                                                               |
 | NODES         | integer   | N/A       | Number of thermal solution nodes in the soil column                                                                                       |
-| MODEL_STEPS_PER_DAY | integer   | steps     | Simulation time step length. NOTE: MODEL_STEPS_PER_DAY should be > 4 for FULL_ENERGY=TRUE or FROZEN_SOIL=TRUE.             |
-| SNOW_STEPS_PER_DAY  | integer   | steps     | Length of time step used to solve the snow model (if MODEL_STEPS_PER_DAY > 1, SNOW_STEPS_PER_DAY should = MODEL_STEPS_PER_DAY)                 |
+| MODEL_STEPS_PER_DAY | integer   | steps     | Number of simulation time steps per day. NOTE: MODEL_STEPS_PER_DAY should be > 4 for FULL_ENERGY=TRUE or FROZEN_SOIL=TRUE.             |
+| SNOW_STEPS_PER_DAY  | integer   | steps     | Number of time steps per day used to solve the snow model (if MODEL_STEPS_PER_DAY > 1, SNOW_STEPS_PER_DAY should = MODEL_STEPS_PER_DAY)                 |
+| RUNOFF_STEPS_PER_DAY  | integer   | steps     | Number of time steps per day used to solve the runoff model (should be >= MODEL_STEPS_PER_DAY)                 |
 | STARTYEAR     | integer   | year      | Year model simulation starts                                                                                                              |
 | STARTMONTH    | integer   | month     | Month model simulation starts                                                                                                             |
 | STARTDAY      | integer   | day       | Day model simulation starts                                                                                                               |
-| STARTHOUR     | integer   | hour      | Hour model simulation starts                                                                                                              |
 | EITHER:       |           |           | *Note:* **either** NRECS or ENDYEAR, ENDMONTH, and ENDDAY must be specified, but **not both**                                                       |
 | NRECS         | integer   | N/A       | Number of time steps over which to run model. ***NOTE: The number of records must be defined such that the model completes the last day.***     |
 | OR:           |           |           | *Note:* **either** NRECS or ENDYEAR, ENDMONTH, and ENDDAY must be specified, but **not both**                                                       |
@@ -80,6 +80,20 @@ Generally these default values do not need to be overridden.
 | MIN_WIND_SPEED        | float     | m/s       | Minimum allowable wind speed. <br><br>Default = 0.1 m/s. |
 | AERO_RESIST_CANSNOW   | string    | N/A       | Options for aerodynamic resistance in snow-filled canopy:  <li>**AR_406** = Multiply by 10 for latent heat, but do NOT multiply by 10 for sensible heat. When no snow in canopy, use surface aero_resist instead of overstory aero_resist. (As in VIC 4.0.6).  <li>**AR_406_LS** = Multiply by 10 for both latent and sensible heat. When no snow in canopy, use surface aero_resist instead of overstory aero_resist.  <li>**AR_406_FULL** = Multiply by 10 for both latent and sensible heat. Always use overstory aero_resist (snow or bare).  <li>**AR_410** = Apply stability correction, instead of multiplying by 10, for both latent and sensible heat. Always use overstory aero_resist (snow or bare). <br><br>*NOTE*: this option exists for backwards compatibility with earlier releases and likely will be removed in later releases. <br><br>Default = AR_406_FULL. |
 
+## Meteorological Forcing Disaggregation Parameters
+
+Generally these default values do not need to be overridden.
+
+| Name            | Type   | Units         | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              |
+|-----------------|--------|---------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| PLAPSE          | string | TRUE or FALSE | Options for computing grid cell average surface atmospheric pressure (and density) when it is not explicitly supplied as a meteorological forcing:  <li>**FALSE** = Set surface atmospheric pressure to constant 95.5 kPa (as in earlier releases).  <li>**TRUE** = Lapse surface atmospheric pressure (and density) from sea level to the grid cell average elevation.  <br><br>*NOTE 1*: air pressure is already lapsed to grid cell or band elevation when computing latent heat; this option only affects computation of sensible heat.  <br><br>*NOTE 2*: this option exists for backwards compatibility with earlier releases and likely will be removed in later releases (the TRUE option will become the standard behavior).  <br><br>Default = TRUE. |
+| SW_PREC_THRESH  | float  | mm            | Minimum daily precipitation, above which incoming shortwave is dimmed by 25%, when shortwave is not supplied as a forcing but instead is estimated from daily temperature range. <br><br>*Note*: This option's purpose is to avoid erroneous dimming of estimated shortwave when using forcings that have been aggregated or re-sampled from a different resolution. Re-sampling can sometimes smear small amounts of precipitation from neighboring cells into cells that originally had no precipitation. The appropriate value of SW_PREC_THRESH must be found through examination of the forcings.  <br><br>Default = 0 mm (any precipitation causes dimming)  |
+| MTCLIM_SWE_CORR | string | TRUE or FALSE | This controls VIC's estimates of incoming shortwave (when shortwave is not supplied as a forcing) in the presence of snow. When shortwave is supplied as a forcing, this option is ignored.  <li>**TRUE** = Adjust incoming shortwave for snow albedo effect.  <li>**FALSE** = Do not adjust shortwave (as in earlier releases).  <br><br>Default = TRUE.  |
+| VP_ITER         | string | N/A           | This controls VIC's iteration between estimates of shortwave and vapor pressure:  <li>**VP_ITER_NEVER** = Never iterate; make estimates separately.  <li>**VP_ITER_ALWAYS** = Always iterate once (as in previous releases).  <li>**VP_ITER_ANNUAL** = Iterate once for arid climates (based on annual Precip/PET ratio) and never for humid climates.  <li>**VP_ITER_CONVERGE** = Always iterate until shortwave and vp stabilize.  <br><br>Default = VP_ITER_ALWAYS.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                |
+| VP_INTERP       | string | TRUE or FALSE | This controls sub-daily humidity estimates:  <li>**TRUE** = Interpolate daily VP estimates linearly between sunrise of one day to the next.  <li>**FALSE** = Hold VP constant for entire day (as in previous releases).  <br><br>Default = TRUE.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          |
+| LW_TYPE         | string | N/A           | This controls the algorithm used to estimate clear-sky longwave radiation:  <li>**LW_TVA** = Tennessee Valley Authority algorithm (1972) (this option is what previous releases used)  <li>**LW_ANDERSON** = Algorithm of Anderson (1964)  <li>**LW_BRUTSAERT** = Algorithm of Brutsaert (1975)  <li>**LW_SATTERLUND** = Algorithm of Satterlund (1979)  <li>**LW_IDSO** = Algorithm of Idso (1981)  <li>**LW_PRATA** = Algorithm of Prata (1996)  <br><br>Default = LW_TVA.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        |
+| LW_CLOUD        | string | N/A           | This controls the algorithm used to estimate the influence of clouds on total longwave:  <li>**LW_CLOUD_BRAS** = Method from Bras textbook (this option is what previous releases used)  <li>**LW_CLOUD_DEARDORFF** = Algorithm of Deardorff (1978)  <br><br>Default = LW_CLOUD_DEARDORFF.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            |
+
 ## Carbon Parameters
 
 The following options only apply to carbon cycling.
@@ -111,13 +125,13 @@ The following options control input and output of state files.
 | STATEDAY              | integer   | day               | Day at which model simulation state should be saved. State will be saved at the end of the final timestep on this day. <br><br>*NOTE*: if STATENAME is not specified, STATEDAY will be ignored.                                                                                                                                            |
 | BINARY_STATE_FILE     | string    | TRUE or FALSE     | If FALSE, VIC reads/writes the intial/output state files in ASCII format. If TRUE, VIC reads/writes intial/output state files in binary format. <br><br>*NOTE*: if INIT_STATE or STATENAME are not specified, BINARY_STATE_FILE will be ignored.                                                                                                                    |
 
-# Define Meteorological Forcing Files
+# Define Meteorological and Vegetation Forcing Files
 
-This section describes how to define the forcing files needed by the VIC model.
+This section describes how to define the forcing files needed by the VIC model.  VIC handles vegetation historical timeseries (LAI, albedo, vegetation canopy cover fraction) similarly to meteorological forcings (with some exceptions; see below).
 
-Unlike model parameters, for which 1 file contains data for all grid cells, the meteorological forcings are stored as a separate time series for each grid cell. VIC will not disaggregate sub-daily forcings from one time step length to another. If the input forcings are sub-daily, and VIC is running with a different sub-daily model timesetep, VIC will exit. Input files can be ASCII or Binary (signed or unsigned short ints) column formatted. Columns in the file must be in the same order as they are defined in the global control file.
+Unlike model parameters, for which 1 file contains data for all grid cells, the meteorological forcings are stored as a separate time series for each grid cell. The time step length of the input forcings must match the time step length at which VIC is running. Input files can be ASCII or Binary (signed or unsigned short ints) column formatted. Columns in the file must be in the same order as they are defined in the global control file.
 
-VIC will allow forcing data to be stored in two different files per grid cell (e.g., precip and wind speed in one file, tmin and tmax in another file). Note that if you are using two forcing files per grid cell, the parameters for the first file must be defined before those for the second. **Bold** numbers indicate the order in which these values should be defined, after each forcing file (FORCING1 or FORCING2). Options that do not have a bold number apply to both forcing file types and should appear after the numbered options.
+VIC will allow forcing data to be stored in two different files per grid cell (e.g., precip and wind speed in one file, tmin and tmax in another file; or meteorological variables in one file, and vegetation timeseries in another file). Note that if you are using two forcing files per grid cell, the parameters for the first file must be defined before those for the second. **Bold** numbers indicate the order in which these values should be defined, after each forcing file (FORCING1 or FORCING2). Options that do not have a bold number apply to both forcing file types and should appear after the numbered options.
 
 All FORCING filenames are actually the pathname, and prefix for gridded data types: ex. DATA/forcing_YY.YYY_XX.XXX. Latitude and longitude index suffix is added by VIC based on GRID_DECIMAL parameter defined above, and the latitude and longitude values defined in the [soil parameter file](SoilParam.md).
 
@@ -127,13 +141,12 @@ All FORCING filenames are actually the pathname, and prefix for gridded data typ
 | (1*) FORCING2     | string    | pathname and file prefix  | Second forcing file name, or FALSE if only one file used. ***This must precede all other forcing parameters used to define the second forcing file, and follow those used to define the first forcing file.***                                                                                                                        |
 | (2) FORCE_FORMAT  | string    | BINARY or ASCII           | Defines the format type for the forcing files.                                                                                                                                                                                                                                                                                        |
 | (3)FORCE_ENDIAN   | string    | BIG or LITTLE             | Identifies the architecture of the machine on which the binary forcing files were created:  <li>**BIG** = big-endian (e.g. SUN).  <li>**LITTLE** = little-endian (e.g. PC/linux). Model will identify the endian of the current machine, and swap bytes if necessary. Required for binary forcing file, not used for ASCII forcing file. |
-| (4) N_TYPES       | int       | N/A                       | Number of columns in the current data file.                                                                                                                                                                                                                                                                                           |
-| (5) [FORCE_TYPE](ForcingData.md) | string<br>string<br>float | VarName<br>(un)signed<br>multiplier | Defines what forcing types are read from the file, and in what order. For ASCII file only the forcing type needs to be defined, but for Binary file each line must also define whether the column is SIGNED or UNSIGNED short int and by what factor values are multiplied before being written to output. [Click here for details.](ForcingData.md) |
+| (4) N_TYPES       | int       | N/A                       | Number of columns in the current data file, with the following exception: for the vegetation history variables ALBEDO, LAI_IN, and FCANOPY, there must be multiple columns for these variables, one per vegetation tile. In this case, ALBEDO, LAI_IN, and FCANOPY each count as only 1 variable despite covering multiple columns.    |
+| (5) [FORCE_TYPE](ForcingData.md) | string<br>string<br>float | VarName<br>(un)signed<br>multiplier | Defines what forcing types are read from the file, and in what order. For ASCII file only the forcing type needs to be defined, but for Binary file each line must also define whether the column is SIGNED or UNSIGNED short int and by what factor values are multiplied before being written to output. Note: Unlike other variables, ALBEDO, LAI_IN, and FCANOPY, each span multiple columns, one column per veg tile.  This will generally vary from one grid cell to the next as the number of veg tiles varies.  However, ALBEDO, LAI_IN, and FCANOPY should each have only one FORCE_TYPE entry.  [Click here for details.](ForcingData.md) |
 | (6) FORCE_STEPS_PER_DAY | integer   | steps                     | Number of timesteps per day in forcing file (must be >= 1)                                                                                                                                                                                                                                                                                  |
 | (7) FORCEYEAR     | integer   | year                      | Year meteorological forcing files start                                                                                                                                                                                                                                                                                               |
 | (8) FORCEMONTH    | integer   | month                     | Month meteorological forcing files start                                                                                                                                                                                                                                                                                              |
 | (9) FORCEDAY      | integer   | day                       | Day meteorological forcing files start                                                                                                                                                                                                                                                                                                |
-| (10) FORCEHOUR    | integer   | hour                      | Hour meteorological forcing files start                                                                                                                                                                                                                                                                                               |
 | GRID_DECIMAL      | integer   | N/A                       | Number of decimals to use in gridded file name extensions                                                                                                                                                                                                                                                                             |
 | WIND_H            | float     | m                         | Height of wind speed measurement over bare soil and snow cover. ***Wind measurement height over vegetation is now read from the vegetation library file for all types, the value in the global file only controls the wind height over bare soil and over the snow pack when a vegetation canopy is not defined.***                   |
 | ALMA_INPUT        | string    | TRUE or FALSE             | This option tells VIC the units to expect for the input variables:  <li>**FALSE** = Use standard VIC units: for moisture fluxes, use cumulative mm over the time step; for temperature, use degrees C;  <li>**TRUE** = Use the units of the ALMA convention: for moisture fluxes, use the average rate in mm/s (or kg/m<sup>2</sup>s) over the time step; for temperature, use degrees K;  <br><br>Default = FALSE. |
@@ -176,12 +189,12 @@ The following options describe the input parameter files.
 | VEGPARAM              | string    | path/filename     | Vegetation parameter file name                                                                                                                                                                                                                                                                            |
 | ROOT_ZONES            | integer   | N/A               | Number of defined root zones defined for root distribution.                                                                                                                                                                                                                                               |
 | VEGPARAM_ALBEDO       | string    | TRUE or FALSE     | If TRUE the vegetation parameter file contains an extra line for each vegetation type that defines monthly ALBEDO values for each vegetation type for each grid cell. <br><br>Default = FALSE. |
-| ALBEDO_SRC            | string    | N/A               | This option tells VIC where to look for ALBEDO values: <li>**FROM_VEGLIB** = Use the ALBEDO values listed in the vegetation library file. <li>**FROM_VEGPARAM** = Use the ALBEDO values listed in the vegetation parameter file. Note: for this to work, VEGPARAM_ALBEDO must be TRUE. <br><br>Default = FROM_VEGLIB. |
+| ALBEDO_SRC            | string    | N/A               | This option tells VIC where to look for ALBEDO values: <li>**FROM_VEGLIB** = Use the ALBEDO values listed in the vegetation library file. <li>**FROM_VEGPARAM** = Use the ALBEDO values listed in the vegetation parameter file. Note: for this to work, VEGPARAM_ALBEDO must be TRUE. <li>**FROM_VEGHIST** = Use the ALBEDO values listed in the veg_hist forcing files. Note: for this to work, ALBEDO must be supplied in the veg_hist files and listd in the global parameter file as one of the variables in the files. <br><br>Default = FROM_VEGLIB. |
 | VEGPARAM_LAI          | string    | TRUE or FALSE     | If TRUE the vegetation parameter file contains an extra line for each vegetation type that defines monthly LAI values for each vegetation type for each grid cell. <br><br>Default = FALSE. |
-| LAI_SRC               | string    | N/A               | This option tells VIC where to look for LAI values: <li>**FROM_VEGLIB** = Use the LAI values listed in the vegetation library file. <li>**FROM_VEGPARAM** = Use the LAI values listed in the vegetation parameter file. Note: for this to work, VEGPARAM_LAI must be TRUE. <br><br>Default = FROM_VEGLIB. |
-| VEGLIB_VEGCOVER       | string    | TRUE or FALSE     | If TRUE the vegetation library file contains monthly VEGCOVER values for each vegetation type for each grid cell (between the LAI and ALBEDO values). <br><br>Default = FALSE. |
-| VEGPARAM_VEGCOVER     | string    | TRUE or FALSE     | If TRUE the vegetation parameter file contains an extra line for each vegetation type that defines monthly VEGCOVER values for each vegetation type for each grid cell. <br><br>Default = FALSE. |
-| VEGCOVER_SRC          | string    | N/A               | This option tells VIC where to look for VEGCOVER values: <li>**FROM_VEGLIB** = Use the VEGCOVER values listed in the vegetation library file. Note: for this to work, VEGLIB_VEGCOVER must be TRUE.. <li>**FROM_VEGPARAM** = Use the VEGCOVER values listed in the vegetation parameter file. Note: for this to work, VEGPARAM_VEGCOVER must be TRUE. <br><br>Default = FROM_VEGLIB. |
+| LAI_SRC               | string    | N/A               | This option tells VIC where to look for LAI values: <li>**FROM_VEGLIB** = Use the LAI values listed in the vegetation library file. <li>**FROM_VEGPARAM** = Use the LAI values listed in the vegetation parameter file. Note: for this to work, VEGPARAM_LAI must be TRUE. <li>**FROM_VEGHIST** = Use the LAI values listed in the veg_hist forcing files. Note: for this to work, LAI_IN must be supplied in the veg_hist files and listd in the global parameter file as one of the variables in the files. <br><br>Default = FROM_VEGLIB. |
+| VEGLIB_FCAN       | string    | TRUE or FALSE     | If TRUE the vegetation library file contains monthly FCANOPY values for each vegetation type for each grid cell (between the LAI and ALBEDO values). <br><br>Default = FALSE. |
+| VEGPARAM_FCAN     | string    | TRUE or FALSE     | If TRUE the vegetation parameter file contains an extra line for each vegetation type that defines monthly FCANOPY values for each vegetation type for each grid cell. <br><br>Default = FALSE. |
+| FCAN_SRC          | string    | N/A               | This option tells VIC where to look for FCANOPY values: <li>**FROM_DEFAULT** = Set FCANOPY to 1.0 for all veg classes, all times, and all locations. <li>**FROM_VEGLIB** = Use the FCANOPY values listed in the vegetation library file. Note: for this to work, VEGLIB_FCANOPY must be TRUE.. <li>**FROM_VEGPARAM** = Use the FCANOPY values listed in the vegetation parameter file. Note: for this to work, VEGPARAM_FCANOPY must be TRUE. <li>**FROM_VEGHIST** = Use the FCANOPY values listed in the veg_hist forcing files. Note: for this to work, FCANOPY must be supplied in the veg_hist files and listd in the global parameter file as one of the variables in the files. <br><br>Default = FROM_DEFAULT. |
 | SNOW_BAND             | integer <br> [string] | N/A <br> [path/filename] | Maximum number of snow elevation bands to use, and the name (with path) of the snow elevation band file. For example: `SNOW_BAND 5 path/filename`.  To turn off this feature, set the number of snow bands to 1 and do not follow this with a snow elevation band file name.  <br><br>Default = 1. |
 | CONSTANTS             | string    | path/filename     | Constants / Parameters file name |
 
@@ -213,11 +226,10 @@ The following options describe the output files. Click [here](OutputFormatting.m
 | MOISTFRACT            | string    | TRUE or FALSE     | Options for output soil moisture units (default is FALSE): <li>**FALSE** = Standard VIC units. Soil moisture is in mm over the grid cell area <li>**TRUE** = Soil moisture is volume fraction                                                                                                                                                   |
 | PRT_HEADER            | string    | TRUE or FALSE     | Options for output file headers (default is FALSE): <li>**FALSE** = output files contain no headers <li>**TRUE** = headers are inserted into the beginning of each output file, listing the names of the variables in each field of the file (if ASCII) and/or the variable data types (if BINARY) <br><br>[Click here for more information.](OutputFormatting.md)                                                                                                                                                          |
 | PRT_SNOW_BAND         | string    | TRUE or FALSE     | if TRUE then print snow variables for each snow band in a separate output file (`snow_band_*`). <br><br>*NOTE*: this option is ignored if output file contents are specified. |
-| N_OUTFILES\*            | integer   | N/A               | Number of output files per grid cell. [Click here for more information](OutputFormatting.md).                                                                                                                    |
-| OUTFILE\*               | <br> string <br> integer <br>| <br>prefix <br> nvars <br>| Information about this output file: <br>Prefix of the output file (to which the lat and lon will be appended)<br>Number of variables in the output file <br> This should be specified once for each output file. [Click here for more information.](OutputFormatting.md) |
+| OUTFILE\*               | <br> string <br> | <br>prefix <br> | Information about this output file: <br>Prefix of the output file (to which the lat and lon will be appended) <br> This should be specified once for each output file. [Click here for more information.](OutputFormatting.md) |
 | OUTVAR\*                | <br> string <br> string <br> string <br> integer <br> | <br> name <br> format <br> type <br> multiplier <br> | Information about this output variable:<br>Name (must match a name listed in vicNl_def.h) <br> Output format (C fprintf-style format code) <br>Data type (one of: OUT_TYPE_DEFAULT, OUT_TYPE_CHAR, OUT_TYPE_SINT, OUT_TYPE_USINT, OUT_TYPE_INT, OUT_TYPE_FLOAT,OUT_TYPE_DOUBLE) <br> Multiplier - number to multiply the data with in order to recover the original values (only valid with BINARY_OUTPUT=TRUE) <br><br> This should be specified once for each output variable. [Click here for more information.](OutputFormatting.md)|
 
-\* *Note: `N_OUTFILES`, `OUTFILE`, and `OUTVAR` are optional; if omitted, traditional output files are produced. [Click here for details on using these instructions](OutputFormatting.md).*
+\* *Note: `OUTFILE`, and `OUTVAR` are optional; if omitted, traditional output files are produced. [Click here for details on using these instructions](OutputFormatting.md).*
 
 # Obsolete Options from Earlier Versions
 
@@ -225,9 +237,15 @@ The following options are no longer supported.
 
 | Name          | Type      | Units             | Description                                                                                                                                                                                                                                   |
 |-------------  |--------   |-----------------  |---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| TIME_STEP     | integer   | hour      | Simulation time step length        |
+| SNOW_STEP     | integer   | hour      | Snow model time step length        |
+| STARTHOUR     | integer   | hour      | Hour model simulation starts        |
 | GRND_FLUX     | string    | TRUE or FALSE     | Versions 4.1.1 and earlier. If TRUE, compute ground heat flux and energy balance; if FALSE, do not compute ground heat flux. Default: If FULL_ENERGY or FROZEN_SOIL are TRUE, GRND_FLUX is automatically set to TRUE; otherwise GRND_FLUX is automatically set to FALSE.  |
 | MIN_LIQ       | string    | TRUE or FALSE     | Version 4.1.1 only. Options for handling minimum soil moisture in presence of ice (default is FALSE): <li>**FALSE** = Use residual moisture as lower bound on soil moisture in Brooks-Corey/Campbell and other relationships involving liquid water. <li>**TRUE** = Use (`residual moisture * unfrozen water fraction` as function of temperature) as lower bound on soil moisture in Brooks-Corey/Campbell and other relationships involving liquid water. |
 | GLOBAL_LAI    | string    | TRUE or FALSE     | If TRUE the vegetation parameter file contains an extra line for each vegetation type that defines monthly LAI values for each vegetation type for each grid cell. <br><br>*NOTE*: This option has been replaced by the two options LAI_SRC and VEGPARAM_LAI. |
+| OUTPUT_FORCE  | string    | TRUE or FALSE     | If TRUE, perform disaggregation of forcings, skip the simulation, and output the disaggregated forcings. |
+| FORCEHOUR    | integer   | hour                      | Hour meteorological forcing files start                             |
+| MEASURE_H    | decimal   | m      | Height of humidity measurement        |
 | PRT_FLUX      | string    | TRUE or FALSE     | Versions 4.1.1 and earlier. If TRUE print energy fluxes debugging files .  |
 | PRT_BALANCE   | string    | TRUE or FALSE     | Versions 4.1.1 and earlier. If TRUE print water balance debugging files .  |
 | PRT_SOIL      | string    | TRUE or FALSE     | Versions 4.1.1 and earlier. If TRUE print soil parameter debugging files .  |
@@ -242,7 +260,7 @@ The following options are no longer supported.
 ## Example Global Parameter File:
 ```
 #######################################################################
-# VIC Model Parameters - 4.2
+# VIC Model Parameters - 5.0
 #######################################################################
 # $Id$
 #######################################################################
@@ -250,12 +268,12 @@ The following options are no longer supported.
 #######################################################################
 NLAYER      3   # number of soil layers
 NODES       10  # number of soil thermal nodes
-MODEL_STEPS_PER_DAY  8   # model time step in hours (set to 1 if FULL_ENERGY = FALSE, set to > 4 if FULL_ENERGY = TRUE)
-SNOW_STEPS_PER_DAY  8   # time step in hours for which to solve the snow model (should = MODEL_STEPS_PER_DAY if MODEL_STEPS_PER_DAY > 1)
+MODEL_STEPS_PER_DAY  8   # number of model time steps per day (set to 1 if FULL_ENERGY = FALSE, set to > 4 if FULL_ENERGY = TRUE)
+SNOW_STEPS_PER_DAY  8   # number of time steps per day for which to solve the snow model (should = MODEL_STEPS_PER_DAY if MODEL_STEPS_PER_DAY > 1)
+RUNOFF_STEPS_PER_DAY  8   # number of time steps per day for which to solve the runoff model (should be >= MODEL_STEPS_PER_DAY)
 STARTYEAR   2000    # year model simulation starts
 STARTMONTH  01  # month model simulation starts
 STARTDAY    01  # day model simulation starts
-STARTHOUR   00  # hour model simulation starts
 ENDYEAR     2000    # year model simulation ends
 ENDMONTH    12  # month model simulation ends
 ENDDAY      31  # day model simulation ends
@@ -314,6 +332,29 @@ FROZEN_SOIL FALSE   # TRUE = calculate frozen soils.  Default = FALSE.
 #           # Default   = AR_406_FULL
 
 #######################################################################
+# Meteorological Forcing Disaggregation Parameters
+# Generally these default values do not need to be overridden
+#######################################################################
+#PLAPSE     TRUE    # This controls how VIC computes air pressure when air pressure is not supplied as an input forcing: TRUE = set air pressure to sea level pressure, lapsed to grid cell average elevation; FALSE = set air pressure to constant 95.5 kPa (as in all versions of VIC pre-4.1.1)
+#SW_PREC_THRESH     0   # Minimum daily precip [mm] that can cause dimming of incoming shortwave; default = 0.
+#MTCLIM_SWE_CORR    TRUE    # This controls VIC's estimates of incoming shortwave in the presence of snow; TRUE = adjust incoming shortwave for snow albedo effect; FALSE = do not adjust shortwave; default = TRUE
+#VP_ITER        VP_ITER_ANNUAL  # This controls VIC's iteration between estimates of shortwave and vapor pressure:
+#           # VP_ITER_NEVER = never iterate; make estimates separately
+#           # VP_ITER_ALWAYS = always iterate once
+#           # VP_ITER_ANNUAL = iterate once for arid climates based on annual Precip/PET ratio
+#           # VP_ITER_CONVERGE = iterate until shortwave and vp stabilize
+#           # default = VP_ITER_ALWAYS
+#VP_INTERP  TRUE    # This controls sub-daily humidity estimates; TRUE = interpolate daily VP estimates linearly between sunrise of one day to the next; FALSE = hold VP constant for entire day
+#LW_TYPE        LW_PRATA    # This controls the algorithm used to estimate clear-sky longwave radiation:
+#           # LW_TVA = Tennessee Valley Authority algorithm (1972) (this was traditional VIC algorithm)
+#           # other options listed in vic_driver_shared.h
+#           # default = LW_PRATA
+#LW_CLOUD   LW_CLOUD_DEARDORFF  # This controls the algorithm used to estimate the influence of clouds on total longwave:
+#           # LW_CLOUD_BRAS = method from Bras textbook (this was the traditional VIC algorithm)
+#           # LW_CLOUD_DEARDORFF = method of Deardorff (1978)
+#           # default = LW_CLOUD_DEARDORFF
+
+#######################################################################
 # Carbon Cycle Parameters
 #######################################################################
 #CARBON         FALSE       # TRUE = simulate carbon cycle; FALSE = do not simulate carbon cycle.  Default = FALSE.
@@ -365,7 +406,6 @@ FORCE_STEPS_PER_DAY    24  # Forcing time step length (hours)
 FORCEYEAR   2000    # Year of first forcing record
 FORCEMONTH  01  # Month of first forcing record
 FORCEDAY    01  # Day of first forcing record
-FORCEHOUR   00  # Hour of first forcing record
 GRID_DECIMAL    4   # Number of digits after decimal point in forcing file names
 WIND_H          10.0    # height of wind speed measurement (m)
 ALMA_INPUT  FALSE   # TRUE = ALMA-compliant input variable units; FALSE = standard VIC units
@@ -380,13 +420,13 @@ ORGANIC_FRACT   FALSE   # TRUE = simulate organic soils; soil param file contain
 VEGLIB          (put the veg library path/file here)    # Veg library path/file
 VEGPARAM        (put the veg parameter path/file here)  # Veg parameter path/file
 ROOT_ZONES      3   # Number of root zones (must match format of veg param file)
-#VEGLIB_VEGCOVER    FALSE   # TRUE = veg lib file contains 12 monthly values of partial vegcover fraction for each veg class, between the LAI and albedo values
+#VEGLIB_FCAN    FALSE   # TRUE = veg lib file contains 12 monthly values of partial vegcover fraction for each veg class, between the LAI and albedo values
 #VEGPARAM_LAI   TRUE    # TRUE = veg param file contains LAI information; FALSE = veg param file does NOT contain LAI information
 #VEGPARAM_ALB   FALSE    # TRUE = veg param file contains albedo information; FALSE = veg param file does NOT contain albedo information
-#VEGPARAM_VEGCOVER  FALSE    # TRUE = veg param file contains veg_cover information; FALSE = veg param file does NOT contain veg_cover information
+#VEGPARAM_FCAN  FALSE    # TRUE = veg param file contains veg_cover information; FALSE = veg param file does NOT contain veg_cover information
 #LAI_SRC    FROM_VEGLIB    # FROM_VEGPARAM = read LAI from veg param file; FROM_VEGLIB = read LAI from veg library file
 #ALB_SRC    FROM_VEGLIB    # FROM_VEGPARAM = read albedo from veg param file; FROM_VEGLIB = read albedo from veg library file
-#VEGCOVER_SRC   FROM_VEGLIB    # FROM_VEGPARAM = read veg_cover from veg param file; FROM_VEGLIB = read veg_cover from veg library file
+#FCAN_SRC   FROM_VEGLIB    # FROM_VEGPARAM = read fcanopy from veg param file; FROM_VEGLIB = read fcanopy from veg library file
 SNOW_BAND   1   # Number of snow bands; if number of snow bands > 1, you must insert the snow band path/file after the number of bands (e.g. SNOW_BAND 5 my_path/my_snow_band_file)
 
 #######################################################################
@@ -402,13 +442,13 @@ SNOW_BAND   1   # Number of snow bands; if number of snow bands > 1, you must in
 # Output Files and Parameters
 #######################################################################
 RESULT_DIR      (put the result directory path here)    # Results directory path
-OUTPUT_STEPS_PER_DAY         # Output interval (hours); if 0, OUT_STEP = MODEL_STEPS_PER_DAY
+OUTPUT_STEPS_PER_DAY   0      # Output interval (hours); if 0, OUT_STEP = MODEL_STEPS_PER_DAY
 SKIPYEAR    0   # Number of years of output to omit from the output files
 COMPRESS    FALSE   # TRUE = compress input and output files when done
 BINARY_OUTPUT   FALSE   # TRUE = binary output files
 ALMA_OUTPUT FALSE   # TRUE = ALMA-format output files; FALSE = standard VIC units
 MOISTFRACT  FALSE   # TRUE = output soil moisture as volumetric fraction; FALSE = standard VIC units
-PRT_SNOW_BAND   FALSE   # TRUE = write a "snowband" output file, containing band-specific values of snow variables; NOTE: this is ignored if N_OUTFILES is specified below.
+PRT_SNOW_BAND   FALSE   # TRUE = write a "snowband" output file, containing band-specific values of snow variables.
 
 #######################################################################
 #
@@ -435,26 +475,22 @@ PRT_SNOW_BAND   FALSE   # TRUE = write a "snowband" output file, containing band
 #
 # Format:
 #
-#   N_OUTFILES    <n_outfiles>
-#
-#   OUTFILE       <prefix>        <nvars>
+#   OUTFILE       <prefix>
 #   OUTVAR        <varname>       [<format>        <type>  <multiplier>]
 #   OUTVAR        <varname>       [<format>        <type>  <multiplier>]
 #   OUTVAR        <varname>       [<format>        <type>  <multiplier>]
 #
-#   OUTFILE       <prefix>        <nvars>
+#   OUTFILE       <prefix>
 #   OUTVAR        <varname>       [<format>        <type>  <multiplier>]
 #   OUTVAR        <varname>       [<format>        <type>  <multiplier>]
 #   OUTVAR        <varname>       [<format>        <type>  <multiplier>]
 #
 #
 # where
-#   <n_outfiles> = number of output files
 #   <prefix>     = name of the output file, NOT including latitude
 #                  and longitude
-#   <nvars>      = number of variables in the output file
 #   <varname>    = name of the variable (this must be one of the
-#                  output variable names listed in vicNl_def.h.)
+#                  output variable names listed in vic_driver_shared.h.)
 #   <format>     = (for ascii output files) fprintf format string,
 #                  e.g.
 #                    %.4f = floating point with 4 decimal places

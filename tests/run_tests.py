@@ -8,9 +8,9 @@ import argparse
 import datetime
 from collections import OrderedDict
 import string
-from vic import VIC, VIC_TestError, VIC_RuntimeError
-from vic.io import read_config, read_vic_ascii, read_configobj
-from vic.testing import check_completed, check_for_nans
+from tonic.models.vic.vic import VIC, VICRuntimeError, read_vic_ascii
+from tonic.io import read_config, read_configobj
+from tonic.testing import check_completed, check_for_nans, VICTestError
 
 OUTPUT_WIDTH = 100
 
@@ -76,7 +76,7 @@ class TestResults(object):
 
 
 # -------------------------------------------------------------------- #
-class VIC_ReturnCodeError(BaseException):
+class VICReturnCodeError(BaseException):
     pass
 # -------------------------------------------------------------------- #
 
@@ -144,7 +144,7 @@ def main():
     # Validate input directories
     for d in [data_dir, test_dir]:
         if not os.path.exists(d):
-            raise VIC_TestError('Directory: {0} does not exist'.format(d))
+            raise VICTestError('Directory: {0} does not exist'.format(d))
     # ---------------------------------------------------------------- #
 
     # ---------------------------------------------------------------- #
@@ -222,9 +222,10 @@ def main():
 
 
 # -------------------------------------------------------------------- #
-def run_unit_tests(config_file):
+def run_unit_tests():
     '''Run unittests from config file'''
-    return OrderedDict()
+    pytest.main('-x unit')
+    return
 # -------------------------------------------------------------------- #
 
 
@@ -316,10 +317,10 @@ def run_system(config_file, vic_exe, test_dir, test_data_dir, out_dir):
 
             expectation = test_dict['expected_retval']
             if returncode != int(test_dict['expected_retval']):
-                raise VIC_ReturnCodeError('VIC return code ({0}) '
-                                          'does not match expected '
-                                          '({1})'.format(returncode,
-                                                         expectation))
+                raise VICReturnCodeError('VIC return code ({0}) '
+                                         'does not match expected '
+                                         '({1})'.format(returncode,
+                                                        expectation))
 
             # -------------------------------------------------------- #
             # check output files
@@ -351,13 +352,13 @@ def run_system(config_file, vic_exe, test_dir, test_data_dir, out_dir):
             # -------------------------------------------------------- #
 
         # Handle errors
-        except VIC_RuntimeError as e:
+        except VICRuntimeError as e:
             test_comment = 'Test failed during simulation'
             error_message = e
-        except VIC_TestError as e:
+        except VICTestError as e:
             test_comment = 'Test failed during testing of output files'
             error_message = e
-        except VIC_ReturnCodeError as e:
+        except VICReturnCodeError as e:
             test_comment = 'Test failed due to incorrect return code'
             error_message = e
 
@@ -462,8 +463,8 @@ def run_science(config_file, vic_exe, test_dir, test_data_dir, out_dir):
             test_complete = True
 
             if returncode != 0:
-                raise VIC_ReturnCodeError('VIC return code not equal to zero, '
-                                          'check VIC logs for test')
+                raise VICReturnCodeError('VIC return code not equal to zero, '
+                                         'check VIC logs for test')
 
             # -------------------------------------------------------- #
             # check output files
@@ -495,13 +496,13 @@ def run_science(config_file, vic_exe, test_dir, test_data_dir, out_dir):
             # -------------------------------------------------------- #
 
         # Handle errors
-        except VIC_RuntimeError as e:
+        except VICRuntimeError as e:
             test_comment = 'Test failed during simulation'
             error_message = e
-        except VIC_TestError as e:
+        except VICTestError as e:
             test_comment = 'Test failed during testing of output files'
             error_message = e
-        except VIC_ReturnCodeError as e:
+        except VICReturnCodeError as e:
             test_comment = 'Test failed due to incorrect return code'
             error_message = e
 
@@ -606,8 +607,8 @@ def run_examples(config_file, vic_exe, test_dir, test_data_dir, out_dir):
             test_complete = True
 
             if returncode != 0:
-                raise VIC_ReturnCodeError('VIC return code not equal to zero, '
-                                          'check VIC logs for test')
+                raise VICReturnCodeError('VIC return code not equal to zero, '
+                                         'check VIC logs for test')
 
             # -------------------------------------------------------- #
             # check output files
@@ -639,13 +640,13 @@ def run_examples(config_file, vic_exe, test_dir, test_data_dir, out_dir):
             # -------------------------------------------------------- #
 
         # Handle errors
-        except VIC_RuntimeError as e:
+        except VICRuntimeError as e:
             test_comment = 'Test failed during simulation'
             error_message = e
-        except VIC_TestError as e:
+        except VICTestError as e:
             test_comment = 'Test failed during testing of output files'
             error_message = e
-        except VIC_ReturnCodeError as e:
+        except VICReturnCodeError as e:
             test_comment = 'Test failed due to incorrect return code'
             error_message = e
 

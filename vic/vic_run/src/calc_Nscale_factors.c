@@ -28,14 +28,13 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  *****************************************************************************/
 
-#include <vic_def.h>
 #include <vic_run.h>
 
 /******************************************************************************
  * @brief    Calculate nitrogen scaling factors for all canopy layers.
  *****************************************************************************/
 void
-calc_Nscale_factors(char           NscaleFlag,
+calc_Nscale_factors(bool           NscaleFlag,
                     double        *CanopLayerBnd,
                     double         LAItotal,
                     double         lat,

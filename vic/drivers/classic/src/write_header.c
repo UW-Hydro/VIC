@@ -24,8 +24,6 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  *****************************************************************************/
 
-#include <vic_def.h>
-#include <vic_run.h>
 #include <vic_driver_classic.h>
 
 /******************************************************************************
@@ -61,7 +59,7 @@ write_header(out_data_file_struct *out_data_files,
     }
 
     if (options.BINARY_OUTPUT) { // BINARY
-        tmp_str = (char *)calloc(256, sizeof(char));
+        tmp_str = calloc(BINHEADERSIZE, sizeof(*tmp_str));
 
         // Binary header format:
         //

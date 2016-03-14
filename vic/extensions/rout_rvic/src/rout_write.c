@@ -27,6 +27,8 @@
 #include <vic_def.h>
 #include <rout.h>
 
-void rout_write() {
+void
+rout_write()
+{
     log_info("In rout_write");
 }

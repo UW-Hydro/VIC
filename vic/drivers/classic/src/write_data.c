@@ -24,8 +24,6 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  *****************************************************************************/
 
-#include <vic_def.h>
-#include <vic_run.h>
 #include <vic_driver_classic.h>
 
 /******************************************************************************
@@ -38,6 +36,7 @@ write_data(out_data_file_struct *out_data_files,
            double                dt)
 {
     extern option_struct options;
+    size_t               n;
     size_t               file_idx;
     size_t               var_idx;
     size_t               elem_idx;
@@ -50,22 +49,14 @@ write_data(out_data_file_struct *out_data_files,
     double              *tmp_dptr;
 
     if (options.BINARY_OUTPUT) { // BINARY
+        n = N_OUTVAR_TYPES * options.Nlayer * options.SNOW_BAND;
         // Initialize pointers
-        tmp_cptr = (char *) calloc(
-            N_OUTVAR_TYPES * options.Nlayer * options.SNOW_BAND, sizeof(char));
-        tmp_siptr = (short int *) calloc(
-            N_OUTVAR_TYPES * options.Nlayer * options.SNOW_BAND,
-            sizeof(short int));
-        tmp_usiptr = (unsigned short int *) calloc(
-            N_OUTVAR_TYPES * options.Nlayer * options.SNOW_BAND,
-            sizeof(unsigned short int));
-        tmp_iptr = (int *) calloc(
-            N_OUTVAR_TYPES * options.Nlayer * options.SNOW_BAND, sizeof(int));
-        tmp_fptr = (float *) calloc(
-            N_OUTVAR_TYPES * options.Nlayer * options.SNOW_BAND, sizeof(float));
-        tmp_dptr = (double *) calloc(
-            N_OUTVAR_TYPES * options.Nlayer * options.SNOW_BAND,
-            sizeof(double));
+        tmp_cptr = calloc(n, sizeof(*tmp_cptr));
+        tmp_siptr = calloc(n, sizeof(*tmp_siptr));
+        tmp_usiptr = calloc(n, sizeof(*tmp_usiptr));
+        tmp_iptr = calloc(n, sizeof(*tmp_iptr));
+        tmp_fptr = calloc(n, sizeof(*tmp_fptr));
+        tmp_dptr = calloc(n, sizeof(*tmp_dptr));
 
         // Time
         tmp_iptr[0] = dmy->year;

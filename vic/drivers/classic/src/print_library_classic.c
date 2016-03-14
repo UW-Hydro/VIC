@@ -24,8 +24,6 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  *****************************************************************************/
 
-#include <vic_def.h>
-#include <vic_run.h>
 #include <vic_driver_classic.h>
 
 /******************************************************************************
@@ -35,7 +33,8 @@ void
 print_atmos_data(atmos_data_struct *atmos,
                  size_t             nr)
 {
-    size_t i;
+    extern option_struct options;
+    size_t               i;
 
     fprintf(LOG_DEST, "atmos_data  :\n");
     fprintf(LOG_DEST, "\tair_temp  :");
@@ -43,29 +42,9 @@ print_atmos_data(atmos_data_struct *atmos,
         fprintf(LOG_DEST, "\t%.4f", atmos->air_temp[i]);
     }
     fprintf(LOG_DEST, "\n");
-    fprintf(LOG_DEST, "\tCatm      :");
-    for (i = 0; i <= nr; i++) {
-        fprintf(LOG_DEST, "\t%.4f", atmos->Catm[i]);
-    }
-    fprintf(LOG_DEST, "\n");
-    fprintf(LOG_DEST, "\tchannel_in:");
-    for (i = 0; i <= nr; i++) {
-        fprintf(LOG_DEST, "\t%.4f", atmos->channel_in[i]);
-    }
-    fprintf(LOG_DEST, "\n");
-    fprintf(LOG_DEST, "\tcoszen    :");
-    for (i = 0; i <= nr; i++) {
-        fprintf(LOG_DEST, "\t%.4f", atmos->coszen[i]);
-    }
-    fprintf(LOG_DEST, "\n");
     fprintf(LOG_DEST, "\tdensity   :");
     for (i = 0; i <= nr; i++) {
         fprintf(LOG_DEST, "\t%.4f", atmos->density[i]);
-    }
-    fprintf(LOG_DEST, "\n");
-    fprintf(LOG_DEST, "\tfdir      :");
-    for (i = 0; i <= nr; i++) {
-        fprintf(LOG_DEST, "\t%.4f", atmos->fdir[i]);
     }
     fprintf(LOG_DEST, "\n");
     fprintf(LOG_DEST, "\tlongwave  :");
@@ -88,11 +67,6 @@ print_atmos_data(atmos_data_struct *atmos,
         fprintf(LOG_DEST, "\t%.4f", atmos->out_snow);
     }
     fprintf(LOG_DEST, "\n");
-    fprintf(LOG_DEST, "\tpar       :");
-    for (i = 0; i <= nr; i++) {
-        fprintf(LOG_DEST, "\t%.4f", atmos->par[i]);
-    }
-    fprintf(LOG_DEST, "\n");
     fprintf(LOG_DEST, "\tprec      :");
     for (i = 0; i <= nr; i++) {
         fprintf(LOG_DEST, "\t%.4f", atmos->prec[i]);
@@ -113,11 +87,6 @@ print_atmos_data(atmos_data_struct *atmos,
         fprintf(LOG_DEST, "\t%d\n", atmos->snowflag[i]);
     }
     fprintf(LOG_DEST, "\n");
-    fprintf(LOG_DEST, "\ttskc      :");
-    for (i = 0; i <= nr; i++) {
-        fprintf(LOG_DEST, "\t%.4f", atmos->tskc[i]);
-    }
-    fprintf(LOG_DEST, "\n");
     fprintf(LOG_DEST, "\tvp        :");
     for (i = 0; i <= nr; i++) {
         fprintf(LOG_DEST, "\t%.4f", atmos->vp[i]);
@@ -133,4 +102,28 @@ print_atmos_data(atmos_data_struct *atmos,
         fprintf(LOG_DEST, "\t%.4f", atmos->wind[i]);
     }
     fprintf(LOG_DEST, "\n");
+    if (options.LAKES) {
+        fprintf(LOG_DEST, "\tchannel_in:");
+        for (i = 0; i <= nr; i++) {
+            fprintf(LOG_DEST, "\t%.4f", atmos->channel_in[i]);
+        }
+        fprintf(LOG_DEST, "\n");
+    }
+    if (options.CARBON) {
+        fprintf(LOG_DEST, "\tCatm      :");
+        for (i = 0; i <= nr; i++) {
+            fprintf(LOG_DEST, "\t%.4f", atmos->Catm[i]);
+        }
+        fprintf(LOG_DEST, "\n");
+        fprintf(LOG_DEST, "\tfdir      :");
+        for (i = 0; i <= nr; i++) {
+            fprintf(LOG_DEST, "\t%.4f", atmos->fdir[i]);
+        }
+        fprintf(LOG_DEST, "\n");
+        fprintf(LOG_DEST, "\tpar       :");
+        for (i = 0; i <= nr; i++) {
+            fprintf(LOG_DEST, "\t%.4f", atmos->par[i]);
+        }
+        fprintf(LOG_DEST, "\n");
+    }
 }

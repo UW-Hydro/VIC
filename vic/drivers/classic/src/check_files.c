@@ -24,8 +24,6 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  *****************************************************************************/
 
-#include <vic_def.h>
-#include <vic_run.h>
 #include <vic_driver_classic.h>
 
 /******************************************************************************
@@ -40,14 +38,12 @@ check_files(filep_struct     *filep,
     extern FILE          *open_file(char string[], char type[]);
 
     filep->soilparam = open_file(fnames->soil, "r");
-    if (!options.OUTPUT_FORCE) {
-        filep->veglib = open_file(fnames->veglib, "r");
-        filep->vegparam = open_file(fnames->veg, "r");
-        if (options.SNOW_BAND > 1) {
-            filep->snowband = open_file(fnames->snowband, "r");
-        }
-        if (options.LAKES) {
-            filep->lakeparam = open_file(fnames->lakeparam, "r");
-        }
+    filep->veglib = open_file(fnames->veglib, "r");
+    filep->vegparam = open_file(fnames->veg, "r");
+    if (options.SNOW_BAND > 1) {
+        filep->snowband = open_file(fnames->snowband, "r");
+    }
+    if (options.LAKES) {
+        filep->lakeparam = open_file(fnames->lakeparam, "r");
     }
 }

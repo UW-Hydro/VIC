@@ -24,7 +24,6 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  *****************************************************************************/
 
-#include <vic_def.h>
 #include <vic_run.h>
 
 /******************************************************************************
@@ -1816,7 +1815,6 @@ water_balance(lake_var_struct *lake,
               lake_con_struct  lake_con,
               double           dt,
               all_vars_struct *all_vars,
-              int              rec,
               int              iveg,
               int              band,
               double           lakefrac,
@@ -1859,8 +1857,8 @@ water_balance(lake_var_struct *lake,
 
     frost_fract = soil_con.frost_fract;
 
-    delta_moist = (double*) calloc(options.Nlayer, sizeof(double));
-    moist = (double*) calloc(options.Nlayer, sizeof(double));
+    delta_moist = calloc(options.Nlayer, sizeof(*delta_moist));
+    moist = calloc(options.Nlayer, sizeof(*moist));
 
     /**********************************************************************
     * 1. Preliminary stuff
@@ -1901,13 +1899,13 @@ water_balance(lake_var_struct *lake,
     volume_save = lake->volume;
     ErrorFlag = get_depth(lake_con, lake->volume - lake->ice_water_eq, &ldepth);
     if (ErrorFlag == ERROR) {
-        log_err("Something went wrong in get_depth; record = %d, "
-                "volume = %f, depth = %e", rec, lake->volume, ldepth);
+        log_err("Something went wrong in get_depth; "
+                "volume = %f, depth = %e", lake->volume, ldepth);
     }
     ErrorFlag = get_sarea(lake_con, ldepth, &surfacearea);
     if (ErrorFlag == ERROR) {
-        log_err("Something went wrong in get_sarea; record = %d, depth = %f, "
-                "sarea = %e", rec, ldepth, surfacearea);
+        log_err("Something went wrong in get_sarea; depth = %f, "
+                "sarea = %e", ldepth, surfacearea);
     }
 
     // Estimate the new lake fraction (before recharge)
@@ -2050,13 +2048,13 @@ water_balance(lake_var_struct *lake,
     // baseflow will only come from under the liquid portion of the lake
     ErrorFlag = get_depth(lake_con, lake->volume - lake->ice_water_eq, &ldepth);
     if (ErrorFlag == ERROR) {
-        log_err("Something went wrong in get_depth; record = %d, volume = %f, "
-                "depth = %e", rec, lake->volume, ldepth);
+        log_err("Something went wrong in get_depth; volume = %f, "
+                "depth = %e", lake->volume, ldepth);
     }
     ErrorFlag = get_sarea(lake_con, ldepth, &surfacearea);
     if (ErrorFlag == ERROR) {
-        log_err("Error in get_sarea; record = %d, depth = %f, sarea = %e",
-                rec, ldepth, surfacearea);
+        log_err("Error in get_sarea; depth = %f, sarea = %e",
+                ldepth, surfacearea);
     }
     lake->baseflow_out = baseflow_out_mm * surfacearea / MM_PER_M;
     if (lake->volume - lake->ice_water_eq >= lake->baseflow_out) {
@@ -2070,8 +2068,8 @@ water_balance(lake_var_struct *lake,
     // Find new lake depth for runoff calculations
     ErrorFlag = get_depth(lake_con, lake->volume - lake->ice_water_eq, &ldepth);
     if (ErrorFlag == ERROR) {
-        log_err("Something went wrong in get_depth; record = %d, volume = %f, "
-                "depth = %e", rec, lake->volume, ldepth);
+        log_err("Something went wrong in get_depth; volume = %f, "
+                "depth = %e", lake->volume, ldepth);
     }
 
     // Compute runoff volume in m^3 and extract runoff volume from lake
@@ -2079,7 +2077,7 @@ water_balance(lake_var_struct *lake,
         lake->runoff_out = 0.0;
     }
     else {
-        circum = 2*CONST_PI*pow(surfacearea / CONST_PI, 0.5);
+        circum = 2 * CONST_PI * pow(surfacearea / CONST_PI, 0.5);
         lake->runoff_out = lake_con.wfrac * circum * dt *
                            1.6 * pow(ldepth - lake_con.mindepth, 1.5);
         if ((lake->volume - lake->ice_water_eq) >= lake->runoff_out) {
@@ -2131,8 +2129,8 @@ water_balance(lake_var_struct *lake,
     ErrorFlag =
         get_depth(lake_con, lake->volume - lake->ice_water_eq, &(lake->ldepth));
     if (ErrorFlag == ERROR) {
-        log_err("Something went wrong in get_depth; record = %d, volume = %f, "
-                "depth = %e", rec, lake->volume, lake->ldepth);
+        log_err("Something went wrong in get_depth; volume = %f, "
+                "depth = %e", lake->volume, lake->ldepth);
     }
 
     /**********************************************************************
@@ -2185,8 +2183,8 @@ water_balance(lake_var_struct *lake,
 
         ErrorFlag = get_sarea(lake_con, ldepth, &(lake->surface[k]));
         if (ErrorFlag == ERROR) {
-            log_err("Something went wrong in get_sarea; record = %d, depth = "
-                    "%f, sarea = %e", rec, ldepth, lake->surface[k]);
+            log_err("Something went wrong in get_sarea; depth = "
+                    "%f, sarea = %e", ldepth, lake->surface[k]);
         }
     }
 

@@ -24,7 +24,6 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  *****************************************************************************/
 
-#include <vic_def.h>
 #include <vic_run.h>
 
 /******************************************************************************
@@ -59,13 +58,13 @@ compute_soil_resp(int     Nnodes,
     double                  *RhSlow;
 
     /* Allocate temp arrays */
-    TK = (double*)calloc(Nnodes, sizeof(double));
-    fTSoil = (double*)calloc(Nnodes, sizeof(double));
-    fMSoil = (double*)calloc(Nnodes, sizeof(double));
-    CInterNode = (double*)calloc(Nnodes, sizeof(double));
-    CSlowNode = (double*)calloc(Nnodes, sizeof(double));
-    RhInter = (double*)calloc(Nnodes, sizeof(double));
-    RhSlow = (double*)calloc(Nnodes, sizeof(double));
+    TK = calloc(Nnodes, sizeof(*TK));
+    fTSoil = calloc(Nnodes, sizeof(*fTSoil));
+    fMSoil = calloc(Nnodes, sizeof(*fMSoil));
+    CInterNode = calloc(Nnodes, sizeof(*CInterNode));
+    CSlowNode = calloc(Nnodes, sizeof(*CSlowNode));
+    RhInter = calloc(Nnodes, sizeof(*RhInter));
+    RhSlow = calloc(Nnodes, sizeof(*RhSlow));
 
     /* Compute Lloyd-Taylor temperature dependence */
     Tref = 10. + CONST_TKFRZ; /* reference temperature of 10 C */

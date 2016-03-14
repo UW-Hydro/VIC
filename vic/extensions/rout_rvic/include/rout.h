@@ -26,32 +26,39 @@
 #ifndef ROUT_RVIC_H
 #define ROUT_RVIC_H
 
-#include <vic_def.h>
+#define ROUT_EXT "rout_rvic"
 
-#define EXT_ROUTING "RVIC"
+#include <vic_def.h>
 
 /******************************************************************************
  * @brief   Routing Structs
  *****************************************************************************/
 typedef struct {
-    size_t              iSubsetLength;         /*scalar - number of timesteps*/
-    size_t              iSources;              /*scalar - number of sources*/
-    size_t              iOutlets;              /*scalar - length of subset*/
-    int                *source2outlet_ind;    /*1d array - source to outlet mapping*/
-    int                *source_y_ind ;        /*1d array - source y location*/
-    int                *source_x_ind;         /*1d array - source x location*/
-    int                *source_time_offset;   /*1d array - source time offset*/
-    double             *unit_hydrograph;   /*2d array[times][sources] - unit hydrographs*/
-    double             *aggrunin;          /*2d array[ysize][xsize] - vic runoff flux*/
+    size_t iSubsetLength;                     /*scalar - number of timesteps*/
+    size_t iSources;                          /*scalar - number of sources*/
+    size_t iOutlets;                          /*scalar - length of subset*/
+    size_t *source2outlet_ind;                /*1d array - source to outlet mapping*/
+    int *source_y_ind;                        /*1d array - source y location*/
+    int *source_x_ind;                        /*1d array - source x location*/
+    double *source_lat;                       /*1d array - Latitude coordinate of source grid cell*/
+    double *source_lon;                       /*1d array - Longitude coordinate of source grid cell*/
+    double *outlet_lat;                       /*1d array - Latitude coordinate of outlet grid cell*/
+    double *outlet_lon;                       /*1d array - Longitude coordinate of outlet grid cell*/
+    int *source_VIC_index;                    /*1d array - mapping of routing-source index to VIC index*/
+    int *outlet_VIC_index;                    /*1d array - mapping of routing-outlet index to VIC index*/
+    int *source_time_offset;                  /*1d array - source time offset*/
+    double *unit_hydrograph;                  /*2d array[times][sources] - unit hydrographs*/
+    double *aggrunin;                         /*2d array[ysize][xsize] - vic runoff flux*/
 } rout_param_struct;
 
 /******************************************************************************
  * @brief   main routing Struct
  *****************************************************************************/
 typedef struct {
-    char                param_filename[MAXSTRING];
-    rout_param_struct   rout_param;
-    double             *ring;
+    char param_filename[MAXSTRING];
+    rout_param_struct rout_param;
+    double *ring;
+    double *discharge;
 } rout_struct;
 
 /******************************************************************************
@@ -68,17 +75,17 @@ void rout_finalize(void);   // clean up routine for routing
  * @brief   Convolution function adapted from the RVIC scheme
  *****************************************************************************/
 void convolve(const size_t nsources,               /*scalar - number of sources*/
-                const size_t noutlets,             /*scalar - length of subset*/
-                const size_t subset_length,        /*scalar - length of subset*/
-                const size_t x_size,
-                const int* source2outlet_ind,   /*1d array - source to outlet mapping*/
-                const int* source_y_ind,        /*1d array - source y location*/
-                const int* source_x_ind,        /*1d array - source x location*/
-                const int* source_time_offset,  /*1d array - source time offset*/
-                const double* unit_hydrograph,  /*2d array[times][sources] - unit hydrographs*/
-                const double* aggrunin,         /*2d array[ysize][xsize] - vic runoff flux*/
-                double* ring);
+              const size_t noutlets,               /*scalar - length of subset*/
+              const size_t subset_length,          /*scalar - length of subset*/
+              const size_t x_size, const int*source2outlet_ind, /*1d array - source to outlet mapping*/
+              const int*source_y_ind,           /*1d array - source y location*/
+              const int*source_x_ind,           /*1d array - source x location*/
+              const int*source_time_offset,     /*1d array - source time offset*/
+              const double*unit_hydrograph,     /*2d array[times][sources] - unit hydrographs*/
+              const double*aggrunin,            /*2d array[ysize][xsize] - vic runoff flux*/
+              double*ring);
 void get_global_param_rout(FILE *gp);
-void cshift(double*, int, int);
+void cshift(double *, int, int, int, int);
+void print_array(double *, int, int);
 
 #endif

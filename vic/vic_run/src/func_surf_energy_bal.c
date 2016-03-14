@@ -30,7 +30,6 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  *****************************************************************************/
 
-#include <vic_def.h>
 #include <vic_run.h>
 
 /******************************************************************************
@@ -47,13 +46,9 @@ func_surf_energy_bal(double  Ts,
 
     /* general model terms */
     size_t             i;
-    int                rec;
     int                VEG;
     int                veg_class;
     int                Error;
-
-    // error counting variables for IMPLICIT option
-    static int         error_cnt0, error_cnt1;
 
     double             delta_t;
 
@@ -115,6 +110,7 @@ func_surf_energy_bal(double  Ts,
     double            *Wdew;
     double            *displacement;
     double            *ra;
+    double            *Ra_veg;
     double            *Ra_used;
     double             rainfall;
     double            *ref_height;
@@ -214,13 +210,15 @@ func_surf_energy_bal(double  Ts,
     double             tmp_displacement[3];
     double             tmp_roughness[3];
     double             tmp_ref_height[3];
+    double             ga_veg;
+    double             ga_bare;
+    double             ga_average;
 
     /************************************
        Read variables from variable list
     ************************************/
 
     /* general model terms */
-    rec = (int) va_arg(ap, int);
     VEG = (int) va_arg(ap, int);
     veg_class = (int) va_arg(ap, int);
     delta_t = (double) va_arg(ap, double);
@@ -269,6 +267,7 @@ func_surf_energy_bal(double  Ts,
     Wdew = (double *) va_arg(ap, double *);
     displacement = (double *) va_arg(ap, double *);
     ra = (double *) va_arg(ap, double *);
+    Ra_veg = (double *) va_arg(ap, double *);
     Ra_used = (double *) va_arg(ap, double *);
     rainfall = (double) va_arg(ap, double);
     ref_height = (double *) va_arg(ap, double *);
@@ -364,14 +363,10 @@ func_surf_energy_bal(double  Ts,
     ***************/
 
     Error = 0;
-    if (rec == 0) {
-        error_cnt0 = 0;
-        error_cnt1 = 0;
-    }
 
     TMean = Ts;
 
-    transp = (double *) calloc(options.Nlayer, sizeof(double));
+    transp = calloc(options.Nlayer, sizeof(*transp));
     for (i = 0; i < options.Nlayer; i++) {
         transp[i] = 0.;
     }
@@ -452,13 +447,6 @@ func_surf_energy_bal(double  Ts,
                                              quartz, bulk_density,
                                              soil_density, organic, depth);
 
-            /* print out error information for IMPLICIT solution */
-            if (Error == 0) {
-                error_cnt0++;
-            }
-            else {
-                error_cnt1++;
-            }
             if (FIRST_SOLN[1]) {
                 FIRST_SOLN[1] = false;
             }
@@ -676,21 +664,83 @@ func_surf_energy_bal(double  Ts,
 
     /** Compute atmospheric stability correction **/
     if (wind[UnderStory] > 0.0 && overstory && SNOWING) {
-        Ra_used[0] = ra[UnderStory] /
-                     StabilityCorrection(ref_height[UnderStory], 0., TMean,
-                                         Tair,
-                                         wind[UnderStory],
-                                         roughness[UnderStory]);
+        Ra_veg[0] = ra[UnderStory] /
+                    StabilityCorrection(ref_height[UnderStory], 0., TMean,
+                                        Tair,
+                                        wind[UnderStory],
+                                        roughness[UnderStory]);
     }
     else if (wind[UnderStory] > 0.0) {
-        Ra_used[0] = ra[UnderStory] /
-                     StabilityCorrection(ref_height[UnderStory],
-                                         displacement[UnderStory],
-                                         TMean, Tair, wind[UnderStory],
-                                         roughness[UnderStory]);
+        Ra_veg[0] = ra[UnderStory] /
+                    StabilityCorrection(ref_height[UnderStory],
+                                        displacement[UnderStory],
+                                        TMean, Tair, wind[UnderStory],
+                                        roughness[UnderStory]);
     }
     else {
-        Ra_used[0] = param.HUGE_RESIST;
+        Ra_veg[0] = param.HUGE_RESIST;
+    }
+    Ra_used[0] = Ra_veg[0];
+
+    /*************************************************
+       Compute aerodynamic resistance for the case of exposed soil between
+       plants (or gaps in canopy).  Assume plants and exposed soil are well-
+       mixed, i.e., exposed soil is neither as disconnected from the
+       atmosphere as soil under veg or canopy, nor as exposed as a large
+       area of exposed soil.  Rather, it is subject to some wind attenuation
+       from the surrounding plants.  Thus, compute as the area-weighted
+       average of "pure" understory and "pure" exposed conditions.
+
+       NOTE: can't average the resistances; must convert to conductances,
+       average the conductances, and then convert the average conductance
+       to a resistance.
+
+       NOTE 2: since a resistance of 0 corresponds to an infinite conductance,
+       if either Ra_veg (resistance under veg) or Ra_bare (resistance over
+       exposed soil) are 0, then Ra_used must necessarily be 0 as well.
+    *************************************************/
+    if (veg_var->fcanopy < 1) {
+        /** If Ra_veg is non-zero, use it to compute area-weighted average **/
+        if (Ra_veg[0] > 0) {
+            /** aerodynamic conductance under vegetation **/
+            ga_veg = 1 / Ra_veg[0];
+            /** compute aerodynamic resistance over exposed soil (Ra_bare) **/
+            tmp_wind[0] = wind[0];
+            tmp_wind[1] = MISSING; // unused
+            tmp_wind[2] = MISSING; // unused
+            tmp_height = soil_con->rough / param.VEG_RATIO_RL_HEIGHT;
+            tmp_displacement[0] = calc_veg_displacement(tmp_height);
+            tmp_roughness[0] = soil_con->rough;
+            tmp_ref_height[0] = param.SOIL_WINDH; // wind height over bare soil
+            Error = CalcAerodynamic(0, 0, 0, soil_con->snow_rough,
+                                    soil_con->rough, 0, Ra_bare, tmp_wind,
+                                    tmp_displacement, tmp_ref_height,
+                                    tmp_roughness);
+            Ra_bare[0] /= StabilityCorrection(tmp_ref_height[0],
+                                              tmp_displacement[0], TMean,
+                                              Tair, tmp_wind[0],
+                                              tmp_roughness[0]);
+
+            /** if Ra_bare is non-zero, compute area-weighted average
+                aerodynamic conductance **/
+            if (Ra_bare[0] > 0) {
+                /** aerodynamic conductance over exposed soil **/
+                ga_bare = 1 / Ra_bare[0];
+                /** area-weighted average aerodynamic conductance **/
+                ga_average = veg_var->fcanopy * ga_veg +
+                             (1 - veg_var->fcanopy) * ga_bare;
+                /** aerodynamic resistance is inverse of conductance **/
+                Ra_used[0] = 1 / ga_average;
+            }
+            /** else aerodynamic resistance is zero **/
+            else {
+                Ra_used[0] = 0;
+            }
+        }
+        /** else aerodynamic resistance is zero **/
+        else {
+            Ra_used[0] = 0;
+        }
     }
 
     /*************************************************
@@ -699,46 +749,32 @@ func_surf_energy_bal(double  Ts,
        Should evapotranspiration be active when the
        ground is only partially covered with snow????
 
-       Use Arno Evap if LAI is set to zero (e.g. no
-       winter crop planted).
+       Use Arno Evap in the exposed soil portion, and/or
+       if LAI is zero.
     *************************************************/
-    if (VEG && !SNOWING && veg_var->vegcover > 0) {
+    if (VEG && !SNOWING && veg_var->fcanopy > 0) {
         Evap = canopy_evap(layer, veg_var, true,
                            veg_class, Wdew, delta_t, NetBareRad, vpd,
-                           NetShortBare, Tair, Ra_used[1], elevation, rainfall,
+                           NetShortBare, Tair, Ra_veg[1], elevation, rainfall,
                            Wmax, Wcr, Wpwp, frost_fract, root, dryFrac,
                            shortwave, Catm, CanopLayerBnd);
-        if (veg_var->vegcover < 1) {
+        if (veg_var->fcanopy < 1) {
             for (i = 0; i < options.Nlayer; i++) {
                 transp[i] = layer[i].evap;
                 layer[i].evap = 0.;
             }
-            tmp_wind[0] = wind[0];
-            tmp_wind[1] = -999.;
-            tmp_wind[2] = -999.;
-            tmp_height = soil_con->rough / 0.123;
-            tmp_displacement[0] = calc_veg_displacement(tmp_height);
-            tmp_roughness[0] = soil_con->rough;
-            tmp_ref_height[0] = 10.;
-            Error = CalcAerodynamic(0, 0., 0., soil_con->snow_rough,
-                                    soil_con->rough, 0, Ra_bare, tmp_wind,
-                                    tmp_displacement, tmp_ref_height,
-                                    tmp_roughness);
-            Ra_bare[0] /= StabilityCorrection(tmp_ref_height[0],
-                                              tmp_displacement[0], TMean, Tair,
-                                              tmp_wind[0], tmp_roughness[0]);
-            Evap *= veg_var->vegcover;
-            Evap += (1 - veg_var->vegcover) *
+            Evap *= veg_var->fcanopy;
+            Evap += (1 - veg_var->fcanopy) *
                     arno_evap(layer, surf_atten * NetBareRad, Tair, vpd,
                               depth[0], max_moist * depth[0] * MM_PER_M,
-                              elevation, b_infilt, Ra_bare[0], delta_t,
+                              elevation, b_infilt, Ra_used[0], delta_t,
                               resid_moist[0], frost_fract);
             for (i = 0; i < options.Nlayer; i++) {
-                layer[i].evap = veg_var->vegcover * transp[i] +
-                                (1 - veg_var->vegcover) * layer[i].evap;
+                layer[i].evap = veg_var->fcanopy * transp[i] +
+                                (1 - veg_var->fcanopy) * layer[i].evap;
                 if (layer[i].evap > 0.) {
                     layer[i].bare_evap_frac = 1 -
-                                              (veg_var->vegcover *
+                                              (veg_var->fcanopy *
                                                transp[i]) / layer[i].evap;
                 }
                 else {
@@ -747,10 +783,10 @@ func_surf_energy_bal(double  Ts,
             }
             veg_var->throughfall =
                 (1 -
-                 veg_var->vegcover) * rainfall + veg_var->vegcover *
+                 veg_var->fcanopy) * rainfall + veg_var->fcanopy *
                 veg_var->throughfall;
-            veg_var->canopyevap *= veg_var->vegcover;
-            veg_var->Wdew *= veg_var->vegcover;
+            veg_var->canopyevap *= veg_var->fcanopy;
+            veg_var->Wdew *= veg_var->fcanopy;
         }
         else {
             for (i = 0; i < options.Nlayer; i++) {

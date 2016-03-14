@@ -1,0 +1,91 @@
+#!/usr/bin/env bash
+
+set -e
+
+DRIVER_PATH="./vic/drivers/image/"
+DRIVER_EXE="${DRIVER_PATH}vic_image.exe"
+
+function vic_before_install {
+    echo vic_before_install
+    echo $PATH
+    if [ ! -z "$USE_CC" ]; then
+        echo "export CC=$USE_CC"
+        export CC=$USE_CC;
+        $CC --version
+    fi
+    if [ "$TRAVIS_OS_NAME" = "osx" ]; then
+        echo "Testing on osx"
+		if [ ! -z "$BREW_TAPS" ]; then
+			for tap in $BREW_TAPS
+			do
+				brew tap $tap
+			done
+		fi
+        if [ ! -z "$BREW_INSTALLS" ]; then
+            brew update
+            for pkg in $BREW_INSTALLS
+            do
+                brew outdated $pkg || brew upgrade $pkg || brew install $pkg
+                brew link $pkg
+            done
+            # building openmpi from source - not sure why the homebrew install
+            # isn't working right.
+            brew install homebrew/versions/gcc49
+            brew reinstall open-mpi --build-from-source
+        fi
+		export TRAVIS_NETCDFPATH=/usr/local
+		export TRAVIS_MPIPATH=/usr/local
+    else
+		export TRAVIS_NETCDFPATH=/usr
+		export TRAVIS_MPIPATH="${HOME}/mpich"
+
+        # Install MPICH
+        if [ ! -d ${TRAVIS_MPIPATH} ]; then
+            wget --no-check-certificate -q http://www.mpich.org/static/downloads/3.2/mpich-3.2.tar.gz
+            tar -xzf mpich-3.2.tar.gz
+            cd mpich-3.2
+            mkdir build && cd build
+            ../configure CC=$CC CXX=$CXX --prefix=${TRAVIS_MPIPATH}
+            make -j2
+            make install
+            cd ${TRAVIS_BUILD_DIR}
+        else
+            echo "MPICH installed..."
+        fi
+        find ${TRAVIS_MPIPATH} -name mpiexec
+        find ${TRAVIS_MPIPATH} -name mpicc
+	fi
+
+}
+
+function vic_install {
+    echo vic_install
+    cd ${TRAVIS_BUILD_DIR}
+    echo $PWD
+    make full -C $DRIVER_PATH
+}
+
+function vic_before_script {
+    echo vic_before_script
+    if [ ! -f $DRIVER_EXE ]; then
+        echo "Executable (${DRIVER_EXE}) not found!"
+        exit 1
+    fi
+}
+
+function vic_script {
+    echo vic_script
+    $DRIVER_EXE -v
+    $DRIVER_EXE -o
+
+}
+
+function vic_after_success {
+    echo vic_after_success
+    echo "Success!"
+}
+
+function vic_after_failure {
+    echo vic_after_failure
+    echo "Test failed -- please review the log"
+}

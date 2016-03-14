@@ -25,10 +25,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  *****************************************************************************/
 
-#include <vic_def.h>
-#include <vic_run.h>
 #include <vic_driver_classic.h>
-#include <vic_driver_shared.h>
 
 /******************************************************************************
  * @brief    Display the current settings of options defined in the header
@@ -58,6 +55,8 @@ display_current_settings(int mode)
 
     fprintf(LOG_DEST, "VIC_DRIVER:\t\t%s\n", VIC_DRIVER);
     fprintf(LOG_DEST, "\n");
+    fprintf(LOG_DEST, "LOG_LEVEL:\t\t%d\n", LOG_LVL);
+    fprintf(LOG_DEST, "\n");
     fprintf(LOG_DEST, "Maximum Array Sizes:\n");
     fprintf(LOG_DEST, "MAX_BANDS\t\t%2d\n", MAX_BANDS);
     fprintf(LOG_DEST, "MAX_FRONTS\t\t%2d\n", MAX_FRONTS);
@@ -69,7 +68,7 @@ display_current_settings(int mode)
     fprintf(LOG_DEST, "MAX_VEG\t\t\t%2d\n", MAX_VEG);
     fprintf(LOG_DEST, "\n");
     fprintf(LOG_DEST, "MINSOILDEPTH\t\t%f\n", MINSOILDEPTH);
-    fprintf(LOG_DEST, "MIN_VEGCOVER\t\t%f\n", MIN_VEGCOVER);
+    fprintf(LOG_DEST, "MIN_FCANOPY\t\t%f\n", MIN_FCANOPY);
     fprintf(LOG_DEST, "\n");
     fprintf(LOG_DEST, "MIN_SUBDAILY_STEPS_PER_DAY %d\n",
             MIN_SUBDAILY_STEPS_PER_DAY);
@@ -178,30 +177,6 @@ display_current_settings(int mode)
     else if (options.GRND_FLUX_TYPE == GF_410) {
         fprintf(LOG_DEST, "GRND_FLUX_TYPE\t\tGF_410\n");
     }
-    if (options.LW_TYPE == LW_TVA) {
-        fprintf(LOG_DEST, "LW_TYPE\t\tLW_TVA\n");
-    }
-    else if (options.LW_TYPE == LW_ANDERSON) {
-        fprintf(LOG_DEST, "LW_TYPE\t\tLW_ANDERSON\n");
-    }
-    else if (options.LW_TYPE == LW_BRUTSAERT) {
-        fprintf(LOG_DEST, "LW_TYPE\t\tLW_BRUTSAERT\n");
-    }
-    else if (options.LW_TYPE == LW_SATTERLUND) {
-        fprintf(LOG_DEST, "LW_TYPE\t\tLW_SATTERLUND\n");
-    }
-    else if (options.LW_TYPE == LW_IDSO) {
-        fprintf(LOG_DEST, "LW_TYPE\t\tLW_IDSO\n");
-    }
-    else if (options.LW_TYPE == LW_PRATA) {
-        fprintf(LOG_DEST, "LW_TYPE\t\tLW_PRATA\n");
-    }
-    if (options.LW_CLOUD == LW_CLOUD_DEARDORFF) {
-        fprintf(LOG_DEST, "LW_CLOUD\t\tLW_CLOUD_DEARDORFF\n");
-    }
-    else {
-        fprintf(LOG_DEST, "LW_CLOUD\t\tLW_CLOUD_BRAS\n");
-    }
     if (options.IMPLICIT) {
         fprintf(LOG_DEST, "IMPLICIT\t\tTRUE\n");
     }
@@ -213,18 +188,6 @@ display_current_settings(int mode)
     }
     else {
         fprintf(LOG_DEST, "NOFLUX\t\t\tFALSE\n");
-    }
-    if (options.MTCLIM_SWE_CORR) {
-        fprintf(LOG_DEST, "MTCLIM_SWE_CORR\t\tTRUE\n");
-    }
-    else {
-        fprintf(LOG_DEST, "MTCLIM_SWE_CORR\t\tFALSE\n");
-    }
-    if (options.PLAPSE) {
-        fprintf(LOG_DEST, "PLAPSE\t\tTRUE\n");
-    }
-    else {
-        fprintf(LOG_DEST, "PLAPSE\t\tFALSE\n");
     }
     if (options.QUICK_FLUX) {
         fprintf(LOG_DEST, "QUICK_FLUX\t\tTRUE\n");
@@ -263,26 +226,7 @@ display_current_settings(int mode)
     else {
         fprintf(LOG_DEST, "TFALLBACK\t\tFALSE\n");
     }
-    if (options.VP_INTERP) {
-        fprintf(LOG_DEST, "VP_INTERP\t\tTRUE\n");
-    }
-    else {
-        fprintf(LOG_DEST, "VP_INTERP\t\tFALSE\n");
-    }
-    if (options.VP_ITER == VP_ITER_NONE) {
-        fprintf(LOG_DEST, "VP_ITER\t\tVP_ITER_NONE\n");
-    }
-    else if (options.VP_ITER == VP_ITER_ALWAYS) {
-        fprintf(LOG_DEST, "VP_ITER\t\tVP_ITER_ALWAYS\n");
-    }
-    else if (options.VP_ITER == VP_ITER_ANNUAL) {
-        fprintf(LOG_DEST, "VP_ITER\t\tVP_ITER_ANNUAL\n");
-    }
-    else if (options.VP_ITER == VP_ITER_CONVERGE) {
-        fprintf(LOG_DEST, "VP_ITER\t\tVP_ITER_CONVERGE\n");
-    }
     fprintf(LOG_DEST, "WIND_H\t\t\t%f\n", global_param.wind_h);
-    fprintf(LOG_DEST, "MEASURE_H\t\t%f\n", global_param.measure_h);
     fprintf(LOG_DEST, "NODES\t\t\t%zu\n", options.Nnode);
     if (options.CARBON) {
         fprintf(LOG_DEST, "CARBON\t\tTRUE\n");
@@ -330,12 +274,6 @@ display_current_settings(int mode)
         }
     }
     fprintf(LOG_DEST, "GRID_DECIMAL\t\t%d\n", options.GRID_DECIMAL);
-    if (options.ALMA_INPUT) {
-        fprintf(LOG_DEST, "ALMA_INPUT\t\tTRUE\n");
-    }
-    else {
-        fprintf(LOG_DEST, "ALMA_INPUT\t\tFALSE\n");
-    }
 
     fprintf(LOG_DEST, "\n");
     fprintf(LOG_DEST, "Constants File\t\t%s\n", filenames.constants);
@@ -369,11 +307,11 @@ display_current_settings(int mode)
     else {
         fprintf(LOG_DEST, "VEGLIB_PHOTO\t\tFALSE\n");
     }
-    if (options.VEGLIB_VEGCOVER) {
-        fprintf(LOG_DEST, "VEGLIB_VEGCOVER\t\tTRUE\n");
+    if (options.VEGLIB_FCAN) {
+        fprintf(LOG_DEST, "VEGLIB_FCAN\t\tTRUE\n");
     }
     else {
-        fprintf(LOG_DEST, "VEGLIB_VEGCOVER\t\tFALSE\n");
+        fprintf(LOG_DEST, "VEGLIB_FCAN\t\tFALSE\n");
     }
     fprintf(LOG_DEST, "Veg param file\t\t%s\n", filenames.veg);
     fprintf(LOG_DEST, "ROOT_ZONES\t\t%zu\n", options.ROOT_ZONES);
@@ -383,23 +321,32 @@ display_current_settings(int mode)
     else {
         fprintf(LOG_DEST, "VEGPARAM_LAI\t\tFALSE\n");
     }
-    if (options.LAI_SRC == FROM_VEGPARAM) {
+    if (options.LAI_SRC == FROM_VEGHIST) {
+        fprintf(LOG_DEST, "LAI_SRC\t\tFROM_VEGHIST\n");
+    }
+    else if (options.LAI_SRC == FROM_VEGPARAM) {
         fprintf(LOG_DEST, "LAI_SRC\t\tFROM_VEGPARAM\n");
     }
     else if (options.LAI_SRC == FROM_VEGLIB) {
         fprintf(LOG_DEST, "LAI_SRC\t\tFROM_VEGLIB\n");
     }
-    if (options.VEGPARAM_VEGCOVER) {
-        fprintf(LOG_DEST, "VEGPARAM_VEGCOVER\t\tTRUE\n");
+    if (options.VEGPARAM_FCAN) {
+        fprintf(LOG_DEST, "VEGPARAM_FCAN\t\tTRUE\n");
     }
     else {
-        fprintf(LOG_DEST, "VEGPARAM_VEGCOVER\t\tFALSE\n");
+        fprintf(LOG_DEST, "VEGPARAM_FCAN\t\tFALSE\n");
     }
-    if (options.VEGCOVER_SRC == FROM_VEGPARAM) {
-        fprintf(LOG_DEST, "VEGCOVER_SRC\t\tFROM_VEGPARAM\n");
+    if (options.FCAN_SRC == FROM_VEGHIST) {
+        fprintf(LOG_DEST, "FCAN_SRC\t\tFROM_VEGHIST\n");
     }
-    else if (options.VEGCOVER_SRC == FROM_VEGLIB) {
-        fprintf(LOG_DEST, "VEGCOVER_SRC\t\tFROM_VEGLIB\n");
+    else if (options.FCAN_SRC == FROM_VEGPARAM) {
+        fprintf(LOG_DEST, "FCAN_SRC\t\tFROM_VEGPARAM\n");
+    }
+    else if (options.FCAN_SRC == FROM_VEGLIB) {
+        fprintf(LOG_DEST, "FCAN_SRC\t\tFROM_VEGLIB\n");
+    }
+    else if (options.FCAN_SRC == FROM_DEFAULT) {
+        fprintf(LOG_DEST, "FCAN_SRC\t\tFROM_DEFAULT\n");
     }
     if (options.VEGPARAM_ALB) {
         fprintf(LOG_DEST, "VEGPARAM_ALB\t\tTRUE\n");
@@ -407,7 +354,10 @@ display_current_settings(int mode)
     else {
         fprintf(LOG_DEST, "VEGPARAM_ALB\t\tFALSE\n");
     }
-    if (options.ALB_SRC == FROM_VEGPARAM) {
+    if (options.ALB_SRC == FROM_VEGHIST) {
+        fprintf(LOG_DEST, "ALB_SRC\t\tFROM_VEGHIST\n");
+    }
+    else if (options.ALB_SRC == FROM_VEGPARAM) {
         fprintf(LOG_DEST, "ALB_SRC\t\tFROM_VEGPARAM\n");
     }
     else if (options.ALB_SRC == FROM_VEGLIB) {
@@ -505,12 +455,6 @@ display_current_settings(int mode)
     }
     else {
         fprintf(LOG_DEST, "MOISTFRACT\t\tFALSE\n");
-    }
-    if (options.OUTPUT_FORCE) {
-        fprintf(LOG_DEST, "OUTPUT_FORCE\t\tTRUE\n");
-    }
-    else {
-        fprintf(LOG_DEST, "OUTPUT_FORCE\t\tFALSE\n");
     }
     if (options.PRT_HEADER) {
         fprintf(LOG_DEST, "PRT_HEADER\t\tTRUE\n");

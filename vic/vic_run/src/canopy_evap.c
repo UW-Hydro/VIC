@@ -28,7 +28,6 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  *****************************************************************************/
 
-#include <vic_def.h>
 #include <vic_run.h>
 
 /******************************************************************************
@@ -373,7 +372,7 @@ transpiration(layer_data_struct *layer,
         /* Initialize conductances for aggregation over soil layers */
         gc = 0;
         if (options.CARBON) {
-            gsLayer = (double *)calloc(options.Ncanopy, sizeof(double));
+            gsLayer = calloc(options.Ncanopy, sizeof(*gsLayer));
             for (cidx = 0; cidx < options.Ncanopy; cidx++) {
                 gsLayer[cidx] = 0;
             }

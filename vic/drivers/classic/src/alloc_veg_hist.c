@@ -24,9 +24,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  *****************************************************************************/
 
-#include <vic_def.h>
-#include <vic_run.h>
-#include <vic_driver_shared.h>
+#include <vic_driver_classic.h>
 
 /******************************************************************************
  * @brief    Allocate memory for veg his structure.
@@ -38,30 +36,31 @@ alloc_veg_hist(int                nrecs,
 {
     int i, j;
 
-    (*veg_hist) = (veg_hist_struct **) calloc(nrecs, sizeof(veg_hist_struct *));
+    *veg_hist = calloc(nrecs, sizeof(*(*veg_hist)));
     if ((*veg_hist) == NULL) {
         log_err("Memory allocation error in alloc_veg_hist().");
     }
 
     for (i = 0; i < nrecs; i++) {
-        (*veg_hist)[i] = (veg_hist_struct *) calloc(nveg,
-                                                    sizeof(veg_hist_struct));
+        (*veg_hist)[i] = calloc(nveg, sizeof(*((*veg_hist)[i])));
         if ((*veg_hist)[i] == NULL) {
             log_err("Memory allocation error in alloc_veg_hist().");
         }
         for (j = 0; j < nveg; j++) {
             (*veg_hist)[i][j].albedo =
-                (double *) calloc(NR + 1, sizeof(double));
+                calloc(NR + 1, sizeof(*((*veg_hist)[i][j].albedo)));
             if ((*veg_hist)[i][j].albedo == NULL) {
                 log_err("Memory allocation error in alloc_veg_hist().");
             }
-            (*veg_hist)[i][j].LAI = (double *) calloc(NR + 1, sizeof(double));
+            (*veg_hist)[i][j].LAI =
+                calloc(NR + 1, sizeof(*((*veg_hist)[i][j].LAI)));
             if ((*veg_hist)[i][j].LAI == NULL) {
                 log_err("Memory allocation error in alloc_veg_hist().");
             }
-            (*veg_hist)[i][j].vegcover = (double *) calloc(NR + 1,
-                                                           sizeof(double));
-            if ((*veg_hist)[i][j].vegcover == NULL) {
+            (*veg_hist)[i][j].fcanopy = calloc(NR + 1,
+                                               sizeof(*((*veg_hist)[i][j].
+                                                        fcanopy)));
+            if ((*veg_hist)[i][j].fcanopy == NULL) {
                 log_err("Memory allocation error in alloc_veg_hist().");
             }
         }
@@ -86,7 +85,7 @@ free_veg_hist(int                nrecs,
         for (j = 0; j < nveg; j++) {
             free((*veg_hist)[i][j].albedo);
             free((*veg_hist)[i][j].LAI);
-            free((*veg_hist)[i][j].vegcover);
+            free((*veg_hist)[i][j].fcanopy);
         }
         free((*veg_hist)[i]);
     }

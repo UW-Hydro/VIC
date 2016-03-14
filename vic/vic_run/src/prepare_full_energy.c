@@ -26,7 +26,6 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  *****************************************************************************/
 
-#include <vic_def.h>
 #include <vic_run.h>
 
 /******************************************************************************
@@ -46,8 +45,7 @@ prepare_full_energy(int              iveg,
     size_t               i, band;
     layer_data_struct   *layer;
 
-    layer = (layer_data_struct *) calloc(options.Nlayer,
-                                         sizeof(layer_data_struct));
+    layer = calloc(options.Nlayer, sizeof(*layer));
 
     for (band = 0; band < options.SNOW_BAND; band++) {
         if (soil_con->AreaFract[band] > 0.0) {

@@ -26,8 +26,6 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  *****************************************************************************/
 
-#include <vic_def.h>
-#include <vic_run.h>
 #include <vic_driver_classic.h>
 
 /******************************************************************************
@@ -46,21 +44,21 @@ read_forcing_data(FILE              **infile,
     double                **forcing_data;
 
     /** Allocate data arrays for input forcing data **/
-    forcing_data = (double **) calloc(N_FORCING_TYPES, sizeof(double*));
-    (*veg_hist_data) = (double ***) calloc(N_FORCING_TYPES, sizeof(double**));
+    forcing_data = calloc(N_FORCING_TYPES, sizeof(*forcing_data));
+    (*veg_hist_data) = calloc(N_FORCING_TYPES, sizeof(*(*veg_hist_data)));
     for (i = 0; i < N_FORCING_TYPES; i++) {
         if (param_set.TYPE[i].SUPPLIED) {
-            if (i != ALBEDO && i != LAI_IN && i != VEGCOVER) {
-                forcing_data[i] = (double *) calloc((global_param.nrecs * NF),
-                                                    sizeof(double));
+            if (i != ALBEDO && i != LAI_IN && i != FCANOPY) {
+                forcing_data[i] = calloc(global_param.nrecs * NF,
+                                         sizeof(*(forcing_data[i])));
             }
             else {
-                (*veg_hist_data)[i] = (double **) calloc(
-                    param_set.TYPE[i].N_ELEM, sizeof(double*));
+                (*veg_hist_data)[i] = calloc(param_set.TYPE[i].N_ELEM,
+                                             sizeof(*((*veg_hist_data)[i])));
                 for (j = 0; j < param_set.TYPE[i].N_ELEM; j++) {
-                    (*veg_hist_data)[i][j] =
-                        (double *) calloc((global_param.nrecs * NF),
-                                          sizeof(double));
+                    (*veg_hist_data)[i][j] = calloc(global_param.nrecs * NF,
+                                                    sizeof(*((*veg_hist_data)[i]
+                                                             [j])));
                 }
             }
         }

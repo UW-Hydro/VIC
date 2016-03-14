@@ -24,8 +24,6 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  *****************************************************************************/
 
-#include <vic_def.h>
-#include <vic_run.h>
 #include <vic_driver_image.h>
 
 /******************************************************************************
@@ -57,7 +55,7 @@ vic_restore(void)
     }
 
     // run through the remaining VIC initialization routines
-    for (i = 0; i < local_domain.ncells; i++) {
+    for (i = 0; i < local_domain.ncells_active; i++) {
         // TBD: do something sensible for surf_temp
         surf_temp = 0.;
         nveg = veg_con[i][0].vegetat_type_num;

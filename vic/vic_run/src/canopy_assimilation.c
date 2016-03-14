@@ -24,7 +24,6 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  *****************************************************************************/
 
-#include <vic_def.h>
 #include <vic_run.h>
 
 /******************************************************************************
@@ -75,7 +74,7 @@ canopy_assimilation(char    Ctype,
        temperature is equal air_temp */
     pz = CONST_PSTD * exp(-(double) elevation / h);
 
-    CiLayer = (double*)calloc(options.Ncanopy, sizeof(double));
+    CiLayer = calloc(options.Ncanopy, sizeof(*CiLayer));
 
     if (!strcasecmp(mode, "ci")) {
         /* Assume a default leaf-internal CO2; compute assimilation,

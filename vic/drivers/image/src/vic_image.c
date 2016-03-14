@@ -24,8 +24,6 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  *****************************************************************************/
 
-#include <vic_def.h>
-#include <vic_run.h>
 #include <vic_driver_image.h>
 #include <rout.h>   // Routing routine (extension)
 
@@ -43,6 +41,7 @@ domain_struct       local_domain;
 global_param_struct global_param;
 lake_con_struct     lake_con;
 MPI_Datatype        mpi_global_struct_type;
+MPI_Datatype        mpi_filenames_struct_type;
 MPI_Datatype        mpi_location_struct_type;
 MPI_Datatype        mpi_nc_file_struct_type;
 MPI_Datatype        mpi_option_struct_type;
@@ -99,10 +98,10 @@ main(int    argc,
 
     // read global parameters
     vic_start();
-    
+
     // read global parameters for routing
     rout_start();   // Routing routine (extension)
-    
+
     // allocate memory
     vic_alloc();
 
@@ -140,14 +139,14 @@ main(int    argc,
 
         // if save: TBD needs to be fixed - not working in MPI
         // if (current == global_param.nrecs - 1) {
-        //    vic_store();
+        // vic_store();
         // }
     }
 
     // clean up
     vic_finalize();
 
-    // clean up routing 
+    // clean up routing
     rout_finalize();    // Routing routine (extension)
 
     // finalize MPI

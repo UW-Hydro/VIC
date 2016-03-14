@@ -26,7 +26,7 @@
 #ifndef ROUT_STUB_H
 #define ROUT_STUB_H
 
-#define EXT_ROUTING "STUB"
+#define ROUT_EXT "rout_stub"
 
 /******************************************************************************
  * @brief   main routing Struct

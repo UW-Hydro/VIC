@@ -26,7 +26,6 @@
 * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 ******************************************************************************/
 
-#include <vic_def.h>
 #include <vic_run.h>
 
 /******************************************************************************
@@ -78,7 +77,6 @@ solve_snow(char               overstory,
            unsigned short     iveg,
            unsigned short     band,
            double             dt,
-           size_t             rec,
            size_t             hidx,
            int                veg_class,
            int               *UnderStory,
@@ -113,8 +111,8 @@ solve_snow(char               overstory,
     double                   vp;
     double                   vpd;
 
-    month = dmy[rec].month;
-    day_in_year = dmy[rec].day_in_year;
+    month = dmy->month;
+    day_in_year = dmy->day_in_year;
 
     density = atmos->density[hidx];
     longwave = atmos->longwave[hidx];
@@ -191,7 +189,7 @@ solve_snow(char               overstory,
 
                 (*ShortUnderIn) *= (*surf_atten); // SW transmitted through canopy
                 ShortOverIn = (1. - (*surf_atten)) * shortwave; // canopy incident SW
-                ShortOverIn /= veg_var->vegcover;
+                ShortOverIn /= veg_var->fcanopy;
                 ErrorFlag = snow_intercept(dt, 1.,
                                            veg_var->LAI,
                                            (*Le), longwave, LongUnderOut,
@@ -217,7 +215,7 @@ solve_snow(char               overstory,
                                            displacement,
                                            ref_height, roughness, root,
                                            *UnderStory, band,
-                                           iveg, month, rec, hidx,
+                                           iveg, month, hidx,
                                            veg_class,
                                            CanopLayerBnd, dryFrac, atmos,
                                            layer, soil_con, veg_var);
@@ -255,27 +253,27 @@ solve_snow(char               overstory,
             /* Rescale veg terms back to whole tile (as opposed to just over plants) */
             veg_var->throughfall =
                 (1 -
-                 veg_var->vegcover) * (*out_prec) + veg_var->vegcover *
+                 veg_var->fcanopy) * (*out_prec) + veg_var->fcanopy *
                 veg_var->throughfall;
             *rainfall =
                 (1 -
-                 veg_var->vegcover) * (*out_rain) + veg_var->vegcover *
+                 veg_var->fcanopy) * (*out_rain) + veg_var->fcanopy *
                 (*rainfall);
             *snowfall =
                 (1 -
-                 veg_var->vegcover) * (*out_snow) + veg_var->vegcover *
+                 veg_var->fcanopy) * (*out_snow) + veg_var->fcanopy *
                 (*snowfall);
-            snow->canopy_vapor_flux *= veg_var->vegcover;
-            snow->snow_canopy *= veg_var->vegcover;
-            veg_var->Wdew *= veg_var->vegcover;
-            veg_var->canopyevap *= veg_var->vegcover;
-            energy->canopy_advection *= veg_var->vegcover;
-            energy->canopy_latent *= veg_var->vegcover;
-            energy->canopy_latent_sub *= veg_var->vegcover;
-            energy->canopy_sensible *= veg_var->vegcover;
-            energy->canopy_refreeze *= veg_var->vegcover;
-            energy->NetShortOver *= veg_var->vegcover;
-            energy->NetLongOver *= veg_var->vegcover;
+            snow->canopy_vapor_flux *= veg_var->fcanopy;
+            snow->snow_canopy *= veg_var->fcanopy;
+            veg_var->Wdew *= veg_var->fcanopy;
+            veg_var->canopyevap *= veg_var->fcanopy;
+            energy->canopy_advection *= veg_var->fcanopy;
+            energy->canopy_latent *= veg_var->fcanopy;
+            energy->canopy_latent_sub *= veg_var->fcanopy;
+            energy->canopy_sensible *= veg_var->fcanopy;
+            energy->canopy_refreeze *= veg_var->fcanopy;
+            energy->NetShortOver *= veg_var->fcanopy;
+            energy->NetLongOver *= veg_var->fcanopy;
         }
         else { /* no vegetation present */
             energy->NetLongOver = 0;
@@ -343,8 +341,8 @@ solve_snow(char               overstory,
                                   &energy->deltaCC, &tmp_grnd_flux,
                                   &energy->latent,
                                   &energy->latent_sub, &energy->refreeze_energy,
-                                  &energy->sensible, INCLUDE_SNOW,
-                                  rec, iveg, band, snow);
+                                  &energy->sensible, INCLUDE_SNOW, iveg, band,
+                                  snow);
             if (ErrorFlag == ERROR) {
                 return (ERROR);
             }

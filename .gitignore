@@ -16,10 +16,28 @@
 *.so
 *.so.*
 *.dylib
+*.dSYM
+*.mod
 
 vicNl
 vic_classic
 vic_image
+liblnd.a
+_vic.py
 
 .DS_Store
 TAGS
+
+*egg-info*
+
+# Python stuff
+.ipynb_checkpoints
+.eggs
+
+# Netbeans stuff
+nbproject
+
+# Test folders
+image_test
+uncrust.sh
+*.exe

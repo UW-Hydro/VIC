@@ -24,7 +24,6 @@
 * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 ******************************************************************************/
 
-#include <vic_def.h>
 #include <vic_run.h>
 
 /******************************************************************************
@@ -234,7 +233,7 @@ snow_albedo(double new_snow,
             double cold_content,
             double dt,
             int    last_snow,
-            char   MELTING)
+            bool   MELTING)
 {
     extern parameters_struct param;
 

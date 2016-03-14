@@ -25,7 +25,6 @@
 * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 ******************************************************************************/
 
-#include <vic_def.h>
 #include <vic_run.h>
 
 /******************************************************************************
@@ -71,7 +70,6 @@ snow_intercept(double             Dt,
                int                band,
                int                iveg,
                int                month,
-               int                rec,
                int                hidx,
                unsigned short     veg_class,
                double            *CanopLayerBnd,
@@ -134,7 +132,12 @@ snow_intercept(double             Dt,
     Press = atmos->pressure[hidx];
     Vpd = atmos->vpd[hidx];
     shortwave = atmos->shortwave[hidx];
-    Catm = atmos->Catm[hidx];
+    if (options.CARBON) {
+        Catm = atmos->Catm[hidx];
+    }
+    else {
+        Catm = MISSING;
+    }
 
     /* Initialize Tfoliage_fbflag */
     *Tfoliage_fbflag = 0;
@@ -363,8 +366,7 @@ snow_intercept(double             Dt,
                 (*Tfoliage_fbcount)++;
             }
             else {
-                Qnet = error_calc_canopy_energy_bal(*Tfoliage, band, month, rec,
-                                                    Dt,
+                Qnet = error_calc_canopy_energy_bal(*Tfoliage, band, month, Dt,
                                                     soil_con->elevation,
                                                     soil_con->max_moist,
                                                     soil_con->Wcr,
@@ -608,7 +610,6 @@ error_print_canopy_energy_bal(double  Tfoliage,
     /* General Model Parameters */
     int                  band;
     int                  month;
-    int                  rec;
 
     double               delta_t;
     double               elevation;
@@ -680,7 +681,6 @@ error_print_canopy_energy_bal(double  Tfoliage,
     /* General Model Parameters */
     band = (int) va_arg(ap, int);
     month = (int) va_arg(ap, int);
-    rec = (int) va_arg(ap, int);
 
     delta_t = (double) va_arg(ap, double);
     elevation = (double) va_arg(ap, double);
@@ -754,7 +754,6 @@ error_print_canopy_energy_bal(double  Tfoliage,
     /* General Model Parameters */
     fprintf(LOG_DEST, "band = %i\n", band);
     fprintf(LOG_DEST, "month = %i\n", month);
-    fprintf(LOG_DEST, "rec = %i\n", rec);
 
     fprintf(LOG_DEST, "delta_t = %f\n", delta_t);
     fprintf(LOG_DEST, "elevation = %f\n", elevation);

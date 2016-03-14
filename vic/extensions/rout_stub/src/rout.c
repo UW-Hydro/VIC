@@ -25,32 +25,37 @@
  *****************************************************************************/
 
 // read global parameters for routing
-void rout_start(void)
+void
+rout_start(void)
 {
-//    log_info("In Routing Stub Model");
 }
 
 // allocate memory
-void rout_alloc(void)
+void
+rout_alloc(void)
 {
 }
 
 // initialize model parameters from parameter files
-void rout_init(void)
+void
+rout_init(void)
 {
 }
 
 // run routing over the domain
-void rout_run(void)
+void
+rout_run(void)
 {
 }
 
 // write routine for routing
-void rout_write(void)
+void
+rout_write(void)
 {
 }
 
 // clean up routine for routing
-void rout_finalize(void)
+void
+rout_finalize(void)
 {
 }

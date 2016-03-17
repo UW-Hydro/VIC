@@ -110,11 +110,15 @@ void write_data(out_data_file_struct *out_data_files,
     tmp_fptr = (float *)calloc(N_OUTVAR_TYPES*options.Nlayer*options.SNOW_BAND,sizeof(float));
     tmp_dptr = (double *)calloc(N_OUTVAR_TYPES*options.Nlayer*options.SNOW_BAND,sizeof(double));
 
-    // Time
-    tmp_iptr[0] = dmy->year;
-    tmp_iptr[1] = dmy->month;
-    tmp_iptr[2] = dmy->day;
-    tmp_iptr[3] = dmy->hour;
+    if (!options.OUTPUT_FORCE) {
+
+      // Time
+      tmp_iptr[0] = dmy->year;
+      tmp_iptr[1] = dmy->month;
+      tmp_iptr[2] = dmy->day;
+      tmp_iptr[3] = dmy->hour;
+
+    }
 
     // Loop over output files
     for (file_idx = 0; file_idx < options.Noutfiles; file_idx++) {

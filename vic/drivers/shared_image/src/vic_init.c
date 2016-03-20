@@ -38,7 +38,6 @@ vic_init(void)
     extern domain_struct       local_domain;
     extern option_struct       options;
     extern filenames_struct    filenames;
-    extern global_param_struct global_param;
     extern soil_con_struct    *soil_con;
     extern veg_con_map_struct *veg_con_map;
     extern veg_con_struct    **veg_con;

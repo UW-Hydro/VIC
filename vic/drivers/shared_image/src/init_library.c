@@ -172,11 +172,8 @@ initialize_domain_info(domain_info_struct *info)
 void
 initialize_global_structures(void)
 {
-    extern filenames_struct    filenames;
-    extern filep_struct        filep;
     extern domain_struct       global_domain;
     extern domain_struct       local_domain;
-    extern global_param_struct global_param;
     extern int                 mpi_rank;
 
     initialize_domain_info(&local_domain.info);

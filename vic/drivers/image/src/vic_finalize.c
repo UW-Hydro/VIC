@@ -85,13 +85,13 @@ vic_finalize(void)
             }
             free_veg_hist(&(veg_hist[i][j]));
         }
+        free_all_vars(&(all_vars[i]), veg_con[i][0].vegetat_type_num);
+        free_out_data(&(out_data[i]));
         free(veg_con_map[i].vidx);
         free(veg_con_map[i].Cv);
         free(veg_con[i]);
         free(veg_hist[i]);
         free(veg_lib[i]);
-        free_all_vars(&(all_vars[i]), veg_con[i][0].vegetat_type_num);
-        free_out_data(&(out_data[i]));
     }
     free(atmos);
     free(soil_con);

@@ -105,8 +105,8 @@ main(int    argc,
     // initialize model parameters from parameter files
     vic_init();
 
-    // restore model state, either using a cold start or from a restart file
-    vic_restore();
+    // populate model state, either using a cold start or from a restart file
+    vic_populate_model_state();
 
     // initialize output structures
     vic_init_output();

@@ -36,7 +36,7 @@ vic_cesm_alloc(void)
     extern l2x_data_struct *l2x_vic;
     extern domain_struct    local_domain;
 
-    debug("In vic_alloc");
+    debug("In vic_cesm_alloc");
 
     // allocate memory for x2l_vic structure
     x2l_vic = malloc(local_domain.ncells_active * sizeof(*x2l_vic));

@@ -1,7 +1,7 @@
 /******************************************************************************
  * @section DESCRIPTION
  *
- * Header file for vic_driver_image routines
+ * MPI support routines for VIC's CESM driver
  *
  * @section LICENSE
  *
@@ -24,18 +24,18 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  *****************************************************************************/
 
-#ifndef VIC_DRIVER_IMAGE_H
-#define VIC_DRIVER_IMAGE_H
+#include <vic_driver_cesm.h>
 
-#include <vic_driver_shared_image.h>
+/******************************************************************************
+ * @brief   Wrapper around VIC's initialize mpi function, first translating the
+            Fortran MPI Communicator to C.
+ *****************************************************************************/
+void
+initialize_vic_cesm_mpi(MPI_Fint *MPI_COMM_VIC_F)
+{
+    extern MPI_Comm MPI_COMM_VIC;
 
-#define VIC_DRIVER "Image"
+    MPI_COMM_VIC = MPI_Comm_f2c(*MPI_COMM_VIC_F);
 
-void get_forcing_file_info(param_set_struct *param_set, size_t file_num);
-void get_global_param(FILE *);
-void vic_image_init(void);
-void vic_image_start(void);
-void vic_force(void);
-void vic_restore(void);
-
-#endif
+    initialize_mpi();
+}

@@ -1,7 +1,7 @@
 /******************************************************************************
  * @section DESCRIPTION
  *
- * Header file for vic_driver_image routines
+ * This routine handles the startup tasks for the image driver.
  *
  * @section LICENSE
  *
@@ -24,18 +24,27 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  *****************************************************************************/
 
-#ifndef VIC_DRIVER_IMAGE_H
-#define VIC_DRIVER_IMAGE_H
+#include <vic_driver_image.h>
 
-#include <vic_driver_shared_image.h>
+/******************************************************************************
+ * @brief    Wrapper function for VIC startup tasks.
+ *****************************************************************************/
+void
+vic_image_start(void)
+{
+    extern filep_struct     filep;
+    extern filenames_struct filenames;
+    extern int              mpi_rank;
 
-#define VIC_DRIVER "Image"
+    // Initialize structures
+    initialize_global_structures();
 
-void get_forcing_file_info(param_set_struct *param_set, size_t file_num);
-void get_global_param(FILE *);
-void vic_image_init(void);
-void vic_image_start(void);
-void vic_force(void);
-void vic_restore(void);
+    if (mpi_rank == 0) {
+        // Read the global parameter file
+        filep.globalparam = open_file(filenames.global, "r");
+        get_global_param(filep.globalparam);
+    }
 
-#endif
+    // initialize image mode structures and settings
+    vic_start();
+}

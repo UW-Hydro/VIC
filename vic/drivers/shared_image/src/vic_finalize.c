@@ -24,7 +24,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  *****************************************************************************/
 
-#include <vic_driver_image.h>
+#include <vic_driver_shared_image.h>
 
 /******************************************************************************
  * @brief    Finalize VIC run by freeing memory and closing open files.
@@ -65,7 +65,7 @@ vic_finalize(void)
         if (nc_hist_file.open == true) {
             status = nc_close(nc_hist_file.nc_id);
             if (status != NC_NOERR) {
-                log_err("Error history file");
+                log_err("Error closing history file %s", nc_hist_file.fname);
             }
         }
     }

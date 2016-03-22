@@ -25,7 +25,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  *****************************************************************************/
 
-#include <vic_driver_image.h>
+#include <vic_driver_cesm.h>
 
 /******************************************************************************
  * @brief    Display the current settings of options defined in the header
@@ -41,7 +41,6 @@ display_current_settings(int mode)
 
     int                        file_num;
 
-
     print_version(VIC_DRIVER);
 
     if (mode == DISP_VERSION) {
@@ -56,12 +55,10 @@ display_current_settings(int mode)
 
     fprintf(LOG_DEST, "VIC_DRIVER:\t\t%s\n", VIC_DRIVER);
     fprintf(LOG_DEST, "\n");
-    fprintf(LOG_DEST, "LOG_LEVEL:\t\t%d\n", LOG_LVL);
-    fprintf(LOG_DEST, "\n");
     fprintf(LOG_DEST, "Maximum Array Sizes:\n");
     fprintf(LOG_DEST, "MAX_BANDS\t\t%2d\n", MAX_BANDS);
     fprintf(LOG_DEST, "MAX_FRONTS\t\t%2d\n", MAX_FRONTS);
-    fprintf(LOG_DEST, "MAX_FROST_AREAS\t\t%2d\n", MAX_FROST_AREAS);
+    fprintf(LOG_DEST, "MAX_FROST_AREAS\t\t\t%2d\n", MAX_FROST_AREAS);
     fprintf(LOG_DEST, "MAX_LAKE_NODES\t\t%2d\n", MAX_LAKE_NODES);
     fprintf(LOG_DEST, "MAX_ZWTVMOIST\t\t%2d\n", MAX_ZWTVMOIST);
     fprintf(LOG_DEST, "MAX_LAYERS\t\t%2d\n", MAX_LAYERS);
@@ -361,21 +358,6 @@ display_current_settings(int mode)
     }
     else if (options.ALB_SRC == FROM_VEGLIB) {
         fprintf(LOG_DEST, "ALB_SRC\t\tFROM_VEGLIB\n");
-    }
-
-    fprintf(LOG_DEST, "\n");
-    fprintf(LOG_DEST, "Input Elevation Data:\n");
-    if (options.SNOW_BAND > 1) {
-        fprintf(LOG_DEST, "SNOW_BAND\t\t%zu\t%s\n", options.SNOW_BAND,
-                filenames.snowband);
-    }
-    else if (options.SNOW_BAND == 1) {
-        fprintf(LOG_DEST,
-                "SNOW_BAND\t\t%zu\t(no input file needed for SNOW_BAND=1)\n",
-                options.SNOW_BAND);
-    }
-    else {
-        fprintf(LOG_DEST, "SNOW_BAND\t\t%zu\n", options.SNOW_BAND);
     }
 
     fprintf(LOG_DEST, "\n");

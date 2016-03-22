@@ -1,7 +1,7 @@
 /******************************************************************************
  * @section DESCRIPTION
  *
- * Header file for vic_driver_image routines
+ * Initialize model parameters for image driver.
  *
  * @section LICENSE
  *
@@ -24,18 +24,20 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  *****************************************************************************/
 
-#ifndef VIC_DRIVER_IMAGE_H
-#define VIC_DRIVER_IMAGE_H
+#include <vic_driver_image.h>
 
-#include <vic_driver_shared_image.h>
+/******************************************************************************
+ * @brief    Initialize model parameters
+ *****************************************************************************/
+void
+vic_image_init(void)
+{
+    extern dmy_struct         *dmy;
+    extern global_param_struct global_param;
 
-#define VIC_DRIVER "Image"
+    // make_dmy()
+    initialize_time();
+    dmy = make_dmy(&global_param);
 
-void get_forcing_file_info(param_set_struct *param_set, size_t file_num);
-void get_global_param(FILE *);
-void vic_image_init(void);
-void vic_image_start(void);
-void vic_force(void);
-void vic_restore(void);
-
-#endif
+    vic_init();
+}

@@ -338,9 +338,11 @@ vic_force(void)
             vidx = veg_con_map[i].vidx[v];
             if (vidx != -1) {
                 for (j = 0; j < NF; j++) {
-                    if (veg_hist[i][vidx].fcanopy[j] < MIN_FCANOPY) {
+                    if ((veg_hist[i][vidx].fcanopy[j] < MIN_FCANOPY) &&
+                        ((current == 0) || (options.FCAN_SRC == FROM_VEGHIST))) {
+                        // Only issue this warning once if not using veg hist fractions
                         log_warn(
-                            "cell %zu, veg %d substep %zu fcanopy %f < minimum of %f; setting = %f\n", i, vidx, j,
+                            "cell %zu, veg` %d substep %zu fcanopy %f < minimum of %f; setting = %f\n", i, vidx, j,
                             veg_hist[i][vidx].fcanopy[j], MIN_FCANOPY,
                             MIN_FCANOPY);
                         veg_hist[i][vidx].fcanopy[j] = MIN_FCANOPY;

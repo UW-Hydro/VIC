@@ -1,7 +1,7 @@
 /******************************************************************************
  * @section DESCRIPTION
  *
- * Header file for vic_driver_image routines
+ * Allocate memory for VIC structures.
  *
  * @section LICENSE
  *
@@ -24,18 +24,36 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  *****************************************************************************/
 
-#ifndef VIC_DRIVER_IMAGE_H
-#define VIC_DRIVER_IMAGE_H
+#include <vic_driver_cesm.h>
 
-#include <vic_driver_shared_image.h>
+/******************************************************************************
+ * @brief    Allocate memory for VIC structures.
+ *****************************************************************************/
+void
+vic_cesm_alloc(void)
+{
+    extern x2l_data_struct *x2l_vic;
+    extern l2x_data_struct *l2x_vic;
+    extern domain_struct    local_domain;
 
-#define VIC_DRIVER "Image"
+    debug("In vic_cesm_alloc");
 
-void get_forcing_file_info(param_set_struct *param_set, size_t file_num);
-void get_global_param(FILE *);
-void vic_image_init(void);
-void vic_image_start(void);
-void vic_force(void);
-void vic_restore(void);
+    // allocate memory for x2l_vic structure
+    x2l_vic = malloc(local_domain.ncells_active * sizeof(*x2l_vic));
+    if (x2l_vic == NULL) {
+        log_err("Memory allocation error in vic_alloc().");
+    }
+    // initialize x2l data
+    initialize_x2l_data();
 
-#endif
+    // allocate memory for l2x_vic structure
+    l2x_vic = malloc(local_domain.ncells_active * sizeof(*l2x_vic));
+    if (l2x_vic == NULL) {
+        log_err("Memory allocation error in vic_alloc().");
+    }
+    // initialize l2x data
+    initialize_l2x_data();
+
+    // allocate the rest of the image mode structures
+    vic_alloc();
+}

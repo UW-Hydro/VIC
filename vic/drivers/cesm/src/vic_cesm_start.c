@@ -124,7 +124,7 @@ trim(char *str)
     }
 
     // Write new null terminator
-    *(end + 1) = 0;
+    *(end + 1) = '\0';
 
     return str;
 }

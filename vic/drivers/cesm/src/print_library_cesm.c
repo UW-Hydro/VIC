@@ -27,7 +27,7 @@
 #include <vic_driver_cesm.h>
 
 /******************************************************************************
- * @brief    Print vic_clock structure.
+ * @brief    Print vic_clock structure.  See also cesm_print_library_f.F90
  *****************************************************************************/
 void
 print_vic_clock(vic_clock *vclock)
@@ -45,7 +45,7 @@ print_vic_clock(vic_clock *vclock)
 }
 
 /******************************************************************************
- * @brief    Print case_metadata structure.
+ * @brief    Print case_metadata structure.  See also cesm_print_library_f.F90
  *****************************************************************************/
 void
 print_case_metadata(case_metadata *cmeta)
@@ -60,7 +60,7 @@ print_case_metadata(case_metadata *cmeta)
 }
 
 /******************************************************************************
- * @brief    Print x2l_data_struct.
+ * @brief    Print x2l_data_struct.  See also cesm_print_library_f.F90
  *****************************************************************************/
 void
 print_x2l_data(x2l_data_struct *x2l)
@@ -102,7 +102,7 @@ print_x2l_data(x2l_data_struct *x2l)
 }
 
 /******************************************************************************
- * @brief    Print l2x_data_struct.
+ * @brief    Print l2x_data_struct.  See also cesm_print_library_f.F90
  *****************************************************************************/
 void
 print_l2x_data(l2x_data_struct *l2x)

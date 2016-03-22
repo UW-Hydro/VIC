@@ -32,9 +32,10 @@
 #define VIC_DRIVER "CESM"
 
 #define MAXDIMS 10
+// Hardcoded filenames (see bld/build_vic_namelist for more info)
 #define GLOBALPARAM "vic.globalconfig.txt"
 #define RPOINTER "rpointer.lnd"
-#define SHR_CONST_SPVAL 1.0e30
+#define SHR_CONST_SPVAL 1.0e30   /**< CESM missing value */
 
 /******************************************************************************
  * @brief   CESM run types

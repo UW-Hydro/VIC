@@ -626,10 +626,12 @@ CONTAINS
     index_l2x_Fall_flxdst2  = mct_avect_indexra(l2x, 'Fall_flxdst2')
     index_l2x_Fall_flxdst3  = mct_avect_indexra(l2x, 'Fall_flxdst3')
     index_l2x_Fall_flxdst4  = mct_avect_indexra(l2x, 'Fall_flxdst4')
-
+    ! co2 var, perrwith='quiet' supresses errors
     index_l2x_Fall_fco2_lnd = mct_avect_indexra(l2x, 'Fall_fco2_lnd', perrwith='quiet')
 
     !--- MEGAN fluxes
+    ! MEGAN = Model of Emissions of Gases and Aerosols from Nature
+    ! Emissions from land surface
     IF (shr_megan_mechcomps_n>0) THEN
        index_l2x_Fall_flxvoc = mct_avect_indexra(l2x, TRIM(shr_megan_fields_token))
     ELSE
@@ -648,8 +650,9 @@ CONTAINS
     index_x2l_Sa_pbot       = mct_avect_indexra(x2l, 'Sa_pbot')
     index_x2l_Sa_tbot       = mct_avect_indexra(x2l, 'Sa_tbot')
     index_x2l_Sa_shum       = mct_avect_indexra(x2l, 'Sa_shum')
-    index_x2l_Sa_co2prog    = mct_avect_indexra(x2l, 'Sa_co2prog',perrwith='quiet')
-    index_x2l_Sa_co2diag    = mct_avect_indexra(x2l, 'Sa_co2diag',perrwith='quiet')
+    ! co2 vars, perrwith='quiet' supresses errors
+    index_x2l_Sa_co2prog    = mct_avect_indexra(x2l, 'Sa_co2prog', perrwith='quiet')
+    index_x2l_Sa_co2diag    = mct_avect_indexra(x2l, 'Sa_co2diag', perrwith='quiet')
 
     index_x2l_Faxa_lwdn     = mct_avect_indexra(x2l, 'Faxa_lwdn')
     index_x2l_Faxa_rainc    = mct_avect_indexra(x2l, 'Faxa_rainc')

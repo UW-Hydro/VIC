@@ -31,6 +31,7 @@ pages:
     - 'Contributing': 'Development/Contributing.md'
     - 'Working with Git and Github': 'Development/working-with-git.md'
     - 'Docker': 'Development/Docker.md'
+    - 'Testing': 'Development/Testing.md'
 - Downloads:
     - Datasets: 'Datasets/Datasets.md'
     - Code: 'SourceCode/Code.md'

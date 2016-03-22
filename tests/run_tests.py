@@ -1,37 +1,44 @@
 #!/usr/bin/env python
-'''VIC command line testing interface'''
+'''VIC testing command line interface'''
 
 from __future__ import print_function
 import os
+import sys
 import glob
 import argparse
 import datetime
 from collections import OrderedDict
 import string
+
+import pytest
+
 from tonic.models.vic.vic import VIC, VICRuntimeError, read_vic_ascii
 from tonic.io import read_config, read_configobj
 from tonic.testing import check_completed, check_for_nans, VICTestError
+
+test_dir = os.path.dirname(os.path.abspath(__file__))
+
 
 OUTPUT_WIDTH = 100
 
 description = '''
                             VIC Test Suite
 -------------------------------------------------------------------------------
-This is the VIC Test Suite.  There are six main test types:
+This is the VIC Test Suite. There are six main test types:
 
-    1.  unit:  function level tests.  *[Note: None currently implemented.]*
-    2.  system: tests that aim to address model runtime issues.  These tests
+    1. unit: function level tests.
+    2. system: tests that aim to address model runtime issues. These tests
             are generally very quick.
         * configuration errors - tests that address model startup and error
                 checking.
-        * restart:  tests that address model state and restart capacity.
-        * I/O:  tests that address model input and output functionality.
-            *  forcings come out the way the come in
-            *  parameter files are appropriately read in allocated.
-    3.  science:  tests that aim to assess the model's scientific skill.
+        * restart: tests that address model state and restart capacity.
+        * I/O: tests that address model input and output functionality.
+            * forcings come out the way the come in
+            * parameter files are appropriately read in allocated.
+    3. science: tests that aim to assess the model's scientific skill.
             Many of these tests are compared to observations of some kind.
-    4.  examples:  a set of examples that users may download and run.
-    5.  release:  longer, full domain simulations performed prior to release
+    4. examples: a set of examples that users may download and run.
+    5. release: longer, full domain simulations performed prior to release
             demonstrating model output for a final release.
 -------------------------------------------------------------------------------
 '''
@@ -39,7 +46,7 @@ This is the VIC Test Suite.  There are six main test types:
 epilog = '''
 -------------------------------------------------------------------------------
 The VIC Test Suite was developed by Joe Hamman at the University of Washington
-Land Surface Hydrology Group.  For questions about the development or use of
+Computational Hydrology Group. For questions about the development or use of
 VIC, please email the VIC users list serve at vic_users@u.washington.edu.
 -------------------------------------------------------------------------------
 '''
@@ -104,10 +111,7 @@ def main():
                         help='Test sets to run',
                         choices=['all', 'unit', 'system', 'science',
                                  'examples', 'release'],
-                        default=['unit', 'system', 'science'], nargs='+')
-    parser.add_argument('--unit', type=str,
-                        help='unit tests configuration file',
-                        default='./unit/unit.cfg')
+                        default=['unit', 'system'], nargs='+')
     parser.add_argument('--system', type=str,
                         help='system tests configuration file',
                         default='./system/system_tests.cfg')
@@ -122,13 +126,13 @@ def main():
                         default='./release/release.cfg')
     parser.add_argument('--vic_exe', type=str,
                         help='VIC executable to test',
-                        default=['../drivers/classic/vic_classic'], nargs='+')
+                        default=['../drivers/classic/vic_classic.exe'], nargs='+')
     parser.add_argument('--output_dir', type=str,
                         help='directory to write test output to',
                         default='$WORKDIR/VIC_tests_{0}'.format(ymd))
     parser.add_argument('--data_dir', type=str,
                         help='directory to find test data',
-                        default='./test_data/VIC.4.1.2')
+                        default='./samples/VIC_sample_data')
     args = parser.parse_args()
     # ---------------------------------------------------------------- #
 
@@ -142,9 +146,10 @@ def main():
 
     # ---------------------------------------------------------------- #
     # Validate input directories
-    for d in [data_dir, test_dir]:
-        if not os.path.exists(d):
-            raise VICTestError('Directory: {0} does not exist'.format(d))
+    if not (len(args.tests) == 1 and args.tests[0] == 'unit'):
+        for d in [data_dir, test_dir]:
+            if not os.path.exists(d):
+                raise VICTestError('Directory: {0} does not exist'.format(d))
     # ---------------------------------------------------------------- #
 
     # ---------------------------------------------------------------- #
@@ -156,15 +161,16 @@ def main():
 
     # ---------------------------------------------------------------- #
     # Setup VIC executable
-    vic_exe = VIC(args.vic_exe[0])
-    print('VIC version string: {0}'.format(vic_exe.version))
+    if not (len(args.tests) == 1 and args.tests[0] == 'unit'):
+        vic_exe = VIC(args.vic_exe[0])
+        print('VIC version string: {0}'.format(vic_exe.version))
     # ---------------------------------------------------------------- #
 
     # ---------------------------------------------------------------- #
     # run test sets
     # unit
     if any(i in ['all', 'unit'] for i in args.tests):
-        test_results['unit'] = run_unit_tests(args.unit)
+        test_results['unit'] = run_unit_tests()
 
     # system
     if any(i in ['all', 'system'] for i in args.tests):
@@ -189,7 +195,8 @@ def main():
 
     # ---------------------------------------------------------------- #
     # Print test results
-    summary = {}
+    summary = OrderedDict()
+    failed = 0
     print('\nTest Results:')
     for test_set, results in test_results.items():
         print('-'.ljust(OUTPUT_WIDTH, '-'))
@@ -202,6 +209,8 @@ def main():
             if not r.passed:
                 summary[test_set] += 1
 
+        failed += summary[test_set]
+
     print('\nTest Summary:')
     print('-'.ljust(OUTPUT_WIDTH, '-'))
     for test_set, r in summary.items():
@@ -213,8 +222,13 @@ def main():
     # end date and times
     endtime = datetime.datetime.now()
     elapsed = endtime - starttime
-    print('\nFinished testing VIC.  Endtime: {0}'.format(endtime))
+    print('\nFinished testing VIC. Endtime: {0}'.format(endtime))
     print('Time elapsed during testing:  {0}\n'.format(elapsed))
+    # ---------------------------------------------------------------- #
+
+    # ---------------------------------------------------------------- #
+    # return exit code
+    sys.exit(failed)
     # ---------------------------------------------------------------- #
 
     return
@@ -224,8 +238,21 @@ def main():
 # -------------------------------------------------------------------- #
 def run_unit_tests():
     '''Run unittests from config file'''
-    pytest.main('-x unit')
-    return
+
+    print('\n-'.ljust(OUTPUT_WIDTH + 1, '-'))
+    print('Running Unit Tests')
+    print('-'.ljust(OUTPUT_WIDTH, '-'))
+
+    retcode = pytest.main(['-x',  os.path.join(test_dir, 'unit')])
+    return {'unittests': TestResults('unittests',
+                                     test_complete=True,
+                                     passed=retcode == 0,
+                                     comment='see standard out from pytest',
+                                     returncode=retcode)}
+
+    print('\n-'.ljust(OUTPUT_WIDTH + 1, '-'))
+    print('Finished unit tests.')
+    print('-'.ljust(OUTPUT_WIDTH, '-'))
 # -------------------------------------------------------------------- #
 
 
@@ -290,7 +317,7 @@ def run_system(config_file, vic_exe, test_dir, test_data_dir, out_dir):
         if 'options' in test_dict:
             replacements = test_dict['options']
         else:
-            replacements = {}
+            replacements = OrderedDict()
         global_param = replace_global_values(global_param, replacements)
         # ------------------------------------------------------------ #
 
@@ -686,7 +713,7 @@ def setup_test_dirs(testname, out_dir, mkdirs=['results', 'state',
                                                'logs', 'plots']):
     '''create test directories for testname'''
 
-    dirs = {}
+    dirs = OrderedDict()
     dirs['test'] = os.path.join(out_dir, testname)
     for d in mkdirs:
         dirs[d] = os.path.join(dirs['test'], d)

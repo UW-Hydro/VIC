@@ -53,6 +53,9 @@ function vic_script {
     $DRIVER_EXE -v
     $DRIVER_EXE -o
 
+    # Run test package
+    ./tests/run_tests.py unit --vic_exe=$DRIVER_EXE
+
 }
 
 function vic_after_success {

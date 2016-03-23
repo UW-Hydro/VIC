@@ -140,7 +140,7 @@ sources = []
 sources.extend(glob.glob(os.path.join(vic_root_abs_path, 'vic', 'vic_run',
                                       'src', '*c')))
 sources.extend(glob.glob(os.path.join(vic_root_abs_path, 'vic', 'drivers',
-                                      'shared', 'src', '*c')))
+                                      'shared_all', 'src', '*c')))
 sources.extend(glob.glob(os.path.join(vic_root_abs_path, 'vic', 'drivers',
                                       'python', 'src', '*c')))
 
@@ -148,7 +148,7 @@ includes = []
 includes.append(os.path.join(vic_root_abs_path, 'vic', 'vic_run',
                              'include', ''))
 includes.append(os.path.join(vic_root_abs_path, 'vic',
-                             'drivers', 'shared', 'include', ''))
+                             'drivers', 'shared_all', 'include', ''))
 includes.append(os.path.join(vic_root_abs_path, 'vic',
                              'drivers', 'python', 'include', ''))
 

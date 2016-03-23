@@ -32,7 +32,8 @@
 DRIVERPATH = .
 
 # VIC RUN PATH
-SHAREDPATH = ../shared
+SHAREDPATH = ../shared_all
+SHAREDIMAGEPATH = ../shared_image
 
 # VIC RUN PATH
 VICPATH = ../../vic_run
@@ -70,7 +71,7 @@ CC = ${MPIPATH}/bin/mpicc
 else ifeq ($(UNAME_S), Linux)
 CC = ${MPIPATH}/bin/mpicc
 else
-CC = mpicc-mpich-mp
+CC = mpicc
 endif
 
 # Set the log level
@@ -84,23 +85,16 @@ endif
 LOG_LVL = 5
 
 # set includes
-INCLUDES = -I ${DRIVERPATH}/include -I ${VICPATH}/include -I ${SHAREDPATH}/include -I ${NETCDFPATH}/include -I ${MPIPATH}/include
-
-# Uncomment for normal optimized code flags (fastest run option)
-#CFLAGS  = -O3 -Wall -Wno-unused -DLOG_LVL=$(LOG_LVL)
-# LIBRARY = -lm -L${NETCDFPATH}/lib -lnetcdf -L${MPIPATH}/lib -lmpi
+INCLUDES = -I ${DRIVERPATH}/include \
+		   -I ${VICPATH}/include \
+		   -I ${SHAREDPATH}/include \
+		   -I ${SHAREDIMAGEPATH}/include \
+		   -I ${NETCDFPATH}/include \
+		   -I ${MPIPATH}/include
 
 # Uncomment to include debugging information
 CFLAGS  =  ${INCLUDES} -ggdb -O0 -Wall -Wextra -std=c99 -DLOG_LVL=$(LOG_LVL)
 LIBRARY = -lm -L${NETCDFPATH}/lib -lnetcdf -L${MPIPATH}/lib -lmpi
-
-# Uncomment to include execution profiling information
-# CFLAGS  = ${INCLUDES} -O3 -pg -Wall -Wno-unused  -DLOG_LVL=$(LOG_LVL)
-# LIBRARY = -lm -L${NETCDFPATH}/lib -lnetcdf -L${MPIPATH}/lib -lmpi
-
-# Uncomment to debug memory problems using electric fence (man efence)
-#CFLAGS  = ${INCLUDES} -g -Wall -Wno-unused -DLOG_LVL=$(LOG_LVL)
-#LIBRARY = -lm -L${NETCDFPATH}/lib -lnetcdf -L${MPIPATH}/lib -lmpi -lefence -L/usr/local/lib
 
 COMPEXE = vic_image
 EXT = .exe
@@ -112,12 +106,14 @@ EXT = .exe
 HDRS = \
 	$(wildcard ${VICPATH}/include/*.h) \
 	$(wildcard ${DRIVERPATH}/include/*.h) \
-	$(wildcard ${SHAREDPATH}/include/*.h)
+	$(wildcard ${SHAREDPATH}/include/*.h) \
+	$(wildcard ${SHAREDIMAGEPATH}/include/*.h)
 
 SRCS = \
 	$(wildcard ${VICPATH}/src/*.c) \
 	$(wildcard ${DRIVERPATH}/src/*.c) \
-	$(wildcard ${SHAREDPATH}/src/*.c)
+	$(wildcard ${SHAREDPATH}/src/*.c) \
+	$(wildcard ${SHAREDIMAGEPATH}/src/*.c)
 
 OBJS = $(SRCS:%.o=%.c)
 

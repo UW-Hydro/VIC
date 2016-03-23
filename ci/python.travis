@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+set -e
+
 DRIVER_PATH="vic/drivers/python/"
 
 function vic_before_install {

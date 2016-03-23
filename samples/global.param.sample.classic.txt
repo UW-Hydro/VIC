@@ -143,13 +143,13 @@ ORGANIC_FRACT	FALSE	# TRUE = simulate organic soils; soil param file contains 3*
 VEGLIB	        (put the veg library path/file here)	# Veg library path/file
 VEGPARAM        (put the veg parameter path/file here)	# Veg parameter path/file
 ROOT_ZONES      3	# Number of root zones (must match format of veg param file)
-#VEGLIB_VEGCOVER	FALSE	# TRUE = veg lib file contains 12 monthly values of partial vegcover fraction for each veg class, between the LAI and albedo values
+#VEGLIB_FCAN	FALSE	# TRUE = veg lib file contains 12 monthly values of plant canopy fraction FCANOPY for each veg class, between the LAI and albedo values
 #VEGPARAM_LAI 	TRUE    # TRUE = veg param file contains LAI information; FALSE = veg param file does NOT contain LAI information
 #VEGPARAM_ALB 	FALSE    # TRUE = veg param file contains albedo information; FALSE = veg param file does NOT contain albedo information
-#VEGPARAM_VEGCOVER 	FALSE    # TRUE = veg param file contains veg_cover information; FALSE = veg param file does NOT contain veg_cover information
+#VEGPARAM_FCAN 	FALSE    # TRUE = veg param file contains veg_cover information; FALSE = veg param file does NOT contain veg_cover information
 #LAI_SRC 	FROM_VEGLIB    # FROM_VEGLIB = read LAI from veg library file; FROM_VEGPARAM = read LAI from veg param file; FROM_VEGHIST = read LAI from veg_hist forcing files
 #ALB_SRC 	FROM_VEGLIB    # FROM_VEGLIB = read ALBEDO from veg library file; FROM_VEGPARAM = read ALBEDO from veg param file; FROM_VEGHIST = read ALBEDO from veg_hist forcing files
-#VEGCOVER_SRC 	FROM_DEFAULT    # FROM_DEFAULT = set VEGCOVER to 1.0 for all veg classes, all times, and all locations; FROM_VEGLIB = read VEGCOVER from veg library file; FROM_VEGPARAM = read VEGCOVER from veg param file; FROM_VEGHIST = read VEGCOVER from veg_hist forcing files
+#FCAN_SRC 	FROM_DEFAULT    # FROM_DEFAULT = set FCANOPY to 1.0 for all veg classes, all times, and all locations; FROM_VEGLIB = read FCANOPY from veg library file; FROM_VEGPARAM = read FCANOPY from veg param file; FROM_VEGHIST = read FCANOPY from veg_hist forcing files
 SNOW_BAND	1	# Number of snow bands; if number of snow bands > 1, you must insert the snow band path/file after the number of bands (e.g. SNOW_BAND 5 my_path/my_snow_band_file)
 
 #######################################################################

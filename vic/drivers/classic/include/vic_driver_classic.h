@@ -27,7 +27,7 @@
 #ifndef VIC_DRIVER_CLASSIC_H
 #define VIC_DRIVER_CLASSIC_H
 
-#include <vic_driver_shared.h>
+#include <vic_driver_shared_all.h>
 
 #define VIC_DRIVER "Classic"
 
@@ -42,11 +42,13 @@ void check_files(filep_struct *, filenames_struct *);
 FILE  *check_state_file(char *, size_t, size_t, int *);
 void close_files(filep_struct *, out_data_file_struct *, filenames_struct *);
 size_t count_n_outfiles(FILE *gp);
+void compute_cell_area(soil_con_struct *);
 size_t count_outfile_nvars(FILE *gp);
 out_data_struct *create_output_list();
 void free_atmos(int nrecs, atmos_data_struct **atmos);
 void free_veg_hist(int nrecs, int nveg, veg_hist_struct ***veg_hist);
 void free_veglib(veg_lib_struct **);
+double get_dist(double lat1, double long1, double lat2, double long2);
 void get_force_type(char *, int, int *);
 void get_global_param(FILE *);
 void init_output_list(out_data_struct *, int, char *, int, double);

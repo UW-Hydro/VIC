@@ -24,8 +24,6 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  *****************************************************************************/
 
-#include <vic_def.h>
-#include <vic_run.h>
 #include <vic_driver_classic.h>
 
 /******************************************************************************
@@ -37,41 +35,33 @@ read_soilparam(FILE *soilparam,
                char *MODEL_DONE)
 {
     void ttrim(char *string);
-    extern option_struct       options;
-    extern global_param_struct global_param;
-    extern veg_lib_struct     *veg_lib;
-    extern parameters_struct   param;
+    extern option_struct     options;
+    extern veg_lib_struct   *veg_lib;
+    extern parameters_struct param;
 
-    char                       line[MAXSTRING];
-    char                       tmpline[MAXSTRING];
-    const char                 delimiters[] = " \t";
-    char                      *token;
-    size_t                     layer;
-    int                        i, tempint, j;
-    double                     Wcr_FRACT[MAX_LAYERS];
-    double                     Wpwp_FRACT[MAX_LAYERS];
-    double                     off_gmt;
-    double                     tempdbl;
-    double                     lat;
-    double                     lng;
-    double                     start_lat;
-    double                     right_lng;
-    double                     left_lng;
-    double                     delta;
-    double                     dist;
-    size_t                     length;
-    int                        Nbands, band;
-    int                        flag;
-    double                     tmp_depth;
-    double                     tmp_depth2, tmp_depth2_save;
-    double                     b, b_save;
-    double                     bubble, bub_save;
-    double                     tmp_max_moist;
-    double                     tmp_resid_moist;
-    double                     zwt_prime, zwt_prime_eff;
-    double                     tmp_moist;
-    double                     w_avg;
-    soil_con_struct            temp;
+    char                     line[MAXSTRING];
+    char                     tmpline[MAXSTRING];
+    const char               delimiters[] = " \t";
+    char                    *token;
+    size_t                   layer;
+    int                      i, tempint, j;
+    double                   Wcr_FRACT[MAX_LAYERS];
+    double                   Wpwp_FRACT[MAX_LAYERS];
+    double                   off_gmt;
+    double                   tempdbl;
+    size_t                   length;
+    int                      Nbands, band;
+    int                      flag;
+    double                   tmp_depth;
+    double                   tmp_depth2, tmp_depth2_save;
+    double                   b, b_save;
+    double                   bubble, bub_save;
+    double                   tmp_max_moist;
+    double                   tmp_resid_moist;
+    double                   zwt_prime, zwt_prime_eff;
+    double                   tmp_moist;
+    double                   w_avg;
+    soil_con_struct          temp;
 
     /** Read plain ASCII soil parameter file **/
     if ((fscanf(soilparam, "%d", &flag)) != EOF) {
@@ -705,32 +695,7 @@ read_soilparam(FILE *soilparam,
         /*******************************************************************
            Calculate grid cell area.
          ******************************************************************/
-
-        if (options.EQUAL_AREA) {
-            temp.cell_area = global_param.resolution * M_PER_KM * M_PER_KM; /* Grid cell area in m^2. */
-        }
-        else {
-            lat = fabs(temp.lat);
-            lng = fabs(temp.lng);
-
-            start_lat = lat - global_param.resolution / 2;
-            right_lng = lng + global_param.resolution / 2;
-            left_lng = lng - global_param.resolution / 2;
-
-            delta = get_dist(lat, lng, lat + global_param.resolution / 10.,
-                             lng);
-
-            dist = 0.;
-
-            for (i = 0; i < 10; i++) {
-                dist +=
-                    get_dist(start_lat, left_lng, start_lat,
-                             right_lng) * delta;
-                start_lat += global_param.resolution / 10;
-            }
-
-            temp.cell_area = dist; /* Grid cell area in m^2. */
-        }
+        compute_cell_area(&temp);
 
         /*************************************************
            Allocate and Initialize Snow Band Parameters

@@ -24,7 +24,6 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  *****************************************************************************/
 
-#include <vic_def.h>
 #include <vic_run.h>
 
 /******************************************************************************
@@ -44,7 +43,7 @@ compute_pot_evap(size_t  model_steps_per_day,
                  double *aero_resist,
                  char    overstory,
                  double  rarc,
-                 double  vegcover,
+                 double  fcanopy,
                  double  ra_soil,
                  double *pot_evap)
 {
@@ -82,5 +81,5 @@ compute_pot_evap(size_t  model_steps_per_day,
         penman(tair, elevation, net_rad, vpd, ra_soil, 0.0,
                param.SOIL_RARC) / model_steps_per_day;
 
-    *pot_evap = vegcover * Epot_veg + (1 - vegcover) * Epot_soil;
+    *pot_evap = fcanopy * Epot_veg + (1 - fcanopy) * Epot_soil;
 }

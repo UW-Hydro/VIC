@@ -25,9 +25,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  *****************************************************************************/
 
-#include <vic_def.h>
-#include <vic_run.h>
-#include <vic_driver_shared.h>
+#include <vic_driver_python.h>
 
 // global variables
 int                 flag;

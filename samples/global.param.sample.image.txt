@@ -126,12 +126,12 @@ FROZEN_SOIL	FALSE	# TRUE = calculate frozen soils.  Default = FALSE.
 #######################################################################
 FORCING1      (put the forcing path/prefix here  # Forcing file path and prefix, ending in "_"
 FORCE_TYPE    AIR_TEMP 	   tas    # Average air temperature, C
-FORCE_TYPE    PREC 	       prcp   # Total precipitation (rain and snow), mm
+FORCE_TYPE    PREC 	   prcp   # Total precipitation (rain and snow), mm
 FORCE_TYPE    PRESSURE 	   pres   # Atmospheric pressure, kPa
 FORCE_TYPE    SHORTWAVE    dswrf  # Incoming shortwave, W/m2
 FORCE_TYPE    LONGWAVE 	   dslwr  # Incoming longwave radiation, W/m2
-FORCE_TYPE    QAIR 	       shum   # Vapor pressure, kPa
-FORCE_TYPE    WIND 	       wind   # Wind speed, m/s
+FORCE_TYPE    QAIR 	   shum   # Vapor pressure, kPa
+FORCE_TYPE    WIND 	   wind   # Wind speed, m/s
 WIND_H        10.0                # height of wind speed measurement (m)
 
 #######################################################################
@@ -145,7 +145,7 @@ VEGPARAM        (put the veg parameter path/file here)	# Veg parameter path/file
 ROOT_ZONES      3	# Number of root zones (must match format of veg param file)
 #LAI_SRC 	FROM_VEGPARAM    # FROM_VEGPARAM = read LAI from veg param file; FROM_VEGHIST = read LAI from veg_hist forcing file
 #ALB_SRC 	FROM_VEGPARAM    # FROM_VEGPARAM = read ALBEDO from veg param file; FROM_VEGHIST = read ALBEDO from veg_hist forcing file
-#VEGCOVER_SRC 	FROM_DEFAULT     # FROM_DEFAULT = set all vegcover values to 1.0; FROM_VEGPARAM = read VEGCOVER from veg param file; FROM_VEGHIST = read VEGCOVER from veg_hist forcing file
+#FCAN_SRC 	FROM_DEFAULT     # FROM_DEFAULT = set all fcanopy values to 1.0; FROM_VEGPARAM = read FCANOPY from veg param file; FROM_VEGHIST = read FCANOPY from veg_hist forcing file
 SNOW_BAND	1	# Number of snow bands; if number of snow bands > 1, you must insert the snow band path/file after the number of bands (e.g. SNOW_BAND 5 my_path/my_snow_band_file)
 
 #######################################################################

@@ -24,8 +24,6 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  *****************************************************************************/
 
-#include <vic_def.h>
-#include <vic_run.h>
 #include <vic_driver_image.h>
 
 /******************************************************************************
@@ -220,8 +218,8 @@ vic_force(void)
                         veg_con[i][vidx].albedo[dmy[current].month - 1];
                     veg_hist[i][vidx].LAI[j] =
                         veg_con[i][vidx].LAI[dmy[current].month - 1];
-                    veg_hist[i][vidx].vegcover[j] =
-                        veg_con[i][vidx].vegcover[dmy[current].month - 1];
+                    veg_hist[i][vidx].fcanopy[j] =
+                        veg_con[i][vidx].fcanopy[dmy[current].month - 1];
                 }
             }
         }
@@ -229,7 +227,7 @@ vic_force(void)
 
     // Read veg_hist file
     if (options.LAI_SRC == FROM_VEGHIST ||
-        options.VEGCOVER_SRC == FROM_VEGHIST ||
+        options.FCAN_SRC == FROM_VEGHIST ||
         options.ALB_SRC == FROM_VEGHIST) {
         // for now forcing file is determined by the year
         sprintf(filenames.forcing[1], "%s%4d.nc", filenames.f_path_pfx[1],
@@ -268,7 +266,7 @@ vic_force(void)
         }
 
         // Partial veg cover fraction: fcov
-        if (options.VEGCOVER_SRC == FROM_VEGHIST) {
+        if (options.FCAN_SRC == FROM_VEGHIST) {
             for (j = 0; j < NF; j++) {
                 d4start[0] = global_param.forceoffset[1] + j;
                 for (v = 0; v < options.NVEGTYPES; v++) {
@@ -278,7 +276,7 @@ vic_force(void)
                     for (i = 0; i < local_domain.ncells_active; i++) {
                         vidx = veg_con_map[i].vidx[v];
                         if (vidx != -1) {
-                            veg_hist[i][vidx].vegcover[j] = (double) dvar[i];
+                            veg_hist[i][vidx].fcanopy[j] = (double) dvar[i];
                         }
                     }
                 }
@@ -335,17 +333,19 @@ vic_force(void)
                                                 param.SNOW_MAX_SNOW_TEMP,
                                                 &(atmos[i].prec[j]), 1);
         }
-        // Check on vegcover
+        // Check on fcanopy
         for (v = 0; v < options.NVEGTYPES; v++) {
             vidx = veg_con_map[i].vidx[v];
             if (vidx != -1) {
                 for (j = 0; j < NF; j++) {
-                    if (veg_hist[i][vidx].vegcover[j] < MIN_VEGCOVER) {
+                    if ((veg_hist[i][vidx].fcanopy[j] < MIN_FCANOPY) &&
+                        ((current == 0) || (options.FCAN_SRC == FROM_VEGHIST))) {
+                        // Only issue this warning once if not using veg hist fractions
                         log_warn(
-                            "cell %zu, veg %d substep %zu vegcover %f < minimum of %f; setting = %f\n", i, vidx, j,
-                            veg_hist[i][vidx].vegcover[j], MIN_VEGCOVER,
-                            MIN_VEGCOVER);
-                        veg_hist[i][vidx].vegcover[j] = MIN_VEGCOVER;
+                            "cell %zu, veg` %d substep %zu fcanopy %f < minimum of %f; setting = %f\n", i, vidx, j,
+                            veg_hist[i][vidx].fcanopy[j], MIN_FCANOPY,
+                            MIN_FCANOPY);
+                        veg_hist[i][vidx].fcanopy[j] = MIN_FCANOPY;
                     }
                 }
             }
@@ -379,8 +379,8 @@ vic_force(void)
                 veg_hist[i][vidx].albedo[NR] = average(veg_hist[i][vidx].albedo,
                                                        NF);
                 veg_hist[i][vidx].LAI[NR] = average(veg_hist[i][vidx].LAI, NF);
-                veg_hist[i][vidx].vegcover[NR] = average(
-                    veg_hist[i][vidx].vegcover, NF);
+                veg_hist[i][vidx].fcanopy[NR] = average(
+                    veg_hist[i][vidx].fcanopy, NF);
             }
         }
 

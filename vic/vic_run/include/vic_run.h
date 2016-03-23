@@ -173,8 +173,6 @@ void get_shear(double x, double *f, double *df, double Ur, double Zr);
 double get_thresh(double Tair, double SurfaceLiquidWater, double Zo_salt);
 int get_volume(lake_con_struct, double, double *);
 double hiTinhib(double);
-int initialize_lake(lake_var_struct *, lake_con_struct, soil_con_struct *,
-                    cell_data_struct *, double, int);
 int ice_melt(double, double, double *, double, snow_data_struct *,
              lake_var_struct *, double, double, double, double, double, double,
              double, double, double, double, double, double, double, double,
@@ -184,6 +182,8 @@ double IceEnergyBalance(double, va_list);
 void iceform(double *, double *, double, double, double *, int, double, double,
              double, double *, double *, double *, double *, double);
 void icerad(double, double, double, double *, double *, double *);
+int initialize_lake(lake_var_struct *, lake_con_struct, soil_con_struct *,
+                    cell_data_struct *, double, int);
 int lakeice(double, double, double, double, double, double *, double, double *,
             double *, double, double);
 void latent_heat_from_snow(double, double, double, double, double, double,

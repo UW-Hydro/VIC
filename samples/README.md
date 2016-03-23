@@ -8,14 +8,10 @@ This directory includes complete sample datasets to run VIC. Sample datasets tha
 
 ## Classic Driver
 
-*In progress*
-
-1.  Stehekin
-1.  Rosemount
+1.  Stehekin - 10-days of forcings
 
 ## Summary of Datasets:
 1.  Stehekin: This is a distributed datasets that covers the entire Stehekin River Basin, located in Washington State, USA.
-1.  Rosemount: This is a single point dataset from Rosemount site, Illinois, USA.  
 
 ## Getting the Datasets:
 The VIC sample datasets are in a "git submodule", to download the datasets to this directory, simply run the following command:

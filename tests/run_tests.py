@@ -45,9 +45,8 @@ This is the VIC Test Suite. There are six main test types:
 
 epilog = '''
 -------------------------------------------------------------------------------
-The VIC Test Suite was developed by Joe Hamman at the University of Washington
-Computational Hydrology Group. For questions about the development or use of
-VIC, please email the VIC users list serve at vic_users@u.washington.edu.
+For questions about the development or use of VIC or use of this test module,
+please email the VIC users list serve at vic_users@u.washington.edu.
 -------------------------------------------------------------------------------
 '''
 
@@ -247,7 +246,7 @@ def run_unit_tests():
     return {'unittests': TestResults('unittests',
                                      test_complete=True,
                                      passed=retcode == 0,
-                                     comment='see standard out from pytest',
+                                     comment='see stdout from pytest',
                                      returncode=retcode)}
 
     print('\n-'.ljust(OUTPUT_WIDTH + 1, '-'))

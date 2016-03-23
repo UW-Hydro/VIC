@@ -12,7 +12,7 @@ matrix:
     env: TESTID='classic'
     addons:
       apt_packages:
-        - valgrid
+        - valgrind
       sources:
          - ubuntu-toolchain-r-test
   - compiler: gcc
@@ -20,7 +20,7 @@ matrix:
     env: TESTID='classic'
     addons:
       apt_packages:
-        - valgrid
+        - valgrind
       sources:
          - ubuntu-toolchain-r-test
   - compiler: gcc
@@ -32,7 +32,7 @@ matrix:
           - gcc-5
           - gcc-5-multilib
           - linux-libc-dev:i386
-          - valgrid
+          - valgrind
         sources:
           - ubuntu-toolchain-r-test
   - compiler: clang
@@ -42,7 +42,7 @@ matrix:
       apt:
         packages:
           - clang-3.6
-          - valgrid
+          - valgrind
         sources:
           - llvm-toolchain-precise-3.6
           - ubuntu-toolchain-r-test
@@ -57,7 +57,7 @@ matrix:
       apt_packages:
         - libnetcdf-dev
         - gfortran
-        - valgrid
+        - valgrind
         # open-mpi is built from source in image.travis
   # CESM Driver
   - compiler: gcc
@@ -67,7 +67,7 @@ matrix:
       apt_packages:
         - libnetcdf-dev
         - gfortran
-        - valgrid
+        - valgrind
         # open-mpi is built from source in cesm.travis
 
 before_install:

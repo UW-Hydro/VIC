@@ -35,7 +35,7 @@ This is the VIC Test Suite. There are six main test types:
         * restart: tests that address model state and restart capacity.
         * I/O: tests that address model input and output functionality.
             * forcings come out the way the come in
-            * parameter files are appropriately read in allocated.
+            * parameter files are appropriately read in and allocated.
     3. science: tests that aim to assess the model's scientific skill.
             Many of these tests are compared to observations of some kind.
     4. examples: a set of examples that users may download and run.
@@ -46,9 +46,8 @@ This is the VIC Test Suite. There are six main test types:
 
 epilog = '''
 -------------------------------------------------------------------------------
-The VIC Test Suite was developed by Joe Hamman at the University of Washington
-Computational Hydrology Group. For questions about the development or use of
-VIC, please email the VIC users list serve at vic_users@u.washington.edu.
+For questions about the development or use of VIC or use of this test module,
+please email the VIC users list serve at vic_users@u.washington.edu.
 -------------------------------------------------------------------------------
 '''
 
@@ -254,7 +253,7 @@ def run_unit_tests():
     return {'unittests': TestResults('unittests',
                                      test_complete=True,
                                      passed=retcode == 0,
-                                     comment='see standard out from pytest',
+                                     comment='see stdout from pytest',
                                      returncode=retcode)}
 
     print('\n-'.ljust(OUTPUT_WIDTH + 1, '-'))

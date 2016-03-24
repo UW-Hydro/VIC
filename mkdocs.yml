@@ -25,6 +25,7 @@ pages:
     - 'VIC Drivers':
         - 'Classic': 'Documentation/Drivers/Classic/ClassicDriver.md'
         - 'Image': 'Documentation/Drivers/Image/ImageDriver.md'
+        - 'CESM': 'Documentation/Drivers/CESM/CESMDriver.md'
 - Development:
     - 'Development': 'Development/ModelDevelopment.md'
     - 'Release Notes': 'Development/ReleaseNotes.md'
@@ -64,6 +65,9 @@ pages:
     - 'Params': 'Documentation/Drivers/Image/Params.md'
     - 'RunVIC': 'Documentation/Drivers/Image/RunVIC.md'
     - 'StateFile': 'Documentation/Drivers/Image/StateFile.md'
+    # CESM Driver
+    - 'Inputs': 'Documentation/Drivers/CESM/Inputs.md'
+
     # Other
     - 'Constants': 'Documentation/Constants.md'
     - 'Definitions': 'Documentation/Definitions.md'

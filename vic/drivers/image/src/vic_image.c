@@ -24,8 +24,6 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  *****************************************************************************/
 
-#include <vic_def.h>
-#include <vic_run.h>
 #include <vic_driver_image.h>
 
 size_t              NF, NR;
@@ -41,6 +39,7 @@ domain_struct       global_domain;
 domain_struct       local_domain;
 global_param_struct global_param;
 lake_con_struct     lake_con;
+MPI_Comm            MPI_COMM_VIC = MPI_COMM_WORLD;
 MPI_Datatype        mpi_global_struct_type;
 MPI_Datatype        mpi_filenames_struct_type;
 MPI_Datatype        mpi_location_struct_type;
@@ -97,13 +96,13 @@ main(int    argc,
     }
 
     // read global parameters
-    vic_start();
+    vic_image_start();
 
     // allocate memory
     vic_alloc();
 
     // initialize model parameters from parameter files
-    vic_init();
+    vic_image_init();
 
     // populate model state, either using a cold start or from a restart file
     vic_populate_model_state();

@@ -25,8 +25,6 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  *****************************************************************************/
 
-#include <vic_def.h>
-#include <vic_run.h>
 #include <vic_driver_classic.h>
 
 /******************************************************************************
@@ -68,10 +66,10 @@ vic_force(atmos_data_struct *atmos,
     if (!param_set.TYPE[PREC].SUPPLIED) {
         log_err("Precipitation must be supplied as a forcing");
     }
-    if (!param_set.TYPE[SHORTWAVE].SUPPLIED) {
+    if (!param_set.TYPE[SWDOWN].SUPPLIED) {
         log_err("Downward shortwave radiation must be supplied as a forcing");
     }
-    if (!param_set.TYPE[LONGWAVE].SUPPLIED) {
+    if (!param_set.TYPE[LWDOWN].SUPPLIED) {
         log_err("Downward longwave radiation must be supplied as a forcing");
     }
     if (!param_set.TYPE[PRESSURE].SUPPLIED) {
@@ -131,9 +129,9 @@ vic_force(atmos_data_struct *atmos,
             // precipitation in mm/period
             atmos[rec].prec[i] = forcing_data[PREC][uidx];
             // downward shortwave in W/m2
-            atmos[rec].shortwave[i] = forcing_data[SHORTWAVE][uidx];
+            atmos[rec].shortwave[i] = forcing_data[SWDOWN][uidx];
             // downward longwave in W/m2
-            atmos[rec].longwave[i] = forcing_data[LONGWAVE][uidx];
+            atmos[rec].longwave[i] = forcing_data[LWDOWN][uidx];
             // pressure in kPa
             atmos[rec].pressure[i] = forcing_data[PRESSURE][uidx] * PA_PER_KPA;
             // vapor pressure in kPa

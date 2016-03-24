@@ -25,8 +25,6 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  *****************************************************************************/
 
-#include <vic_def.h>
-#include <vic_run.h>
 #include <vic_driver_classic.h>
 
 /******************************************************************************
@@ -117,7 +115,7 @@ set_output_defaults(out_data_struct *out_data)
         set_output_var(out_data_files, true, filenum, out_data,
                        "OUT_RAD_TEMP", varnum++, "%.4f", OUT_TYPE_FLOAT, 1);
     }
-    set_output_var(out_data_files, true, filenum, out_data, "OUT_NET_SHORT",
+    set_output_var(out_data_files, true, filenum, out_data, "OUT_SWNET",
                    varnum++, "%.4f", OUT_TYPE_FLOAT, 1);
     set_output_var(out_data_files, true, filenum, out_data, "OUT_R_NET",
                    varnum++, "%.4f", OUT_TYPE_FLOAT, 1);
@@ -254,10 +252,10 @@ set_output_defaults(out_data_struct *out_data)
                            OUT_TYPE_FLOAT, 1);
         }
         set_output_var(out_data_files, true, filenum, out_data,
-                       "OUT_NET_SHORT_BAND", varnum++, "%.4f",
+                       "OUT_SWNET_BAND", varnum++, "%.4f",
                        OUT_TYPE_FLOAT, 1);
         set_output_var(out_data_files, true, filenum, out_data,
-                       "OUT_NET_LONG_BAND", varnum++, "%.4f",
+                       "OUT_LWNET_BAND", varnum++, "%.4f",
                        OUT_TYPE_FLOAT, 1);
         set_output_var(out_data_files, true, filenum, out_data,
                        "OUT_ALBEDO_BAND", varnum++, "%.4f", OUT_TYPE_FLOAT,

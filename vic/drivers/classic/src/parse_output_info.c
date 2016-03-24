@@ -25,8 +25,6 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  *****************************************************************************/
 
-#include <vic_def.h>
-#include <vic_run.h>
 #include <vic_driver_classic.h>
 
 /******************************************************************************
@@ -49,6 +47,7 @@ parse_output_info(FILE                  *gp,
     int                  type;
     char                 multstr[MAXSTRING];
     double               mult;
+    size_t               noutfiles;
 
     strcpy(format, "*");
 
@@ -60,7 +59,13 @@ parse_output_info(FILE                  *gp,
     outvarnum = 0;
 
     // Count the number of output files listed in the global param file
-    options.Noutfiles = count_n_outfiles(gp);
+    noutfiles = count_n_outfiles(gp);
+    if (noutfiles > 0) {
+        options.Noutfiles = noutfiles;
+    }
+    else {
+        return;
+    }
 
     // only parse the output info if there are output files to parse
     if (options.Noutfiles > 0) {
@@ -86,18 +91,21 @@ parse_output_info(FILE                  *gp,
                                 "%zu but found %hu", options.Noutfiles,
                                 outfilenum);
                     }
-                    sscanf(cmdstr, "%*s %s", (*out_data_files)[outfilenum].prefix);
+                    sscanf(cmdstr, "%*s %s",
+                           (*out_data_files)[outfilenum].prefix);
 
                     // determine how many variable will be in this file before
                     // allocating (GH: 209)
-                    (*out_data_files)[outfilenum].nvars = count_outfile_nvars(gp);
+                    (*out_data_files)[outfilenum].nvars =
+                        count_outfile_nvars(gp);
 
                     (*out_data_files)[outfilenum].varid =
                         calloc((*out_data_files)[outfilenum].nvars,
                                sizeof(*((*out_data_files)[outfilenum].varid)));
-                   if ((*out_data_files)[outfilenum].varid == NULL) {
-                       log_err("Memory allocation error in parse_output_info().");
-                   }
+                    if ((*out_data_files)[outfilenum].varid == NULL) {
+                        log_err(
+                            "Memory allocation error in parse_output_info().");
+                    }
                     outvarnum = 0;
                 }
                 else if (strcasecmp("OUTVAR", optstr) == 0) {
@@ -139,7 +147,8 @@ parse_output_info(FILE                  *gp,
                         }
                     }
                     if (set_output_var((*out_data_files), true, outfilenum,
-                                       out_data, varname, outvarnum, format, type,
+                                       out_data, varname, outvarnum, format,
+                                       type,
                                        mult) != 0) {
                         log_err("Invalid output variable specification.");
                     }
@@ -152,7 +161,6 @@ parse_output_info(FILE                  *gp,
     }
     fclose(gp);
 }
-
 
 /******************************************************************************
  * @brief    This routine determines the counts the number of output variables
@@ -199,7 +207,6 @@ count_outfile_nvars(FILE *gp)
     return nvars;
 }
 
-
 /******************************************************************************
  * @brief    This routine determines the counts the number of output files
              specified in the global parameter file.
@@ -230,10 +237,6 @@ count_n_outfiles(FILE *gp)
             // if the line starts with OUTFILE
             if (strcasecmp("OUTFILE", optstr) == 0) {
                 n_outfiles++;
-            }
-            // else we're done with this file so break out of loop
-            else {
-                break;
             }
         }
         fgets(cmdstr, MAXSTRING, gp);

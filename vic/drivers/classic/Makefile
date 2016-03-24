@@ -32,7 +32,7 @@
 DRIVERPATH = .
 
 # VIC RUN PATH
-SHAREDPATH = ../shared
+SHAREDPATH = ../shared_all
 
 # VIC RUN PATH
 VICPATH = ../../vic_run

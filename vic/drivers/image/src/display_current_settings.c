@@ -25,8 +25,6 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  *****************************************************************************/
 
-#include <vic_def.h>
-#include <vic_run.h>
 #include <vic_driver_image.h>
 
 /******************************************************************************
@@ -63,7 +61,7 @@ display_current_settings(int mode)
     fprintf(LOG_DEST, "Maximum Array Sizes:\n");
     fprintf(LOG_DEST, "MAX_BANDS\t\t%2d\n", MAX_BANDS);
     fprintf(LOG_DEST, "MAX_FRONTS\t\t%2d\n", MAX_FRONTS);
-    fprintf(LOG_DEST, "MAX_FROST_AREAS\t\t\t%2d\n", MAX_FROST_AREAS);
+    fprintf(LOG_DEST, "MAX_FROST_AREAS\t\t%2d\n", MAX_FROST_AREAS);
     fprintf(LOG_DEST, "MAX_LAKE_NODES\t\t%2d\n", MAX_LAKE_NODES);
     fprintf(LOG_DEST, "MAX_ZWTVMOIST\t\t%2d\n", MAX_ZWTVMOIST);
     fprintf(LOG_DEST, "MAX_LAYERS\t\t%2d\n", MAX_LAYERS);

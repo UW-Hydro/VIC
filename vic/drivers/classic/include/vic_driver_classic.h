@@ -27,7 +27,7 @@
 #ifndef VIC_DRIVER_CLASSIC_H
 #define VIC_DRIVER_CLASSIC_H
 
-#include <vic_driver_shared.h>
+#include <vic_driver_shared_all.h>
 
 #define VIC_DRIVER "Classic"
 
@@ -41,7 +41,6 @@ double calc_netshort(double, int, double, double *);
 void check_files(filep_struct *, filenames_struct *);
 FILE  *check_state_file(char *, size_t, size_t, int *);
 void close_files(filep_struct *, out_data_file_struct *, filenames_struct *);
-size_t count_force_vars(FILE *gp);
 size_t count_n_outfiles(FILE *gp);
 void compute_cell_area(soil_con_struct *);
 size_t count_outfile_nvars(FILE *gp);

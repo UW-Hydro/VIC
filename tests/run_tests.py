@@ -34,7 +34,7 @@ This is the VIC Test Suite. There are six main test types:
         * restart: tests that address model state and restart capacity.
         * I/O: tests that address model input and output functionality.
             * forcings come out the way the come in
-            * parameter files are appropriately read in allocated.
+            * parameter files are appropriately read in and allocated.
     3. science: tests that aim to assess the model's scientific skill.
             Many of these tests are compared to observations of some kind.
     4. examples: a set of examples that users may download and run.

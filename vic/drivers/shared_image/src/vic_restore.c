@@ -64,7 +64,7 @@ vic_restore(void)
     check_init_state_file();
 
     // read state variables
- 
+
     // allocate memory for variables to be stored
     cvar = malloc(local_domain.ncells_active * sizeof(*cvar));
     if (cvar == NULL) {
@@ -487,7 +487,6 @@ vic_restore(void)
     }
 
     if (options.LAKES) {
- 
         // total soil moisture
         for (j = 0; j < options.Nlayer; j++) {
             d3start[0] = j;
@@ -514,7 +513,6 @@ vic_restore(void)
         }
 
         if (options.CARBON) {
-
             // litter carbon: tmpval = lake_var.soil.CLitter;
             get_scatter_nc_field_double(filenames.init_state,
                                         "Lake_CLitter",
@@ -538,7 +536,6 @@ vic_restore(void)
             for (i = 0; i < local_domain.ncells_active; i++) {
                 all_vars[i].lake_var.soil.CSlow = dvar[i];
             }
-
         }
 
         // snow age: lake_var.snow.last_snow
@@ -821,7 +818,6 @@ vic_restore(void)
         for (i = 0; i < local_domain.ncells_active; i++) {
             all_vars[i].lake_var.sdepth = dvar[i];
         }
- 
     }
 
     free(cvar);
@@ -830,7 +826,8 @@ vic_restore(void)
     free(fvar);
 }
 
-void check_init_state_file(void)
+void
+check_init_state_file(void)
 {
     extern filenames_struct filenames;
     extern domain_struct    global_domain;
@@ -898,7 +895,7 @@ void check_init_state_file(void)
                     "match parameter file");
         }
     }
- 
+
     // read dimension variables
 
     // lat/lon
@@ -912,7 +909,7 @@ void check_init_state_file(void)
         log_err("Unable to find variable \"lat\" in %s",
                 filenames.init_state);
     }
-    if (options.COORD_DIMS_OUT == 1) {
+    if (global_domain.info.n_coord_dims == 1) {
         d1start[0] = 0;
         dvar = calloc(global_domain.n_nx, sizeof(*dvar));
         d1count[0] = global_domain.n_nx;
@@ -946,7 +943,7 @@ void check_init_state_file(void)
         }
         free(dvar);
     }
-    else if (options.COORD_DIMS_OUT == 2) {
+    else if (global_domain.info.n_coord_dims == 2) {
         d2start[0] = 0;
         d2start[1] = 0;
         dvar = calloc(global_domain.n_ny * global_domain.n_nx, sizeof(*dvar));
@@ -979,7 +976,7 @@ void check_init_state_file(void)
         free(dvar);
     }
     else {
-        log_err("COORD_DIMS_OUT should be 1 or 2");
+        log_err("global_domain.info.n_coord_dims should be 1 or 2");
     }
 
     // Variables for other dimensions
@@ -1009,5 +1006,4 @@ void check_init_state_file(void)
         }
     }
     free(dvar);
-
 }

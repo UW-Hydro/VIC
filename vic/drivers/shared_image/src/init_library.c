@@ -172,9 +172,9 @@ initialize_domain_info(domain_info_struct *info)
 void
 initialize_global_structures(void)
 {
-    extern domain_struct       global_domain;
-    extern domain_struct       local_domain;
-    extern int                 mpi_rank;
+    extern domain_struct global_domain;
+    extern domain_struct local_domain;
+    extern int           mpi_rank;
 
     initialize_domain_info(&local_domain.info);
     if (mpi_rank == 0) {

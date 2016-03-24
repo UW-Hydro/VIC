@@ -82,15 +82,15 @@ vic_store(void)
     // write dimension variables
 
     // Coordinate variables
-    ndims = options.COORD_DIMS_OUT;
+    ndims = global_domain.info.n_coord_dims;
     dstart[0] = 0;
     dstart[1] = 0;
 
-    if (options.COORD_DIMS_OUT == 1) {
+    if (global_domain.info.n_coord_dims == 1) {
         dimids[0] = nc_state_file.ni_dimid;
         dcount[0] = nc_state_file.ni_size;
     }
-    else if (options.COORD_DIMS_OUT == 2) {
+    else if (global_domain.info.n_coord_dims == 2) {
         dimids[0] = nc_state_file.nj_dimid;
         dcount[0] = nc_state_file.nj_size;
 
@@ -102,7 +102,8 @@ vic_store(void)
     }
 
     // define the netcdf variable longitude
-    status = nc_def_var(nc_state_file.nc_id, options.DOMAIN_LON_VAR, NC_DOUBLE, ndims,
+    status = nc_def_var(nc_state_file.nc_id, global_domain.info.lon_var,
+                        NC_DOUBLE, ndims,
                         dimids, &(lon_var_id));
     if (status != NC_NOERR) {
         log_err("Error defining lon variable in %s", nc_state_file.fname);
@@ -124,13 +125,14 @@ vic_store(void)
         log_err("Error adding attribute in %s", nc_state_file.fname);
     }
 
-    if (options.COORD_DIMS_OUT == 1) {
+    if (global_domain.info.n_coord_dims == 1) {
         dimids[0] = nc_state_file.nj_dimid;
         dcount[0] = nc_state_file.nj_size;
     }
 
     // define the netcdf variable latitude
-    status = nc_def_var(nc_state_file.nc_id, options.DOMAIN_LAT_VAR, NC_DOUBLE, ndims,
+    status = nc_def_var(nc_state_file.nc_id, global_domain.info.lat_var,
+                        NC_DOUBLE, ndims,
                         dimids, &(lat_var_id));
     if (status != NC_NOERR) {
         log_err("Error defining lat variable in %s", nc_state_file.fname);
@@ -152,7 +154,7 @@ vic_store(void)
     }
 
     // populate lat/lon
-    if (options.COORD_DIMS_OUT == 1) {
+    if (global_domain.info.n_coord_dims == 1) {
         dvar = calloc(nc_state_file.ni_size, sizeof(*dvar));
 
         dcount[0] = nc_state_file.ni_size;
@@ -160,7 +162,8 @@ vic_store(void)
             dvar[i] = (double) global_domain.locations[i].longitude;
         }
         status =
-            nc_put_vara_double(nc_state_file.nc_id, lon_var_id, dstart, dcount, dvar);
+            nc_put_vara_double(nc_state_file.nc_id, lon_var_id, dstart, dcount,
+                               dvar);
         if (status != NC_NOERR) {
             log_err("Error adding data to lon in %s", nc_state_file.fname);
         }
@@ -174,20 +177,24 @@ vic_store(void)
         }
 
         status =
-            nc_put_vara_double(nc_state_file.nc_id, lat_var_id, dstart, dcount, dvar);
+            nc_put_vara_double(nc_state_file.nc_id, lat_var_id, dstart, dcount,
+                               dvar);
         if (status != NC_NOERR) {
             log_err("Error adding data to lon in %s", nc_state_file.fname);
         }
         free(dvar);
     }
-    else if (options.COORD_DIMS_OUT == 2) {
-        dvar = calloc(nc_state_file.nj_size * nc_state_file.ni_size, sizeof(*dvar));
+    else if (global_domain.info.n_coord_dims == 2) {
+        dvar =
+            calloc(nc_state_file.nj_size * nc_state_file.ni_size,
+                   sizeof(*dvar));
 
         for (i = 0; i < nc_state_file.nj_size * nc_state_file.ni_size; i++) {
             dvar[i] = (double) global_domain.locations[i].longitude;
         }
         status =
-            nc_put_vara_double(nc_state_file.nc_id, lon_var_id, dstart, dcount, dvar);
+            nc_put_vara_double(nc_state_file.nc_id, lon_var_id, dstart, dcount,
+                               dvar);
         if (status != NC_NOERR) {
             log_err("Error adding data to lon in %s", nc_state_file.fname);
         }
@@ -196,7 +203,8 @@ vic_store(void)
             dvar[i] = (double) global_domain.locations[i].latitude;
         }
         status =
-            nc_put_vara_double(nc_state_file.nc_id, lat_var_id, dstart, dcount, dvar);
+            nc_put_vara_double(nc_state_file.nc_id, lat_var_id, dstart, dcount,
+                               dvar);
         if (status != NC_NOERR) {
             log_err("Error adding data to lat in %s", nc_state_file.fname);
         }
@@ -310,7 +318,6 @@ vic_store(void)
     }
 
     if (options.LAKES) {
-
         // lake nodes
         dimids[0] = nc_state_file.lake_node_dimid;
         ivar = malloc(options.NLAKENODES * sizeof(*ivar));
@@ -329,12 +336,11 @@ vic_store(void)
             dimids[i] = -1;
         }
         free(ivar);
-
     }
 
 
     // write state variables
- 
+
     // allocate memory for variables to be stored
     cvar = malloc(local_domain.ncells_active * sizeof(*cvar));
     if (cvar == NULL) {
@@ -1132,7 +1138,6 @@ vic_store(void)
     }
 
     if (options.LAKES) {
- 
         // total soil moisture
         ndims = 3;
         dimids[0] = nc_state_file.layer_dimid;
@@ -1187,7 +1192,6 @@ vic_store(void)
         }
 
         if (options.CARBON) {
-
             // litter carbon: tmpval = lake_var.soil.CLitter;
             ndims = 2;
             dimids[0] = nc_state_file.nj_dimid;
@@ -1247,7 +1251,6 @@ vic_store(void)
             for (i = 0; i < ndims; i++) {
                 dimids[i] = -1;
             }
-
         }
 
         // snow age: lake_var.snow.last_snow
@@ -1793,7 +1796,8 @@ vic_store(void)
                                    &(nc_state_file.open),
                                    &(nc_state_file.nc_id),
                                    nc_state_file.d_fillvalue,
-                                   dimids, ndims, "Lake_ice_snow_water_equivalen",
+                                   dimids, ndims,
+                                   "Lake_ice_snow_water_equivalen",
                                    d2start, d2count, dvar);
         for (i = 0; i < local_domain.ncells_active; i++) {
             dvar[i] = nc_state_file.i_fillvalue;
@@ -1941,8 +1945,6 @@ vic_store(void)
         for (i = 0; i < ndims; i++) {
             dimids[i] = -1;
         }
-
- 
     }
 
     // close the netcdf file if it is still open
@@ -2039,7 +2041,8 @@ initialize_state_file(nc_file_struct *nc)
         log_err("Error defining frost_area in %s", nc->fname);
     }
 
-    status = nc_def_dim(nc->nc_id, "soil_node", nc->node_size, &(nc->node_dimid));
+    status =
+        nc_def_dim(nc->nc_id, "soil_node", nc->node_size, &(nc->node_dimid));
     if (status != NC_NOERR) {
         log_err("Error defining soil_node in %s", nc->fname);
     }

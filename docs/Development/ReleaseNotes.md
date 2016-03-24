@@ -108,7 +108,7 @@ This is a major update from VIC 4. The VIC 5.0.0 release aims to have nearly ide
 
 	Similarly, output variables `OUT_NET_LONG` and `OUT_NET_SHORT` have been replaced with `OUT_LWNET` and `OUT_SWNET`, respectively.
 
-3.  Changed the name of the variable VEGCOVER to FCANOPY, since this more accurately captures the meaning of the term (i.e., the fractional area of the plant canopy within the veg tile).  Similarly changed OUT_VEGCOVER to OUT_FCANOPY.
+4.  Changed the name of the variable VEGCOVER to FCANOPY, since this more accurately captures the meaning of the term (i.e., the fractional area of the plant canopy within the veg tile).  Similarly changed OUT_VEGCOVER to OUT_FCANOPY.
 
     Similarly, changed the names of the following global parameter file options:
         - VEGLIB_VEGCOVER

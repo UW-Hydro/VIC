@@ -24,5 +24,5 @@ The VIC sample datasets are in a "git submodule". To download the datasets to th
 You may also download the sample data to another location on your computer by specifying the directory in which you would like to add the data:
 
 ```
-git clone https://github.com/jhamman/VIC_sample_data.git path/folder_name
+git clone https://github.com/UW-Hydro/VIC_sample_data.git path/folder_name
 ```

@@ -37,14 +37,7 @@ function vic_before_install {
 
         # Install MPICH
         if [ ! -d ${TRAVIS_MPIPATH} ]; then
-            wget --no-check-certificate -q http://www.mpich.org/static/downloads/3.2/mpich-3.2.tar.gz
-            tar -xzf mpich-3.2.tar.gz
-            cd mpich-3.2
-            mkdir build && cd build
-            ../configure CC=$CC CXX=$CXX --prefix=${TRAVIS_MPIPATH}
-            make -j2
-            make install
-            cd ${TRAVIS_BUILD_DIR}
+            install_mpich
         else
             echo "MPICH installed..."
         fi
@@ -72,6 +65,9 @@ function vic_before_script {
 function vic_script {
     echo vic_script
     nm ${DRIVER_LIB}
+
+    # Run test package
+    ./tests/run_tests.py unit
 }
 
 function vic_after_success {

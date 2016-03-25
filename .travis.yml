@@ -4,15 +4,25 @@ notifications:
   email: false
 
 matrix:
-  fast_finish: false
+  fast_finish: true
   include:
   # Classic Driver
   - compiler: clang
     os: linux
     env: TESTID='classic'
+    addons:
+      apt_packages:
+        - valgrind
+      sources:
+         - ubuntu-toolchain-r-test
   - compiler: gcc
     os: linux
     env: TESTID='classic'
+    addons:
+      apt_packages:
+        - valgrind
+      sources:
+         - ubuntu-toolchain-r-test
   - compiler: gcc
     os: linux
     env: TESTID=classic USE_CC=gcc-5
@@ -22,6 +32,7 @@ matrix:
           - gcc-5
           - gcc-5-multilib
           - linux-libc-dev:i386
+          - valgrind
         sources:
           - ubuntu-toolchain-r-test
   - compiler: clang
@@ -31,6 +42,7 @@ matrix:
       apt:
         packages:
           - clang-3.6
+          - valgrind
         sources:
           - llvm-toolchain-precise-3.6
           - ubuntu-toolchain-r-test
@@ -45,6 +57,7 @@ matrix:
       apt_packages:
         - libnetcdf-dev
         - gfortran
+        - valgrind
         # open-mpi is built from source in image.travis
   # CESM Driver
   - compiler: gcc
@@ -54,23 +67,13 @@ matrix:
       apt_packages:
         - libnetcdf-dev
         - gfortran
-        # open-mpi is built from source in image.travis
-  # Python Driver
-  - compiler: clang
-    os: linux
-    env: TESTID="python" TRAVIS_PYTHON=2.7
-  - compiler: gcc
-    os: linux
-    env: TESTID="python" TRAVIS_PYTHON=2.7
-  - compiler: clang
-    os: linux
-    env: TESTID="python" TRAVIS_PYTHON=3.5
-  - compiler: gcc
-    os: linux
-    env: TESTID="python" TRAVIS_PYTHON=3.5
+        - valgrind
+        # open-mpi is built from source in cesm.travis
 
 before_install:
+  - source ci/vic_install_utils
   - source ci/${TESTID}.travis
+  - install_miniconda
   - vic_before_install
 install:
   - vic_install

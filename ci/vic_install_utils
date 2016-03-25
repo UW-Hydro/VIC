@@ -1,0 +1,41 @@
+#!/usr/bin/env bash
+
+set -e
+
+if [ -z "$WORKDIR" ]; then
+    export WORKDIR=$HOME/workdir
+    mkdir -p $WORKDIR
+fi
+
+function install_mpich {
+    wget --no-check-certificate -q http://www.mpich.org/static/downloads/3.2/mpich-3.2.tar.gz
+    tar -xzf mpich-3.2.tar.gz
+    cd mpich-3.2
+    mkdir build && cd build
+    ../configure CC=$CC CXX=$CXX --prefix=${TRAVIS_MPIPATH}
+    make -j2
+    make install
+    cd ${TRAVIS_BUILD_DIR}
+}
+
+function install_miniconda {
+    if [ "$TRAVIS_OS_NAME" = "osx" ]; then
+        # miniconda for python3
+		echo "installing miniconda for osx"
+		wget https://repo.continuum.io/miniconda/Miniconda3-latest-MacOSX-x86_64.sh -O miniconda.sh
+	else
+		echo "installing miniconda for linux"
+		wget https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh -O miniconda.sh
+	fi
+    bash miniconda.sh -b -p $HOME/miniconda
+    export PATH="$HOME/miniconda/bin:$PATH"
+    hash -r
+    conda config --set always_yes yes --set changeps1 no
+    conda update -q conda
+    conda info -a
+
+    env_name="vic_test_env"
+    conda env create -n ${env_name} -f ci/requirements.yml
+    source activate ${env_name}
+    python ./vic/drivers/python/setup.py install
+}

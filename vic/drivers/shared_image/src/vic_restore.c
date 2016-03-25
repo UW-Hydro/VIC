@@ -844,6 +844,8 @@ check_init_state_file(void)
     int                     lon_var_id;
     int                     lat_var_id;
     double                 *dvar;
+    double                  rtol = 0.0; // maybe move this to a .h file
+    double                  abs_tol = 0.0001; // maybe move this to a .h file
     nc_file_struct          nc;
 
     // open the netcdf file
@@ -853,12 +855,12 @@ check_init_state_file(void)
     }
 
     // read and validate dimension lengths
-    dimlen = get_nc_dimension(filenames.init_state, "ni");
+    dimlen = get_nc_dimension(filenames.init_state, global_domain->info.x_dim);
     if (dimlen != global_domain.n_nx) {
         log_err("Number of grid columns in state file does not "
                 "match parameter file");
     }
-    dimlen = get_nc_dimension(filenames.init_state, "nj");
+    dimlen = get_nc_dimension(filenames.init_state, global_domain->info.y_dim);
     if (dimlen != global_domain.n_ny) {
         log_err("Number of grid rows in state file does not "
                 "match parameter file");
@@ -899,15 +901,15 @@ check_init_state_file(void)
     // read dimension variables
 
     // lat/lon
-    status = nc_inq_varid(nc.nc_id, "lon", &lon_var_id);
+    status = nc_inq_varid(nc.nc_id, global_domain->info.lon_var, &lon_var_id);
     if (status != NC_NOERR) {
-        log_err("Unable to find variable \"lon\" in %s",
-                filenames.init_state);
+        log_err("Unable to find variable \"%s\" in %s",
+                global_domain->info.lon_var, filenames.init_state);
     }
-    status = nc_inq_varid(nc.nc_id, "lat", &lat_var_id);
+    status = nc_inq_varid(nc.nc_id, global_domain->info.lat_var, &lat_var_id);
     if (status != NC_NOERR) {
-        log_err("Unable to find variable \"lat\" in %s",
-                filenames.init_state);
+        log_err("Unable to find variable \"%s\" in %s",
+                global_domain->info.lat_var, filenames.init_state);
     }
     if (global_domain.info.n_coord_dims == 1) {
         d1start[0] = 0;
@@ -916,11 +918,11 @@ check_init_state_file(void)
         status = nc_get_vara_double(nc.nc_id, lon_var_id,
                                     d1start, d1count, dvar);
         if (status != NC_NOERR) {
-            log_err("Error reading data from \"lon\" in %s",
-                    filenames.init_state);
+            log_err("Error reading data from \"%s\" in %s",
+                    global_domain->info.lon_var, filenames.init_state);
         }
         for (i = 0; i < global_domain.n_nx; i++) {
-            if (dvar[i] != (double) global_domain.locations[i].longitude) {
+            if (!assert_close_double(dvar[i], global_domain.locations[i].longitude, rtol, abs_tol)) {
                 log_err("Longitudes in initial state file do not "
                         "match parameter file");
             }
@@ -932,11 +934,11 @@ check_init_state_file(void)
         status = nc_get_vara_double(nc.nc_id, lat_var_id,
                                     d1start, d1count, dvar);
         if (status != NC_NOERR) {
-            log_err("Error reading data from \"lat\" in %s",
-                    filenames.init_state);
+            log_err("Error reading data from \"%s\" in %s",
+                    global_domain->info.lat_var, filenames.init_state);
         }
         for (i = 0; i < global_domain.n_ny; i++) {
-            if (dvar[i] != (double) global_domain.locations[i].latitude) {
+            if (!assert_close_double(dvar[i], global_domain.locations[i].latitude, rtol, abs_tol)) {
                 log_err("Latitudes in initial state file do not "
                         "match parameter file");
             }
@@ -952,8 +954,8 @@ check_init_state_file(void)
         status = nc_get_vara_double(nc.nc_id, lon_var_id,
                                     d2start, d2count, dvar);
         if (status != NC_NOERR) {
-            log_err("Error reading data from \"lon\" in %s",
-                    filenames.init_state);
+            log_err("Error reading data from \"%s\" in %s",
+                    global_domain->info.lon_var, filenames.init_state);
         }
         for (i = 0; i < global_domain.n_ny * global_domain.n_nx; i++) {
             if (dvar[i] != (double) global_domain.locations[i].longitude) {
@@ -964,8 +966,8 @@ check_init_state_file(void)
         status = nc_get_vara_double(nc.nc_id, lat_var_id,
                                     d2start, d2count, dvar);
         if (status != NC_NOERR) {
-            log_err("Error reading data from \"lat\" in %s",
-                    filenames.init_state);
+            log_err("Error reading data from \"%s\" in %s",
+                    global_domain->info.lat_var, filenames.init_state);
         }
         for (i = 0; i < global_domain.n_ny * global_domain.n_nx; i++) {
             if (dvar[i] != (double) global_domain.locations[i].latitude) {

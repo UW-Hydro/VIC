@@ -15,7 +15,7 @@ This directory includes complete sample datasets to run VIC. Sample datasets tha
 2.  More will be added soon!
 
 ## Getting the Datasets:
-The VIC sample datasets are in a "git submodule", to download the datasets to this directory, simply run the following command:
+The VIC sample datasets are in a "git submodule". To download the datasets to this directory, simply run the following command:
 
 ```
 ./get_sample_data.bash

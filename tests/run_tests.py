@@ -11,8 +11,9 @@ from collections import OrderedDict
 import string
 
 import pytest
+import pandas as pd
 
-from tonic.models.vic.vic import VIC, VICRuntimeError, read_vic_ascii
+from tonic.models.vic.vic import VIC, VICRuntimeError  # , read_vic_ascii
 from tonic.io import read_config, read_configobj
 from tonic.testing import check_completed, check_for_nans, VICTestError
 
@@ -125,7 +126,11 @@ def main():
                         default='./release/release.cfg')
     parser.add_argument('--vic_exe', type=str,
                         help='VIC executable to test',
-                        default=['../drivers/classic/vic_classic.exe'], nargs='+')
+                        default='../vic/drivers/classic/vic_classic.exe')
+    parser.add_argument('--driver', type=str,
+                        help='VIC driver to test',
+                        choices=['classic', 'image'],
+                        default='classic')
     parser.add_argument('--output_dir', type=str,
                         help='directory to write test output to',
                         default='$WORKDIR/VIC_tests_{0}'.format(ymd))
@@ -161,8 +166,8 @@ def main():
     # ---------------------------------------------------------------- #
     # Setup VIC executable
     if not (len(args.tests) == 1 and args.tests[0] == 'unit'):
-        vic_exe = VIC(args.vic_exe[0])
-        print('VIC version string: {0}'.format(vic_exe.version))
+        vic_exe = VIC(args.vic_exe)
+        print('VIC version string:\n{0}'.format(vic_exe.version.decode()))
     # ---------------------------------------------------------------- #
 
     # ---------------------------------------------------------------- #
@@ -175,7 +180,8 @@ def main():
     if any(i in ['all', 'system'] for i in args.tests):
         test_results['system'] = run_system(args.system, vic_exe,
                                             'system', data_dir,
-                                            os.path.join(out_dir, 'system'))
+                                            os.path.join(out_dir, 'system'),
+                                            args.driver)
     # science
     if any(i in ['all', 'science'] for i in args.tests):
         test_results['science'] = run_science(args.science, vic_exe,
@@ -186,7 +192,8 @@ def main():
         test_results['examples'] = run_examples(args.examples, vic_exe,
                                                 'examples', data_dir,
                                                 os.path.join(out_dir,
-                                                             'examples'))
+                                                             'examples'),
+                                                args.driver)
     # release
     if any(i in ['all', 'release'] for i in args.tests):
         test_results['release'] = run_release(args.release)
@@ -256,7 +263,7 @@ def run_unit_tests():
 
 
 # -------------------------------------------------------------------- #
-def run_system(config_file, vic_exe, test_dir, test_data_dir, out_dir):
+def run_system(config_file, vic_exe, test_dir, test_data_dir, out_dir, driver):
     '''Run system tests from config file'''
 
     # ---------------------------------------------------------------- #
@@ -557,7 +564,7 @@ def run_science(config_file, vic_exe, test_dir, test_data_dir, out_dir):
 
 
 # -------------------------------------------------------------------- #
-def run_examples(config_file, vic_exe, test_dir, test_data_dir, out_dir):
+def run_examples(config_file, vic_exe, test_dir, test_data_dir, out_dir, driver):
     '''Run examples tests from config file '''
 
     # ---------------------------------------------------------------- #
@@ -570,6 +577,14 @@ def run_examples(config_file, vic_exe, test_dir, test_data_dir, out_dir):
     # ---------------------------------------------------------------- #
     # Get setup
     config = read_config(config_file)
+
+    # drop invalid driver tests
+    drop_tests = []
+    for key, test_cfg in config.items():
+        if test_cfg['driver'].lower() != driver.lower():
+            drop_tests.append(key)
+    for test in drop_tests:
+        del config[test]
 
     test_results = OrderedDict()
     # ---------------------------------------------------------------- #
@@ -669,16 +684,22 @@ def run_examples(config_file, vic_exe, test_dir, test_data_dir, out_dir):
         except VICRuntimeError as e:
             test_comment = 'Test failed during simulation'
             error_message = e
+            tail = vic_exe.stderr
         except VICTestError as e:
             test_comment = 'Test failed during testing of output files'
             error_message = e
+            tail = None
         except VICReturnCodeError as e:
             test_comment = 'Test failed due to incorrect return code'
             error_message = e
+            tail = vic_exe.stderr
 
         if test_comment or error_message:
             print('\t{0}'.format(test_comment))
             print('\t{0}'.format(error_message))
+            if tail is not None:
+                print('\tLast 10 lines of standard out:')
+                print_tail(tail)
         # ------------------------------------------------------------ #
 
         # ------------------------------------------------------------ #
@@ -737,6 +758,12 @@ def print_test_dict(d):
 # -------------------------------------------------------------------- #
 
 
+def print_tail(string, n=10, indent='\t--->'):
+    lines = string.decode().splitlines()
+    for l in lines[-10:]:
+        print('{0}{1}'.format(indent, l))
+
+
 # -------------------------------------------------------------------- #
 def replace_global_values(gp, replace):
     '''given a multiline string that represents a VIC global parameter file,
@@ -763,6 +790,54 @@ def replace_global_values(gp, replace):
 
     return gpl
 # -------------------------------------------------------------------- #
+
+
+# TODO: Update tonic version of this function, need to check that subdaily works
+# -------------------------------------------------------------------- #
+def read_vic_ascii(filepath, header=True, parse_dates=True,
+                   datetime_index=None, names=None, **kwargs):
+    """Generic reader function for VIC ASCII output with a standard header
+    filepath: path to VIC output file
+    header (True or False):  Standard VIC header is present
+    parse_dates (True or False): Parse dates from file
+    datetime_index (Pandas.tseries.index.DatetimeIndex):  Index to use as
+    datetime index names (list like): variable names
+    **kwargs: passed to Pandas.read_table
+    returns Pandas.DataFrame
+    """
+    kwargs['header'] = None
+
+    if header:
+        kwargs['skiprows'] = 6
+
+        # get names
+        if names is None:
+            with open(filepath) as f:
+                # skip lines 0 through 3
+                for _ in range(3):
+                    next(f)
+
+                # process header
+                names = next(f)
+                names = names.strip('#').replace('OUT_', '').split()
+
+    kwargs['names'] = names
+
+    if parse_dates:
+        time_cols = ['YEAR', 'MONTH', 'DAY']
+        if 'SECONDS' in names:
+            time_cols.append('SECONDS')
+        kwargs['parse_dates'] = {'datetime': time_cols}
+        kwargs['index_col'] = 0
+
+    df = pd.read_table(filepath, **kwargs)
+
+    if datetime_index is not None:
+        df.index = datetime_index
+
+    return df
+# -------------------------------------------------------------------- #
+
 
 # -------------------------------------------------------------------- #
 if __name__ == '__main__':

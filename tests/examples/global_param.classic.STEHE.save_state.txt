@@ -14,8 +14,8 @@ FULL_ENERGY           FALSE
 FROZEN_SOIL           FALSE
 STATENAME             $state_dir/STEHE.state
 STATEYEAR             1949
-STATEMONTH            12
-STATEDAY              31
+STATEMONTH            01
+STATEDAY              10
 BINARY_STATE_FILE     FALSE
 FORCING1              $test_data_dir/classic/Stehekin/forcings/full_data_
 FORCE_FORMAT          ASCII

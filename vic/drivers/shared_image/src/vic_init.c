@@ -1550,8 +1550,7 @@ vic_init(void)
             }
             initialize_lake(&(all_vars[i].lake_var), lake_con[i],
                             &(soil_con[i]),
-                            &(all_vars[i].cell[tmp_lake_idx][0]),
-                            soil_con[i].avg_temp, 0);
+                            &(all_vars[i].cell[tmp_lake_idx][0]), 0);
         }
         initialize_energy(all_vars[i].energy, nveg);
     }

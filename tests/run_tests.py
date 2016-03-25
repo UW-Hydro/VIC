@@ -143,7 +143,6 @@ def main():
     # ---------------------------------------------------------------- #
     # Define test directories
     data_dir = args.data_dir
-    test_dir = os.path.dirname(os.path.realpath(__file__))
     out_dir = os.path.expandvars(args.output_dir)
     os.makedirs(out_dir, exist_ok=True)
     # ---------------------------------------------------------------- #
@@ -178,21 +177,17 @@ def main():
 
     # system
     if any(i in ['all', 'system'] for i in args.tests):
-        test_results['system'] = run_system(args.system, vic_exe,
-                                            'system', data_dir,
+        test_results['system'] = run_system(args.system, vic_exe, data_dir,
                                             os.path.join(out_dir, 'system'),
                                             args.driver)
     # science
     if any(i in ['all', 'science'] for i in args.tests):
-        test_results['science'] = run_science(args.science, vic_exe,
-                                              'science', data_dir,
+        test_results['science'] = run_science(args.science, vic_exe, data_dir,
                                               os.path.join(out_dir, 'science'))
     # examples
     if any(i in ['all', 'examples'] for i in args.tests):
-        test_results['examples'] = run_examples(args.examples, vic_exe,
-                                                'examples', data_dir,
-                                                os.path.join(out_dir,
-                                                             'examples'),
+        test_results['examples'] = run_examples(args.examples, vic_exe, data_dir,
+                                                os.path.join(out_dir, 'examples'),
                                                 args.driver)
     # release
     if any(i in ['all', 'release'] for i in args.tests):
@@ -263,7 +258,7 @@ def run_unit_tests():
 
 
 # -------------------------------------------------------------------- #
-def run_system(config_file, vic_exe, test_dir, test_data_dir, out_dir, driver):
+def run_system(config_file, vic_exe, test_data_dir, out_dir, driver):
     '''Run system tests from config file'''
 
     # ---------------------------------------------------------------- #
@@ -297,7 +292,7 @@ def run_system(config_file, vic_exe, test_dir, test_data_dir, out_dir, driver):
 
         # ------------------------------------------------------------ #
         # read template global parameter file
-        infile = os.path.join(test_dir,
+        infile = os.path.join(test_dir, 'samples',
                               test_dict['global_parameter_file'])
 
         with open(infile, 'r') as global_file:
@@ -420,7 +415,7 @@ def run_system(config_file, vic_exe, test_dir, test_data_dir, out_dir, driver):
 
 
 # -------------------------------------------------------------------- #
-def run_science(config_file, vic_exe, test_dir, test_data_dir, out_dir):
+def run_science(config_file, vic_exe, test_data_dir, out_dir):
     '''Run science tests from config file'''
 
     # ---------------------------------------------------------------- #
@@ -564,7 +559,7 @@ def run_science(config_file, vic_exe, test_dir, test_data_dir, out_dir):
 
 
 # -------------------------------------------------------------------- #
-def run_examples(config_file, vic_exe, test_dir, test_data_dir, out_dir, driver):
+def run_examples(config_file, vic_exe, test_data_dir, out_dir, driver):
     '''Run examples tests from config file '''
 
     # ---------------------------------------------------------------- #
@@ -607,7 +602,7 @@ def run_examples(config_file, vic_exe, test_dir, test_data_dir, out_dir, driver)
 
         # ------------------------------------------------------------ #
         # read template global parameter file
-        infile = os.path.join(test_dir, test_dict['global_parameter_file'])
+        infile = os.path.join(test_dir, 'examples', test_dict['global_parameter_file'])
 
         with open(infile, 'r') as global_file:
             global_param = global_file.read()

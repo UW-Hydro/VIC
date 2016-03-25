@@ -6,7 +6,7 @@ RUNOFF_STEPS_PER_DAY  24
 STARTYEAR             1949
 STARTMONTH            01
 STARTDAY              01
-STARTHOUR             00
+STARTSEC              00
 ENDYEAR               1949
 ENDMONTH              01
 ENDDAY                10
@@ -44,7 +44,7 @@ VEGPARAM_LAI          TRUE
 LAI_SRC               FROM_VEGLIB
 SNOW_BAND             5    $test_data_dir/classic/Stehekin/parameters/Stehekin_snowbands.txt
 RESULT_DIR            $result_dir
-OUT_STEP              0
+OUTPUT_STEPS_PER_DAY  0
 SKIPYEAR              0
 COMPRESS              FALSE
 BINARY_OUTPUT         FALSE

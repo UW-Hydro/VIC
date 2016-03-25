@@ -9,7 +9,7 @@ SAMPLES="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 git submodule init
 
 # Get the sample data
-cd $SAMPLES/VIC_sample_data
+cd $SAMPLES/data
 git fetch origin
 # TODO - get data branch/tag that aligns with the state of the VIC repo.
 git checkout master

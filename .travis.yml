@@ -77,6 +77,8 @@ before_install:
   - vic_before_install
 install:
   - vic_install
+before_script:
+  - vic_before_script
 script:
   - vic_script
 after_success:

@@ -2,8 +2,9 @@
 
 set -e
 
-DRIVER_PATH="./vic/drivers/image/"
+DRIVER_PATH="${TRAVIS_BUILD_DIR}/vic/drivers/image/"
 DRIVER_EXE="${DRIVER_PATH}vic_image.exe"
+SAMPLES_PATH="${TRAVIS_BUILD_DIR}/samples/"
 
 function vic_before_install {
     echo vic_before_install
@@ -64,6 +65,10 @@ function vic_before_script {
         echo "Executable (${DRIVER_EXE}) not found!"
         exit 1
     fi
+
+    echo "Getting sample data"
+    bash ${SAMPLES_PATH}/get_sample_data.bash
+
 }
 
 function vic_script {
@@ -72,7 +77,11 @@ function vic_script {
     $DRIVER_EXE -o
 
     # Run test package
-    ./tests/run_tests.py unit --vic_exe=$DRIVER_EXE
+    ./tests/run_tests.py unit examples \
+        --vic_exe=${DRIVER_EXE} \
+        --driver=${TESTID} \
+        --data_dir=${SAMPLES_PATH}/data \
+        --examples=./tests/examples/examples.cfg
 
 }
 

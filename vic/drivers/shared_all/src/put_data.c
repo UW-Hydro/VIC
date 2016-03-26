@@ -519,8 +519,11 @@ put_data(all_vars_struct   *all_vars,
             out_data[OUT_SOIL_MOIST].data[index];
 
         out_data[OUT_SMLIQFRAC].data[index] =
-            out_data[OUT_SOIL_LIQ].data[index] / out_data[OUT_SOIL_MOIST].data[index];
-        out_data[OUT_SMFROZFRAC].data[index] = 1 - out_data[OUT_SMLIQFRAC].data[index];
+            out_data[OUT_SOIL_LIQ].data[index] /
+            out_data[OUT_SOIL_MOIST].data[index];
+        out_data[OUT_SMFROZFRAC].data[index] = 1 -
+                                               out_data[OUT_SMLIQFRAC].data[
+            index];
     }
     if (rec >= 0) {
         out_data[OUT_DELSOILMOIST].data[0] -= save_data->total_soil_moist;

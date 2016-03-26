@@ -234,7 +234,6 @@ vic_force(void)
             atmos[i].fdir[NR] = average(atmos[i].fdir, NF);
             atmos[i].par[NR] = average(atmos[i].par, NF);
         }
-
     }
 
     // TBD: coszen (used for some of the carbon functions)
@@ -244,7 +243,7 @@ vic_force(void)
     for (i = 0; i < local_domain.ncells_active; i++) {
         for (v = 0; v < options.NVEGTYPES; v++) {
             vidx = veg_con_map[i].vidx[v];
-            if (vidx != -1) {
+            if (vidx != NODATA_VEG) {
                 for (j = 0; j < NF; j++) {
                     veg_hist[i][vidx].albedo[j] =
                         veg_lib[i][v].albedo[dmy.month - 1];

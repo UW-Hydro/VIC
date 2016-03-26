@@ -212,7 +212,7 @@ vic_force(void)
     for (i = 0; i < local_domain.ncells_active; i++) {
         for (v = 0; v < options.NVEGTYPES; v++) {
             vidx = veg_con_map[i].vidx[v];
-            if (vidx != -1) {
+            if (vidx != NODATA_VEG) {
                 for (j = 0; j < NF; j++) {
                     veg_hist[i][vidx].albedo[j] =
                         veg_con[i][vidx].albedo[dmy[current].month - 1];
@@ -257,7 +257,7 @@ vic_force(void)
                                                 d4start, d4count, dvar);
                     for (i = 0; i < local_domain.ncells_active; i++) {
                         vidx = veg_con_map[i].vidx[v];
-                        if (vidx != -1) {
+                        if (vidx != NODATA_VEG) {
                             veg_hist[i][vidx].LAI[j] = (double) dvar[i];
                         }
                     }
@@ -275,7 +275,7 @@ vic_force(void)
                                                 d4start, d4count, dvar);
                     for (i = 0; i < local_domain.ncells_active; i++) {
                         vidx = veg_con_map[i].vidx[v];
-                        if (vidx != -1) {
+                        if (vidx != NODATA_VEG) {
                             veg_hist[i][vidx].fcanopy[j] = (double) dvar[i];
                         }
                     }
@@ -293,7 +293,7 @@ vic_force(void)
                                                 d4start, d4count, dvar);
                     for (i = 0; i < local_domain.ncells_active; i++) {
                         vidx = veg_con_map[i].vidx[v];
-                        if (vidx != -1) {
+                        if (vidx != NODATA_VEG) {
                             veg_hist[i][vidx].albedo[j] = (double) dvar[i];
                         }
                     }
@@ -336,10 +336,11 @@ vic_force(void)
         // Check on fcanopy
         for (v = 0; v < options.NVEGTYPES; v++) {
             vidx = veg_con_map[i].vidx[v];
-            if (vidx != -1) {
+            if (vidx != NODATA_VEG) {
                 for (j = 0; j < NF; j++) {
                     if ((veg_hist[i][vidx].fcanopy[j] < MIN_FCANOPY) &&
-                        ((current == 0) || (options.FCAN_SRC == FROM_VEGHIST))) {
+                        ((current == 0) ||
+                         (options.FCAN_SRC == FROM_VEGHIST))) {
                         // Only issue this warning once if not using veg hist fractions
                         log_warn(
                             "cell %zu, veg` %d substep %zu fcanopy %f < minimum of %f; setting = %f\n", i, vidx, j,
@@ -372,7 +373,7 @@ vic_force(void)
 
         for (v = 0; v < options.NVEGTYPES; v++) {
             vidx = veg_con_map[i].vidx[v];
-            if (vidx != -1) {
+            if (vidx != NODATA_VEG) {
                 // not the correct way to calculate average albedo in general,
                 // but leave for now (it's correct if albedo is constant over
                 // the model step)

@@ -1098,6 +1098,9 @@ vic_init(void)
                 }
             }
         }
+        // handle the bare soil portion of the tile
+        vidx = veg_con_map[i].vidx[options.NVEGTYPES - 1];
+        veg_con[i][0].Cv_sum += veg_con[i][vidx].Cv;
 
         // handle the vegetation for the treeline option. This is somewhat
         // confusingly handled in VIC. If I am not mistaken, in VIC classic
@@ -1224,7 +1227,7 @@ vic_init(void)
         // rescale vegetation classes to 1.0 if their sum is greater than 0.99
         // otherwise throw an error
         // TBD: Need better check for equal to 1.
-        if (veg_con[i][0].Cv_sum != 1.) {
+        if (!assert_close_double(veg_con[i][0].Cv_sum, 1., 0., 0.01)) {
             sprint_location(locstr, &(local_domain.locations[i]));
             log_warn("Cv !=  1.0 (%f) at grid cell %zd. Rescaling ...\n%s",
                      veg_con[i][0].Cv_sum, i, locstr);

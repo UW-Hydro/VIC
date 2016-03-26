@@ -218,18 +218,26 @@ vic_force(void)
         atmos[i].pressure[NR] = average(atmos[i].pressure, NF);
         atmos[i].wind[NR] = average(atmos[i].wind, NF);
         atmos[i].vp[NR] = average(atmos[i].vp, NF);
-        atmos[i].Catm[NR] = average(atmos[i].Catm, NF);
-        atmos[i].channel_in[NR] = average(atmos[i].channel_in, NF);
         atmos[i].vpd[NR] = (svp(atmos[i].air_temp[NR]) - atmos[i].vp[NR]);
         atmos[i].density[NR] = air_density(atmos[i].air_temp[NR],
                                            atmos[i].pressure[NR]);
         atmos[i].snowflag[NR] = will_it_snow(atmos[i].air_temp, t_offset,
                                              param.SNOW_MAX_SNOW_TEMP,
                                              atmos[i].prec, NF);
+
+        // Optional inputs
+        if (options.LAKES) {
+            atmos[i].channel_in[NR] = average(atmos[i].channel_in, NF) * NF;
+        }
+        if (options.CARBON) {
+            atmos[i].Catm[NR] = average(atmos[i].Catm, NF);
+            atmos[i].fdir[NR] = average(atmos[i].fdir, NF);
+            atmos[i].par[NR] = average(atmos[i].par, NF);
+        }
+
     }
 
     // TBD: coszen (used for some of the carbon functions)
-    // Catm (not used as far as I can tell)
 
     // Update the veg_hist structure with the current vegetation parameters.
     // Currently only implemented for climatological values in image mode

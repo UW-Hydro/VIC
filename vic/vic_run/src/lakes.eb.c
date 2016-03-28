@@ -404,8 +404,9 @@ solve_lake(double           snowfall,
                 lake->hice = 0.0;
                 lake->ice_water_eq = 0.0;
             }
-            lake->aero_resist = (log((2. + ZWATER) / ZWATER)
-                                * log(wind_h/ZWATER) / (von_K*von_K)) / windi;
+            lake->aero_resist =
+                (log((2. + param.LAKE_ZWATER) / param.LAKE_ZWATER) *
+                 log(wind_h / param.LAKE_ZWATER) / (von_K * von_K)) / windi;
         }
         lake->soil.aero_resist[0] = lake->aero_resist;
 
@@ -838,7 +839,6 @@ eddy(int     freezeflag,
             de[k] = param.LAKE_DM;
         }
     }
-
     /**********************************************************************
     * Avoid too low wind speeds for computational stability.
     **********************************************************************/

@@ -406,7 +406,8 @@ solve_lake(double           snowfall,
             }
             lake->aero_resist =
                 (log((2. + param.LAKE_ZWATER) / param.LAKE_ZWATER) *
-                 log(wind_h / param.LAKE_ZWATER) / (von_K * von_K)) / windi;
+                 log(wind_h / param.LAKE_ZWATER) /
+                 (CONST_KARMAN * CONST_KARMAN)) / windi;
         }
         lake->soil.aero_resist[0] = lake->aero_resist;
 

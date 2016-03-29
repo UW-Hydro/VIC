@@ -1043,7 +1043,6 @@ print_veg_con(veg_con_struct *vcon,
 
     fprintf(LOG_DEST, "veg_con:\n");
     fprintf(LOG_DEST, "\tCv              : %.4f\n", vcon->Cv);
-    fprintf(LOG_DEST, "\tCv_sum          : %.4f\n", vcon->Cv_sum);
     fprintf(LOG_DEST, "\troot            :");
     for (i = 0; i < nroots; i++) {
         fprintf(LOG_DEST, "\t%.2f", vcon->root[i]);

@@ -38,7 +38,7 @@ initialize_soil_con(soil_con_struct *soil_con)
 
 
     soil_con->FS_ACTIVE = 0;
-    soil_con->gridcel = -1;
+    soil_con->gridcel = MISSING_USI;
 
     soil_con->AlbedoPar = 0.;
     soil_con->elevation = 0.;
@@ -129,8 +129,7 @@ initialize_veg_con(veg_con_struct *veg_con)
     size_t               i;
 
     veg_con->Cv = 0.;
-    veg_con->Cv_sum = 0.;
-    veg_con->veg_class = -1; // -1 to force a crash if inappropriate
+    veg_con->veg_class = NODATA_VEG; // -1 to force a crash if inappropriate
     veg_con->vegetat_type_num = 0.;
     veg_con->sigma_slope = 0.;
     veg_con->lag_one = 0.;

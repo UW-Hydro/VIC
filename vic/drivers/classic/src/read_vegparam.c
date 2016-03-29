@@ -51,6 +51,7 @@ read_vegparam(FILE  *vegparam,
     int                      NoOverstory;
     double                   depth_sum;
     double                   sum;
+    double                   Cv_sum;
     char                     str[MAX_VEGPARAM_LINE_LENGTH];
     char                     line[MAXSTRING];
     char                     tmpline[MAXSTRING];
@@ -107,7 +108,7 @@ read_vegparam(FILE  *vegparam,
 
     /** Allocate memory for vegetation grid cell parameters **/
     temp = calloc(MaxVeg, sizeof(*temp));
-    temp[0].Cv_sum = 0.0;
+    Cv_sum = 0.0;
 
     for (i = 0; i < vegetat_type_num; i++) {
         temp[i].zone_depth = calloc(options.ROOT_ZONES,
@@ -219,7 +220,7 @@ read_vegparam(FILE  *vegparam,
             temp[i].veg_class = veg_class;
         }
 
-        temp[0].Cv_sum += temp[i].Cv;
+        Cv_sum += temp[i].Cv;
 
         for (k = 0; k < Nfields; k++) {
             free(vegarr[k]);
@@ -371,28 +372,28 @@ read_vegparam(FILE  *vegparam,
     }
 
     // Determine if we have bare soil
-    if (temp[0].Cv_sum > 1.0) {
-        log_warn("Cv exceeds 1.0 at grid cell %d, fractions being "
-                 "adjusted to equal 1", gridcel);
+    if (Cv_sum > 1.0) {
+        log_warn("Cv_sum exceeds 1.0 (%f) at grid cell %d, fractions being "
+                 "adjusted to equal 1", Cv_sum, gridcel);
         for (j = 0; j < (size_t)vegetat_type_num; j++) {
-            temp[j].Cv = temp[j].Cv / temp[0].Cv_sum;
+            temp[j].Cv = temp[j].Cv / Cv_sum;
         }
-        temp[0].Cv_sum = 1.;
+        Cv_sum = 1.;
     }
-    else if (temp[0].Cv_sum > 0.99 && temp[0].Cv_sum < 1.0) {
+    else if (Cv_sum > 0.99 && Cv_sum < 1.0) {
         log_warn("Cv > 0.99 and Cv < 1.0 at grid cell %d, model "
                  "assuming that bare soil is not to be run - fractions being "
                  "adjusted to equal 1",
                  gridcel);
         for (j = 0; j < (size_t)vegetat_type_num; j++) {
-            temp[j].Cv = temp[j].Cv / temp[0].Cv_sum;
+            temp[j].Cv = temp[j].Cv / Cv_sum;
         }
-        temp[0].Cv_sum = 1.;
+        Cv_sum = 1.;
     }
 
     // Handle veg above the treeline
     if (options.SNOW_BAND > 1 && options.COMPUTE_TREELINE &&
-        (!NoOverstory && temp[0].Cv_sum == 1.)) {
+        (!NoOverstory && Cv_sum == 1.)) {
         // All vegetation in the current cell is defined with overstory.
         // Add default non-overstory vegetation so that snow bands above treeline
         // can be sucessfully simulated.
@@ -402,7 +403,7 @@ read_vegparam(FILE  *vegparam,
             for (j = 0; j < (size_t)vegetat_type_num; j++) {
                 temp[j].Cv -= (0.001 / (double) vegetat_type_num);
             }
-            temp[0].Cv_sum -= 0.001;
+            Cv_sum -= 0.001;
         }
         else {
             // Above treeline snowband should use the defined vegetation
@@ -416,8 +417,6 @@ read_vegparam(FILE  *vegparam,
 
                 temp[vegetat_type_num].Cv = 0.001;
                 temp[vegetat_type_num].veg_class = options.AboveTreelineVeg;
-                temp[vegetat_type_num].Cv_sum =
-                    temp[vegetat_type_num - 1].Cv_sum;
                 temp[vegetat_type_num].zone_depth = calloc(options.ROOT_ZONES,
                                                            sizeof(double));
                 temp[vegetat_type_num].zone_fract = calloc(options.ROOT_ZONES,
@@ -462,10 +461,10 @@ read_vegparam(FILE  *vegparam,
     }
 
     // Bare soil tile
-    if (temp[0].Cv_sum < 1.) {
+    if (Cv_sum < 1.) {
         j = vegetat_type_num;
         temp[j].veg_class = Nveg_type; // Create a veg_class ID for bare soil, which is not mentioned in the veg library
-        temp[j].Cv = 1.0 - temp[0].Cv_sum;
+        temp[j].Cv = 1.0 - Cv_sum;
         // Don't allocate any root-zone-related arrays
         if (options.BLOWING) {
             if (vegetat_type_num > 0) {

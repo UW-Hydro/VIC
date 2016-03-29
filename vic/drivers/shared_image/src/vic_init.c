@@ -840,7 +840,7 @@ vic_init(void)
             get_scatter_nc_field_double(filenames.snowband, "Pfactor",
                                         d3start, d3count, dvar);
             for (i = 0; i < local_domain.ncells_active; i++) {
-                soil_con[i].BandElev[j] = (double) dvar[i];
+                soil_con[i].Pfactor[j] = (double) dvar[i];
             }
         }
         // Run some checks and corrections for soil

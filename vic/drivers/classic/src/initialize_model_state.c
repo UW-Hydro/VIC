@@ -129,8 +129,7 @@ initialize_model_state(all_vars_struct     *all_vars,
         }
         ErrorFlag =
             initialize_lake(lake_var, lake_con, soil_con,
-                            &(cell[tmp_lake_idx][0]),
-                            surf_temp, 0);
+                            &(cell[tmp_lake_idx][0]), 0);
         if (ErrorFlag == ERROR) {
             return(ErrorFlag);
         }

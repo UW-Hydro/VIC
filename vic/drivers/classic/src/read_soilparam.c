@@ -261,7 +261,7 @@ read_soilparam(FILE *soilparam,
                     "soil file");
         }
         sscanf(token, "%lf", &temp.avg_temp);
-        if (options.FULL_ENERGY &&
+        if ((options.FULL_ENERGY || options.LAKES) &&
             (temp.avg_temp > 100. || temp.avg_temp < -50)) {
             log_err("Need valid average soil temperature in degrees C to "
                     "run.  Full Energy model, %f is not acceptable.",

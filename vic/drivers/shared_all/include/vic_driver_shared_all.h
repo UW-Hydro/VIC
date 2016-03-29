@@ -192,11 +192,6 @@ enum
     OUT_DELTACC,          /**< rate of change in cold content in snow pack [W/m2] (ALMA_OUTPUT: [J/m2]) */
     OUT_DELTAH,           /**< rate of change in heat storage [W/m2] (ALMA_OUTPUT: [J/m2]) */
     OUT_ENERGY_ERROR,     /**< energy budget error [W/m2] */
-    OUT_TFOLIAGE_FBCOUNT,  /**< number of fallbacks in Tfoliage */
-    OUT_TCANOPY_FBCOUNT,  /**< number of fallbacks in Tcanopy */
-    OUT_TSNOWSURF_FBCOUNT,  /**< number of fallbacks in Tsnowsurf */
-    OUT_TSURF_FBCOUNT,    /**< number of fallbacks in Tsurf */
-    OUT_TSOIL_FBCOUNT,    /**< number of fallbacks in Soil T profile */
     OUT_FUSION,           /**< net energy used to melt/freeze soil moisture [W/m2] */
     OUT_GRND_FLUX,        /**< net heat flux into ground [W/m2] */
     OUT_IN_LONG,          /**< incoming longwave at ground surface (under veg) [W/m2] */

@@ -34,9 +34,9 @@
  * @brief   Routing Structs
  *****************************************************************************/
 typedef struct {
-    size_t iSubsetLength;                     /*scalar - number of timesteps*/
-    size_t iSources;                          /*scalar - number of sources*/
-    size_t iOutlets;                          /*scalar - length of subset*/
+    size_t nTimesteps;                        /*scalar - number of timesteps*/
+    size_t nSources;                          /*scalar - number of sources*/
+    size_t nOutlets;                          /*scalar - length of subset*/
     size_t *source2outlet_ind;                /*1d array - source to outlet mapping*/
     int *source_y_ind;                        /*1d array - source y location*/
     int *source_x_ind;                        /*1d array - source x location*/
@@ -86,6 +86,6 @@ void convolve(const size_t nsources,               /*scalar - number of sources*
               double*ring);
 void get_global_param_rout(FILE *gp);
 void cshift(double *, int, int, int, int);
-void print_array(double *, int, int);
+void print_array(double *, int, int, int);
 
 #endif

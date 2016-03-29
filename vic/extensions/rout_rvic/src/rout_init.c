@@ -37,7 +37,7 @@ void
 rout_init(void)
 {
     extern rout_struct   rout;
-    extern domain_struct global_domain;
+    extern domain_struct local_domain;
 
     int                 *ivar = NULL;
     double              *dvar = NULL;
@@ -52,98 +52,98 @@ rout_init(void)
     d3start[0] = 0;
     d3start[1] = 0;
     d3start[2] = 0;
-    d3count[0] = rout.rout_param.iSubsetLength;
-    d3count[1] = rout.rout_param.iSources;
+    d3count[0] = rout.rout_param.nTimesteps;
+    d3count[1] = rout.rout_param.nSources;
     d3count[2] = 1; // tracers dimension
 
 
     // allocate memory for variables to be read
-    ivar = (int *) malloc(sizeof(int) * rout.rout_param.iSources);
+    ivar = (int *) malloc(sizeof(int) * rout.rout_param.nSources);
     if (ivar == NULL) {
         log_err("Memory allocation error in vic_init().");
     }
 
     // allocate memory for variables to be read
     dvar = (double *) malloc(
-        rout.rout_param.iSubsetLength * rout.rout_param.iSources *
+        rout.rout_param.nTimesteps * rout.rout_param.nSources *
         sizeof(double));
     if (dvar == NULL) {
         log_err("Memory allocation error in vic_init().");
     }
 
     // The Ring
-    for (j = 0; j < rout.rout_param.iOutlets; j++) {
-        for (i = 0; i < rout.rout_param.iSubsetLength; i++) {
-            rout.ring[j * rout.rout_param.iSubsetLength + i] = 0.0;
+    for (j = 0; j < rout.rout_param.nOutlets; j++) {
+        for (i = 0; i < rout.rout_param.nTimesteps; i++) {
+            rout.ring[j * rout.rout_param.nTimesteps + i] = 0.0;
         }
     }
 
     // discharge
-    for (j = 0; j < global_domain.ncells_active; j++) {
+    for (j = 0; j < local_domain.ncells_active; j++) {
         rout.discharge[j] = 0.0;
     }
 
     // source2outlet_ind: source to outlet index mapping
     get_nc_field_int(rout.param_filename,
                      "source2outlet_ind",
-                     &i1start, &rout.rout_param.iSources, ivar);
-    for (i = 0; i < rout.rout_param.iSources; i++) {
+                     &i1start, &rout.rout_param.nSources, ivar);
+    for (i = 0; i < rout.rout_param.nSources; i++) {
         rout.rout_param.source2outlet_ind[i] = (int) ivar[i];
     }
 
     // source_time_offset: Number of leading timesteps ommited
     get_nc_field_int(rout.param_filename,
                      "source_time_offset",
-                     &i1start, &rout.rout_param.iSources, ivar);
-    for (i = 0; i < rout.rout_param.iSources; i++) {
+                     &i1start, &rout.rout_param.nSources, ivar);
+    for (i = 0; i < rout.rout_param.nSources; i++) {
         rout.rout_param.source_time_offset[i] = (int) ivar[i];
     }
 
     // source_x_ind: x grid coordinate of source grid cell
     get_nc_field_int(rout.param_filename,
                      "source_x_ind",
-                     &i1start, &rout.rout_param.iSources, ivar);
-    for (i = 0; i < rout.rout_param.iSources; i++) {
+                     &i1start, &rout.rout_param.nSources, ivar);
+    for (i = 0; i < rout.rout_param.nSources; i++) {
         rout.rout_param.source_x_ind[i] = (int) ivar[i];
     }
 
     // source_y_ind: y grid coordinate of source grid cell
     get_nc_field_int(rout.param_filename,
                      "source_y_ind",
-                     &i1start, &rout.rout_param.iSources, ivar);
-    for (i = 0; i < rout.rout_param.iSources; i++) {
+                     &i1start, &rout.rout_param.nSources, ivar);
+    for (i = 0; i < rout.rout_param.nSources; i++) {
         rout.rout_param.source_y_ind[i] = (int) ivar[i];
     }
 
     // source_lat: Latitude coordinate of source grid cell
     get_nc_field_double(rout.param_filename,
                         "source_lat",
-                        &i1start, &rout.rout_param.iSources, dvar);
-    for (i = 0; i < rout.rout_param.iSources; i++) {
+                        &i1start, &rout.rout_param.nSources, dvar);
+    for (i = 0; i < rout.rout_param.nSources; i++) {
         rout.rout_param.source_lat[i] = (double) dvar[i];
     }
 
     // source_lon: Longitude coordinate of source grid cell
     get_nc_field_double(rout.param_filename,
                         "source_lon",
-                        &i1start, &rout.rout_param.iSources, dvar);
-    for (i = 0; i < rout.rout_param.iSources; i++) {
+                        &i1start, &rout.rout_param.nSources, dvar);
+    for (i = 0; i < rout.rout_param.nSources; i++) {
         rout.rout_param.source_lon[i] = (double) dvar[i];
     }
 
     // outlet_lat: Latitude coordinate of source grid cell
     get_nc_field_double(rout.param_filename,
                         "outlet_lat",
-                        &i1start, &rout.rout_param.iOutlets, dvar);
-    for (i = 0; i < rout.rout_param.iOutlets; i++) {
+                        &i1start, &rout.rout_param.nOutlets, dvar);
+    for (i = 0; i < rout.rout_param.nOutlets; i++) {
         rout.rout_param.outlet_lat[i] = (double) dvar[i];
     }
 
     // outlet_lon: Longitude coordinate of source grid cell
     get_nc_field_double(rout.param_filename,
                         "outlet_lon",
-                        &i1start, &rout.rout_param.iOutlets, dvar);
-    for (i = 0; i < rout.rout_param.iOutlets; i++) {
+                        &i1start, &rout.rout_param.nOutlets, dvar);
+    for (i = 0; i < rout.rout_param.nOutlets; i++) {
         rout.rout_param.outlet_lon[i] = (double) dvar[i];
     }
 
@@ -152,7 +152,7 @@ rout_init(void)
                         "unit_hydrograph",
                         d3start, d3count, dvar);
     for (i = 0;
-         i < (rout.rout_param.iSubsetLength * rout.rout_param.iSources);
+         i < (rout.rout_param.nTimesteps * rout.rout_param.nSources);
          i++) {
         rout.rout_param.unit_hydrograph[i] = (double) dvar[i];
     }
@@ -160,48 +160,55 @@ rout_init(void)
     // TODO: Check inbouwen: wat als er geen VIC gridcell bestaat voor een Rout source?!
     // Mapping: Let the routing-source index numbers correspond to the VIC index numbers
     size_t iSource;
-    for (iSource = 0; iSource < rout.rout_param.iSources; iSource++) {
-        for (i = 0; i < global_domain.ncells_active; i++) {
+    for (iSource = 0; iSource < rout.rout_param.nSources; iSource++) {
+        for (i = 0; i < local_domain.ncells_active; i++) {
             if (rout.rout_param.source_lat[iSource] ==
-                global_domain.locations[i].latitude &&
+                local_domain.locations[i].latitude &&
                 rout.rout_param.source_lon[iSource] ==
-                global_domain.locations[i].longitude) {
+                local_domain.locations[i].longitude) {
+                
                 rout.rout_param.source_VIC_index[iSource] = i;
             }
         }
     }
 
     printf("\nsource, index of VIC gridcell: \n ");
-    for (iSource = 0; iSource < rout.rout_param.iSources; iSource++) {
-        printf("%3i,  %7i \n ", (int)(iSource),
-               rout.rout_param.source_VIC_index[iSource]);
+    for (iSource = 0; iSource < rout.rout_param.nSources; iSource++) {
+//        printf("iSource: iVIC: %3i,  %7i, %5.2f,  %5.2f         %5.2f,  %5.2f \n ",
+//               (int)(iSource),
+//               rout.rout_param.source_VIC_index[iSource],
+//               rout.rout_param.source_lon[iSource],
+//               local_domain.locations[rout.rout_param.source_VIC_index[iSource]].longitude,
+//               rout.rout_param.source_lat[iSource],
+//               local_domain.locations[rout.rout_param.source_VIC_index[iSource]].latitude
+//              );
         if ((size_t)rout.rout_param.source_VIC_index[iSource] < 0 ||
             (size_t)rout.rout_param.source_VIC_index[iSource] >
-            global_domain.ncells_active) {
+            local_domain.ncells_active) {
             log_err("invalid source, index of VIC gridcell");
         }
     }
 
     // Mapping: Let the routing-outlet index numbers correspond to the VIC index numbers
     size_t iOutlet;
-    for (iOutlet = 0; iOutlet < rout.rout_param.iOutlets; iOutlet++) {
-        for (i = 0; i < global_domain.ncells_active; i++) {
+    for (iOutlet = 0; iOutlet < rout.rout_param.nOutlets; iOutlet++) {
+        for (i = 0; i < local_domain.ncells_active; i++) {
             if (rout.rout_param.outlet_lat[iOutlet] ==
-                global_domain.locations[i].latitude &&
+                local_domain.locations[i].latitude &&
                 rout.rout_param.outlet_lon[iOutlet] ==
-                global_domain.locations[i].longitude) {
+                local_domain.locations[i].longitude) {
                 rout.rout_param.outlet_VIC_index[iOutlet] = i;
             }
         }
     }
 
     printf("\noutlet, index of VIC gridcell: \n ");
-    for (iOutlet = 0; iOutlet < rout.rout_param.iOutlets; iOutlet++) {
-        printf("%3i,  %7i \n ", (int)(iOutlet),
-               rout.rout_param.outlet_VIC_index[iOutlet]);
+    for (iOutlet = 0; iOutlet < rout.rout_param.nOutlets; iOutlet++) {
+//        printf("%3i,  %7i \n ", (int)(iOutlet),
+//               rout.rout_param.outlet_VIC_index[iOutlet]);
         if ((size_t)rout.rout_param.outlet_VIC_index[iOutlet] < 0 ||
             (size_t)rout.rout_param.outlet_VIC_index[iOutlet] >
-            global_domain.ncells_active) {
+            local_domain.ncells_active) {
             log_err("invalid outlet, index of VIC gridcell");
         }
     }

@@ -36,93 +36,88 @@ rout_run(void)
 
     extern rout_struct       rout;
     extern out_data_struct **out_data;
-    size_t                   i, j, s;
+    extern dmy_struct *dmy;
+    size_t             iSource, iOutlet, iTimestep , jTimestep;
+    int                offset; /*2d indicies*/
+    size_t iRing, iUH; /*1d indicies*/
 
-    // /TESTS!!!
-    printf("\nmapping test!!!...");
-
-    for (j = 0; j < rout.rout_param.iSources; j++) {
-        printf(
-            "\nsource: %2zu, outlet_ind: %2zu, Lon_source: , %8.4f, Lat_source: %8.4f",
-            j, rout.rout_param.source2outlet_ind[j],
-            rout.rout_param.source_lon[j],
-            rout.rout_param.source_lat[j]);
-    }
-
-
-// // even worse stuff here
+    printf("\n######### Time: %i/%i/%i %i", dmy->year,dmy->month,dmy->day,dmy->dayseconds);
+    
+// // even worse stuffy here
 // for (i = 0; i < global_domain.ncells; i++) {
 // rout.rout_param.aggrunin[i] = out_data[i][OUT_RUNOFF].data[0] + out_data[i][OUT_BASEFLOW].data[0];
 // }
 
     printf("\nThe hydrograph, just printed...\n");
-    print_array(rout.rout_param.unit_hydrograph, rout.rout_param.iSubsetLength,
-                rout.rout_param.iSources);
+    print_array(rout.rout_param.unit_hydrograph, rout.rout_param.nTimesteps,
+                rout.rout_param.nSources, 5);
 
-    // Filling the ring with dummy data
-    for (j = 0; j < rout.rout_param.iOutlets; j++) {
-        for (i = 0; i < rout.rout_param.iSubsetLength; i++) {
-            // rout.ring[i * rout.rout_param.iOutlets + j]=i * rout.rout_param.iOutlets + j;
-        }
-    }
+//    // Filling the ring with dummy data
+//    for (iOutlet = 0; iOutlet < rout.rout_param.nOutlets; iOutlet++) {
+//        for (iTimestep = 0; iTimestep < rout.rout_param.nTimesteps; iTimestep++) {
+//            rout.ring[iOutlet]=iOutlet;
+//            //rout.ring[iTimestep * rout.rout_param.nOutlets + iOutlet] = rout.ring[iTimestep * rout.rout_param.nOutlets + iOutlet] + iTimestep * rout.rout_param.nOutlets + iOutlet;
+//            
+//        }
+//    }
 
     // Zero out current ring
     // in python: (from variables.py) self.ring[tracer][0, :] = 0.
     printf("\nThe Ring (ZERO)...\n");
-    for (i = 0; i < rout.rout_param.iOutlets; i++) {
-        rout.ring[i] = 0.0;
+    for (iOutlet = 0; iOutlet < rout.rout_param.nOutlets; iOutlet++) {
+        rout.ring[iOutlet] = 0.0;
     }
 
-    print_array(rout.ring, rout.rout_param.iSubsetLength,
-                rout.rout_param.iOutlets);
+    print_array(rout.ring, rout.rout_param.nTimesteps,
+                rout.rout_param.nOutlets, 5);
 
     // Equivalent to Fortran 90 cshift function, in python: (from variables.py) self.ring[tracer] = np.roll(self.ring[tracer], -1, axis=0)
-    cshift(rout.ring, rout.rout_param.iSubsetLength, rout.rout_param.iOutlets,
-           0,
-           1);
+    cshift(rout.ring, rout.rout_param.nTimesteps, rout.rout_param.nOutlets, 0, 1);
 
     printf("\nThe Ring, c-shifted...\n");
-    print_array(rout.ring, rout.rout_param.iSubsetLength,
-                rout.rout_param.iOutlets);
+    print_array(rout.ring, rout.rout_param.nTimesteps,
+                rout.rout_param.nOutlets, 5);
 
-    printf("\nDoing convolution test!\n");
-    int offset, outlet; /*2d indicies*/
-    int rind, uhind; /*1d indicies*/
+    // Filling the ring with dummy data
+    for (iOutlet = 0; iOutlet < rout.rout_param.nOutlets; iOutlet++) {
+        for (iTimestep = 0; iTimestep < rout.rout_param.nTimesteps; iTimestep++) {
+        //      rout.ring[j]=55;
+        }
+        //rout.ring[iOutlet]=iOutlet*0.5;
+    }
 
     /*Loop through all sources*/
-    for (s = 0; s < rout.rout_param.iSources; s++) {
-        outlet = rout.rout_param.source2outlet_ind[s];
-        offset = rout.rout_param.source_time_offset[s];
+    for (iSource = 0; iSource < rout.rout_param.nSources; iSource++) {
+        iOutlet = rout.rout_param.source2outlet_ind[iSource];
+        offset = rout.rout_param.source_time_offset[iSource];
 
         /* Do the convolution */
-        // i is the position in the unit hydrograph
-        // j is the position in the ring
-        for (i = 0; i < rout.rout_param.iSubsetLength; i++) {
-            j = i + offset;
+        // iTimestep is the position in the unit hydrograph
+        // jTimestep is the position in the ring
+        for (iTimestep = 0; iTimestep < rout.rout_param.nTimesteps; iTimestep++) {
+            jTimestep = iTimestep + offset;
+            jTimestep = iTimestep;
+            
+            // index locations
+            iRing = ( jTimestep * rout.rout_param.nOutlets ) + iOutlet;
+            iUH = ( iTimestep * rout.rout_param.nSources ) + iSource;
 
-            // 1d index locations
-            rind = j * rout.rout_param.iOutlets + outlet;
-            uhind = i * rout.rout_param.iSources + s;
-
-            // ring[rind] += unit_hydrograph[uhind] * aggrunin[xyind];
-            // ring[rind] += unit_hydrograph[uhind];
-            // ring[rind] += out_data[rout.rout_param.source_VIC_index[s]][OUT_RUNOFF].data[0] + out_data[rout.rout_param.source_VIC_index[s]][OUT_BASEFLOW].data[0];
-            rout.ring[rind] += (rout.rout_param.unit_hydrograph[uhind] *
-                                (out_data[rout.rout_param.source_VIC_index[s]][
-                                     OUT_RUNOFF].data[0] +
-                                 out_data[rout.rout_param.source_VIC_index[s]][
-                                     OUT_BASEFLOW].data[0]));
+            // printf("(iSource: %zu, year: %i, iTimestep: %zu, j: %zu, iRing: %zu, iUH: %zu\n", s, dmy[1].year, iTimestep, j, iRing, iUH);
+            rout.ring[iRing] += rout.rout_param.unit_hydrograph[iUH] * (1);
+//            rout.ring[iRing] += (rout.rout_param.unit_hydrograph[iUH] *
+//                                (out_data[rout.rout_param.source_VIC_index[(iSource]][
+//                                     OUT_RUNOFF].data[0] +
+//                                 out_data[rout.rout_param.source_VIC_index[(iSource]][
+//                                     OUT_BASEFLOW].data[0]));
         }
     }
 
     printf("\nThe Ring, after convolution...\n");
-    print_array(rout.ring, rout.rout_param.iSubsetLength,
-                rout.rout_param.iOutlets);
+    print_array(rout.ring, rout.rout_param.nTimesteps,
+                rout.rout_param.nOutlets, 5);
 
     // Write to output struct...
-    for (s = 0; s < rout.rout_param.iOutlets; s++) {
-        out_data[rout.rout_param.outlet_VIC_index[s]][OUT_DISCHARGE].aggdata[0]
-            =
-                rout.ring[s];
+    for (iOutlet = 0; iOutlet < rout.rout_param.nOutlets; iOutlet++) {
+        out_data[rout.rout_param.outlet_VIC_index[iOutlet]][OUT_DISCHARGE].aggdata[0] = rout.ring[iOutlet];
     }
 }

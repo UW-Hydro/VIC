@@ -55,12 +55,14 @@ cshift(double *data,
 void
 print_array(double *data,
             int     nx,
-            int     ny)
+            int     ny,
+            int     nlines)
 {
     int x, y;
-    for (y = 0; y != ny; y++) {
+    
+    for (y = 0; y != nlines; y++) {
         for (x = 0; x != nx; x++) {
-            printf("%3i:%9.6f ", (int)(x * ny + y), data[x * ny + y]);
+            printf("%3i:%9.6f, ", (int)(x * ny + y), data[x * ny + y]);
         }
         printf("\n");
     }

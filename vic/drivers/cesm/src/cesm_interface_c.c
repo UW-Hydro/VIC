@@ -100,6 +100,9 @@ vic_cesm_init(vic_clock     *vclock,
 int
 vic_cesm_run(vic_clock *vclock)
 {
+
+    bool write_flag;
+
     // reset l2x fields
     initialize_l2x_data();
 
@@ -117,7 +120,10 @@ vic_cesm_run(vic_clock *vclock)
     vic_cesm_put_data();
 
     // if output:
-    vic_write();
+    write_flag = check_write_flag(current);
+    if (write_flag) {
+        vic_write();
+    }
 
     // if save:
     if (vclock->state_flag) {

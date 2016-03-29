@@ -31,7 +31,7 @@
  * @brief    This routine converts data units, and stores finalized values in
  *           an array for later output to the output files.
  *****************************************************************************/
-int
+void
 put_data(all_vars_struct   *all_vars,
          atmos_data_struct *atmos,
          soil_con_struct   *soil_con,
@@ -75,12 +75,6 @@ put_data(all_vars_struct   *all_vars,
     double                     dt_sec;
     double                     out_dt_sec;
     unsigned int               out_step_ratio;
-    static unsigned int        step_count;
-    static int                 Tfoliage_fbcount_total;
-    static int                 Tcanopy_fbcount_total;
-    static int                 Tsnowsurf_fbcount_total;
-    static int                 Tsurf_fbcount_total;
-    static int                 Tsoil_fbcount_total;
 
     cell_data_struct         **cell;
     energy_bal_struct        **energy;
@@ -102,16 +96,6 @@ put_data(all_vars_struct   *all_vars,
     dt_sec = global_param.dt;
     out_dt_sec = global_param.out_dt;
     out_step_ratio = (unsigned int) (out_dt_sec / dt_sec);
-    if (rec >= 0) {
-        step_count++;
-    }
-    if (rec == 0) {
-        Tsoil_fbcount_total = 0;
-        Tsurf_fbcount_total = 0;
-        Tsnowsurf_fbcount_total = 0;
-        Tcanopy_fbcount_total = 0;
-        Tfoliage_fbcount_total = 0;
-    }
 
     // Compute treeline adjustment factors
     for (band = 0; band < options.SNOW_BAND; band++) {
@@ -260,11 +244,6 @@ put_data(all_vars_struct   *all_vars,
                     collect_eb_terms(energy[veg][band],
                                      snow[veg][band],
                                      cell[veg][band],
-                                     &Tsoil_fbcount_total,
-                                     &Tsurf_fbcount_total,
-                                     &Tsnowsurf_fbcount_total,
-                                     &Tcanopy_fbcount_total,
-                                     &Tfoliage_fbcount_total,
                                      Cv,
                                      ThisAreaFract,
                                      ThisTreeAdjust,
@@ -336,11 +315,6 @@ put_data(all_vars_struct   *all_vars,
                         collect_eb_terms(lake_var.energy,
                                          lake_var.snow,
                                          lake_var.soil,
-                                         &Tsoil_fbcount_total,
-                                         &Tsurf_fbcount_total,
-                                         &Tsnowsurf_fbcount_total,
-                                         &Tcanopy_fbcount_total,
-                                         &Tfoliage_fbcount_total,
                                          Cv,
                                          ThisAreaFract,
                                          ThisTreeAdjust,
@@ -577,17 +551,25 @@ put_data(all_vars_struct   *all_vars,
     }
     storage += out_data[OUT_SWE].data[0] + out_data[OUT_SNOW_CANOPY].data[0] +
                out_data[OUT_WDEW].data[0] + out_data[OUT_SURFSTOR].data[0];
-    out_data[OUT_WATER_ERROR].data[0] = calc_water_balance_error(rec, inflow,
-                                                                 outflow,
-                                                                 storage);
+    if (rec > 0) {
+        out_data[OUT_WATER_ERROR].data[0] = calc_water_balance_error(inflow,
+                                                                     outflow,
+                                                                     storage,
+                                                                     save_data->total_moist_storage);
+    }
+    else {
+        out_data[OUT_WATER_ERROR].data[0] = 0.;
+    }
+
+    // Store total storage for next timestep
+    save_data->total_moist_storage = storage;
 
     /********************
        Check Energy Balance
     ********************/
     if (options.FULL_ENERGY) {
         out_data[OUT_ENERGY_ERROR].data[0] = \
-            calc_energy_balance_error(rec,
-                                      out_data[OUT_SWNET].data[0] +
+            calc_energy_balance_error(out_data[OUT_SWNET].data[0] +
                                       out_data[OUT_LWNET].data[0],
                                       out_data[OUT_LATENT].data[0] +
                                       out_data[OUT_LATENT_SUB].data[0],
@@ -602,31 +584,14 @@ put_data(all_vars_struct   *all_vars,
                                       out_data[OUT_RFRZ_ENERGY].data[0]);
     }
     else {
-        out_data[OUT_ENERGY_ERROR].data[0] = 0;  // Perhaps this should be replaced with a NODATA value in this case
+        out_data[OUT_ENERGY_ERROR].data[0] = MISSING;
     }
 
     /******************************************************************************************
        Return to parent function if this was just an initialization of wb and eb storage terms
     ******************************************************************************************/
     if (rec < 0) {
-        return(0);
-    }
-
-
-    /********************
-       Report T Fallback Occurrences
-    ********************/
-    if (rec == (int) global_param.nrecs - 1) {
-        fprintf(LOG_DEST, "Total number of fallbacks in Tfoliage: %d\n",
-                Tfoliage_fbcount_total);
-        fprintf(LOG_DEST, "Total number of fallbacks in Tcanopy: %d\n",
-                Tcanopy_fbcount_total);
-        fprintf(LOG_DEST, "Total number of fallbacks in Tsnowsurf: %d\n",
-                Tsnowsurf_fbcount_total);
-        fprintf(LOG_DEST, "Total number of fallbacks in Tsurf: %d\n",
-                Tsurf_fbcount_total);
-        fprintf(LOG_DEST, "Total number of fallbacks in soil T profile: %d\n",
-                Tsoil_fbcount_total);
+        return;
     }
 
     /********************
@@ -657,16 +622,6 @@ put_data(all_vars_struct   *all_vars,
     out_data[OUT_AERO_RESIST2].aggdata[0] = 1 /
                                             out_data[OUT_AERO_COND2].aggdata[0];
 
-    /********************
-       Output procedure
-       (only execute when we've completed an output interval)
-    ********************/
-    if (step_count == out_step_ratio) {
-        step_count = 0;
-        return 1;
-    }
-
-    return 0;
 }
 
 /******************************************************************************
@@ -872,11 +827,6 @@ void
 collect_eb_terms(energy_bal_struct energy,
                  snow_data_struct  snow,
                  cell_data_struct  cell_wet,
-                 int              *Tsoil_fbcount_total,
-                 int              *Tsurf_fbcount_total,
-                 int              *Tsnowsurf_fbcount_total,
-                 int              *Tcanopy_fbcount_total,
-                 int              *Tfoliage_fbcount_total,
                  double            Cv,
                  double            AreaFract,
                  double            TreeAdjustFactor,
@@ -985,18 +935,13 @@ collect_eb_terms(energy_bal_struct energy,
 
     /** record temperature flags  **/
     out_data[OUT_SURFT_FBFLAG].data[0] += energy.Tsurf_fbflag * AreaFactor;
-    *Tsurf_fbcount_total += energy.Tsurf_fbcount;
     for (index = 0; index < options.Nnode; index++) {
         out_data[OUT_SOILT_FBFLAG].data[index] += energy.T_fbflag[index] *
                                                   AreaFactor;
-        *Tsoil_fbcount_total += energy.T_fbcount[index];
     }
     out_data[OUT_SNOWT_FBFLAG].data[0] += snow.surf_temp_fbflag * AreaFactor;
-    *Tsnowsurf_fbcount_total += snow.surf_temp_fbcount;
     out_data[OUT_TFOL_FBFLAG].data[0] += energy.Tfoliage_fbflag * AreaFactor;
-    *Tfoliage_fbcount_total += energy.Tfoliage_fbcount;
     out_data[OUT_TCAN_FBFLAG].data[0] += energy.Tcanopy_fbflag * AreaFactor;
-    *Tcanopy_fbcount_total += energy.Tcanopy_fbcount;
 
     /** record net shortwave radiation **/
     out_data[OUT_SWNET].data[0] += energy.NetShortAtmos * AreaFactor;
@@ -1155,4 +1100,70 @@ collect_eb_terms(energy_bal_struct energy,
     /** record band net ground heat flux **/
     out_data[OUT_GRND_FLUX_BAND].data[band] -= energy.grnd_flux * Cv *
                                                lakefactor;
+}
+
+/******************************************************************************
+ * @brief    This subroutine computes the overall model water balance, and
+ *           warns the model user if large errors are found.
+ *****************************************************************************/
+double
+calc_water_balance_error(double inflow,
+                         double outflow,
+                         double storage,
+                         double last_storage)
+{
+
+    double        error;
+
+    error = inflow - outflow - (storage - last_storage);
+
+    return(error);
+}
+
+/******************************************************************************
+ * @brief    This subroutine computes the overall model energy balance.
+ *****************************************************************************/
+double
+calc_energy_balance_error(double net_rad,
+                          double latent,
+                          double sensible,
+                          double grnd_flux,
+                          double snow_fluxes)
+{
+    double        error;
+
+    error = net_rad - latent - sensible - grnd_flux + snow_fluxes;
+
+    return(error);
+}
+
+
+/******************************************************************************
+ * @brief    This subroutine checks if it is time to write an output file
+ *****************************************************************************/
+bool
+check_write_flag(int rec) {
+
+    extern global_param_struct global_param;
+
+    static unsigned int  out_step_ratio;
+    static unsigned int  step_count;
+
+
+    if (rec == 0) {
+        step_count = 0;
+        out_step_ratio = (unsigned int) (global_param.out_dt / global_param.dt);
+    }
+
+    if (rec >= 0) {
+        step_count++;
+    }
+
+    // Output procedure (only execute when we've completed an output interval)
+    if (step_count == out_step_ratio) {
+        step_count = 0;
+        return true;
+    }
+
+    return false;
 }

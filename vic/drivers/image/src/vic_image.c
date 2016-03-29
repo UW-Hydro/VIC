@@ -75,7 +75,8 @@ int
 main(int    argc,
      char **argv)
 {
-    int status;
+    int  status;
+    bool write_flag;
 
     // Initialize MPI - note: logging not yet initialized
     status = MPI_Init(&argc, &argv);
@@ -119,7 +120,10 @@ main(int    argc,
         vic_image_run();
 
         // if output:
-        vic_write();
+        write_flag = check_write_flag(current);
+        if (write_flag) {
+            vic_write();
+        }
 
         // if save: TBD needs to be fixed - not working in MPI
         // if (current == global_param.nrecs - 1) {
@@ -135,6 +139,8 @@ main(int    argc,
     if (status != MPI_SUCCESS) {
         log_err("MPI error in main(): %d\n", status);
     }
+
+    log_info("Completed running VIC %s", VIC_DRIVER);
 
     return EXIT_SUCCESS;
 }

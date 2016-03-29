@@ -76,7 +76,6 @@ main(int    argc,
      char **argv)
 {
     int  status;
-    bool write_flag;
 
     // Initialize MPI - note: logging not yet initialized
     status = MPI_Init(&argc, &argv);
@@ -120,8 +119,7 @@ main(int    argc,
         vic_image_run();
 
         // if output:
-        write_flag = check_write_flag(current);
-        if (write_flag) {
+        if (check_write_flag(current)) {
             vic_write();
         }
 

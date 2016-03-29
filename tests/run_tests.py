@@ -1,46 +1,53 @@
 #!/usr/bin/env python
-'''VIC command line testing interface'''
+'''VIC testing command line interface'''
 
 from __future__ import print_function
 import os
+import sys
 import glob
 import argparse
 import datetime
 from collections import OrderedDict
 import string
-from tonic.models.vic.vic import VIC, VICRuntimeError, read_vic_ascii
+
+import pytest
+import pandas as pd
+
+from tonic.models.vic.vic import VIC, VICRuntimeError  # , read_vic_ascii
 from tonic.io import read_config, read_configobj
 from tonic.testing import check_completed, check_for_nans, VICTestError
+
+test_dir = os.path.dirname(os.path.abspath(__file__))
+
 
 OUTPUT_WIDTH = 100
 
 description = '''
                             VIC Test Suite
 -------------------------------------------------------------------------------
-This is the VIC Test Suite.  There are six main test types:
+This is the VIC Test Suite. There are six main test types:
 
-    1.  unit:  function level tests.  *[Note: None currently implemented.]*
-    2.  system: tests that aim to address model runtime issues.  These tests
+    1. unit: function level tests.
+    2. system: tests that aim to address model runtime issues. These tests
             are generally very quick.
         * configuration errors - tests that address model startup and error
                 checking.
-        * restart:  tests that address model state and restart capacity.
-        * I/O:  tests that address model input and output functionality.
-            *  forcings come out the way the come in
-            *  parameter files are appropriately read in allocated.
-    3.  science:  tests that aim to assess the model's scientific skill.
+        * restart: tests that address model state and restart capacity.
+        * I/O: tests that address model input and output functionality.
+            * forcings come out the way the come in
+            * parameter files are appropriately read in and allocated.
+    3. science: tests that aim to assess the model's scientific skill.
             Many of these tests are compared to observations of some kind.
-    4.  examples:  a set of examples that users may download and run.
-    5.  release:  longer, full domain simulations performed prior to release
+    4. examples: a set of examples that users may download and run.
+    5. release: longer, full domain simulations performed prior to release
             demonstrating model output for a final release.
 -------------------------------------------------------------------------------
 '''
 
 epilog = '''
 -------------------------------------------------------------------------------
-The VIC Test Suite was developed by Joe Hamman at the University of Washington
-Land Surface Hydrology Group.  For questions about the development or use of
-VIC, please email the VIC users list serve at vic_users@u.washington.edu.
+For questions about the development or use of VIC or use of this test module,
+please email the VIC users list serve at vic_users@u.washington.edu.
 -------------------------------------------------------------------------------
 '''
 
@@ -104,10 +111,7 @@ def main():
                         help='Test sets to run',
                         choices=['all', 'unit', 'system', 'science',
                                  'examples', 'release'],
-                        default=['unit', 'system', 'science'], nargs='+')
-    parser.add_argument('--unit', type=str,
-                        help='unit tests configuration file',
-                        default='./unit/unit.cfg')
+                        default=['unit', 'system'], nargs='+')
     parser.add_argument('--system', type=str,
                         help='system tests configuration file',
                         default='./system/system_tests.cfg')
@@ -122,29 +126,33 @@ def main():
                         default='./release/release.cfg')
     parser.add_argument('--vic_exe', type=str,
                         help='VIC executable to test',
-                        default=['../drivers/classic/vic_classic'], nargs='+')
+                        default='../vic/drivers/classic/vic_classic.exe')
+    parser.add_argument('--driver', type=str,
+                        help='VIC driver to test',
+                        choices=['classic', 'image'],
+                        default='classic')
     parser.add_argument('--output_dir', type=str,
                         help='directory to write test output to',
                         default='$WORKDIR/VIC_tests_{0}'.format(ymd))
     parser.add_argument('--data_dir', type=str,
                         help='directory to find test data',
-                        default='./test_data/VIC.4.1.2')
+                        default='./samples/VIC_sample_data')
     args = parser.parse_args()
     # ---------------------------------------------------------------- #
 
     # ---------------------------------------------------------------- #
     # Define test directories
     data_dir = args.data_dir
-    test_dir = os.path.dirname(os.path.realpath(__file__))
     out_dir = os.path.expandvars(args.output_dir)
     os.makedirs(out_dir, exist_ok=True)
     # ---------------------------------------------------------------- #
 
     # ---------------------------------------------------------------- #
     # Validate input directories
-    for d in [data_dir, test_dir]:
-        if not os.path.exists(d):
-            raise VICTestError('Directory: {0} does not exist'.format(d))
+    if not (len(args.tests) == 1 and args.tests[0] == 'unit'):
+        for d in [data_dir, test_dir]:
+            if not os.path.exists(d):
+                raise VICTestError('Directory: {0} does not exist'.format(d))
     # ---------------------------------------------------------------- #
 
     # ---------------------------------------------------------------- #
@@ -156,32 +164,31 @@ def main():
 
     # ---------------------------------------------------------------- #
     # Setup VIC executable
-    vic_exe = VIC(args.vic_exe[0])
-    print('VIC version string: {0}'.format(vic_exe.version))
+    if not (len(args.tests) == 1 and args.tests[0] == 'unit'):
+        vic_exe = VIC(args.vic_exe)
+        print('VIC version string:\n{0}'.format(vic_exe.version.decode()))
     # ---------------------------------------------------------------- #
 
     # ---------------------------------------------------------------- #
     # run test sets
     # unit
     if any(i in ['all', 'unit'] for i in args.tests):
-        test_results['unit'] = run_unit_tests(args.unit)
+        test_results['unit'] = run_unit_tests()
 
     # system
     if any(i in ['all', 'system'] for i in args.tests):
-        test_results['system'] = run_system(args.system, vic_exe,
-                                            'system', data_dir,
-                                            os.path.join(out_dir, 'system'))
+        test_results['system'] = run_system(args.system, vic_exe, data_dir,
+                                            os.path.join(out_dir, 'system'),
+                                            args.driver)
     # science
     if any(i in ['all', 'science'] for i in args.tests):
-        test_results['science'] = run_science(args.science, vic_exe,
-                                              'science', data_dir,
+        test_results['science'] = run_science(args.science, vic_exe, data_dir,
                                               os.path.join(out_dir, 'science'))
     # examples
     if any(i in ['all', 'examples'] for i in args.tests):
-        test_results['examples'] = run_examples(args.examples, vic_exe,
-                                                'examples', data_dir,
-                                                os.path.join(out_dir,
-                                                             'examples'))
+        test_results['examples'] = run_examples(args.examples, vic_exe, data_dir,
+                                                os.path.join(out_dir, 'examples'),
+                                                args.driver)
     # release
     if any(i in ['all', 'release'] for i in args.tests):
         test_results['release'] = run_release(args.release)
@@ -189,7 +196,8 @@ def main():
 
     # ---------------------------------------------------------------- #
     # Print test results
-    summary = {}
+    summary = OrderedDict()
+    failed = 0
     print('\nTest Results:')
     for test_set, results in test_results.items():
         print('-'.ljust(OUTPUT_WIDTH, '-'))
@@ -202,6 +210,8 @@ def main():
             if not r.passed:
                 summary[test_set] += 1
 
+        failed += summary[test_set]
+
     print('\nTest Summary:')
     print('-'.ljust(OUTPUT_WIDTH, '-'))
     for test_set, r in summary.items():
@@ -213,8 +223,13 @@ def main():
     # end date and times
     endtime = datetime.datetime.now()
     elapsed = endtime - starttime
-    print('\nFinished testing VIC.  Endtime: {0}'.format(endtime))
+    print('\nFinished testing VIC. Endtime: {0}'.format(endtime))
     print('Time elapsed during testing:  {0}\n'.format(elapsed))
+    # ---------------------------------------------------------------- #
+
+    # ---------------------------------------------------------------- #
+    # return exit code
+    sys.exit(failed)
     # ---------------------------------------------------------------- #
 
     return
@@ -224,13 +239,26 @@ def main():
 # -------------------------------------------------------------------- #
 def run_unit_tests():
     '''Run unittests from config file'''
-    pytest.main('-x unit')
-    return
+
+    print('\n-'.ljust(OUTPUT_WIDTH + 1, '-'))
+    print('Running Unit Tests')
+    print('-'.ljust(OUTPUT_WIDTH, '-'))
+
+    retcode = pytest.main(['-x',  os.path.join(test_dir, 'unit')])
+    return {'unittests': TestResults('unittests',
+                                     test_complete=True,
+                                     passed=retcode == 0,
+                                     comment='see stdout from pytest',
+                                     returncode=retcode)}
+
+    print('\n-'.ljust(OUTPUT_WIDTH + 1, '-'))
+    print('Finished unit tests.')
+    print('-'.ljust(OUTPUT_WIDTH, '-'))
 # -------------------------------------------------------------------- #
 
 
 # -------------------------------------------------------------------- #
-def run_system(config_file, vic_exe, test_dir, test_data_dir, out_dir):
+def run_system(config_file, vic_exe, test_data_dir, out_dir, driver):
     '''Run system tests from config file'''
 
     # ---------------------------------------------------------------- #
@@ -264,7 +292,7 @@ def run_system(config_file, vic_exe, test_dir, test_data_dir, out_dir):
 
         # ------------------------------------------------------------ #
         # read template global parameter file
-        infile = os.path.join(test_dir,
+        infile = os.path.join(test_dir, 'samples',
                               test_dict['global_parameter_file'])
 
         with open(infile, 'r') as global_file:
@@ -290,7 +318,7 @@ def run_system(config_file, vic_exe, test_dir, test_data_dir, out_dir):
         if 'options' in test_dict:
             replacements = test_dict['options']
         else:
-            replacements = {}
+            replacements = OrderedDict()
         global_param = replace_global_values(global_param, replacements)
         # ------------------------------------------------------------ #
 
@@ -387,7 +415,7 @@ def run_system(config_file, vic_exe, test_dir, test_data_dir, out_dir):
 
 
 # -------------------------------------------------------------------- #
-def run_science(config_file, vic_exe, test_dir, test_data_dir, out_dir):
+def run_science(config_file, vic_exe, test_data_dir, out_dir):
     '''Run science tests from config file'''
 
     # ---------------------------------------------------------------- #
@@ -531,7 +559,7 @@ def run_science(config_file, vic_exe, test_dir, test_data_dir, out_dir):
 
 
 # -------------------------------------------------------------------- #
-def run_examples(config_file, vic_exe, test_dir, test_data_dir, out_dir):
+def run_examples(config_file, vic_exe, test_data_dir, out_dir, driver):
     '''Run examples tests from config file '''
 
     # ---------------------------------------------------------------- #
@@ -544,6 +572,14 @@ def run_examples(config_file, vic_exe, test_dir, test_data_dir, out_dir):
     # ---------------------------------------------------------------- #
     # Get setup
     config = read_config(config_file)
+
+    # drop invalid driver tests
+    drop_tests = []
+    for key, test_cfg in config.items():
+        if test_cfg['driver'].lower() != driver.lower():
+            drop_tests.append(key)
+    for test in drop_tests:
+        del config[test]
 
     test_results = OrderedDict()
     # ---------------------------------------------------------------- #
@@ -566,7 +602,7 @@ def run_examples(config_file, vic_exe, test_dir, test_data_dir, out_dir):
 
         # ------------------------------------------------------------ #
         # read template global parameter file
-        infile = os.path.join(test_dir, test_dict['global_parameter_file'])
+        infile = os.path.join(test_dir, 'examples', test_dict['global_parameter_file'])
 
         with open(infile, 'r') as global_file:
             global_param = global_file.read()
@@ -643,16 +679,22 @@ def run_examples(config_file, vic_exe, test_dir, test_data_dir, out_dir):
         except VICRuntimeError as e:
             test_comment = 'Test failed during simulation'
             error_message = e
+            tail = vic_exe.stderr
         except VICTestError as e:
             test_comment = 'Test failed during testing of output files'
             error_message = e
+            tail = None
         except VICReturnCodeError as e:
             test_comment = 'Test failed due to incorrect return code'
             error_message = e
+            tail = vic_exe.stderr
 
         if test_comment or error_message:
             print('\t{0}'.format(test_comment))
             print('\t{0}'.format(error_message))
+            if tail is not None:
+                print('\tLast 10 lines of standard out:')
+                print_tail(tail)
         # ------------------------------------------------------------ #
 
         # ------------------------------------------------------------ #
@@ -686,7 +728,7 @@ def setup_test_dirs(testname, out_dir, mkdirs=['results', 'state',
                                                'logs', 'plots']):
     '''create test directories for testname'''
 
-    dirs = {}
+    dirs = OrderedDict()
     dirs['test'] = os.path.join(out_dir, testname)
     for d in mkdirs:
         dirs[d] = os.path.join(dirs['test'], d)
@@ -709,6 +751,12 @@ def print_test_dict(d):
         print('-'.ljust(OUTPUT_WIDTH, '-'))
     return
 # -------------------------------------------------------------------- #
+
+
+def print_tail(string, n=10, indent='\t--->'):
+    lines = string.decode().splitlines()
+    for l in lines[-10:]:
+        print('{0}{1}'.format(indent, l))
 
 
 # -------------------------------------------------------------------- #
@@ -737,6 +785,54 @@ def replace_global_values(gp, replace):
 
     return gpl
 # -------------------------------------------------------------------- #
+
+
+# TODO: Update tonic version of this function, need to check that subdaily works
+# -------------------------------------------------------------------- #
+def read_vic_ascii(filepath, header=True, parse_dates=True,
+                   datetime_index=None, names=None, **kwargs):
+    """Generic reader function for VIC ASCII output with a standard header
+    filepath: path to VIC output file
+    header (True or False):  Standard VIC header is present
+    parse_dates (True or False): Parse dates from file
+    datetime_index (Pandas.tseries.index.DatetimeIndex):  Index to use as
+    datetime index names (list like): variable names
+    **kwargs: passed to Pandas.read_table
+    returns Pandas.DataFrame
+    """
+    kwargs['header'] = None
+
+    if header:
+        kwargs['skiprows'] = 6
+
+        # get names
+        if names is None:
+            with open(filepath) as f:
+                # skip lines 0 through 3
+                for _ in range(3):
+                    next(f)
+
+                # process header
+                names = next(f)
+                names = names.strip('#').replace('OUT_', '').split()
+
+    kwargs['names'] = names
+
+    if parse_dates:
+        time_cols = ['YEAR', 'MONTH', 'DAY']
+        if 'SECONDS' in names:
+            time_cols.append('SECONDS')
+        kwargs['parse_dates'] = {'datetime': time_cols}
+        kwargs['index_col'] = 0
+
+    df = pd.read_table(filepath, **kwargs)
+
+    if datetime_index is not None:
+        df.index = datetime_index
+
+    return df
+# -------------------------------------------------------------------- #
+
 
 # -------------------------------------------------------------------- #
 if __name__ == '__main__':

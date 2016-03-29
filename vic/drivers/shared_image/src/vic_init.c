@@ -24,7 +24,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  *****************************************************************************/
 
-#include <vic_driver_image.h>
+#include <vic_driver_shared_image.h>
 
 /******************************************************************************
  * @brief    Initialize model parameters
@@ -34,12 +34,10 @@ vic_init(void)
 {
     extern all_vars_struct    *all_vars;
     extern size_t              current;
-    extern dmy_struct         *dmy;
     extern domain_struct       global_domain;
     extern domain_struct       local_domain;
     extern option_struct       options;
     extern filenames_struct    filenames;
-    extern global_param_struct global_param;
     extern soil_con_struct    *soil_con;
     extern veg_con_map_struct *veg_con_map;
     extern veg_con_struct    **veg_con;
@@ -52,6 +50,7 @@ vic_init(void)
     char                       locstr[MAXSTRING];
     double                     mean;
     double                     sum;
+    double                    *Cv_sum = NULL;
     double                    *dvar = NULL;
     int                       *ivar = NULL;
     size_t                     i;
@@ -70,9 +69,11 @@ vic_init(void)
     size_t                     d4start[4];
     int                        tmp_lake_idx;
 
-    // make_dmy()
-    initialize_time();
-    dmy = make_dmy(&global_param);
+    // allocate memory for Cv_sum
+    Cv_sum = malloc(local_domain.ncells_active * sizeof(*Cv_sum));
+    if (Cv_sum == NULL) {
+        log_err("Memory allocation error in vic_init().");
+    }
 
     // allocate memory for variables to be read
     dvar = malloc(local_domain.ncells_active * sizeof(*dvar));
@@ -117,6 +118,8 @@ vic_init(void)
     // TBD: Check that options.NVEGTYPES is the right number. Bare soil is
     // the complicating factor here
     for (i = 0; i < local_domain.ncells_active; i++) {
+        Cv_sum[i] = 0.;
+
         for (j = 0; j < options.NVEGTYPES; j++) {
             veg_lib[i][j].NVegLibTypes = options.NVEGTYPES;
             veg_lib[i][j].veg_class = (int) j;
@@ -1003,7 +1006,7 @@ vic_init(void)
                 k++;
             }
             else {
-                veg_con_map[i].vidx[j] = -1;
+                veg_con_map[i].vidx[j] = NODATA_VEG;
             }
         }
     }
@@ -1017,7 +1020,7 @@ vic_init(void)
                                         d4start, d4count, dvar);
             for (i = 0; i < local_domain.ncells_active; i++) {
                 vidx = veg_con_map[i].vidx[j];
-                if (vidx != -1) {
+                if (vidx != NODATA_VEG) {
                     veg_con[i][vidx].zone_depth[k] = (double) dvar[i];
                 }
             }
@@ -1033,7 +1036,7 @@ vic_init(void)
                                         d4start, d4count, dvar);
             for (i = 0; i < local_domain.ncells_active; i++) {
                 vidx = veg_con_map[i].vidx[j];
-                if (vidx != -1) {
+                if (vidx != NODATA_VEG) {
                     veg_con[i][vidx].zone_fract[k] = (double) dvar[i];
                 }
             }
@@ -1051,7 +1054,7 @@ vic_init(void)
         // Only run to options.NVEGTYPES - 1, since bare soil is the last type
         for (j = 0; j < options.NVEGTYPES - 1; j++) {
             vidx = veg_con_map[i].vidx[j];
-            if (vidx != -1) {
+            if (vidx != NODATA_VEG) {
                 sum = 0;
                 for (k = 0; k < options.ROOT_ZONES; k++) {
                     sum += veg_con[i][vidx].zone_depth[k];
@@ -1093,10 +1096,7 @@ vic_init(void)
                             "library\n%s", veg_con[i][vidx].veg_class, vidx, i,
                             locstr);
                 }
-                // bad use of indexing -- Cv_sum should not be part of the
-                // structure. Simply maintained for backward compatibility with
-                // classic mode
-                veg_con[i][0].Cv_sum += veg_con[i][vidx].Cv;
+                Cv_sum[i] += veg_con[i][vidx].Cv;
 
                 // check for overstory
                 if (!veg_lib[i][j].overstory) {
@@ -1104,6 +1104,9 @@ vic_init(void)
                 }
             }
         }
+        // handle the bare soil portion of the tile
+        vidx = veg_con_map[i].vidx[options.NVEGTYPES - 1];
+        Cv_sum[i] += veg_con[i][vidx].Cv;
 
         // handle the vegetation for the treeline option. This is somewhat
         // confusingly handled in VIC. If I am not mistaken, in VIC classic
@@ -1147,23 +1150,23 @@ vic_init(void)
         // Only case 2 needs to be handled explicitly
 
         if (options.SNOW_BAND > 1 && options.COMPUTE_TREELINE &&
-            !no_overstory && veg_con[i][0].Cv_sum == 1.) {
+            !no_overstory && Cv_sum[i] == 1.) {
             // Use bare soil above treeline
             if (options.AboveTreelineVeg < 0) {
                 for (j = 0; j < options.NVEGTYPES; j++) {
                     vidx = veg_con_map[i].vidx[j];
-                    if (vidx != -1) {
+                    if (vidx != NODATA_VEG) {
                         veg_con[i][vidx].Cv -=
                             0.001 / veg_con[i][vidx].vegetat_type_num;
                     }
                 }
-                veg_con[i][0].Cv_sum -= 0.001;
+                Cv_sum[i] -= 0.001;
             }
             // Use defined vegetation type above treeline
             else {
                 for (j = 0; j < options.NVEGTYPES; j++) {
                     vidx = veg_con_map[i].vidx[j];
-                    if (vidx != -1) {
+                    if (vidx != NODATA_VEG) {
                         veg_con[i][vidx].Cv -=
                             0.001 / veg_con[i][vidx].vegetat_type_num;
                         veg_con[i][vidx].vegetat_type_num += 1;
@@ -1172,8 +1175,6 @@ vic_init(void)
                 veg_con[i][options.NVEGTYPES - 1].Cv = 0.001;
                 veg_con[i][options.NVEGTYPES - 1].veg_class =
                     options.AboveTreelineVeg;
-                veg_con[i][options.NVEGTYPES - 1].Cv_sum =
-                    veg_con[i][0].Cv_sum;
                 veg_con[i][options.NVEGTYPES - 1].vegetat_type_num =
                     veg_con[i][0].vegetat_type_num;
                 // Since root zones are not defined they are copied from another
@@ -1194,7 +1195,7 @@ vic_init(void)
                         k++;
                     }
                     else {
-                        veg_con_map[i].vidx[j] = -1;
+                        veg_con_map[i].vidx[j] = NODATA_VEG;
                     }
                 }
                 // check that the vegetation type is defined in the vegetation
@@ -1225,22 +1226,11 @@ vic_init(void)
             }
         }
 
-        // Bare soil is now read in as the "last" (highest index) vegetation
-        // class
-        // rescale vegetation classes to 1.0 if their sum is greater than 0.99
-        // otherwise throw an error
-        // TBD: Need better check for equal to 1.
-        if (veg_con[i][0].Cv_sum != 1.) {
+        // If the sum of the tile fractions is not within a tolerance, throw an error
+        if (!assert_close_double(Cv_sum[i], 1., 0., 0.001)) {
             sprint_location(locstr, &(local_domain.locations[i]));
-            log_warn("Cv !=  1.0 (%f) at grid cell %zd. Rescaling ...\n%s",
-                     veg_con[i][0].Cv_sum, i, locstr);
-            for (j = 0; j < options.NVEGTYPES; j++) {
-                vidx = veg_con_map[i].vidx[j];
-                if (vidx != -1) {
-                    veg_con[i][vidx].Cv /= veg_con[i][0].Cv_sum;
-                }
-            }
-            veg_con[i][0].Cv_sum = 1.;
+            log_err("Cv !=  1.0 (%f) at grid cell %zd. Exiting ...\n%s",
+                    Cv_sum[i], i, locstr);
         }
     }
 
@@ -1253,7 +1243,7 @@ vic_init(void)
                                         d3start, d3count, dvar);
             for (i = 0; i < local_domain.ncells_active; i++) {
                 vidx = veg_con_map[i].vidx[j];
-                if (vidx != -1) {
+                if (vidx != NODATA_VEG) {
                     veg_con[i][vidx].sigma_slope = (double) dvar[i];
                     if (veg_con[i][vidx].sigma_slope <= 0) {
                         log_err("cell %zu veg %d: deviation of terrain slope "
@@ -1270,7 +1260,7 @@ vic_init(void)
                                         d3start, d3count, dvar);
             for (i = 0; i < local_domain.ncells_active; i++) {
                 vidx = veg_con_map[i].vidx[j];
-                if (vidx != -1) {
+                if (vidx != NODATA_VEG) {
                     veg_con[i][vidx].lag_one = (double) dvar[i];
                     if (veg_con[i][vidx].lag_one <= 0) {
                         log_err("cell %zu veg %d: lag_one is %f but "
@@ -1287,7 +1277,7 @@ vic_init(void)
                                         d3start, d3count, dvar);
             for (i = 0; i < local_domain.ncells_active; i++) {
                 vidx = veg_con_map[i].vidx[j];
-                if (vidx != -1) {
+                if (vidx != NODATA_VEG) {
                     veg_con[i][vidx].fetch = (double) dvar[i];
                     if (veg_con[i][vidx].fetch <= 1) {
                         log_err("cell %zu veg %d: fetch is %f but "

@@ -33,12 +33,9 @@
 
 void get_forcing_file_info(param_set_struct *param_set, size_t file_num);
 void get_global_param(FILE *);
-void vic_alloc(void);
-void vic_finalize(void);
+void vic_image_init(void);
+void vic_image_start(void);
 void vic_force(void);
-void vic_image_run(void);
-void vic_init(void);
-void vic_init_output(void);
-void vic_start(void);
+void vic_restore(void);
 
 #endif

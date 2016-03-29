@@ -1,0 +1,81 @@
+#!/usr/bin/env bash
+
+set -e
+
+DRIVER_PATH="./vic/drivers/cesm/"
+DRIVER_LIB="${DRIVER_PATH}lndlib.a"
+
+function vic_before_install {
+    echo vic_before_install
+    echo $PATH
+    if [ ! -z "$USE_CC" ]; then
+        echo "export CC=$USE_CC"
+        export CC=$USE_CC;
+        $CC --version
+    fi
+    if [ "$TRAVIS_OS_NAME" = "osx" ]; then
+        echo "Testing on osx"
+		if [ ! -z "$BREW_TAPS" ]; then
+			for tap in $BREW_TAPS
+			do
+				brew tap $tap
+			done
+		fi
+        if [ ! -z "$BREW_INSTALLS" ]; then
+            brew update
+            for pkg in $BREW_INSTALLS
+            do
+                brew outdated $pkg || brew upgrade $pkg || brew install $pkg
+                brew link $pkg
+            done
+        fi
+		export TRAVIS_NETCDFPATH=/usr/local
+		export TRAVIS_MPIPATH=/usr/local
+    else
+		export TRAVIS_NETCDFPATH=/usr
+		export TRAVIS_MPIPATH="${HOME}/mpich"
+
+        # Install MPICH
+        if [ ! -d ${TRAVIS_MPIPATH} ]; then
+            install_mpich
+        else
+            echo "MPICH installed..."
+        fi
+        find ${TRAVIS_MPIPATH} -name mpiexec
+        find ${TRAVIS_MPIPATH} -name mpicc
+	fi
+
+}
+
+function vic_install {
+    echo vic_install
+    cd ${TRAVIS_BUILD_DIR}
+    echo $PWD
+    make full -C $DRIVER_PATH
+}
+
+function vic_before_script {
+    echo vic_before_script
+    if [ ! -f $DRIVER_LIB ]; then
+        echo "Library (${DRIVER_LIB}) not found!"
+        exit 1
+    fi
+}
+
+function vic_script {
+    echo vic_script
+    nm ${DRIVER_LIB}
+
+    # Run test package
+    ./tests/run_tests.py unit
+}
+
+function vic_after_success {
+    echo vic_after_success
+    echo "Success!"
+}
+
+function vic_after_failure {
+    echo vic_after_failure
+    echo "Test failed -- please review the log"
+}

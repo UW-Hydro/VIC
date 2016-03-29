@@ -10,6 +10,9 @@
 
 # Build process
 .depend
+.cache
+build/
+dist/
 
 # Shared objects (inc. Windows DLLs)
 *.dll

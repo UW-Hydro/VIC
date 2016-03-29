@@ -40,6 +40,7 @@ domain_struct       global_domain;
 domain_struct       local_domain;
 global_param_struct global_param;
 lake_con_struct     lake_con;
+MPI_Comm            MPI_COMM_VIC = MPI_COMM_WORLD;
 MPI_Datatype        mpi_global_struct_type;
 MPI_Datatype        mpi_filenames_struct_type;
 MPI_Datatype        mpi_location_struct_type;
@@ -97,7 +98,7 @@ main(int    argc,
     }
 
     // read global parameters
-    vic_start();
+    vic_image_start();
 
     // read global parameters for routing
     rout_start();   // Routing routine (extension)
@@ -109,7 +110,7 @@ main(int    argc,
     rout_alloc();   // Routing routine (extension)
 
     // initialize model parameters from parameter files
-    vic_init();
+    vic_image_init();
 
     // initialize routing parameters from parameter files
     rout_init();    // Routing routine (extension)

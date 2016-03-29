@@ -134,7 +134,7 @@ print_license()
             "  model version %s, Copyright (C) 2014 Land Surface\n",
             SHORT_VERSION);
     fprintf(stdout,
-            "  HydrologyGroup, Dept. of Civil and Environmental Engineering,\n");
+            "  Hydrology Group, Dept. of Civil and Environmental Engineering,\n");
     fprintf(stdout,
             "  University of Washington.  VIC comes with ABSOLUTELY NO\n");
     fprintf(stdout,

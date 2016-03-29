@@ -1,7 +1,7 @@
 /******************************************************************************
  * @section DESCRIPTION
  *
- * Run function for image mode driver.
+ * Finalize VIC run by freeing memory and closing open files.
  *
  * @section LICENSE
  *
@@ -24,36 +24,20 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  *****************************************************************************/
 
-#include <vic_driver_image.h>
+#include <vic_driver_cesm.h>
 
 /******************************************************************************
- * @brief    Run VIC for one timestep and store output data
+ * @brief    Finalize VIC run by freeing memory and closing open files.
  *****************************************************************************/
 void
-vic_image_run(void)
+vic_cesm_finalize(void)
 {
-    extern size_t              current;
-    extern all_vars_struct    *all_vars;
-    extern atmos_data_struct  *atmos;
-    extern dmy_struct         *dmy;
-    extern domain_struct       local_domain;
-    extern global_param_struct global_param;
-    extern lake_con_struct     lake_con;
-    extern out_data_struct   **out_data;
-    extern save_data_struct   *save_data;
-    extern soil_con_struct    *soil_con;
-    extern veg_con_struct    **veg_con;
-    extern veg_hist_struct   **veg_hist;
-    extern veg_lib_struct    **veg_lib;
+    extern x2l_data_struct *x2l_vic;
+    extern l2x_data_struct *l2x_vic;
 
-    size_t                     i;
+    // free VIC/CESM data structures
+    free(x2l_vic);
+    free(l2x_vic);
 
-    for (i = 0; i < local_domain.ncells_active; i++) {
-        update_step_vars(&(all_vars[i]), veg_con[i], veg_hist[i]);
-        vic_run(&(atmos[i]), &(all_vars[i]), &dmy[current], &global_param,
-                &lake_con, &(soil_con[i]), veg_con[i], veg_lib[i]);
-        put_data(&(all_vars[i]), &(atmos[i]), &(soil_con[i]), veg_con[i],
-                 veg_lib[i], &lake_con, out_data[i], &(save_data[i]),
-                 current);
-    }
+    vic_finalize();
 }

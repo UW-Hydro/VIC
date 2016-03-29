@@ -43,7 +43,9 @@
 /***** Model Constants *****/
 #define MAXSTRING    2048
 #define MISSING      -99999.   /**< missing value */
+#define MISSING_USI  99999.    /**< missing value for unsigned ints */
 #define NODATA_VH    -1        /**< missing value for veg_hist inputs */
+#define NODATA_VEG   -1        /**< flag for veg types not in grid cell */
 #define ERROR        -999      /**< Error Flag returned by subroutines */
 
 /***** Define maximum array sizes for model source code *****/
@@ -642,7 +644,6 @@ typedef struct {
  *****************************************************************************/
 typedef struct {
     double Cv;              /**< fraction of vegetation coverage */
-    double Cv_sum;          /**< total fraction of vegetation coverage */
     double root[MAX_LAYERS]; /**< percent of roots in each soil layer (fraction) */
     double *zone_depth;     /**< depth of root zone */
     double *zone_fract;     /**< fraction of roots within root zone */

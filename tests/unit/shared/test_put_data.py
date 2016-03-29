@@ -26,8 +26,7 @@ def test_calc_energy_balance_error():
     sensibles = np.random.random(steps) - 0.2
     grnd_fluxes = np.random.random(steps) - 0.3
     snow_fluxes = np.random.random(steps) - 0.15
-    assert vic_lib.calc_energy_balance_error(
-        -1 * steps, 0., 0., 0., 0., 0.) == 0.
+    assert vic_lib.calc_energy_balance_error(0., 0., 0., 0., 0.) == 0.
     for rec in recs:
         assert vic_lib.calc_energy_balance_error(
             net_rads[rec], latents[rec], sensibles[rec], grnd_fluxes[rec],

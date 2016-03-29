@@ -65,10 +65,12 @@ get_global_domain(char          *nc_name,
                      run);
 
     for (i = 0; i < global_domain->ncells_total; i++) {
-        if (run[i]) {
+        if (run[i] == 1) {
             global_domain->ncells_active++;
         }
     }
+    debug("%zu active grid cells found in domain mask",
+          global_domain->ncells_active);
 
     // if MASTER_PROC
     global_domain->locations =
@@ -87,13 +89,13 @@ get_global_domain(char          *nc_name,
     }
 
     for (i = 0; i < global_domain->ncells_total; i++) {
-        if (run[i]) {
+        if (run[i] == 1) {
             global_domain->locations[i].run = true;
         }
     }
 
     for (i = 0, j = 0; i < global_domain->ncells_total; i++) {
-        if (run[i]) {
+        if (run[i] == 1) {
             global_domain->locations[i].io_idx = i;
             global_domain->locations[i].global_idx = j;
             j++;
@@ -159,14 +161,14 @@ get_global_domain(char          *nc_name,
             if (var[i] < -180.f || var[i] > 180.f) {
                 var[i] -= round(var[i] / 360.f) * 360.f;
             }
-            global_domain->locations[i].longitude = (double) var[i];
+            global_domain->locations[i].longitude = var[i];
         }
 
         // get latitude for unmasked grid
         get_nc_field_double(nc_name, global_domain->info.lat_var,
                             d2start, d2count, var);
         for (i = 0; i < global_domain->ncells_total; i++) {
-            global_domain->locations[i].latitude = (double) var[i];
+            global_domain->locations[i].latitude = var[i];
         }
     }
     else {
@@ -180,7 +182,7 @@ get_global_domain(char          *nc_name,
     get_nc_field_double(nc_name, global_domain->info.area_var,
                         d2start, d2count, var);
     for (i = 0; i < global_domain->ncells_total; i++) {
-        global_domain->locations[i].area = (double) var[i];
+        global_domain->locations[i].area = var[i];
     }
 
     // get fraction
@@ -188,7 +190,7 @@ get_global_domain(char          *nc_name,
     get_nc_field_double(nc_name, global_domain->info.frac_var,
                         d2start, d2count, var);
     for (i = 0; i < global_domain->ncells_total; i++) {
-        global_domain->locations[i].frac = (double) var[i];
+        global_domain->locations[i].frac = var[i];
     }
 
     // free memory
@@ -206,8 +208,8 @@ initialize_domain(domain_struct *domain)
 {
     domain->ncells_total = 0;
     domain->ncells_active = 0;
-    domain->n_nx = 0;
-    domain->n_ny = 0;
+    domain->n_nx = MISSING_USI;
+    domain->n_ny = MISSING_USI;
     domain->locations = NULL;
 
     // Initialize domain info structure
@@ -218,7 +220,7 @@ initialize_domain(domain_struct *domain)
     strcpy(domain->info.frac_var, "MISSING");
     strcpy(domain->info.y_dim, "MISSING");
     strcpy(domain->info.x_dim, "MISSING");
-    domain->info.n_coord_dims = 0;
+    domain->info.n_coord_dims = MISSING_USI;
 }
 
 /******************************************************************************
@@ -227,15 +229,15 @@ initialize_domain(domain_struct *domain)
 void
 initialize_location(location_struct *location)
 {
-    location->run = 0;
-    location->latitude = 0;
-    location->longitude = 0;
-    location->area = 0;
-    location->frac = 0;
-    location->nveg = 0;
-    location->global_idx = 0;
-    location->io_idx = 0;
-    location->local_idx = 0;
+    location->run = false;
+    location->latitude = MISSING;
+    location->longitude = MISSING;
+    location->area = MISSING;
+    location->frac = MISSING;
+    location->nveg = MISSING_USI;
+    location->global_idx = MISSING_USI;
+    location->io_idx = MISSING_USI;
+    location->local_idx = MISSING_USI;
 }
 
 /******************************************************************************

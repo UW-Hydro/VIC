@@ -81,7 +81,8 @@ initialize_model_state(all_vars_struct *all_vars,
     }
 
     /************************************************************************
-       CASE 1: initial conditions files provided -- handled in vic_restore()
+       CASE 1: initial conditions files provided -- handled in
+       vic_populate_model_state()
     ************************************************************************/
 
     /************************************************************************

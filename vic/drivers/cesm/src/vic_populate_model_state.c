@@ -1,7 +1,7 @@
 /******************************************************************************
  * @section DESCRIPTION
  *
- * Restore model state.
+ * Populate model state.
  *
  * @section LICENSE
  *
@@ -24,15 +24,13 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  *****************************************************************************/
 
-#include <vic_def.h>
-#include <vic_run.h>
 #include <vic_driver_cesm.h>
 
 /******************************************************************************
- * @brief    This function handles tasks related to restoring model state.
+ * @brief    This function handles tasks related to populating model state.
  *****************************************************************************/
 void
-vic_restore(char *runtype_str)
+vic_populate_model_state(char *runtype_str)
 {
     extern all_vars_struct *all_vars;
     extern domain_struct    local_domain;
@@ -60,7 +58,8 @@ vic_restore(char *runtype_str)
         // Get restart file from rpointer file
         read_rpointer_file(filenames.init_state);
 
-        // TODO: read initial state file
+        // read initial state file
+        vic_restore();
     }
     else if (runtype == CESM_RUNTYPE_CLEANSTART) {
         // run type is clean start

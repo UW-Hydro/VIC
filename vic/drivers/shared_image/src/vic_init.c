@@ -936,8 +936,9 @@ vic_init(void)
     for (i = 0; i < local_domain.ncells_active; i++) {
         for (j = 0; j < options.SNOW_BAND; j++) {
             // Lapse average annual July air temperature
-            if (soil_con[i].avgJulyAirTemp + soil_con[i].Tfactor[j] <=
-                param.TREELINE_TEMPERATURE) {
+            if ((options.COMPUTE_TREELINE) &&
+                (soil_con[i].avgJulyAirTemp + soil_con[i].Tfactor[j] <=
+                 param.TREELINE_TEMPERATURE)) {
                 // Snow band is above treeline
                 soil_con[i].AboveTreeLine[j] = true;
             }
@@ -1106,7 +1107,9 @@ vic_init(void)
         }
         // handle the bare soil portion of the tile
         vidx = veg_con_map[i].vidx[options.NVEGTYPES - 1];
-        Cv_sum[i] += veg_con[i][vidx].Cv;
+        if (vidx != NODATA_VEG) {
+            Cv_sum[i] += veg_con[i][vidx].Cv;
+        }
 
         // handle the vegetation for the treeline option. This is somewhat
         // confusingly handled in VIC. If I am not mistaken, in VIC classic

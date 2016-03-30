@@ -238,9 +238,8 @@ main(int   argc,
 
             /** Sending a negative record number (-global_param.nrecs) to
                 put_data() will accomplish this **/
-            ErrorFlag = put_data(&all_vars, &atmos[0], &soil_con, veg_con,
-                                 veg_lib, &lake_con, out_data, &save_data,
-                                 -global_param.nrecs);
+            put_data(&all_vars, &atmos[0], &soil_con, veg_con, veg_lib, &lake_con,
+                     out_data, &save_data, -global_param.nrecs);
 
             /******************************************
                Run Model in Grid Cell for all Time Steps
@@ -263,9 +262,10 @@ main(int   argc,
                 /**************************************************
                    Calculate cell average values for current time step
                 **************************************************/
-                write_flag = put_data(&all_vars, &atmos[rec], &soil_con,
-                                      veg_con, veg_lib, &lake_con, out_data,
-                                      &save_data, rec);
+                put_data(&all_vars, &atmos[rec], &soil_con, veg_con, veg_lib,
+                         &lake_con, out_data, &save_data, rec);
+
+                write_flag = check_write_flag(rec);
 
                 // Write cell average values for current time step
                 if (write_flag) {
@@ -344,6 +344,8 @@ main(int   argc,
         fclose(filep.statefile);
     }
     finalize_logging();
+
+    log_info("Completed running VIC %s", VIC_DRIVER);
 
     return EXIT_SUCCESS;
 }       /* End Main Program */

@@ -425,6 +425,11 @@ vic_init(void)
                 "recompile.", options.Nlayer, MAX_LAYERS);
     }
 
+    // latitude and longitude
+    for (i = 0; i < local_domain.ncells_active; i++) {
+        soil_con[i].lat = local_domain.locations[i].latitude;
+        soil_con[i].lng = local_domain.locations[i].longitude;
+    }
 
     // b_infilt
     get_scatter_nc_field_double(filenames.soil, "infilt",
@@ -840,7 +845,7 @@ vic_init(void)
             get_scatter_nc_field_double(filenames.snowband, "Pfactor",
                                         d3start, d3count, dvar);
             for (i = 0; i < local_domain.ncells_active; i++) {
-                soil_con[i].BandElev[j] = (double) dvar[i];
+                soil_con[i].Pfactor[j] = (double) dvar[i];
             }
         }
         // Run some checks and corrections for soil
@@ -936,8 +941,9 @@ vic_init(void)
     for (i = 0; i < local_domain.ncells_active; i++) {
         for (j = 0; j < options.SNOW_BAND; j++) {
             // Lapse average annual July air temperature
-            if (soil_con[i].avgJulyAirTemp + soil_con[i].Tfactor[j] <=
-                param.TREELINE_TEMPERATURE) {
+            if ((options.COMPUTE_TREELINE) &&
+                (soil_con[i].avgJulyAirTemp + soil_con[i].Tfactor[j] <=
+                 param.TREELINE_TEMPERATURE)) {
                 // Snow band is above treeline
                 soil_con[i].AboveTreeLine[j] = true;
             }
@@ -1106,7 +1112,9 @@ vic_init(void)
         }
         // handle the bare soil portion of the tile
         vidx = veg_con_map[i].vidx[options.NVEGTYPES - 1];
-        Cv_sum[i] += veg_con[i][vidx].Cv;
+        if (vidx != NODATA_VEG) {
+            Cv_sum[i] += veg_con[i][vidx].Cv;
+        }
 
         // handle the vegetation for the treeline option. This is somewhat
         // confusingly handled in VIC. If I am not mistaken, in VIC classic
@@ -1528,7 +1536,7 @@ vic_init(void)
 
         // compute other lake parameters here
         for (i = 0; i < local_domain.ncells_active; i++) {
-            soil_con[i].cell_area = global_domain.locations[i].area;
+            soil_con[i].cell_area = local_domain.locations[i].area;
             compute_lake_params(&(lake_con[i]), soil_con[i]);
         }
     }
@@ -1546,8 +1554,7 @@ vic_init(void)
             }
             initialize_lake(&(all_vars[i].lake_var), lake_con[i],
                             &(soil_con[i]),
-                            &(all_vars[i].cell[tmp_lake_idx][0]),
-                            soil_con[i].avg_temp, 0);
+                            &(all_vars[i].cell[tmp_lake_idx][0]), 0);
         }
         initialize_energy(all_vars[i].energy, nveg);
     }

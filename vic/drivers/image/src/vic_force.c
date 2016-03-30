@@ -129,7 +129,8 @@ vic_force(void)
     // Wind speed: wind
     for (j = 0; j < NF; j++) {
         d3start[0] = global_param.forceoffset[0] + j;
-        get_scatter_nc_field_double(filenames.forcing[0], "wind",
+        get_scatter_nc_field_double(filenames.forcing[0], 
+                                    param_set.TYPE[WIND].varname,
                                     d3start, d3count, dvar);
         for (i = 0; i < local_domain.ncells_active; i++) {
             atmos[i].wind[j] = (double) dvar[i];

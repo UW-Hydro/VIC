@@ -80,7 +80,7 @@ int
 main(int    argc,
      char **argv)
 {
-    int status;
+    int  status;
 
     ////////////////////////////////////////////////////////////////////////////
     // FOR DEBUGGING ONLY !!!
@@ -114,8 +114,8 @@ main(int    argc,
     // initialize model parameters from parameter files
     vic_image_init();
 
-    // restore model state, either using a cold start or from a restart file
-    vic_restore();
+    // populate model state, either using a cold start or from a restart file
+    vic_populate_model_state();
 
     // initialize output structures
     vic_init_output();
@@ -129,7 +129,9 @@ main(int    argc,
         vic_image_run();
 
         // if output:
-        vic_write();
+        if (check_write_flag(current)) {
+            vic_write();
+        }
 
         // if save: TBD needs to be fixed - not working in MPI
         // if (current == global_param.nrecs - 1) {
@@ -145,6 +147,8 @@ main(int    argc,
     if (status != MPI_SUCCESS) {
         log_err("MPI error in main(): %d\n", status);
     }
+
+    log_info("Completed running VIC %s", VIC_DRIVER);
 
     return EXIT_SUCCESS;
 }

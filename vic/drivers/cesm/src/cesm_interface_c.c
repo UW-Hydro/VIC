@@ -85,8 +85,8 @@ vic_cesm_init(vic_clock     *vclock,
     // initialize model parameters from parameter files
     vic_init();
 
-    // restore model state, either using a cold start or from a restart file
-    vic_restore(trim(cmeta->starttype));
+    // populate model state, either using a cold start or from a restart file
+    vic_populate_model_state(trim(cmeta->starttype));
 
     // initialize output structures
     vic_init_output();
@@ -100,6 +100,7 @@ vic_cesm_init(vic_clock     *vclock,
 int
 vic_cesm_run(vic_clock *vclock)
 {
+
     // reset l2x fields
     initialize_l2x_data();
 
@@ -117,7 +118,9 @@ vic_cesm_run(vic_clock *vclock)
     vic_cesm_put_data();
 
     // if output:
-    vic_write();
+    if (check_write_flag(current)) {
+        vic_write();
+    }
 
     // if save:
     if (vclock->state_flag) {

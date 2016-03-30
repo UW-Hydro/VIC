@@ -129,13 +129,16 @@ get_global_domain(char          *nc_name,
         // get longitude for unmasked grid
         get_nc_field_double(nc_name, global_domain->info.lon_var,
                             d1start, d1count, var_lon);
-        for (i = 0; i < global_domain->n_nx; i++) {
-            // rescale to [-180., 180]. Note that the if statement is not strictly
-            // needed, but it prevents -180 from turning into 180 and vice versa
-            if (var_lon[i] < -180.f || var_lon[i] > 180.f) {
-                var_lon[i] -= round(var_lon[i] / 360.f) * 360.f;
+        for (j = 0; j < global_domain->n_ny; j++) {
+            for (i = 0; i < global_domain->n_nx; i++) {
+                // rescale to [-180., 180]. Note that the if statement is not strictly
+                // needed, but it prevents -180 from turning into 180 and vice versa
+                if (var_lon[i] < -180.f || var_lon[i] > 180.f) {
+                    var_lon[i] -= round(var_lon[i] / 360.f) * 360.f;
+                }
+                global_domain->locations[j * global_domain->n_nx +
+                                         i].longitude = (double) var_lon[i];
             }
-            global_domain->locations[i].longitude = (double) var_lon[i];
         }
 
         d1start[0] = 0;
@@ -145,7 +148,11 @@ get_global_domain(char          *nc_name,
         get_nc_field_double(nc_name, global_domain->info.lat_var,
                             d1start, d1count, var_lat);
         for (i = 0; i < global_domain->n_ny; i++) {
-            global_domain->locations[i].latitude = (double) var_lat[i];
+            for (j = 0; j < global_domain->n_nx; j++) {
+                global_domain->locations[i *
+                                         global_domain->n_nx].latitude =
+                    (double) var_lat[i];
+            }
         }
 
         free(var_lon);

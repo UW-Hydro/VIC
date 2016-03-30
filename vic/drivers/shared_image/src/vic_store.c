@@ -194,9 +194,9 @@ vic_store(void)
         dvar =
             calloc(nc_state_file.nj_size * nc_state_file.ni_size,
                    sizeof(*dvar));
-            if (dvar == NULL) {
-                log_err("Memory allocation error in vic_store().");
-            }
+        if (dvar == NULL) {
+            log_err("Memory allocation error in vic_store().");
+        }
 
         for (i = 0; i < nc_state_file.nj_size * nc_state_file.ni_size; i++) {
             dvar[i] = (double) global_domain.locations[i].longitude;
@@ -2016,14 +2016,20 @@ initialize_state_file(nc_file_struct *nc)
     }
 
     // define netcdf dimensions
-    status = nc_def_dim(nc->nc_id, global_domain.info.x_dim, nc->ni_size, &(nc->ni_dimid));
+    status =
+        nc_def_dim(nc->nc_id, global_domain.info.x_dim, nc->ni_size,
+                   &(nc->ni_dimid));
     if (status != NC_NOERR) {
-        log_err("Error defining \"%s\" in %s", global_domain.info.x_dim, nc->fname);
+        log_err("Error defining \"%s\" in %s", global_domain.info.x_dim,
+                nc->fname);
     }
 
-    status = nc_def_dim(nc->nc_id, global_domain.info.y_dim, nc->nj_size, &(nc->nj_dimid));
+    status =
+        nc_def_dim(nc->nc_id, global_domain.info.y_dim, nc->nj_size,
+                   &(nc->nj_dimid));
     if (status != NC_NOERR) {
-        log_err("Error defining \"%s\" in %s", global_domain.info.y_dim, nc->fname);
+        log_err("Error defining \"%s\" in %s", global_domain.info.y_dim,
+                nc->fname);
     }
 
     status = nc_def_dim(nc->nc_id, "veg_class", nc->veg_size,

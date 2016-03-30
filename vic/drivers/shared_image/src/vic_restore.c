@@ -925,7 +925,9 @@ check_init_state_file(void)
                     global_domain.info.lon_var, filenames.init_state);
         }
         for (i = 0; i < global_domain.n_nx; i++) {
-            if (!assert_close_double(dvar[i], global_domain.locations[i].longitude, rtol, abs_tol)) {
+            if (!assert_close_double(dvar[i],
+                                     global_domain.locations[i].longitude, rtol,
+                                     abs_tol)) {
                 log_err("Longitudes in initial state file do not "
                         "match parameter file");
             }
@@ -944,7 +946,9 @@ check_init_state_file(void)
                     global_domain.info.lat_var, filenames.init_state);
         }
         for (i = 0; i < global_domain.n_ny; i++) {
-            if (!assert_close_double(dvar[i], global_domain.locations[i].latitude, rtol, abs_tol)) {
+            if (!assert_close_double(dvar[i],
+                                     global_domain.locations[i].latitude, rtol,
+                                     abs_tol)) {
                 log_err("Latitudes in initial state file do not "
                         "match parameter file");
             }

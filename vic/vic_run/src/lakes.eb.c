@@ -216,6 +216,7 @@ solve_lake(double           snowfall,
             sw_ice = 0.0;
             lake_energy->AlbedoLake = albw;
         }
+        lake_energy->AlbedoUnder = lake_energy->AlbedoLake;
 
         sw_water = shortin * (1. - albw);
 
@@ -403,7 +404,12 @@ solve_lake(double           snowfall,
                 lake->hice = 0.0;
                 lake->ice_water_eq = 0.0;
             }
+            lake->aero_resist =
+                (log((2. + param.LAKE_ZWATER) / param.LAKE_ZWATER) *
+                 log(wind_h / param.LAKE_ZWATER) /
+                 (CONST_KARMAN * CONST_KARMAN)) / windi;
         }
+        lake->soil.aero_resist[0] = lake->aero_resist;
 
         /**********************************************************************
         * 9. Average water temperature.
@@ -467,18 +473,6 @@ solve_lake(double           snowfall,
         lake_snow->blowing_flux *= fracprv;
         lake_snow->surface_flux *= fracprv;
         lake_snow->melt = lake->snowmlt * fracprv;    // in mm
-
-        // Adjust lake_energy variables to represent storage and flux over entire lake
-        lake_energy->NetShortAtmos *= fracprv;
-        lake_energy->NetLongAtmos *= fracprv;
-        lake_energy->AtmosSensible *= fracprv;
-        lake_energy->AtmosLatent *= fracprv;
-        lake_energy->deltaH *= fracprv;
-        lake_energy->grnd_flux *= fracprv;
-        lake_energy->refreeze_energy *= fracprv;
-        lake_energy->advection *= fracprv;
-        lake_energy->snow_flux *= fracprv;
-        lake_energy->error *= fracprv;
 
         /* Lake data structure terms */
         lake->evapw *=
@@ -846,7 +840,6 @@ eddy(int     freezeflag,
             de[k] = param.LAKE_DM;
         }
     }
-
     /**********************************************************************
     * Avoid too low wind speeds for computational stability.
     **********************************************************************/
@@ -2310,8 +2303,7 @@ water_balance(lake_var_struct *lake,
             }
         }
         else { // lake didn't exist at beginning of time step; create new lake
-            initialize_lake(lake, lake_con, &soil_con, &(cell[iveg][band]),
-                            energy[iveg][band].T[0], 1);
+            initialize_lake(lake, lake_con, &soil_con, &(cell[iveg][band]), 1);
         }
     }
     else if (lakefrac > 0.0) { // lake is gone at end of time step, but existed at beginning of step

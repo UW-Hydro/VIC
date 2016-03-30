@@ -150,7 +150,7 @@ get_global_domain(char          *nc_name,
         for (i = 0; i < global_domain->n_ny; i++) {
             for (j = 0; j < global_domain->n_nx; j++) {
                 global_domain->locations[i *
-                                         global_domain->n_nx].latitude =
+                                         global_domain->n_nx + j].latitude =
                     (double) var_lat[i];
             }
         }

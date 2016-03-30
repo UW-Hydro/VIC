@@ -1160,7 +1160,6 @@ vic_init(void)
 
         if (options.SNOW_BAND > 1 && options.COMPUTE_TREELINE &&
             !no_overstory && Cv_sum == 1.) {
-NOTE: we really need to mirror classic (read_vegparam.c) in order to be guaranteed that this will work.  classic did something funky - if bare soil exists, it will be at index vegetat_type_num.  If we're running compute_treeline, then treeline veg class will be stored at index (original)vegetat_type_num nd then vegetat_type_num will be incremented to allow for bare soil at (new)vegetat_type_num - or maybe vice versa, but I don't have time to check at the moment.  You can see my logic below for freeing up space and assigning to some other veg class.  What I tried to do was wrong.  The reason it's hard to compare classic with image is that we've assumed explicit bare soil tiles in the input and we've updated the Cv_sum to include bare soil in the lines immediately preceding this block.  I think updating Cv_sum to include bare soil is OK as long as it is accounted for correctly below.  I'm close to figuring it out, but have to go now.
             // Use bare soil above treeline
             if (options.AboveTreelineVeg < 0) {
                 vidx = veg_con_map[i].vidx[options.NVEGTYPES - 1];

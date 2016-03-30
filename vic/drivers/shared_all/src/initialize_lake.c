@@ -34,7 +34,6 @@ initialize_lake(lake_var_struct  *lake,
                 lake_con_struct   lake_con,
                 soil_con_struct  *soil_con,
                 cell_data_struct *cell,
-                double            airtemp,
                 int               skip_hydro)
 {
     extern option_struct     options;
@@ -46,10 +45,8 @@ initialize_lake(lake_var_struct  *lake,
     double                   depth;
     double                   tmp_volume;
 
-    /*  Assume no ice present, lake completely equilibrated with atmosphere. */
-
     for (i = 0; i < MAX_LAKE_NODES; i++) {
-        lake->temp[i] = max(airtemp, 0.0);
+        lake->temp[i] = max(soil_con->avg_temp, 0.0);
     }
 
     lake->areai = 0.0;

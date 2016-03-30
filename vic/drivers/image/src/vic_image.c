@@ -77,7 +77,7 @@ int
 main(int    argc,
      char **argv)
 {
-    int status;
+    int  status;
 
     // Initialize MPI - note: logging not yet initialized
     status = MPI_Init(&argc, &argv);
@@ -133,7 +133,9 @@ main(int    argc,
         rout_run();     // Routing routine (extension)
 
         // if output:
-        vic_write();
+        if (check_write_flag(current)) {
+            vic_write();
+        }
 
         // if output (routing)
         rout_write(); // Routing routine (extension)
@@ -155,6 +157,8 @@ main(int    argc,
     if (status != MPI_SUCCESS) {
         log_err("MPI error in main(): %d\n", status);
     }
+
+    log_info("Completed running VIC %s", VIC_DRIVER);
 
     return EXIT_SUCCESS;
 }

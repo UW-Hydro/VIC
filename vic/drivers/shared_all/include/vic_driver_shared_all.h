@@ -379,6 +379,7 @@ typedef struct {
  *          with next time step.
  *****************************************************************************/
 typedef struct {
+    double total_moist_storage;   /**< total moisture storage [mm] */
     double total_soil_moist;      /**< total column soil moisture [mm] */
     double surfstor;              /**< surface water storage [mm] */
     double swe;                   /**< snow water equivalent [mm] */
@@ -434,14 +435,14 @@ double air_density(double t, double p);
 double all_30_day_from_dmy(dmy_struct *dmy);
 double all_leap_from_dmy(dmy_struct *dmy);
 double average(double *ar, size_t n);
-double calc_energy_balance_error(int, double, double, double, double, double);
+double calc_energy_balance_error(double, double, double, double, double);
 void calc_root_fractions(veg_con_struct *veg_con, soil_con_struct *soil_con);
-double calc_water_balance_error(int, double, double, double);
+double calc_water_balance_error(double, double, double, double);
 unsigned short int calendar_from_chars(char *cal_chars);
+bool check_write_flag(int rec);
 void collect_eb_terms(energy_bal_struct, snow_data_struct, cell_data_struct,
-                      int *, int *, int *, int *, int *, double, double, double,
-                      int, int, double, int, int, double *, double,
-                      out_data_struct *);
+                      double, double, double, int, int, double, int, int,
+                      double *, double, out_data_struct *);
 void collect_wb_terms(cell_data_struct, veg_var_struct, snow_data_struct,
                       double, double, double, int, double, int, double *,
                       double *, out_data_struct *);
@@ -499,9 +500,9 @@ void num2date(double origin, double time_value, double tzoffset,
 FILE *open_file(char string[], char type[]);
 void parse_nc_time_units(char *nc_unit_chars, unsigned short int *units,
                          dmy_struct *dmy);
-int put_data(all_vars_struct *, atmos_data_struct *, soil_con_struct *,
-             veg_con_struct *, veg_lib_struct *veg_lib, lake_con_struct *,
-             out_data_struct *, save_data_struct *, int);
+void put_data(all_vars_struct *, atmos_data_struct *, soil_con_struct *,
+              veg_con_struct *, veg_lib_struct *veg_lib, lake_con_struct *,
+              out_data_struct *, save_data_struct *, int);
 void print_cell_data(cell_data_struct *cell, size_t nlayers, size_t nfrost);
 void print_dmy(dmy_struct *dmy);
 void print_energy_bal(energy_bal_struct *eb, size_t nnodes, size_t nfronts);

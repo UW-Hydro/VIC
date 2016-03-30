@@ -115,8 +115,7 @@ vic_init(void)
 
     // read_veglib()
 
-    // TBD: Check that options.NVEGTYPES is the right number. Bare soil is
-    // the complicating factor here
+    // Assign veg class ids
     for (i = 0; i < local_domain.ncells_active; i++) {
         Cv_sum[i] = 0.;
 
@@ -960,10 +959,10 @@ vic_init(void)
     // the grid cell. The veg_con_map_struct is used to provide some of this
     // mapping
 
-    // number of vegetation types - in vic this is defined without the bare soil
-    // and the vegetation above the treeline
+    // number of vegetation types - in vic an extra veg tile is created
+    // for above-treeline vegetation in some cases
     for (i = 0; i < local_domain.ncells_active; i++) {
-        nveg = veg_con_map[i].nv_active - 1;
+        nveg = veg_con_map[i].nv_active;
         if (options.AboveTreelineVeg >= 0) {
             nveg -= 1;
         }
@@ -1057,7 +1056,8 @@ vic_init(void)
     // Run some checks and corrections for vegetation
     for (i = 0; i < local_domain.ncells_active; i++) {
         no_overstory = false;
-        // Only run to options.NVEGTYPES - 1, since bare soil is the last type
+        // Only run to options.NVEGTYPES - 1, assuming bare soil
+        // is the last type
         for (j = 0; j < options.NVEGTYPES - 1; j++) {
             vidx = veg_con_map[i].vidx[j];
             if (vidx != NODATA_VEG) {
@@ -1110,6 +1110,7 @@ vic_init(void)
                 }
             }
         }
+
         // handle the bare soil portion of the tile
         vidx = veg_con_map[i].vidx[options.NVEGTYPES - 1];
         if (vidx != NODATA_VEG) {
@@ -1158,17 +1159,34 @@ vic_init(void)
         // Only case 2 needs to be handled explicitly
 
         if (options.SNOW_BAND > 1 && options.COMPUTE_TREELINE &&
-            !no_overstory && Cv_sum[i] == 1.) {
+            !no_overstory && Cv_sum == 1.) {
+NOTE: we really need to mirror classic (read_vegparam.c) in order to be guaranteed that this will work.  classic did something funky - if bare soil exists, it will be at index vegetat_type_num.  If we're running compute_treeline, then treeline veg class will be stored at index (original)vegetat_type_num nd then vegetat_type_num will be incremented to allow for bare soil at (new)vegetat_type_num - or maybe vice versa, but I don't have time to check at the moment.  You can see my logic below for freeing up space and assigning to some other veg class.  What I tried to do was wrong.  The reason it's hard to compare classic with image is that we've assumed explicit bare soil tiles in the input and we've updated the Cv_sum to include bare soil in the lines immediately preceding this block.  I think updating Cv_sum to include bare soil is OK as long as it is accounted for correctly below.  I'm close to figuring it out, but have to go now.
             // Use bare soil above treeline
             if (options.AboveTreelineVeg < 0) {
-                for (j = 0; j < options.NVEGTYPES; j++) {
-                    vidx = veg_con_map[i].vidx[j];
-                    if (vidx != NODATA_VEG) {
-                        veg_con[i][vidx].Cv -=
-                            0.001 / veg_con[i][vidx].vegetat_type_num;
+                vidx = veg_con_map[i].vidx[options.NVEGTYPES - 1];
+                if (vidx == NODATA_VEG) {
+                    // free up a tiny amount of space for a bare soil tile
+                    for (j = 0; j < options.NVEGTYPES - 1; j++) {
+                        vidx = veg_con_map[i].vidx[j];
+                        if (vidx != NODATA_VEG) {
+                            veg_con[i][vidx].Cv -=
+                                0.001 / veg_con[i][vidx].vegetat_type_num;
+                        }
+                    }
+                    veg_con[i][vidx].veg_class = options.NVEGTYPES - 1;
+                    veg_con[i][vidx].zone_depth[0] = 0;
+                    veg_con[i][vidx].zone_fract[0] = 1.;
+                    for (j = 1; j < options.ROOT_ZONES; j++) {
+                        veg_con[i][vidx].zone_depth[j] = 0;
+                        veg_con[i][vidx].zone_fract[j] = 0;
+                    }
+                    for (j = 0; j < options.NVEGTYPES; j++) {
+                        vidx = veg_con_map[i].vidx[j];
+                        if (vidx != NODATA_VEG) {
+                            veg_con[i][vidx].vegetat_type_num += 1;
+                        }
                     }
                 }
-                Cv_sum[i] -= 0.001;
             }
             // Use defined vegetation type above treeline
             else {
@@ -1180,17 +1198,17 @@ vic_init(void)
                         veg_con[i][vidx].vegetat_type_num += 1;
                     }
                 }
-                veg_con[i][options.NVEGTYPES - 1].Cv = 0.001;
-                veg_con[i][options.NVEGTYPES - 1].veg_class =
-                    options.AboveTreelineVeg;
-                veg_con[i][options.NVEGTYPES - 1].vegetat_type_num =
+                vidx = veg_con_map[i].vidx[options.NVEGTYPES - 1];
+                veg_con[i][vidx].Cv = 0.001;
+                veg_con[i][vidx].veg_class = options.AboveTreelineVeg;
+                veg_con[i][vidx].vegetat_type_num =
                     veg_con[i][0].vegetat_type_num;
                 // Since root zones are not defined they are copied from another
                 // vegetation type.
                 for (j = 0; j < options.ROOT_ZONES; j++) {
-                    veg_con[i][options.NVEGTYPES - 1].zone_depth[j] =
+                    veg_con[i][vidx].zone_depth[j] =
                         veg_con[i][0].zone_depth[j];
-                    veg_con[i][options.NVEGTYPES - 1].zone_fract[j] =
+                    veg_con[i][vidx].zone_fract[j] =
                         veg_con[i][0].zone_fract[j];
                 }
                 // redo the mapping to ensure that the veg type is active

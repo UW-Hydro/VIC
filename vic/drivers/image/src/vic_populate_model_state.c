@@ -1,7 +1,7 @@
 /******************************************************************************
  * @section DESCRIPTION
  *
- * Restore model state.
+ * Populate model state.
  *
  * @section LICENSE
  *
@@ -27,10 +27,10 @@
 #include <vic_driver_image.h>
 
 /******************************************************************************
- * @brief    This function handles tasks related to restoring model state.
+ * @brief    This function handles tasks related to populating model state.
  *****************************************************************************/
 void
-vic_restore(void)
+vic_populate_model_state(void)
 {
     extern all_vars_struct    *all_vars;
     extern domain_struct       local_domain;
@@ -52,6 +52,7 @@ vic_restore(void)
 
     // read the model state from the netcdf file if there is one
     if (options.INIT_STATE) {
+        vic_restore();
     }
 
     // run through the remaining VIC initialization routines

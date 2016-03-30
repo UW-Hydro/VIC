@@ -94,6 +94,7 @@ typedef struct {
     int band_dimid;
     int front_dimid;
     int frost_dimid;
+    int lake_node_dimid;
     int layer_dimid;
     int ni_dimid;
     int nj_dimid;
@@ -104,6 +105,7 @@ typedef struct {
     size_t band_size;
     size_t front_size;
     size_t frost_size;
+    size_t lake_node_size;
     size_t layer_size;
     size_t ni_size;
     size_t nj_size;
@@ -149,6 +151,7 @@ void alloc_veg_hist(veg_hist_struct *veg_hist);
 double air_density(double t, double p);
 double average(double *ar, size_t n);
 out_data_struct *create_output_list(void);
+void check_init_state_file(void);
 void free_atmos(atmos_data_struct *atmos);
 void free_veg_hist(veg_hist_struct *veg_hist);
 void get_domain_type(char *cmdstr);
@@ -197,6 +200,7 @@ void vic_init(void);
 void vic_init_output(void);
 void vic_nc_info(nc_file_struct *nc_hist_file, out_data_struct **out_data,
                  nc_var_struct *nc_vars);
+void vic_restore(void);
 void vic_start(void);
 void vic_store(void);
 void vic_write(void);

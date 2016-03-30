@@ -31,11 +31,12 @@
 
 #define VIC_DRIVER "Image"
 
+void display_current_settings(int);
 void get_forcing_file_info(param_set_struct *param_set, size_t file_num);
 void get_global_param(FILE *);
+void vic_force(void);
 void vic_image_init(void);
 void vic_image_start(void);
-void vic_force(void);
-void vic_restore(void);
+void vic_populate_model_state(void);
 
 #endif

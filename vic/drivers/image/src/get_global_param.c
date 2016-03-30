@@ -1109,6 +1109,11 @@ get_global_param(FILE *gp)
 
     // Validate the elevation band file information
     if (options.SNOW_BAND > 1) {
+        // Prohibit snow bands > 1 in image drivers for now
+        log_err("Currently VIC image drivers cannot handle "
+                "SNOW_BAND > 1");
+    }
+    if (options.SNOW_BAND > 1) {
         if (strcmp(filenames.snowband, "MISSING") == 0) {
             log_err("\"SNOW_BAND\" was specified with %zu elevation bands, "
                     "but no elevation band file has been defined.  "

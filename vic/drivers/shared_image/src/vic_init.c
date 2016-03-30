@@ -820,6 +820,7 @@ vic_init(void)
         }
     }
     else {
+
         // AreaFract: fraction of grid cell in each snow band
         for (j = 0; j < options.SNOW_BAND; j++) {
             d3start[0] = j;
@@ -1158,34 +1159,27 @@ vic_init(void)
         //
         // Only case 2 needs to be handled explicitly
 
+        // WARNING: SNOW_BAND > 1 currently not enabled - this section
+        // will be ignored
+        // WARNING: by this point, Cv_sum most likely == 1, no good reason
+        // for it not to, since bare soil is explicitly included in the
+        // input parameter file
         if (options.SNOW_BAND > 1 && options.COMPUTE_TREELINE &&
             !no_overstory && Cv_sum == 1.) {
             // Use bare soil above treeline
+            // TBD: check to make sure that we actually need to make
+            // room for a new veg tile; 
             if (options.AboveTreelineVeg < 0) {
-                vidx = veg_con_map[i].vidx[options.NVEGTYPES - 1];
-                if (vidx == NODATA_VEG) {
-                    // free up a tiny amount of space for a bare soil tile
-                    for (j = 0; j < options.NVEGTYPES - 1; j++) {
-                        vidx = veg_con_map[i].vidx[j];
-                        if (vidx != NODATA_VEG) {
-                            veg_con[i][vidx].Cv -=
-                                0.001 / veg_con[i][vidx].vegetat_type_num;
-                        }
-                    }
-                    veg_con[i][vidx].veg_class = options.NVEGTYPES - 1;
-                    veg_con[i][vidx].zone_depth[0] = 0;
-                    veg_con[i][vidx].zone_fract[0] = 1.;
-                    for (j = 1; j < options.ROOT_ZONES; j++) {
-                        veg_con[i][vidx].zone_depth[j] = 0;
-                        veg_con[i][vidx].zone_fract[j] = 0;
-                    }
-                    for (j = 0; j < options.NVEGTYPES; j++) {
-                        vidx = veg_con_map[i].vidx[j];
-                        if (vidx != NODATA_VEG) {
-                            veg_con[i][vidx].vegetat_type_num += 1;
-                        }
+                for (j = 0; j < options.NVEGTYPES; j++) {
+                    vidx = veg_con_map[i].vidx[j];
+                    if (vidx != NODATA_VEG) {
+                        veg_con[i][vidx].Cv -=
+                            0.001 / veg_con[i][vidx].vegetat_type_num;
                     }
                 }
+                // WARNING: This is wrong, since there is no subsequent
+                // code to replace the area that is being subtracted
+                Cv_sum[i] -= 0.001;
             }
             // Use defined vegetation type above treeline
             else {

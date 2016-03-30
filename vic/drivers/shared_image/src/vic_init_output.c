@@ -379,7 +379,7 @@ initialize_history_file(nc_file_struct *nc)
         dcount[0] = nc->nj_size;
         for (i = 0; i < nc->nj_size; i++) {
             dvar[i] =
-                (double) global_domain.locations[i].latitude;
+                (double) global_domain.locations[i * nc->ni_size].latitude;
         }
 
         status =

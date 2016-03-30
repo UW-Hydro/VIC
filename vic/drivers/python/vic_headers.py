@@ -927,6 +927,7 @@ typedef struct {
     veg_var_struct **veg_var;
 } all_vars_struct;
 typedef struct {
+    double total_moist_storage;
     double total_soil_moist;
     double surfstor;
     double swe;
@@ -983,7 +984,7 @@ double calc_atmos_energy_bal(double, double, double, double, double, double,
                              double, double *, double *, double *, double *,
                              double *, double *, _Bool *, unsigned int*);
 double calc_density(double);
-double calc_energy_balance_error(int, double, double, double, double, double);
+double calc_energy_balance_error(double, double, double, double, double);
 double calc_latent_heat_of_sublimation(double temp);
 double calc_latent_heat_of_vaporization(double temp);
 int calc_layer_average_thermal_props(energy_bal_struct *, layer_data_struct *,
@@ -1021,7 +1022,7 @@ double calc_surf_energy_bal(double, double, double, double, double, double,
 double calc_veg_displacement(double);
 double calc_veg_height(double);
 double calc_veg_roughness(double);
-double calc_water_balance_error(int, double, double, double);
+double calc_water_balance_error(double, double, double, double);
 unsigned short int calendar_from_chars(char *cal_chars);
 int CalcAerodynamic(_Bool, double, double, double, double, double, double *,
                     double *, double *, double *, double *);
@@ -1042,12 +1043,12 @@ double canopy_evap(layer_data_struct *, veg_var_struct *, _Bool,
                    unsigned short int, double *, double, double, double, double,
                    double, double, double, double, double *, double *, double *,
                    double *, double *, double *, double, double, double *);
+bool check_write_flag(int rec);
 void colavg(double *, double *, double *, double, double *, int, double,
             double);
 void collect_eb_terms(energy_bal_struct, snow_data_struct, cell_data_struct,
-                      int *, int *, int *, int *, int *, double, double, double,
-                      int, int, double, int, int, double *, double,
-                      out_data_struct *);
+                      double, double, double, int, int, double, int, int,
+                      double *, double, out_data_struct *);
 void collect_wb_terms(cell_data_struct, veg_var_struct, snow_data_struct,
                       double, double, double, int, double, int, double *,
                       double *, out_data_struct *);
@@ -1130,9 +1131,9 @@ void photosynth(char, double, double, double, double, double, double, double,
 void polint(double xa[], double ya[], int n, double x, double *y, double *dy);
 void prepare_full_energy(int, all_vars_struct *, soil_con_struct *, double *,
                          double *);
-int put_data(all_vars_struct *, atmos_data_struct *, soil_con_struct *,
-             veg_con_struct *, veg_lib_struct *veg_lib, lake_con_struct *,
-             out_data_struct *, save_data_struct *, int);
+void put_data(all_vars_struct *, atmos_data_struct *, soil_con_struct *,
+              veg_con_struct *, veg_lib_struct *veg_lib, lake_con_struct *,
+              out_data_struct *, save_data_struct *, int);
 double qromb(
     double (*sub_with_height)(), double es, double Wind, double AirDens, double ZO, double EactAir, double F, double hsalt, double phi_r, double ushear, double Zrh, double a,
     double b);

@@ -845,7 +845,7 @@ vic_init(void)
             get_scatter_nc_field_double(filenames.snowband, "Pfactor",
                                         d3start, d3count, dvar);
             for (i = 0; i < local_domain.ncells_active; i++) {
-                soil_con[i].BandElev[j] = (double) dvar[i];
+                soil_con[i].Pfactor[j] = (double) dvar[i];
             }
         }
         // Run some checks and corrections for soil
@@ -1551,8 +1551,7 @@ vic_init(void)
             }
             initialize_lake(&(all_vars[i].lake_var), lake_con[i],
                             &(soil_con[i]),
-                            &(all_vars[i].cell[tmp_lake_idx][0]),
-                            soil_con[i].avg_temp, 0);
+                            &(all_vars[i].cell[tmp_lake_idx][0]), 0);
         }
         initialize_energy(all_vars[i].energy, nveg);
     }

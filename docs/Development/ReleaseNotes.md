@@ -121,6 +121,11 @@ This is a major update from VIC 4. The VIC 5.0.0 release aims to have nearly ide
 
 #### Bug Fixes:
 
+1. Miscellaneous fixes to lake module
+
+	Several lake processes (aerodynamic resistance, albedo, latent/sensible heat fluxes, net radiation, etc) were reported incorrectly or not at all in output files. This has been fixed. In addition, in the absence of an initial state file, lake temperatures were initialized to unrealistic temperatures (the air temperature of the first simulation time step). To fix this, we now initialize the lake temperature to annual average soil temperature.
+
+
 ------------------------------
 
 ## VIC 4.2.c [![DOI](https://zenodo.org/badge/doi/10.5281/zenodo.35302.svg)](http://dx.doi.org/10.5281/zenodo.35302)

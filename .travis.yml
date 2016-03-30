@@ -6,6 +6,26 @@ notifications:
 matrix:
   fast_finish: true
   include:
+  # Image Driver
+  - compiler: gcc
+    os: linux
+    env: TESTID='image'
+    addons:
+      apt_packages:
+        - libnetcdf-dev
+        - gfortran
+        - valgrind
+        # open-mpi is built from source in image.travis
+  # CESM Driver
+  - compiler: gcc
+    os: linux
+    env: TESTID='cesm'
+    addons:
+      apt_packages:
+        - libnetcdf-dev
+        - gfortran
+        - valgrind
+        # open-mpi is built from source in cesm.travis
   # Classic Driver
   - compiler: clang
     os: linux
@@ -49,26 +69,6 @@ matrix:
   - compiler: gcc
     os: osx
     env: TESTID=classic
-  # Image Driver
-  - compiler: gcc
-    os: linux
-    env: TESTID='image'
-    addons:
-      apt_packages:
-        - libnetcdf-dev
-        - gfortran
-        - valgrind
-        # open-mpi is built from source in image.travis
-  # CESM Driver
-  - compiler: gcc
-    os: linux
-    env: TESTID='cesm'
-    addons:
-      apt_packages:
-        - libnetcdf-dev
-        - gfortran
-        - valgrind
-        # open-mpi is built from source in cesm.travis
 
 before_install:
   - source ci/vic_install_utils

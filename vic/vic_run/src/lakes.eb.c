@@ -290,15 +290,16 @@ solve_lake(double           snowfall,
         *  6. Calculate initial energy balance over ice.
         **********************************************************************/
 
+        windi = (wind * log((2. + soil_con.snow_rough) / soil_con.snow_rough) /
+                 log(wind_h / soil_con.snow_rough));
+        if (windi < 1.0) {
+            windi = 1.0;
+        }
+
         if (fracprv >= param.LAKE_FRACLIM) {
             freezeflag = 0;   /* Calculation for ice. */
             Le = calc_latent_heat_of_sublimation(tair); /* ice*/
-            windi =
-                (wind * log((2. + soil_con.snow_rough) / soil_con.snow_rough) /
-                 log(wind_h / soil_con.snow_rough));
-            if (windi < 1.0) {
-                windi = 1.0;
-            }
+
             lake->aero_resist =
                 (log((2. + soil_con.snow_rough) / soil_con.snow_rough) *
                  log(wind_h /

@@ -244,7 +244,7 @@ vic_restore(void)
             }
         }
 
-        // intermediate carbon: tmpval = tmpval = cell[veg][band].CInter;
+        // intermediate carbon: tmpval = cell[veg][band].CInter;
         for (m = 0; m < options.NVEGTYPES; m++) {
             d4start[0] = m;
             for (k = 0; k < options.SNOW_BAND; k++) {
@@ -757,7 +757,7 @@ vic_restore(void)
 
         // lake ice snow water equivalent: lake_var.swe
         get_scatter_nc_field_double(filenames.init_state,
-                                    "Lake_ice_snow_water_equivalen",
+                                    "Lake_ice_snow_water_equivalent",
                                     d2start, d2count, dvar);
         for (i = 0; i < local_domain.ncells_active; i++) {
             all_vars[i].lake_var.swe = dvar[i];
@@ -914,6 +914,9 @@ check_init_state_file(void)
     if (global_domain.info.n_coord_dims == 1) {
         d1start[0] = 0;
         dvar = calloc(global_domain.n_nx, sizeof(*dvar));
+        if (dvar == NULL) {
+            log_err("Memory allocation error in check_init_state_file().");
+        }
         d1count[0] = global_domain.n_nx;
         status = nc_get_vara_double(nc.nc_id, lon_var_id,
                                     d1start, d1count, dvar);
@@ -930,6 +933,9 @@ check_init_state_file(void)
         free(dvar);
 
         dvar = calloc(global_domain.n_ny, sizeof(*dvar));
+        if (dvar == NULL) {
+            log_err("Memory allocation error in check_init_state_file().");
+        }
         d1count[0] = global_domain.n_ny;
         status = nc_get_vara_double(nc.nc_id, lat_var_id,
                                     d1start, d1count, dvar);
@@ -949,6 +955,9 @@ check_init_state_file(void)
         d2start[0] = 0;
         d2start[1] = 0;
         dvar = calloc(global_domain.n_ny * global_domain.n_nx, sizeof(*dvar));
+        if (dvar == NULL) {
+            log_err("Memory allocation error in check_init_state_file().");
+        }
         d2count[0] = global_domain.n_ny;
         d2count[1] = global_domain.n_nx;
         status = nc_get_vara_double(nc.nc_id, lon_var_id,
@@ -987,6 +996,9 @@ check_init_state_file(void)
 
     // soil thermal node deltas
     dvar = calloc(options.Nnode, sizeof(*dvar));
+    if (dvar == NULL) {
+        log_err("Memory allocation error in check_init_state_file().");
+    }
     get_nc_field_double(filenames.init_state, "dz_node",
                         d1start, d1count, dvar);
     for (i = 0; i < options.Nnode; i++) {
@@ -999,6 +1011,9 @@ check_init_state_file(void)
 
     // soil thermal node depths
     dvar = calloc(options.Nnode, sizeof(*dvar));
+    if (dvar == NULL) {
+        log_err("Memory allocation error in check_init_state_file().");
+    }
     get_nc_field_double(filenames.init_state, "node_depth",
                         d1start, d1count, dvar);
     for (i = 0; i < options.Nnode; i++) {

@@ -156,6 +156,9 @@ vic_store(void)
     // populate lat/lon
     if (global_domain.info.n_coord_dims == 1) {
         dvar = calloc(nc_state_file.ni_size, sizeof(*dvar));
+        if (dvar == NULL) {
+            log_err("Memory allocation error in vic_store().");
+        }
 
         dcount[0] = nc_state_file.ni_size;
         for (i = 0; i < nc_state_file.ni_size; i++) {
@@ -170,6 +173,9 @@ vic_store(void)
         free(dvar);
 
         dvar = calloc(nc_state_file.nj_size, sizeof(*dvar));
+        if (dvar == NULL) {
+            log_err("Memory allocation error in vic_store().");
+        }
         dcount[0] = nc_state_file.nj_size;
         for (i = 0; i < nc_state_file.nj_size; i++) {
             dvar[i] =
@@ -188,6 +194,9 @@ vic_store(void)
         dvar =
             calloc(nc_state_file.nj_size * nc_state_file.ni_size,
                    sizeof(*dvar));
+            if (dvar == NULL) {
+                log_err("Memory allocation error in vic_store().");
+            }
 
         for (i = 0; i < nc_state_file.nj_size * nc_state_file.ni_size; i++) {
             dvar[i] = (double) global_domain.locations[i].longitude;

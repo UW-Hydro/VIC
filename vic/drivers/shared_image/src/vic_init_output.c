@@ -363,6 +363,9 @@ initialize_history_file(nc_file_struct *nc)
     // fill the netcdf variables lat/lon
     if (global_domain.info.n_coord_dims == 1) {
         dvar = calloc(nc->ni_size, sizeof(*dvar));
+        if (dvar == NULL) {
+            log_err("Memory allocation error in vic_init_output().");
+        }
 
         dcount[0] = nc->ni_size;
         for (i = 0; i < nc->ni_size; i++) {
@@ -376,6 +379,9 @@ initialize_history_file(nc_file_struct *nc)
         free(dvar);
 
         dvar = calloc(nc->nj_size, sizeof(*dvar));
+        if (dvar == NULL) {
+            log_err("Memory allocation error in vic_init_output().");
+        }
         dcount[0] = nc->nj_size;
         for (i = 0; i < nc->nj_size; i++) {
             dvar[i] =
@@ -391,6 +397,9 @@ initialize_history_file(nc_file_struct *nc)
     }
     else if (global_domain.info.n_coord_dims == 2) {
         dvar = calloc(nc->nj_size * nc->ni_size, sizeof(*dvar));
+        if (dvar == NULL) {
+            log_err("Memory allocation error in vic_init_output().");
+        }
 
         for (i = 0; i < nc->nj_size * nc->ni_size; i++) {
             dvar[i] = (double) global_domain.locations[i].longitude;

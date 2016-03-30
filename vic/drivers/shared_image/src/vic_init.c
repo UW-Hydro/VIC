@@ -425,6 +425,11 @@ vic_init(void)
                 "recompile.", options.Nlayer, MAX_LAYERS);
     }
 
+    // latitude and longitude
+    for (i = 0; i < local_domain.ncells_active; i++) {
+        soil_con[i].lat = local_domain.locations[i].latitude;
+        soil_con[i].lng = local_domain.locations[i].longitude;
+    }
 
     // b_infilt
     get_scatter_nc_field_double(filenames.soil, "infilt",
@@ -1528,7 +1533,7 @@ vic_init(void)
 
         // compute other lake parameters here
         for (i = 0; i < local_domain.ncells_active; i++) {
-            soil_con[i].cell_area = global_domain.locations[i].area;
+            soil_con[i].cell_area = local_domain.locations[i].area;
             compute_lake_params(&(lake_con[i]), soil_con[i]);
         }
     }

@@ -115,8 +115,8 @@ main(int    argc,
     // initialize routing parameters from parameter files
     rout_init();    // Routing routine (extension)
 
-    // restore model state, either using a cold start or from a restart file
-    vic_restore();
+    // populate model state, either using a cold start or from a restart file
+    vic_populate_model_state();
 
     // initialize output structures
     vic_init_output();

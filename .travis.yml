@@ -12,6 +12,7 @@ matrix:
     env: TESTID='image'
     addons:
       apt_packages:
+        - libudunits2-dev
         - libnetcdf-dev
         - gfortran
         - valgrind
@@ -22,6 +23,7 @@ matrix:
     env: TESTID='cesm'
     addons:
       apt_packages:
+        - libudunits2-dev
         - libnetcdf-dev
         - gfortran
         - valgrind

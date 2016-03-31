@@ -24,11 +24,6 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  *****************************************************************************/
 
-////////////////////////////////////////////////////////////////////////////////
-// FOR DEBUGGING ONLY !!!
-#include <xmmintrin.h>
-////////////////////////////////////////////////////////////////////////////////
-
 #include <vic_driver_image.h>
 
 size_t              NF, NR;
@@ -81,11 +76,6 @@ main(int    argc,
      char **argv)
 {
     int  status;
-
-    ////////////////////////////////////////////////////////////////////////////
-    // FOR DEBUGGING ONLY !!!
-    _MM_SET_EXCEPTION_MASK(_MM_GET_EXCEPTION_MASK() & ~_MM_MASK_INVALID);
-    ////////////////////////////////////////////////////////////////////////////
 
     // Initialize MPI - note: logging not yet initialized
     status = MPI_Init(&argc, &argv);

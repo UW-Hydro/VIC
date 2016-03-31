@@ -158,7 +158,7 @@ vic_alloc(void)
             log_err("Memory allocation error in vic_alloc().");
         }
 
-        veg_con_map[i].nv_active = (size_t) local_domain.locations[i].nveg;
+        veg_con_map[i].nv_active = (size_t) local_domain.locations[i].nveg + 1;
         if (options.AboveTreelineVeg >= 0) {
             veg_con_map[i].nv_active += 1;
         }

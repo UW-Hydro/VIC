@@ -46,7 +46,6 @@ vic_init(void)
     extern parameters_struct   param;
 
     bool                       found;
-    bool                       no_overstory;
     char                       locstr[MAXSTRING];
     double                     mean;
     double                     sum;
@@ -59,7 +58,6 @@ vic_init(void)
     size_t                     m;
     size_t                     nveg;
     size_t                     max_numnod;
-    int                        veg_class;
     int                        vidx;
     size_t                     d2count[2];
     size_t                     d2start[2];
@@ -687,14 +685,7 @@ vic_init(void)
         }
     }
 
-    if (options.COMPUTE_TREELINE) {
-        // avgJulyAirTemp: average July air temperature
-        get_scatter_nc_field_double(filenames.soil, "avgJulyAirTemp",
-                                    d2start, d2count, dvar);
-        for (i = 0; i < local_domain.ncells_active; i++) {
-            soil_con[i].avgJulyAirTemp = (double) dvar[i];
-        }
-    }
+    // TODO: read avgJulyAirTemp for compute treeline option
 
     // Additional processing of the soil variables
     for (i = 0; i < local_domain.ncells_active; i++) {
@@ -937,21 +928,7 @@ vic_init(void)
         }
     }
 
-    // logic from compute_treeline()
-    for (i = 0; i < local_domain.ncells_active; i++) {
-        for (j = 0; j < options.SNOW_BAND; j++) {
-            // Lapse average annual July air temperature
-            if ((options.COMPUTE_TREELINE) &&
-                (soil_con[i].avgJulyAirTemp + soil_con[i].Tfactor[j] <=
-                 param.TREELINE_TEMPERATURE)) {
-                // Snow band is above treeline
-                soil_con[i].AboveTreeLine[j] = true;
-            }
-            else {
-                soil_con[i].AboveTreeLine[j] = false;
-            }
-        }
-    }
+    // TODO: Determine which bands are above treeline
 
     // read_vegparam()
 
@@ -962,11 +939,9 @@ vic_init(void)
 
     // number of vegetation types - in vic an extra veg tile is created
     // for above-treeline vegetation in some cases
+    // TODO: handle above treeline vegetation tile
     for (i = 0; i < local_domain.ncells_active; i++) {
-        nveg = veg_con_map[i].nv_active;
-        if (options.AboveTreelineVeg >= 0) {
-            nveg -= 1;
-        }
+        nveg = veg_con_map[i].nv_active - 1;
         for (j = 0; j < veg_con_map[i].nv_active; j++) {
             veg_con[i][j].vegetat_type_num = (int) nveg;
         }
@@ -1056,7 +1031,6 @@ vic_init(void)
 
     // Run some checks and corrections for vegetation
     for (i = 0; i < local_domain.ncells_active; i++) {
-        no_overstory = false;
         // Only run to options.NVEGTYPES - 1, assuming bare soil
         // is the last type
         for (j = 0; j < options.NVEGTYPES - 1; j++) {
@@ -1104,11 +1078,6 @@ vic_init(void)
                             locstr);
                 }
                 Cv_sum[i] += veg_con[i][vidx].Cv;
-
-                // check for overstory
-                if (!veg_lib[i][j].overstory) {
-                    no_overstory = true;
-                }
             }
         }
 
@@ -1118,132 +1087,7 @@ vic_init(void)
             Cv_sum[i] += veg_con[i][vidx].Cv;
         }
 
-        // handle the vegetation for the treeline option. This is somewhat
-        // confusingly handled in VIC. If I am not mistaken, in VIC classic
-        // this is handled in the following way:
-        //
-        // The treeline option is only active if there is more than one snow
-        // band and options.COMPUTE_TREELINE is explicitly set in the global
-        // file. If the treeline option is active, then there a few cases:
-        //
-        // 1. The grid cell contains one or more vegetation types that
-        // do not have an overstory (either bare soil or vegetation). Nothing
-        // further needs to be done to the input. For the elevation bands above
-        // the treeline, the values from vegetation with an overstory are simply
-        // ignored and the understory and bare ground values are scaled so they
-        // cover the entire band. This scaling is done in put_data()
-        //
-        // 2. The grid cell contains only vegetation with an overstory.
-        // In that case a small area of bare soil or vegetation without an
-        // overstory must be created.  This will have almost no effect
-        // on the results for most elevation bands, but above the treeline, the
-        // elevation band will consists entirely of bare soil or the understory
-        // vegetation (because of the scaling in put_data(). There are two
-        // cases:
-        //
-        // 2.a. options.AboveTreelineVeg < 0. In that case a small amount of
-        // bare soil is created (fraction is 0.001).
-        //
-        // 2.b. options.AboveTreelineVeg > 0. In that case a small amount of
-        // the new vegetation is created (fraction is 0.001). This vegetation
-        // should not have an overstory.
-        //
-        // The tricky parts are:
-        //
-        // Ensure that the correct number of vegetation types are reflected
-        // for each cell.
-        //
-        // Ensure that bare soil remains the last vegetation type (the one with
-        // the highest number). This will seem odd, but that is how it is
-        // handled within VIC.
-        //
-        // Only case 2 needs to be handled explicitly
-
-        // WARNING: COMPUTE_TREELINE currently not enabled - this section
-        // will be ignored
-        // WARNING: by this point, Cv_sum most likely == 1, no good reason
-        // for it not to, since bare soil is explicitly included in the
-        // input parameter file
-        if (options.SNOW_BAND > 1 && options.COMPUTE_TREELINE &&
-            !no_overstory && Cv_sum[i] == 1.) {
-            // Use bare soil above treeline
-            // TBD: check to make sure that we actually need to make
-            // room for a new veg tile; 
-            if (options.AboveTreelineVeg < 0) {
-                for (j = 0; j < options.NVEGTYPES; j++) {
-                    vidx = veg_con_map[i].vidx[j];
-                    if (vidx != NODATA_VEG) {
-                        veg_con[i][vidx].Cv -=
-                            0.001 / veg_con[i][vidx].vegetat_type_num;
-                    }
-                }
-                // WARNING: This is wrong, since there is no subsequent
-                // code to replace the area that is being subtracted
-                Cv_sum[i] -= 0.001;
-            }
-            // Use defined vegetation type above treeline
-            else {
-                for (j = 0; j < options.NVEGTYPES; j++) {
-                    vidx = veg_con_map[i].vidx[j];
-                    if (vidx != NODATA_VEG) {
-                        veg_con[i][vidx].Cv -=
-                            0.001 / veg_con[i][vidx].vegetat_type_num;
-                        veg_con[i][vidx].vegetat_type_num += 1;
-                    }
-                }
-                vidx = veg_con_map[i].vidx[options.NVEGTYPES - 1];
-                veg_con[i][vidx].Cv = 0.001;
-                veg_con[i][vidx].veg_class = options.AboveTreelineVeg;
-                veg_con[i][vidx].vegetat_type_num =
-                    veg_con[i][0].vegetat_type_num;
-                // Since root zones are not defined they are copied from another
-                // vegetation type.
-                for (j = 0; j < options.ROOT_ZONES; j++) {
-                    veg_con[i][vidx].zone_depth[j] =
-                        veg_con[i][0].zone_depth[j];
-                    veg_con[i][vidx].zone_fract[j] =
-                        veg_con[i][0].zone_fract[j];
-                }
-                // redo the mapping to ensure that the veg type is active
-                k = 0;
-                for (j = 0; j < options.NVEGTYPES; j++) {
-                    if (veg_con_map[i].Cv[j] > 0) {
-                        veg_con_map[i].vidx[j] = k;
-                        veg_con[i][k].Cv = veg_con_map[i].Cv[j];
-                        veg_con[i][k].veg_class = j;
-                        k++;
-                    }
-                    else {
-                        veg_con_map[i].vidx[j] = NODATA_VEG;
-                    }
-                }
-                // check that the vegetation type is defined in the vegetation
-                // library
-                found = false;
-                for (k = 0; k < options.NVEGTYPES; k++) {
-                    if (veg_con[i][vidx].veg_class == veg_lib[i][k].veg_class) {
-                        found = true;
-                        break;
-                    }
-                }
-                if (!found) {
-                    sprint_location(locstr, &(local_domain.locations[i]));
-                    log_err("The vegetation class id %i in vegetation tile %i "
-                            "from cell %zd is not defined in the vegetation "
-                            "library\n%s", veg_con[i][vidx].veg_class, vidx, i,
-                            locstr);
-                }
-                // make sure it has no overstory
-                veg_class = veg_con[i][options.NVEGTYPES - 1].veg_class;
-                if (veg_lib[i][veg_class].overstory) {
-                    sprint_location(locstr, &(local_domain.locations[i]));
-                    log_err("Vegetation class %i is defined to have overstory, "
-                            "so it cannot be used as the default vegetation "
-                            "type for above canopy snow bands.\n%s", veg_class,
-                            locstr);
-                }
-            }
-        }
+        // TODO: handle bare soil adjustment for compute treeline option
 
         // If the sum of the tile fractions is not within a tolerance, throw an error
         if (!assert_close_double(Cv_sum[i], 1., 0., 0.001)) {

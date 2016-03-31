@@ -1228,6 +1228,9 @@ get_global_param(FILE *gp)
     }
 
     // Validate treeline option
+    if (options.COMPUTE_TREELINE) {
+        log_err("COMPUTE_TREELINE not implemented in image driver");
+    }
     if (options.COMPUTE_TREELINE && !options.JULY_TAVG_SUPPLIED) {
         log_err("COMPUTE_TREELINE is TRUE but JULY_TAVG_SUPPLIED is "
                 "FALSE.\n You must supply July average temperature if"

@@ -115,8 +115,7 @@ vic_init(void)
 
     // read_veglib()
 
-    // TBD: Check that options.NVEGTYPES is the right number. Bare soil is
-    // the complicating factor here
+    // Assign veg class ids
     for (i = 0; i < local_domain.ncells_active; i++) {
         Cv_sum[i] = 0.;
 
@@ -821,6 +820,7 @@ vic_init(void)
         }
     }
     else {
+
         // AreaFract: fraction of grid cell in each snow band
         for (j = 0; j < options.SNOW_BAND; j++) {
             d3start[0] = j;
@@ -960,10 +960,10 @@ vic_init(void)
     // the grid cell. The veg_con_map_struct is used to provide some of this
     // mapping
 
-    // number of vegetation types - in vic this is defined without the bare soil
-    // and the vegetation above the treeline
+    // number of vegetation types - in vic an extra veg tile is created
+    // for above-treeline vegetation in some cases
     for (i = 0; i < local_domain.ncells_active; i++) {
-        nveg = veg_con_map[i].nv_active - 1;
+        nveg = veg_con_map[i].nv_active;
         if (options.AboveTreelineVeg >= 0) {
             nveg -= 1;
         }
@@ -1057,7 +1057,8 @@ vic_init(void)
     // Run some checks and corrections for vegetation
     for (i = 0; i < local_domain.ncells_active; i++) {
         no_overstory = false;
-        // Only run to options.NVEGTYPES - 1, since bare soil is the last type
+        // Only run to options.NVEGTYPES - 1, assuming bare soil
+        // is the last type
         for (j = 0; j < options.NVEGTYPES - 1; j++) {
             vidx = veg_con_map[i].vidx[j];
             if (vidx != NODATA_VEG) {
@@ -1110,6 +1111,7 @@ vic_init(void)
                 }
             }
         }
+
         // handle the bare soil portion of the tile
         vidx = veg_con_map[i].vidx[options.NVEGTYPES - 1];
         if (vidx != NODATA_VEG) {
@@ -1157,9 +1159,16 @@ vic_init(void)
         //
         // Only case 2 needs to be handled explicitly
 
+        // WARNING: COMPUTE_TREELINE currently not enabled - this section
+        // will be ignored
+        // WARNING: by this point, Cv_sum most likely == 1, no good reason
+        // for it not to, since bare soil is explicitly included in the
+        // input parameter file
         if (options.SNOW_BAND > 1 && options.COMPUTE_TREELINE &&
             !no_overstory && Cv_sum[i] == 1.) {
             // Use bare soil above treeline
+            // TBD: check to make sure that we actually need to make
+            // room for a new veg tile; 
             if (options.AboveTreelineVeg < 0) {
                 for (j = 0; j < options.NVEGTYPES; j++) {
                     vidx = veg_con_map[i].vidx[j];
@@ -1168,6 +1177,8 @@ vic_init(void)
                             0.001 / veg_con[i][vidx].vegetat_type_num;
                     }
                 }
+                // WARNING: This is wrong, since there is no subsequent
+                // code to replace the area that is being subtracted
                 Cv_sum[i] -= 0.001;
             }
             // Use defined vegetation type above treeline
@@ -1180,17 +1191,17 @@ vic_init(void)
                         veg_con[i][vidx].vegetat_type_num += 1;
                     }
                 }
-                veg_con[i][options.NVEGTYPES - 1].Cv = 0.001;
-                veg_con[i][options.NVEGTYPES - 1].veg_class =
-                    options.AboveTreelineVeg;
-                veg_con[i][options.NVEGTYPES - 1].vegetat_type_num =
+                vidx = veg_con_map[i].vidx[options.NVEGTYPES - 1];
+                veg_con[i][vidx].Cv = 0.001;
+                veg_con[i][vidx].veg_class = options.AboveTreelineVeg;
+                veg_con[i][vidx].vegetat_type_num =
                     veg_con[i][0].vegetat_type_num;
                 // Since root zones are not defined they are copied from another
                 // vegetation type.
                 for (j = 0; j < options.ROOT_ZONES; j++) {
-                    veg_con[i][options.NVEGTYPES - 1].zone_depth[j] =
+                    veg_con[i][vidx].zone_depth[j] =
                         veg_con[i][0].zone_depth[j];
-                    veg_con[i][options.NVEGTYPES - 1].zone_fract[j] =
+                    veg_con[i][vidx].zone_fract[j] =
                         veg_con[i][0].zone_fract[j];
                 }
                 // redo the mapping to ensure that the veg type is active

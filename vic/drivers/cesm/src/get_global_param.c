@@ -737,7 +737,7 @@ validate_options(option_struct *options)
     }
 
     // Validate treeline option
-    if (options.COMPUTE_TREELINE) {
+    if (options->COMPUTE_TREELINE) {
         log_err("COMPUTE_TREELINE not implemented in cesm driver");
     }
     if (options->COMPUTE_TREELINE && !options->JULY_TAVG_SUPPLIED) {

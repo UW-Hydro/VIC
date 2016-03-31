@@ -979,7 +979,8 @@ vic_init(void)
                         options.ALB_SRC == FROM_VEGPARAM) {
                         veg_con[i][k].albedo[m] = veg_lib[i][j].albedo[m];
                     }
-                    if (options.FCAN_SRC == FROM_VEGLIB ||
+                    if (options.FCAN_SRC == FROM_DEFAULT ||
+                        options.FCAN_SRC == FROM_VEGLIB ||
                         options.FCAN_SRC == FROM_VEGPARAM) {
                         veg_con[i][k].fcanopy[m] = veg_lib[i][j].fcanopy[m];
                     }

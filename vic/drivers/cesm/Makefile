@@ -79,10 +79,9 @@ INCLUDES = -I ${DRIVERPATH}/include \
 		   -I ${SHAREDPATH}/include \
 		   -I ${SHAREDIMAGEPATH}/include \
 		   -I ${NETCDFPATH}/include \
-		   -I ${MPIPATH}/include \
 
 # Set libraries
-LIBRARY = -lm -L${NETCDFPATH}/lib -lnetcdf -L${MPIPATH}/lib -lmpi
+LIBRARY = -lm -L${NETCDFPATH}/lib -lnetcdf
 
 # Set compiler flags
 CFLAGS  =  ${INCLUDES} -ggdb -O0 -Wall -Wextra -fPIC

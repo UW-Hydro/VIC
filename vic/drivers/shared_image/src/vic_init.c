@@ -1159,13 +1159,13 @@ vic_init(void)
         //
         // Only case 2 needs to be handled explicitly
 
-        // WARNING: SNOW_BAND > 1 currently not enabled - this section
+        // WARNING: COMPUTE_TREELINE currently not enabled - this section
         // will be ignored
         // WARNING: by this point, Cv_sum most likely == 1, no good reason
         // for it not to, since bare soil is explicitly included in the
         // input parameter file
         if (options.SNOW_BAND > 1 && options.COMPUTE_TREELINE &&
-            !no_overstory && Cv_sum == 1.) {
+            !no_overstory && Cv_sum[i] == 1.) {
             // Use bare soil above treeline
             // TBD: check to make sure that we actually need to make
             // room for a new veg tile; 

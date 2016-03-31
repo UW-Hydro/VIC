@@ -62,6 +62,17 @@ else
 MPIPATH = /opt/local
 endif
 
+# udunits include .. change the path depending on travis or other location
+ifeq (true, ${TRAVIS})
+UDUNITSPATH = ${TRAVIS_UDUNITSPATH}
+else ifeq (hydro-c1, $(shell hostname))
+UDUNITSPATH = /usr/local/udunits2
+else ifeq ($(UNAME_S), Linux)
+UDUNITSPATH = /usr
+else
+UDUNITSPATH = /opt/local
+endif
+
 # Set SHELL = your shell here
 SHELL = /bin/bash
 
@@ -90,11 +101,12 @@ INCLUDES = -I ${DRIVERPATH}/include \
 		   -I ${SHAREDPATH}/include \
 		   -I ${SHAREDIMAGEPATH}/include \
 		   -I ${NETCDFPATH}/include \
-		   -I ${MPIPATH}/include
+		   -I ${MPIPATH}/include \
+		   -I ${UDUNITSPATH}/include
 
 # Uncomment to include debugging information
 CFLAGS  =  ${INCLUDES} -ggdb -O0 -Wall -Wextra -std=c99 -DLOG_LVL=$(LOG_LVL)
-LIBRARY = -lm -L${NETCDFPATH}/lib -lnetcdf -L${MPIPATH}/lib -lmpi
+LIBRARY = -lm -L${NETCDFPATH}/lib -lnetcdf -L${MPIPATH}/lib -lmpi -L${UDUNITSPATH}/lib -ludunits2
 
 COMPEXE = vic_image
 EXT = .exe

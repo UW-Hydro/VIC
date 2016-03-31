@@ -31,6 +31,7 @@
 #include <vic_mpi.h>
 
 #include <netcdf.h>
+#include <udunits2.h>
 
 #define MAXDIMS 10
 
@@ -204,5 +205,6 @@ void vic_restore(void);
 void vic_start(void);
 void vic_store(void);
 void vic_write(void);
+cv_converter*udunits_conversion(const char*const from, const char*const to);
 
 #endif

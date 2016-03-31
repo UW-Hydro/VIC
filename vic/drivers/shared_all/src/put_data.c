@@ -624,7 +624,6 @@ put_data(all_vars_struct   *all_vars,
                                             out_data[OUT_AERO_COND1].aggdata[0];
     out_data[OUT_AERO_RESIST2].aggdata[0] = 1 /
                                             out_data[OUT_AERO_COND2].aggdata[0];
-
 }
 
 /******************************************************************************
@@ -1115,8 +1114,7 @@ calc_water_balance_error(double inflow,
                          double storage,
                          double last_storage)
 {
-
-    double        error;
+    double error;
 
     error = inflow - outflow - (storage - last_storage);
 
@@ -1133,24 +1131,23 @@ calc_energy_balance_error(double net_rad,
                           double grnd_flux,
                           double snow_fluxes)
 {
-    double        error;
+    double error;
 
     error = net_rad - latent - sensible - grnd_flux + snow_fluxes;
 
     return(error);
 }
 
-
 /******************************************************************************
  * @brief    This subroutine checks if it is time to write an output file
  *****************************************************************************/
 bool
-check_write_flag(int rec) {
-
+check_write_flag(int rec)
+{
     extern global_param_struct global_param;
 
-    static unsigned int  out_step_ratio;
-    static unsigned int  step_count;
+    static unsigned int        out_step_ratio;
+    static unsigned int        step_count;
 
 
     if (rec == 0) {

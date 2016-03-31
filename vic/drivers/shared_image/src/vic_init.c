@@ -811,7 +811,6 @@ vic_init(void)
         }
     }
     else {
-
         // AreaFract: fraction of grid cell in each snow band
         for (j = 0; j < options.SNOW_BAND; j++) {
             d3start[0] = j;

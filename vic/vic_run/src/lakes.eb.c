@@ -841,6 +841,7 @@ eddy(int     freezeflag,
             de[k] = param.LAKE_DM;
         }
     }
+
     /**********************************************************************
     * Avoid too low wind speeds for computational stability.
     **********************************************************************/

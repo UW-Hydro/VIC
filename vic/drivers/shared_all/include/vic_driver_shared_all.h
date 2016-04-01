@@ -123,11 +123,11 @@ enum
     OUT_ZWT_LUMPED,       /**< lumped water table position [cm] (zwt of total moisture across all layers, lumped together) */
     // Water Balance Terms - fluxes
     OUT_BASEFLOW,         /**< baseflow out of the bottom layer  [mm] (ALMA_OUTPUT: [mm/s]) */
-    OUT_DISCHARGE,        /** */
     OUT_DELINTERCEPT,     /**< change in canopy interception storage  [mm] */
     OUT_DELSOILMOIST,     /**< change in soil water content  [mm] */
     OUT_DELSURFSTOR,      /**< change in surface liquid water storage  [mm] */
     OUT_DELSWE,           /**< change in snow water equivalent  [mm] */
+    OUT_DISCHARGE,        /**< river discharge [m3] (ALMA_OUTPUT: [m3/s]) */
     OUT_EVAP,             /**< total net evaporation [mm] (ALMA_OUTPUT: [mm/s]) */
     OUT_EVAP_BARE,        /**< net evaporation from bare soil [mm] (ALMA_OUTPUT: [mm/s]) */
     OUT_EVAP_CANOP,       /**< net evaporation from canopy interception [mm] (ALMA_OUTPUT: [mm/s]) */

@@ -100,7 +100,6 @@ vic_cesm_init(vic_clock     *vclock,
 int
 vic_cesm_run(vic_clock *vclock)
 {
-
     // reset l2x fields
     initialize_l2x_data();
 

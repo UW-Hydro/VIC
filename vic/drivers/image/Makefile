@@ -106,7 +106,7 @@ INCLUDES = -I ${DRIVERPATH}/include \
 
 # Uncomment to include debugging information
 CFLAGS  =  ${INCLUDES} -ggdb -O0 -Wall -Wextra -std=c99 -DLOG_LVL=$(LOG_LVL)
-LIBRARY = -lm -L${NETCDFPATH}/lib -lnetcdf -L${MPIPATH}/lib -lmpi -L${UDUNITSPATH}/lib -ludunits2
+LIBRARY = -lm -L${NETCDFPATH}/lib -lnetcdf -L${UDUNITSPATH}/lib -ludunits2
 
 COMPEXE = vic_image
 EXT = .exe

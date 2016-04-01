@@ -238,7 +238,8 @@ main(int   argc,
 
             /** Sending a negative record number (-global_param.nrecs) to
                 put_data() will accomplish this **/
-            put_data(&all_vars, &atmos[0], &soil_con, veg_con, veg_lib, &lake_con,
+            put_data(&all_vars, &atmos[0], &soil_con, veg_con, veg_lib,
+                     &lake_con,
                      out_data, &save_data, -global_param.nrecs);
 
             /******************************************

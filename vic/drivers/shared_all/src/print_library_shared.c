@@ -755,7 +755,8 @@ void
 print_save_data(save_data_struct *save)
 {
     fprintf(LOG_DEST, "save_data:\n");
-    fprintf(LOG_DEST, "\ttotal_moist_storage: %.4f\n", save->total_moist_storage);
+    fprintf(LOG_DEST, "\ttotal_moist_storage: %.4f\n",
+            save->total_moist_storage);
     fprintf(LOG_DEST, "\ttotal_soil_moist: %.4f\n", save->total_soil_moist);
     fprintf(LOG_DEST, "\tsurfstor: %.4f\n", save->surfstor);
     fprintf(LOG_DEST, "\tswe: %.4f\n", save->swe);

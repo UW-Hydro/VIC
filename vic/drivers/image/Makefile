@@ -101,7 +101,6 @@ INCLUDES = -I ${DRIVERPATH}/include \
 		   -I ${SHAREDPATH}/include \
 		   -I ${SHAREDIMAGEPATH}/include \
 		   -I ${NETCDFPATH}/include \
-		   -I ${MPIPATH}/include \
 		   -I ${UDUNITSPATH}/include
 
 # Uncomment to include debugging information

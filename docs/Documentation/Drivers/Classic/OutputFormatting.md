@@ -1,14 +1,8 @@
 # VIC Model Output Formatting
 
-## How to control the contents of VIC output files
-
-These instructions apply to VIC model versions 4.0.6 and later. In earlier versions of VIC, the user has little control over the contents of VIC output files without changing the VIC source code.
-
 ## Specifying Output Files and Variables
 
-In earlier versions of VIC, the set of output files and their contents were hard-coded. Users inevitably had to modify the code to produce the type of output they wanted, and had to merge their changes into any new versions of the code as they were released.
-
-VIC (4.0.6 and later) now allows the user to specify exactly which output files to create and which variables to store in each file. This way, users can save space by only writing those variables that are useful, and will be less likely to need to maintain a private version of the code to do this.
+VIC allows the user to specify exactly which output files to create and which variables to store in each file. This way, users can save space by only writing those variables that are useful, and will be less likely to need to maintain a private version of the code to do this.
 
 **Main points:**
 
@@ -50,7 +44,7 @@ _format_ = (for ascii output files) `fprintf` format string, e.g.
   - `%.7e` = scientific notation w/ 7 decimal places
   - `*` = use the default format for this variable
 
-_type_ = (for binary output files) data type code. Must be one of:
+_type_ = (for `BINARY` output files) data type code. Must be one of:
   - `OUT_TYPE_DOUBLE` = double-precision floating point
   - `OUT_TYPE_FLOAT` = single-precision floating point
   - `OUT_TYPE_INT` = integer
@@ -59,7 +53,7 @@ _type_ = (for binary output files) data type code. Must be one of:
   - `OUT_TYPE_CHAR` = char
   - `*` = use the default type
 
-_multiplier_ = (for binary output files) factor to multiply the data by before writing, to increase precision.
+_multiplier_ = (for `BINARY` output files) factor to multiply the data by before writing, to increase precision compared to not using the multiplier.
   - `*` = use the default multiplier for this variable
 
 Here's an example. To specify 2 output files, named "wbal" and "ebal", and containing water balance and energy balance terms, respectively, you could do something like this:
@@ -97,11 +91,11 @@ Note that even if you only want to specify the format, you must supply a value i
 
 For typical output files, the date is always written at the beginning of each record. This will consist of the following columns:
 
-year month day hour
+year month day seconds
 
-For daily output timestep, "hour" is not written.
+For daily output timestep, "seconds" is not written.
 
-If BINARY_OUTPUT is TRUE, these will all be written as type int (OUT_TYPE_INT).
+If OUT_FORMAT is BINARY, these will all be written as type int (OUT_TYPE_INT).
 
 **Multiple-valued variables:**
 
@@ -118,7 +112,7 @@ OUTVAR	OUT_ALBEDO_BAND
 
 will result in an output file containing:
 
-```year month day (hour) swe[0] swe[1] albedo[0] albedo[1]```
+```year month day (seconds) swe[0] swe[1] albedo[0] albedo[1]```
 
 ## Specifying Units
 
@@ -173,20 +167,16 @@ Now VIC provides an option to insert descriptive headers into its output files, 
 For ascii files, the output header has the following format:
 
 ```
-# NRECS: (nrecs)
-# DT: (dt)
-# STARTDATE: yyyy-mm-dd hh:00:00
-# ALMA_OUTPUT: (0 or 1)
-# NVARS: (Nvars)
-# VARNAME    VARNAME   VARNAME   ...
+# SIMULATION: (OUTFILE prefix)
+# MODEL_VERSION: (Version String)
+# ALMA_UNITS: (True or False)
+VARNAME    VARNAME   VARNAME   ...
 ```
 where
 
-- nrecs = Number of records in the file
-- dt = Time step length in hours
-- start date = Date and time of first record of file
-- ALMA_OUTPUT = Indicates units of the variables; 0 = standard VIC units; 1 = ALMA units
-- Nvars = Number of variables in the file, including date fields
+- SIMULATION: OUTFILE prefix from global parameter file
+- MODEL_VERSION: VIC Version String
+- ALMA_OUTPUT = Indicates units of the variables; TRUE or FALSE
 
 For binary files, the output header has the following format:
 

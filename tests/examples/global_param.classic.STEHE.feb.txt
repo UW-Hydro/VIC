@@ -42,7 +42,7 @@ RESULT_DIR            $result_dir
 OUTPUT_STEPS_PER_DAY  0
 SKIPYEAR              0
 COMPRESS              FALSE
-BINARY_OUTPUT         FALSE
+OUT_FORMAT            ASCII
 ALMA_OUTPUT           FALSE
 MOISTFRACT            FALSE
 PRT_HEADER            TRUE

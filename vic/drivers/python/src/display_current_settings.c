@@ -258,18 +258,6 @@ display_current_settings(int mode)
             fprintf(LOG_DEST, "N_TYPES\t\t\t%zu\n",
                     param_set.N_TYPES[file_num]);
             fprintf(LOG_DEST, "FORCE_DT\t\t%f\n", param_set.FORCE_DT[file_num]);
-            if (param_set.FORCE_ENDIAN[file_num] == LITTLE) {
-                fprintf(LOG_DEST, "FORCE_ENDIAN\t\tLITTLE\n");
-            }
-            else {
-                fprintf(LOG_DEST, "FORCE_ENDIAN\t\tBIG\n");
-            }
-            if (param_set.FORCE_FORMAT[file_num] == BINARY) {
-                fprintf(LOG_DEST, "FORCE_FORMAT\t\tBINARY\n");
-            }
-            else {
-                fprintf(LOG_DEST, "FORCE_FORMAT\t\tASCII\n");
-            }
         }
     }
     fprintf(LOG_DEST, "GRID_DECIMAL\t\t%hu\n", options.GRID_DECIMAL);
@@ -395,11 +383,11 @@ display_current_settings(int mode)
     fprintf(LOG_DEST, "Input State File:\n");
     if (options.INIT_STATE) {
         fprintf(LOG_DEST, "INIT_STATE\t\tTRUE\t%s\n", filenames.init_state);
-        if (options.BINARY_STATE_FILE) {
-            fprintf(LOG_DEST, "BINARY_STATE_FILE\tTRUE\n");
+        if (options.STATE_FORMAT == BINARY) {
+            fprintf(LOG_DEST, "STATE_FORMAT\tBINARY\n");
         }
-        else {
-            fprintf(LOG_DEST, "BINARY_STATE_FILE\tFALSE\n");
+        else if (options.STATE_FORMAT == ASCII) {
+            fprintf(LOG_DEST, "STATE_FORMAT\tASCII\n");
         }
     }
     else {
@@ -414,11 +402,11 @@ display_current_settings(int mode)
         fprintf(LOG_DEST, "STATEYEAR\t\t%d\n", global_param.stateyear);
         fprintf(LOG_DEST, "STATEMONTH\t\t%d\n", global_param.statemonth);
         fprintf(LOG_DEST, "STATEDAY\t\t%d\n", global_param.stateday);
-        if (options.BINARY_STATE_FILE) {
-            fprintf(LOG_DEST, "BINARY_STATE_FILE\tTRUE\n");
+        if (options.STATE_FORMAT == BINARY) {
+            fprintf(LOG_DEST, "STATE_FORMAT\tBINARY\n");
         }
-        else {
-            fprintf(LOG_DEST, "BINARY_STATE_FILE\tFALSE\n");
+        else if (options.STATE_FORMAT == ASCII) {
+            fprintf(LOG_DEST, "STATE_FORMAT\tASCII\n");
         }
     }
     else {
@@ -435,11 +423,11 @@ display_current_settings(int mode)
     else {
         fprintf(LOG_DEST, "ALMA_OUTPUT\t\tFALSE\n");
     }
-    if (options.BINARY_OUTPUT) {
-        fprintf(LOG_DEST, "BINARY_OUTPUT\t\tTRUE\n");
+    if (options.OUT_FORMAT == ASCII) {
+        fprintf(LOG_DEST, "OUT_FORMAT\t\tASCII\n");
     }
-    else {
-        fprintf(LOG_DEST, "BINARY_OUTPUT\t\tFALSE\n");
+    else if (options.OUT_FORMAT == BINARY) {
+        fprintf(LOG_DEST, "OUT_FORMAT\t\tBINARY\n");
     }
     if (options.COMPRESS) {
         fprintf(LOG_DEST, "COMPRESS\t\tTRUE\n");

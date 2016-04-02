@@ -48,7 +48,7 @@ write_data(out_data_file_struct *out_data_files,
     float               *tmp_fptr;
     double              *tmp_dptr;
 
-    if (options.BINARY_OUTPUT) { // BINARY
+    if (options.OUT_FORMAT == BINARY) {
         n = N_OUTVAR_TYPES * options.Nlayer * options.SNOW_BAND;
         // Initialize pointers
         tmp_cptr = calloc(n, sizeof(*tmp_cptr));
@@ -184,8 +184,8 @@ write_data(out_data_file_struct *out_data_files,
         free((char *) tmp_fptr);
         free((char *) tmp_dptr);
     }
-    else { // ASCII
-           // Loop over output files
+    else if (options.OUT_FORMAT == ASCII) {
+        // Loop over output files
         for (file_idx = 0; file_idx < options.Noutfiles; file_idx++) {
             // Write the date
             if (dt < SEC_PER_DAY) {
@@ -221,5 +221,8 @@ write_data(out_data_file_struct *out_data_files,
             }
             fprintf(out_data_files[file_idx].fh, "\n");
         }
+    }
+    else {
+        log_err("Unrecognized OUT_FORMAT option");
     }
 }

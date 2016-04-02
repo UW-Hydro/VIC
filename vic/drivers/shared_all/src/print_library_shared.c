@@ -80,6 +80,23 @@ print_dmy(dmy_struct *dmy)
 }
 
 /******************************************************************************
+ * @brief    Print dmy structure as one string.
+ *****************************************************************************/
+void
+sprint_dmy(char       *str,
+           dmy_struct *dmy)
+{
+    sprintf(str,
+            "dmy:\n"
+            "\tday         : %hu\n"
+            "\tday_in_year : %hu\n"
+            "\tseconds     : %u\n"
+            "\tmonth       : %hu\n"
+            "\tyear        : %u\n",
+            dmy->day, dmy->day_in_year, dmy->dayseconds, dmy->month, dmy->year);
+}
+
+/******************************************************************************
  * @brief    Print energy balance structure.
  *****************************************************************************/
 void

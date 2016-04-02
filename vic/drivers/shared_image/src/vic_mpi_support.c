@@ -519,7 +519,7 @@ create_MPI_nc_file_struct_type(MPI_Datatype *mpi_type)
     MPI_Datatype *mpi_types;
 
     // nitems has to equal the number of elements in nc_file_struct
-    nitems = 27;
+    nitems = 29;
     blocklengths = malloc(nitems * sizeof(*blocklengths));
     if (blocklengths == NULL) {
         log_err("Memory allocation error in create_MPI_nc_file_struct_type().")
@@ -581,6 +581,10 @@ create_MPI_nc_file_struct_type(MPI_Datatype *mpi_type)
     offsets[i] = offsetof(nc_file_struct, frost_dimid);
     mpi_types[i++] = MPI_INT;
 
+    // int lake_node_dimid;
+    offsets[i] = offsetof(nc_file_struct, lake_node_dimid);
+    mpi_types[i++] = MPI_INT;
+
     // int layer_dimid;
     offsets[i] = offsetof(nc_file_struct, layer_dimid);
     mpi_types[i++] = MPI_INT;
@@ -619,6 +623,10 @@ create_MPI_nc_file_struct_type(MPI_Datatype *mpi_type)
 
     // size_t frost_size;
     offsets[i] = offsetof(nc_file_struct, frost_size);
+    mpi_types[i++] = MPI_AINT;
+
+    // size_t lake_node_size;
+    offsets[i] = offsetof(nc_file_struct, lake_node_size);
     mpi_types[i++] = MPI_AINT;
 
     // size_t layer_size;
@@ -878,36 +886,36 @@ create_MPI_option_struct_type(MPI_Datatype *mpi_type)
     offsets[i] = offsetof(option_struct, GRID_DECIMAL);
     mpi_types[i++] = MPI_UNSIGNED_SHORT;
 
-    // bool VEGLIB_PHOTO;
-    offsets[i] = offsetof(option_struct, VEGLIB_PHOTO);
-    mpi_types[i++] = MPI_C_BOOL;
-
     // bool VEGLIB_FCAN;
     offsets[i] = offsetof(option_struct, VEGLIB_FCAN);
+    mpi_types[i++] = MPI_C_BOOL;
+
+    // bool VEGLIB_PHOTO;
+    offsets[i] = offsetof(option_struct, VEGLIB_PHOTO);
     mpi_types[i++] = MPI_C_BOOL;
 
     // bool VEGPARAM_ALB;
     offsets[i] = offsetof(option_struct, VEGPARAM_ALB);
     mpi_types[i++] = MPI_C_BOOL;
 
-    // bool VEGPARAM_LAI;
-    offsets[i] = offsetof(option_struct, VEGPARAM_LAI);
-    mpi_types[i++] = MPI_C_BOOL;
-
     // bool VEGPARAM_FCAN;
     offsets[i] = offsetof(option_struct, VEGPARAM_FCAN);
+    mpi_types[i++] = MPI_C_BOOL;
+
+    // bool VEGPARAM_LAI;
+    offsets[i] = offsetof(option_struct, VEGPARAM_LAI);
     mpi_types[i++] = MPI_C_BOOL;
 
     // unsigned short ALB_SRC;
     offsets[i] = offsetof(option_struct, ALB_SRC);
     mpi_types[i++] = MPI_UNSIGNED_SHORT;
 
-    // unsigned short LAI_SRC;
-    offsets[i] = offsetof(option_struct, LAI_SRC);
-    mpi_types[i++] = MPI_UNSIGNED_SHORT;
-
     // unsigned short FCAN_SRC;
     offsets[i] = offsetof(option_struct, FCAN_SRC);
+    mpi_types[i++] = MPI_UNSIGNED_SHORT;
+
+    // unsigned short LAI_SRC;
+    offsets[i] = offsetof(option_struct, LAI_SRC);
     mpi_types[i++] = MPI_UNSIGNED_SHORT;
 
     // bool LAKE_PROFILE;
@@ -1000,7 +1008,7 @@ create_MPI_param_struct_type(MPI_Datatype *mpi_type)
     MPI_Datatype   *mpi_types;
 
     // nitems has to equal the number of elements in parameters_struct
-    nitems = 139;
+    nitems = 143;
     blocklengths = malloc(nitems * sizeof(*blocklengths));
     if (blocklengths == NULL) {
         log_err("Memory allocation error in create_MPI_param_struct_type().")
@@ -1064,6 +1072,10 @@ create_MPI_param_struct_type(MPI_Datatype *mpi_type)
     offsets[i] = offsetof(parameters_struct, EMISS_H2O);
     mpi_types[i++] = MPI_DOUBLE;
 
+    // double SOIL_ARC
+    offsets[i] = offsetof(parameters_struct, SOIL_RARC);
+    mpi_types[i++] = MPI_DOUBLE;
+
     // double SOIL_RESID_MOIST
     offsets[i] = offsetof(parameters_struct, SOIL_RESID_MOIST);
     mpi_types[i++] = MPI_DOUBLE;
@@ -1072,16 +1084,28 @@ create_MPI_param_struct_type(MPI_Datatype *mpi_type)
     offsets[i] = offsetof(parameters_struct, SOIL_SLAB_MOIST_FRACT);
     mpi_types[i++] = MPI_DOUBLE;
 
+    // double SOIL_WINDH
+    offsets[i] = offsetof(parameters_struct, SOIL_WINDH);
+    mpi_types[i++] = MPI_DOUBLE;
+
     // double VEG_LAI_SNOW_MULTIPLIER
     offsets[i] = offsetof(parameters_struct, VEG_LAI_SNOW_MULTIPLIER);
+    mpi_types[i++] = MPI_DOUBLE;
+
+    // double VEG_LAI_WATER_FACTOR
+    offsets[i] = offsetof(parameters_struct, VEG_LAI_WATER_FACTOR);
     mpi_types[i++] = MPI_DOUBLE;
 
     // double VEG_MIN_INTERCEPTION_STORAGE
     offsets[i] = offsetof(parameters_struct, VEG_MIN_INTERCEPTION_STORAGE);
     mpi_types[i++] = MPI_DOUBLE;
 
-    // double VEG_LAI_WATER_FACTOR
-    offsets[i] = offsetof(parameters_struct, VEG_LAI_WATER_FACTOR);
+    // double VEG_RATIO_DH_HEIGHT
+    offsets[i] = offsetof(parameters_struct, VEG_RATIO_DH_HEIGHT);
+    mpi_types[i++] = MPI_DOUBLE;
+
+    // double VEG_RATIO_RL_HEIGHT
+    offsets[i] = offsetof(parameters_struct, VEG_RATIO_RL_HEIGHT);
     mpi_types[i++] = MPI_DOUBLE;
 
     // double CANOPY_CLOSURE

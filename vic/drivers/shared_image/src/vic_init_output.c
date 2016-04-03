@@ -137,7 +137,7 @@ initialize_history_file(nc_file_struct *nc)
     nc->veg_size = options.NVEGTYPES;
 
     // open the netcdf file
-    status = nc_create(nc->fname, NC_NETCDF4 | NC_CLASSIC_MODEL, &(nc->nc_id));
+    status = nc_create(nc->fname, NC_CLASSIC_MODEL, &(nc->nc_id));
     if (status != NC_NOERR) {
         log_err("Error creating %s", nc->fname);
     }

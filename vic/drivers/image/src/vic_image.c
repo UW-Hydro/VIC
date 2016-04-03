@@ -75,7 +75,7 @@ int
 main(int    argc,
      char **argv)
 {
-    int  status;
+    int status;
 
     // Initialize MPI - note: logging not yet initialized
     status = MPI_Init(&argc, &argv);

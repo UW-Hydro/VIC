@@ -148,8 +148,8 @@ root_brent(double LowerBound,
                returns a valid value */
             sprintf(ErrorString, "ERROR: %s: the given function produced "
                     "undefined values while attempting to "
-                    "bracket the root between %f and %f.\n",
-                    Routine, LowerBound, UpperBound);
+                    "bracket the root between %f and %f. Driver info: %s.",
+                    Routine, LowerBound, UpperBound, vic_run_ref_str);
             log_warn("Root Brent is returning an error: %s", ErrorString);
             va_end(ap);
             return(ERROR);
@@ -192,8 +192,8 @@ root_brent(double LowerBound,
                     sprintf(ErrorString, "ERROR: %s: the given function "
                             "produced undefined values while "
                             "attempting to bracket the root "
-                            "between %f and %f.\n",
-                            Routine, LowerBound, UpperBound);
+                            "between %f and %f. Driver info: %s.",
+                            Routine, LowerBound, UpperBound, vic_run_ref_str);
                     log_warn("Root Brent is returning an error: %s",
                              ErrorString);
                     va_end(ap);
@@ -210,8 +210,8 @@ root_brent(double LowerBound,
                     sprintf(ErrorString,
                             "ERROR: %s: the given function produced undefined "
                             "values while attempting to bracket the root "
-                            "between %f and %f.\n", Routine, LowerBound,
-                            UpperBound);
+                            "between %f and %f. Driver info: %s.",
+                            Routine, LowerBound, UpperBound, vic_run_ref_str);
                     log_warn("Root Brent is returning an error: %s",
                              ErrorString);
                     va_end(ap);
@@ -238,7 +238,8 @@ root_brent(double LowerBound,
                 sprintf(ErrorString,
                         "ERROR: %s: the given function produced undefined "
                         "values while attempting to bracket the root between "
-                        "%f and %f.\n", Routine, LowerBound, UpperBound);
+                        "%f and %f. Driver info: %s.",
+                        Routine, LowerBound, UpperBound, vic_run_ref_str);
                 log_warn("Root Brent is returning an error: %s", ErrorString);
                 va_end(ap);
                 return(ERROR);
@@ -261,7 +262,8 @@ root_brent(double LowerBound,
         /* if we get here, the lower and upper bounds did not bracket the root */
         sprintf(ErrorString,
                 "WARNING: %s: lower and upper bounds %f and %f failed to "
-                "bracket the root.\n", Routine, a, b);
+                "bracket the root. Driver info: %s.",
+                Routine, a, b, vic_run_ref_str);
         log_warn("Root Brent is returning an error: %s", ErrorString);
         va_end(ap);
         return(ERROR);
@@ -346,8 +348,8 @@ root_brent(double LowerBound,
             // Catch ERROR values returned from Function
             if (fb == ERROR) {
                 sprintf(ErrorString, "ERROR returned to root_brent on "
-                        "iteration %d: temperature = %.4f\n",
-                        i + 1, b);
+                        "iteration %d: temperature = %.4f. Driver info: %s.",
+                        i + 1, b, vic_run_ref_str);
                 log_warn("Root Brent is returning an error: %s", ErrorString);
                 va_end(ap);
                 return(ERROR);
@@ -355,7 +357,8 @@ root_brent(double LowerBound,
         }
     }
     /* If we get here, there were too many iterations */
-    sprintf(ErrorString, "WARNING: %s: too many iterations.\n", Routine);
+    sprintf(ErrorString, "WARNING: %s: too many iterations. Driver info: %s.",
+            Routine, vic_run_ref_str);
     log_warn("Root Brent is returning an error: %s", ErrorString);
     va_end(ap);
     return(ERROR);

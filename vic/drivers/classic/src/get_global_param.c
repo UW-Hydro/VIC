@@ -416,13 +416,16 @@ get_global_param(FILE *gp)
             else if (strcasecmp("STATEDAY", optstr) == 0) {
                 sscanf(cmdstr, "%*s %hu", &global_param.stateday);
             }
-            else if (strcasecmp("BINARY_STATE_FILE", optstr) == 0) {
+            else if (strcasecmp("STATE_FORMAT", optstr) == 0) {
                 sscanf(cmdstr, "%*s %s", flgstr);
-                if (strcasecmp("FALSE", flgstr) == 0) {
-                    options.BINARY_STATE_FILE = false;
+                if (strcasecmp("BINARY", flgstr) == 0) {
+                    options.STATE_FORMAT = BINARY;
+                }
+                else if (strcasecmp("ASCII", flgstr) == 0) {
+                    options.STATE_FORMAT = ASCII;
                 }
                 else {
-                    options.BINARY_STATE_FILE = true;
+                    log_err("STATE_FORMAT must be either ASCII or BINARY.");
                 }
             }
 
@@ -741,13 +744,16 @@ get_global_param(FILE *gp)
                     options.COMPRESS = false;
                 }
             }
-            else if (strcasecmp("BINARY_OUTPUT", optstr) == 0) {
+            else if (strcasecmp("OUT_FORMAT", optstr) == 0) {
                 sscanf(cmdstr, "%*s %s", flgstr);
-                if (strcasecmp("TRUE", flgstr) == 0) {
-                    options.BINARY_OUTPUT = true;
+                if (strcasecmp("BINARY", flgstr) == 0) {
+                    options.OUT_FORMAT = BINARY;
+                }
+                else if (strcasecmp("ASCII", flgstr) == 0) {
+                    options.OUT_FORMAT = ASCII;
                 }
                 else {
-                    options.BINARY_OUTPUT = false;
+                    log_err("OUT_FORMAT must be either ASCII or BINARY.");
                 }
             }
             else if (strcasecmp("ALMA_OUTPUT", optstr) == 0) {
@@ -814,6 +820,14 @@ get_global_param(FILE *gp)
             }
             else if (strcasecmp("FORCE_DT", optstr) == 0) {
                 log_err("FORCE_DT has been replaced with FORCE_STEPS_PER_DAY, "
+                        "update your global parameter file accordingly");
+            }
+            else if (strcasecmp("BINARY_OUTPUT", optstr) == 0) {
+                log_err("BINARY_OUTPUT has been replaced with OUT_FORMAT, "
+                        "update your global parameter file accordingly");
+            }
+            else if (strcasecmp("BINARY_STATE_FILE", optstr) == 0) {
+                log_err("BINARY_STATE_FILE has been replaced with STATE_FORMAT, "
                         "update your global parameter file accordingly");
             }
 
@@ -1416,6 +1430,14 @@ get_global_param(FILE *gp)
                 "initialize state file (%s).  The initialize state file "
                 "will be destroyed when the save state file is opened.",
                 filenames.statefile, filenames.init_state);
+    }
+
+    // Default file formats (if unset)
+    if (options.SAVE_STATE && options.STATE_FORMAT == UNSET_FILE_FORMAT) {
+        options.STATE_FORMAT = ASCII;
+    }
+    if (options.OUT_FORMAT == UNSET_FILE_FORMAT) {
+        options.OUT_FORMAT = ASCII;
     }
 
     // Validate soil parameter/simulation mode combinations

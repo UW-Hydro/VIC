@@ -2003,7 +2003,8 @@ initialize_state_file(nc_file_struct *nc)
     }
 
     // open the netcdf file
-    status = nc_create(nc->fname, NC_NETCDF4 | NC_CLASSIC_MODEL, &(nc->nc_id));
+    status = nc_create(nc->fname, get_nc_mode(options.STATE_FORMAT),
+                       &(nc->nc_id));
     if (status != NC_NOERR) {
         log_err("Error creating %s", nc->fname);
     }

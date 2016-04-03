@@ -112,7 +112,7 @@ FROZEN_SOIL	FALSE	# TRUE = calculate frozen soils.  Default = FALSE.
 #STATEYEAR	2000	# year to save model state
 #STATEMONTH	12	# month to save model state
 #STATEDAY	31	# day to save model state
-#BINARY_STATE_FILE       FALSE	# TRUE if state file should be binary format; FALSE if ascii
+#STATE_FORMAT           NETCDF4_CLASSIC	# State file format, valid options: NETCDF3_CLASSIC, NETCDF3_64BIT_OFFSET, NETCDF4_CLASSIC, NETCDF4
 
 #######################################################################
 # Forcing Files and Parameters
@@ -159,7 +159,8 @@ SNOW_BAND	1	# Number of snow bands; if number of snow bands > 1, you must insert
 # Output Files and Parameters
 #######################################################################
 RESULT_DIR      (put the result directory path here)	# Results directory path
-OUTPUT_STEPS_PER_DAY        0       # Output interval (hours); if 0, OUTPUT_STEPS_PER_DAY = MODEL_STEPS_PER_DAY
+OUTPUT_STEPS_PER_DAY    0                       # Output interval (hours); if 0, OUTPUT_STEPS_PER_DAY = MODEL_STEPS_PER_DAY
+#OUT_FORMAT             NETCDF4_CLASSIC	# Output file format, valid options: NETCDF3_CLASSIC, NETCDF3_64BIT_OFFSET, NETCDF4_CLASSIC, NETCDF4
 SKIPYEAR 	0	# Number of years of output to omit from the output files
 ALMA_OUTPUT	FALSE	# TRUE = ALMA-format output files; FALSE = standard VIC units
 MOISTFRACT 	FALSE	# TRUE = output soil moisture as volumetric fraction; FALSE = standard VIC units

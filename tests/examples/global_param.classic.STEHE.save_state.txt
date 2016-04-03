@@ -16,7 +16,7 @@ STATENAME             $state_dir/STEHE.state
 STATEYEAR             1949
 STATEMONTH            01
 STATEDAY              10
-BINARY_STATE_FILE     FALSE
+STATE_FORMAT          ASCII
 FORCING1              $test_data_dir/classic/Stehekin/forcings/full_data_
 FORCE_FORMAT          ASCII
 FORCE_TYPE            PREC
@@ -47,7 +47,7 @@ RESULT_DIR            $result_dir
 OUTPUT_STEPS_PER_DAY  0
 SKIPYEAR              0
 COMPRESS              FALSE
-BINARY_OUTPUT         FALSE
+OUT_FORMAT            ASCII
 ALMA_OUTPUT           FALSE
 MOISTFRACT            FALSE
 PRT_HEADER            TRUE

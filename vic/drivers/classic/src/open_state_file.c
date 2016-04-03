@@ -42,7 +42,7 @@ open_state_file(global_param_struct *global,
 
     /* open state file */
     sprintf(filename, "%s", filenames.statefile);
-    if (options.BINARY_STATE_FILE) {
+    if (options.STATE_FORMAT == BINARY) {
         statefile = open_file(filename, "wb");
     }
     else {
@@ -50,7 +50,7 @@ open_state_file(global_param_struct *global,
     }
 
     /* Write save state date information */
-    if (options.BINARY_STATE_FILE) {
+    if (options.STATE_FORMAT == BINARY) {
         fwrite(&global->stateyear, sizeof(int), 1, statefile);
         fwrite(&global->statemonth, sizeof(int), 1, statefile);
         fwrite(&global->stateday, sizeof(int), 1, statefile);
@@ -61,7 +61,7 @@ open_state_file(global_param_struct *global,
     }
 
     /* Write simulation flags */
-    if (options.BINARY_STATE_FILE) {
+    if (options.STATE_FORMAT == BINARY) {
         fwrite(&Nlayer, sizeof(int), 1, statefile);
         fwrite(&Nnodes, sizeof(int), 1, statefile);
     }

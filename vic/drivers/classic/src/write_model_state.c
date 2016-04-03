@@ -71,7 +71,7 @@ write_model_state(all_vars_struct *all_vars,
     lake_var = all_vars->lake_var;
 
     /* write cell information */
-    if (options.BINARY_STATE_FILE) {
+    if (options.STATE_FORMAT == BINARY) {
         fwrite(&cellnum, sizeof(int), 1, filep->statefile);
         fwrite(&Nveg, sizeof(int), 1, filep->statefile);
         fwrite(&Nbands, sizeof(int), 1, filep->statefile);
@@ -83,7 +83,7 @@ write_model_state(all_vars_struct *all_vars,
     // of the line.  DO NOT CHANGE unless you have changed the values
     // written to the state file.
     // IF YOU EDIT THIS FILE: UPDATE THIS VALUE!
-    if (options.BINARY_STATE_FILE) {
+    if (options.STATE_FORMAT == BINARY) {
         Nbytes = options.Nnode * sizeof(double) + // dz_node
                  options.Nnode * sizeof(double) + // Zsum_node
                  (Nveg + 1) * Nbands * 2 * sizeof(int) + // veg & band
@@ -141,7 +141,7 @@ write_model_state(all_vars_struct *all_vars,
 
     /* Write soil thermal node deltas */
     for (nidx = 0; nidx < options.Nnode; nidx++) {
-        if (options.BINARY_STATE_FILE) {
+        if (options.STATE_FORMAT == BINARY) {
             fwrite(&soil_con->dz_node[nidx], sizeof(double), 1,
                    filep->statefile);
         }
@@ -151,7 +151,7 @@ write_model_state(all_vars_struct *all_vars,
     }
     /* Write soil thermal node depths */
     for (nidx = 0; nidx < options.Nnode; nidx++) {
-        if (options.BINARY_STATE_FILE) {
+        if (options.STATE_FORMAT == BINARY) {
             fwrite(&soil_con->Zsum_node[nidx], sizeof(double), 1,
                    filep->statefile);
         }
@@ -159,7 +159,7 @@ write_model_state(all_vars_struct *all_vars,
             fprintf(filep->statefile, " %f ", soil_con->Zsum_node[nidx]);
         }
     }
-    if (!options.BINARY_STATE_FILE) {
+    if (options.STATE_FORMAT == ASCII) {
         fprintf(filep->statefile, "\n");
     }
 
@@ -168,7 +168,7 @@ write_model_state(all_vars_struct *all_vars,
         /* Output for all snow bands */
         for (band = 0; band < Nbands; band++) {
             /* Write cell identification information */
-            if (options.BINARY_STATE_FILE) {
+            if (options.STATE_FORMAT == BINARY) {
                 fwrite(&veg, sizeof(int), 1, filep->statefile);
                 fwrite(&band, sizeof(int), 1, filep->statefile);
             }
@@ -179,7 +179,7 @@ write_model_state(all_vars_struct *all_vars,
             /* Write total soil moisture */
             for (lidx = 0; lidx < options.Nlayer; lidx++) {
                 tmpval = cell[veg][band].layer[lidx].moist;
-                if (options.BINARY_STATE_FILE) {
+                if (options.STATE_FORMAT == BINARY) {
                     fwrite(&tmpval, sizeof(double), 1, filep->statefile);
                 }
                 else {
@@ -192,7 +192,7 @@ write_model_state(all_vars_struct *all_vars,
                 for (frost_area = 0; frost_area < options.Nfrost;
                      frost_area++) {
                     tmpval = cell[veg][band].layer[lidx].ice[frost_area];
-                    if (options.BINARY_STATE_FILE) {
+                    if (options.STATE_FORMAT == BINARY) {
                         fwrite(&tmpval, sizeof(double), 1, filep->statefile);
                     }
                     else {
@@ -204,7 +204,7 @@ write_model_state(all_vars_struct *all_vars,
             if (veg < Nveg) {
                 /* Write dew storage */
                 tmpval = veg_var[veg][band].Wdew;
-                if (options.BINARY_STATE_FILE) {
+                if (options.STATE_FORMAT == BINARY) {
                     fwrite(&tmpval, sizeof(double), 1, filep->statefile);
                 }
                 else {
@@ -213,14 +213,14 @@ write_model_state(all_vars_struct *all_vars,
                 if (options.CARBON) {
                     /* Write cumulative NPP */
                     tmpval = veg_var[veg][band].AnnualNPP;
-                    if (options.BINARY_STATE_FILE) {
+                    if (options.STATE_FORMAT == BINARY) {
                         fwrite(&tmpval, sizeof(double), 1, filep->statefile);
                     }
                     else {
                         fprintf(filep->statefile, " %f", tmpval);
                     }
                     tmpval = veg_var[veg][band].AnnualNPPPrev;
-                    if (options.BINARY_STATE_FILE) {
+                    if (options.STATE_FORMAT == BINARY) {
                         fwrite(&tmpval, sizeof(double), 1, filep->statefile);
                     }
                     else {
@@ -228,21 +228,21 @@ write_model_state(all_vars_struct *all_vars,
                     }
                     /* Write soil carbon storages */
                     tmpval = cell[veg][band].CLitter;
-                    if (options.BINARY_STATE_FILE) {
+                    if (options.STATE_FORMAT == BINARY) {
                         fwrite(&tmpval, sizeof(double), 1, filep->statefile);
                     }
                     else {
                         fprintf(filep->statefile, " %f", tmpval);
                     }
                     tmpval = cell[veg][band].CInter;
-                    if (options.BINARY_STATE_FILE) {
+                    if (options.STATE_FORMAT == BINARY) {
                         fwrite(&tmpval, sizeof(double), 1, filep->statefile);
                     }
                     else {
                         fprintf(filep->statefile, " %f", tmpval);
                     }
                     tmpval = cell[veg][band].CSlow;
-                    if (options.BINARY_STATE_FILE) {
+                    if (options.STATE_FORMAT == BINARY) {
                         fwrite(&tmpval, sizeof(double), 1, filep->statefile);
                     }
                     else {
@@ -252,7 +252,7 @@ write_model_state(all_vars_struct *all_vars,
             }
 
             /* Write snow data */
-            if (options.BINARY_STATE_FILE) {
+            if (options.STATE_FORMAT == BINARY) {
                 fwrite(&snow[veg][band].last_snow, sizeof(int), 1,
                        filep->statefile);
                 fwrite(&snow[veg][band].MELTING, sizeof(char), 1,
@@ -288,7 +288,7 @@ write_model_state(all_vars_struct *all_vars,
 
             /* Write soil thermal node temperatures */
             for (nidx = 0; nidx < options.Nnode; nidx++) {
-                if (options.BINARY_STATE_FILE) {
+                if (options.STATE_FORMAT == BINARY) {
                     fwrite(&energy[veg][band].T[nidx], sizeof(double), 1,
                            filep->statefile);
                 }
@@ -297,14 +297,14 @@ write_model_state(all_vars_struct *all_vars,
                 }
             }
 
-            if (!options.BINARY_STATE_FILE) {
+            if (options.STATE_FORMAT == ASCII) {
                 fprintf(filep->statefile, "\n");
             }
         }
     }
 
     if (options.LAKES) {
-        if (options.BINARY_STATE_FILE) {
+        if (options.STATE_FORMAT == BINARY) {
             /* Write total soil moisture */
             for (lidx = 0; lidx < options.Nlayer; lidx++) {
                 fwrite(&lake_var.soil.layer[lidx].moist, sizeof(double), 1,
@@ -322,21 +322,21 @@ write_model_state(all_vars_struct *all_vars,
             if (options.CARBON) {
                 /* Write soil carbon storages */
                 tmpval = lake_var.soil.CLitter;
-                if (options.BINARY_STATE_FILE) {
+                if (options.STATE_FORMAT == BINARY) {
                     fwrite(&tmpval, sizeof(double), 1, filep->statefile);
                 }
                 else {
                     fprintf(filep->statefile, " %f", tmpval);
                 }
                 tmpval = lake_var.soil.CInter;
-                if (options.BINARY_STATE_FILE) {
+                if (options.STATE_FORMAT == BINARY) {
                     fwrite(&tmpval, sizeof(double), 1, filep->statefile);
                 }
                 else {
                     fprintf(filep->statefile, " %f", tmpval);
                 }
                 tmpval = lake_var.soil.CSlow;
-                if (options.BINARY_STATE_FILE) {
+                if (options.STATE_FORMAT == BINARY) {
                     fwrite(&tmpval, sizeof(double), 1, filep->statefile);
                 }
                 else {

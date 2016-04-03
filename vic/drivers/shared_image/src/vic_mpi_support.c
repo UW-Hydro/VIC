@@ -926,9 +926,9 @@ create_MPI_option_struct_type(MPI_Datatype *mpi_type)
     offsets[i] = offsetof(option_struct, ORGANIC_FRACT);
     mpi_types[i++] = MPI_C_BOOL;
 
-    // bool BINARY_STATE_FILE;
-    offsets[i] = offsetof(option_struct, BINARY_STATE_FILE);
-    mpi_types[i++] = MPI_C_BOOL;
+    // unsigned short STATE_FORMAT;
+    offsets[i] = offsetof(option_struct, STATE_FORMAT);
+    mpi_types[i++] = MPI_UNSIGNED_SHORT;
 
     // bool INIT_STATE;
     offsets[i] = offsetof(option_struct, INIT_STATE);
@@ -942,9 +942,9 @@ create_MPI_option_struct_type(MPI_Datatype *mpi_type)
     offsets[i] = offsetof(option_struct, ALMA_OUTPUT);
     mpi_types[i++] = MPI_C_BOOL;
 
-    // bool BINARY_OUTPUT;
-    offsets[i] = offsetof(option_struct, BINARY_OUTPUT);
-    mpi_types[i++] = MPI_C_BOOL;
+    // unsigned short OUT_FORMAT;
+    offsets[i] = offsetof(option_struct, OUT_FORMAT);
+    mpi_types[i++] = MPI_UNSIGNED_SHORT;
 
     // bool COMPRESS;
     offsets[i] = offsetof(option_struct, COMPRESS);

@@ -37,9 +37,13 @@
  *****************************************************************************/
 enum
 {
+    UNSET_FILE_FORMAT,
     ASCII,
     BINARY,
-    NETCDF
+    NETCDF3_CLASSIC,
+    NETCDF3_64BIT_OFFSET,
+    NETCDF4_CLASSIC,
+    NETCDF4
 };
 
 /******************************************************************************
@@ -533,6 +537,7 @@ double q_to_vp(double q, double p);
 int set_output_var(out_data_file_struct *, int, int, out_data_struct *, char *,
                    int, char *, int, double);
 void soil_moisture_from_water_table(soil_con_struct *soil_con, size_t nlayers);
+void sprint_dmy(char *str, dmy_struct *dmy);
 unsigned short int timeunits_from_chars(char *units_chars);
 int update_step_vars(all_vars_struct *, veg_con_struct *, veg_hist_struct *);
 int valid_date(unsigned short int calendar, dmy_struct *dmy);

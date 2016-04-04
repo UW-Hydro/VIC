@@ -166,6 +166,7 @@ int get_nc_field_float(char *nc_name, char *var_name, size_t *start,
                        size_t *count, float *var);
 int get_nc_field_int(char *nc_name, char *var_name, size_t *start,
                      size_t *count, int *var);
+int get_nc_mode(unsigned short int format);
 void initialize_domain(domain_struct *domain);
 void initialize_domain_info(domain_info_struct *info);
 void initialize_energy(energy_bal_struct **energy, size_t nveg);

@@ -137,7 +137,8 @@ initialize_history_file(nc_file_struct *nc)
     nc->veg_size = options.NVEGTYPES;
 
     // open the netcdf file
-    status = nc_create(nc->fname, NC_CLASSIC_MODEL, &(nc->nc_id));
+    status =
+        nc_create(nc->fname, get_nc_mode(options.OUT_FORMAT), &(nc->nc_id));
     if (status != NC_NOERR) {
         log_err("Error creating %s", nc->fname);
     }
@@ -423,5 +424,28 @@ initialize_history_file(nc_file_struct *nc)
     }
     else {
         log_err("n_coord_dims should be 1 or 2");
+    }
+}
+
+/******************************************************************************
+ * @brief    Determine the netCDF file format
+ *****************************************************************************/
+int
+get_nc_mode(unsigned short int format)
+{
+    if (format == NETCDF3_CLASSIC) {
+        return (NC_CLASSIC_MODEL);
+    }
+    else if (format == NETCDF3_64BIT_OFFSET) {
+        return (NC_64BIT_OFFSET);
+    }
+    else if (format == NETCDF4_CLASSIC) {
+        return (NC_NETCDF4 | NC_CLASSIC_MODEL);
+    }
+    else if (format == NETCDF4) {
+        return (NC_NETCDF4);
+    }
+    else {
+        log_err("Unrecognized netCDF file format");
     }
 }

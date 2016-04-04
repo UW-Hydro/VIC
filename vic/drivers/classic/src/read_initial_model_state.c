@@ -73,7 +73,7 @@ read_initial_model_state(FILE            *init_state,
     lake_var = &all_vars->lake_var;
 
     /* read cell information */
-    if (options.BINARY_STATE_FILE) {
+    if (options.STATE_FORMAT == BINARY) {
         fread(&tmp_cellnum, sizeof(int), 1, init_state);
         fread(&tmp_Nveg, sizeof(int), 1, init_state);
         fread(&tmp_Nband, sizeof(int), 1, init_state);
@@ -84,7 +84,7 @@ read_initial_model_state(FILE            *init_state,
     }
     // Skip over unused cell information
     while (tmp_cellnum != cellnum && !feof(init_state)) {
-        if (options.BINARY_STATE_FILE) {
+        if (options.STATE_FORMAT == BINARY) {
             // skip rest of current cells info
             for (byte = 0; byte < Nbytes; byte++) {
                 fread(&tmpchar, 1, 1, init_state);
@@ -129,7 +129,7 @@ read_initial_model_state(FILE            *init_state,
 
     /* Read soil thermal node deltas */
     for (nidx = 0; nidx < options.Nnode; nidx++) {
-        if (options.BINARY_STATE_FILE) {
+        if (options.STATE_FORMAT == BINARY) {
             fread(&soil_con->dz_node[nidx], sizeof(double), 1, init_state);
         }
         else {
@@ -142,7 +142,7 @@ read_initial_model_state(FILE            *init_state,
 
     /* Read soil thermal node depths */
     for (nidx = 0; nidx < options.Nnode; nidx++) {
-        if (options.BINARY_STATE_FILE) {
+        if (options.STATE_FORMAT == BINARY) {
             fread(&soil_con->Zsum_node[nidx], sizeof(double), 1, init_state);
         }
         else {
@@ -164,7 +164,7 @@ read_initial_model_state(FILE            *init_state,
         /* Input for all snow bands */
         for (band = 0; band < Nbands; band++) {
             /* Read cell identification information */
-            if (options.BINARY_STATE_FILE) {
+            if (options.STATE_FORMAT == BINARY) {
                 if (fread(&iveg, sizeof(int), 1, init_state) != 1) {
                     log_err("End of model state file found unexpectedly");
                 }
@@ -188,7 +188,7 @@ read_initial_model_state(FILE            *init_state,
 
             /* Read total soil moisture */
             for (lidx = 0; lidx < options.Nlayer; lidx++) {
-                if (options.BINARY_STATE_FILE) {
+                if (options.STATE_FORMAT == BINARY) {
                     if (fread(&cell[veg][band].layer[lidx].moist,
                               sizeof(double), 1, init_state) != 1) {
                         log_err("End of model state file found unexpectedly");
@@ -206,7 +206,7 @@ read_initial_model_state(FILE            *init_state,
             for (lidx = 0; lidx < options.Nlayer; lidx++) {
                 for (frost_area = 0; frost_area < options.Nfrost;
                      frost_area++) {
-                    if (options.BINARY_STATE_FILE) {
+                    if (options.STATE_FORMAT == BINARY) {
                         if (fread(&cell[veg][band].layer[lidx].ice[frost_area],
                                   sizeof(double), 1, init_state) != 1) {
                             log_err("End of model state file found"
@@ -227,7 +227,7 @@ read_initial_model_state(FILE            *init_state,
 
             if (veg < Nveg) {
                 /* Read dew storage */
-                if (options.BINARY_STATE_FILE) {
+                if (options.STATE_FORMAT == BINARY) {
                     if (fread(&veg_var[veg][band].Wdew, sizeof(double), 1,
                               init_state) != 1) {
                         log_err("End of model state file found unexpectedly");
@@ -241,7 +241,7 @@ read_initial_model_state(FILE            *init_state,
                 }
 
                 if (options.CARBON) {
-                    if (options.BINARY_STATE_FILE) {
+                    if (options.STATE_FORMAT == BINARY) {
                         /* Read cumulative annual NPP */
                         if (fread(&(veg_var[veg][band].AnnualNPP),
                                   sizeof(double), 1, init_state) != 1) {
@@ -293,7 +293,7 @@ read_initial_model_state(FILE            *init_state,
             }
 
             /* Read snow data */
-            if (options.BINARY_STATE_FILE) {
+            if (options.STATE_FORMAT == BINARY) {
                 if (fread(&snow[veg][band].last_snow, sizeof(int), 1,
                           init_state) != 1) {
                     log_err("End of model state file found unexpectedly");
@@ -363,7 +363,7 @@ read_initial_model_state(FILE            *init_state,
 
             /* Read soil thermal node temperatures */
             for (nidx = 0; nidx < options.Nnode; nidx++) {
-                if (options.BINARY_STATE_FILE) {
+                if (options.STATE_FORMAT == BINARY) {
                     if (fread(&energy[veg][band].T[nidx], sizeof(double), 1,
                               init_state) != 1) {
                         log_err("End of model state file found unexpectedly");
@@ -379,7 +379,7 @@ read_initial_model_state(FILE            *init_state,
         }
     }
     if (options.LAKES) {
-        if (options.BINARY_STATE_FILE) {
+        if (options.STATE_FORMAT == BINARY) {
             /* Read total soil moisture */
             for (lidx = 0; lidx < options.Nlayer; lidx++) {
                 if (fread(&lake_var->soil.layer[lidx].moist, sizeof(double), 1,

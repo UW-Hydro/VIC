@@ -83,6 +83,7 @@ extern size_t NR;       /**< array index for atmos struct that indicates
                              the model step avarage or sum */
 extern size_t NF;       /**< array index loop counter limit for atmos
                              struct that indicates the SNOW_STEP values */
+char          vic_run_ref_str[MAXSTRING];
 
 /******************************************************************************
  * @brief   Snow Density parametrizations
@@ -311,13 +312,13 @@ typedef struct {
     bool ORGANIC_FRACT;  /**< TRUE = organic matter fraction of each layer is read from the soil parameter file; otherwise set to 0.0. */
 
     // state options
-    bool BINARY_STATE_FILE; /**< TRUE = model state file is binary (default) */
+    unsigned short int STATE_FORMAT;  /**< TRUE = model state file is binary (default) */
     bool INIT_STATE;     /**< TRUE = initialize model state from file */
     bool SAVE_STATE;     /**< TRUE = save state file */
 
     // output options
     bool ALMA_OUTPUT;    /**< TRUE = output variables are in ALMA-compliant units; FALSE = standard VIC units */
-    bool BINARY_OUTPUT;  /**< TRUE = output files are in binary, not ASCII */
+    unsigned short int OUT_FORMAT;  /**< TRUE = output files are in binary, not ASCII */
     bool COMPRESS;       /**< TRUE = Compress all output files */
     bool MOISTFRACT;     /**< TRUE = output soil moisture as fractional moisture content */
     size_t Noutfiles;    /**< Number of output files (not including state files) */

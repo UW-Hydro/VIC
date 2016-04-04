@@ -374,11 +374,11 @@ typedef struct {
     unsigned short int LAI_SRC;
     _Bool LAKE_PROFILE;
     _Bool ORGANIC_FRACT;
-    _Bool BINARY_STATE_FILE;
+    unsigned short int STATE_FORMAT;
     _Bool INIT_STATE;
     _Bool SAVE_STATE;
     _Bool ALMA_OUTPUT;
-    _Bool BINARY_OUTPUT;
+    unsigned short int OUT_FORMAT;
     _Bool COMPRESS;
     _Bool MOISTFRACT;
     size_t Noutfiles;

@@ -325,6 +325,26 @@ get_global_param(FILE *gp)
             else if (strcasecmp("LOG_DIR", optstr) == 0) {
                 sscanf(cmdstr, "%*s %s", filenames.log_path);
             }
+            // Define state file format
+            else if (strcasecmp("STATE_FORMAT", optstr) == 0) {
+                sscanf(cmdstr, "%*s %s", flgstr);
+                if (strcasecmp("NETCDF3_CLASSIC", flgstr) == 0) {
+                    options.STATE_FORMAT = NETCDF3_CLASSIC;
+                }
+                else if (strcasecmp("NETCDF3_64BIT_OFFSET", flgstr) == 0) {
+                    options.STATE_FORMAT = NETCDF3_64BIT_OFFSET;
+                }
+                else if (strcasecmp("NETCDF4_CLASSIC", flgstr) == 0) {
+                    options.STATE_FORMAT = NETCDF4_CLASSIC;
+                }
+                else if (strcasecmp("NETCDF4", flgstr) == 0) {
+                    options.STATE_FORMAT = NETCDF4;
+                }
+                else {
+                    log_err("STATE_FORMAT must be either NETCDF3_CLASSIC, "
+                            "NETCDF3_64BIT_OFFSET, NETCDF4_CLASSIC, or NETCDF4.");
+                }
+            }
 
             /*************************************
                Define parameter files
@@ -489,6 +509,25 @@ get_global_param(FILE *gp)
             }
             else if (strcasecmp("SKIPYEAR", optstr) == 0) {
                 sscanf(cmdstr, "%*s %hu", &global_param.skipyear);
+            }
+            else if (strcasecmp("OUT_FORMAT", optstr) == 0) {
+                sscanf(cmdstr, "%*s %s", flgstr);
+                if (strcasecmp("NETCDF3_CLASSIC", flgstr) == 0) {
+                    options.OUT_FORMAT = NETCDF3_CLASSIC;
+                }
+                else if (strcasecmp("NETCDF3_64BIT_OFFSET", flgstr) == 0) {
+                    options.OUT_FORMAT = NETCDF3_64BIT_OFFSET;
+                }
+                else if (strcasecmp("NETCDF4_CLASSIC", flgstr) == 0) {
+                    options.OUT_FORMAT = NETCDF4_CLASSIC;
+                }
+                else if (strcasecmp("NETCDF4", flgstr) == 0) {
+                    options.OUT_FORMAT = NETCDF4;
+                }
+                else {
+                    log_err("OUT_FORMAT must be either NETCDF3_CLASSIC, "
+                            "NETCDF3_64BIT_OFFSET, NETCDF4_CLASSIC, or NETCDF4.");
+                }
             }
             else if (strcasecmp("ALMA_OUTPUT", optstr) == 0) {
                 sscanf(cmdstr, "%*s %s", flgstr);
@@ -752,5 +791,13 @@ validate_options(option_struct *options)
             log_err("LAKES = TRUE and COMPUTE_TREELINE = TRUE are "
                     "incompatible options.");
         }
+    }
+
+    // Default file formats (if unset)
+    if (options->STATE_FORMAT == UNSET_FILE_FORMAT) {
+        options->STATE_FORMAT = NETCDF3_CLASSIC;
+    }
+    if (options->OUT_FORMAT == UNSET_FILE_FORMAT) {
+        options->OUT_FORMAT = NETCDF3_CLASSIC;
     }
 }

@@ -30,13 +30,13 @@
  * @brief    udunits2 support.
  *****************************************************************************/
 cv_converter*
-udunits_conversion(const char*const from,
-                   const char*const to)
+udunits_conversion(const char *const from,
+                   const char *const to)
 {
-    ut_system   *unitSystem;
-    ut_unit     *ut_from;
-    ut_unit     *ut_to;
-    cv_converter*converter;
+    ut_system    *unitSystem;
+    ut_unit      *ut_from;
+    ut_unit      *ut_to;
+    cv_converter *converter;
 
     // Read udunits unitSystem
     ut_set_error_message_handler(ut_ignore);

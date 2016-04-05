@@ -214,6 +214,13 @@ veg_con_struct *read_vegparam(FILE *vegparam,
     for(k=0; k<Nfields; k++)
       free(vegarr[k]);
 
+    for ( j = 0; j < MONTHSPERYEAR; j++ ) {
+      temp[i].albedo[j] = veg_lib[temp[i].veg_class].albedo[j];
+      temp[i].LAI[j] = veg_lib[temp[i].veg_class].LAI[j];
+      temp[i].vegcover[j] = veg_lib[temp[i].veg_class].vegcover[j];
+      temp[i].Wdmax[j] = veg_lib[temp[i].veg_class].Wdmax[j];
+    }
+
     if ( options.VEGPARAM_LAI ) {
       // Read the LAI line
       if ( fgets( line, MAXSTRING, vegparam ) == NULL ){
@@ -238,14 +245,7 @@ veg_con_struct *read_vegparam(FILE *vegparam,
         sprintf(ErrStr,"ERROR - cell %d - expecting %d LAI values but found %d in line %s\n",gridcel, NfieldsMax, Nfields, line);
         nrerror(ErrStr);
       }
-
-      for ( j = 0; j < MONTHSPERYEAR; j++ ) {
-        temp[i].albedo[j] = veg_lib[temp[i].veg_class].albedo[j];
-        temp[i].LAI[j] = veg_lib[temp[i].veg_class].LAI[j];
-        temp[i].vegcover[j] = veg_lib[temp[i].veg_class].vegcover[j];
-        temp[i].Wdmax[j] = veg_lib[temp[i].veg_class].Wdmax[j];
-      }
-
+      
       if (options.LAI_SRC == FROM_VEGPARAM) {
         for ( j = 0; j < 12; j++ ) {
           tmp = atof( vegarr[j] );

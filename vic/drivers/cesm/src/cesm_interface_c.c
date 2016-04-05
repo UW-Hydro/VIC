@@ -111,7 +111,7 @@ vic_cesm_run(vic_clock *vclock)
     vic_force();
 
     // run vic over the domain
-    vic_image_run();
+    vic_image_run(&dmy);
 
     // return fields to coupler
     vic_cesm_put_data();

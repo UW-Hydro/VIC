@@ -195,7 +195,7 @@ void set_force_type(char *cmdstr, int file_num, int *field);
 void sprint_location(char *str, location_struct *loc);
 void vic_alloc(void);
 void vic_finalize(void);
-void vic_image_run(void);
+void vic_image_run(dmy_struct *dmy_current);
 void vic_init(void);
 void vic_init_output(void);
 void vic_nc_info(nc_file_struct *nc_hist_file, out_data_struct **out_data,

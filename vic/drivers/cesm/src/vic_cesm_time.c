@@ -72,6 +72,8 @@ advance_time(void)
     extern dmy_struct          dmy;
     extern global_param_struct global_param;
 
+    char dmy_string[MAXSTRING];
+
     current++;
 
     numdate += dt_time_units;
@@ -79,7 +81,11 @@ advance_time(void)
     num2date(global_param.time_origin_num, numdate, 0., global_param.calendar,
              global_param.time_units, &dmy);
 
-    print_dmy(&dmy);
+    if (!valid_date(global_param.calendar, &dmy)) {
+        sprint_dmy(dmy_string, &dmy);
+        log_err("Invalid date encountered while advancing VIC clock in "
+                "timestep %zu.\n%s", current, dmy_string);
+    }
 }
 
 /******************************************************************************

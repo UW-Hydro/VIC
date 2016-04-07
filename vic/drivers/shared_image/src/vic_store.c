@@ -1974,7 +1974,7 @@ void
 initialize_state_file(nc_file_struct *nc)
 {
     extern size_t           current;
-    extern dmy_struct      *dmy;
+    extern dmy_struct       dmy_current;
     extern filenames_struct filenames;
     extern domain_struct    global_domain;
     extern option_struct    options;
@@ -1983,8 +1983,8 @@ initialize_state_file(nc_file_struct *nc)
     int                     old_fill_mode;
 
     sprintf(nc->fname, "%s.%04d%02d%02d_%05u.nc",
-            filenames.statefile, dmy[current].year, dmy[current].month,
-            dmy[current].day, dmy[current].dayseconds);
+            filenames.statefile, dmy_current.year, dmy_current.month,
+            dmy_current.day, dmy_current.dayseconds);
 
     nc->c_fillvalue = NC_FILL_CHAR;
     nc->i_fillvalue = NC_FILL_INT;

@@ -34,7 +34,7 @@ vic_cesm_put_data()
 {
     extern all_vars_struct    *all_vars;
     extern atmos_data_struct  *atmos;
-    extern dmy_struct          dmy;
+    extern dmy_struct          dmy_current;
     extern domain_struct       local_domain;
     extern soil_con_struct    *soil_con;
     extern veg_con_struct    **veg_con;
@@ -69,6 +69,9 @@ vic_cesm_put_data()
     veg_var_struct             veg_var;
 
     for (i = 0; i < local_domain.ncells_active; i++) {
+        
+        debug("running cell %zu", i);
+
         // Zero l2x vars (leave unused fields as MISSING values)
         l2x_vic[i].l2x_Sl_t = 0;
         l2x_vic[i].l2x_Sl_tref = 0;
@@ -123,6 +126,8 @@ vic_cesm_put_data()
                               TreeAdjustFactor * lakefactor);
                 AreaFactorSum += AreaFactor;
 
+                debug("veg %zu, band %zu, AreaFactor %f", veg, band, AreaFactor);
+
                 // temperature
                 // CESM units: K
                 if (overstory && snow.snow && !(options.LAKES && IsWet)) {
@@ -147,9 +152,14 @@ vic_cesm_put_data()
 
                 // albedo: direct , visible
                 // CESM units: unitless
-                albedo = AreaFactor *
-                         (atmos->shortwave[NR] /
-                          (atmos->shortwave[NR] - energy.NetShortAtmos));
+                if (atmos->shortwave[NR] > 0.) {
+                    albedo = AreaFactor *
+                             (atmos->shortwave[NR] /
+                              (atmos->shortwave[NR] - energy.NetShortAtmos));
+                }
+                else {
+                    albedo = 0.;
+                }
                 l2x_vic[i].l2x_Sl_avsdr += albedo;
 
                 // albedo: direct , near-ir
@@ -195,7 +205,7 @@ vic_cesm_put_data()
                 else if (HasVeg) {
                     // bare soil roughness
                     roughness =
-                        veg_lib[i][veg_con[i][veg].veg_class].roughness[dmy.
+                        veg_lib[i][veg_con[i][veg].veg_class].roughness[dmy_current.
                                                                         month -
                                                                         1];
                 }
@@ -289,7 +299,7 @@ vic_cesm_put_data()
         }
 
         if (fabs(1 - AreaFactorSum) > 1e-5) {  // TODO: replace with EPS
-            log_err("AreaFactorSum is not 1 in cesm_put_data.c");
+            log_warn("AreaFactorSum (%f) is not 1 in cesm_put_data.c", AreaFactorSum);
         }
     }
 }

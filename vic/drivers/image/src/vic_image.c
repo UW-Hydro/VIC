@@ -33,6 +33,7 @@ size_t             *mpi_map_mapping_array = NULL;
 all_vars_struct    *all_vars = NULL;
 atmos_data_struct  *atmos = NULL;
 dmy_struct         *dmy = NULL;
+dmy_struct          dmy_current;
 filenames_struct    filenames;
 filep_struct        filep;
 domain_struct       global_domain;
@@ -116,7 +117,8 @@ main(int    argc,
         vic_force();
 
         // run vic over the domain
-        vic_image_run(&(dmy[current]));
+        dmy_current = dmy[current];
+        vic_image_run(&dmy_current);
 
         // if output:
         if (check_write_flag(current)) {

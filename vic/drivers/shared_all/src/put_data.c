@@ -1169,16 +1169,10 @@ check_write_flag(int rec)
     if (rec == 0) {
         step_count = 0;
         out_step_ratio = (unsigned int) ((int) global_param.out_dt / (int) global_param.dt);
-        debug("global_param.out_dt (%i) / global_param.dt (%i) = %hu",
-             ((int) global_param.out_dt),
-             ((int) global_param.dt),
-             ((unsigned int) ((int) global_param.out_dt / (int) global_param.dt)));
     }
 
     if (rec >= 0) {
         step_count++;
-        debug("why is this not writing -- step_count: %hu, out_step_ratio: %hu, rec: %d", step_count, out_step_ratio, rec);
-        debug("global_param.out_dt: %f, global_param.dt: %f", global_param.out_dt, global_param.dt);
     }
 
     // Output procedure (only execute when we've completed an output interval)

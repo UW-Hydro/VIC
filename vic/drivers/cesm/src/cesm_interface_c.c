@@ -118,7 +118,6 @@ vic_cesm_run(vic_clock *vclock)
 
     // if output:
     if (check_write_flag(current - 1)) {
-        debug("writing now");
         vic_write();
     }
 

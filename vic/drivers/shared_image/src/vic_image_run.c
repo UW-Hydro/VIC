@@ -57,8 +57,6 @@ vic_image_run(dmy_struct *dmy_current)
         sprintf(vic_run_ref_str, "Gridcell io_idx: %zu, timestep info: %s",
                 local_domain.locations[i].io_idx, dmy_str);
 
-        debug("Running TS/GC: %s", vic_run_ref_str);
-
         update_step_vars(&(all_vars[i]), veg_con[i], veg_hist[i]);
         vic_run(&(atmos[i]), &(all_vars[i]), dmy_current, &global_param,
                 &lake_con, &(soil_con[i]), veg_con[i], veg_lib[i]);

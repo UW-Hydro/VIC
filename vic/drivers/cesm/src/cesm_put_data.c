@@ -69,8 +69,6 @@ vic_cesm_put_data()
     veg_var_struct             veg_var;
 
     for (i = 0; i < local_domain.ncells_active; i++) {
-        
-        debug("running cell %zu", i);
 
         // Zero l2x vars (leave unused fields as MISSING values)
         l2x_vic[i].l2x_Sl_t = 0;
@@ -125,8 +123,6 @@ vic_cesm_put_data()
                               soil_con[i].AreaFract[band] *
                               TreeAdjustFactor * lakefactor);
                 AreaFactorSum += AreaFactor;
-
-                debug("veg %zu, band %zu, AreaFactor %f", veg, band, AreaFactor);
 
                 // temperature
                 // CESM units: K
@@ -298,8 +294,8 @@ vic_cesm_put_data()
             }
         }
 
-        if (fabs(1 - AreaFactorSum) > 1e-5) {  // TODO: replace with EPS
-            log_warn("AreaFactorSum (%f) is not 1 in cesm_put_data.c", AreaFactorSum);
+        if (fabs(1 - AreaFactorSum) > DBL_EPSILON) {
+            log_warn("AreaFactorSum (%f) is not 1.0 in cesm_put_data.c", AreaFactorSum);
         }
     }
 }

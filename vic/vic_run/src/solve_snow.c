@@ -358,7 +358,6 @@ solve_snow(char               overstory,
                 /** Calculate Snow Density **/
                 if (snow->surf_temp <= 0) {
                     // snowpack present, compress and age density
-                    debug("snow_density dt %f", dt);
                     snow->density = snow_density(snow, *snowfall, old_swq,
                                                  air_temp, dt);
                 }

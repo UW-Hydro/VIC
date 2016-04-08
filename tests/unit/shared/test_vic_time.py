@@ -74,6 +74,17 @@ def dmy_june31(scope='module'):
 
 
 @pytest.fixture()
+def dmy_too_many_seconds(feb3_noon, scope='module'):
+    dmy = ffi.new('dmy_struct *')
+    dmy[0].year = feb3_noon.year
+    dmy[0].month = feb3_noon.month
+    dmy[0].day = feb3_noon.day
+    dmy[0].dayseconds = 86400
+    dmy[0].day_in_year = feb3_noon.timetuple().tm_yday
+    return dmy
+
+
+@pytest.fixture()
 def dmy_now(scope='function'):
     now = datetime.datetime.now()
     return datetime_to_dmy(now)
@@ -196,19 +207,26 @@ def test_dmy_all_30_day(feb3_noon):
 
 @pytest.mark.skipif(nctime_unavailable, reason=nc_reason)
 def test_num2date():
-
-    dates = pd.date_range(start="1900-01-01", end="2100-12-31",
-                          freq='MS').to_pydatetime()
-
+    # Test dates_sets:
+    #   1) monthly frequency that covers typical VIC simulation dates.
+    #   2) 20min frequency with small subsecond positive offset
+    #   3) 20min frequency with small subsecond negative offset
+    date_sets = (pd.date_range(start="1900-01-01", end="2100-12-31",
+                               freq='MS').to_pydatetime(),
+                 pd.date_range(start='1948-09-01 00:00:00.010000',
+                               periods=200, freq='20min').to_pydatetime(),
+                 pd.date_range(start='1948-09-02 23:59:59.09000',
+                               periods=200, freq='20min').to_pydatetime())
     dmy_struct = ffi.new("dmy_struct *")
     for cal, cal_num in calendars.items():
         ut = utime(vic_default_units, calendar=cal)
-        for date in dates:
-            num = ut.date2num(date)
-            vic_lib.num2date(ut._jd0, num, 0., cal_num, units['days'],
-                             dmy_struct)
-            actual = dmy_to_datetime(dmy_struct)
-            assert abs(date - actual) < datetime.timedelta(seconds=1)
+        for dates in date_sets:
+            for date in dates:
+                num = ut.date2num(date)
+                vic_lib.num2date(ut._jd0, num, 0., cal_num, units['days'],
+                                 dmy_struct)
+                actual = dmy_to_datetime(dmy_struct)
+                assert abs(date - actual) < datetime.timedelta(seconds=1)
 
 
 @pytest.mark.skipif(nctime_unavailable, reason=nc_reason)
@@ -250,10 +268,11 @@ def test_initialize_time():
                                        ut._jd0)
 
 
-def test_valid_date(dmy_feb_3_noon, dmy_june31):
+def test_valid_date(dmy_feb_3_noon, dmy_june31, dmy_too_many_seconds):
     for cal in calendars:
         assert vic_lib.valid_date(calendars[cal], dmy_feb_3_noon) == 0
         assert vic_lib.valid_date(calendars[cal], dmy_june31) > 0
+        assert vic_lib.valid_date(calendars[cal], dmy_too_many_seconds) > 0
 
 
 @pytest.mark.skipif(nctime_unavailable, reason=nc_reason)

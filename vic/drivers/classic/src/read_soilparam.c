@@ -62,6 +62,10 @@ read_soilparam(FILE *soilparam,
     double                   tmp_moist;
     double                   w_avg;
     soil_con_struct          temp;
+    double                   Zsum, dp;
+    double                   tmpdp, tmpadj, Bexp;
+    size_t                   k;
+    size_t                   Nnodes;
 
     /** Read plain ASCII soil parameter file **/
     if ((fscanf(soilparam, "%d", &flag)) != EOF) {
@@ -690,6 +694,108 @@ read_soilparam(FILE *soilparam,
                          temp.Ds * temp.max_moist[layer];
             temp.Ds = temp.Ds * temp.Ws / temp.Dsmax;
             temp.Ws = temp.Ws / temp.max_moist[layer];
+        }
+
+        // Soil thermal node thicknesses and positions
+        Nnodes = options.Nnode;
+        dp = temp.dp;
+        if (options.QUICK_FLUX) {
+            /* node thicknesses */
+            temp.dz_node[0] = temp.depth[0];
+            temp.dz_node[1] = temp.depth[0];
+            temp.dz_node[2] = 2. * (dp - 1.5 * temp.depth[0]);
+
+            /* node depths (positions) */
+            temp.Zsum_node[0] = 0;
+            temp.Zsum_node[1] = temp.depth[0];
+            temp.Zsum_node[2] = dp;
+        }
+        else {
+            if (!options.EXP_TRANS) {
+                /* Compute soil node thicknesses
+                   Nodes set at surface, the depth of the first layer,
+                   twice the depth of the first layer, and at the
+                   damping depth.  Extra nodes are placed equal distance
+                   between the damping depth and twice the depth of the
+                   first layer. */
+
+                temp.dz_node[0] = temp.depth[0];
+                temp.dz_node[1] = temp.depth[0];
+                temp.dz_node[2] = temp.depth[0];
+                temp.Zsum_node[0] = 0;
+                temp.Zsum_node[1] = temp.depth[0];
+                Zsum = 2. * temp.depth[0];
+                temp.Zsum_node[2] = Zsum;
+                tmpdp = dp - temp.depth[0] * 2.5;
+                tmpadj = 3.5;
+                for (k = 3; k < Nnodes - 1; k++) {
+                    temp.dz_node[k] = tmpdp / (((double) Nnodes - tmpadj));
+                    Zsum += (temp.dz_node[k] + temp.dz_node[k - 1]) / 2.;
+                    temp.Zsum_node[k] = Zsum;
+                }
+                temp.dz_node[Nnodes -
+                             1] = (dp - Zsum - temp.dz_node[Nnodes - 2] / 2.) *
+                                  2.;
+                Zsum += (temp.dz_node[Nnodes - 2] + temp.dz_node[Nnodes - 1]) /
+                        2.;
+                temp.Zsum_node[Nnodes - 1] = Zsum;
+                if ((int) (Zsum * MM_PER_M + 0.5) !=
+                    (int) (dp * MM_PER_M + 0.5)) {
+                    log_err("Sum of thermal node thicknesses (%f) "
+                            "in initialize_model_state do not "
+                            "equal dp (%f), check initialization "
+                            "procedure", Zsum, dp);
+                }
+            }
+            else {
+                // exponential grid transformation, EXP_TRANS = TRUE
+                // calculate exponential function parameter
+                // to force Zsum=dp at bottom node
+                Bexp = logf(dp + 1.) / (double) (Nnodes - 1);
+                // validate Nnodes by requiring that there be at
+                // least 3 nodes in the top 50cm
+                if (Nnodes < 5 * logf(dp + 1.) + 1) {
+                    log_err("The number of soil thermal nodes (%zu) "
+                            "is too small for the supplied damping "
+                            "depth (%f) with EXP_TRANS set to "
+                            "TRUE, leading to fewer than 3 nodes "
+                            "in the top 50 cm of the soil column.  "
+                            "For EXP_TRANS=TRUE, Nnodes and dp "
+                            "must follow the relationship:\n"
+                            "5*ln(dp+1)<Nnodes-1\n"
+                            "Either set Nnodes to at least %d in "
+                            "the global param file or reduce "
+                            "damping depth to %f in the soil "
+                            "parameter file.  Or set EXP_TRANS to "
+                            "FALSE in the global parameter file.",
+                            Nnodes, dp, (int) (5 * logf(dp + 1.)) + 2,
+                            exp(0.2 * (Nnodes - 1)) + 1);
+                }
+                for (k = 0; k <= Nnodes - 1; k++) {
+                    temp.Zsum_node[k] = expf(Bexp * k) - 1.;
+                }
+                if (temp.Zsum_node[0] > temp.depth[0]) {
+                    log_err("Depth of first thermal node (%f) in "
+                            "initialize_model_state is greater "
+                            "than depth of first soil layer (%f); "
+                            "increase the number of nodes or "
+                            "decrease the thermal damping depth "
+                            "dp (%f)", temp.Zsum_node[0], temp.depth[0], dp);
+                }
+
+                // top node
+                k = 0;
+                temp.dz_node[k] = temp.Zsum_node[k + 1] - temp.Zsum_node[k];
+                // middle nodes
+                for (k = 1; k < Nnodes - 1; k++) {
+                    temp.dz_node[k] =
+                        (temp.Zsum_node[k + 1] - temp.Zsum_node[k]) / 2. +
+                        (temp.Zsum_node[k] - temp.Zsum_node[k - 1]) / 2.;
+                }
+                // bottom node
+                k = Nnodes - 1;
+                temp.dz_node[k] = temp.Zsum_node[k] - temp.Zsum_node[k - 1];
+            } // end if !EXP_TRANS
         }
 
         /*******************************************************************

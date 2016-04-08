@@ -416,6 +416,9 @@ get_global_param(FILE *gp)
             else if (strcasecmp("STATEDAY", optstr) == 0) {
                 sscanf(cmdstr, "%*s %hu", &global_param.stateday);
             }
+            else if (strcasecmp("STATESEC", optstr) == 0) {
+                sscanf(cmdstr, "%*s %u", &global_param.statesec);
+            }
             else if (strcasecmp("STATE_FORMAT", optstr) == 0) {
                 sscanf(cmdstr, "%*s %s", flgstr);
                 if (strcasecmp("BINARY", flgstr) == 0) {
@@ -1397,32 +1400,36 @@ get_global_param(FILE *gp)
         if (global_param.stateyear == 0 || global_param.statemonth == 0 ||
             global_param.stateday == 0) {
             log_err("Incomplete specification of the date to save state "
-                    "for state file (%s).  Specified date (yyyy-mm-dd): "
-                    "%04d-%02d-%02d Make sure STATEYEAR, STATEMONTH, and "
-                    "STATEDAY are set correctly in your global parameter "
+                    "for state file (%s).\nSpecified date (yyyy-mm-dd-hh): "
+                    "%04d-%02d-%02d-%05u\nMake sure STATEYEAR, STATEMONTH, "
+                    "and STATEDAY are set correctly in your global parameter "
                     "file.", filenames.statefile, global_param.stateyear,
-                    global_param.statemonth, global_param.stateday);
+                    global_param.statemonth, global_param.stateday,
+                    global_param.statesec);
         }
         // Check for month, day in range
         make_lastday(global_param.stateyear, global_param.calendar,
                      lastday);
         if (global_param.stateday > lastday[global_param.statemonth - 1] ||
-            global_param.statemonth > MONTHS_PER_YEAR ||
             global_param.statemonth < 1 ||
-            global_param.stateday < 1) {
-            log_err("Unusual specification of the date to save state for "
-                    "state file (%s).  Specified date (yyyy-mm-dd): "
-                    "%04d-%02d-%02d Make sure STATEYEAR, STATEMONTH, and "
-                    "STATEDAY are set correctly in your global parameter "
-                    "file.", filenames.statefile, global_param.stateyear,
-                    global_param.statemonth, global_param.stateday);
+            global_param.statemonth > MONTHS_PER_YEAR ||
+            global_param.stateday < 1 || global_param.stateday > 31 ||
+            global_param.statesec > SEC_PER_DAY) {
+            log_err("Unusual specification of the date to save state "
+                    "for state file (%s).\nSpecified date (yyyy-mm-dd-hh): "
+                    "%04d-%02d-%02d-%05u\nMake sure STATEYEAR, STATEMONTH, "
+                    "STATEDAY and STATESEC are set correctly in your global "
+                    "parameter file.", filenames.statefile,
+                    global_param.stateyear, global_param.statemonth,
+                    global_param.stateday, global_param.statesec);
         }
     }
     // Set the statename here to be able to compare with INIT_STATE name
     if (options.SAVE_STATE) {
-        sprintf(filenames.statefile, "%s_%04i%02i%02i", filenames.statefile,
-                global_param.stateyear, global_param.statemonth,
-                global_param.stateday);
+        sprintf(filenames.statefile, "%s_%04i%02i%02i_%05u",
+                filenames.statefile, global_param.stateyear,
+                global_param.statemonth, global_param.stateday,
+                global_param.statesec);
     }
     if (options.INIT_STATE && options.SAVE_STATE &&
         (strcmp(filenames.init_state, filenames.statefile) == 0)) {

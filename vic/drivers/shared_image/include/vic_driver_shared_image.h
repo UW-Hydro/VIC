@@ -169,7 +169,6 @@ int get_nc_field_int(char *nc_name, char *var_name, size_t *start,
 int get_nc_mode(unsigned short int format);
 void initialize_domain(domain_struct *domain);
 void initialize_domain_info(domain_info_struct *info);
-void initialize_energy(energy_bal_struct **energy, size_t nveg);
 void initialize_global_structures(void);
 void initialize_history_file(nc_file_struct *nc);
 void initialize_location(location_struct *location);
@@ -177,7 +176,6 @@ int initialize_model_state(all_vars_struct *all_vars, size_t Nveg,
                            size_t Nnodes, double surf_temp,
                            soil_con_struct *soil_con, veg_con_struct *veg_con);
 void initialize_soil_con(soil_con_struct *soil_con);
-void initialize_state_file(nc_file_struct *nc);
 void initialize_veg_con(veg_con_struct *veg_con);
 int parse_output_info(FILE *gp, out_data_struct **out_data);
 void print_atmos_data(atmos_data_struct *atmos);

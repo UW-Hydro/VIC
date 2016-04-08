@@ -1,7 +1,8 @@
 /******************************************************************************
  * @section DESCRIPTION
  *
- * Header file for vic_driver_image routines
+ * Function to check whether model state should be saved for the current
+ * time step
  *
  * @section LICENSE
  *
@@ -24,20 +25,25 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  *****************************************************************************/
 
-#ifndef VIC_DRIVER_IMAGE_H
-#define VIC_DRIVER_IMAGE_H
+#include <vic_driver_classic.h>
 
-#include <vic_driver_shared_image.h>
+/******************************************************************************
+ * @brief   Function to check whether model state should be saved for the
+ * current time step
+ *****************************************************************************/
+bool
+check_save_state_flag(dmy_struct *dmy,
+                      size_t      current)
+{
+    extern global_param_struct global_param;
 
-#define VIC_DRIVER "Image"
-
-bool check_save_state_flag(size_t);
-void display_current_settings(int);
-void get_forcing_file_info(param_set_struct *param_set, size_t file_num);
-void get_global_param(FILE *);
-void vic_force(void);
-void vic_image_init(void);
-void vic_image_start(void);
-void vic_populate_model_state(void);
-
-#endif
+    if (dmy[current].year == global_param.stateyear &&
+        dmy[current].month == global_param.statemonth &&
+        dmy[current].day == global_param.stateday &&
+        dmy[current].dayseconds == global_param.statesec) {
+        return true;
+    }
+    else {
+        return false;
+    }
+}

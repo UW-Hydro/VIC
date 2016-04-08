@@ -47,13 +47,7 @@ initialize_soil(cell_data_struct **cell,
             cell[veg][band].runoff = 0;
             for (lindex = 0; lindex < options.Nlayer; lindex++) {
                 cell[veg][band].layer[lindex].evap = 0;
-                cell[veg][band].layer[lindex].moist =
-                    soil_con->init_moist[lindex];
-                if (cell[veg][band].layer[lindex].moist >
-                    soil_con->max_moist[lindex]) {
-                    cell[veg][band].layer[lindex].moist =
-                        soil_con->max_moist[lindex];
-                }
+                cell[veg][band].layer[lindex].moist = 0;
                 tmp_moist[lindex] = cell[veg][band].layer[lindex].moist;
                 for (frost_area = 0; frost_area < options.Nfrost;
                      frost_area++) {

@@ -42,29 +42,33 @@ read_initial_model_state(FILE            *init_state,
                          int              Nveg,
                          int              Nbands,
                          int              cellnum,
-                         soil_con_struct *soil_con)
+                         soil_con_struct *soil_con,
+                         lake_con_struct  lake_con)
 {
-    extern option_struct options;
+    extern option_struct     options;
+    extern parameters_struct param;
 
-    char                 tmpstr[MAXSTRING];
-    char                 tmpchar;
-    int                  veg, iveg;
-    int                  band, iband;
-    size_t               lidx;
-    size_t               nidx;
-    int                  tmp_cellnum;
-    int                  tmp_Nveg;
-    int                  tmp_Nband;
-    int                  tmp_char;
-    int                  byte, Nbytes;
-    int                  node;
-    size_t               frost_area;
+    char                     tmpstr[MAXSTRING];
+    char                     tmpchar;
+    int                      veg, iveg;
+    int                      band, iband;
+    size_t                   lidx;
+    size_t                   nidx;
+    int                      tmp_cellnum;
+    int                      tmp_Nveg;
+    int                      tmp_Nband;
+    int                      tmp_char;
+    int                      byte, Nbytes;
+    int                      node;
+    size_t                   frost_area;
+    double                   pack_swq;
+    double                   surf_swq;
 
-    cell_data_struct   **cell;
-    snow_data_struct   **snow;
-    energy_bal_struct  **energy;
-    veg_var_struct     **veg_var;
-    lake_var_struct     *lake_var;
+    cell_data_struct       **cell;
+    snow_data_struct       **snow;
+    energy_bal_struct      **energy;
+    veg_var_struct         **veg_var;
+    lake_var_struct         *lake_var;
 
     cell = all_vars->cell;
     veg_var = all_vars->veg_var;
@@ -685,6 +689,92 @@ read_initial_model_state(FILE            *init_state,
             }
             if (fscanf(init_state, " %lf", &lake_var->sdepth) == EOF) {
                 log_err("End of model state file found unexpectedly");
+            }
+        }
+    }
+
+    /******Check that soil moisture does not exceed maximum allowed************/
+    for (veg = 0; veg <= Nveg; veg++) {
+        for (band = 0; band < Nbands; band++) {
+            for (lidx = 0; lidx < options.Nlayer; lidx++) {
+                if (cell[veg][band].layer[lidx].moist >
+                    soil_con->max_moist[lidx]) {
+                    log_warn("Initial soil moisture (%f mm) exceeds "
+                             "maximum (%f mm) in layer %zu for veg tile "
+                             "%d and snow band %d.  Resetting to maximum.",
+                             cell[veg][band].layer[lidx].moist,
+                             soil_con->max_moist[lidx], lidx, veg, band);
+                    for (frost_area = 0;
+                         frost_area < options.Nfrost;
+                         frost_area++) {
+                        cell[veg][band].layer[lidx].ice[frost_area] *=
+                            soil_con->max_moist[lidx] /
+                            cell[veg][band].layer[lidx].moist;
+                    }
+                    cell[veg][band].layer[lidx].moist =
+                        soil_con->max_moist[lidx];
+                }
+
+                for (frost_area = 0;
+                     frost_area < options.Nfrost;
+                     frost_area++) {
+                    if (cell[veg][band].layer[lidx].ice[frost_area] >
+                        cell[veg][band].layer[lidx].moist) {
+                        cell[veg][band].layer[lidx].ice[frost_area] =
+                            cell[veg][band].layer[lidx].moist;
+                    }
+                }
+            }
+        }
+
+        // Override possible bad values of soil moisture under lake coming from state file
+        // (ideally we wouldn't store these in the state file in the first place)
+        if (options.LAKES && (int) veg == lake_con.lake_idx) {
+            for (lidx = 0; lidx < options.Nlayer; lidx++) {
+                lake_var->soil.layer[lidx].moist =
+                    soil_con->max_moist[lidx];
+                for (frost_area = 0;
+                     frost_area < options.Nfrost;
+                     frost_area++) {
+                    if (lake_var->soil.layer[lidx].ice[frost_area] >
+                        lake_var->soil.layer[lidx].moist) {
+                        lake_var->soil.layer[lidx].ice[frost_area] =
+                            lake_var->soil.layer[lidx].moist;
+                    }
+                }
+            }
+        }
+    }
+
+    /******Check that snow pack terms are self-consistent************/
+    for (veg = 0; veg <= Nveg; veg++) {
+        for (band = 0; band < Nbands; band++) {
+            if (snow[veg][band].swq > param.SNOW_MAX_SURFACE_SWE) {
+                pack_swq = snow[veg][band].swq - param.SNOW_MAX_SURFACE_SWE;
+                surf_swq = param.SNOW_MAX_SURFACE_SWE;
+            }
+            else {
+                pack_swq = 0;
+                surf_swq = snow[veg][band].swq;
+                snow[veg][band].pack_temp = 0;
+            }
+            if (snow[veg][band].surf_water >
+                param.SNOW_LIQUID_WATER_CAPACITY *
+                surf_swq) {
+                snow[veg][band].pack_water += snow[veg][band].surf_water -
+                                              (param.
+                                               SNOW_LIQUID_WATER_CAPACITY *
+                                               surf_swq);
+                snow[veg][band].surf_water =
+                    param.SNOW_LIQUID_WATER_CAPACITY *
+                    surf_swq;
+            }
+            if (snow[veg][band].pack_water >
+                param.SNOW_LIQUID_WATER_CAPACITY *
+                pack_swq) {
+                snow[veg][band].pack_water =
+                    param.SNOW_LIQUID_WATER_CAPACITY *
+                    pack_swq;
             }
         }
     }

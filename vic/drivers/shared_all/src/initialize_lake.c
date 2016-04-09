@@ -74,6 +74,7 @@ initialize_lake(lake_var_struct  *lake,
     lake->coldcontent = 0.0;
     for (i = 0; i < MAX_LAKE_NODES; i++) {
         lake->density[i] = CONST_RHOFW;
+        lake->temp[i] = 0;
     }
     lake->hice = 0.0;
     lake->ice_throughfall = 0.0;
@@ -85,9 +86,6 @@ initialize_lake(lake_var_struct  *lake,
     lake->surf_temp = 0.0;
     lake->surf_water = 0.0;
     lake->swe = 0.0;
-    for (i = 0; i < MAX_LAKE_NODES; i++) {
-        lake->temp[i] = 0;
-    }
     lake->tempavg = 0.0;
     lake->tempi = 0.0;
 

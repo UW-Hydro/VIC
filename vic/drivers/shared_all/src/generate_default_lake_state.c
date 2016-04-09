@@ -29,7 +29,7 @@
 
 /******************************************************************************
  * @brief    Initialize the lake model state (energy balance, water balance,
- * and snow components) to default values.
+ *           and snow components) to default values.
  *****************************************************************************/
 void
 generate_default_lake_state(all_vars_struct *all_vars,

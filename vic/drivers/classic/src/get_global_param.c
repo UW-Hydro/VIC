@@ -1400,7 +1400,7 @@ get_global_param(FILE *gp)
         if (global_param.stateyear == 0 || global_param.statemonth == 0 ||
             global_param.stateday == 0) {
             log_err("Incomplete specification of the date to save state "
-                    "for state file (%s).\nSpecified date (yyyy-mm-dd-hh): "
+                    "for state file (%s).\nSpecified date (yyyy-mm-dd-sssss): "
                     "%04d-%02d-%02d-%05u\nMake sure STATEYEAR, STATEMONTH, "
                     "and STATEDAY are set correctly in your global parameter "
                     "file.", filenames.statefile, global_param.stateyear,
@@ -1416,7 +1416,7 @@ get_global_param(FILE *gp)
             global_param.stateday < 1 || global_param.stateday > 31 ||
             global_param.statesec > SEC_PER_DAY) {
             log_err("Unusual specification of the date to save state "
-                    "for state file (%s).\nSpecified date (yyyy-mm-dd-hh): "
+                    "for state file (%s).\nSpecified date (yyyy-mm-dd-sssss): "
                     "%04d-%02d-%02d-%05u\nMake sure STATEYEAR, STATEMONTH, "
                     "STATEDAY and STATESEC are set correctly in your global "
                     "parameter file.", filenames.statefile,

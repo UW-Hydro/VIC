@@ -36,7 +36,7 @@
 
 /******************************************************************************
  * @brief    Initialize the model state (energy balance, water balance, and
- * snow components).
+ *           snow components).
  *****************************************************************************/
 void
 vic_populate_model_state(all_vars_struct *all_vars,

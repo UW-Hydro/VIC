@@ -29,7 +29,7 @@
 
 /******************************************************************************
  * @brief   Function to check whether model state should be saved for the
- * current time step
+ *          current time step
  *****************************************************************************/
 bool
 check_save_state_flag(dmy_struct *dmy,

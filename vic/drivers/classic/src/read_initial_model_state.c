@@ -693,7 +693,7 @@ read_initial_model_state(FILE            *init_state,
         }
     }
 
-    /******Check that soil moisture does not exceed maximum allowed************/
+    // Check that soil moisture does not exceed maximum allowed
     for (veg = 0; veg <= Nveg; veg++) {
         for (band = 0; band < Nbands; band++) {
             for (lidx = 0; lidx < options.Nlayer; lidx++) {
@@ -746,7 +746,7 @@ read_initial_model_state(FILE            *init_state,
         }
     }
 
-    /******Check that snow pack terms are self-consistent************/
+    // Check that snow pack terms are self-consistent
     for (veg = 0; veg <= Nveg; veg++) {
         for (band = 0; band < Nbands; band++) {
             if (snow[veg][band].swq > param.SNOW_MAX_SURFACE_SWE) {

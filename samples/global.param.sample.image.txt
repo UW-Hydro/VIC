@@ -108,7 +108,7 @@ FROZEN_SOIL	FALSE	# TRUE = calculate frozen soils.  Default = FALSE.
 # State Files and Parameters
 #######################################################################
 #INIT_STATE	(put the initial state path/filename here)	# Initial state path/file
-#STATENAME	(put the path/prefix of output state file here)	# Output state file path/prefix.  The date (STATEYEAR,STATEMONTH,STATEDAY,STATESEC) will be appended to the prefix automatically in the format yyyymmdd_ss.
+#STATENAME	(put the path/prefix of output state file here)	# Output state file path/prefix.  The date (STATEYEAR,STATEMONTH,STATEDAY,STATESEC) will be appended to the prefix automatically in the format yyyymmdd_sssss.
 #STATEYEAR	2000	# year to save model state
 #STATEMONTH	12	# month to save model state
 #STATEDAY	31	# day to save model state

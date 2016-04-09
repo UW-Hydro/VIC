@@ -33,7 +33,7 @@
  *           and snow components) that are derived from the variables that
  *           are stored in state files.
  *****************************************************************************/
-int
+void
 compute_derived_state_vars(all_vars_struct *all_vars,
                            soil_con_struct *soil_con,
                            veg_con_struct  *veg_con)
@@ -145,7 +145,8 @@ compute_derived_state_vars(all_vars_struct *all_vars,
                             options.Nnode, options.Nlayer,
                             soil_con->FS_ACTIVE);
                     if (ErrorFlag == ERROR) {
-                        return (ErrorFlag);
+                        log_err("Error setting physical properties for "
+                                "soil thermal nodes");
                     }
 
                     // Check node spacing v time step
@@ -201,6 +202,10 @@ compute_derived_state_vars(all_vars_struct *all_vars,
                                 soil_con->expt, soil_con->bubble,
                                 soil_con->frost_fract, soil_con->frost_slope,
                                 soil_con->FS_ACTIVE);
+                        if (ErrorFlag == ERROR) {
+                            log_err("Error in "
+                                    "estimate_layer_ice_content_quick_flux");
+                        }
                     }
                     else {
                         ErrorFlag = estimate_layer_ice_content(
@@ -216,6 +221,10 @@ compute_derived_state_vars(all_vars_struct *all_vars,
                             options.Nnode,
                             options.Nlayer,
                             soil_con->FS_ACTIVE);
+                        if (ErrorFlag == ERROR) {
+                            log_err("Error in "
+                                    "estimate_layer_ice_content");
+                        }
                     }
 
                     /* Find freezing and thawing front depths */
@@ -230,5 +239,4 @@ compute_derived_state_vars(all_vars_struct *all_vars,
         }
     }
 
-    return(0);
 }

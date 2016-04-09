@@ -449,9 +449,9 @@ void collect_eb_terms(energy_bal_struct, snow_data_struct, cell_data_struct,
 void collect_wb_terms(cell_data_struct, veg_var_struct, snow_data_struct,
                       double, double, double, int, double, int, double *,
                       double *, out_data_struct *);
-int compute_derived_lake_dimensions(lake_var_struct *, lake_con_struct);
-int compute_derived_state_vars(all_vars_struct *, soil_con_struct *,
-                               veg_con_struct *);
+void compute_derived_lake_dimensions(lake_var_struct *, lake_con_struct);
+void compute_derived_state_vars(all_vars_struct *, soil_con_struct *,
+                                veg_con_struct *);
 void compute_lake_params(lake_con_struct *, soil_con_struct);
 void compute_treeline(atmos_data_struct *, dmy_struct *, double, double *,
                       bool *);

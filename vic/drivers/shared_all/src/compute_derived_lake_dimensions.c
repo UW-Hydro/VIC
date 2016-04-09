@@ -26,13 +26,12 @@
  *****************************************************************************/
 
 #include <vic_driver_shared_all.h>
-#include <vic_run.h>
 
 /******************************************************************************
  * @brief    This routine computes those lake variables that are completely
  *           dependent on lake depth and basin dimensions.
  *****************************************************************************/
-int
+void
 compute_derived_lake_dimensions(lake_var_struct *lake,
                                 lake_con_struct  lake_con)
 {
@@ -96,7 +95,6 @@ compute_derived_lake_dimensions(lake_var_struct *lake,
     if (status < 0) {
         log_err("Error in get_volume: record = %d, depth = %f, "
                 "volume = %e", 0, depth, tmp_volume);
-        return(status);
     }
     else if (status > 0) {
         log_err("Warning in get_volume: lake depth exceeds maximum; "
@@ -104,5 +102,4 @@ compute_derived_lake_dimensions(lake_var_struct *lake,
     }
     lake->volume = tmp_volume + lake->ice_water_eq;
 
-    return(0);
 }

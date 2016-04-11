@@ -580,6 +580,7 @@ num2date(double             origin,
         log_err("Unknown Time Units Flag: %hu", time_units);
     }
 
+    // Small offset is added to handle subsecond precision issues.
     jd = jdelta + origin + small_offset;
 
     if (calendar == CALENDAR_JULIAN ||
@@ -705,7 +706,7 @@ initialize_time()
  *****************************************************************************/
 int
 invalid_date(unsigned short int calendar,
-           dmy_struct        *dmy)
+             dmy_struct        *dmy)
 {
     unsigned short int lastday[MONTHS_PER_YEAR];
     unsigned short int days_in_year;

@@ -207,7 +207,10 @@ def test_dmy_all_30_day(feb3_noon):
 
 @pytest.mark.skipif(nctime_unavailable, reason=nc_reason)
 def test_num2date():
-
+    # Test dates_sets:
+    #   1) monthly frequency that covers typical VIC simulation dates.
+    #   2) 20min frequency with small subsecond positive offset
+    #   3) 20min frequency with small subsecond negative offset
     date_sets = (pd.date_range(start="1900-01-01", end="2100-12-31",
                                freq='MS').to_pydatetime(),
                  pd.date_range(start='1948-09-01 00:00:00.010000',
@@ -265,11 +268,11 @@ def test_initialize_time():
                                        ut._jd0)
 
 
-def test_invalid_date(dmy_feb_3_noon, dmy_june31, dmy_too_many_seconds):
+def test_valid_date(dmy_feb_3_noon, dmy_june31, dmy_too_many_seconds):
     for cal in calendars:
-        assert vic_lib.invalid_date(calendars[cal], dmy_feb_3_noon) == 0
-        assert vic_lib.invalid_date(calendars[cal], dmy_june31) > 0
-        assert vic_lib.invalid_date(calendars[cal], dmy_too_many_seconds) > 0
+        assert vic_lib.valid_date(calendars[cal], dmy_feb_3_noon) == 0
+        assert vic_lib.valid_date(calendars[cal], dmy_june31) > 0
+        assert vic_lib.valid_date(calendars[cal], dmy_too_many_seconds) > 0
 
 
 @pytest.mark.skipif(nctime_unavailable, reason=nc_reason)

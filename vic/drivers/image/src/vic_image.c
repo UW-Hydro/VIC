@@ -116,11 +116,11 @@ main(int    argc,
         vic_force();
 
         // run vic over the domain
-        vic_image_run();
+        vic_image_run(&(dmy[current]));
 
         // if output:
         if (check_write_flag(current)) {
-            vic_write();
+            vic_write(&(dmy[current]));
         }
 
         // if save:

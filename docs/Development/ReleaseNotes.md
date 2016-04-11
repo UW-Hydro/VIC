@@ -99,7 +99,8 @@ This is a major update from VIC 4. The VIC 5.0.0 release aims to have nearly ide
 1.  Removed unused global parameter option `MEASURE_H` ([GH#284](https://github.com/UW-Hydro/VIC/pull/284).)
 2.  Removed MTCLIM ([GH#288](https://github.com/UW-Hydro/VIC/pull/288)).
 
-	Previous versions of VIC used MTCLIM to generate missing forcing variables required to run VIC.  This led to confusion by many users and considerably more complex code in the Classic Driver. VIC forcings are now required to be provided at the same time frequency as the model will be run at (`SNOW_STEPS_PER_DAY` or `MODEL_STEPS_PER_DAY`). The following options have been removed from the Classic Driver:
+	Previous versions of VIC used MTCLIM to generate missing forcing variables required to run VIC.  This led to confusion by many users and considerably more complex code in the Classic Driver. VIC forcings are now required to be provided at the same time frequency as the model will be run at (`SNOW_STEPS_PER_DAY` or `MODEL_STEPS_PER_DAY`).
+	The following options have been removed from the Classic Driver:
 
 	- `LW_TYPE`
 	- `LW_CLOUD`
@@ -107,6 +108,11 @@ This is a major update from VIC 4. The VIC 5.0.0 release aims to have nearly ide
 	- `VP_INTERP`
 	- `VP_ITER`
 	- `OUTPUT_FORCE`
+
+	The following output variables have been removed from the Classic Driver:
+
+	- `OUT_COSZEN`
+	- `OUT_TSKC`
 
 	We are providing a stand-alone version of MTCLIM that produces subdaily VIC meteorological forcings.  That tool is available [here](http://mtclim.readthedocs.org).
 3. Removed `LONGWAVE` and `SHORTWAVE` forcing types ([GH#379](https://github.com/UW-Hydro/VIC/pull/379)).
@@ -131,6 +137,10 @@ This is a major update from VIC 4. The VIC 5.0.0 release aims to have nearly ide
 1. Miscellaneous fixes to lake module
 
 	Several lake processes (aerodynamic resistance, albedo, latent/sensible heat fluxes, net radiation, etc) were reported incorrectly or not at all in output files. This has been fixed. In addition, in the absence of an initial state file, lake temperatures were initialized to unrealistic temperatures (the air temperature of the first simulation time step). To fix this, we now initialize the lake temperature to annual average soil temperature.
+
+2. Fix for computation of soil layer temperatures when soil thermal nodes do not reach the bottom of the soil column.
+
+	Previously, if the soil thermal damping depth was shallower than the bottom of the deepest soil layer, and FROZEN_SOIL was TRUE, VIC would abort when estimating layer ice contents because it could not estimate a layer temperature if the thermal nodes did not completely span the layer.  Now, a layer temperature is estimated even when thermal nodes do not completely span the layer, and the error no longer occurs.
 
 
 ------------------------------

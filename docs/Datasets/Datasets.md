@@ -1,9 +1,6 @@
 # Sample Data Sets
 
-*   Stehekin Basin ([vic.sample.stehekin.tgz](ftp://ftp.hydro.washington.edu/pub/HYDRO/models/VIC/Datasets/vic.sample.stehekin.tgz)): example of meteorological forcings, VIC parameters, routing model parameters, for learning to use VIC and the routing model.
-*   Forcings and VIC parameters for the PILPS-2E experiment, Torne-Kalix basin, Sweden: [pilps.tar](ftp://ftp.hydro.washington.edu/pub/HYDRO/models/VIC/Datasets/pilps.tar)
-*   Forcings, VIC parameters, and observations of snow depth and soil moisture and temperatures for the Rosemount site, Illinois: [RosemountTestSet.tgz](ftp://ftp.hydro.washington.edu/pub/HYDRO/models/VIC/Datasets/RosemountTestSet.tgz).
-
+*   Stehekin Basin ([VIC_sample_data](https://github.com/UW-Hydro/VIC_sample_data)): example of meteorological forcings, and VIC parameters for learning to use the VIC classic and image drivers.
 
 # VIC Input and Output Data Sets
 

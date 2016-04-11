@@ -37,7 +37,7 @@ void
 initialize_cesm_time(void)
 {
     extern size_t              current;
-    extern dmy_struct          dmy;
+    extern dmy_struct          dmy_current;
     extern global_param_struct global_param;
 
     debug("In initialize_cesm_time");
@@ -47,18 +47,18 @@ initialize_cesm_time(void)
     // initialize time
     initialize_time();
 
-    // Set dmy using global param start date/time
-    dmy.year = global_param.startyear;
-    dmy.month = global_param.startmonth;
-    dmy.day = global_param.startday;
-    dmy.dayseconds = global_param.startsec;
+    // Set dmy_current using global param start date/time
+    dmy_current.year = global_param.startyear;
+    dmy_current.month = global_param.startmonth;
+    dmy_current.day = global_param.startday;
+    dmy_current.dayseconds = global_param.startsec;
 
     // initialize module level globals
     dt_seconds_to_time_units(global_param.time_units, global_param.dt,
                              &dt_time_units);
 
     // initialize numdate
-    numdate = date2num(global_param.time_origin_num, &dmy, 0.,
+    numdate = date2num(global_param.time_origin_num, &dmy_current, 0.,
                        global_param.calendar, global_param.time_units);
 }
 
@@ -69,20 +69,20 @@ void
 advance_time(void)
 {
     extern size_t              current;
-    extern dmy_struct          dmy;
+    extern dmy_struct          dmy_current;
     extern global_param_struct global_param;
 
-    char dmy_string[MAXSTRING];
+    char                       dmy_string[MAXSTRING];
 
     current++;
 
     numdate += dt_time_units;
 
     num2date(global_param.time_origin_num, numdate, 0., global_param.calendar,
-             global_param.time_units, &dmy);
+             global_param.time_units, &dmy_current);
 
-    if (!valid_date(global_param.calendar, &dmy)) {
-        sprint_dmy(dmy_string, &dmy);
+    if (invalid_date(global_param.calendar, &dmy_current)) {
+        sprint_dmy(dmy_string, &dmy_current);
         log_err("Invalid date encountered while advancing VIC clock in "
                 "timestep %zu.\n%s", current, dmy_string);
     }
@@ -99,8 +99,6 @@ assert_time_insync(vic_clock  *vclock,
         (vclock->current_month != dmy->month) ||
         (vclock->current_day != dmy->day) ||
         (vclock->current_dayseconds != dmy->dayseconds)) {
-        print_vic_clock(vclock);
-        print_dmy(dmy);
         log_err("Clocks out of sync");
     }
 }

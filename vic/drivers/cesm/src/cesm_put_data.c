@@ -43,6 +43,7 @@ vic_cesm_put_data()
     extern x2l_data_struct    *x2l_vic;
     extern global_param_struct global_param;
     extern option_struct       options;
+    extern parameters_struct   param;
 
     bool                       IsWet = false; // TODO: add lake fraction
     bool                       overstory;
@@ -102,9 +103,9 @@ vic_cesm_put_data()
         // running sum to make sure we get the full grid cell
         AreaFactorSum = 0;
 
-        for (veg = 0; veg < local_domain.locations[i].nveg; veg++) {
+        for (veg = 0; veg <= local_domain.locations[i].nveg; veg++) {
             overstory = veg_lib[i][veg_con[i][veg].veg_class].overstory;
-            if (veg < local_domain.locations[i].nveg - 1) {
+            if (veg <= local_domain.locations[i].nveg - 1) {
                 HasVeg = true;
             }
             else {
@@ -121,6 +122,10 @@ vic_cesm_put_data()
                 AreaFactor = (veg_con[i][veg].Cv *
                               soil_con[i].AreaFract[band] *
                               TreeAdjustFactor * lakefactor);
+                if (AreaFactor < DBL_EPSILON) {
+                    // Skip this patch since the area factor is zero
+                    continue;
+                }
                 AreaFactorSum += AreaFactor;
 
                 // temperature
@@ -193,6 +198,12 @@ vic_cesm_put_data()
                 else {
                     aero_resist = cell.aero_resist[0];
                 }
+
+                if (aero_resist < DBL_EPSILON) {
+                    log_warn("aero_resist (%f) is < %f", aero_resist, DBL_EPSILON);
+                    aero_resist = param.HUGE_RESIST;
+                }
+
                 l2x_vic[i].l2x_Sl_ram1 += AreaFactor * aero_resist;
 
                 // log z0
@@ -209,6 +220,10 @@ vic_cesm_put_data()
                 }
                 else {
                     roughness = soil_con[i].rough;
+                }
+                if (roughness < DBL_EPSILON) {
+                    log_warn("roughness (%f) is < %f", roughness, DBL_EPSILON);
+                    roughness = DBL_EPSILON;
                 }
                 l2x_vic[i].l2x_Sl_logz0 += AreaFactor * log(roughness);
 
@@ -296,8 +311,8 @@ vic_cesm_put_data()
             }
         }
 
-        if (assert_close_double(AreaFactorSum, 1., 0., 1e-5)) {
-            log_err("AreaFactorSum is not 1 in cesm_put_data.c");
+        if (!assert_close_double(AreaFactorSum, 1., 0., 1e-3)) {
+            log_warn("AreaFactorSum (%f) is not 1 in cesm_put_data.c", AreaFactorSum);
         }
     }
 }

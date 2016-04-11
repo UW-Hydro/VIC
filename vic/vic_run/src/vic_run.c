@@ -303,7 +303,7 @@ vic_run(atmos_data_struct   *atmos,
                         veg_var[iveg][band].LAI,
                         atmos->coszen[NR],
                         veg_var[iveg][band].NscaleFactor);
-// NOTE: this should be moved
+                    // TBD: move this outside of vic_run()
                     if (dmy->day_in_year == 1) {
                         veg_var[iveg][band].AnnualNPPPrev =
                             veg_var[iveg][band].AnnualNPP;

@@ -354,7 +354,7 @@ solve_snow(char               overstory,
             energy->AlbedoUnder = *AlbedoUnder;
 
             /** Compute Snow Parameters **/
-            if (snow->swq > DBL_EPSILON) {
+            if (snow->swq > 0.) {
                 /** Calculate Snow Density **/
                 if (snow->surf_temp <= 0) {
                     // snowpack present, compress and age density

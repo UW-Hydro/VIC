@@ -620,24 +620,24 @@ put_data(all_vars_struct   *all_vars,
     }
 
     if (out_data[OUT_AERO_COND].aggdata[0] > DBL_EPSILON) {
-        out_data[OUT_AERO_RESIST].aggdata[0] = 1 /
-                                               out_data[OUT_AERO_COND].aggdata[0];
+        out_data[OUT_AERO_RESIST].aggdata[0] =
+            1 / out_data[OUT_AERO_COND].aggdata[0];
     }
     else {
         out_data[OUT_AERO_RESIST].aggdata[0] = param.HUGE_RESIST;
     }
 
     if (out_data[OUT_AERO_COND1].aggdata[0] > DBL_EPSILON) {
-        out_data[OUT_AERO_RESIST1].aggdata[0] = 1 /
-                                            out_data[OUT_AERO_COND1].aggdata[0];
+        out_data[OUT_AERO_RESIST1].aggdata[0] =
+            1 / out_data[OUT_AERO_COND1].aggdata[0];
     }
     else {
         out_data[OUT_AERO_RESIST1].aggdata[0] = param.HUGE_RESIST;
     }
 
     if (out_data[OUT_AERO_COND2].aggdata[0] > DBL_EPSILON) {
-        out_data[OUT_AERO_RESIST2].aggdata[0] = 1 /
-                                                out_data[OUT_AERO_COND2].aggdata[0];
+        out_data[OUT_AERO_RESIST2].aggdata[0] =
+            1 / out_data[OUT_AERO_COND2].aggdata[0];
     }
     else {
         out_data[OUT_AERO_RESIST2].aggdata[0] = param.HUGE_RESIST;
@@ -1168,7 +1168,8 @@ check_write_flag(int rec)
 
     if (rec == 0) {
         step_count = 0;
-        out_step_ratio = (unsigned int) ((int) global_param.out_dt / (int) global_param.dt);
+        out_step_ratio =
+            (unsigned int) ((int) global_param.out_dt / (int) global_param.dt);
     }
 
     if (rec >= 0) {

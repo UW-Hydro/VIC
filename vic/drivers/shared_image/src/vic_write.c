@@ -31,11 +31,10 @@
  *           double
  *****************************************************************************/
 void
-vic_write(void)
+vic_write(dmy_struct *dmy_current)
 {
     extern out_data_struct   **out_data;
     extern global_param_struct global_param;
-    extern dmy_struct          dmy_current;
     extern domain_struct       local_domain;
     extern nc_file_struct      nc_hist_file;
     extern nc_var_struct       nc_vars[N_OUTVAR_TYPES];
@@ -124,7 +123,7 @@ vic_write(void)
     dstart[0] = current;
     dcount[0] = 1;
 
-    dvar[0] = date2num(global_param.time_origin_num, &dmy_current, 0.,
+    dvar[0] = date2num(global_param.time_origin_num, dmy_current, 0.,
                        global_param.calendar, global_param.time_units);
 
     // write to file

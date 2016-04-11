@@ -177,7 +177,7 @@ int initialize_model_state(all_vars_struct *all_vars, size_t Nveg,
                            size_t Nnodes, double surf_temp,
                            soil_con_struct *soil_con, veg_con_struct *veg_con);
 void initialize_soil_con(soil_con_struct *soil_con);
-void initialize_state_file(nc_file_struct *nc);
+void initialize_state_file(nc_file_struct *nc, dmy_struct *dmy_current);
 void initialize_veg_con(veg_con_struct *veg_con);
 int parse_output_info(FILE *gp, out_data_struct **out_data);
 void print_atmos_data(atmos_data_struct *atmos);
@@ -203,7 +203,7 @@ void vic_nc_info(nc_file_struct *nc_hist_file, out_data_struct **out_data,
                  nc_var_struct *nc_vars);
 void vic_restore(void);
 void vic_start(void);
-void vic_store(void);
-void vic_write(void);
+void vic_store(dmy_struct *dmy_current);
+void vic_write(dmy_struct *dmy_current);
 
 #endif

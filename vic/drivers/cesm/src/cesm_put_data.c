@@ -69,7 +69,6 @@ vic_cesm_put_data()
     veg_var_struct             veg_var;
 
     for (i = 0; i < local_domain.ncells_active; i++) {
-
         // Zero l2x vars (leave unused fields as MISSING values)
         l2x_vic[i].l2x_Sl_t = 0;
         l2x_vic[i].l2x_Sl_tref = 0;
@@ -146,12 +145,16 @@ vic_cesm_put_data()
                 // Albedo Note: VIC does not partition its albedo, all returned
                 // values will be the same
 
-                // albedo: direct , visible
+                // albedo: direct, visible
                 // CESM units: unitless
+                // atmos->shortwave is the incoming shortwave (+ down)
+                // atmos->NetShortAtmos net shortwave flux (+ down)
+                // SWup = atmos->shortwave[NR] - energy.NetShortAtmos
+                // Set the albedo to zero for the case where there is no shortwave down
                 if (atmos->shortwave[NR] > 0.) {
                     albedo = AreaFactor *
-                             (atmos->shortwave[NR] /
-                              (atmos->shortwave[NR] - energy.NetShortAtmos));
+                             (atmos->shortwave[NR] - energy.NetShortAtmos) /
+                             atmos->shortwave[NR];
                 }
                 else {
                     albedo = 0.;
@@ -201,9 +204,8 @@ vic_cesm_put_data()
                 else if (HasVeg) {
                     // bare soil roughness
                     roughness =
-                        veg_lib[i][veg_con[i][veg].veg_class].roughness[dmy_current.
-                                                                        month -
-                                                                        1];
+                        veg_lib[i][veg_con[i][veg].veg_class].roughness[
+                            dmy_current.month - 1];
                 }
                 else {
                     roughness = soil_con[i].rough;
@@ -294,8 +296,8 @@ vic_cesm_put_data()
             }
         }
 
-        if (fabs(1 - AreaFactorSum) > DBL_EPSILON) {
-            log_warn("AreaFactorSum (%f) is not 1.0 in cesm_put_data.c", AreaFactorSum);
+        if (assert_close_double(AreaFactorSum, 1., 0., 1e-5)) {
+            log_err("AreaFactorSum is not 1 in cesm_put_data.c");
         }
     }
 }

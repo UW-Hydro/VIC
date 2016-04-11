@@ -103,10 +103,6 @@ vic_cesm_run(vic_clock *vclock)
     // reset l2x fields
     initialize_l2x_data();
 
-    // advance the clock
-    advance_time();
-    assert_time_insync(vclock, &dmy_current);
-
     // read forcing data
     vic_force();
 
@@ -117,18 +113,22 @@ vic_cesm_run(vic_clock *vclock)
     vic_cesm_put_data();
 
     // if output:
-    if (check_write_flag(current - 1)) {
-        vic_write();
+    if (check_write_flag(current)) {
+        vic_write(&dmy_current);
     }
 
     // if save:
     if (vclock->state_flag) {
         log_warn("Skipping state file write");
-        //vic_store();
+        // vic_store();
     }
 
     // reset x2l fields
     initialize_x2l_data();
+
+    // advance the clock
+    advance_time();
+    assert_time_insync(vclock, &dmy_current);
 
     return 0;
 }

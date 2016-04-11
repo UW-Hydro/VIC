@@ -125,7 +125,7 @@ main(int    argc,
 
         // if save:
         if (check_save_state_flag(current)) {
-            vic_store();
+            vic_store(&(dmy[current]));
         }
     }
 

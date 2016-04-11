@@ -68,6 +68,7 @@ MODULE vic_cesm_def_mod
   !!          vic_cesm_def.h
   !--------------------------------------------------------------------------
   TYPE, bind(C) :: location_struct
+    LOGICAL(C_BOOL)   :: run          !< TRUE: run grid cell. FALSE: do not run grid cell
     REAL(C_DOUBLE)    :: latitude     !< latitude of grid cell center
     REAL(C_DOUBLE)    :: longitude    !< longitude of grid cell center
     REAL(C_DOUBLE)    :: area         !< area of grid cell

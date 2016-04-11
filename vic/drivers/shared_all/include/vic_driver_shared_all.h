@@ -540,7 +540,7 @@ void soil_moisture_from_water_table(soil_con_struct *soil_con, size_t nlayers);
 void sprint_dmy(char *str, dmy_struct *dmy);
 unsigned short int timeunits_from_chars(char *units_chars);
 int update_step_vars(all_vars_struct *, veg_con_struct *, veg_hist_struct *);
-int valid_date(unsigned short int calendar, dmy_struct *dmy);
+int invalid_date(unsigned short int calendar, dmy_struct *dmy);
 void validate_parameters(void);
 char will_it_snow(double *t, double t_offset, double max_snow_temp,
                   double *prcp, size_t n);

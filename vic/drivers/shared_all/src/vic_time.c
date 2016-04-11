@@ -705,8 +705,8 @@ initialize_time()
  * @return 0 if ok, else return > 0
  *****************************************************************************/
 int
-valid_date(unsigned short int calendar,
-           dmy_struct        *dmy)
+invalid_date(unsigned short int calendar,
+             dmy_struct        *dmy)
 {
     unsigned short int lastday[MONTHS_PER_YEAR];
     unsigned short int days_in_year;

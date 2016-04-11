@@ -30,12 +30,11 @@
  * @brief    Run VIC for one timestep and store output data
  *****************************************************************************/
 void
-vic_image_run(void)
+vic_image_run(dmy_struct *dmy_current)
 {
     extern size_t              current;
     extern all_vars_struct    *all_vars;
     extern atmos_data_struct  *atmos;
-    extern dmy_struct         *dmy;
     extern domain_struct       local_domain;
     extern global_param_struct global_param;
     extern lake_con_struct     lake_con;
@@ -50,7 +49,7 @@ vic_image_run(void)
     size_t                     i;
 
     // Print the current timestep info before running vic_run
-    sprint_dmy(dmy_str, &(dmy[current]));
+    sprint_dmy(dmy_str, dmy_current);
     debug("Running timestep %zu: %s", current, dmy_str);
 
     for (i = 0; i < local_domain.ncells_active; i++) {
@@ -59,7 +58,7 @@ vic_image_run(void)
                 local_domain.locations[i].io_idx, dmy_str);
 
         update_step_vars(&(all_vars[i]), veg_con[i], veg_hist[i]);
-        vic_run(&(atmos[i]), &(all_vars[i]), &dmy[current], &global_param,
+        vic_run(&(atmos[i]), &(all_vars[i]), dmy_current, &global_param,
                 &lake_con, &(soil_con[i]), veg_con[i], veg_lib[i]);
         put_data(&(all_vars[i]), &(atmos[i]), &(soil_con[i]), veg_con[i],
                  veg_lib[i], &lake_con, out_data[i], &(save_data[i]),

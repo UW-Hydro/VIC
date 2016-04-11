@@ -268,11 +268,11 @@ def test_initialize_time():
                                        ut._jd0)
 
 
-def test_valid_date(dmy_feb_3_noon, dmy_june31, dmy_too_many_seconds):
+def test_invalid_date(dmy_feb_3_noon, dmy_june31, dmy_too_many_seconds):
     for cal in calendars:
-        assert vic_lib.valid_date(calendars[cal], dmy_feb_3_noon) == 0
-        assert vic_lib.valid_date(calendars[cal], dmy_june31) > 0
-        assert vic_lib.valid_date(calendars[cal], dmy_too_many_seconds) > 0
+        assert vic_lib.invalid_date(calendars[cal], dmy_feb_3_noon) == 0
+        assert vic_lib.invalid_date(calendars[cal], dmy_june31) > 0
+        assert vic_lib.invalid_date(calendars[cal], dmy_too_many_seconds) > 0
 
 
 @pytest.mark.skipif(nctime_unavailable, reason=nc_reason)

@@ -111,8 +111,11 @@ snow_density(snow_data_struct *snow,
             c3 = exp(-0.046 * (density - dm));
             c4 = 1.0;
         }
-        if ((snow->surf_water + snow->pack_water) / snow->depth > 0.01) {
-            c4 = 2.0; /* presence of wet snow */
+
+        if (snow->depth > 0) {
+            if ((snow->surf_water + snow->pack_water) / snow->depth > 0.01) {
+                c4 = 2.0; /* presence of wet snow */
+            }
         }
         ddz1 = -param.SNOW_DENS_C2 * c3 * c4 * dexpf;
 
@@ -123,6 +126,7 @@ snow_density(snow_data_struct *snow,
 
         /* Currently VIC essentially has only one layer of snow, so compaction
            due to overburden will come mostly from new snowfall. */
+
         swq = new_snow / MM_PER_M + f * sswq;
 
         if (new_snow > 0.0) {

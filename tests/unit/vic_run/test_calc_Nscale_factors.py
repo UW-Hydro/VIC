@@ -9,5 +9,5 @@ def test_calc_nscale_factors():
     flag = ffi.cast('char', True)
 
     assert vic_lib.calc_Nscale_factors(
-        flag, ffi.cast('double *', canopy_layer_bnd.ctypes.data), 3., 45, 0., 
-        0., 45, ffi.cast('double *', nscale_factor.ctypes.data)) is None
+        flag, ffi.cast('double *', canopy_layer_bnd.ctypes.data), 3., 
+        0.5, ffi.cast('double *', nscale_factor.ctypes.data)) is None

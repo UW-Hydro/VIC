@@ -133,6 +133,10 @@ This is a major update from VIC 4. The VIC 5.0.0 release aims to have nearly ide
 
 	Several lake processes (aerodynamic resistance, albedo, latent/sensible heat fluxes, net radiation, etc) were reported incorrectly or not at all in output files. This has been fixed. In addition, in the absence of an initial state file, lake temperatures were initialized to unrealistic temperatures (the air temperature of the first simulation time step). To fix this, we now initialize the lake temperature to annual average soil temperature.
 
+2. Fix for computation of soil layer temperatures when soil thermal nodes do not reach the bottom of the soil column.
+
+	Previously, if the soil thermal damping depth was shallower than the bottom of the deepest soil layer, and FROZEN_SOIL was TRUE, VIC would abort when estimating layer ice contents because it could not estimate a layer temperature if the thermal nodes did not completely span the layer.  Now, a layer temperature is estimated even when thermal nodes do not completely span the layer, and the error no longer occurs.
+
 
 ------------------------------
 

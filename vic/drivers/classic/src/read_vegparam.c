@@ -228,8 +228,11 @@ read_vegparam(FILE  *vegparam,
 
         for (j = 0; j < MONTHS_PER_YEAR; j++) {
             temp[i].albedo[j] = veg_lib[temp[i].veg_class].albedo[j];
-            temp[i].LAI[j] = veg_lib[temp[i].veg_class].LAI[j];
+            temp[i].displacement[j] =
+                veg_lib[temp[i].veg_class].displacement[j];
             temp[i].fcanopy[j] = veg_lib[temp[i].veg_class].fcanopy[j];
+            temp[i].LAI[j] = veg_lib[temp[i].veg_class].LAI[j];
+            temp[i].roughness[j] = veg_lib[temp[i].veg_class].roughness[j];
             temp[i].Wdmax[j] = veg_lib[temp[i].veg_class].Wdmax[j];
         }
 

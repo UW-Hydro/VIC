@@ -55,9 +55,11 @@ update_step_vars(all_vars_struct *all_vars,
     /* Assign current veg characteristics */
     for (iveg = 0; iveg < Nveg; iveg++) {
         for (band = 0; band < Nbands; band++) {
-            veg_var[iveg][band].fcanopy = veg_hist[iveg].fcanopy[0];
             veg_var[iveg][band].albedo = veg_hist[iveg].albedo[0];
+            veg_var[iveg][band].displacement = veg_hist[iveg].displacement[0];
+            veg_var[iveg][band].fcanopy = veg_hist[iveg].fcanopy[0];
             veg_var[iveg][band].LAI = veg_hist[iveg].LAI[0];
+            veg_var[iveg][band].roughness = veg_hist[iveg].roughness[0];
         }
     }
 

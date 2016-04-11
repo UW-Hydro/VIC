@@ -248,10 +248,8 @@ vic_run(atmos_data_struct   *atmos,
             tmp_wind[2] = MISSING;
 
             /* Set surface descriptive variables */
-            displacement[0] =
-                vic_run_veg_lib[veg_class].displacement[dmy->month - 1];
-            roughness[0] =
-                vic_run_veg_lib[veg_class].roughness[dmy->month - 1];
+            displacement[0] = veg_var[iveg][0].displacement;
+            roughness[0] = veg_var[iveg][0].roughness;
             if (roughness[0] == 0) {
                 roughness[0] = soil_con->rough;
             }
@@ -299,18 +297,14 @@ vic_run(atmos_data_struct   *atmos,
                         veg_var[iveg][band].rsLayer[cidx] = param.HUGE_RESIST;
                     }
                     veg_var[iveg][band].aPAR = 0;
-                    if (dmy->dayseconds == 0) {
-                        calc_Nscale_factors(
-                            vic_run_veg_lib[veg_class].NscaleFlag,
-                            veg_con[iveg].CanopLayerBnd,
-                            vic_run_veg_lib[veg_class].LAI[dmy->month - 1],
-                            soil_con->lat,
-                            soil_con->lng,
-                            soil_con->time_zone_lng,
-                            dmy->day_in_year,
-                            veg_var[iveg][band].NscaleFactor);
-                    }
-                    if (dmy->month == 1 && dmy->day == 1) {
+                    calc_Nscale_factors(
+                        vic_run_veg_lib[veg_class].NscaleFlag,
+                        veg_con[iveg].CanopLayerBnd,
+                        veg_var[iveg][band].LAI,
+                        atmos->coszen[NR],
+                        veg_var[iveg][band].NscaleFactor);
+// NOTE: this should be moved
+                    if (dmy->day_in_year == 1) {
                         veg_var[iveg][band].AnnualNPPPrev =
                             veg_var[iveg][band].AnnualNPP;
                         veg_var[iveg][band].AnnualNPP = 0;

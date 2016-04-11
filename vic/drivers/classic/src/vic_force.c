@@ -165,6 +165,12 @@ vic_force(atmos_data_struct *atmos,
                 atmos[rec].fdir[i] = forcing_data[FDIR][uidx];
                 // photosynthetically active radiation
                 atmos[rec].par[i] = forcing_data[PAR][uidx];
+                // Cosine of solar zenith angle
+                atmos[rec].coszen[i] = compute_coszen(soil_con->lat,
+                                                      soil_con->lng,
+                                                      soil_con->time_zone_lng,
+                                                      dmy[rec].day_in_year,
+                                                      dmy[rec].dayseconds);
             }
         }
         if (NF > 1) {
@@ -192,6 +198,12 @@ vic_force(atmos_data_struct *atmos,
                 atmos[rec].Catm[NR] = average(atmos[rec].Catm, NF);
                 atmos[rec].fdir[NR] = average(atmos[rec].fdir, NF);
                 atmos[rec].par[NR] = average(atmos[rec].par, NF);
+                // for coszen, use value at noon
+                atmos[rec].coszen[NR] = compute_coszen(soil_con->lat,
+                                                       soil_con->lng,
+                                                       soil_con->time_zone_lng,
+                                                       dmy[rec].day_in_year,
+                                                       SEC_PER_DAY / 2);
             }
         }
     }
@@ -206,10 +218,14 @@ vic_force(atmos_data_struct *atmos,
             for (i = 0; i < NF; i++) {
                 veg_hist[rec][v].albedo[i] =
                     veg_con[v].albedo[dmy[rec].month - 1];
-                veg_hist[rec][v].LAI[i] =
-                    veg_con[v].LAI[dmy[rec].month - 1];
+                veg_hist[rec][v].displacement[i] =
+                    veg_con[v].displacement[dmy[rec].month - 1];
                 veg_hist[rec][v].fcanopy[i] =
                     veg_con[v].fcanopy[dmy[rec].month - 1];
+                veg_hist[rec][v].LAI[i] =
+                    veg_con[v].LAI[dmy[rec].month - 1];
+                veg_hist[rec][v].roughness[i] =
+                    veg_con[v].roughness[dmy[rec].month - 1];
             }
         }
     }
@@ -252,9 +268,13 @@ vic_force(atmos_data_struct *atmos,
             if (NF > 1) {
                 veg_hist[rec][v].albedo[NR] = average(veg_hist[rec][v].albedo,
                                                       NF);
-                veg_hist[rec][v].LAI[NR] = average(veg_hist[rec][v].LAI, NF);
+                veg_hist[rec][v].displacement[NR] = average(
+                    veg_hist[rec][v].displacement, NF);
                 veg_hist[rec][v].fcanopy[NR] = average(
                     veg_hist[rec][v].fcanopy, NF);
+                veg_hist[rec][v].LAI[NR] = average(veg_hist[rec][v].LAI, NF);
+                veg_hist[rec][v].roughness[NR] = average(
+                    veg_hist[rec][v].roughness, NF);
             }
         }
     }

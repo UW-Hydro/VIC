@@ -74,7 +74,12 @@ This is a major update from VIC 4. The VIC 5.0.0 release aims to have nearly ide
 	- `BINARY_STATE_FILE` (TRUE or FALSE) has been changed to `STATE_FORMAT` (BINARY or ASCII)
 	- `BINARY_OUTPUT` (TRUE or FALSE) has been changed to `OUT_FORMAT` (BINARY or ASCII)
 
-3.  Classic Driver Output Variables ([GH#352](https://github.com/UW-Hydro/VIC/pull/352))
+3.  State files now include seconds ([GH#464] (https://github.com/UW-Hydro/VIC/pull/464))
+
+	- There is a new global parameter option, `STATESEC`.  This specifies the time step at the end of which state will be saved, in units of seconds.  In other words, if you have an hourly time step (3600 sec) and you want to save state at the end of the final time step of the day (which is 86400 seconds long), subtract 3600 from 86400 to get a STATESEC of 82800.  This corresponds to the first second of the final time step.  State will be saved at the end of that time step.  
+	- When the state save date is appended to state filenames, STATESEC will be included so that the date will have the format YYYYMMDD_SSSSS.
+
+4.  Classic Driver Output Variables ([GH#352](https://github.com/UW-Hydro/VIC/pull/352))
 
 	Computation of potential evapotranspiration (PET) has been simplified, reducing the number of output variables from 6 to 1.  The following output variables have been removed:
 

@@ -58,6 +58,7 @@ vic_init(void)
     size_t                     m;
     size_t                     nveg;
     size_t                     max_numnod;
+    size_t                     Nnodes;
     int                        vidx;
     size_t                     d2count[2];
     size_t                     d2start[2];
@@ -66,6 +67,8 @@ vic_init(void)
     size_t                     d4count[4];
     size_t                     d4start[4];
     int                        tmp_lake_idx;
+    double                     Zsum, dp;
+    double                     tmpdp, tmpadj, Bexp;
 
     // allocate memory for Cv_sum
     Cv_sum = malloc(local_domain.ncells_active * sizeof(*Cv_sum));
@@ -688,6 +691,7 @@ vic_init(void)
     // TODO: read avgJulyAirTemp for compute treeline option
 
     // Additional processing of the soil variables
+    // (compute derived parameters)
     for (i = 0; i < local_domain.ncells_active; i++) {
         for (j = 0; j < options.Nlayer; j++) {
             // compute layer properties
@@ -792,6 +796,120 @@ vic_init(void)
 
         soil_moisture_from_water_table(&(soil_con[i]), options.Nlayer);
 
+        // Soil thermal node thicknesses and positions
+        Nnodes = options.Nnode;
+        dp = soil_con[i].dp;
+        if (options.QUICK_FLUX) {
+            /* node thicknesses */
+            soil_con[i].dz_node[0] = soil_con[i].depth[0];
+            soil_con[i].dz_node[1] = soil_con[i].depth[0];
+            soil_con[i].dz_node[2] = 2. * (dp - 1.5 * soil_con[i].depth[0]);
+
+            /* node depths (positions) */
+            soil_con[i].Zsum_node[0] = 0;
+            soil_con[i].Zsum_node[1] = soil_con[i].depth[0];
+            soil_con[i].Zsum_node[2] = dp;
+        }
+        else {
+            if (!options.EXP_TRANS) {
+                /* Compute soil node thicknesses
+                   Nodes set at surface, the depth of the first layer,
+                   twice the depth of the first layer, and at the
+                   damping depth.  Extra nodes are placed equal distance
+                   between the damping depth and twice the depth of the
+                   first layer. */
+
+                soil_con[i].dz_node[0] = soil_con[i].depth[0];
+                soil_con[i].dz_node[1] = soil_con[i].depth[0];
+                soil_con[i].dz_node[2] = soil_con[i].depth[0];
+                soil_con[i].Zsum_node[0] = 0;
+                soil_con[i].Zsum_node[1] = soil_con[0].depth[0];
+                Zsum = 2. * soil_con[0].depth[0];
+                soil_con[i].Zsum_node[2] = Zsum;
+                tmpdp = dp - soil_con[0].depth[0] * 2.5;
+                tmpadj = 3.5;
+                for (j = 3; j < Nnodes - 1; j++) {
+                    soil_con[i].dz_node[j] = tmpdp /
+                                             (((double) Nnodes - tmpadj));
+                    Zsum +=
+                        (soil_con[i].dz_node[j] + soil_con[i].dz_node[j - 1]) /
+                        2.;
+                    soil_con[i].Zsum_node[j] = Zsum;
+                }
+                soil_con[i].dz_node[Nnodes -
+                                    1] =
+                    (dp - Zsum - soil_con[i].dz_node[Nnodes - 2] / 2.) * 2.;
+                Zsum +=
+                    (soil_con[i].dz_node[Nnodes - 2] +
+                     soil_con[i].dz_node[Nnodes - 1]) / 2.;
+                soil_con[i].Zsum_node[Nnodes - 1] = Zsum;
+                if ((int) (Zsum * MM_PER_M + 0.5) !=
+                    (int) (dp * MM_PER_M + 0.5)) {
+                    log_err("Sum of thermal node thicknesses (%f) "
+                            "in initialize_model_state do not "
+                            "equal dp (%f), check initialization "
+                            "procedure", Zsum, dp);
+                }
+            }
+            else {
+                // exponential grid transformation, EXP_TRANS = TRUE
+                // calculate exponential function parameter
+                // to force Zsum=dp at bottom node
+                Bexp = logf(dp + 1.) / (double) (Nnodes - 1);
+                // validate Nnodes by requiring that there be at
+                // least 3 nodes in the top 50cm
+                if (Nnodes < 5 * logf(dp + 1.) + 1) {
+                    log_err("The number of soil thermal nodes (%zu) "
+                            "is too small for the supplied damping "
+                            "depth (%f) with EXP_TRANS set to "
+                            "TRUE, leading to fewer than 3 nodes "
+                            "in the top 50 cm of the soil column.  "
+                            "For EXP_TRANS=TRUE, Nnodes and dp "
+                            "must follow the relationship:\n"
+                            "5*ln(dp+1)<Nnodes-1\n"
+                            "Either set Nnodes to at least %d in "
+                            "the global param file or reduce "
+                            "damping depth to %f in the soil "
+                            "parameter file.  Or set EXP_TRANS to "
+                            "FALSE in the global parameter file.",
+                            Nnodes, dp, (int) (5 * logf(dp + 1.)) + 2,
+                            exp(0.2 * (Nnodes - 1)) + 1);
+                }
+                for (j = 0; j <= Nnodes - 1; j++) {
+                    soil_con[i].Zsum_node[j] = expf(Bexp * j) - 1.;
+                }
+                if (soil_con[i].Zsum_node[0] > soil_con[i].depth[0]) {
+                    log_err("Depth of first thermal node (%f) in "
+                            "initialize_model_state is greater "
+                            "than depth of first soil layer (%f); "
+                            "increase the number of nodes or "
+                            "decrease the thermal damping depth "
+                            "dp (%f)", soil_con[i].Zsum_node[0],
+                            soil_con[i].depth[0], dp);
+                }
+
+                // top node
+                j = 0;
+                soil_con[i].dz_node[j] = soil_con[i].Zsum_node[j + 1] -
+                                         soil_con[i].Zsum_node[j];
+                // middle nodes
+                for (j = 1; j < Nnodes - 1; j++) {
+                    soil_con[i].dz_node[j] =
+                        (soil_con[i].Zsum_node[j + 1] -
+                         soil_con[i].Zsum_node[j]) /
+                        2. +
+                        (soil_con[i].Zsum_node[j] -
+                         soil_con[i].Zsum_node[j - 1]) /
+                        2.;
+                }
+                // bottom node
+                j = Nnodes - 1;
+                soil_con[i].dz_node[j] = soil_con[i].Zsum_node[j] -
+                                         soil_con[i].Zsum_node[j - 1];
+            } // end if !EXP_TRANS
+        }
+
+        // Carbon parameters
         if (options.CARBON) {
             // TBD Remove hardcoded parameter values
             soil_con[i].AlbedoPar = 0.92 * param.ALBEDO_BARE_SOIL - 0.015;
@@ -1396,7 +1514,7 @@ vic_init(void)
         }
     }
 
-    // initialize structures with default values
+    // initialize state variables with default values
     for (i = 0; i < local_domain.ncells_active; i++) {
         nveg = veg_con[i][0].vegetat_type_num;
         initialize_snow(all_vars[i].snow, nveg);
@@ -1409,7 +1527,7 @@ vic_init(void)
             }
             initialize_lake(&(all_vars[i].lake_var), lake_con[i],
                             &(soil_con[i]),
-                            &(all_vars[i].cell[tmp_lake_idx][0]), 0);
+                            &(all_vars[i].cell[tmp_lake_idx][0]), false);
         }
         initialize_energy(all_vars[i].energy, nveg);
     }

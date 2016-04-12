@@ -195,4 +195,4 @@ Figure 9.  VIC dynamic lake/wetland interaction.
 
 ## Streamflow Routing
 
-Routing of stream flow (Figure 10) is performed separately from the land surface simulation, using a separate model, typically the routing model of [Lohmann, et al. (1996; 1998)](../Documentation/References.md#streamflow-routing-model-references). The original Lohmann routing model no longer supported but remains available [here](https://github.com/UW-Hydro/VIC_Routing). An updated version of the model, RVIC, is available [here](http://rvic.readthedocs.org).
+Routing of stream flow is performed separately from the land surface simulation, using a separate model, typically the routing model of [Lohmann, et al. (1996; 1998)](../Documentation/References.md#streamflow-routing-model-references). The original Lohmann routing model is no longer supported but remains available [here](https://github.com/UW-Hydro/VIC_Routing). An updated version of the model, RVIC, is available [here](http://rvic.readthedocs.org).

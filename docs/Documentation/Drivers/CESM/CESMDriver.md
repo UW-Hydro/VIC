@@ -4,8 +4,8 @@ VIC CESM Driver
 !!! Warning
     The VIC CESM Driver is experimental and is still under development. No documentation or support is provided for running CESM in any way.
 
-The CESM driver was developed for coupling VIC within the Regional Arctic System
-Model (RASM). Although it has only been tested as part of RASM, it should be possible to apply this coupling to CESM 1.0.
+The CESM driver was developed for coupling VIC within the [Regional Arctic System
+Model (RASM)](http://uw-hydro.github.io/current_project/rasm). Although it has only been tested as part of RASM, it should be possible to apply this coupling to CESM 1.0.
 
 ## Building the Model
 
@@ -20,4 +20,5 @@ The CESM driver for VIC can be built in two ways.
 
 ## Configuring VIC as the land surface component in CESM.
 Most of the inputs and options for the CESM driver are identical to the Image driver. See the [Image Driver Documentation](../Image/ImageDriver.md) for more details.
+
 1.  [VIC Input Files](Inputs.md)

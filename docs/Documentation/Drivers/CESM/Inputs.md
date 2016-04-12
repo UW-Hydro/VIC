@@ -2,7 +2,7 @@
 
 To run VIC, several sets of input data are necessary:
 
-*   Input Configuration File: This file lists the individual input files used by the CESM driver. The heading (e.g. `wr50a`) describes the domain grid used and is used by `build_vic_namelist` via the `LND_GRID` environment variable set by the CESM build system. The individual input files described are described below.
+*   Input Configuration File: This file lists the individual input files used by the CESM driver. The heading (e.g. `wr50a`) describes the domain grid used and is used by `build_vic_namelist` via the `LND_GRID` environment variable set by the CESM build system. The individual input files described are described below. Currently, the `vic_global_param` and `vic_constants` are included in the `VIC/vic/drivers/cesm/bld/` directory. Additional default configuration files may be added in the future.
 
 ```
     [wr50a]
@@ -11,8 +11,6 @@ To run VIC, several sets of input data are necessary:
     vic_global_param = vic.globalconfig.txt
     vic_constants = vic.parameters.txt
 ```
-
-    Currently, the `vic_global_param` and `vic_constants` are included in the `VIC/vic/drivers/cesm/bld/` directory. Additional default configuration files may be added in the future.
 
 *   [Global Parameter File](../Image/GlobalParam.md): This is the main input file for VIC. It points VIC to the locations of the other input/output files and sets parameters that govern the simulation (e.g. input parameter files, modes of operation, and output variables).
 

@@ -36,33 +36,37 @@ print_cell_data(cell_data_struct *cell,
 {
     size_t i;
 
-    fprintf(LOG_DEST, "cell_data:\n");
+    // Print state variables
+    fprintf(LOG_DEST, "cell_data - states:\n");
     fprintf(LOG_DEST, "\taero_resist :");
     for (i = 0; i < 2; i++) {
-        fprintf(LOG_DEST, "\t%.4f", cell->aero_resist[i]);
+        fprintf(LOG_DEST, "\t%f", cell->aero_resist[i]);
     }
     fprintf(LOG_DEST, "\n");
-    fprintf(LOG_DEST, "\tasat        : %.4f\n", cell->asat);
-    fprintf(LOG_DEST, "\tbaseflow    : %.4f\n", cell->baseflow);
-    fprintf(LOG_DEST, "\tCLitter     : %.4f\n", cell->CLitter);
-    fprintf(LOG_DEST, "\tCInter      : %.4f\n", cell->CInter);
-    fprintf(LOG_DEST, "\tCSlow       : %.4f\n", cell->CSlow);
-    fprintf(LOG_DEST, "\tinflow      : %.4f\n", cell->inflow);
-    fprintf(LOG_DEST, "\tpot_evap    : %.4f\n", cell->pot_evap);
-    fprintf(LOG_DEST, "\trunoff      : %.4f\n", cell->runoff);
+    fprintf(LOG_DEST, "\tasat        : %f\n", cell->asat);
+    fprintf(LOG_DEST, "\tCLitter     : %f\n", cell->CLitter);
+    fprintf(LOG_DEST, "\tCInter      : %f\n", cell->CInter);
+    fprintf(LOG_DEST, "\tCSlow       : %f\n", cell->CSlow);
     for (i = 0; i < nlayers; i++) {
         fprintf(LOG_DEST, "\tlayer %zd   :\n", i);
         print_layer_data(&(cell->layer[i]), nfrost);
     }
-    fprintf(LOG_DEST, "\tRhLitter    : %.4f\n", cell->RhLitter);
-    fprintf(LOG_DEST, "\tRhLitter2Atm: %.4f\n", cell->RhLitter2Atm);
-    fprintf(LOG_DEST, "\tRhInter     : %.4f\n", cell->RhInter);
-    fprintf(LOG_DEST, "\tRhSlow      : %.4f\n", cell->RhSlow);
-    fprintf(LOG_DEST, "\tRhTot       : %.4f\n", cell->RhTot);
-    fprintf(LOG_DEST, "\trootmoist   : %.4f\n", cell->rootmoist);
-    fprintf(LOG_DEST, "\twetness     : %.4f\n", cell->wetness);
-    fprintf(LOG_DEST, "\tzwt         : %.4f\n", cell->zwt);
-    fprintf(LOG_DEST, "\tzwt_lumped  : %.4f\n", cell->zwt_lumped);
+    fprintf(LOG_DEST, "\trootmoist   : %f\n", cell->rootmoist);
+    fprintf(LOG_DEST, "\twetness     : %f\n", cell->wetness);
+    fprintf(LOG_DEST, "\tzwt         : %f\n", cell->zwt);
+    fprintf(LOG_DEST, "\tzwt_lumped  : %f\n", cell->zwt_lumped);
+
+    // Print fluxes
+    fprintf(LOG_DEST, "cell_data - fluxes:\n");
+    fprintf(LOG_DEST, "\tpot_evap    : %f\n", cell->pot_evap);
+    fprintf(LOG_DEST, "\tbaseflow    : %f\n", cell->baseflow);
+    fprintf(LOG_DEST, "\tinflow      : %f\n", cell->inflow);
+    fprintf(LOG_DEST, "\trunoff      : %f\n", cell->runoff);
+    fprintf(LOG_DEST, "\tRhLitter    : %f\n", cell->RhLitter);
+    fprintf(LOG_DEST, "\tRhLitter2Atm: %f\n", cell->RhLitter2Atm);
+    fprintf(LOG_DEST, "\tRhInter     : %f\n", cell->RhInter);
+    fprintf(LOG_DEST, "\tRhSlow      : %f\n", cell->RhSlow);
+    fprintf(LOG_DEST, "\tRhTot       : %f\n", cell->RhTot);
 }
 
 /******************************************************************************
@@ -106,51 +110,52 @@ print_energy_bal(energy_bal_struct *eb,
 {
     size_t i;
 
-    fprintf(LOG_DEST, "energy_bal:\n");
-    fprintf(LOG_DEST, "\tAlbedoLake       : %.4f\n", eb->AlbedoLake);
-    fprintf(LOG_DEST, "\tAlbedoOver       : %.4f\n", eb->AlbedoOver);
-    fprintf(LOG_DEST, "\tAlbedoUnder      : %.4f\n", eb->AlbedoUnder);
+    // Print energy_bal - state variables
+    fprintf(LOG_DEST, "energy_bal - states:\n");
+    fprintf(LOG_DEST, "\tAlbedoLake       : %f\n", eb->AlbedoLake);
+    fprintf(LOG_DEST, "\tAlbedoOver       : %f\n", eb->AlbedoOver);
+    fprintf(LOG_DEST, "\tAlbedoUnder      : %f\n", eb->AlbedoUnder);
     fprintf(LOG_DEST, "\tCs               :");
     for (i = 0; i < 2; i++) {
-        fprintf(LOG_DEST, "\t%.4f", eb->Cs[i]);
+        fprintf(LOG_DEST, "\t%f", eb->Cs[i]);
     }
     fprintf(LOG_DEST, "\n");
     fprintf(LOG_DEST, "\tCs_node          :");
     for (i = 0; i < nnodes; i++) {
-        fprintf(LOG_DEST, "\t%.4f", eb->Cs_node[i]);
+        fprintf(LOG_DEST, "\t%f", eb->Cs_node[i]);
     }
     fprintf(LOG_DEST, "\n");
     fprintf(LOG_DEST, "\tfdepth           :");
     for (i = 0; i < nfronts; i++) {
-        fprintf(LOG_DEST, "\t%.4f", eb->fdepth[i]);
+        fprintf(LOG_DEST, "\t%f", eb->fdepth[i]);
     }
     fprintf(LOG_DEST, "\n");
     fprintf(LOG_DEST, "\tfrozen           : %d\n", eb->frozen);
     fprintf(LOG_DEST, "\tice              :");
     for (i = 0; i < nnodes; i++) {
-        fprintf(LOG_DEST, "\t%.4f", eb->ice[i]);
+        fprintf(LOG_DEST, "\t%f", eb->ice[i]);
     }
     fprintf(LOG_DEST, "\n");
     fprintf(LOG_DEST, "\tkappa            :");
     for (i = 0; i < 2; i++) {
-        fprintf(LOG_DEST, "\t%.4f", eb->kappa[i]);
+        fprintf(LOG_DEST, "\t%f", eb->kappa[i]);
     }
     fprintf(LOG_DEST, "\n");
     fprintf(LOG_DEST, "\tkappa_node       :");
     for (i = 0; i < nnodes; i++) {
-        fprintf(LOG_DEST, "\t%.4f", eb->kappa_node[i]);
+        fprintf(LOG_DEST, "\t%f", eb->kappa_node[i]);
     }
     fprintf(LOG_DEST, "\n");
     fprintf(LOG_DEST, "\tmoist            :");
     for (i = 0; i < nnodes; i++) {
-        fprintf(LOG_DEST, "\t%.4f", eb->moist[i]);
+        fprintf(LOG_DEST, "\t%f", eb->moist[i]);
     }
     fprintf(LOG_DEST, "\n");
     fprintf(LOG_DEST, "\tNfrost           : %zu\n", eb->Nfrost);
     fprintf(LOG_DEST, "\tNthaw            : %zu\n", eb->Nthaw);
     fprintf(LOG_DEST, "\tT                :");
     for (i = 0; i < nnodes; i++) {
-        fprintf(LOG_DEST, "\t%.4f", eb->T[i]);
+        fprintf(LOG_DEST, "\t%f", eb->T[i]);
     }
     fprintf(LOG_DEST, "\n");
     fprintf(LOG_DEST, "\tT_fbflag         :");
@@ -164,59 +169,62 @@ print_energy_bal(energy_bal_struct *eb,
     }
     fprintf(LOG_DEST, "\n");
     fprintf(LOG_DEST, "\tT1_index         : %d\n", eb->T1_index);
-    fprintf(LOG_DEST, "\tTcanopy          : %.4f\n", eb->Tcanopy);
+    fprintf(LOG_DEST, "\tTcanopy          : %f\n", eb->Tcanopy);
     fprintf(LOG_DEST, "\tTcanopy_fbflag   : %d\n", eb->Tcanopy_fbflag);
     fprintf(LOG_DEST, "\tTcanopy_fbcount  : %d\n", eb->Tcanopy_fbcount);
     fprintf(LOG_DEST, "\ttdepth           :");
     for (i = 0; i < nfronts; i++) {
-        fprintf(LOG_DEST, "\t%.4f", eb->tdepth[i]);
+        fprintf(LOG_DEST, "\t%f", eb->tdepth[i]);
     }
     fprintf(LOG_DEST, "\n");
-    fprintf(LOG_DEST, "\tTfoliage         : %.4f\n", eb->Tfoliage);
+    fprintf(LOG_DEST, "\tTfoliage         : %f\n", eb->Tfoliage);
     fprintf(LOG_DEST, "\tTfoliage_fbflag  : %d\n", eb->Tfoliage_fbflag);
     fprintf(LOG_DEST, "\tTfoliage_fbcount : %d\n", eb->Tfoliage_fbcount);
-    fprintf(LOG_DEST, "\tTsurf            : %.4f\n", eb->Tsurf);
+    fprintf(LOG_DEST, "\tTsurf            : %f\n", eb->Tsurf);
     fprintf(LOG_DEST, "\tTsurf_fbflag     : %d\n", eb->Tsurf_fbflag);
     fprintf(LOG_DEST, "\tTsurf_fbcount    : %d\n", eb->Tsurf_fbcount);
-    fprintf(LOG_DEST, "\tunfrozen         : %.4f\n", eb->unfrozen);
-    fprintf(LOG_DEST, "\tadvected_sensible: %.4f\n", eb->advected_sensible);
-    fprintf(LOG_DEST, "\tadvection        : %.4f\n", eb->advection);
-    fprintf(LOG_DEST, "\tAtmosError       : %.4f\n", eb->AtmosError);
-    fprintf(LOG_DEST, "\tAtmosLatent      : %.4f\n", eb->AtmosLatent);
-    fprintf(LOG_DEST, "\tAtmosLatentSub   : %.4f\n", eb->AtmosLatentSub);
-    fprintf(LOG_DEST, "\tAtmosSensible    : %.4f\n", eb->AtmosSensible);
-    fprintf(LOG_DEST, "\tcanopy_advection : %.4f\n", eb->canopy_advection);
-    fprintf(LOG_DEST, "\tcanopy_latent    : %.4f\n", eb->canopy_latent);
-    fprintf(LOG_DEST, "\tcanopy_latent_sub: %.4f\n", eb->canopy_latent_sub);
-    fprintf(LOG_DEST, "\tcanopy_refreeze  : %.4f\n", eb->canopy_refreeze);
-    fprintf(LOG_DEST, "\tcanopy_sensible  : %.4f\n", eb->canopy_sensible);
-    fprintf(LOG_DEST, "\tdeltaCC          : %.4f\n", eb->deltaCC);
-    fprintf(LOG_DEST, "\tdeltaH           : %.4f\n", eb->deltaH);
-    fprintf(LOG_DEST, "\terror            : %.4f\n", eb->error);
-    fprintf(LOG_DEST, "\tfusion           : %.4f\n", eb->fusion);
-    fprintf(LOG_DEST, "\tgrnd_flux        : %.4f\n", eb->grnd_flux);
-    fprintf(LOG_DEST, "\tlatent           : %.4f\n", eb->latent);
-    fprintf(LOG_DEST, "\tlatent_sub       : %.4f\n", eb->latent_sub);
-    fprintf(LOG_DEST, "\tlongwave         : %.4f\n", eb->longwave);
-    fprintf(LOG_DEST, "\tLongOverIn       : %.4f\n", eb->LongOverIn);
-    fprintf(LOG_DEST, "\tLongUnderIn      : %.4f\n", eb->LongUnderIn);
-    fprintf(LOG_DEST, "\tLongUnderOut     : %.4f\n", eb->LongUnderOut);
-    fprintf(LOG_DEST, "\tmelt_energy      : %.4f\n", eb->melt_energy);
-    fprintf(LOG_DEST, "\tNetLongAtmos     : %.4f\n", eb->NetLongAtmos);
-    fprintf(LOG_DEST, "\tNetLongOver      : %.4f\n", eb->NetLongOver);
-    fprintf(LOG_DEST, "\tNetLongUnder     : %.4f\n", eb->NetLongUnder);
-    fprintf(LOG_DEST, "\tNetShortAtmos    : %.4f\n", eb->NetShortAtmos);
-    fprintf(LOG_DEST, "\tNetShortGrnd     : %.4f\n", eb->NetShortGrnd);
-    fprintf(LOG_DEST, "\tNetShortOver     : %.4f\n", eb->NetShortOver);
-    fprintf(LOG_DEST, "\tNetShortUnder    : %.4f\n", eb->NetShortUnder);
-    fprintf(LOG_DEST, "\tout_long_canopy  : %.4f\n", eb->out_long_canopy);
-    fprintf(LOG_DEST, "\tout_long_surface : %.4f\n", eb->out_long_surface);
-    fprintf(LOG_DEST, "\trefreeze_energy  : %.4f\n", eb->refreeze_energy);
-    fprintf(LOG_DEST, "\tsensible         : %.4f\n", eb->sensible);
-    fprintf(LOG_DEST, "\tshortwave        : %.4f\n", eb->shortwave);
-    fprintf(LOG_DEST, "\tShortOverIn      : %.4f\n", eb->ShortOverIn);
-    fprintf(LOG_DEST, "\tShortUnderIn     : %.4f\n", eb->ShortUnderIn);
-    fprintf(LOG_DEST, "\tsnow_flux        : %.4f\n", eb->snow_flux);
+    fprintf(LOG_DEST, "\tunfrozen         : %f\n", eb->unfrozen);
+
+    // Print energy_bal - fluxes
+    fprintf(LOG_DEST, "energy_bal - fluxes:\n");
+    fprintf(LOG_DEST, "\tadvected_sensible: %f\n", eb->advected_sensible);
+    fprintf(LOG_DEST, "\tadvection        : %f\n", eb->advection);
+    fprintf(LOG_DEST, "\tAtmosError       : %f\n", eb->AtmosError);
+    fprintf(LOG_DEST, "\tAtmosLatent      : %f\n", eb->AtmosLatent);
+    fprintf(LOG_DEST, "\tAtmosLatentSub   : %f\n", eb->AtmosLatentSub);
+    fprintf(LOG_DEST, "\tAtmosSensible    : %f\n", eb->AtmosSensible);
+    fprintf(LOG_DEST, "\tcanopy_advection : %f\n", eb->canopy_advection);
+    fprintf(LOG_DEST, "\tcanopy_latent    : %f\n", eb->canopy_latent);
+    fprintf(LOG_DEST, "\tcanopy_latent_sub: %f\n", eb->canopy_latent_sub);
+    fprintf(LOG_DEST, "\tcanopy_refreeze  : %f\n", eb->canopy_refreeze);
+    fprintf(LOG_DEST, "\tcanopy_sensible  : %f\n", eb->canopy_sensible);
+    fprintf(LOG_DEST, "\tdeltaCC          : %f\n", eb->deltaCC);
+    fprintf(LOG_DEST, "\tdeltaH           : %f\n", eb->deltaH);
+    fprintf(LOG_DEST, "\terror            : %f\n", eb->error);
+    fprintf(LOG_DEST, "\tfusion           : %f\n", eb->fusion);
+    fprintf(LOG_DEST, "\tgrnd_flux        : %f\n", eb->grnd_flux);
+    fprintf(LOG_DEST, "\tlatent           : %f\n", eb->latent);
+    fprintf(LOG_DEST, "\tlatent_sub       : %f\n", eb->latent_sub);
+    fprintf(LOG_DEST, "\tlongwave         : %f\n", eb->longwave);
+    fprintf(LOG_DEST, "\tLongOverIn       : %f\n", eb->LongOverIn);
+    fprintf(LOG_DEST, "\tLongUnderIn      : %f\n", eb->LongUnderIn);
+    fprintf(LOG_DEST, "\tLongUnderOut     : %f\n", eb->LongUnderOut);
+    fprintf(LOG_DEST, "\tmelt_energy      : %f\n", eb->melt_energy);
+    fprintf(LOG_DEST, "\tNetLongAtmos     : %f\n", eb->NetLongAtmos);
+    fprintf(LOG_DEST, "\tNetLongOver      : %f\n", eb->NetLongOver);
+    fprintf(LOG_DEST, "\tNetLongUnder     : %f\n", eb->NetLongUnder);
+    fprintf(LOG_DEST, "\tNetShortAtmos    : %f\n", eb->NetShortAtmos);
+    fprintf(LOG_DEST, "\tNetShortGrnd     : %f\n", eb->NetShortGrnd);
+    fprintf(LOG_DEST, "\tNetShortOver     : %f\n", eb->NetShortOver);
+    fprintf(LOG_DEST, "\tNetShortUnder    : %f\n", eb->NetShortUnder);
+    fprintf(LOG_DEST, "\tout_long_canopy  : %f\n", eb->out_long_canopy);
+    fprintf(LOG_DEST, "\tout_long_surface : %f\n", eb->out_long_surface);
+    fprintf(LOG_DEST, "\trefreeze_energy  : %f\n", eb->refreeze_energy);
+    fprintf(LOG_DEST, "\tsensible         : %f\n", eb->sensible);
+    fprintf(LOG_DEST, "\tshortwave        : %f\n", eb->shortwave);
+    fprintf(LOG_DEST, "\tShortOverIn      : %f\n", eb->ShortOverIn);
+    fprintf(LOG_DEST, "\tShortUnderIn     : %f\n", eb->ShortUnderIn);
+    fprintf(LOG_DEST, "\tsnow_flux        : %f\n", eb->snow_flux);
 }
 
 /******************************************************************************
@@ -438,18 +446,18 @@ print_layer_data(layer_data_struct *ldata,
     size_t i;
 
     fprintf(LOG_DEST, "layer_data:\n");
-    fprintf(LOG_DEST, "\tCs   : %.4f\n", ldata->Cs);
-    fprintf(LOG_DEST, "\tT    : %.4f\n", ldata->T);
-    fprintf(LOG_DEST, "\tevap : %.4f\n", ldata->evap);
+    fprintf(LOG_DEST, "\tCs   : %f\n", ldata->Cs);
+    fprintf(LOG_DEST, "\tT    : %f\n", ldata->T);
+    fprintf(LOG_DEST, "\tevap (flux): %f\n", ldata->evap);
     fprintf(LOG_DEST, "\tice  :");
     for (i = 0; i < nfrost; i++) {
-        fprintf(LOG_DEST, "\t%.4f", ldata->ice[i]);
+        fprintf(LOG_DEST, "\t%f", ldata->ice[i]);
     }
     fprintf(LOG_DEST, "\n");
-    fprintf(LOG_DEST, "\tkappa: %.4f\n", ldata->kappa);
-    fprintf(LOG_DEST, "\tmoist: %.4f\n", ldata->moist);
-    fprintf(LOG_DEST, "\tphi  : %.4f\n", ldata->phi);
-    fprintf(LOG_DEST, "\tzwt  : %.4f\n", ldata->zwt);
+    fprintf(LOG_DEST, "\tkappa: %f\n", ldata->kappa);
+    fprintf(LOG_DEST, "\tmoist: %f\n", ldata->moist);
+    fprintf(LOG_DEST, "\tphi  : %f\n", ldata->phi);
+    fprintf(LOG_DEST, "\tzwt  : %f\n", ldata->zwt);
 }
 
 /******************************************************************************
@@ -785,39 +793,43 @@ print_save_data(save_data_struct *save)
 void
 print_snow_data(snow_data_struct *snow)
 {
-    fprintf(LOG_DEST, "snow_data:\n");
-    fprintf(LOG_DEST, "\talbedo            : %.4f\n", snow->albedo);
-    fprintf(LOG_DEST, "\tcanopy_albedo     : %.4f\n", snow->canopy_albedo);
-    fprintf(LOG_DEST, "\tcoldcontent       : %.4f\n", snow->coldcontent);
-    fprintf(LOG_DEST, "\tcoverage          : %.4f\n", snow->coverage);
-    fprintf(LOG_DEST, "\tdensity           : %.4f\n", snow->density);
-    fprintf(LOG_DEST, "\tdepth             : %.4f\n", snow->depth);
+    // Print state variables
+    fprintf(LOG_DEST, "snow_data - states:\n");
+    fprintf(LOG_DEST, "\talbedo            : %f\n", snow->albedo);
+    fprintf(LOG_DEST, "\tcanopy_albedo     : %f\n", snow->canopy_albedo);
+    fprintf(LOG_DEST, "\tcoldcontent       : %f\n", snow->coldcontent);
+    fprintf(LOG_DEST, "\tcoverage          : %f\n", snow->coverage);
+    fprintf(LOG_DEST, "\tdensity           : %f\n", snow->density);
+    fprintf(LOG_DEST, "\tdepth             : %f\n", snow->depth);
     fprintf(LOG_DEST, "\tlast_snow         : %d\n", snow->last_snow);
-    fprintf(LOG_DEST, "\tmax_snow_depth    : %.4f\n", snow->max_snow_depth);
+    fprintf(LOG_DEST, "\tmax_snow_depth    : %f\n", snow->max_snow_depth);
     fprintf(LOG_DEST, "\tMELTING           : %d\n", snow->MELTING);
-    fprintf(LOG_DEST, "\tpack_temp         : %.4f\n", snow->pack_temp);
-    fprintf(LOG_DEST, "\tpack_water        : %.4f\n", snow->pack_water);
+    fprintf(LOG_DEST, "\tpack_temp         : %f\n", snow->pack_temp);
+    fprintf(LOG_DEST, "\tpack_water        : %f\n", snow->pack_water);
     fprintf(LOG_DEST, "\tsnow              : %d\n", snow->snow);
-    fprintf(LOG_DEST, "\tsnow_canopy       : %.4f\n", snow->snow_canopy);
-    fprintf(LOG_DEST, "\tstore_coverage    : %.4f\n", snow->store_coverage);
+    fprintf(LOG_DEST, "\tsnow_canopy       : %f\n", snow->snow_canopy);
+    fprintf(LOG_DEST, "\tstore_coverage    : %f\n", snow->store_coverage);
     fprintf(LOG_DEST, "\tstore_snow        : %d\n", snow->store_snow);
-    fprintf(LOG_DEST, "\tstore_swq         : %.4f\n", snow->store_swq);
-    fprintf(LOG_DEST, "\tsurf_temp         : %.4f\n", snow->surf_temp);
+    fprintf(LOG_DEST, "\tstore_swq         : %f\n", snow->store_swq);
+    fprintf(LOG_DEST, "\tsurf_temp         : %f\n", snow->surf_temp);
     fprintf(LOG_DEST, "\tsurf_temp_fbcount : %u\n", snow->surf_temp_fbcount);
     fprintf(LOG_DEST, "\tsurf_temp_fbflag  : %d\n", snow->surf_temp_fbflag);
-    fprintf(LOG_DEST, "\tsurf_water        : %.4f\n", snow->surf_water);
-    fprintf(LOG_DEST, "\tswq               : %.4f\n", snow->swq);
-    fprintf(LOG_DEST, "\tsnow_distrib_slope: %.4f\n",
+    fprintf(LOG_DEST, "\tsurf_water        : %f\n", snow->surf_water);
+    fprintf(LOG_DEST, "\tswq               : %f\n", snow->swq);
+    fprintf(LOG_DEST, "\tsnow_distrib_slope: %f\n",
             snow->snow_distrib_slope);
-    fprintf(LOG_DEST, "\ttmp_int_storage   : %.4f\n", snow->tmp_int_storage);
-    fprintf(LOG_DEST, "\tblowing_flux      : %.4f\n", snow->blowing_flux);
-    fprintf(LOG_DEST, "\tcanopy_vapor_flux : %.4f\n", snow->canopy_vapor_flux);
-    fprintf(LOG_DEST, "\tmass_error        : %.4f\n", snow->mass_error);
-    fprintf(LOG_DEST, "\tmelt              : %.4f\n", snow->melt);
-    fprintf(LOG_DEST, "\tQnet              : %.4f\n", snow->Qnet);
-    fprintf(LOG_DEST, "\tsurface_flux      : %.4f\n", snow->surface_flux);
-    fprintf(LOG_DEST, "\ttransport         : %.4f\n", snow->transport);
-    fprintf(LOG_DEST, "\tvapor_flux        : %.4f\n", snow->vapor_flux);
+    fprintf(LOG_DEST, "\ttmp_int_storage   : %f\n", snow->tmp_int_storage);
+
+    // Print fluxes
+    fprintf(LOG_DEST, "snow_data - fluxes:\n");
+    fprintf(LOG_DEST, "\tblowing_flux      : %f\n", snow->blowing_flux);
+    fprintf(LOG_DEST, "\tcanopy_vapor_flux : %f\n", snow->canopy_vapor_flux);
+    fprintf(LOG_DEST, "\tmass_error        : %f\n", snow->mass_error);
+    fprintf(LOG_DEST, "\tmelt              : %f\n", snow->melt);
+    fprintf(LOG_DEST, "\tQnet              : %f\n", snow->Qnet);
+    fprintf(LOG_DEST, "\tsurface_flux      : %f\n", snow->surface_flux);
+    fprintf(LOG_DEST, "\ttransport         : %f\n", snow->transport);
+    fprintf(LOG_DEST, "\tvapor_flux        : %f\n", snow->vapor_flux);
 }
 
 /******************************************************************************
@@ -836,181 +848,181 @@ print_soil_con(soil_con_struct *scon,
 
     fprintf(LOG_DEST, "soil_con:\n");
     fprintf(LOG_DEST, "\tFS_ACTIVE             : %d\n", scon->FS_ACTIVE);
-    fprintf(LOG_DEST, "\tDs                    : %.4f\n", scon->Ds);
-    fprintf(LOG_DEST, "\tDsmax                 : %.4f\n", scon->Dsmax);
+    fprintf(LOG_DEST, "\tDs                    : %f\n", scon->Ds);
+    fprintf(LOG_DEST, "\tDsmax                 : %f\n", scon->Dsmax);
     fprintf(LOG_DEST, "\tKsat                  :");
     for (i = 0; i < nlayers; i++) {
-        fprintf(LOG_DEST, "\t%.4f", scon->Ksat[i]);
+        fprintf(LOG_DEST, "\t%f", scon->Ksat[i]);
     }
     fprintf(LOG_DEST, "\n");
     fprintf(LOG_DEST, "\tWcr                   :");
     for (i = 0; i < nlayers; i++) {
-        fprintf(LOG_DEST, "\t%.4f", scon->Wcr[i]);
+        fprintf(LOG_DEST, "\t%f", scon->Wcr[i]);
     }
     fprintf(LOG_DEST, "\n");
     fprintf(LOG_DEST, "\tWpwp                  :");
     for (i = 0; i < nlayers; i++) {
-        fprintf(LOG_DEST, "\t%.4f", scon->Wpwp[i]);
+        fprintf(LOG_DEST, "\t%f", scon->Wpwp[i]);
     }
     fprintf(LOG_DEST, "\n");
-    fprintf(LOG_DEST, "\tWs                    : %.4f\n", scon->Ws);
-    fprintf(LOG_DEST, "\tAlbedoPar             : %.4f\n", scon->AlbedoPar);
+    fprintf(LOG_DEST, "\tWs                    : %f\n", scon->Ws);
+    fprintf(LOG_DEST, "\tAlbedoPar             : %f\n", scon->AlbedoPar);
     fprintf(LOG_DEST, "\talpha                 :");
     for (i = 0; i < nnodes; i++) {
-        fprintf(LOG_DEST, "\t%.4f", scon->alpha[i]);
+        fprintf(LOG_DEST, "\t%f", scon->alpha[i]);
     }
     fprintf(LOG_DEST, "\n");
-    fprintf(LOG_DEST, "\tannual_prec           : %.4f\n", scon->annual_prec);
-    fprintf(LOG_DEST, "\tavg_temp              : %.4f\n", scon->avg_temp);
-    fprintf(LOG_DEST, "\tavgJulyAirTemp        : %.4f\n",
+    fprintf(LOG_DEST, "\tannual_prec           : %f\n", scon->annual_prec);
+    fprintf(LOG_DEST, "\tavg_temp              : %f\n", scon->avg_temp);
+    fprintf(LOG_DEST, "\tavgJulyAirTemp        : %f\n",
             scon->avgJulyAirTemp);
-    fprintf(LOG_DEST, "\tb_infilt              : %.4f\n", scon->b_infilt);
+    fprintf(LOG_DEST, "\tb_infilt              : %f\n", scon->b_infilt);
     fprintf(LOG_DEST, "\tbeta                  :");
     for (i = 0; i < nnodes; i++) {
-        fprintf(LOG_DEST, "\t%.4f", scon->beta[i]);
+        fprintf(LOG_DEST, "\t%f", scon->beta[i]);
     }
     fprintf(LOG_DEST, "\n");
     fprintf(LOG_DEST, "\tbubble                :");
     for (i = 0; i < nlayers; i++) {
-        fprintf(LOG_DEST, "\t%.4f", scon->bubble[i]);
+        fprintf(LOG_DEST, "\t%f", scon->bubble[i]);
     }
     fprintf(LOG_DEST, "\n");
     fprintf(LOG_DEST, "\tbubble_node           :");
     for (i = 0; i < nnodes; i++) {
-        fprintf(LOG_DEST, "\t%.4f", scon->bubble_node[i]);
+        fprintf(LOG_DEST, "\t%f", scon->bubble_node[i]);
     }
     fprintf(LOG_DEST, "\n");
     fprintf(LOG_DEST, "\tbulk_density          :");
     for (i = 0; i < nlayers; i++) {
-        fprintf(LOG_DEST, "\t%.4f", scon->bulk_density[i]);
+        fprintf(LOG_DEST, "\t%f", scon->bulk_density[i]);
     }
     fprintf(LOG_DEST, "\n");
     fprintf(LOG_DEST, "\tbulk_dens_min         :");
     for (i = 0; i < nlayers; i++) {
-        fprintf(LOG_DEST, "\t%.4f", scon->bulk_dens_min[i]);
+        fprintf(LOG_DEST, "\t%f", scon->bulk_dens_min[i]);
     }
     fprintf(LOG_DEST, "\n");
     fprintf(LOG_DEST, "\tbulk_dens_org       :");
     for (i = 0; i < nlayers; i++) {
-        fprintf(LOG_DEST, "\t%.4f", scon->bulk_dens_org[i]);
+        fprintf(LOG_DEST, "\t%f", scon->bulk_dens_org[i]);
     }
     fprintf(LOG_DEST, "\n");
-    fprintf(LOG_DEST, "\tc                     : %.4f\n", scon->c);
+    fprintf(LOG_DEST, "\tc                     : %f\n", scon->c);
     fprintf(LOG_DEST, "\tdepth                 :");
     for (i = 0; i < nlayers; i++) {
-        fprintf(LOG_DEST, "\t%.4f", scon->depth[i]);
+        fprintf(LOG_DEST, "\t%f", scon->depth[i]);
     }
     fprintf(LOG_DEST, "\n");
-    fprintf(LOG_DEST, "\tdp                    : %.4f\n", scon->dp);
+    fprintf(LOG_DEST, "\tdp                    : %f\n", scon->dp);
     fprintf(LOG_DEST, "\tdz_node               :");
     for (i = 0; i < nnodes; i++) {
-        fprintf(LOG_DEST, "\t%.4f", scon->dz_node[i]);
+        fprintf(LOG_DEST, "\t%f", scon->dz_node[i]);
     }
     fprintf(LOG_DEST, "\n");
     fprintf(LOG_DEST, "\tZsum_node             :");
     for (i = 0; i < nnodes; i++) {
-        fprintf(LOG_DEST, "\t%.4f", scon->Zsum_node[i]);
+        fprintf(LOG_DEST, "\t%f", scon->Zsum_node[i]);
     }
     fprintf(LOG_DEST, "\n");
     fprintf(LOG_DEST, "\texpt                  :");
     for (i = 0; i < nlayers; i++) {
-        fprintf(LOG_DEST, "\t%.4f", scon->expt[i]);
+        fprintf(LOG_DEST, "\t%f", scon->expt[i]);
     }
     fprintf(LOG_DEST, "\n");
     fprintf(LOG_DEST, "\texpt_node             :");
     for (i = 0; i < nnodes; i++) {
-        fprintf(LOG_DEST, "\t%.4f", scon->expt_node[i]);
+        fprintf(LOG_DEST, "\t%f", scon->expt_node[i]);
     }
     fprintf(LOG_DEST, "\n");
     fprintf(LOG_DEST, "\tfrost_fract           :");
     for (i = 0; i < nfrost; i++) {
-        fprintf(LOG_DEST, "\t%.4f", scon->frost_fract[i]);
+        fprintf(LOG_DEST, "\t%f", scon->frost_fract[i]);
     }
     fprintf(LOG_DEST, "\n");
-    fprintf(LOG_DEST, "\tfrost_slope           : %.4f\n", scon->frost_slope);
+    fprintf(LOG_DEST, "\tfrost_slope           : %f\n", scon->frost_slope);
     fprintf(LOG_DEST, "\tgamma                 :");
     for (i = 0; i < nnodes; i++) {
-        fprintf(LOG_DEST, "\t%.4f", scon->gamma[i]);
+        fprintf(LOG_DEST, "\t%f", scon->gamma[i]);
     }
     fprintf(LOG_DEST, "\n");
     fprintf(LOG_DEST, "\tinit_moist            :");
     for (i = 0; i < nlayers; i++) {
-        fprintf(LOG_DEST, "\t%.4f", scon->init_moist[i]);
+        fprintf(LOG_DEST, "\t%f", scon->init_moist[i]);
     }
     fprintf(LOG_DEST, "\n");
-    fprintf(LOG_DEST, "\tmax_infil             : %.4f\n", scon->max_infil);
+    fprintf(LOG_DEST, "\tmax_infil             : %f\n", scon->max_infil);
     fprintf(LOG_DEST, "\tmax_moist             :");
     for (i = 0; i < nlayers; i++) {
-        fprintf(LOG_DEST, "\t%.4f", scon->max_moist[i]);
+        fprintf(LOG_DEST, "\t%f", scon->max_moist[i]);
     }
     fprintf(LOG_DEST, "\n");
     fprintf(LOG_DEST, "\tmax_moist_node        :");
     for (i = 0; i < nnodes; i++) {
-        fprintf(LOG_DEST, "\t%.4f", scon->max_moist_node[i]);
+        fprintf(LOG_DEST, "\t%f", scon->max_moist_node[i]);
     }
     fprintf(LOG_DEST, "\n");
-    fprintf(LOG_DEST, "\tmax_snow_distrib_slope: %.4f\n",
+    fprintf(LOG_DEST, "\tmax_snow_distrib_slope: %f\n",
             scon->max_snow_distrib_slope);
     fprintf(LOG_DEST, "\tphi_s                 :");
     for (i = 0; i < nlayers; i++) {
-        fprintf(LOG_DEST, "\t%.4f", scon->phi_s[i]);
+        fprintf(LOG_DEST, "\t%f", scon->phi_s[i]);
     }
     fprintf(LOG_DEST, "\n");
     fprintf(LOG_DEST, "\tporosity              :");
     for (i = 0; i < nlayers; i++) {
-        fprintf(LOG_DEST, "\t%.4f", scon->porosity[i]);
+        fprintf(LOG_DEST, "\t%f", scon->porosity[i]);
     }
     fprintf(LOG_DEST, "\n");
     fprintf(LOG_DEST, "\tquartz              :");
     for (i = 0; i < nlayers; i++) {
-        fprintf(LOG_DEST, "\t%.4f", scon->quartz[i]);
+        fprintf(LOG_DEST, "\t%f", scon->quartz[i]);
     }
     fprintf(LOG_DEST, "\n");
     fprintf(LOG_DEST, "\torganic               :");
     for (i = 0; i < nlayers; i++) {
-        fprintf(LOG_DEST, "\t%.4f", scon->organic[i]);
+        fprintf(LOG_DEST, "\t%f", scon->organic[i]);
     }
     fprintf(LOG_DEST, "\n");
     fprintf(LOG_DEST, "\tresid_moist           :");
     for (i = 0; i < nlayers; i++) {
-        fprintf(LOG_DEST, "\t%.4f", scon->resid_moist[i]);
+        fprintf(LOG_DEST, "\t%f", scon->resid_moist[i]);
     }
     fprintf(LOG_DEST, "\n");
-    fprintf(LOG_DEST, "\trough                 : %.4f\n", scon->rough);
-    fprintf(LOG_DEST, "\tsnow_rough            : %.4f\n", scon->snow_rough);
+    fprintf(LOG_DEST, "\trough                 : %f\n", scon->rough);
+    fprintf(LOG_DEST, "\tsnow_rough            : %f\n", scon->snow_rough);
     fprintf(LOG_DEST, "\tsoil_density          :");
     for (i = 0; i < nlayers; i++) {
-        fprintf(LOG_DEST, "\t%.4f", scon->soil_density[i]);
+        fprintf(LOG_DEST, "\t%f", scon->soil_density[i]);
     }
     fprintf(LOG_DEST, "\n");
     fprintf(LOG_DEST, "\tsoil_dens_min         :");
     for (i = 0; i < nlayers; i++) {
-        fprintf(LOG_DEST, "\t%.4f", scon->soil_dens_min[i]);
+        fprintf(LOG_DEST, "\t%f", scon->soil_dens_min[i]);
     }
     fprintf(LOG_DEST, "\n");
     fprintf(LOG_DEST, "\tsoil_dens_org         :");
     for (i = 0; i < nlayers; i++) {
-        fprintf(LOG_DEST, "\t%.4f", scon->soil_dens_org[i]);
+        fprintf(LOG_DEST, "\t%f", scon->soil_dens_org[i]);
     }
     fprintf(LOG_DEST, "\n");
     fprintf(LOG_DEST, "BandElev                :");
     for (i = 0; i < nbands; i++) {
-        fprintf(LOG_DEST, "\t%.4f", scon->BandElev[i]);
+        fprintf(LOG_DEST, "\t%f", scon->BandElev[i]);
     }
     fprintf(LOG_DEST, "\n");
     fprintf(LOG_DEST, "AreaFract               :");
     for (i = 0; i < nbands; i++) {
-        fprintf(LOG_DEST, "\t%.4f", scon->AreaFract[i]);
+        fprintf(LOG_DEST, "\t%f", scon->AreaFract[i]);
     }
     fprintf(LOG_DEST, "\n");
     fprintf(LOG_DEST, "Pfactor               :");
     for (i = 0; i < nbands; i++) {
-        fprintf(LOG_DEST, "\t%.4f", scon->Pfactor[i]);
+        fprintf(LOG_DEST, "\t%f", scon->Pfactor[i]);
     }
     fprintf(LOG_DEST, "\n");
     fprintf(LOG_DEST, "Tfactor               :");
     for (i = 0; i < nbands; i++) {
-        fprintf(LOG_DEST, "\t%.4f", scon->Tfactor[i]);
+        fprintf(LOG_DEST, "\t%f", scon->Tfactor[i]);
     }
     fprintf(LOG_DEST, "\n");
     fprintf(LOG_DEST, "AboveTreeLine         :");
@@ -1018,16 +1030,16 @@ print_soil_con(soil_con_struct *scon,
         fprintf(LOG_DEST, "\t%d", scon->AboveTreeLine[i]);
     }
     fprintf(LOG_DEST, "\n");
-    fprintf(LOG_DEST, "\televation             : %.4f\n", scon->elevation);
-    fprintf(LOG_DEST, "\tlat                   : %.4f\n", scon->lat);
-    fprintf(LOG_DEST, "\tlng                   : %.4f\n", scon->lng);
-    fprintf(LOG_DEST, "\tcell_area             : %.4f\n", scon->cell_area);
-    fprintf(LOG_DEST, "\ttime_zone_lng         : %.4f\n", scon->time_zone_lng);
+    fprintf(LOG_DEST, "\televation             : %f\n", scon->elevation);
+    fprintf(LOG_DEST, "\tlat                   : %f\n", scon->lat);
+    fprintf(LOG_DEST, "\tlng                   : %f\n", scon->lng);
+    fprintf(LOG_DEST, "\tcell_area             : %f\n", scon->cell_area);
+    fprintf(LOG_DEST, "\ttime_zone_lng         : %f\n", scon->time_zone_lng);
     fprintf(LOG_DEST, "\tgridcel               : %d\n", scon->gridcel);
     fprintf(LOG_DEST, "\tzwtvmoist_zwt         :");
     for (i = 0; i < nlayers + 2; i++) {
         for (j = 0; j < nzwt; j++) {
-            fprintf(LOG_DEST, "\t%.4f", scon->zwtvmoist_zwt[i][j]);
+            fprintf(LOG_DEST, "\t%f", scon->zwtvmoist_zwt[i][j]);
         }
         fprintf(LOG_DEST, "\n\t\t\t");
     }
@@ -1035,15 +1047,15 @@ print_soil_con(soil_con_struct *scon,
     fprintf(LOG_DEST, "\tzwtvmoist_moist       :");
     for (i = 0; i < nlayers + 2; i++) {
         for (j = 0; j < nzwt; j++) {
-            fprintf(LOG_DEST, "\t%.4f", scon->zwtvmoist_moist[i][j]);
+            fprintf(LOG_DEST, "\t%f", scon->zwtvmoist_moist[i][j]);
         }
         fprintf(LOG_DEST, "\n\t\t\t");
     }
     fprintf(LOG_DEST, "\n");
-    fprintf(LOG_DEST, "\tslope                 : %.4f\n", scon->slope);
-    fprintf(LOG_DEST, "\taspect                : %.4f\n", scon->aspect);
-    fprintf(LOG_DEST, "\tehoriz                : %.4f\n", scon->ehoriz);
-    fprintf(LOG_DEST, "\twhoriz                : %.4f\n", scon->whoriz);
+    fprintf(LOG_DEST, "\tslope                 : %f\n", scon->slope);
+    fprintf(LOG_DEST, "\taspect                : %f\n", scon->aspect);
+    fprintf(LOG_DEST, "\tehoriz                : %f\n", scon->ehoriz);
+    fprintf(LOG_DEST, "\twhoriz                : %f\n", scon->whoriz);
 }
 
 /******************************************************************************
@@ -1163,44 +1175,58 @@ void
 print_veg_var(veg_var_struct *vvar,
               size_t          ncanopy)
 {
+    extern option_struct options;
+
     size_t i;
 
-    fprintf(LOG_DEST, "veg_var:\n");
-    fprintf(LOG_DEST, "\tcanopyevap   : %.4f\n", vvar->canopyevap);
-    fprintf(LOG_DEST, "\tthroughfall  : %.4f\n", vvar->throughfall);
-    fprintf(LOG_DEST, "\tWdew         : %.4f\n", vvar->Wdew);
-    fprintf(LOG_DEST, "\tNscaleFactor :");
-    for (i = 0; i < ncanopy; i++) {
-        fprintf(LOG_DEST, "\t%.4f", vvar->NscaleFactor[i]);
+    // Print state variables
+    fprintf(LOG_DEST, "veg_var - states:\n");
+    fprintf(LOG_DEST, "\talbedo   : %f\n", vvar->albedo);
+    fprintf(LOG_DEST, "\tLAI   : %f\n", vvar->LAI);
+    fprintf(LOG_DEST, "\tfcanopy   : %f\n", vvar->fcanopy);
+    fprintf(LOG_DEST, "\tWdew         : %f\n", vvar->Wdew);
+    fprintf(LOG_DEST, "\tWdmax         : %f\n", vvar->Wdmax);
+    fprintf(LOG_DEST, "\tCi           : %f\n", vvar->Ci);
+    fprintf(LOG_DEST, "\trc           : %f\n", vvar->rc);
+    fprintf(LOG_DEST, "\tNPPfactor    : %f\n", vvar->NPPfactor);
+    fprintf(LOG_DEST, "\tAnnualNPP    : %f\n", vvar->AnnualNPP);
+    fprintf(LOG_DEST, "\tAnnualNPPPrev: %f\n", vvar->AnnualNPPPrev);
+    if (options.CARBON) {
+        fprintf(LOG_DEST, "\tNscaleFactor :");
+        for (i = 0; i < ncanopy; i++) {
+            fprintf(LOG_DEST, "\t%f", vvar->NscaleFactor[i]);
+        }
+        fprintf(LOG_DEST, "\n");
+        fprintf(LOG_DEST, "\tCiLayer      :");
+        for (i = 0; i < ncanopy; i++) {
+            fprintf(LOG_DEST, "\t%f", vvar->CiLayer[i]);
+        }
+        fprintf(LOG_DEST, "\n");
+        fprintf(LOG_DEST, "\trsLayer      :");
+        for (i = 0; i < ncanopy; i++) {
+            fprintf(LOG_DEST, "\t%f", vvar->rsLayer[i]);
+        }
+        fprintf(LOG_DEST, "\n");
     }
-    fprintf(LOG_DEST, "\n");
+
+    // Print fluxes
+    fprintf(LOG_DEST, "veg_var - fluxes:\n");
+    fprintf(LOG_DEST, "\tcanopyevap   : %f\n", vvar->canopyevap);
+    fprintf(LOG_DEST, "\tthroughfall  : %f\n", vvar->throughfall);
     fprintf(LOG_DEST, "\taPARLayer    :");
-    for (i = 0; i < ncanopy; i++) {
-        fprintf(LOG_DEST, "\t%.4f", vvar->aPARLayer[i]);
+    fprintf(LOG_DEST, "\taPAR         : %f\n", vvar->aPAR);
+    fprintf(LOG_DEST, "\tGPP          : %f\n", vvar->GPP);
+    fprintf(LOG_DEST, "\tRphoto       : %f\n", vvar->Rphoto);
+    fprintf(LOG_DEST, "\tRdark        : %f\n", vvar->Rdark);
+    fprintf(LOG_DEST, "\tRmaint       : %f\n", vvar->Rmaint);
+    fprintf(LOG_DEST, "\tRgrowth      : %f\n", vvar->Rgrowth);
+    fprintf(LOG_DEST, "\tRaut         : %f\n", vvar->Raut);
+    fprintf(LOG_DEST, "\tNPP          : %f\n", vvar->NPP);
+    fprintf(LOG_DEST, "\tLitterfall   : %f\n", vvar->Litterfall);
+    if (options.CARBON) {
+        for (i = 0; i < ncanopy; i++) {
+            fprintf(LOG_DEST, "\t%f", vvar->aPARLayer[i]);
+        }
+        fprintf(LOG_DEST, "\n");
     }
-    fprintf(LOG_DEST, "\n");
-    fprintf(LOG_DEST, "\tCiLayer      :");
-    for (i = 0; i < ncanopy; i++) {
-        fprintf(LOG_DEST, "\t%.4f", vvar->CiLayer[i]);
-    }
-    fprintf(LOG_DEST, "\n");
-    fprintf(LOG_DEST, "\trsLayer      :");
-    for (i = 0; i < ncanopy; i++) {
-        fprintf(LOG_DEST, "\t%.4f", vvar->rsLayer[i]);
-    }
-    fprintf(LOG_DEST, "\n");
-    fprintf(LOG_DEST, "\taPAR         : %.4f\n", vvar->aPAR);
-    fprintf(LOG_DEST, "\tCi           : %.4f\n", vvar->Ci);
-    fprintf(LOG_DEST, "\trc           : %.4f\n", vvar->rc);
-    fprintf(LOG_DEST, "\tNPPfactor    : %.4f\n", vvar->NPPfactor);
-    fprintf(LOG_DEST, "\tGPP          : %.4f\n", vvar->GPP);
-    fprintf(LOG_DEST, "\tRphoto       : %.4f\n", vvar->Rphoto);
-    fprintf(LOG_DEST, "\tRdark        : %.4f\n", vvar->Rdark);
-    fprintf(LOG_DEST, "\tRmaint       : %.4f\n", vvar->Rmaint);
-    fprintf(LOG_DEST, "\tRgrowth      : %.4f\n", vvar->Rgrowth);
-    fprintf(LOG_DEST, "\tRaut         : %.4f\n", vvar->Raut);
-    fprintf(LOG_DEST, "\tNPP          : %.4f\n", vvar->NPP);
-    fprintf(LOG_DEST, "\tLitterfall   : %.4f\n", vvar->Litterfall);
-    fprintf(LOG_DEST, "\tAnnualNPP    : %.4f\n", vvar->AnnualNPP);
-    fprintf(LOG_DEST, "\tAnnualNPPPrev: %.4f\n", vvar->AnnualNPPPrev);
 }

@@ -108,6 +108,7 @@ double canopy_evap(layer_data_struct *, veg_var_struct *, bool,
 void colavg(double *, double *, double *, double, double *, int, double,
             double);
 double compute_coszen(double, double, double, unsigned short int, unsigned int);
+void compute_derived_lake_dimensions(lake_var_struct *, lake_con_struct);
 void compute_pot_evap(size_t, double, double, double, double, double, double,
                       double, double, double, double *, char, double, double,
                       double, double *);
@@ -182,6 +183,8 @@ double IceEnergyBalance(double, va_list);
 void iceform(double *, double *, double, double, double *, int, double, double,
              double, double *, double *, double *, double *, double);
 void icerad(double, double, double, double *, double *, double *);
+void initialize_lake(lake_var_struct *, lake_con_struct, soil_con_struct *,
+                     cell_data_struct *, bool);
 int lakeice(double, double, double, double, double, double *, double, double *,
             double *, double, double);
 void latent_heat_from_snow(double, double, double, double, double, double,

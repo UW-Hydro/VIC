@@ -4,7 +4,7 @@
  * This routine initializes the model state (energy balance, water balance, and
  * snow components).
  *
- * If a state file is provided to the model than its
+ * If a state file is provided to the model then its
  * contents are checked to see if it agrees with the current simulation set-up,
  * if so it is used to initialize the model state.  If no state file is
  * provided the model initializes all variables with defaults and the user

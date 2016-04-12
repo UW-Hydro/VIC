@@ -46,7 +46,6 @@ read_initial_model_state(FILE            *init_state,
                          lake_con_struct  lake_con)
 {
     extern option_struct     options;
-    extern parameters_struct param;
 
     char                     tmpstr[MAXSTRING];
     char                     tmpchar;
@@ -61,8 +60,6 @@ read_initial_model_state(FILE            *init_state,
     int                      byte, Nbytes;
     int                      node;
     size_t                   frost_area;
-    double                   pack_swq;
-    double                   surf_swq;
 
     cell_data_struct       **cell;
     snow_data_struct       **snow;
@@ -746,36 +743,4 @@ read_initial_model_state(FILE            *init_state,
         }
     }
 
-    // Check that snow pack terms are self-consistent
-    for (veg = 0; veg <= Nveg; veg++) {
-        for (band = 0; band < Nbands; band++) {
-            if (snow[veg][band].swq > param.SNOW_MAX_SURFACE_SWE) {
-                pack_swq = snow[veg][band].swq - param.SNOW_MAX_SURFACE_SWE;
-                surf_swq = param.SNOW_MAX_SURFACE_SWE;
-            }
-            else {
-                pack_swq = 0;
-                surf_swq = snow[veg][band].swq;
-                snow[veg][band].pack_temp = 0;
-            }
-            if (snow[veg][band].surf_water >
-                param.SNOW_LIQUID_WATER_CAPACITY *
-                surf_swq) {
-                snow[veg][band].pack_water += snow[veg][band].surf_water -
-                                              (param.
-                                               SNOW_LIQUID_WATER_CAPACITY *
-                                               surf_swq);
-                snow[veg][band].surf_water =
-                    param.SNOW_LIQUID_WATER_CAPACITY *
-                    surf_swq;
-            }
-            if (snow[veg][band].pack_water >
-                param.SNOW_LIQUID_WATER_CAPACITY *
-                pack_swq) {
-                snow[veg][band].pack_water =
-                    param.SNOW_LIQUID_WATER_CAPACITY *
-                    pack_swq;
-            }
-        }
-    }
 }

@@ -449,7 +449,6 @@ void collect_eb_terms(energy_bal_struct, snow_data_struct, cell_data_struct,
 void collect_wb_terms(cell_data_struct, veg_var_struct, snow_data_struct,
                       double, double, double, int, double, int, double *,
                       double *, out_data_struct *);
-void compute_derived_lake_dimensions(lake_var_struct *, lake_con_struct);
 void compute_derived_state_vars(all_vars_struct *, soil_con_struct *,
                                 veg_con_struct *);
 void compute_lake_params(lake_con_struct *, soil_con_struct);
@@ -487,8 +486,6 @@ void initialize_energy(energy_bal_struct **energy, size_t nveg);
 void initialize_filenames(void);
 void initialize_fileps(void);
 void initialize_global(void);
-void initialize_lake(lake_var_struct *, lake_con_struct, soil_con_struct *,
-                     cell_data_struct *, bool);
 void initialize_options(void);
 void initialize_parameters(void);
 void initialize_snow(snow_data_struct **snow, size_t veg_num);

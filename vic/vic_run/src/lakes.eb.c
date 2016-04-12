@@ -25,7 +25,6 @@
  *****************************************************************************/
 
 #include <vic_run.h>
-#include <vic_driver_shared_all.h>
 
 /******************************************************************************
  * @brief    This subroutine solves the energy budget for open water bodies.

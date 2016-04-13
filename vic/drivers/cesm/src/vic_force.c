@@ -37,7 +37,7 @@ vic_force(void)
     extern size_t              current;
     extern atmos_data_struct  *atmos;
     extern x2l_data_struct    *x2l_vic;
-    extern dmy_struct          dmy;
+    extern dmy_struct          dmy_current;
     extern domain_struct       global_domain;
     extern domain_struct       local_domain;
     extern filenames_struct    filenames;
@@ -175,7 +175,8 @@ vic_force(void)
                 atmos[i].coszen[j] = compute_coszen(
                     local_domain.locations[i].latitude,
                     local_domain.locations[i].longitude,
-                    soil_con[i].time_zone_lng, dmy.day_in_year, dmy.dayseconds);
+                    soil_con[i].time_zone_lng, dmy_current.day_in_year,
+                    dmy_current.dayseconds);
             }
         }
     }
@@ -248,7 +249,7 @@ vic_force(void)
             atmos[i].coszen[NR] = compute_coszen(
                 local_domain.locations[i].latitude,
                 local_domain.locations[i].longitude, soil_con[i].time_zone_lng,
-                dmy.day_in_year, SEC_PER_DAY / 2);
+                dmy_current.day_in_year, SEC_PER_DAY / 2);
         }
     }
 
@@ -260,15 +261,15 @@ vic_force(void)
             if (vidx != NODATA_VEG) {
                 for (j = 0; j < NF; j++) {
                     veg_hist[i][vidx].albedo[j] =
-                        veg_lib[i][v].albedo[dmy.month - 1];
+                        veg_lib[i][v].albedo[dmy_current.month - 1];
                     veg_hist[i][vidx].displacement[j] =
-                        veg_lib[i][v].displacement[dmy.month - 1];
+                        veg_lib[i][v].displacement[dmy_current.month - 1];
                     veg_hist[i][vidx].fcanopy[j] =
-                        veg_lib[i][v].fcanopy[dmy.month - 1];
+                        veg_lib[i][v].fcanopy[dmy_current.month - 1];
                     veg_hist[i][vidx].LAI[j] =
-                        veg_lib[i][v].LAI[dmy.month - 1];
+                        veg_lib[i][v].LAI[dmy_current.month - 1];
                     veg_hist[i][vidx].roughness[j] =
-                        veg_lib[i][v].roughness[dmy.month - 1];
+                        veg_lib[i][v].roughness[dmy_current.month - 1];
                 }
                 // not the correct way to calculate average albedo, but leave
                 // for now

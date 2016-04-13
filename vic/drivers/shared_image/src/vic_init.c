@@ -679,12 +679,29 @@ vic_init(void)
         for (i = 0; i < local_domain.ncells_active; i++) {
             soil_con[i].max_snow_distrib_slope = (double) dvar[i];
         }
+    }
 
+    // spatial frost
+    if (options.SPATIAL_FROST) {
         // frost_slope: slope of frozen soil distribution
         get_scatter_nc_field_double(filenames.soil, "frost_slope",
                                     d2start, d2count, dvar);
         for (i = 0; i < local_domain.ncells_active; i++) {
             soil_con[i].frost_slope = (double) dvar[i];
+        }
+    }
+    for (k = 0; k < options.Nfrost; k++) {
+        if (options.Nfrost == 1) {
+            soil_con[i].frost_fract[k] = 1.;
+        }
+        else if (options.Nfrost == 2) {
+            soil_con[i].frost_fract[k] = 0.5;
+        }
+        else {
+            soil_con[i].frost_fract[k] = 1. / (options.Nfrost - 1);
+            if (k == 0 || k == options.Nfrost - 1) {
+                soil_con[i].frost_fract[k] /= 2.;
+            }
         }
     }
 

@@ -62,18 +62,4 @@ initialize_soil(cell_data_struct **cell,
             cell[veg][band].CSlow = 0;
         }
     }
-    for (frost_area = 0; frost_area < options.Nfrost; frost_area++) {
-        if (options.Nfrost == 1) {
-            soil_con->frost_fract[frost_area] = 1.;
-        }
-        else if (options.Nfrost == 2) {
-            soil_con->frost_fract[frost_area] = 0.5;
-        }
-        else {
-            soil_con->frost_fract[frost_area] = 1. / (options.Nfrost - 1);
-            if (frost_area == 0 || frost_area == options.Nfrost - 1) {
-                soil_con->frost_fract[frost_area] /= 2.;
-            }
-        }
-    }
 }

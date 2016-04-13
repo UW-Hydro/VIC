@@ -679,6 +679,20 @@ read_soilparam(FILE *soilparam,
                         temp.frost_slope);
             }
         }
+        for (k = 0; k < options.Nfrost; k++) {
+            if (options.Nfrost == 1) {
+                temp.frost_fract[k] = 1.;
+            }
+            else if (options.Nfrost == 2) {
+                temp.frost_fract[k] = 0.5;
+            }
+            else {
+                temp.frost_fract[k] = 1. / (options.Nfrost - 1);
+                if (k == 0 || k == options.Nfrost - 1) {
+                    temp.frost_fract[k] /= 2.;
+                }
+            }
+        }
 
         /*************************************************
            If BASEFLOW = NIJSSEN2001 then convert NIJSSEN2001

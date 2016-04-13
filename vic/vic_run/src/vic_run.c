@@ -288,9 +288,7 @@ vic_run(atmos_data_struct   *atmos,
                 }
             }
 
-            /******************************
-               Compute nitrogen scaling factors and initialize other veg vars
-            ******************************/
+            // Compute nitrogen scaling factors and initialize other veg vars
             if (options.CARBON && iveg < Nveg) {
                 for (band = 0; band < Nbands; band++) {
                     for (cidx = 0; cidx < options.Ncanopy; cidx++) {

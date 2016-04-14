@@ -214,7 +214,7 @@ vic_force(atmos_data_struct *atmos,
 
     /* First, assign default climatology */
     for (rec = 0; rec < global_param.nrecs; rec++) {
-        for (v = 0; v < veg_con[0].vegetat_type_num; v++) {
+        for (v = 0; v <= veg_con[0].vegetat_type_num; v++) {
             for (i = 0; i < NF; i++) {
                 veg_hist[rec][v].albedo[i] =
                     veg_con[v].albedo[dmy[rec].month - 1];
@@ -232,7 +232,7 @@ vic_force(atmos_data_struct *atmos,
 
     /* Next, overwrite with veg_hist values, validate, and average */
     for (rec = 0; rec < global_param.nrecs; rec++) {
-        for (v = 0; v < veg_con[0].vegetat_type_num; v++) {
+        for (v = 0; v <= veg_con[0].vegetat_type_num; v++) {
             for (i = 0; i < NF; i++) {
                 uidx = rec * NF + i;
                 if (param_set.TYPE[ALBEDO].SUPPLIED &&

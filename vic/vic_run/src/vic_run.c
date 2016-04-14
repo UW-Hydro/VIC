@@ -67,7 +67,7 @@ vic_run(atmos_data_struct   *atmos,
     double                   displacement[3];
     double                   roughness[3];
     double                   ref_height[3];
-    double                  *aero_resist;
+    double                   aero_resist[3];
     double                   Cv;
     double                   Le;
     double                   Melt[2 * MAX_BANDS];
@@ -98,9 +98,6 @@ vic_run(atmos_data_struct   *atmos,
     // grid cell is used within vic_run. For simplicity sake, use vic_run_veg_lib
     // everywhere within vic_run
     vic_run_veg_lib = veg_lib;
-
-    /* Allocate aero_resist array */
-    aero_resist = calloc(3, sizeof(*aero_resist));
 
     /* set local pointers */
     cell = all_vars->cell;
@@ -384,8 +381,6 @@ vic_run(atmos_data_struct   *atmos,
             veg_var[iveg][band].Wdmax *= veg_var[iveg][band].fcanopy;
         }
     }
-
-    free((char *) aero_resist);
 
     /****************************
        Run Lake Model

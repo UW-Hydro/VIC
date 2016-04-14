@@ -461,26 +461,37 @@ read_vegparam(FILE  *vegparam,
                         veg_lib[veg_class].veg_class);
             }
         }
+        vegetat_type_num = temp[0].vegetat_type_num;
     }
 
-    // Bare soil tile
-    if (Cv_sum < 1.) {
-        j = vegetat_type_num;
-        temp[j].veg_class = Nveg_type; // Create a veg_class ID for bare soil, which is not mentioned in the veg library
-        temp[j].Cv = 1.0 - Cv_sum;
-        // Don't allocate any root-zone-related arrays
-        if (options.BLOWING) {
-            if (vegetat_type_num > 0) {
-                temp[j].sigma_slope = temp[0].sigma_slope;
-                temp[j].lag_one = temp[0].lag_one;
-                temp[j].fetch = temp[0].fetch;
-            }
-            else {
-                temp[j].sigma_slope = 0.005;
-                temp[j].lag_one = 0.95;
-                temp[j].fetch = 2000;
-            }
+    // Default bare soil tile - not specified in vegparam file
+    i = vegetat_type_num;
+    temp[i].veg_class = Nveg_type; // Create a veg_class ID for bare soil, which is not mentioned in the veg library
+    temp[i].Cv = 1.0 - Cv_sum;
+    if (temp[i].Cv < 0) {
+        temp[i].Cv = 0;
+    }
+    // Don't allocate any root-zone-related arrays
+    if (options.BLOWING) {
+        if (vegetat_type_num > 0) {
+            temp[i].sigma_slope = temp[0].sigma_slope;
+            temp[i].lag_one = temp[0].lag_one;
+            temp[i].fetch = temp[0].fetch;
         }
+        else {
+            temp[i].sigma_slope = 0.005;
+            temp[i].lag_one = 0.95;
+            temp[i].fetch = 2000;
+        }
+    }
+    for (j = 0; j < MONTHS_PER_YEAR; j++) {
+        temp[i].albedo[j] = veg_lib[temp[i].veg_class].albedo[j];
+        temp[i].displacement[j] =
+            veg_lib[temp[i].veg_class].displacement[j];
+        temp[i].fcanopy[j] = veg_lib[temp[i].veg_class].fcanopy[j];
+        temp[i].LAI[j] = veg_lib[temp[i].veg_class].LAI[j];
+        temp[i].roughness[j] = veg_lib[temp[i].veg_class].roughness[j];
+        temp[i].Wdmax[j] = veg_lib[temp[i].veg_class].Wdmax[j];
     }
 
     return temp;

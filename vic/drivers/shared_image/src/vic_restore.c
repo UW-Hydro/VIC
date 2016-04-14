@@ -837,6 +837,7 @@ check_init_state_file(void)
     int                     status;
     size_t                  dimlen;
     size_t                  i;
+    size_t                  j;
     size_t                  d1count[1];
     size_t                  d1start[1];
     size_t                  d2count[2];
@@ -924,6 +925,7 @@ check_init_state_file(void)
             log_err("Error reading data from \"%s\" in %s",
                     global_domain.info.lon_var, filenames.init_state);
         }
+        // implicitly nested loop over ni and nj with j set to 0
         for (i = 0; i < global_domain.n_nx; i++) {
             if (!assert_close_double(dvar[i],
                                      global_domain.locations[i].longitude, rtol,
@@ -945,9 +947,13 @@ check_init_state_file(void)
             log_err("Error reading data from \"%s\" in %s",
                     global_domain.info.lat_var, filenames.init_state);
         }
-        for (i = 0; i < global_domain.n_ny; i++) {
-            if (!assert_close_double(dvar[i],
-                                     global_domain.locations[i].latitude, rtol,
+        // implicitly nested loop over ni and nj with i set to 0;
+        // j stride = n_nx
+        for (j = 0; j < global_domain.n_ny; j++) {
+            if (!assert_close_double(dvar[j],
+                                     global_domain.locations[j *
+                                                             global_domain.n_nx]
+                                     .latitude, rtol,
                                      abs_tol)) {
                 log_err("Latitudes in initial state file do not "
                         "match parameter file");

@@ -1103,12 +1103,6 @@ vic_init(void)
                 veg_con[i][k].Cv = veg_con_map[i].Cv[j];
                 veg_con[i][k].veg_class = j;
                 for (m = 0; m < MONTHS_PER_YEAR; m++) {
-                    if (options.LAI_SRC == FROM_VEGLIB ||
-                        options.LAI_SRC == FROM_VEGPARAM) {
-                        veg_con[i][k].LAI[m] = veg_lib[i][j].LAI[m];
-                        veg_con[i][k].Wdmax[m] = param.VEG_LAI_WATER_FACTOR *
-                                                 veg_con[i][k].LAI[m];
-                    }
                     if (options.ALB_SRC == FROM_VEGLIB ||
                         options.ALB_SRC == FROM_VEGPARAM) {
                         veg_con[i][k].albedo[m] = veg_lib[i][j].albedo[m];
@@ -1118,6 +1112,17 @@ vic_init(void)
                         options.FCAN_SRC == FROM_VEGPARAM) {
                         veg_con[i][k].fcanopy[m] = veg_lib[i][j].fcanopy[m];
                     }
+                    if (options.LAI_SRC == FROM_VEGLIB ||
+                        options.LAI_SRC == FROM_VEGPARAM) {
+                        veg_con[i][k].LAI[m] = veg_lib[i][j].LAI[m];
+                        veg_con[i][k].Wdmax[m] = param.VEG_LAI_WATER_FACTOR *
+                                                 veg_con[i][k].LAI[m];
+                    }
+                    // displacement and roughness are the same in veg_lib
+                    // and veg_con
+                    veg_con[i][k].displacement[m] =
+                        veg_lib[i][j].displacement[m];
+                    veg_con[i][k].roughness[m] = veg_lib[i][j].roughness[m];
                 }
                 k++;
             }

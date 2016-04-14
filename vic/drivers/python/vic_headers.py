@@ -408,11 +408,12 @@ typedef struct {
     size_t nrecs;
     unsigned short int skipyear;
     unsigned short int startday;
-    unsigned int startsec;
     unsigned short int startmonth;
+    unsigned int startsec;
     unsigned short int startyear;
     unsigned short int stateday;
     unsigned short int statemonth;
+    unsigned int statesec;
     unsigned short int stateyear;
     unsigned short int calendar;
     unsigned short int time_units;

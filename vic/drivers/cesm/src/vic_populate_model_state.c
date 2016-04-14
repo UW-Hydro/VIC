@@ -33,6 +33,7 @@ void
 vic_populate_model_state(char *runtype_str)
 {
     extern all_vars_struct *all_vars;
+    extern lake_con_struct *lake_con;
     extern domain_struct    local_domain;
     extern option_struct    options;
     extern soil_con_struct *soil_con;
@@ -40,18 +41,12 @@ vic_populate_model_state(char *runtype_str)
     extern filenames_struct filenames;
 
 
-    double                  surf_temp;
     size_t                  i;
-    size_t                  nveg;
     unsigned short int      runtype;
 
-    debug("In vic_restore");
+    debug("In vic_populate_model_state");
 
     runtype = start_type_from_char(runtype_str);
-
-    // read first forcing timestep (used in restoring model state)
-    // reset the forcing offset to what it was before
-    vic_force();
 
     // read the model state from the netcdf file if there is one
     if (runtype == CESM_RUNTYPE_RESTART || runtype == CESM_RUNTYPE_BRANCH) {
@@ -64,11 +59,20 @@ vic_populate_model_state(char *runtype_str)
     else if (runtype == CESM_RUNTYPE_CLEANSTART) {
         // run type is clean start
         for (i = 0; i < local_domain.ncells_active; i++) {
-            // TBD: do something sensible for surf_temp
-            surf_temp = 0.;
-            nveg = veg_con[i][0].vegetat_type_num;
-            initialize_model_state(&(all_vars[i]), nveg, options.Nnode,
-                                   surf_temp, &(soil_con[i]), veg_con[i]);
+            generate_default_state(&(all_vars[i]), &(soil_con[i]), veg_con[i]);
+            if (options.LAKES) {
+                generate_default_lake_state(&(all_vars[i]), &(soil_con[i]),
+                                            lake_con[i]);
+            }
+        }
+    }
+
+    // compute those state variables that are derived from the others
+    for (i = 0; i < local_domain.ncells_active; i++) {
+        compute_derived_state_vars(&(all_vars[i]), &(soil_con[i]), veg_con[i]);
+        if (options.LAKES) {
+            compute_derived_lake_dimensions(&(all_vars[i].lake_var),
+                                            lake_con[i]);
         }
     }
 }

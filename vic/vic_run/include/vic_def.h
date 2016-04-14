@@ -361,14 +361,15 @@ typedef struct {
     unsigned short int skipyear;  /**< Number of years to skip before writing
                                       output data */
     unsigned short int startday;  /**< Starting day of the simulation */
+    unsigned short int startmonth;  /**< Starting month of the simulation */
     unsigned int startsec;          /**< Seconds since midnight when simulation
                                        will start */
-    unsigned short int startmonth;  /**< Starting month of the simulation */
     unsigned short int startyear;  /**< Starting year of the simulation */
     unsigned short int stateday;   /**< Day of the simulation at which to save
                                       model state */
     unsigned short int statemonth;  /**< Month of the simulation at which to save
                                        model state */
+    unsigned int statesec;          /**< Seconds since midnight at which to save state */
     unsigned short int stateyear;  /**< Year of the simulation at which to save
                                       model state */
     unsigned short int calendar;  /**< Date/time calendar */

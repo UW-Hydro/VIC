@@ -417,6 +417,7 @@ display_current_settings(int mode)
         fprintf(LOG_DEST, "STATEYEAR\t\t%d\n", global_param.stateyear);
         fprintf(LOG_DEST, "STATEMONTH\t\t%d\n", global_param.statemonth);
         fprintf(LOG_DEST, "STATEDAY\t\t%d\n", global_param.stateday);
+        fprintf(LOG_DEST, "STATESEC\t\t%u\n", global_param.statesec);
         if (options.STATE_FORMAT == BINARY) {
             fprintf(LOG_DEST, "STATE_FORMAT\tBINARY\n");
         }

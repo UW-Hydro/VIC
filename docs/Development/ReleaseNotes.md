@@ -18,52 +18,63 @@ Type `vicNl -v` or for VIC 5 and later, `vic_{driver}.exe -v`.
 
 **Release date: (Unreleased)**
 
-This is a major update from VIC 4. The VIC 5.0.0 release aims to have nearly identical physics as VIC 4.2 while providing a clean, refactored code base supporting multiple drivers. There are a number of backward incompatible changes. See the VIC Github page for more details on the changes included in this release.
+This is a major update from VIC 4. The VIC 5.0.0 release aims to have nearly identical physics as VIC 4.2 while providing a clean, refactored code base supporting multiple drivers. There are a number of new features, bug fixes, and backward incompatible changes. See the VIC Github page for more details on the changes included in this release.
 
 #### New Features:
 
-1. "vic_run"
+1. "vic_run" ([GH#7](https://github.com/UW-Hydro/VIC/issues/7))
 
 	Although the physics and model behavior of VIC 5.0.0 should be nearly identical to VIC 4.2, the source code has undergone a major cleanup and reorganization. We have separated the physical core ("vic_run") from the driver source code. This work has improved the extensibility and readability of the model.
 
-2. Classic Driver
+2. Classic Driver ([GH#7](https://github.com/UW-Hydro/VIC/issues/7))
 
-	The Classic Driver provides similar functionality as VIC 4, including ASCII and binary I/O, and a time-before-space evaluation loop order. The classic driver is maintained for two main reasons: 1) to provide some level of backward compatibility for existing VIC users that wish to continue using VIC using a traditional approach, and 2) to allow VIC to be run at individual grid cells, without requiring the infrastructure needed by the Image Driver. Classic Driver specific documentation can be found here.
+	The Classic Driver provides similar functionality as VIC 4, including ASCII and binary I/O, and a time-before-space evaluation loop order. The Classic Driver is maintained for two main reasons:
 
-3. Image Driver
+		1. to provide some level of backward compatibility for existing VIC users that wish to continue using VIC using a traditional approach, and,
+		2. to allow VIC to be run at individual grid cells, without requiring the infrastructure needed by the Image Driver. Classic Driver specific documentation can be found [here](http://vic.readthedocs.org/en/develop/Documentation/Drivers/Classic/ClassicDriver/).
 
-	The Image Driver adds a number of features to the user interface of the VIC model. Most notably, it uses a space-before-time evaluation loop order, netCDF I/O, and parallelization using Open-MPI.  Image Driver specific documentation can be found here.
+3. Image Driver ([GH#7](https://github.com/UW-Hydro/VIC/issues/7))
+
+	The Image Driver adds a number of features to the user interface of the VIC model. Most notably, it uses a space-before-time evaluation loop order, netCDF I/O, and parallelization using MPI.  Image Driver specific documentation can be found [here](http://vic.readthedocs.org/en/develop/Documentation/Drivers/Image/ImageDriver/).
 
 4. Constants File ([GH#192](https://github.com/UW-Hydro/VIC/pull/173))
 
-	Earlier versions of VIC included many hard-coded parameters and constants.  We have consolidated these constants into a single structure and developed a input file that allows users to modify parameters at run-time.  See here for more information.
+	Earlier versions of VIC included many hard-coded parameters and constants.  We have consolidated these constants into a single structure and developed a input file that allows users to modify parameters at run-time.  See [here](http://vic.readthedocs.org/en/develop/Documentation/Constants/) for more information.
 
 5. Logging ([GH#173](https://github.com/UW-Hydro/VIC/pull/173))
 
-	A set of logging Macros have been added to all drivers and `vic_run`. The logging level can be set in the driver `Makefile` via the `LOG_LVL` variable. The logging Macros provide the filename and line number in the source code to aid in debugging.  Additionally, when compiler support is available, a traceback is printed when VIC exits during runtime.  
+	A set of logging Macros have been added to all drivers and `vic_run`. The logging level can be set in the driver `Makefile` via the `LOG_LVL` variable. The logging Macros provide the filename and line number in the source code to aid in debugging.  Additionally, when compiler support is available, a traceback is printed when VIC exits during runtime. When the `LOG_DIR` variable is provided in the global parameter file, VIC will write its log(s) to log files instead of printing to stdout.
 
 6. Sub-hourly Timestep ([GH#188](https://github.com/UW-Hydro/VIC/pull/188))
 
-	Previous versions of VIC were limited to a minimum timestep of one hour.  The units of the VIC timestep have been changed from hours to seconds and the minimum timestep is now one second. If you intend on running VIC at a timestep less that one hour, we suggest significant testing.
+	Previous versions of VIC were limited to a minimum timestep of one hour. The units of the VIC timestep have been changed from hours to seconds and the minimum timestep is now one second. If you intend on running VIC at a timestep less that one hour, we suggest significant testing.
 
 7. Calendar Support ([GH#188](https://github.com/UW-Hydro/VIC/pull/188))
 
-	Earlier versions of VIC used the standard Gregorian calendar.  Because many modern climate models use non-standard calendars, we have implemented all [CF compliant calendars](http://www.cgd.ucar.edu/cms/eaton/netcdf/CF-20010629.htm#cal). The standard calendar remains the VIC default.  See the documentation for individual drivers for how to set the calendar option.
+	Earlier versions of VIC used the standard Gregorian calendar.  Because many modern climate models use non-standard calendars, we have implemented all [CF compliant calendars](http://www.cgd.ucar.edu/cms/eaton/netcdf/CF-20010629.htm#cal). The standard Gregorian calendar remains the VIC default. See the documentation for individual drivers for how to set the calendar option (e.g. [classic](http://vic.readthedocs.org/en/develop/Documentation/Drivers/Classic/GlobalParam/#main-simulation-parameters)).
 
-8. Sample Datasets
+8. Sample Datasets ([GH#387](https://github.com/UW-Hydro/VIC/pull/387))
 
-9. Tests Datasets
+	The [VIC_sample_data](https://github.com/UW-hydro/VIC_sample_data) repository contains the necessary input datasets (forcings and parameters) to run short simulations of the VIC model for both the classic and image driver.
+
+9. Tests Datasets ([GH#79](https://github.com/UW-Hydro/VIC/issues/79))
+
+	**TODO:** See https://github.com/UW-Hydro/VIC/issues/79 for more information.
+
+10. Testing and Continuous Integration ([GH#190](https://github.com/UW-Hydro/VIC/pull/190))
+
+	A comprehensive testing platform has been implemented and is available for public use along with the VIC model. A small subset of the test platform is run on [Travis-CI](https://travis-ci.org/UW-Hydro/VIC), which facilitates for continuous integration of the VIC test platform. More information on the test platform is [here](http://vic.readthedocs.org/en/develop/Development/Testing/)
 
 #### Backwards Incompatible Changes:
 
-1.  Classic Driver I/O Formatting ([GH#227](https://github.com/UW-Hydro/VIC/pull/227) and ?)
+1.  Classic Driver I/O Formatting ([GH#18](https://github.com/UW-Hydro/VIC/issues/18), [GH#204](https://github.com/UW-Hydro/VIC/issues/204), [GH#227], ](https://github.com/UW-Hydro/VIC/pull/227))
 
 	The format of ASCII forcing and output files has changed in VIC 5. These changes were motivated by the desire to improve simulation metadata tracking and reproducibility of VIC simulations.
 
 	- Forcing files now require date stamps for each timestep and a header specifies the names of the forcing variables.   
 	- Output files now include a header with simulation metadata and variable names. The `PRT_HEADER` option has been deprecated.
 
-2.  Classic Driver Global Parameter Options:
+2.  Classic Driver Global Parameter Options
 
 	A number of global parameter options have changed for the Classic Driver, relative to VIC 4.
 
@@ -74,28 +85,34 @@ This is a major update from VIC 4. The VIC 5.0.0 release aims to have nearly ide
 	- `BINARY_STATE_FILE` (TRUE or FALSE) has been changed to `STATE_FORMAT` (BINARY or ASCII)
 	- `BINARY_OUTPUT` (TRUE or FALSE) has been changed to `OUT_FORMAT` (BINARY or ASCII)
 
-3.  Classic Driver Output Variables ([GH#352](https://github.com/UW-Hydro/VIC/pull/352))
+3.  State files now include seconds ([GH#464] (https://github.com/UW-Hydro/VIC/pull/464))
+
+	- There is a new global parameter option, `STATESEC`.  This specifies the time step at the end of which state will be saved, in units of seconds.  In other words, if you have an hourly time step (3600 sec) and you want to save state at the end of the final time step of the day (which is 86400 seconds long), subtract 3600 from 86400 to get a STATESEC of 82800.  This corresponds to the first second of the final time step.  State will be saved at the end of that time step.  
+	- When the state save date is appended to state filenames, STATESEC will be included so that the date will have the format YYYYMMDD_SSSSS.
+
+4.  Classic Driver Output Variables ([GH#352](https://github.com/UW-Hydro/VIC/pull/352))
 
 	Computation of potential evapotranspiration (PET) has been simplified, reducing the number of output variables from 6 to 1.  The following output variables have been removed:
 
-    - `OUT_PET_SATSOIL` (potential evap from saturated bare soil)
-    - `OUT_PET_H2OSURF` (potential evap from open water)
-    - `OUT_PET_SHORT` (potential evap (transpiration only) from short reference crop (grass))
-    - `OUT_PET_TALL` (potential evap (transpiration only) from tall reference crop (alfalfa))
-    - `OUT_PET_NATVEG` (potential evap (transpiration only) from current vegetation and current canopy resistance)
-    - `OUT_PET_VEGNOCR` (potential evap (transpiration only) from current vegetation and 0 canopy resistance)
+    - `OUT_PET_SATSOIL` (potential evapotranspiration from saturated bare soil)
+    - `OUT_PET_H2OSURF` (potential evapotranspiration from open water)
+    - `OUT_PET_SHORT` (potential evapotranspiration (transpiration only) from short reference crop (grass))
+    - `OUT_PET_TALL` (potential evapotranspiration (transpiration only) from tall reference crop (alfalfa))
+    - `OUT_PET_NATVEG` (potential evapotranspiration (transpiration only) from current vegetation and current canopy resistance)
+    - `OUT_PET_VEGNOCR` (potential evapotranspiration (transpiration only) from current vegetation and 0 canopy resistance)
 
     These have been replaced by:
 
-    - `OUT_PET` (potential evapotranspiration, which = area-weighted sum of potential transpiration and potential soil evaporation; potential transpiration is computed using the Penman-Monteith eqn with architectural resistance and LAI of the current veg cover)
+    - `OUT_PET` (potential evapotranspiration, which = area-weighted sum of potential transpiration and potential soil evaporation; potential transpiration is computed using the Penman-Monteith equation with architectural resistance and LAI of the current veg cover)
 
 #### Deprecated Features:
 
 1.  Removed unused global parameter option `MEASURE_H` ([GH#284](https://github.com/UW-Hydro/VIC/pull/284).)
 2.  Removed MTCLIM ([GH#288](https://github.com/UW-Hydro/VIC/pull/288)).
 
-	Previous versions of VIC used MTCLIM to generate missing forcing variables required to run VIC.  This led to confusion by many users and considerably more complex code in the Classic Driver. VIC forcings are now required to be provided at the same time frequency as the model will be run at (`SNOW_STEPS_PER_DAY` or `MODEL_STEPS_PER_DAY`).
-	The following options have been removed from the Classic Driver:
+	Previous versions of VIC used MTCLIM to generate missing forcing variables required to run VIC. This led to confusion by many users and considerably more complex code in the Classic Driver. VIC forcings are now required to be provided at the same time frequency as the model will be run at (`SNOW_STEPS_PER_DAY`).
+
+	As part of this change, the following options have been removed from the Classic Driver:
 
 	- `LW_TYPE`
 	- `LW_CLOUD`
@@ -104,39 +121,39 @@ This is a major update from VIC 4. The VIC 5.0.0 release aims to have nearly ide
 	- `VP_ITER`
 	- `OUTPUT_FORCE`
 
-	The following output variables have been removed from the Classic Driver:
+	As part of this change, the following output variables have been removed from the Classic Driver:
 
 	- `OUT_COSZEN`
 	- `OUT_TSKC`
 
-	We are providing a stand-alone version of MTCLIM that produces subdaily VIC meteorological forcings.  That tool is available [here](http://mtclim.readthedocs.org).
+	In the future, we would like to provide a stand-alone version of MTCLIM that produces subdaily meteorological forcings. We are looking for community support for this feature ([GH#17](https://github.com/UW-Hydro/VIC/issues/17)).
+
 3. Removed `LONGWAVE` and `SHORTWAVE` forcing types ([GH#379](https://github.com/UW-Hydro/VIC/pull/379)).
 
 	Previous versions of VIC allowed users to specify either `LONGWAVE` or `LWDOWN` to denote the incoming longwave radiation flux and `SHORTWAVE` or `SWDOWN` to denote the incoming shorwave radiation flux. We have removed these duplicate options, standardizing on the more descriptive `LWDOWN` and `SWDOWN`.
 
 	Similarly, output variables `OUT_NET_LONG` and `OUT_NET_SHORT` have been replaced with `OUT_LWNET` and `OUT_SWNET`, respectively.
 
-4.  Changed the name of the variable VEGCOVER to FCANOPY, since this more accurately captures the meaning of the term (i.e., the fractional area of the plant canopy within the veg tile).  Similarly changed OUT_VEGCOVER to OUT_FCANOPY.
+4.  Changed the name of the variable `VEGCOVER` to `FCANOPY`, since this more accurately captures the meaning of the term (i.e., the fractional area of the plant canopy within the veg tile). Similarly changed `OUT_VEGCOVER` to `OUT_FCANOPY`.
 
     Similarly, changed the names of the following global parameter file options:
-        - VEGLIB_VEGCOVER
-        - VEGPARAM_VEGCOVER
-        - VEGCOVER_SRC
+        - `VEGLIB_VEGCOVER`
+        - `VEGPARAM_VEGCOVER`
+        - `VEGCOVER_SRC`
     to:
-        - VEGLIB_FCAN
-        - VEGPARAM_FCAN
-        - FCAN_SRC
+        - `VEGLIB_FCAN`
+        - `VEGPARAM_FCAN`
+        - `FCAN_SRC`
 
 #### Bug Fixes:
 
-1. Miscellaneous fixes to lake module
+1. Miscellaneous fixes to lake module ([GH#425](https://github.com/UW-Hydro/VIC/pull/425))
 
 	Several lake processes (aerodynamic resistance, albedo, latent/sensible heat fluxes, net radiation, etc) were reported incorrectly or not at all in output files. This has been fixed. In addition, in the absence of an initial state file, lake temperatures were initialized to unrealistic temperatures (the air temperature of the first simulation time step). To fix this, we now initialize the lake temperature to annual average soil temperature.
 
-2. Fix for computation of soil layer temperatures when soil thermal nodes do not reach the bottom of the soil column.
+2. Fix for computation of soil layer temperatures when soil thermal nodes do not reach the bottom of the soil column. ([GH#467](https://github.com/UW-Hydro/VIC/pull/467))
 
-	Previously, if the soil thermal damping depth was shallower than the bottom of the deepest soil layer, and FROZEN_SOIL was TRUE, VIC would abort when estimating layer ice contents because it could not estimate a layer temperature if the thermal nodes did not completely span the layer.  Now, a layer temperature is estimated even when thermal nodes do not completely span the layer, and the error no longer occurs.
-
+	Previously, if the soil thermal damping depth was shallower than the bottom of the deepest soil layer, and `FROZEN_SOIL==TRUE`, VIC would abort when estimating layer ice contents because it could not estimate a layer temperature if the thermal nodes did not completely span the layer.  Now, a layer temperature is estimated even when thermal nodes do not completely span the layer, and the error no longer occurs.
 
 ------------------------------
 

@@ -205,31 +205,8 @@ main(int   argc,
                Initialize Energy Balance and Snow Variables
             **************************************************/
 
-            ErrorFlag = initialize_model_state(&all_vars, &global_param,
-                                               filep, soil_con.gridcel,
-                                               veg_con[0].vegetat_type_num,
-                                               options.Nnode,
-                                               atmos[0].air_temp[NR],
-                                               &soil_con, veg_con,
-                                               lake_con);
-            if (ErrorFlag == ERROR) {
-                if (options.CONTINUEONERROR) {
-                    // Handle grid cell solution error
-                    log_warn("ERROR: Grid cell %i failed in record %zu so "
-                             "the simulation has not finished.  An "
-                             "incomplete output file has been generated, "
-                             "check your inputs before rerunning the "
-                             "simulation.\n", soil_con.gridcel, rec);
-                    break;
-                }
-                else {
-                    // Else exit program on cell solution error as in previous versions
-                    log_err("ERROR: Grid cell %i failed in record %zu so "
-                            "the simulation has ended. Check your inputs "
-                            "before rerunning the simulation.\n",
-                            soil_con.gridcel, rec);
-                }
-            }
+            vic_populate_model_state(&all_vars, filep, soil_con.gridcel,
+                                     &soil_con, veg_con, lake_con);
 
             /** Update Error Handling Structure **/
             Error.filep = filep;
@@ -285,11 +262,7 @@ main(int   argc,
                    (after the final time step of the assigned date)
                 ************************************/
                 if (filep.statefile != NULL &&
-                    (dmy[rec].year == global_param.stateyear &&
-                     dmy[rec].month == global_param.statemonth &&
-                     dmy[rec].day == global_param.stateday &&
-                     (rec + 1 == global_param.nrecs ||
-                      dmy[rec + 1].day != global_param.stateday))) {
+                    check_save_state_flag(dmy, rec)) {
                     write_model_state(&all_vars, veg_con->vegetat_type_num,
                                       soil_con.gridcel, &filep, &soil_con);
                 }

@@ -36,12 +36,20 @@ alloc_veg_hist(veg_hist_struct *veg_hist)
     if (veg_hist->albedo == NULL) {
         log_err("Memory allocation error in alloc_veg_hist().");
     }
-    veg_hist->LAI = calloc(NR + 1, sizeof(*(veg_hist->LAI)));
-    if (veg_hist->LAI == NULL) {
+    veg_hist->displacement = calloc(NR + 1, sizeof(*(veg_hist->displacement)));
+    if (veg_hist->displacement == NULL) {
         log_err("Memory allocation error in alloc_veg_hist().");
     }
     veg_hist->fcanopy = calloc(NR + 1, sizeof(*(veg_hist->fcanopy)));
     if (veg_hist->fcanopy == NULL) {
+        log_err("Memory allocation error in alloc_veg_hist().");
+    }
+    veg_hist->LAI = calloc(NR + 1, sizeof(*(veg_hist->LAI)));
+    if (veg_hist->LAI == NULL) {
+        log_err("Memory allocation error in alloc_veg_hist().");
+    }
+    veg_hist->roughness = calloc(NR + 1, sizeof(*(veg_hist->roughness)));
+    if (veg_hist->roughness == NULL) {
         log_err("Memory allocation error in alloc_veg_hist().");
     }
 }
@@ -57,6 +65,8 @@ free_veg_hist(veg_hist_struct *veg_hist)
     }
 
     free(veg_hist->albedo);
-    free(veg_hist->LAI);
+    free(veg_hist->displacement);
     free(veg_hist->fcanopy);
+    free(veg_hist->LAI);
+    free(veg_hist->roughness);
 }

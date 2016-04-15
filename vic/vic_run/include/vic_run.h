@@ -57,8 +57,7 @@ double calc_outgoing_longwave(double temp, double emis);
 double calc_scale_height(double tair, double elevation);
 double calc_sensible_heat(double atmos_density, double t1, double t0,
                           double Ra);
-void calc_Nscale_factors(bool, double *, double, double, double, double,
-                         unsigned short int, double *);
+void calc_Nscale_factors(bool, double *, double, double, double *);
 double calc_rainonly(double, double, double, double);
 double calc_rc(double, double, double, double, double, double, double, char);
 void calc_rc_ps(char, double, double, double, double *, double, double,

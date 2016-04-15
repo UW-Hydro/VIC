@@ -43,6 +43,7 @@ vic_force(void)
     extern filenames_struct    filenames;
     extern global_param_struct global_param;
     extern option_struct       options;
+    extern soil_con_struct    *soil_con;
     extern veg_con_map_struct *veg_con_map;
     extern veg_hist_struct   **veg_hist;
     extern veg_lib_struct    **veg_lib;
@@ -167,6 +168,17 @@ vic_force(void)
                 atmos[i].Catm[j] = 1e6 * x2l_vic[i].x2l_Sa_co2prog;
             }
         }
+
+        // Cosine of solar zenith angle
+        for (j = 0; j < NF; j++) {
+            for (i = 0; i < local_domain.ncells_active; i++) {
+                atmos[i].coszen[j] = compute_coszen(
+                    local_domain.locations[i].latitude,
+                    local_domain.locations[i].longitude,
+                    soil_con[i].time_zone_lng, dmy_current.day_in_year,
+                    dmy_current.dayseconds);
+            }
+        }
     }
 
     if (options.LAKES) {
@@ -233,10 +245,13 @@ vic_force(void)
             atmos[i].Catm[NR] = average(atmos[i].Catm, NF);
             atmos[i].fdir[NR] = average(atmos[i].fdir, NF);
             atmos[i].par[NR] = average(atmos[i].par, NF);
+            // for coszen, use value at noon
+            atmos[i].coszen[NR] = compute_coszen(
+                local_domain.locations[i].latitude,
+                local_domain.locations[i].longitude, soil_con[i].time_zone_lng,
+                dmy_current.day_in_year, SEC_PER_DAY / 2);
         }
     }
-
-    // TBD: coszen (used for some of the carbon functions)
 
     // Update the veg_hist structure with the current vegetation parameters.
     // Currently only implemented for climatological values in image mode
@@ -247,18 +262,26 @@ vic_force(void)
                 for (j = 0; j < NF; j++) {
                     veg_hist[i][vidx].albedo[j] =
                         veg_lib[i][v].albedo[dmy_current.month - 1];
-                    veg_hist[i][vidx].LAI[j] =
-                        veg_lib[i][v].LAI[dmy_current.month - 1];
+                    veg_hist[i][vidx].displacement[j] =
+                        veg_lib[i][v].displacement[dmy_current.month - 1];
                     veg_hist[i][vidx].fcanopy[j] =
                         veg_lib[i][v].fcanopy[dmy_current.month - 1];
+                    veg_hist[i][vidx].LAI[j] =
+                        veg_lib[i][v].LAI[dmy_current.month - 1];
+                    veg_hist[i][vidx].roughness[j] =
+                        veg_lib[i][v].roughness[dmy_current.month - 1];
                 }
                 // not the correct way to calculate average albedo, but leave
                 // for now
                 veg_hist[i][vidx].albedo[NR] = average(veg_hist[i][vidx].albedo,
                                                        NF);
-                veg_hist[i][vidx].LAI[NR] = average(veg_hist[i][vidx].LAI, NF);
+                veg_hist[i][vidx].displacement[NR] = average(
+                    veg_hist[i][vidx].displacement, NF);
                 veg_hist[i][vidx].fcanopy[NR] = average(
                     veg_hist[i][vidx].fcanopy, NF);
+                veg_hist[i][vidx].LAI[NR] = average(veg_hist[i][vidx].LAI, NF);
+                veg_hist[i][vidx].roughness[NR] = average(
+                    veg_hist[i][vidx].roughness, NF);
             }
         }
     }

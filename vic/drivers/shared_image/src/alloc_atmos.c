@@ -85,6 +85,10 @@ alloc_atmos(atmos_data_struct *atmos)
         if (atmos->Catm == NULL) {
             log_err("Memory allocation error in alloc_atmos().");
         }
+        atmos->coszen = calloc(NR + 1, sizeof(*(atmos->coszen)));
+        if (atmos->coszen == NULL) {
+            log_err("Memory allocation error in alloc_atmos().");
+        }
         atmos->fdir = calloc(NR + 1, sizeof(*(atmos->fdir)));
         if (atmos->fdir == NULL) {
             log_err("Memory allocation error in alloc_atmos().");
@@ -121,6 +125,7 @@ free_atmos(atmos_data_struct *atmos)
     }
     if (options.CARBON) {
         free(atmos->Catm);
+        free(atmos->coszen);
         free(atmos->fdir);
         free(atmos->par);
     }

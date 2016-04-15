@@ -1182,51 +1182,58 @@ print_veg_var(veg_var_struct *vvar,
     // Print state variables
     fprintf(LOG_DEST, "veg_var - states:\n");
     fprintf(LOG_DEST, "\talbedo   : %f\n", vvar->albedo);
-    fprintf(LOG_DEST, "\tLAI   : %f\n", vvar->LAI);
+    fprintf(LOG_DEST, "\tdisplacement : %f\n", vvar->displacement);
     fprintf(LOG_DEST, "\tfcanopy   : %f\n", vvar->fcanopy);
+    fprintf(LOG_DEST, "\tLAI   : %f\n", vvar->LAI);
+    fprintf(LOG_DEST, "\troughness   : %f\n", vvar->roughness);
     fprintf(LOG_DEST, "\tWdew         : %f\n", vvar->Wdew);
     fprintf(LOG_DEST, "\tWdmax         : %f\n", vvar->Wdmax);
-    fprintf(LOG_DEST, "\tCi           : %f\n", vvar->Ci);
-    fprintf(LOG_DEST, "\trc           : %f\n", vvar->rc);
-    fprintf(LOG_DEST, "\tNPPfactor    : %f\n", vvar->NPPfactor);
-    fprintf(LOG_DEST, "\tAnnualNPP    : %f\n", vvar->AnnualNPP);
-    fprintf(LOG_DEST, "\tAnnualNPPPrev: %f\n", vvar->AnnualNPPPrev);
-    if (options.CARBON) {
-        fprintf(LOG_DEST, "\tNscaleFactor :");
-        for (i = 0; i < ncanopy; i++) {
-            fprintf(LOG_DEST, "\t%f", vvar->NscaleFactor[i]);
-        }
-        fprintf(LOG_DEST, "\n");
-        fprintf(LOG_DEST, "\tCiLayer      :");
-        for (i = 0; i < ncanopy; i++) {
-            fprintf(LOG_DEST, "\t%f", vvar->CiLayer[i]);
-        }
-        fprintf(LOG_DEST, "\n");
-        fprintf(LOG_DEST, "\trsLayer      :");
-        for (i = 0; i < ncanopy; i++) {
-            fprintf(LOG_DEST, "\t%f", vvar->rsLayer[i]);
-        }
-        fprintf(LOG_DEST, "\n");
-    }
 
     // Print fluxes
     fprintf(LOG_DEST, "veg_var - fluxes:\n");
     fprintf(LOG_DEST, "\tcanopyevap   : %f\n", vvar->canopyevap);
     fprintf(LOG_DEST, "\tthroughfall  : %f\n", vvar->throughfall);
-    fprintf(LOG_DEST, "\taPARLayer    :");
-    fprintf(LOG_DEST, "\taPAR         : %f\n", vvar->aPAR);
-    fprintf(LOG_DEST, "\tGPP          : %f\n", vvar->GPP);
-    fprintf(LOG_DEST, "\tRphoto       : %f\n", vvar->Rphoto);
-    fprintf(LOG_DEST, "\tRdark        : %f\n", vvar->Rdark);
-    fprintf(LOG_DEST, "\tRmaint       : %f\n", vvar->Rmaint);
-    fprintf(LOG_DEST, "\tRgrowth      : %f\n", vvar->Rgrowth);
-    fprintf(LOG_DEST, "\tRaut         : %f\n", vvar->Raut);
-    fprintf(LOG_DEST, "\tNPP          : %f\n", vvar->NPP);
-    fprintf(LOG_DEST, "\tLitterfall   : %f\n", vvar->Litterfall);
+
     if (options.CARBON) {
+        // Carbon terms - states
+        fprintf(LOG_DEST, "\tAnnualNPP    : %f\n", vvar->AnnualNPP);
+        fprintf(LOG_DEST, "\tAnnualNPPPrev: %f\n", vvar->AnnualNPPPrev);
+        fprintf(LOG_DEST, "\tCi           : %f\n", vvar->Ci);
+        fprintf(LOG_DEST, "\tCiLayer      :");
+        for (i = 0; i < ncanopy; i++) {
+            fprintf(LOG_DEST, "\t%f", vvar->CiLayer[i]);
+        }
+        fprintf(LOG_DEST, "\n");
+        fprintf(LOG_DEST, "\tNPPfactor    : %f\n", vvar->NPPfactor);
+        fprintf(LOG_DEST, "\tNscaleFactor :");
+        for (i = 0; i < ncanopy; i++) {
+            fprintf(LOG_DEST, "\t%f", vvar->NscaleFactor[i]);
+        }
+        fprintf(LOG_DEST, "\n");
+        fprintf(LOG_DEST, "\trc           : %f\n", vvar->rc);
+        fprintf(LOG_DEST, "\trsLayer      :");
+        for (i = 0; i < ncanopy; i++) {
+            fprintf(LOG_DEST, "\t%f", vvar->rsLayer[i]);
+        }
+        fprintf(LOG_DEST, "\n");
+        // Carbon terms - fluxes
+        fprintf(LOG_DEST, "\taPAR         : %f\n", vvar->aPAR);
+        fprintf(LOG_DEST, "\taPARLayer    :");
         for (i = 0; i < ncanopy; i++) {
             fprintf(LOG_DEST, "\t%f", vvar->aPARLayer[i]);
         }
         fprintf(LOG_DEST, "\n");
+        fprintf(LOG_DEST, "\tGPP          : %f\n", vvar->GPP);
+        fprintf(LOG_DEST, "\tLitterfall   : %f\n", vvar->Litterfall);
+        for (i = 0; i < ncanopy; i++) {
+            fprintf(LOG_DEST, "\t%f", vvar->aPARLayer[i]);
+        }
+        fprintf(LOG_DEST, "\n");
+        fprintf(LOG_DEST, "\tNPP          : %f\n", vvar->NPP);
+        fprintf(LOG_DEST, "\tRaut         : %f\n", vvar->Raut);
+        fprintf(LOG_DEST, "\tRdark        : %f\n", vvar->Rdark);
+        fprintf(LOG_DEST, "\tRgrowth      : %f\n", vvar->Rgrowth);
+        fprintf(LOG_DEST, "\tRmaint       : %f\n", vvar->Rmaint);
+        fprintf(LOG_DEST, "\tRphoto       : %f\n", vvar->Rphoto);
     }
 }

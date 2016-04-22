@@ -73,16 +73,6 @@ initialize_soil(cell_data_struct **cell,
             cell[veg][band].RhInter = dummy_double;
             cell[veg][band].RhSlow = dummy_double;
             cell[veg][band].RhTot = dummy_double;
-
-            /* These seem to already be calculated in compute_derived_state_vars.c
-            for (lindex = 0; lindex < options.Nlayer; lindex++) {
-                tmp_moist[lindex] = cell[veg][band].layer[lindex].moist;
-            }
-            compute_runoff_and_asat(soil_con, tmp_moist, 0,
-                                    &(cell[veg][band].asat), &tmp_runoff);
-            wrap_compute_zwt(soil_con, &(cell[veg][band]));
-            */
-
         }
     }
 }

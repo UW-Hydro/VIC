@@ -57,8 +57,7 @@ double calc_outgoing_longwave(double temp, double emis);
 double calc_scale_height(double tair, double elevation);
 double calc_sensible_heat(double atmos_density, double t1, double t0,
                           double Ra);
-void calc_Nscale_factors(bool, double *, double, double, double, double,
-                         unsigned short int, double *);
+void calc_Nscale_factors(bool, double *, double, double, double *);
 double calc_rainonly(double, double, double, double);
 double calc_rc(double, double, double, double, double, double, double, char);
 void calc_rc_ps(char, double, double, double, double *, double, double,
@@ -108,6 +107,7 @@ double canopy_evap(layer_data_struct *, veg_var_struct *, bool,
 void colavg(double *, double *, double *, double, double *, int, double,
             double);
 double compute_coszen(double, double, double, unsigned short int, unsigned int);
+void compute_derived_lake_dimensions(lake_var_struct *, lake_con_struct);
 void compute_pot_evap(size_t, double, double, double, double, double, double,
                       double, double, double, double *, char, double, double,
                       double, double *);
@@ -182,8 +182,8 @@ double IceEnergyBalance(double, va_list);
 void iceform(double *, double *, double, double, double *, int, double, double,
              double, double *, double *, double *, double *, double);
 void icerad(double, double, double, double *, double *, double *);
-int initialize_lake(lake_var_struct *, lake_con_struct, soil_con_struct *,
-                    cell_data_struct *, int);
+void initialize_lake(lake_var_struct *, lake_con_struct, soil_con_struct *,
+                     cell_data_struct *, bool);
 int lakeice(double, double, double, double, double, double *, double, double *,
             double *, double, double);
 void latent_heat_from_snow(double, double, double, double, double, double,

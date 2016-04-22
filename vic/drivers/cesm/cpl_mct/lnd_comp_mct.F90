@@ -260,7 +260,7 @@ CONTAINS
     !   gsize = global size of grid (nx_global * ny_global)
     !   mpicom_lnd and LNDID from cdata above
     ! outputs are gsmap_lnd
-    lsize = local_domain%ncells
+    lsize = local_domain%ncells_active
     gsize = nx_global * ny_global
 
     ! allocate domain arrays
@@ -277,8 +277,8 @@ CONTAINS
     CALL mct_gsMap_init(gsMap_lnd, gindex, mpicom_lnd, LNDID, lsize, gsize)
 
     !-- setup mappings for l2x and x2l structures
-    CALL c_f_pointer(l2x_vic, l2x_vic_ptr, [local_domain%ncells])
-    CALL c_f_pointer(x2l_vic, x2l_vic_ptr, [local_domain%ncells])
+    CALL c_f_pointer(l2x_vic, l2x_vic_ptr, [local_domain%ncells_active])
+    CALL c_f_pointer(x2l_vic, x2l_vic_ptr, [local_domain%ncells_active])
 
     !--- initialize the dom, data in the dom is just local data of size lsize
     CALL mct_gGrid_init(GGrid=dom_lnd, CoordChars=TRIM(seq_flds_dom_coord), &
@@ -710,10 +710,10 @@ CONTAINS
     CHARACTER(len=*), PARAMETER :: subname = '(unpack_vic_domain)'
 
     !--- Associate locations pointer in local_domain structure
-    CALL c_f_pointer(local_domain%locations, locations, [local_domain%ncells])
+    CALL c_f_pointer(local_domain%locations, locations, [local_domain%ncells_active])
 
     !--- Get domain information for each cell in local domain
-    DO i = 1, local_domain%ncells
+    DO i = 1, local_domain%ncells_active
        gindex(i) = locations(i)%io_idx + 1
        lon_data(i) = locations(i)%longitude
        lat_data(i) = locations(i)%latitude

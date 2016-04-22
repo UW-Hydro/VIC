@@ -1,7 +1,8 @@
 /******************************************************************************
  * @section DESCRIPTION
  *
- * This subroutine opens the model state file for output.
+ * This routine initializes the lake model state (energy balance, water balance,
+ * snow components) to default values.
  *
  * @section LICENSE
  *
@@ -24,50 +25,37 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  *****************************************************************************/
 
-#include <vic_driver_classic.h>
+#include <vic_driver_shared_all.h>
 
 /******************************************************************************
- * @brief    Open state file to write to.
+ * @brief    Initialize the lake model state (energy balance, water balance,
+ *           and snow components) to default values.
  *****************************************************************************/
-FILE *
-open_state_file(global_param_struct *global,
-                filenames_struct     filenames,
-                int                  Nlayer,
-                int                  Nnodes)
+void
+generate_default_lake_state(all_vars_struct *all_vars,
+                            soil_con_struct *soil_con,
+                            lake_con_struct  lake_con)
 {
     extern option_struct options;
 
-    FILE                *statefile;
-    char                 filename[MAXSTRING];
+    size_t               k;
 
-    /* open state file */
-    sprintf(filename, "%s", filenames.statefile);
-    if (options.STATE_FORMAT == BINARY) {
-        statefile = open_file(filename, "wb");
-    }
-    else {
-        statefile = open_file(filename, "w");
-    }
+    lake_var_struct      lake;
 
-    /* Write save state date information */
-    if (options.STATE_FORMAT == BINARY) {
-        fwrite(&global->stateyear, sizeof(int), 1, statefile);
-        fwrite(&global->statemonth, sizeof(int), 1, statefile);
-        fwrite(&global->stateday, sizeof(int), 1, statefile);
-    }
-    else {
-        fprintf(statefile, "%i %i %i\n", global->stateyear,
-                global->statemonth, global->stateday);
-    }
+    lake = all_vars->lake_var;
 
-    /* Write simulation flags */
-    if (options.STATE_FORMAT == BINARY) {
-        fwrite(&Nlayer, sizeof(int), 1, statefile);
-        fwrite(&Nnodes, sizeof(int), 1, statefile);
+    /************************************************************************
+       Initialize lake state variables
+       TBD: currently setting depth to depth_in from parameter file, but
+            in future we should initialize to mindepth as default and
+            eliminate depth_in (require user to use a state file if they
+            want control over initial depth)
+    ************************************************************************/
+    if (options.LAKES) {
+        lake.ldepth = lake_con.depth_in;
+        for (k = 0; k < lake.activenod; k++) {
+            // lake model requires FULL_ENERGY set to true
+            lake.temp[k] = soil_con->avg_temp;
+        }
     }
-    else {
-        fprintf(statefile, "%i %i\n", Nlayer, Nnodes);
-    }
-
-    return(statefile);
 }

@@ -37,9 +37,13 @@
  *****************************************************************************/
 enum
 {
+    UNSET_FILE_FORMAT,
     ASCII,
     BINARY,
-    NETCDF
+    NETCDF3_CLASSIC,
+    NETCDF3_64BIT_OFFSET,
+    NETCDF4_CLASSIC,
+    NETCDF4
 };
 
 /******************************************************************************
@@ -446,6 +450,8 @@ void collect_eb_terms(energy_bal_struct, snow_data_struct, cell_data_struct,
 void collect_wb_terms(cell_data_struct, veg_var_struct, snow_data_struct,
                       double, double, double, int, double, int, double *,
                       double *, out_data_struct *);
+void compute_derived_state_vars(all_vars_struct *, soil_con_struct *,
+                                veg_con_struct *);
 void compute_lake_params(lake_con_struct *, soil_con_struct);
 void compute_treeline(atmos_data_struct *, dmy_struct *, double, double *,
                       bool *);
@@ -470,9 +476,14 @@ void free_dmy(dmy_struct **dmy);
 void free_out_data_files(out_data_file_struct **);
 void free_out_data(out_data_struct **);
 void free_vegcon(veg_con_struct **veg_con);
+void generate_default_state(all_vars_struct *, soil_con_struct *,
+                            veg_con_struct *);
+void generate_default_lake_state(all_vars_struct *, soil_con_struct *,
+                                 lake_con_struct);
 void get_parameters(FILE *paramfile);
 void init_output_list(out_data_struct *out_data, int write, char *format,
                       int type, double mult);
+void initialize_energy(energy_bal_struct **energy, size_t nveg);
 void initialize_filenames(void);
 void initialize_fileps(void);
 void initialize_global(void);
@@ -534,9 +545,10 @@ double q_to_vp(double q, double p);
 int set_output_var(out_data_file_struct *, int, int, out_data_struct *, char *,
                    int, char *, int, double);
 void soil_moisture_from_water_table(soil_con_struct *soil_con, size_t nlayers);
+void sprint_dmy(char *str, dmy_struct *dmy);
 unsigned short int timeunits_from_chars(char *units_chars);
 int update_step_vars(all_vars_struct *, veg_con_struct *, veg_hist_struct *);
-int valid_date(unsigned short int calendar, dmy_struct *dmy);
+int invalid_date(unsigned short int calendar, dmy_struct *dmy);
 void validate_parameters(void);
 char will_it_snow(double *t, double t_offset, double max_snow_temp,
                   double *prcp, size_t n);

@@ -123,7 +123,7 @@ The following options control input and output of state files.
 | STATEYEAR             | integer   | year              | Year at which model simulation state should be saved. <br><br>*NOTE*: if STATENAME is not specified, STATEYEAR will be ignored.                                                                                                                                           |
 | STATEMONTH            | integer   | month             | Month at which model simulation state should be saved. <br><br>*NOTE*: if STATENAME is not specified, STATEMONTH will be ignored.                                                                                                                                          |
 | STATEDAY              | integer   | day               | Day at which model simulation state should be saved. State will be saved at the end of the final timestep on this day. <br><br>*NOTE*: if STATENAME is not specified, STATEDAY will be ignored.                                                                                                                                            |
-| BINARY_STATE_FILE     | string    | TRUE or FALSE     | If FALSE, VIC reads/writes the intial/output state files in ASCII format. If TRUE, VIC reads/writes intial/output state files in binary format. <br><br>*NOTE*: if INIT_STATE or STATENAME are not specified, BINARY_STATE_FILE will be ignored.                                                                                                                    |
+| STATE_FORMAT     | string    | BINARY OR ASCII        | If ASCII, VIC reads/writes the intial/output state files in ASCII format. If BINARY, VIC reads/writes intial/output state files in binary format. <br><br>*NOTE*: if INIT_STATE or STATENAME are not specified, STATE_FORMAT will be ignored.                                                                                                                    |
 
 # Define Meteorological and Vegetation Forcing Files
 
@@ -221,13 +221,13 @@ The following options describe the output files. Click [here](OutputFormatting.m
 | OUT_STEP              | integer   | hours             | Output time step length                                                                                                                                                                   |
 | SKIPYEAR              | integer   | years             | Number of years to skip before starting to write output file. Used to reduce output by not including spin-up years.                                                                       |
 | COMPRESS              | string    | TRUE or FALSE     | if TRUE compress input and output files when done (uses gzip)                                                                                                                             |
-| BINARY_OUTPUT         | string    | TRUE or FALSE     | If TRUE write output files in binary (default is ASCII).                                                                                                                                  |
+| OUT_FORMAT            | string    | BINARY OR ASCII   | If BINARY write output files in binary (default is ASCII).                                                                                                                                  |
 | ALMA_OUTPUT           | string    | TRUE or FALSE     | Options for output units: <li>**FALSE** = standard VIC units. Moisture fluxes are in cumulative mm over the time step; temperatures are in degrees C <li>**TRUE** = units follow the ALMA convention. Moisture fluxes are in average mm/s (kg/m<sup>2</sup>s) over the time step; temperatures are in degrees K <br><br>Default = FALSE. [Click here for more information.](OutputFormatting.md)                                                                                                                                                                         |
 | MOISTFRACT            | string    | TRUE or FALSE     | Options for output soil moisture units (default is FALSE): <li>**FALSE** = Standard VIC units. Soil moisture is in mm over the grid cell area <li>**TRUE** = Soil moisture is volume fraction                                                                                                                                                   |
 | PRT_HEADER            | string    | TRUE or FALSE     | Options for output file headers (default is FALSE): <li>**FALSE** = output files contain no headers <li>**TRUE** = headers are inserted into the beginning of each output file, listing the names of the variables in each field of the file (if ASCII) and/or the variable data types (if BINARY) <br><br>[Click here for more information.](OutputFormatting.md)                                                                                                                                                          |
 | PRT_SNOW_BAND         | string    | TRUE or FALSE     | if TRUE then print snow variables for each snow band in a separate output file (`snow_band_*`). <br><br>*NOTE*: this option is ignored if output file contents are specified. |
 | OUTFILE\*               | <br> string <br> | <br>prefix <br> | Information about this output file: <br>Prefix of the output file (to which the lat and lon will be appended) <br> This should be specified once for each output file. [Click here for more information.](OutputFormatting.md) |
-| OUTVAR\*                | <br> string <br> string <br> string <br> integer <br> | <br> name <br> format <br> type <br> multiplier <br> | Information about this output variable:<br>Name (must match a name listed in vicNl_def.h) <br> Output format (C fprintf-style format code) <br>Data type (one of: OUT_TYPE_DEFAULT, OUT_TYPE_CHAR, OUT_TYPE_SINT, OUT_TYPE_USINT, OUT_TYPE_INT, OUT_TYPE_FLOAT,OUT_TYPE_DOUBLE) <br> Multiplier - number to multiply the data with in order to recover the original values (only valid with BINARY_OUTPUT=TRUE) <br><br> This should be specified once for each output variable. [Click here for more information.](OutputFormatting.md)|
+| OUTVAR\*                | <br> string <br> string <br> string <br> integer <br> | <br> name <br> format <br> type <br> multiplier <br> | Information about this output variable:<br>Name (must match a name listed in vicNl_def.h) <br> Output format (C fprintf-style format code) <br>Data type (one of: OUT_TYPE_DEFAULT, OUT_TYPE_CHAR, OUT_TYPE_SINT, OUT_TYPE_USINT, OUT_TYPE_INT, OUT_TYPE_FLOAT,OUT_TYPE_DOUBLE) <br> Multiplier - number to multiply the data with in order to recover the original values (only valid with OUT_FORMAT=BINARY) <br><br> This should be specified once for each output variable. [Click here for more information.](OutputFormatting.md)|
 
 \* *Note: `OUTFILE`, and `OUTVAR` are optional; if omitted, traditional output files are produced. [Click here for details on using these instructions](OutputFormatting.md).*
 
@@ -376,7 +376,7 @@ FROZEN_SOIL FALSE   # TRUE = calculate frozen soils.  Default = FALSE.
 #STATEYEAR  2000    # year to save model state
 #STATEMONTH 12  # month to save model state
 #STATEDAY   31  # day to save model state
-#BINARY_STATE_FILE       FALSE  # TRUE if state file should be binary format; FALSE if ascii
+#STATE_FORMAT   ASCII  # BINARY OR ASCII
 
 #######################################################################
 # Forcing Files and Parameters
@@ -445,7 +445,7 @@ RESULT_DIR      (put the result directory path here)    # Results directory path
 OUTPUT_STEPS_PER_DAY   0      # Output interval (hours); if 0, OUT_STEP = MODEL_STEPS_PER_DAY
 SKIPYEAR    0   # Number of years of output to omit from the output files
 COMPRESS    FALSE   # TRUE = compress input and output files when done
-BINARY_OUTPUT   FALSE   # TRUE = binary output files
+OUT_FORMAT  BINARY  # BINARY or ASCII
 ALMA_OUTPUT FALSE   # TRUE = ALMA-format output files; FALSE = standard VIC units
 MOISTFRACT  FALSE   # TRUE = output soil moisture as volumetric fraction; FALSE = standard VIC units
 PRT_SNOW_BAND   FALSE   # TRUE = write a "snowband" output file, containing band-specific values of snow variables.

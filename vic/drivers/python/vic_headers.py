@@ -200,7 +200,6 @@ enum
     OUT_AERO_RESIST2,
     OUT_AIR_TEMP,
     OUT_CATM,
-    OUT_COSZEN,
     OUT_DENSITY,
     OUT_FCANOPY,
     OUT_FDIR,
@@ -212,7 +211,6 @@ enum
     OUT_REL_HUMID,
     OUT_SWDOWN,
     OUT_SURF_COND,
-    OUT_TSKC,
     OUT_VP,
     OUT_VPD,
     OUT_WIND,
@@ -374,11 +372,11 @@ typedef struct {
     unsigned short int LAI_SRC;
     _Bool LAKE_PROFILE;
     _Bool ORGANIC_FRACT;
-    _Bool BINARY_STATE_FILE;
+    unsigned short int STATE_FORMAT;
     _Bool INIT_STATE;
     _Bool SAVE_STATE;
     _Bool ALMA_OUTPUT;
-    _Bool BINARY_OUTPUT;
+    unsigned short int OUT_FORMAT;
     _Bool COMPRESS;
     _Bool MOISTFRACT;
     size_t Noutfiles;
@@ -410,11 +408,12 @@ typedef struct {
     size_t nrecs;
     unsigned short int skipyear;
     unsigned short int startday;
-    unsigned int startsec;
     unsigned short int startmonth;
+    unsigned int startsec;
     unsigned short int startyear;
     unsigned short int stateday;
     unsigned short int statemonth;
+    unsigned int statesec;
     unsigned short int stateyear;
     unsigned short int calendar;
     unsigned short int time_units;
@@ -993,8 +992,7 @@ double calc_outgoing_longwave(double temp, double emis);
 double calc_scale_height(double tair, double elevation);
 double calc_sensible_heat(double atmos_density, double t1, double t0,
                           double Ra);
-void calc_Nscale_factors(char, double *, double, double, double, double,
-                         unsigned short int, double *);
+void calc_Nscale_factors(char, double *, double, double, double *);
 double calc_rainonly(double, double, double, double);
 double calc_rc(double, double, double, double, double, double, double, char);
 void calc_rc_ps(char, double, double, double, double *, double, double,
@@ -1349,7 +1347,7 @@ int set_output_var(out_data_file_struct *, int, int, out_data_struct *, char *,
 void soil_moisture_from_water_table(soil_con_struct *soil_con, size_t nlayers);
 unsigned short int timeunits_from_chars(char *units_chars);
 int update_step_vars(all_vars_struct *, veg_con_struct *, veg_hist_struct *);
-int valid_date(unsigned short int calendar, dmy_struct *dmy);
+int invalid_date(unsigned short int calendar, dmy_struct *dmy);
 void validate_parameters(void);
 int flag;
 size_t NR;

@@ -42,14 +42,26 @@ alloc_veg_hist(int                nrecs,
     }
 
     for (i = 0; i < nrecs; i++) {
-        (*veg_hist)[i] = calloc(nveg, sizeof(*((*veg_hist)[i])));
+        (*veg_hist)[i] = calloc(nveg + 1, sizeof(*((*veg_hist)[i])));
         if ((*veg_hist)[i] == NULL) {
             log_err("Memory allocation error in alloc_veg_hist().");
         }
-        for (j = 0; j < nveg; j++) {
+        for (j = 0; j < nveg + 1; j++) {
             (*veg_hist)[i][j].albedo =
                 calloc(NR + 1, sizeof(*((*veg_hist)[i][j].albedo)));
             if ((*veg_hist)[i][j].albedo == NULL) {
+                log_err("Memory allocation error in alloc_veg_hist().");
+            }
+            (*veg_hist)[i][j].displacement = calloc(NR + 1,
+                                                    sizeof(*((*veg_hist)[i][j].
+                                                             displacement)));
+            if ((*veg_hist)[i][j].displacement == NULL) {
+                log_err("Memory allocation error in alloc_veg_hist().");
+            }
+            (*veg_hist)[i][j].fcanopy = calloc(NR + 1,
+                                               sizeof(*((*veg_hist)[i][j].
+                                                        fcanopy)));
+            if ((*veg_hist)[i][j].fcanopy == NULL) {
                 log_err("Memory allocation error in alloc_veg_hist().");
             }
             (*veg_hist)[i][j].LAI =
@@ -57,10 +69,10 @@ alloc_veg_hist(int                nrecs,
             if ((*veg_hist)[i][j].LAI == NULL) {
                 log_err("Memory allocation error in alloc_veg_hist().");
             }
-            (*veg_hist)[i][j].fcanopy = calloc(NR + 1,
-                                               sizeof(*((*veg_hist)[i][j].
-                                                        fcanopy)));
-            if ((*veg_hist)[i][j].fcanopy == NULL) {
+            (*veg_hist)[i][j].roughness = calloc(NR + 1,
+                                                 sizeof(*((*veg_hist)[i][j].
+                                                          roughness)));
+            if ((*veg_hist)[i][j].roughness == NULL) {
                 log_err("Memory allocation error in alloc_veg_hist().");
             }
         }
@@ -82,10 +94,12 @@ free_veg_hist(int                nrecs,
     }
 
     for (i = 0; i < nrecs; i++) {
-        for (j = 0; j < nveg; j++) {
+        for (j = 0; j < nveg + 1; j++) {
             free((*veg_hist)[i][j].albedo);
-            free((*veg_hist)[i][j].LAI);
+            free((*veg_hist)[i][j].displacement);
             free((*veg_hist)[i][j].fcanopy);
+            free((*veg_hist)[i][j].LAI);
+            free((*veg_hist)[i][j].roughness);
         }
         free((*veg_hist)[i]);
     }

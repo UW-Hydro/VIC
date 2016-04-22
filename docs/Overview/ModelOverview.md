@@ -32,8 +32,8 @@ Figure 1.  VIC land cover tiles and soil column, with major water and energy flu
 - fluxes and storages from the tiles are averaged together (weighted by area fraction) to give grid-cell average for writing to output files.
 - for a given tile, jarvis-style veg stomatal response used in computing transpiration.
 - considers canopy energy balance separately from ground surface.
-- accounts for soil evaporation and different wind and radiation attenuation in spaces between individual plants (or gaps in the canopy); vegetated and non-vegetated area fractions are controlled by vegetated area fraction (fv) (Figure 2).  See [Bohn and Vivoni (accepted)](../Documentation/References.md#other-historical-references) for more details.
-- supports optional input of daily timeseries of LAI, albedo, and vegetated area fraction from forcing files instead of using the monthly climatology specified in the veg library or veg parameter files.  See [Bohn and Vivoni (accepted)](../Documentation/References.md#other-historical-references)for more details.
+- accounts for soil evaporation and different wind and radiation attenuation in spaces between individual plants (or gaps in the canopy); vegetated and non-vegetated area fractions are controlled by vegetated area fraction (fv) (Figure 2).  See [Bohn and Vivoni (2016)](../Documentation/References.md#other-historical-references) for more details.
+- supports optional input of daily timeseries of LAI, albedo, and vegetated area fraction from forcing files instead of using the monthly climatology specified in the veg library or veg parameter files.  See [Bohn and Vivoni (2016)](../Documentation/References.md#other-historical-references)for more details.
 
 ![Partial Vegetation Cover Schematic](../img/PartialVegCoverSchematic.bw.png)
 
@@ -91,7 +91,7 @@ These forcings must be provided at the timestep that the model will be run at (e
 
 ### Non-Meteorological Input Data
 
-Can read daily timeseries of land cover information such as albedo, LAI, and vegetation canopy cover fraction as forcing variables ([Bohn and Vivoni, accepted](../Documentation/References.md#other-historical-references)).
+Can read daily timeseries of land cover information such as albedo, LAI, and vegetation canopy cover fraction as forcing variables ([Bohn and Vivoni, 2016](../Documentation/References.md#other-historical-references)).
 
 ### Elevation Bands
 
@@ -195,4 +195,4 @@ Figure 9.  VIC dynamic lake/wetland interaction.
 
 ## Streamflow Routing
 
-Routing of stream flow (Figure 10) is performed separately from the land surface simulation, using a separate model, typically the routing model of [Lohmann, et al. (1996; 1998)](../Documentation/References.md#streamflow-routing-model-references). The original Lohmann routing model no longer supported but remains available [here](https://github.com/UW-Hydro/VIC_Routing). An updated version of the model, RVIC, is available [here](http://rvic.readthedocs.org).
+Routing of stream flow is performed separately from the land surface simulation, using a separate model, typically the routing model of [Lohmann, et al. (1996; 1998)](../Documentation/References.md#streamflow-routing-model-references). The original Lohmann routing model is no longer supported but remains available [here](https://github.com/UW-Hydro/VIC_Routing). An updated version of the model, RVIC, is available [here](http://rvic.readthedocs.org).

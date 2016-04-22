@@ -86,15 +86,15 @@ CONTAINS
     INTEGER :: i
     TYPE(location_struct), DIMENSION(:), POINTER :: locations
 
-    CALL c_f_pointer(domain%locations, locations, [domain%ncells])
+    CALL c_f_pointer(domain%locations, locations, [domain%ncells_active])
 
     WRITE(iulog, *) 'domain         :'
-    WRITE(iulog, *) '    ncells     : ', domain%ncells
+    WRITE(iulog, *) '    ncells     : ', domain%ncells_active
     WRITE(iulog, *) '    n_nx       : ', domain%n_nx
     WRITE(iulog, *) '    n_ny       : ', domain%n_ny
     WRITE(iulog, *) '    locations  :'
 
-    DO i = 1, domain%ncells
+    DO i = 1, domain%ncells_active
        WRITE(iulog, *) 'location ', i, '(Fortran indexing)'
        CALL print_location(locations(i))
     END DO

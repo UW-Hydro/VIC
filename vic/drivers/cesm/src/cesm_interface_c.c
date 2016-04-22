@@ -34,7 +34,7 @@ all_vars_struct    *all_vars = NULL;
 atmos_data_struct  *atmos = NULL;
 x2l_data_struct    *x2l_vic = NULL;
 l2x_data_struct    *l2x_vic = NULL;
-dmy_struct          dmy;
+dmy_struct          dmy_current;
 filenames_struct    filenames;
 filep_struct        filep;
 domain_struct       global_domain;
@@ -103,31 +103,32 @@ vic_cesm_run(vic_clock *vclock)
     // reset l2x fields
     initialize_l2x_data();
 
-    // advance the clock
-    advance_time();
-    assert_time_insync(vclock, &dmy);
-
     // read forcing data
     vic_force();
 
     // run vic over the domain
-    vic_image_run();
+    vic_image_run(&dmy_current);
 
     // return fields to coupler
     vic_cesm_put_data();
 
     // if output:
     if (check_write_flag(current)) {
-        vic_write();
+        vic_write(&dmy_current);
     }
 
     // if save:
     if (vclock->state_flag) {
-        vic_store();
+        log_warn("Skipping state file write");
+        // vic_store();
     }
 
     // reset x2l fields
     initialize_x2l_data();
+
+    // advance the clock
+    advance_time();
+    assert_time_insync(vclock, &dmy_current);
 
     return 0;
 }

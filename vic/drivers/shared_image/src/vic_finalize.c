@@ -103,7 +103,8 @@ vic_finalize(void)
     free(out_data);
     free(save_data);
     free(local_domain.locations);
-    free(dmy);
+    // TODO: free dmy for image driver only
+    // free(dmy);
     if (mpi_rank == 0) {
         free(filter_active_cells);
         free(global_domain.locations);

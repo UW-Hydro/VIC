@@ -37,9 +37,9 @@ dmy_struct         *dmy = NULL;
 filenames_struct    filenames;
 filep_struct        filep;
 domain_struct       global_domain;
-domain_struct       local_domain;
 global_param_struct global_param;
-lake_con_struct     lake_con;
+lake_con_struct    *lake_con = NULL;
+domain_struct       local_domain;
 MPI_Comm            MPI_COMM_VIC = MPI_COMM_WORLD;
 MPI_Datatype        mpi_global_struct_type;
 MPI_Datatype        mpi_filenames_struct_type;
@@ -54,10 +54,10 @@ int                 mpi_size;
 nc_file_struct      nc_hist_file;
 nc_var_struct       nc_vars[N_OUTVAR_TYPES];
 option_struct       options;
-parameters_struct   param;
 out_data_struct   **out_data;
-save_data_struct   *save_data;
+parameters_struct   param;
 param_set_struct    param_set;
+save_data_struct   *save_data;
 soil_con_struct    *soil_con = NULL;
 veg_con_map_struct *veg_con_map = NULL;
 veg_con_struct    **veg_con = NULL;
@@ -77,7 +77,7 @@ int
 main(int    argc,
      char **argv)
 {
-    int  status;
+    int status;
 
     // Initialize MPI - note: logging not yet initialized
     status = MPI_Init(&argc, &argv);
@@ -127,23 +127,23 @@ main(int    argc,
         vic_force();
 
         // run vic over the domain
-        vic_image_run();
+        vic_image_run(&(dmy[current]));
 
         // run routing over the domain
         rout_run();     // Routing routine (extension)
 
         // if output:
         if (check_write_flag(current)) {
-            vic_write();
+            vic_write(&(dmy[current]));
         }
 
         // if output (routing)
         rout_write(); // Routing routine (extension)
 
-        // if save: TBD needs to be fixed - not working in MPI
-        // if (current == global_param.nrecs - 1) {
-        // vic_store();
-        // }
+        // if save:
+        if (check_save_state_flag(current)) {
+            vic_store(&(dmy[current]));
+        }
     }
 
     // clean up

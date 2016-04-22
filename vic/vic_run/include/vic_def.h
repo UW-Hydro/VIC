@@ -83,6 +83,7 @@ extern size_t NR;       /**< array index for atmos struct that indicates
                              the model step avarage or sum */
 extern size_t NF;       /**< array index loop counter limit for atmos
                              struct that indicates the SNOW_STEP values */
+char          vic_run_ref_str[MAXSTRING];
 
 /******************************************************************************
  * @brief   Snow Density parametrizations
@@ -311,13 +312,13 @@ typedef struct {
     bool ORGANIC_FRACT;  /**< TRUE = organic matter fraction of each layer is read from the soil parameter file; otherwise set to 0.0. */
 
     // state options
-    bool BINARY_STATE_FILE; /**< TRUE = model state file is binary (default) */
+    unsigned short int STATE_FORMAT;  /**< TRUE = model state file is binary (default) */
     bool INIT_STATE;     /**< TRUE = initialize model state from file */
     bool SAVE_STATE;     /**< TRUE = save state file */
 
     // output options
     bool ALMA_OUTPUT;    /**< TRUE = output variables are in ALMA-compliant units; FALSE = standard VIC units */
-    bool BINARY_OUTPUT;  /**< TRUE = output files are in binary, not ASCII */
+    unsigned short int OUT_FORMAT;  /**< TRUE = output files are in binary, not ASCII */
     bool COMPRESS;       /**< TRUE = Compress all output files */
     bool MOISTFRACT;     /**< TRUE = output soil moisture as fractional moisture content */
     size_t Noutfiles;    /**< Number of output files (not including state files) */
@@ -360,14 +361,15 @@ typedef struct {
     unsigned short int skipyear;  /**< Number of years to skip before writing
                                       output data */
     unsigned short int startday;  /**< Starting day of the simulation */
+    unsigned short int startmonth;  /**< Starting month of the simulation */
     unsigned int startsec;          /**< Seconds since midnight when simulation
                                        will start */
-    unsigned short int startmonth;  /**< Starting month of the simulation */
     unsigned short int startyear;  /**< Starting year of the simulation */
     unsigned short int stateday;   /**< Day of the simulation at which to save
                                       model state */
     unsigned short int statemonth;  /**< Month of the simulation at which to save
                                        model state */
+    unsigned int statesec;          /**< Seconds since midnight at which to save state */
     unsigned short int stateyear;  /**< Year of the simulation at which to save
                                       model state */
     unsigned short int calendar;  /**< Date/time calendar */
@@ -643,44 +645,60 @@ typedef struct {
  *          the current grid cell.
  *****************************************************************************/
 typedef struct {
+    double albedo[MONTHS_PER_YEAR];   /**< climatological vegetation albedo
+                                         (fraction) */
+    double *CanopLayerBnd;  /**< Upper boundary of each canopy layer,
+                               expressed as fraction of total LAI */
     double Cv;              /**< fraction of vegetation coverage */
-    double root[MAX_LAYERS]; /**< percent of roots in each soil layer (fraction) */
+    double displacement[MONTHS_PER_YEAR]; /**< climatological vegetation
+                                             displacement height (m) */
+    double fcanopy[MONTHS_PER_YEAR]; /**< climatological fractional area
+                                        covered by plant canopy (fraction) */
+    double fetch;           /**< Average fetch length for each vegetation
+                               class. */
+    double LAI[MONTHS_PER_YEAR]; /**< climatological leaf area index (m2/m2) */
+    int LAKE;               /**< TRUE = this tile is a lake/wetland tile */
+    double lag_one;         /**< Lag one gradient autocorrelation of
+                               terrain slope */
+    double root[MAX_LAYERS]; /**< percent of roots in each soil layer
+                                (fraction) */
+    double roughness[MONTHS_PER_YEAR]; /**< climatological vegetation
+                                          roughness length (m) */
+    double sigma_slope;     /**< Std. deviation of terrain slope for each
+                               vegetation class */
+    int veg_class;          /**< vegetation class id number */
+    size_t vegetat_type_num; /**< number of vegetation types in the grid
+                                cell */
+    double Wdmax[MONTHS_PER_YEAR]; /**< climatological maximum dew holding
+                                      capacity (mm) */
     double *zone_depth;     /**< depth of root zone */
     double *zone_fract;     /**< fraction of roots within root zone */
-    int veg_class;          /**< vegetation class reference number */
-    size_t vegetat_type_num; /**< number of vegetation types in the grid cell */
-    double sigma_slope;     /**< Std. deviation of terrain slope for each vegetation class. */
-    double lag_one;         /**< Lag one gradient autocorrelation of terrain slope */
-    double fetch;           /**< Average fetch length for each vegetation class. */
-    int LAKE;               /**< TRUE = this tile is a lake/wetland tile */
-    double *CanopLayerBnd;  /**< Upper boundary of each canopy layer, expressed as fraction of total LAI */
-    double albedo[MONTHS_PER_YEAR];   /**< climatological vegetation albedo (fraction) */
-    double LAI[MONTHS_PER_YEAR];      /**< climatological leaf area index (m2/m2) */
-    double fcanopy[MONTHS_PER_YEAR];  /**< climatological fractional area covered by plant canopy (fraction) */
-    double Wdmax[MONTHS_PER_YEAR];    /**< climatological maximum dew holding capacity (mm) */
 } veg_con_struct;
 
 /******************************************************************************
  * @brief   This structure stores parameters for individual vegetation types.
  *****************************************************************************/
 typedef struct {
+    double albedo[MONTHS_PER_YEAR];  /**< vegetation albedo (added for full
+                                        energy) (fraction) */
+    double displacement[MONTHS_PER_YEAR]; /**< vegetation displacement
+                                             height (m) */
+    double emissivity[MONTHS_PER_YEAR]; /**< vegetation emissivity (fraction) */
+    double fcanopy[MONTHS_PER_YEAR];  /**< fractional area covered by plant
+                                         canopy (fraction) */
+    double LAI[MONTHS_PER_YEAR];  /**< leaf area index */
+    size_t NVegLibTypes;   /**< number of vegetation classes defined in
+                              library */
     bool overstory;        /**< TRUE = overstory present, important for snow
                               accumulation in canopy */
-    double LAI[MONTHS_PER_YEAR];  /**< leaf area index */
-    double fcanopy[MONTHS_PER_YEAR];  /**< fractional area covered by plant canopy (fraction) */
-    double Wdmax[MONTHS_PER_YEAR];  /**< maximum dew holding capacity (mm) */
-    double albedo[MONTHS_PER_YEAR];  /**< vegetation albedo (added for full energy)
-                                                           (fraction) */
-    double displacement[MONTHS_PER_YEAR]; /**< vegetation displacement height (m) */
-    double emissivity[MONTHS_PER_YEAR]; /**< vegetation emissivity (fraction) */
-    size_t NVegLibTypes;   /**< number of vegetation classes defined in library */
     double rad_atten;      /**< radiation attenuation due to canopy,
                               default = 0.5 (N/A) */
     double rarc;           /**< architectural resistance (s/m) */
     double rmin;           /**< minimum stomatal resistance (s/m) */
     double roughness[MONTHS_PER_YEAR];  /**< vegetation roughness length (m) */
     double trunk_ratio;    /**< ratio of trunk height to tree height,
-                                              default = 0.2 (fraction) */
+                              default = 0.2 (fraction) */
+    double Wdmax[MONTHS_PER_YEAR];  /**< maximum dew holding capacity (mm) */
     double wind_atten;     /**< wind attenuation through canopy,
                               default = 0.5 (N/A) */
     double wind_h;         /**< height at which wind is measured (m) */
@@ -688,18 +706,23 @@ typedef struct {
                               will be no transpiration (ranges from
                               ~30 W/m^2 for trees to ~100 W/m^2 for crops) */
     unsigned short int veg_class; /**< vegetation class reference number */
+    // Carbon terms
     char Ctype;            /**< Photosynthetic pathway; 0 = C3; 1 = C4 */
-    double MaxCarboxRate;  /**< maximum carboxlyation rate at 25 deg C (mol(CO2)/m2s) */
-    double MaxETransport;  /**< maximum electron transport rate at 25 deg C (mol(CO2)/m2s) (C3 plants) */
-    double CO2Specificity; /**< CO2 specificity at 25 deg C (mol(CO2)/m2s) (C4 plants) */
+    double CO2Specificity; /**< CO2 specificity at 25 deg C (mol(CO2)/m2s)
+                              (C4 plants) */
     double LightUseEff;    /**< Light-use efficiency (mol(CO2)/mol(photons)) */
-    bool NscaleFlag;         /**< TRUE = nitrogen-scaling factors are applicable
-                                to this veg class */
-    double Wnpp_inhib;     /**< moisture level (fraction of maximum moisture) above which photosynthesis
-                              experiencing saturation inhibition, i.e. too wet for optimal photosynthesis;
-                              only applies to top soil layer */
-    double NPPfactor_sat;  /**< photosynthesis multiplier (fraction of maximum) when top soil
-                              layer is saturated */
+    double MaxCarboxRate;  /**< maximum carboxlyation rate at 25 deg C
+                              (mol(CO2)/m2s) */
+    double MaxETransport;  /**< maximum electron transport rate at 25 deg C
+                              (mol(CO2)/m2s) (C3 plants) */
+    double NPPfactor_sat;  /**< photosynthesis multiplier (fraction of
+                              maximum) when top soil layer is saturated */
+    bool NscaleFlag;       /**< TRUE = nitrogen-scaling factors are
+                              applicable to this veg class */
+    double Wnpp_inhib;     /**< moisture level (fraction of maximum moisture)
+                              above which photosynthesis experiencing
+                              saturation inhibition, i.e. too wet for optimal
+                              photosynthesis; only applies to top soil layer */
 } veg_lib_struct;
 
 /******************************************************************************
@@ -710,9 +733,12 @@ typedef struct {
  * is done by for (i = 0; i < NF; i++)
  *****************************************************************************/
 typedef struct {
-    double *albedo;  /**< vegetation albedo (fraction) */
-    double *LAI;     /**< leaf area index (m2/m2) */
-    double *fcanopy; /**< fractional area covered by plant canopy (fraction) */
+    double *albedo;       /**< vegetation albedo (fraction) */
+    double *displacement; /**< vegetation displacement height (m) */
+    double *fcanopy;      /**< fractional area covered by plant canopy
+                             (fraction) */
+    double *LAI;          /**< leaf area index (m2/m2) */
+    double *roughness;    /**< vegetation roughness length (m) */
 } veg_hist_struct;
 
 /******************************************************************************
@@ -726,6 +752,7 @@ typedef struct {
     double *air_temp; /**< air temperature (C) */
     double *Catm;    /**< atmospheric CO2 mixing ratio (mol CO2/ mol air) */
     double *channel_in; /**< incoming channel inflow for time step (mm) */
+    double *coszen;  /**< cosine of the solar zenith angle */
     double *density; /**< atmospheric density (kg/m^3) */
     double *fdir;    /**< fraction of incoming shortwave that is direct (fraction) */
     double *longwave; /**< incoming longwave radiation (W/m^2) (net incoming
@@ -893,29 +920,54 @@ typedef struct {
 typedef struct {
     double albedo;              /**< current vegetation albedo (fraction) */
     double canopyevap;          /**< evaporation from canopy (mm/TS) */
+    double displacement;        /**< current vegetation displacement height
+                                   (m) */
+    double fcanopy;             /**< current fractional area of plant canopy
+                                   (fraction) */
     double LAI;                 /**< current leaf area index (m2/m2) */
-    double throughfall;         /**< water that reaches the ground through the canopy (mm/TS) */
-    double fcanopy;             /**< current fractional area of plant canopy (fraction) */
+    double roughness;           /**< current vegetation roughness length
+                                   (m) */
+    double throughfall;         /**< water that reaches the ground through
+                                   the canopy (mm/TS) */
     double Wdew;                /**< dew trapped on vegetation (mm) */
-    double Wdmax;               /**< current maximum dew holding capacity (mm) */
-    double *NscaleFactor;       /**< array of per-layer nitrogen scaling factors */
-    double *aPARLayer;          /**< array of per-layer absorbed PAR (mol(photons)/m2 leaf area s) */
-    double *CiLayer;            /**< array of per-layer leaf-internal CO2 mixing ratio (mol CO2/mol air) */
-    double *rsLayer;            /**< array of per-layer stomatal resistance (s/m) */
-    double aPAR;                /**< whole-canopy absorbed PAR (mol(photons)/m2 leaf area s) */
-    double Ci;                  /**< whole-canopy leaf-internal CO2 mixing ratio (mol CO2/mol air) */
-    double rc;                  /**< whole-canopy stomatal resistance (s/m) */
-    double NPPfactor;           /**< whole-canopy photosynthesis multiplier to account for inhibition separate from stomatal resistance */
-    double GPP;                 /**< whole-canopy gross assimilation (photosynthesis) (umol(CO2)/m2s) */
-    double Rphoto;              /**< whole-canopy photorespiration (umol(CO2)/m2s) */
-    double Rdark;               /**< whole-canopy 'dark' respiration (umol(CO2)/m2s) */
-    double Rmaint;              /**< plant maintenance respiration (= Rdark/FRLeaf) (umol(CO2)/m2s) */
-    double Rgrowth;             /**< growth respiration ( = (GPP-Rmaint)*FRGrowth/(1+FRGrowth) ) (umol(CO2)/m2s) */
-    double Raut;                /**< total plant respiration (= Rmaint + Rgrowth) (umol(CO2)/m2s) */
-    double NPP;                 /**< net primary productivity (= GPP - Raut) (umol(CO2)/m2s) */
-    double Litterfall;          /**< flux of carbon from living biomass to litter pool [gC/m2] */
+    double Wdmax;               /**< current maximum dew holding capacity
+                                   (mm) */
+    // Carbon terms
     double AnnualNPP;           /**< running total annual NPP [gC/m2] */
-    double AnnualNPPPrev;       /**< total annual NPP from previous year [gC/m2] */
+    double AnnualNPPPrev;       /**< total annual NPP from previous year
+                                   [gC/m2] */
+    double aPAR;                /**< whole-canopy absorbed PAR
+                                   (mol(photons)/m2 leaf area s) */
+    double *aPARLayer;          /**< array of per-layer absorbed PAR
+                                   (mol(photons)/m2 leaf area s) */
+    double Ci;                  /**< whole-canopy leaf-internal CO2 mixing
+                                   ratio (mol CO2/mol air) */
+    double *CiLayer;            /**< array of per-layer leaf-internal CO2
+                                   mixing ratio (mol CO2/mol air) */
+    double GPP;                 /**< whole-canopy gross assimilation
+                                   (photosynthesis) (umol(CO2)/m2s) */
+    double Litterfall;          /**< flux of carbon from living biomass to
+                                   litter pool [gC/m2] */
+    double NPP;                 /**< net primary productivity (= GPP - Raut)
+                                   (umol(CO2)/m2s) */
+    double NPPfactor;           /**< whole-canopy photosynthesis multiplier
+                                   to account for inhibition separate from
+                                   stomatal resistance */
+    double *NscaleFactor;       /**< array of per-layer nitrogen scaling
+                                   factors */
+    double Raut;                /**< total plant respiration (= Rmaint
+                                 + Rgrowth) (umol(CO2)/m2s) */
+    double rc;                  /**< whole-canopy stomatal resistance (s/m) */
+    double Rdark;               /**< whole-canopy 'dark' respiration
+                                   (umol(CO2)/m2s) */
+    double Rgrowth;             /**< growth respiration ( = (GPP-Rmaint)
+                                 * FRGrowth/(1+FRGrowth) ) (umol(CO2)/m2s) */
+    double Rmaint;              /**< plant maintenance respiration
+                                   (= Rdark/FRLeaf) (umol(CO2)/m2s) */
+    double Rphoto;              /**< whole-canopy photorespiration
+                                   (umol(CO2)/m2s) */
+    double *rsLayer;            /**< array of per-layer stomatal resistance
+                                   (s/m) */
 } veg_var_struct;
 
 /******************************************************************************

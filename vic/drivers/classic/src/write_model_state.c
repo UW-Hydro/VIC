@@ -183,7 +183,7 @@ write_model_state(all_vars_struct *all_vars,
                     fwrite(&tmpval, sizeof(double), 1, filep->statefile);
                 }
                 else {
-                    fprintf(filep->statefile, " %f", tmpval);
+                    fprintf(filep->statefile, " %.16g", tmpval);
                 }
             }
 

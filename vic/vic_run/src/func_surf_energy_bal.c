@@ -659,6 +659,7 @@ func_surf_energy_bal(double  Ts,
         (*NetLongSnow) = (LongSnowIn - snow_coverage * LongBareOut);
     }
     (*NetLongBare) = (LongBareIn - (1. - snow_coverage) * LongBareOut); // net LW snow-free area
+    *fusion = 0.0;  // hacked by Yixin
     NetBareRad =
         (NetShortBare + (*NetLongBare) + *grnd_flux + *deltaH + *fusion);
 

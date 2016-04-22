@@ -35,42 +35,45 @@ initialize_snow(snow_data_struct **snow,
 {
     extern option_struct options;
     size_t               i, j;
+    double               dummy_double;
+    unsigned int         dummy_unsigned_int;
+    bool                 dummy_bool;
 
     for (i = 0; i <= veg_num; i++) {
         for (j = 0; j < options.SNOW_BAND; j++) {
-            // State vars
-            snow[i][j].albedo = 0.0;
-            snow[i][j].canopy_albedo = 0.0;
-            snow[i][j].coldcontent = 0.0;
-            snow[i][j].coverage = 0.0;
-            snow[i][j].density = 0.0;
-            snow[i][j].depth = 0.0;
-            snow[i][j].last_snow = 0;
-            snow[i][j].max_snow_depth = 0.0;
-            snow[i][j].MELTING = false;
-            snow[i][j].pack_temp = 0.0;
-            snow[i][j].pack_water = 0.0;
-            snow[i][j].snow = false;
-            snow[i][j].snow_canopy = 0.0;
-            snow[i][j].store_coverage = 0.0;
-            snow[i][j].store_snow = false;
-            snow[i][j].store_swq = 0.0;
-            snow[i][j].surf_temp = 0.0;
-            snow[i][j].surf_temp_fbflag = false;
-            snow[i][j].surf_temp_fbcount = 0;
-            snow[i][j].surf_water = 0.0;
-            snow[i][j].swq = 0.0;
-            snow[i][j].snow_distrib_slope = 0.0;
-            snow[i][j].tmp_int_storage = 0.0;
+            // Prognostic states
+            snow[i][j].albedo = dummy_double;
+            snow[i][j].canopy_albedo = dummy_double;
+            snow[i][j].coldcontent = dummy_double;
+            snow[i][j].coverage = dummy_double;
+            snow[i][j].density = dummy_double;
+            snow[i][j].depth = dummy_double;
+            snow[i][j].last_snow = dummy_unsigned_int;
+            snow[i][j].max_snow_depth = dummy_double;
+            snow[i][j].MELTING = dummy_bool;
+            snow[i][j].pack_temp = dummy_double;
+            snow[i][j].pack_water = dummy_double;
+            snow[i][j].snow = dummy_bool;
+            snow[i][j].snow_canopy = dummy_double;
+            snow[i][j].store_coverage = dummy_double;
+            snow[i][j].store_snow = dummy_bool;
+            snow[i][j].store_swq = dummy_double;
+            snow[i][j].surf_temp = dummy_double;
+            snow[i][j].surf_temp_fbcount = dummy_unsigned_int;
+            snow[i][j].surf_temp_fbflag = dummy_bool;
+            snow[i][j].surf_water = dummy_double;
+            snow[i][j].swq = dummy_double;
+            snow[i][j].snow_distrib_slope = dummy_double;
+            snow[i][j].tmp_int_storage = dummy_double;
             // Fluxes
-            snow[i][j].blowing_flux = 0.0;
-            snow[i][j].canopy_vapor_flux = 0.0;
-            snow[i][j].mass_error = 0.0;
-            snow[i][j].melt = 0.0;
-            snow[i][j].Qnet = 0.0;
-            snow[i][j].surface_flux = 0.0;
-            snow[i][j].transport = 0.0;
-            snow[i][j].vapor_flux = 0.0;
+            snow[i][j].blowing_flux = dummy_double;
+            snow[i][j].canopy_vapor_flux = dummy_double;
+            snow[i][j].mass_error = dummy_double;
+            snow[i][j].melt = dummy_double;
+            snow[i][j].Qnet = dummy_double;
+            snow[i][j].surface_flux = dummy_double;
+            snow[i][j].transport = dummy_double;
+            snow[i][j].vapor_flux = dummy_double;
         }
     }
 }

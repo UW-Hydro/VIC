@@ -297,6 +297,15 @@ write_model_state(all_vars_struct *all_vars,
                 }
             }
 
+            /* Write foliage temperature */
+            if (options.STATE_FORMAT == BINARY) {
+                fwrite(&energy[veg][band].Tfoliage, sizeof(double), 1,
+                       filep->statefile);
+            }
+            else {
+                fprintf(filep->statefile, " %.16g", energy[veg][band].Tfoliage);
+            }
+
             if (options.STATE_FORMAT == ASCII) {
                 fprintf(filep->statefile, "\n");
             }

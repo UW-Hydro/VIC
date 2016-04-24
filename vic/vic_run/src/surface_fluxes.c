@@ -250,7 +250,7 @@ surface_fluxes(bool                 overstory,
 
     energy->advection = 0;
     energy->deltaCC = 0;
-    if (snow->swq > 0) {
+
         snow_flux = energy->snow_flux;
     }
     else {
@@ -544,7 +544,6 @@ surface_fluxes(bool                 overstory,
                 dryFrac = -1;
 
                 /** Solve snow accumulation, ablation and interception **/
-                ShortUnderIn = 0.0; // Hacked by Yixin
                 step_melt = solve_snow(overstory, BareAlbedo, LongUnderOut,
                                        param.SNOW_MIN_RAIN_TEMP,
                                        param.SNOW_MAX_SNOW_TEMP,

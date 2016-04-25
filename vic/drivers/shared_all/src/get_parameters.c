@@ -344,6 +344,15 @@ get_parameters(FILE *paramfile)
             else if (strcasecmp("SNOW_DENS_C2", optstr) == 0) {
                 sscanf(cmdstr, "%*s %lf", &param.SNOW_DENS_C2);
             }
+            else if (strcasecmp("SNOW_DENS_C3", optstr) == 0) {
+                sscanf(cmdstr, "%*s %lf", &param.SNOW_DENS_C3);
+            }
+            else if (strcasecmp("SNOW_DENS_C4", optstr) == 0) {
+                sscanf(cmdstr, "%*s %lf", &param.SNOW_DENS_C4);
+            }
+            else if (strcasecmp("SNOW_DENS_C4WET", optstr) == 0) {
+                sscanf(cmdstr, "%*s %lf", &param.SNOW_DENS_C4WET);
+            }
             else if (strcasecmp("SNOW_DENS_C5", optstr) == 0) {
                 sscanf(cmdstr, "%*s %lf", &param.SNOW_DENS_C5);
             }

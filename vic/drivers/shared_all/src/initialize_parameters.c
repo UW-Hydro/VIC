@@ -156,6 +156,9 @@ initialize_parameters()
     param.SNOW_DENS_ETA0 = 3.6e6;
     param.SNOW_DENS_C1 = 0.04;
     param.SNOW_DENS_C2 = 2.778e-6;
+    param.SNOW_DENS_C3 = 1.0;
+    param.SNOW_DENS_C4 = 1.0;
+    param.SNOW_DENS_C4WET = 2.0;
     param.SNOW_DENS_C5 = 0.08;
     param.SNOW_DENS_C6 = 0.021;
     param.SNOW_DENS_F = 0.6;

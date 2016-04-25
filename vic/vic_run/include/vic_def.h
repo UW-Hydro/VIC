@@ -61,6 +61,7 @@
 /***** Define minimum values for model parameters *****/
 #define MINSOILDEPTH    0.001  /**< Minimum layer depth with which model can work (m) */
 #define MIN_FCANOPY    0.0001  /**< Minimum allowable canopy fraction */
+#define MIN_SNOW_WETFRAC 0.01  /**< Minimum fraction of snow depth to be considered wet */
 
 /***** Define minimum and maximum values for model timesteps *****/
 #define MIN_SUBDAILY_STEPS_PER_DAY  4
@@ -502,6 +503,9 @@ typedef struct {
     double SNOW_DENS_ETA0;  /**< viscosity of snow at T = 0C and density = 0 used in calculation of true viscosity (Ns/m2) */
     double SNOW_DENS_C1;  /**< Constant in snow density computation */
     double SNOW_DENS_C2;  /**< Constant in snow density computation */
+    double SNOW_DENS_C3;  /**< Constant in snow density computation */
+    double SNOW_DENS_C4;  /**< Constant in snow density computation */
+    double SNOW_DENS_C4WET;  /**< Constant in snow density computation */
     double SNOW_DENS_C5;  /**< constant used in snow viscosity calculation, taken from SNTHRM.89 (/C) */
     double SNOW_DENS_C6;  /**< constant used in snow viscosity calculation, taken from SNTHRM.89 (kg/m3) */
     double SNOW_DENS_F;  /**< internal compaction rate coefficient */

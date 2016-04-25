@@ -95,6 +95,7 @@ snow_density(snow_data_struct *snow,
 
         /* Settling due to destructive metamorphism */
         if (new_snow > 0.0 && density_new > 0.0) {
+            // what is 1.15?
             dm =
                 (param.SNOW_DENS_DMLIMIT > 1.15 *
                  density_new) ? param.SNOW_DENS_DMLIMIT : 1.15 * density_new;
@@ -104,17 +105,18 @@ snow_density(snow_data_struct *snow,
         }
 
         if (density <= dm) {
-            c3 = 1.0;
-            c4 = 1.0;
+            c3 = param.SNOW_DENS_C3;
         }
         else {
+            // what is -0.046?
             c3 = exp(-0.046 * (density - dm));
-            c4 = 1.0;
         }
+        c4 = param.SNOW_DENS_C4;
 
         if (snow->depth > 0) {
-            if ((snow->surf_water + snow->pack_water) / snow->depth > 0.01) {
-                c4 = 2.0; /* presence of wet snow */
+            if ((snow->surf_water + snow->pack_water) / snow->depth > MIN_SNOW_WETFRAC) {
+                /* presence of wet snow */
+                c4 = param.SNOW_DENS_C4WET;
             }
         }
         ddz1 = -param.SNOW_DENS_C2 * c3 * c4 * dexpf;
@@ -153,9 +155,10 @@ snow_density(snow_data_struct *snow,
         if (new_snow > 0) {
             if (depth > 0.) {
                 /* Compact current snowpack by weight of new snowfall */
+                // what are 10 and 0.35?
                 delta_depth =
-                    (((new_snow / 25.4) * (depth / 0.0254)) / (swq / 0.0254) *
-                     pow((depth / 0.0254) / 10., 0.35)) * 0.0254;
+                    (((new_snow / MM_PER_IN) * (depth / M_PER_IN)) / (swq / M_PER_IN) *
+                     pow((depth / M_PER_IN) / 10., 0.35)) * M_PER_IN;
                 if (delta_depth > param.SNOW_DENS_MAX_CHANGE * depth) {
                     delta_depth = param.SNOW_DENS_MAX_CHANGE * depth;
                 }
@@ -208,17 +211,23 @@ new_snow_density(double air_temp)
     density_new = 0.0;
 
     if (options.SNOW_DENSITY == DENS_SNTHRM) {
+        // what are 67.9, 51.3, 2.6
         density_new = 67.9 + 51.3 * exp(air_temp / 2.6);
     }
     else if (options.SNOW_DENSITY == DENS_BRAS) {
-        air_temp = air_temp * 9. / 5. + 32.;
+        // why are we converting to F?
+        air_temp = C_TO_F(air_temp);
         if (air_temp > 0) {
+            // what?
             density_new = param.SNOW_NEW_SNOW_DENSITY + 1000. *
                           (air_temp / 100.) * (air_temp / 100.);
         }
         else {
             density_new = param.SNOW_NEW_SNOW_DENSITY;
         }
+    }
+    else {
+        log_err("Unknown SNOW_DENSITY option");
     }
 
     return (density_new);

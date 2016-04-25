@@ -33,6 +33,7 @@
 
 #define BINHEADERSIZE 256
 #define MAX_VEGPARAM_LINE_LENGTH 500
+#define ASCII_STATE_FLOAT_FMT "%.16g"
 
 void alloc_atmos(int, atmos_data_struct **);
 void alloc_veg_hist(int nrecs, int nveg, veg_hist_struct ***veg_hist);

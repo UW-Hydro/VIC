@@ -250,7 +250,7 @@ surface_fluxes(bool                 overstory,
 
     energy->advection = 0;
     energy->deltaCC = 0;
-
+    if (snow->swq > 0) {
         snow_flux = energy->snow_flux;
     }
     else {

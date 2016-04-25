@@ -277,7 +277,12 @@ write_model_state(all_vars_struct *all_vars,
                        filep->statefile);
             }
             else {
-                fprintf(filep->statefile, " %i %i "ASCII_STATE_FLOAT_FMT" "ASCII_STATE_FLOAT_FMT" "ASCII_STATE_FLOAT_FMT" "ASCII_STATE_FLOAT_FMT" "ASCII_STATE_FLOAT_FMT" "ASCII_STATE_FLOAT_FMT" "ASCII_STATE_FLOAT_FMT" "ASCII_STATE_FLOAT_FMT" "ASCII_STATE_FLOAT_FMT,
+                fprintf(filep->statefile, " %i %i "
+                        ASCII_STATE_FLOAT_FMT" "ASCII_STATE_FLOAT_FMT" "
+                        ASCII_STATE_FLOAT_FMT" "ASCII_STATE_FLOAT_FMT" "
+                        ASCII_STATE_FLOAT_FMT" "ASCII_STATE_FLOAT_FMT" "
+                        ASCII_STATE_FLOAT_FMT" "ASCII_STATE_FLOAT_FMT" "
+                        ASCII_STATE_FLOAT_FMT,
                         snow[veg][band].last_snow, (int)snow[veg][band].MELTING,
                         snow[veg][band].coverage, snow[veg][band].swq,
                         snow[veg][band].surf_temp, snow[veg][band].surf_water,

@@ -107,6 +107,9 @@ vic_store(dmy_struct *dmy_current)
         }
         nc_state_file.open = true;
 
+        // Set netcdf file global attributes
+        set_global_nc_attributes(nc_state_file.nc_id, NC_STATE_FILE);
+
         // set the NC_FILL attribute
         status = nc_set_fill(nc_state_file.nc_id, NC_FILL, &old_fill_mode);
         if (status != NC_NOERR) {

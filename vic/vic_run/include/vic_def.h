@@ -36,6 +36,8 @@
 #include <strings.h>
 #include <stdbool.h>
 #include <stddef.h>
+#include <unistd.h>
+#include <time.h>
 
 #include <vic_physical_constants.h>
 #include <vic_log.h>

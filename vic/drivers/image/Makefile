@@ -57,7 +57,7 @@ MPIPATH = ${TRAVIS_MPIPATH}
 else ifeq (hydro-c1, $(shell hostname))
 MPIPATH = /usr/local/netcdf-4.3.0+gcc-4.7.2
 else ifeq ($(UNAME_S), Linux)
-MPIPATH = /opt/openmpi
+MPIPATH = /usr
 else
 MPIPATH = /opt/local
 endif
@@ -73,7 +73,7 @@ CC = ${MPIPATH}/bin/mpicc
 else
 CC = mpicc
 endif
-CC = /usr/lib64/mpich/bin/mpicc
+
 # Set the log level
 # To turn off warning statements, set LOG_LVL >= 30
 # | Level     | Numeric value    |
@@ -89,11 +89,11 @@ INCLUDES = -I ${DRIVERPATH}/include \
 		   -I ${VICPATH}/include \
 		   -I ${SHAREDPATH}/include \
 		   -I ${SHAREDIMAGEPATH}/include \
-		   -I /usr/include
+		   -I ${NETCDFPATH}/include \
 
 # Uncomment to include debugging information
 CFLAGS  =  ${INCLUDES} -ggdb -O0 -Wall -Wextra -std=c99 -DLOG_LVL=$(LOG_LVL)
-LIBRARY = -lm -lnetcdf 
+LIBRARY = -lm -L${NETCDFPATH}/lib -lnetcdf
 
 COMPEXE = vic_image
 EXT = .exe

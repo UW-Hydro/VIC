@@ -50,8 +50,6 @@ initialize_soil(cell_data_struct **cell,
             for (lindex = 0; lindex < options.Nlayer; lindex++) {
                 cell[veg][band].layer[lindex].Cs = 0.0;
                 cell[veg][band].layer[lindex].T = 0.0;
-                cell[veg][band].layer[lindex].bare_evap_frac = 0.0;
-                cell[veg][band].layer[lindex].evap = 0.0;
                 for (frost_area = 0; frost_area < options.Nfrost;
                      frost_area++) {
                     cell[veg][band].layer[lindex].ice[frost_area] = 0.0;
@@ -72,6 +70,10 @@ initialize_soil(cell_data_struct **cell,
             cell[veg][band].RhInter = 0.0;
             cell[veg][band].RhSlow = 0.0;
             cell[veg][band].RhTot = 0.0;
+            for (lindex = 0; lindex < options.Nlayer; lindex++) {
+                cell[veg][band].layer[lindex].bare_evap_frac = 0.0;
+                cell[veg][band].layer[lindex].evap = 0.0;
+            }
         }
     }
 }

@@ -789,11 +789,10 @@ typedef struct {
  *          soil column.
  *****************************************************************************/
 typedef struct {
+    // State variables
     double Cs;              /**< average volumetric heat capacity of the
                                current layer (J/m^3/K) */
     double T;               /**< temperature of the unfrozen sublayer (C) */
-    double bare_evap_frac;  /**< fraction of evapotranspiration coming from bare soil evap, from soil layer (mm) */
-    double evap;            /**< evapotranspiration from soil layer (mm) */
     double ice[MAX_FROST_AREAS]; /**< ice content of the frozen sublayer (mm) */
     double kappa;           /**< average thermal conductivity of the current
                                layer (W/m/K) */
@@ -801,6 +800,10 @@ typedef struct {
                                (mm) */
     double phi;             /**< moisture diffusion parameter */
     double zwt;             /**< water table position relative to soil surface within the layer (cm) */
+    // Fluxes
+    double bare_evap_frac;  /**< fraction of evapotranspiration coming from bare soil evap, from soil layer (mm) */
+    double evap;            /**< evapotranspiration from soil layer (mm) */
+
 } layer_data_struct;
 
 /******************************************************************************
@@ -819,7 +822,8 @@ typedef struct {
     double CInter;                     /**< carbon storage in intermediate pool [gC/m2] */
     double CSlow;                      /**< carbon storage in slow pool [gC/m2] */
     layer_data_struct layer[MAX_LAYERS]; /**< structure containing soil variables
-                                            for each layer (see above) */
+                                            for each layer (see above; including both
+                                            state and flux variables) */
     double rootmoist;                  /**< total of layer.moist over all layers
                                           in the root zone (mm) */
     double wetness;                    /**< average of

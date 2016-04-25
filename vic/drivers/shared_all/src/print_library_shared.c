@@ -49,7 +49,7 @@ print_cell_data(cell_data_struct *cell,
     fprintf(LOG_DEST, "\tCSlow       : %f\n", cell->CSlow);
     for (i = 0; i < nlayers; i++) {
         fprintf(LOG_DEST, "\tlayer %zd   :\n", i);
-        print_layer_data(&(cell->layer[i]), nfrost);
+        print_layer_data_states(&(cell->layer[i]), nfrost);
     }
     fprintf(LOG_DEST, "\trootmoist   : %f\n", cell->rootmoist);
     fprintf(LOG_DEST, "\twetness     : %f\n", cell->wetness);
@@ -67,6 +67,10 @@ print_cell_data(cell_data_struct *cell,
     fprintf(LOG_DEST, "\tRhInter     : %f\n", cell->RhInter);
     fprintf(LOG_DEST, "\tRhSlow      : %f\n", cell->RhSlow);
     fprintf(LOG_DEST, "\tRhTot       : %f\n", cell->RhTot);
+    for (i = 0; i < nlayers; i++) {
+        fprintf(LOG_DEST, "\tlayer %zd   :\n", i);
+        print_layer_data_fluxes(&(cell->layer[i]));
+    }
 }
 
 /******************************************************************************
@@ -440,15 +444,14 @@ print_lake_var(lake_var_struct *lvar,
  * @brief    Print layer data structure.
  *****************************************************************************/
 void
-print_layer_data(layer_data_struct *ldata,
+print_layer_data_states(layer_data_struct *ldata,
                  size_t             nfrost)
 {
     size_t i;
 
-    fprintf(LOG_DEST, "layer_data:\n");
+    fprintf(LOG_DEST, "layer_data (states):\n");
     fprintf(LOG_DEST, "\tCs   : %f\n", ldata->Cs);
     fprintf(LOG_DEST, "\tT    : %f\n", ldata->T);
-    fprintf(LOG_DEST, "\tevap (flux): %f\n", ldata->evap);
     fprintf(LOG_DEST, "\tice  :");
     for (i = 0; i < nfrost; i++) {
         fprintf(LOG_DEST, "\t%f", ldata->ice[i]);
@@ -458,6 +461,14 @@ print_layer_data(layer_data_struct *ldata,
     fprintf(LOG_DEST, "\tmoist: %f\n", ldata->moist);
     fprintf(LOG_DEST, "\tphi  : %f\n", ldata->phi);
     fprintf(LOG_DEST, "\tzwt  : %f\n", ldata->zwt);
+}
+
+void
+print_layer_data_fluxes(layer_data_struct *ldata)
+{
+    fprintf(LOG_DEST, "layer_data (fluxes):\n");
+    fprintf(LOG_DEST, "\tbare_evap_frac: %f\n", ldata->evap);
+    fprintf(LOG_DEST, "\tevap: %f\n", ldata->evap);
 }
 
 /******************************************************************************

@@ -99,7 +99,8 @@ write_model_state(all_vars_struct *all_vars,
         Nbytes += (Nveg + 1) * Nbands * sizeof(int) + // last_snow
                   (Nveg + 1) * Nbands * sizeof(char) + // MELTING
                   (Nveg + 1) * Nbands * sizeof(double) * 9 + // other snow parameters
-                  (Nveg + 1) * Nbands * options.Nnode * sizeof(double); // soil temperatures
+                  (Nveg + 1) * Nbands * options.Nnode * sizeof(double) + // soil temperatures
+                  (Nveg + 1) * Nbands * sizeof(double); // Tfoliage
         if (options.LAKES) {
             /* Lake/wetland tiles have lake-specific state vars */
             Nbytes += sizeof(int) + // activenod

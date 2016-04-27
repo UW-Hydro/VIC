@@ -98,6 +98,7 @@ int main(int argc, char *argv[])
 	      OUTPUT_FORCE condition to avoid memory leak.		TJB
   2014-Mar-28 Removed DIST_PRCP option.					TJB
   2014-Apr-25 Added non-climatological veg parameters.			TJB
+  2016-Apr-27 Add forcing data type: sunshine durations.  SIBADA
 **********************************************************************/
 {
 

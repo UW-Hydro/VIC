@@ -1,6 +1,7 @@
 # 其他乱入
 .idea
 *~
+build
 
 # Object files
 *.o

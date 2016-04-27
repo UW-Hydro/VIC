@@ -2,6 +2,7 @@ cmake_minimum_required(VERSION 2.4)
 project(vicNl)
 
 set(CMAKE_C_COMPILER gcc)
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS}  -I. -g -Wall -Wno-unused")
 include_directories( "." )
 
@@ -110,7 +111,6 @@ set(SOURCE_FILES
     surface_fluxes.c
     svp.c
     vicerror.c
-    vicNl.c
     vicNl.h
     vicNl_def.h
     water_energy_balance.c
@@ -121,6 +121,12 @@ set(SOURCE_FILES
     write_layer.c
     write_model_state.c
     write_vegvar.c estimate_sw_by_sd.c)
+set(MAIN_FILE vicNl.c)
 
-add_executable(vicNl ${SOURCE_FILES})
+add_library(vic SHARED ${SOURCE_FILES})
+set_target_properties(vic PROPERTIES VERSION 4.2 SOVERSION 0.1)
+
+add_executable(vicNl ${MAIN_FILE})
+TARGET_LINK_LIBRARIES(vic m)
 TARGET_LINK_LIBRARIES(vicNl m)
+TARGET_LINK_LIBRARIES(vicNl vic)

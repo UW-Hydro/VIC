@@ -917,10 +917,20 @@ void initialize_atmos(atmos_data_struct        *atmos,
     have_dewpt = 0;
   } // end if VP supplied
 
-
   /*************************************************
     Shortwave, part 1.
   *************************************************/
+
+  if (param_set.TYPE[SD].SUPPLIED &&
+      param_set.FORCE_DT[param_set.TYPE[SD].SUPPLIED-1] == 24) {
+    for (day=0; day<Ndays_local; day++) {
+      double sd = local_forcing_data[SD][day];
+      double lat = phi;
+      int day_seq = dmy_local[day*24].day_in_year;
+      local_forcing_data[SHORTWAVE][day] = estimate_sw_by_sd(sd, lat, day_seq);
+    }
+    param_set.TYPE[SHORTWAVE].SUPPLIED = 1;
+  }
 
   if (param_set.TYPE[SHORTWAVE].SUPPLIED) {
     have_shortwave = 1; // flag for MTCLIM
@@ -942,6 +952,8 @@ void initialize_atmos(atmos_data_struct        *atmos,
   /**************************************************
     Use MTCLIM algorithms to estimate hourly shortwave,
     daily vapor pressure, and cloud radiation attenuation.
+
+    使用MTCLIM方法估计小时短波辐射量，日水气压以及云辐射衰减量
 
     Requires prec, tmax, and tmin.
 
@@ -978,7 +990,7 @@ void initialize_atmos(atmos_data_struct        *atmos,
       if (global_param.starthour - hour_offset_int < 0) hour += 24;
       atmos[rec].shortwave[i] = 0;
       for (idx = hour; idx < hour+options.SNOW_STEP; idx++) {
-	atmos[rec].shortwave[i] += hourlyrad[idx];
+	    atmos[rec].shortwave[i] += hourlyrad[idx];
       }
       atmos[rec].shortwave[i] /= options.SNOW_STEP;
       sum += atmos[rec].shortwave[i];

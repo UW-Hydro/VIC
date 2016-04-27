@@ -98,6 +98,7 @@ int main(int argc, char *argv[])
 	      OUTPUT_FORCE condition to avoid memory leak.		TJB
   2014-Mar-28 Removed DIST_PRCP option.					TJB
   2014-Apr-25 Added non-climatological veg parameters.			TJB
+  2016-Apr-27 Add forcing data type: sunshine durations.  SIBADA
 **********************************************************************/
 {
 
@@ -173,7 +174,7 @@ int main(int argc, char *argv[])
   /** allocate memory for the atmos_data_struct **/
   alloc_atmos(global_param.nrecs, &atmos);
 
-  /** Initial state **/
+  /** 初始化状态 **/
   startrec = 0;
   if (!options.OUTPUT_FORCE) {
 
@@ -191,7 +192,7 @@ int main(int argc, char *argv[])
   } /* !OUTPUT_FORCE */
 
   /************************************
-    Run Model for all Active Grid Cells
+    在所有可运行的网格上运算
     ************************************/
   MODEL_DONE = FALSE;
   while(!MODEL_DONE) {
@@ -287,7 +288,7 @@ int main(int argc, char *argv[])
 	ErrorFlag = put_data(&all_vars, &atmos[0], &soil_con, veg_con, &lake_con, out_data_files, out_data, &save_data, &dmy[0], -global_param.nrecs);
 
         /******************************************
-	  Run Model in Grid Cell for all Time Steps
+	  在该网格每个时间步运行
 	******************************************/
 
         for ( rec = startrec ; rec < global_param.nrecs; rec++ ) {

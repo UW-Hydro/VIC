@@ -74,7 +74,7 @@ void mtclim_wrapper(int have_dewpt, int have_shortwave, double hour_offset,
 		      double *prec, double *tmax, double *tmin, double *tskc,
 		      double *vp, double *hourlyrad, double *fdir) 
 /******************************************************************************
-  mtclim_wrapper: interface between VIC and MTCLIM.
+  mtclim_wrapper: VIC and MTCLIM. VIC和MTCLIM间的接口
 
   Modifications:
   2012-Feb-16 Cleaned up commented code.					TJB

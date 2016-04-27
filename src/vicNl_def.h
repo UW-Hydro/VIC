@@ -271,6 +271,7 @@ extern double ref_veg_trunk_ratio[];
 extern char ref_veg_ref_crop[];
 
 /***** Time Constants *****/
+/***** 时间、日期有关常量 *****/
 #define DAYS_PER_YEAR 365.
 #define HOURSPERDAY   24        /* number of hours per day */
 #define HOURSPERYEAR  24*365    /* number of hours per year */
@@ -280,6 +281,7 @@ extern char ref_veg_ref_crop[];
 #define METERS_PER_KM 1000.
 
 /***** Physical Constants *****/
+/***** 物理常量 *****/
 #define RESID_MOIST  0.0       /* define residual moisture content of soil column */
 #define ice_density  917.	    /* density of ice (kg/m^3) */
 #define T_LAPSE      -0.0065   /* temperature lapse rate of US Std 
@@ -337,9 +339,11 @@ extern char ref_veg_ref_crop[];
 #define LAI_WATER_FACTOR 0.1
 
 /***** Minimum allowable vegcover fraction *****/
+/***** 可接受的土地覆盖比例最小值 *****/
 #define MIN_VEGCOVER 0.0001
 
 /***** Carbon Cycling constants *****/
+/***** 碳循环有关常量 *****/
 
 #define CatmCurrent  383       /* Current global atmospheric CO2 mixing ratio (ppm) */
 #define SW2PAR       0.45      /* Empirical ratio of PAR [W/m2] to SHORTWAVE
@@ -450,7 +454,8 @@ extern char ref_veg_ref_crop[];
 
 
 /***** Forcing Variable Types *****/
-#define N_FORCING_TYPES 29
+/***** 气象驱动数据类型 *****/
+#define N_FORCING_TYPES 30
 #define AIR_TEMP   0 /* air temperature per time step [C] (ALMA_INPUT: [K]) */
 #define ALBEDO     1 /* surface albedo [fraction] */
 #define CATM       2 /* atmospheric CO2 concentration [ppm] */
@@ -479,7 +484,8 @@ extern char ref_veg_ref_crop[];
 #define WIND      25 /* wind speed [m/s] */
 #define WIND_E    26 /* zonal component of wind speed [m/s] */
 #define WIND_N    27 /* meridional component of wind speed [m/s] */
-#define SKIP      28 /* place holder for unused data columns */
+#define SD        28 /* sunshine duration */
+#define SKIP      29 /* place holder for unused data columns */
 
 /***** Output Variable Types *****/
 #define N_OUTVAR_TYPES 180
@@ -836,7 +842,7 @@ typedef struct {
                             VP_ITER_ANNUAL = use annual Epot/PRCP criterion
                             VP_ITER_CONVERGE = always iterate until convergence */
 
-  // input options
+  // 输入设定
   char   ALMA_INPUT;     /* TRUE = input variables are in ALMA-compliant units; FALSE = standard VIC units */
   char   BASEFLOW;       /* ARNO: read Ds, Dm, Ws, c; NIJSSEN2001: read d1, d2, d3, d4 */
   int    GRID_DECIMAL;   /* Number of decimal places in grid file extensions */
@@ -854,12 +860,12 @@ typedef struct {
   char   LAKE_PROFILE;   /* TRUE = user-specified lake/area profile */
   char   ORGANIC_FRACT;  /* TRUE = organic matter fraction of each layer is read from the soil parameter file; otherwise set to 0.0. */
 
-  // state options
+  // 状态设定
   char   BINARY_STATE_FILE; /* TRUE = model state file is binary (default) */
   char   INIT_STATE;     /* TRUE = initialize model state from file */
   char   SAVE_STATE;     /* TRUE = save state file */       
 
-  // output options
+  // 输出设定
   char   ALMA_OUTPUT;    /* TRUE = output variables are in ALMA-compliant units; FALSE = standard VIC units */
   char   BINARY_OUTPUT;  /* TRUE = output files are in binary, not ASCII */
   char   COMPRESS;       /* TRUE = Compress all output files */
@@ -877,11 +883,12 @@ typedef struct {
 
 /*******************************************************
   Stores forcing file input information.
+  记录气象数据文件的输入信息
 *******************************************************/
 typedef struct {
   int     N_ELEM; // number of elements per record; for LAI and ALBEDO, 1 element per veg tile; for others N_ELEM = 1;
   char    SIGNED;
-  int     SUPPLIED;
+  int     SUPPLIED; // 是否提供, 1为作为第一套驱动数据, 2为第二套
   double  multiplier;
 } force_type_struct;
 
@@ -889,6 +896,8 @@ typedef struct {
   This structure records the parameters set by the forcing file
   input routines.  Those filled, are used to estimate the paramters
   needed for the model run in initialize_atmos.c.
+
+  此结构记录关于输入的气象驱动数据的一些信息
   ******************************************************************/
 typedef struct {
   force_type_struct TYPE[N_FORCING_TYPES];
@@ -932,7 +941,7 @@ typedef struct {
 } global_param_struct;
 
 /***********************************************************
-  This structure stores the soil parameters for a grid cell.
+  此结构用于保存单个网格的土壤参数
   ***********************************************************/
 typedef struct {
   int      FS_ACTIVE;                 /* if TRUE frozen soil algorithm is 
@@ -993,10 +1002,10 @@ typedef struct {
   double  *Tfactor;                   /* Change in temperature due to elevation (C) in each snow elevation band */
   char    *AboveTreeLine;             /* Flag to indicate if band is above the treeline */
   float    elevation;                 /* grid cell elevation (m) */
-  float    lat;                       /* grid cell central latitude */
-  float    lng;                       /* grid cell central longitude */
-  double   cell_area;                 /* Area of grid cell (m^2) */
-  float    time_zone_lng;             /* central meridian of the time zone */
+  float    lat;                       /* grid cell central latitude 网格中心纬度 */
+  float    lng;                       /* grid cell central longitude 网格中心经度 */
+  double   cell_area;                 /* Area of grid cell (m^2) 网格面积 */
+  float    time_zone_lng;             /* central meridian of the time zone 时区中央经度 */
   float  **layer_node_fract;          /* fraction of all nodes within each layer */
   int      gridcel;                   /* grid cell number */
   double   zwtvmoist_zwt[MAX_LAYERS+2][MAX_ZWTVMOIST]; /* zwt values in the zwt-v-moist curve for each layer */
@@ -1008,8 +1017,7 @@ typedef struct {
 } soil_con_struct;
 
 /*******************************************************************
-  This structure stores information about the vegetation coverage of
-  the current grid cell.
+  此结构用于保存网格内植被参数
   *******************************************************************/
 typedef struct {
   double  Cv;               /* fraction of vegetation coverage */ 
@@ -1031,12 +1039,12 @@ typedef struct {
 } veg_con_struct;
 
 /******************************************************************
-  This structure stores parameters for individual vegetation types.
+  此结构用于保存植被类型库参数
   ******************************************************************/
 typedef struct {
   char   overstory;        /* TRUE = overstory present, important for snow 
 			      accumulation in canopy */
-  double albedo[12];       /* vegetation albedo (fraction) */
+  double albedo[12];       /* vegetation albedo (fraction) 植被反照率*/
   double LAI[12];          /* leaf area index (m2/m2) */
   double vegcover[12];     /* fractional area covered by plants within the tile (fraction) */
   double Wdmax[12];        /* maximum dew holding capacity (mm) */
@@ -1085,7 +1093,9 @@ typedef struct {
    step for a single grid cell.  Each array stores the values for the 
    SNOW_STEPs during the current model step and the value for the entire model
    step.  The latter is referred to by array[NR].  Looping over the SNOW_STEPs
-   is done by for (i = 0; i < NF; i++) 
+   is done by for (i = 0; i < NF; i++)
+
+   该结构用于保存各个时间步的气象驱动数据。
 ***************************************************************************/
 typedef struct {
   double *air_temp;  /* air temperature (C) */
@@ -1431,7 +1441,7 @@ typedef struct {
 } save_data_struct;
 
 /*******************************************************
-  This structure stores output information for one variable.
+  该结构保存某个输出变量的相关信息
   *******************************************************/
 typedef struct {
   char		varname[20]; /* name of variable */

@@ -130,7 +130,7 @@
 #include <vicNl_def.h>
 #include <LAKE.h>
 
-/*** SubRoutine Prototypes ***/
+/*** 所有函数的声明 ***/
 
 double advected_sensible_heat(double, double, double, double, double);
 void alloc_atmos(int, atmos_data_struct **);
@@ -265,6 +265,7 @@ int estimate_layer_ice_content_quick_flux(layer_data_struct *, double *,
 					  double, double, double, double,
 					  double *, double *, double *,
 					  double *, double, char);
+double estimate_sw_by_sd(double, double, int);
 double estimate_T1(double, double, double, double, double, double, double, 
 		   double, double, double, double);
 double exp_interp(double,double,double,double,double);

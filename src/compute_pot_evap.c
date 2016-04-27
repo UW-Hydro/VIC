@@ -21,6 +21,7 @@ void compute_pot_evap(int veg_class,
   compute_pot_evap: computes potential evaporation for several different
                     reference land cover types (which are defined in
                     vicNl_def.h and global.h).
+                    计算不同土地覆盖类型的潜在蒸散发。
 
   modifications:
   2009-Aug-21 Fixed bug in assignment of albedo for natural vegetation.	TJB

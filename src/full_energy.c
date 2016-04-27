@@ -19,7 +19,9 @@ int  full_energy(int                  gridcell,
 	full_energy	Keith Cherkauer		January 8, 1997
 
   This subroutine controls the model core, it solves both the energy
-  and water balance models, as well as frozen soils.  
+  and water balance models, as well as frozen soils.
+
+  VIC模型核心函数，对每个网格每个时间步进行能量平衡、水量平衡和冻土模式计算。
 
   modifications:
   07-98 restructured to fix problems with distributed precipitation, 

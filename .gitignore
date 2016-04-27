@@ -1,3 +1,7 @@
+# 其他乱入
+.idea
+*~
+
 # Object files
 *.o
 *.ko

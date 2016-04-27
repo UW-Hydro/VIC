@@ -12,24 +12,25 @@ soil_con_struct read_soilparam(FILE *soilparam,
 	read_soilparam		Dag Lohmann		January 1996
 
   This routine reads soil parameters for each grid cell.
+  读取每个网格的土壤参数
 
   Parameters Read from File:
   TYPE   NAME                    UNITS   DESCRIPTION
-  int    gridcel;                N/A     grid cell number
-  float  lat;		         degrees grid cell central latitude
-  float  lng;		         degrees grid cell central longitude
-  double b_infilt;  	         N/A     infiltration parameter
+  int    gridcel;                N/A     grid cell number   网格编号
+  float  lat;		         degrees grid cell central latitude 网格中心维度
+  float  lng;		         degrees grid cell central longitude    网格中心经度
+  double b_infilt;  	         N/A     infiltration parameter 率定参数b
   double Ds;		         fract   fraction of maximum subsurface
-                                         flow rate
-  double Dsmax;  	         mm/day  maximum subsurface flow rate
-  double Ws;		         fract   fraction of maximum soil moisture
-  double c;                      N/A     exponent in ARNO baseflow curve
+                                         flow rate  率定参数Ds
+  double Dsmax;  	         mm/day  maximum subsurface flow rate   率定参数Dsm
+  double Ws;		         fract   fraction of maximum soil moisture  率定参数Ws
+  double c;                      N/A     exponent in ARNO baseflow curve    基流曲线指数
   double expt[MAX_LAYERS];         N/A     exponent n (=3+2/lambda) in Campbell's eqn for hydraulic conductivity, HBH 5.6
-  double Ksat[MAX_LAYERS];         mm/day  saturated hydraulic conductivity
+  double Ksat[MAX_LAYERS];         mm/day  saturated hydraulic conductivity 饱和导水率
   double phi_s[MAX_LAYERS];        mm/mm   saturated matrix potential
-  double init_moist[MAX_LAYERS];   mm      initial layer moisture level
-  float  elevation;	         m       grid cell elevation
-  double depth[MAX_LAYERS];        m       thickness of each layer
+  double init_moist[MAX_LAYERS];   mm      initial layer moisture level 初始土壤含水量
+  float  elevation;	         m       grid cell elevation    网格高程
+  double depth[MAX_LAYERS];        m       thickness of each layer 率定参数，各层土壤厚度
   double avg_temp;	         C       average soil temperature
   double dp;		         m       soil thermal damping depth
   double bubble;	         cm      bubbling pressure, HBH 5.15

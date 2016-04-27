@@ -1,6 +1,6 @@
 /********************************************************************************
   filename  : penman.c
-  purpose   : Calculate daily evapotranspiration using the combination equation
+  purpose   : 使用组合公式计算逐日蒸散发量
   interface : - input : - net radiation (W/m2)
                         - vapor pressure deficit (Pa)
 			- aerodynamical resistance (s/m)
@@ -206,13 +206,13 @@ double penman(double tair,
 	      double rc,
 	      double rarc)
 {
-  double evap;                  /* Penman-Monteith evapotranspiration */
-  double slope;                 /* slope of saturated vapor pressure curve */
-  double r_air;                 /* density of air in kg/m3 */
-  double h;                     /* scale height in the atmosphere (m) */
-  double lv;                    /* latent heat of vaporization (J/kg) */
-  double pz;                    /* surface air pressure */
-  double gamma;                 /* psychrometric constant (Pa/C) */
+  double evap;                  /* Penman-Monteith evapotranspiration 彭曼-蒙特斯蒸散发量 */
+  double slope;                 /* slope of saturated vapor pressure curve 饱和水气压曲线斜率 */
+  double r_air;                 /* density of air in kg/m3 空气密度 */
+  double h;                     /* scale height in the atmosphere (m)  */
+  double lv;                    /* latent heat of vaporization (J/kg)  */
+  double pz;                    /* surface air pressure 表面气压 */
+  double gamma;                 /* psychrometric constant (Pa/C) 干湿表常数 */
 
   /* calculate the slope of the saturated vapor pressure curve in Pa/K */
   slope = svp_slope(tair);

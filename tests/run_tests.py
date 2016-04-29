@@ -292,7 +292,7 @@ def run_system(config_file, vic_exe, test_data_dir, out_dir, driver):
 
         # ------------------------------------------------------------ #
         # read template global parameter file
-        infile = os.path.join(test_dir, 'samples',
+        infile = os.path.join(test_dir, 'system',
                               test_dict['global_parameter_file'])
 
         with open(infile, 'r') as global_file:
@@ -308,9 +308,7 @@ def run_system(config_file, vic_exe, test_data_dir, out_dir, driver):
         # fill in global parameter options
         global_param = s.safe_substitute(test_data_dir=test_data_dir,
                                          result_dir=dirs['results'],
-                                         state_dir=dirs['state'],
-                                         testname=testname,
-                                         test_root=test_dir)
+                                         state_dir=dirs['state'])
         # ------------------------------------------------------------ #
 
         # ------------------------------------------------------------ #
@@ -767,6 +765,8 @@ def replace_global_values(gp, replace):
     gpl = []
     for line in iter(gp.splitlines()):
         line_list = line.split()
+        if line_list==[]:
+            continue
         key = line_list[0]
         if key in replace:
             value = replace.pop(key)

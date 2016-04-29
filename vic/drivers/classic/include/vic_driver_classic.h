@@ -57,7 +57,7 @@ void init_output_list(out_data_struct *, int, char *, int, double);
 void initialize_forcing_files(void);
 void make_in_and_outfiles(filep_struct *, filenames_struct *, soil_con_struct *,
                           out_data_file_struct *);
-FILE *open_state_file(global_param_struct *, filenames_struct, int, int);
+FILE *open_state_file(global_param_struct *, filenames_struct, size_t, size_t);
 void print_atmos_data(atmos_data_struct *atmos, size_t nr);
 void parse_output_info(FILE *, out_data_file_struct **, out_data_struct *);
 void read_atmos_data(FILE *, global_param_struct, int, int, double **,

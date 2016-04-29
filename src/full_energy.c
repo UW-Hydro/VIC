@@ -231,6 +231,7 @@ int  full_energy(int                  gridcell,
   /**************************************************
     Solve Energy and/or Water Balance for Each
     Vegetation Type
+    对每种植被进行能量或水量平衡计算
   **************************************************/
   for(iveg = 0; iveg <= Nveg; iveg++){
 
@@ -265,6 +266,7 @@ int  full_energy(int                  gridcell,
 
       /**************************************************
         Initialize Model Parameters
+        初始化模型参数
       **************************************************/
 
       for(band = 0; band < Nbands; band++) {
@@ -324,6 +326,7 @@ int  full_energy(int                  gridcell,
 	Compute the aerodynamic resistance 
 	for current veg cover and various
 	types of potential evap
+       计算各种植被的空气阻力以及各种潜在蒸散发量
       *************************************/
 
       /* Loop over types of potential evap, plus current veg */
@@ -405,7 +408,8 @@ int  full_energy(int                  gridcell,
       }
 
       /******************************
-        Solve ground surface fluxes 
+        Solve ground surface fluxes
+        地表通量计算
       ******************************/
   
       for ( band = 0; band < Nbands; band++ ) {
@@ -443,6 +447,7 @@ int  full_energy(int                  gridcell,
 
           /********************************************************
             Compute soil wetness and root zone soil moisture
+            计算土壤水分及根区土壤水分
           ********************************************************/
           cell[iveg][band].rootmoist = 0;
           cell[iveg][band].wetness = 0;
@@ -476,7 +481,8 @@ int  full_energy(int                  gridcell,
   free((char *)aero_resist);
 
   /****************************
-     Run Lake Model           
+     Run Lake Model
+     运行湖泊模型
   ****************************/
 
   /** Compute total runoff and baseflow for all vegetation types

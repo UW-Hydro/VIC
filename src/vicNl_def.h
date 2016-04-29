@@ -1113,6 +1113,7 @@ typedef struct {
 /*************************************************************************
   This structure stores information about the time and date of the current
   time step.
+  该结构储存该时间步的相关信息
   *************************************************************************/
 typedef struct {
   int day;                      /* current day */
@@ -1125,6 +1126,7 @@ typedef struct {
 /***************************************************************
   This structure stores all soil variables for each layer in the
   soil column.
+  该结构保存每个网格各层土壤的数据
   ***************************************************************/
 typedef struct {
   double Cs;                /* average volumetric heat capacity of the 
@@ -1144,6 +1146,7 @@ typedef struct {
 /******************************************************************
   This structure stores soil variables for the complete soil column 
   for each grid cell.
+  该结构保存每个网格的计算完毕后的土壤数据
   ******************************************************************/
 typedef struct {
   double aero_resist[2];               /* The (stability-corrected) aerodynamic
@@ -1408,6 +1411,7 @@ typedef struct {
 /*****************************************************************
   This structure stores all variables needed to solve, or save 
   solututions for all versions of this model.
+  该结构存储所有数据和参数的数据结构
 *****************************************************************/
 typedef struct {
   cell_data_struct  **cell;       /* Stores soil layer variables */
@@ -1456,6 +1460,7 @@ typedef struct {
 
 /*******************************************************
   This structure stores output information for one output file.
+  该结构储存数据输出文件的输出信息
   *******************************************************/
 typedef struct {
   char		prefix[20];  /* prefix of the file name, e.g. "fluxes" */

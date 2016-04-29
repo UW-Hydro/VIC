@@ -141,6 +141,7 @@ int main(int argc, char *argv[])
   save_data_struct         save_data;
   
   /** Read Model Options **/
+  /** 读取程序输入参数 **/
   initialize_global();
   filenames = cmd_proc(argc, argv);
 
@@ -149,10 +150,12 @@ int main(int argc, char *argv[])
 #endif
 
   /** Read Global Control File **/
+  /** 读取全局参数 **/
   filep.globalparam = open_file(filenames.global,"r");
   global_param = get_global_param(&filenames, filep.globalparam);
 
   /** Set up output data structures **/
+  /** 建立输出数据结构 **/
   out_data = create_output_list();
   out_data_files = set_output_defaults(out_data);
   fclose(filep.globalparam);
@@ -164,6 +167,7 @@ int main(int argc, char *argv[])
 
   if (!options.OUTPUT_FORCE) {
     /** Read Vegetation Library File **/
+    /** 读取植被参数库数据 **/
     veg_lib = read_veglib(filep.veglib,&Nveg_type);
   } /* !OUTPUT_FORCE */
 
@@ -171,9 +175,11 @@ int main(int argc, char *argv[])
   cellnum = -1;
 
   /** Make Date Data Structure **/
+  /** 建立日期数据结构 **/
   dmy      = make_dmy(&global_param);
 
   /** allocate memory for the atmos_data_struct **/
+  /** 为气象参数数据分配内存空间 **/
   alloc_atmos(global_param.nrecs, &atmos);
 
   /** 初始化状态 **/
@@ -300,17 +306,20 @@ int main(int argc, char *argv[])
 
 	  /**************************************************
 	    Compute cell physics for 1 timestep
+	    计算此时间步的陆面过程
 	  **************************************************/
 	  ErrorFlag = full_energy(cellnum, rec, &atmos[rec], &all_vars, dmy, &global_param, &lake_con, &soil_con, veg_con, veg_hist);
 
 	  /**************************************************
 	    Write cell average values for current time step
+        输出每个时间步的数据
 	  **************************************************/
 	  ErrorFlag = put_data(&all_vars, &atmos[rec], &soil_con, veg_con, &lake_con, out_data_files, out_data, &save_data, &dmy[rec], rec);
 
 	  /************************************
 	    Save model state at assigned date
 	    (after the final time step of the assigned date)
+	    保存每个时间步结尾的状态
 	  ************************************/
 	  if ( filep.statefile != NULL
 	       &&  ( dmy[rec].year == global_param.stateyear
@@ -330,7 +339,7 @@ int main(int argc, char *argv[])
 	      // Else exit program on cell solution error as in previous versions
               sprintf(ErrStr, "ERROR: Grid cell %i failed in record %i so the simulation has ended. Check your inputs before rerunning the simulation.\n", soil_con.gridcel, rec);
               vicerror(ErrStr);
-	    }
+	        }
           }
 
           NEWCELL=FALSE;

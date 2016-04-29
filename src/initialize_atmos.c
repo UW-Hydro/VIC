@@ -923,17 +923,6 @@ void initialize_atmos(atmos_data_struct        *atmos,
     Shortwave, part 1.
   *************************************************/
 
-  if (param_set.TYPE[SD].SUPPLIED &&
-      param_set.FORCE_DT[param_set.TYPE[SD].SUPPLIED-1] == 24) {
-    for (day=0; day<Ndays_local; day++) {
-      double sd = local_forcing_data[SD][day];
-      double lat = phi;
-      int day_seq = dmy_local[day*24].day_in_year;
-      local_forcing_data[SHORTWAVE][day] = estimate_sw_by_sd(sd, lat, day_seq);
-    }
-    param_set.TYPE[SHORTWAVE].SUPPLIED = 1;
-  }
-
   if (param_set.TYPE[SHORTWAVE].SUPPLIED) {
     have_shortwave = 1; // flag for MTCLIM
     for (day=0; day<Ndays_local; day++) {
@@ -949,6 +938,21 @@ void initialize_atmos(atmos_data_struct        *atmos,
   }
   else {
     have_shortwave = 0;
+  }
+
+  if (!param_set.TYPE[SHORTWAVE].SUPPLIED &&
+          param_set.TYPE[SD].SUPPLIED &&
+          param_set.FORCE_DT[param_set.TYPE[SD].SUPPLIED-1] == 24) {
+    for (day=0; day<Ndays_local; day++) {
+      double sd = local_forcing_data[SD][day];
+      int day_seq = dmy_local[day*24].day_in_year;
+      double sw = estimate_sw_by_sd(sd, phi, day_seq);
+      local_forcing_data[SHORTWAVE][day] = sw;
+      for (hour=0; hour<24; hour++) {
+        hourlyrad[day*24+hour] = sw;
+      }
+    }
+    have_shortwave = 1;
   }
 
   /**************************************************

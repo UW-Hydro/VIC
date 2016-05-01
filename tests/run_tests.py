@@ -300,6 +300,18 @@ def run_system(config_file, vic_exe, test_data_dir, out_dir, driver):
         # ------------------------------------------------------------ #
 
         # ------------------------------------------------------------ #
+        # If restart test, prepare running and splitting periods
+        # (1) Find STATESEC option
+        statesec = find_global_param_value(global_param, 'STATESEC')
+        # (2) Prepare running periods and initial state files for restart test
+        if 'restart' in test_dict:
+            run_periods = prepare_restart_run_periods(
+                                test_dict['restart'], driver,
+                                dirs['state'], statesec)
+        # ------------------------------------------------------------ #
+
+
+        # ------------------------------------------------------------ #
         # create template string
         s = string.Template(global_param)
         # ------------------------------------------------------------ #
@@ -833,6 +845,119 @@ def read_vic_ascii(filepath, header=True, parse_dates=True,
     return df
 # -------------------------------------------------------------------- #
 
+# -------------------------------------------------------------------- #
+def prepare_restart_run_periods(restart_dict, driver, state_basedir, statesec):
+    ''' For restart tests, read full running period and splitting dates into datetime objects
+    Parameters
+    ----------
+    restart_dict: <class 'configobj.Section'>
+        A section of the config file for exact restart test setup
+    driver: <str>
+        'classic' or 'image'
+    state_basedir: <str>
+        Basedirectory of output state files.
+        For restart tests, state files will be output as <state_basedir>/<run_start_date>_<run_end_date>/<state_file>
+    statesec: <int>
+        STATESEC option in global parameter file
+
+    Returns
+    ----------
+    run_periods: OrderedDict
+        A list of running periods, including the full-period run, and all splitted 
+        runs in order. Each element of run_period is a dictionary with keys:
+            start_date
+            end_date
+            init_state  # None, or full path of the initial state file
+                        # e.g., '/path/19490101_19490105/states_19490105_82800'
+        
+    '''
+
+    #--- Read in full running period ---#
+    start_date = datetime.datetime(restart_dict['start_date'][0],
+                                   restart_dict['start_date'][1],
+                                   restart_dict['start_date'][2])
+    end_date = datetime.datetime(restart_dict['end_date'][0],
+                                 restart_dict['end_date'][1],
+                                 restart_dict['end_date'][2])
+    #--- Identify each of the splitted running period ---#
+    list_split_dates = []
+    for i, split in enumerate(restart_dict['split_dates']):
+        list_split_dates.append(datetime.datetime(restart_dict['split_dates'][split][0],
+                                                  restart_dict['split_dates'][split][1],
+                                                  restart_dict['split_dates'][split][2]))
+    #--- Prepare running periods ---#
+    # run_periods is a list of running periods, including the full-period run, 
+    # and all splitted runs in order. Each element of run_period is a dictionary 
+    # with keys:
+    #       start_date
+    #       end_date
+    #       init_state  # None, or full path of the initial state file
+    #                   # e.g., '/path/19490101_19490105/states_19490105_82800'
+    run_periods = []
+    # Append the full run
+    d = dict(start_date=start_date, end_date=end_date)
+    d['init_state'] = None
+    run_periods.append(d)
+    # First splitted running period - start_date to first split date
+    d = dict(start_date=start_date, end_date=list_split_dates[0])
+    d['init_state'] = None
+    run_periods.append(d)
+    # Loop over each of the rest splitted periods
+    if driver=='classic':
+        statefile_prefix = 'states_'
+    elif driver=='image':
+        statefile_prefix = 'states.'
+
+    for i in range(len(list_split_dates)-1):
+        d = dict(start_date=list_split_dates[i] + dt.timedelta(days=1),
+                 end_date=list_split_dates[i+1])
+        d['init_state'] = os.path.join(
+                state_basedir,
+                '{}_{}'.format(run_periods[-1]['start_date'].strftime("%Y%m%d"),
+                               run_periods[-1]['end_date'].strftime("%Y%m%d")),
+                '{}{}_{}'.format(statefile_prefix,
+                                 run_periods[-1]['end_date'].strftime("%Y%m%d"),
+                                 statesec))
+    run_periods.append(d)
+    # Last splitted running period - last split date to end_date
+    d = dict(start_date=list_split_dates[len(list_split_dates)-1] + 
+                        datetime.timedelta(days=1),
+             end_date=end_date)
+    d['init_state'] = os.path.join(
+            state_basedir,
+            '{}_{}'.format(run_periods[-1]['start_date'].strftime("%Y%m%d"),
+                           run_periods[-1]['end_date'].strftime("%Y%m%d")),
+            '{}{}_{}'.format(statefile_prefix,
+                             run_periods[-1]['end_date'].strftime("%Y%m%d"),
+                             statesec))
+    run_periods.append(d)
+
+    return run_periods
+# -------------------------------------------------------------------- #
+
+# -------------------------------------------------------------------- #
+def find_global_param_value(gp, param_name):
+    ''' Return the value of a global parameter
+
+    Parameters
+    ----------
+    gp: <str>
+        Global parameter file, read in by read()
+    param_name: <str>
+        The name of the global parameter to find
+
+    Returns
+    ----------
+    line_list[1]: <str>
+        The value of the global parameter
+    '''
+    for line in iter(gp.splitlines()):
+        line_list = line.split()
+        if line_list==[]:
+            continue
+        key = line_list[0]
+        if key==param_name:
+            return line_list[1]
 
 # -------------------------------------------------------------------- #
 if __name__ == '__main__':

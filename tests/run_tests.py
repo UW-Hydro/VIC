@@ -12,6 +12,7 @@ import string
 
 import pytest
 import pandas as pd
+import numpy as np
 
 from tonic.models.vic.vic import VIC, VICRuntimeError  # , read_vic_ascii
 from tonic.io import read_config, read_configobj
@@ -423,6 +424,10 @@ def run_system(config_file, vic_exe, test_data_dir, out_dir, driver):
                         for fname in glob.glob(os.path.join(dirs['results'], '*')):
                             df = read_vic_ascii(fname, header=True)
                             check_for_nans(df)
+
+                # check for exact restarts
+                if 'exact_restart' in test_dict['check']:
+                    check_exact_restart_fluxes(dirs['results'], driver, run_periods)
             # -------------------------------------------------------- #
 
             # -------------------------------------------------------- #
@@ -1090,6 +1095,70 @@ def setup_subdirs_and_fill_in_global_param_restart_test(s, run_periods, driver, 
                 stateday=run_end_date.day))
     return(list_global_param)
 # -------------------------------------------------------------------- #
+
+# -------------------------------------------------------------------- #
+def check_exact_restart_fluxes(result_basedir, driver, run_periods):
+    ''' Checks whether all the fluxes are the same w/ or w/o restart
+
+    Parameters
+    ----------
+    result_basedir: <str>
+        Base directory of output fluxes results; running periods are subdirectories under the base directory
+    driver: <str>
+        'classic' or 'image'
+    run_periods: <list>
+        A list of running periods. Return from prepare_restart_run_periods()
+
+    Returns
+    ----------
+    '''
+
+    #--- Extract full run period ---#
+    run_full_start_date = run_periods[0]['start_date']
+    run_full_end_date = run_periods[0]['end_date']
+    #--- Read full run fluxes ---#
+    if driver=='classic':
+        result_dir = os.path.join(
+            result_basedir,
+            '{}_{}'.format(run_full_start_date.strftime('%Y%m%d'),
+                           run_full_end_date.strftime('%Y%m%d')))
+        # Read in each of the output flux files
+        dict_df_full_run = {}  # a dict of flux at each grid cell, keyed by flux basename
+        for fname in glob.glob(os.path.join(result_dir, '*')):
+            df = read_vic_ascii(fname, header=True)
+            dict_df_full_run[os.path.basename(fname)] = df
+
+    #--- Loop over the result of each split run period ---#
+    for i, run_period in enumerate(run_periods):
+        # Skip the full run
+        if i==0:
+            continue
+        # Extract running period
+        start_date = run_period['start_date']
+        end_date = run_period['end_date']
+        # Read in each of the output flux files
+        result_dir = os.path.join(
+            result_basedir,
+            '{}_{}'.format(start_date.strftime('%Y%m%d'),
+                           end_date.strftime('%Y%m%d')))
+        for flux_basename in dict_df_full_run.keys():
+            fname = os.path.join(result_dir, flux_basename)
+            df = read_vic_ascii(fname, header=True)
+            # Extract the same period from the full run
+            df_full_run_split_period = dict_df_full_run[flux_basename].truncate(
+                                                     before=start_date,
+                                                     after=end_date)
+            # Compare split run fluxes with full run
+            df_diff = df - df_full_run_split_period
+            if np.absolute(df_diff.max().max()) > 0:
+                raise VICTestError('Restart causes inexact flux outputs '
+                                   'for running period {} - {} at grid cell {}!'.
+                            format(start_date.strftime('%Y%m%d'),
+                                   end_date.strftime('%Y%m%d'),
+                                   flux_basename))
+            else:
+                continue
+    return
 
 # -------------------------------------------------------------------- #
 

@@ -248,6 +248,7 @@ int main(int argc, char *argv[])
       /**************************************************
          Initialize Meteological Forcing Values That
          Have not Been Specifically Set
+
        **************************************************/
 
 #if VERBOSE
@@ -307,12 +308,13 @@ int main(int argc, char *argv[])
 	  /**************************************************
 	    Compute cell physics for 1 timestep
 	    计算此时间步的陆面过程
+	    核心函数
 	  **************************************************/
 	  ErrorFlag = full_energy(cellnum, rec, &atmos[rec], &all_vars, dmy, &global_param, &lake_con, &soil_con, veg_con, veg_hist);
 
 	  /**************************************************
 	    Write cell average values for current time step
-        输出每个时间步的数据
+        导出每个时间步的数据
 	  **************************************************/
 	  ErrorFlag = put_data(&all_vars, &atmos[rec], &soil_con, veg_con, &lake_con, out_data_files, out_data, &save_data, &dmy[rec], rec);
 

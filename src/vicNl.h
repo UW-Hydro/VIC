@@ -126,6 +126,15 @@
 	      calc_veg_roughness().					TJB
 ************************************************************************/
 
+#ifndef VICNL_H_
+#define VICNL_H_
+
+#if defined(__cplusplus)||defined(c_plusplus)
+extern "C" {
+#endif
+
+#include <stdlib.h>
+#include <stdio.h>
 #include <math.h>
 #include <vicNl_def.h>
 #include <LAKE.h>
@@ -501,3 +510,8 @@ void write_vegvar(veg_var_struct *, int);
 
 void zero_output_list(out_data_struct *);
 
+#if defined(__cplusplus)||defined(c_plusplus)
+}
+#endif
+
+#endif

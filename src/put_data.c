@@ -19,6 +19,7 @@ int  put_data(all_vars_struct   *all_vars,
 
   This routine converts data units, and stores finalized values
   in an array for later output to the output files.
+  转换数据单位并保存计算完成的数据以便输出
 
   modifications:
   06-24-98  modified for new distributed presipitation data structures KAC

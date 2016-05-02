@@ -300,16 +300,15 @@ def run_system(config_file, vic_exe, test_data_dir, out_dir, driver):
         # ------------------------------------------------------------ #
 
         # ------------------------------------------------------------ #
-        # If restart test, prepare running and splitting periods
+        # If restart test, prepare running periods
         # (1) Find STATESEC option
         statesec = find_global_param_value(global_param, 'STATESEC')
-        # (2) Prepare running periods and initial state files for restart test
+        # (2) Prepare running periods and initial state file info for restart test
         if 'restart' in test_dict:
             run_periods = prepare_restart_run_periods(
-                                test_dict['restart'], driver,
+                                test_dict['restart'],
                                 dirs['state'], statesec)
         # ------------------------------------------------------------ #
-
 
         # ------------------------------------------------------------ #
         # create template string
@@ -318,9 +317,18 @@ def run_system(config_file, vic_exe, test_data_dir, out_dir, driver):
 
         # ------------------------------------------------------------ #
         # fill in global parameter options
-        global_param = s.safe_substitute(test_data_dir=test_data_dir,
-                                         result_dir=dirs['results'],
-                                         state_dir=dirs['state'])
+        #--- if restart test, multiple runs ---#
+        if 'restart' in test_dict:
+            # Set up subdirectories and fill in global parameter options 
+            # for restart testing
+            list_global_param = setup_subdirs_and_fill_in_global_param_restart_test(
+                s, run_periods, driver, dirs['results'], dirs['state'], test_data_dir)
+
+        #--- Else, single run ---#
+        else:
+            global_param = s.safe_substitute(test_data_dir=test_data_dir,
+                                             result_dir=dirs['results'],
+                                             state_dir=dirs['state'])
         # ------------------------------------------------------------ #
 
         # ------------------------------------------------------------ #
@@ -329,17 +337,35 @@ def run_system(config_file, vic_exe, test_data_dir, out_dir, driver):
             replacements = test_dict['options']
         else:
             replacements = OrderedDict()
-        global_param = replace_global_values(global_param, replacements)
+
+        if 'restart' in test_dict:
+            for j, gp in enumerate(list_global_param):
+                list_global_param[j] = replace_global_values(gp, replacements)
+        else:
+            global_param = replace_global_values(global_param, replacements)
         # ------------------------------------------------------------ #
 
         # ------------------------------------------------------------ #
         # write global parameter file
-        test_global_file = os.path.join(dirs['test'],
-                                        '{0}_globalparam.txt'.format(testname))
-
-        with open(test_global_file, mode='w') as f:
-            for line in global_param:
-                f.write(line)
+        if 'restart' in test_dict:
+            list_test_global_file = []
+            for j, gp in enumerate(list_global_param):
+                test_global_file = os.path.join(
+                            dirs['test'],
+                            '{}_globalparam_{}_{}.txt'.format(
+                                    testname,
+                                    run_periods[j]['start_date'].strftime("%Y%m%d"),
+                                    run_periods[j]['end_date'].strftime("%Y%m%d")))
+                list_test_global_file.append(test_global_file)
+                with open(test_global_file, mode='w') as f:
+                    for line in gp:
+                        f.write(line)
+        else:
+            test_global_file = os.path.join(dirs['test'],
+                                            '{0}_globalparam.txt'.format(testname))
+            with open(test_global_file, mode='w') as f:
+                for line in global_param:
+                    f.write(line)
         # ------------------------------------------------------------ #
 
         # ------------------------------------------------------------ #
@@ -350,11 +376,21 @@ def run_system(config_file, vic_exe, test_data_dir, out_dir, driver):
         error_message = ''
 
         try:
-            returncode = vic_exe.run(test_global_file, logdir=dirs['logs'])
+            expectation = int(test_dict['expected_retval'])
+            returncode_flag = True
+
+            if 'restart' in test_dict:
+                for j, test_global_file in enumerate(list_test_global_file):
+                    returncode = vic_exe.run(test_global_file, logdir=dirs['logs'])
+                    if returncode != expectation:
+                        returncode_flag = False
+            else:
+                returncode = vic_exe.run(test_global_file, logdir=dirs['logs'])
+                if returncode != expectation:
+                    returncode_flag = False
             test_complete = True
 
-            expectation = test_dict['expected_retval']
-            if returncode != int(test_dict['expected_retval']):
+            if returncode_flag == False:
                 raise VICReturnCodeError('VIC return code ({0}) '
                                          'does not match expected '
                                          '({1})'.format(returncode,
@@ -364,24 +400,29 @@ def run_system(config_file, vic_exe, test_data_dir, out_dir, driver):
             # check output files
             if test_dict['check']:
                 if 'complete' in test_dict['check']:
-                    start = None
-                    end = None
+                    if 'restart' in test_dict:
+                        pass
+                    else:  # single run
+                        start = None
+                        end = None
+                        for fname in glob.glob(os.path.join(dirs['results'], '*')):
+                            df = read_vic_ascii(fname, header=True)
+                            # check that each dataframe includes all timestamps
+                            if 'complete' in test_dict['check']:
+                                if (start is not None) and (end is not None):
+                                    check_completed(df, start, end)
+                                else:
+                                    start = df.index[0]
+                                    end = df.index[-1]
 
-                for fname in glob.glob(os.path.join(dirs['results'], '*')):
-                    df = read_vic_ascii(fname, header=True)
-                    # do numeric tests
-
-                    # check that each dataframe includes all timestamps
-                    if 'complete' in test_dict['check']:
-                        if (start is not None) and (end is not None):
-                            check_completed(df, start, end)
-                        else:
-                            start = df.index[0]
-                            end = df.index[-1]
-
-                    # check for nans in the df
-                    if 'nonans' in test_dict['check']:
-                        check_for_nans(df)
+                # check for nans in the df
+                if 'nonans' in test_dict['check']:
+                    if 'restart' in test_dict:
+                        pass
+                    else:  # single run
+                        for fname in glob.glob(os.path.join(dirs['results'], '*')):
+                            df = read_vic_ascii(fname, header=True)
+                            check_for_nans(df)
             # -------------------------------------------------------- #
 
             # -------------------------------------------------------- #
@@ -846,14 +887,12 @@ def read_vic_ascii(filepath, header=True, parse_dates=True,
 # -------------------------------------------------------------------- #
 
 # -------------------------------------------------------------------- #
-def prepare_restart_run_periods(restart_dict, driver, state_basedir, statesec):
+def prepare_restart_run_periods(restart_dict, state_basedir, statesec):
     ''' For restart tests, read full running period and splitting dates into datetime objects
     Parameters
     ----------
     restart_dict: <class 'configobj.Section'>
         A section of the config file for exact restart test setup
-    driver: <str>
-        'classic' or 'image'
     state_basedir: <str>
         Basedirectory of output state files.
         For restart tests, state files will be output as <state_basedir>/<run_start_date>_<run_end_date>/<state_file>
@@ -903,11 +942,6 @@ def prepare_restart_run_periods(restart_dict, driver, state_basedir, statesec):
     d['init_state'] = None
     run_periods.append(d)
     # Loop over each of the rest splitted periods
-    if driver=='classic':
-        statefile_prefix = 'states_'
-    elif driver=='image':
-        statefile_prefix = 'states.'
-
     for i in range(len(list_split_dates)-1):
         d = dict(start_date=list_split_dates[i] + dt.timedelta(days=1),
                  end_date=list_split_dates[i+1])
@@ -915,7 +949,7 @@ def prepare_restart_run_periods(restart_dict, driver, state_basedir, statesec):
                 state_basedir,
                 '{}_{}'.format(run_periods[-1]['start_date'].strftime("%Y%m%d"),
                                run_periods[-1]['end_date'].strftime("%Y%m%d")),
-                '{}{}_{}'.format(statefile_prefix,
+                '{}{}_{}'.format('states_',
                                  run_periods[-1]['end_date'].strftime("%Y%m%d"),
                                  statesec))
     run_periods.append(d)
@@ -927,7 +961,7 @@ def prepare_restart_run_periods(restart_dict, driver, state_basedir, statesec):
             state_basedir,
             '{}_{}'.format(run_periods[-1]['start_date'].strftime("%Y%m%d"),
                            run_periods[-1]['end_date'].strftime("%Y%m%d")),
-            '{}{}_{}'.format(statefile_prefix,
+            '{}{}_{}'.format('states_',
                              run_periods[-1]['end_date'].strftime("%Y%m%d"),
                              statesec))
     run_periods.append(d)
@@ -958,6 +992,106 @@ def find_global_param_value(gp, param_name):
         key = line_list[0]
         if key==param_name:
             return line_list[1]
+# -------------------------------------------------------------------- #
+
+# -------------------------------------------------------------------- #
+def setup_subdirs_restart_test(result_basedir, state_basedir, run_periods):
+    ''' Set up subdirectories for multiple runs for restart testing
+    Parameters
+    ----------
+    result_basedir: <str>
+        Base directory of output fluxes results; running periods are subdirectories under the base directory
+    state_basedir: <str>
+        Base directory of output state results; running periods are subdirectories under the base directory
+    run_periods: <list>
+        A list of running periods. Return from prepare_restart_run_periods()
+
+    Returns
+    ----------
+    None
+    '''
+
+    for j, run_period in enumerate(run_periods):
+        # Set up subdirectories for results and states
+        run_start_date = run_period['start_date']
+        run_end_date = run_period['end_date']
+        result_dir = os.path.join(result_basedir,
+                                  '{}_{}'.format(run_start_date.strftime("%Y%m%d"),
+                                                 run_end_date.strftime("%Y%m%d")))
+        state_dir = os.path.join(state_basedir,
+                                 '{}_{}'.format(run_start_date.strftime("%Y%m%d"),
+                                                run_end_date.strftime("%Y%m%d")))
+        os.makedirs(result_dir, exist_ok=True)
+        os.makedirs(state_dir, exist_ok=True)
+
+# -------------------------------------------------------------------- #
+
+# -------------------------------------------------------------------- #
+def setup_subdirs_and_fill_in_global_param_restart_test(s, run_periods, driver, result_basedir, state_basedir, test_data_dir):
+    ''' Fill in global parameter options for multiple runs for restart testing
+
+    Parameters
+    ----------
+    s: <string.Template>
+        Template of the global param file to be filled in
+    run_periods: <list>
+        A list of running periods. Return from prepare_restart_run_periods()
+    driver: <str>
+        'classic' or 'image'
+    result_basedir: <str>
+        Base directory of output fluxes results; running periods are subdirectories under the base directory
+    state_basedir: <str>
+        Base directory of output state results; running periods are subdirectories under the base directory
+    test_data_dir: <str>
+        Base directory of test data
+
+    Returns
+    ----------
+    '''
+
+    list_global_param = []
+    for j, run_period in enumerate(run_periods):
+        # Set up subdirectories for results and states
+        run_start_date = run_period['start_date']
+        run_end_date = run_period['end_date']
+        result_dir = os.path.join(result_basedir,
+                                  '{}_{}'.format(run_start_date.strftime("%Y%m%d"),
+                                                 run_end_date.strftime("%Y%m%d")))
+        state_dir = os.path.join(state_basedir,
+                                 '{}_{}'.format(run_start_date.strftime("%Y%m%d"),
+                                                run_end_date.strftime("%Y%m%d")))
+        os.makedirs(result_dir, exist_ok=True)
+        os.makedirs(state_dir, exist_ok=True)
+        # Determine initial state
+        if run_period['init_state']==None: # if no initial state
+            init_state='#INIT_STATE'
+        else: # else, the initial state is the last time step
+            init_state='INIT_STATE {}'.format(run_period['init_state'])
+            if driver=='image': # In image driver, the name of
+                                # the state file is 'basepath.*'
+                                # instead of 'basepath_*', and
+                                # ends with ".nc"
+                init_state = init_state.replace("states_", "states.") + '.nc'
+
+        # Fill in global parameter options
+        list_global_param.append(s.safe_substitute(
+                test_data_dir=test_data_dir,
+                result_dir=result_dir,
+                state_dir=state_dir,
+                startyear=run_start_date.year,
+                startmonth=run_start_date.month,
+                startday=run_start_date.day,
+                endyear=run_end_date.year,
+                endmonth=run_end_date.month,
+                endday=run_end_date.day,
+                init_state=init_state,
+                stateyear=run_end_date.year,
+                statemonth=run_end_date.month,
+                stateday=run_end_date.day))
+    return(list_global_param)
+# -------------------------------------------------------------------- #
+
+# -------------------------------------------------------------------- #
 
 # -------------------------------------------------------------------- #
 if __name__ == '__main__':

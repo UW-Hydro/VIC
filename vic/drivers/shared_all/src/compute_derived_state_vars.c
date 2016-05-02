@@ -123,30 +123,32 @@ compute_derived_state_vars(all_vars_struct *all_vars,
                     }
 
                     // set soil moisture properties for all soil thermal nodes
-                    ErrorFlag =
-                        distribute_node_moisture_properties(
-                            energy[veg][band].moist,
-                            energy[veg][band].ice,
-                            energy[veg][band].kappa_node,
-                            energy[veg][band].Cs_node,
-                            soil_con->Zsum_node,
-                            energy[veg][band].T,
-                            soil_con->max_moist_node,
-                            soil_con->expt_node,
-                            soil_con->bubble_node,
-                            moist[veg][band],
-                            soil_con->depth,
-                            soil_con->soil_dens_min,
-                            soil_con->bulk_dens_min,
-                            soil_con->quartz,
-                            soil_con->soil_density,
-                            soil_con->bulk_density,
-                            soil_con->organic,
-                            options.Nnode, options.Nlayer,
-                            soil_con->FS_ACTIVE);
-                    if (ErrorFlag == ERROR) {
-                        log_err("Error setting physical properties for "
-                                "soil thermal nodes");
+                    if (options.FULL_ENERGY || options.FROZEN_SOIL) {
+                        ErrorFlag =
+                            distribute_node_moisture_properties(
+                                energy[veg][band].moist,
+                                energy[veg][band].ice,
+                                energy[veg][band].kappa_node,
+                                energy[veg][band].Cs_node,
+                                soil_con->Zsum_node,
+                                energy[veg][band].T,
+                                soil_con->max_moist_node,
+                                soil_con->expt_node,
+                                soil_con->bubble_node,
+                                moist[veg][band],
+                                soil_con->depth,
+                                soil_con->soil_dens_min,
+                                soil_con->bulk_dens_min,
+                                soil_con->quartz,
+                                soil_con->soil_density,
+                                soil_con->bulk_density,
+                                soil_con->organic,
+                                options.Nnode, options.Nlayer,
+                                soil_con->FS_ACTIVE);
+                        if (ErrorFlag == ERROR) {
+                            log_err("Error setting physical properties for "
+                                    "soil thermal nodes");
+                        }
                     }
 
                     // Check node spacing v time step

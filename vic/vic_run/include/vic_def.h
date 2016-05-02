@@ -789,11 +789,10 @@ typedef struct {
  *          soil column.
  *****************************************************************************/
 typedef struct {
+    // State variables
     double Cs;              /**< average volumetric heat capacity of the
                                current layer (J/m^3/K) */
     double T;               /**< temperature of the unfrozen sublayer (C) */
-    double bare_evap_frac;  /**< fraction of evapotranspiration coming from bare soil evap, from soil layer (mm) */
-    double evap;            /**< evapotranspiration from soil layer (mm) */
     double ice[MAX_FROST_AREAS]; /**< ice content of the frozen sublayer (mm) */
     double kappa;           /**< average thermal conductivity of the current
                                layer (W/m/K) */
@@ -801,6 +800,10 @@ typedef struct {
                                (mm) */
     double phi;             /**< moisture diffusion parameter */
     double zwt;             /**< water table position relative to soil surface within the layer (cm) */
+    // Fluxes
+    double bare_evap_frac;  /**< fraction of evapotranspiration coming from bare soil evap, from soil layer (mm) */
+    double evap;            /**< evapotranspiration from soil layer (mm) */
+
 } layer_data_struct;
 
 /******************************************************************************
@@ -808,27 +811,19 @@ typedef struct {
  *          for each grid cell.
  *****************************************************************************/
 typedef struct {
+    // State variables
     double aero_resist[2];             /**< The (stability-corrected) aerodynamic
                                           resistance (s/m) that was actually used
                                           in flux calculations.
                                           [0] = surface (bare soil, non-overstory veg, or snow pack)
                                           [1] = overstory */
     double asat;                       /**< saturated area fraction */
-    double baseflow;                   /**< baseflow from current cell (mm/TS) */
     double CLitter;                    /**< carbon storage in litter pool [gC/m2] */
     double CInter;                     /**< carbon storage in intermediate pool [gC/m2] */
     double CSlow;                      /**< carbon storage in slow pool [gC/m2] */
-    double inflow;                     /**< moisture that reaches the top of
-                                          the soil column (mm) */
-    double pot_evap;                   /**< potential evaporation (mm) */
-    double runoff;                     /**< runoff from current cell (mm/TS) */
     layer_data_struct layer[MAX_LAYERS]; /**< structure containing soil variables
-                                            for each layer (see above) */
-    double RhLitter;                   /**< soil respiration from litter pool [gC/m2] */
-    double RhLitter2Atm;               /**< soil respiration from litter pool [gC/m2] that goes to atmosphere */
-    double RhInter;                    /**< soil respiration from intermediate pool [gC/m2] */
-    double RhSlow;                     /**< soil respiration from slow pool [gC/m2] */
-    double RhTot;                      /**< total soil respiration over all pools [gC/m2] (=RhLitter2Atm+RhInter+RhSlow) */
+                                            for each layer (see above; including both
+                                            state and flux variables) */
     double rootmoist;                  /**< total of layer.moist over all layers
                                           in the root zone (mm) */
     double wetness;                    /**< average of
@@ -836,6 +831,19 @@ typedef struct {
                                           over all layers (fraction) */
     double zwt;                        /**< average water table position [cm] - using lowest unsaturated layer */
     double zwt_lumped;                 /**< average water table position [cm] - lumping all layers' moisture together */
+
+    // Fluxes
+    double pot_evap;                   /**< potential evaporation (mm) */
+    double baseflow;                   /**< baseflow from current cell (mm/TS) */
+    double runoff;                     /**< runoff from current cell (mm/TS) */
+    double inflow;                     /**< moisture that reaches the top of
+                                          the soil column (mm) */
+    double RhLitter;                   /**< soil respiration from litter pool [gC/m2] */
+    double RhLitter2Atm;               /**< soil respiration from litter pool [gC/m2] that goes to atmosphere */
+    double RhInter;                    /**< soil respiration from intermediate pool [gC/m2] */
+    double RhSlow;                     /**< soil respiration from slow pool [gC/m2] */
+    double RhTot;                      /**< total soil respiration over all pools [gC/m2] (=RhLitter2Atm+RhInter+RhSlow) */
+
 } cell_data_struct;
 
 /******************************************************************************
@@ -918,8 +926,8 @@ typedef struct {
  *          in a grid cell.
  *****************************************************************************/
 typedef struct {
+    // State variables
     double albedo;              /**< current vegetation albedo (fraction) */
-    double canopyevap;          /**< evaporation from canopy (mm/TS) */
     double displacement;        /**< current vegetation displacement height
                                    (m) */
     double fcanopy;             /**< current fractional area of plant canopy
@@ -927,37 +935,45 @@ typedef struct {
     double LAI;                 /**< current leaf area index (m2/m2) */
     double roughness;           /**< current vegetation roughness length
                                    (m) */
-    double throughfall;         /**< water that reaches the ground through
-                                   the canopy (mm/TS) */
     double Wdew;                /**< dew trapped on vegetation (mm) */
     double Wdmax;               /**< current maximum dew holding capacity
                                    (mm) */
-    // Carbon terms
+
+    // Fluxes
+    double canopyevap;          /**< evaporation from canopy (mm/TS) */
+    double throughfall;         /**< water that reaches the ground through
+                                   the canopy (mm/TS) */
+
+    // Carbon terms - states
     double AnnualNPP;           /**< running total annual NPP [gC/m2] */
     double AnnualNPPPrev;       /**< total annual NPP from previous year
                                    [gC/m2] */
-    double aPAR;                /**< whole-canopy absorbed PAR
-                                   (mol(photons)/m2 leaf area s) */
-    double *aPARLayer;          /**< array of per-layer absorbed PAR
-                                   (mol(photons)/m2 leaf area s) */
     double Ci;                  /**< whole-canopy leaf-internal CO2 mixing
                                    ratio (mol CO2/mol air) */
     double *CiLayer;            /**< array of per-layer leaf-internal CO2
                                    mixing ratio (mol CO2/mol air) */
+    double NPPfactor;           /**< whole-canopy photosynthesis multiplier
+                                   to account for inhibition separate from
+                                   stomatal resistance */
+    double *NscaleFactor;       /**< array of per-layer nitrogen scaling
+                                   factors */
+    double rc;                  /**< whole-canopy stomatal resistance (s/m) */
+    double *rsLayer;            /**< array of per-layer stomatal resistance
+                                   (s/m) */
+
+    // Carbon terms - fluxes
+    double aPAR;                /**< whole-canopy absorbed PAR
+                                   (mol(photons)/m2 leaf area s) */
+    double *aPARLayer;          /**< array of per-layer absorbed PAR
+                                   (mol(photons)/m2 leaf area s) */
     double GPP;                 /**< whole-canopy gross assimilation
                                    (photosynthesis) (umol(CO2)/m2s) */
     double Litterfall;          /**< flux of carbon from living biomass to
                                    litter pool [gC/m2] */
     double NPP;                 /**< net primary productivity (= GPP - Raut)
                                    (umol(CO2)/m2s) */
-    double NPPfactor;           /**< whole-canopy photosynthesis multiplier
-                                   to account for inhibition separate from
-                                   stomatal resistance */
-    double *NscaleFactor;       /**< array of per-layer nitrogen scaling
-                                   factors */
     double Raut;                /**< total plant respiration (= Rmaint
                                  + Rgrowth) (umol(CO2)/m2s) */
-    double rc;                  /**< whole-canopy stomatal resistance (s/m) */
     double Rdark;               /**< whole-canopy 'dark' respiration
                                    (umol(CO2)/m2s) */
     double Rgrowth;             /**< growth respiration ( = (GPP-Rmaint)
@@ -966,8 +982,6 @@ typedef struct {
                                    (= Rdark/FRLeaf) (umol(CO2)/m2s) */
     double Rphoto;              /**< whole-canopy photorespiration
                                    (umol(CO2)/m2s) */
-    double *rsLayer;            /**< array of per-layer stomatal resistance
-                                   (s/m) */
 } veg_var_struct;
 
 /******************************************************************************

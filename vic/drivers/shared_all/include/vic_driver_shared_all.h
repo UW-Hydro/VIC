@@ -524,7 +524,8 @@ void print_global_param(global_param_struct *gp);
 void print_lake_con(lake_con_struct *lcon, size_t nlnodes);
 void print_lake_var(lake_var_struct *lvar, size_t nlnodes, size_t nfronts,
                     size_t nlayers, size_t nnodes, size_t nfrost);
-void print_layer_data(layer_data_struct *ldata, size_t nfrost);
+void print_layer_data_states(layer_data_struct *ldata, size_t nfrost);
+void print_layer_data_fluxes(layer_data_struct *ldata);
 void print_license(void);
 void print_option(option_struct *option);
 void print_out_data(out_data_struct *out, size_t nelem);

@@ -32,8 +32,8 @@
 FILE *
 open_state_file(global_param_struct *global,
                 filenames_struct     filenames,
-                int                  Nlayer,
-                int                  Nnodes)
+                size_t               Nlayer,
+                size_t               Nnodes)
 {
     extern option_struct options;
 
@@ -62,11 +62,11 @@ open_state_file(global_param_struct *global,
 
     /* Write simulation flags */
     if (options.STATE_FORMAT == BINARY) {
-        fwrite(&Nlayer, sizeof(int), 1, statefile);
-        fwrite(&Nnodes, sizeof(int), 1, statefile);
+        fwrite(&Nlayer, sizeof(size_t), 1, statefile);
+        fwrite(&Nnodes, sizeof(size_t), 1, statefile);
     }
     else {
-        fprintf(statefile, "%i %i\n", Nlayer, Nnodes);
+        fprintf(statefile, "%zu %zu\n", Nlayer, Nnodes);
     }
 
     return(statefile);

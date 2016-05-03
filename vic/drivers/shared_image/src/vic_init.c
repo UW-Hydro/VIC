@@ -1557,4 +1557,5 @@ vic_init(void)
     // cleanup
     free(dvar);
     free(ivar);
+    free(Cv_sum);
 }

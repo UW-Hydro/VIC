@@ -85,7 +85,7 @@ vic_finalize(void)
             }
             free_veg_hist(&(veg_hist[i][j]));
         }
-        free_all_vars(&(all_vars[i]), veg_con[i][0].vegetat_type_num);
+        free_all_vars(&(all_vars[i]), veg_con_map[i].nv_active);
         free_out_data(&(out_data[i]));
         free(veg_con_map[i].vidx);
         free(veg_con_map[i].Cv);
@@ -103,8 +103,7 @@ vic_finalize(void)
     free(out_data);
     free(save_data);
     free(local_domain.locations);
-    // TODO: free dmy for image driver only
-    // free(dmy);
+    free(dmy);
     if (mpi_rank == 0) {
         free(filter_active_cells);
         free(global_domain.locations);

@@ -335,11 +335,18 @@ def run_system(config_file, vic_exe, test_data_dir, out_dir, driver):
 
         # ------------------------------------------------------------ #
         # replace global options from config file
+        # extract global options to be substitute
         if 'options' in test_dict:
             replacements = test_dict['options']
         else:
             replacements = OrderedDict()
 
+        # if STATE_FORMAT is specified, te the specified value (instead of 
+        # the one in the global template file)
+        if 'STATE_FORMAT' in replacements:
+            state_format = replacements.pop('STATE_FORMAT')
+
+        # replace global options
         if 'restart' in test_dict:
             for j, gp in enumerate(list_global_param):
                 list_global_param[j] = replace_global_values(gp, replacements)
@@ -428,7 +435,7 @@ def run_system(config_file, vic_exe, test_data_dir, out_dir, driver):
 
                 # check for exact restarts
                 if 'exact_restart' in test_dict['check']:
-                    check_exact_restart_fluxes(dirs['results'], driver, run_periods)
+                    #check_exact_restart_fluxes(dirs['results'], driver, run_periods)
                     check_exact_restart_states(dirs['state'], driver,
                                                run_periods, statesec, state_format)
             # -------------------------------------------------------- #
@@ -1204,6 +1211,8 @@ def check_exact_restart_states(state_basedir, driver, run_periods, statesec, sta
             'states_{}_{}'.format(run_full_end_date.strftime('%Y%m%d'), statesec))
         if state_format=='ASCII':
             states_full_run = read_ascii_state(state_fname)
+        elif state_format=='BINARY':
+            states_full_run = read_binary_state(state_fname)
 
     #--- Read the state at the end of the last period of run ---#
     # Extract the last split run period
@@ -1218,14 +1227,24 @@ def check_exact_restart_states(state_basedir, driver, run_periods, statesec, sta
             'states_{}_{}'.format(run_last_period_end_date.strftime('%Y%m%d'), statesec))
         if state_format=='ASCII':
             states = read_ascii_state(state_fname)
+        elif state_format=='BINARY':
+            states = read_binary_state(state_fname)
 
     #--- Compare split run states with full run ---#
     if driver=='classic':
-        states_diff = states - states_full_run
-        if np.absolute(states_diff).max() > pow(10, -6):
-            raise VICTestError('Restart causes inexact state outputs!')
-        else:
-            return
+        # If ASCII state file, check if almost the same
+        if state_format=='ASCII':
+            states_diff = states - states_full_run
+            if np.absolute(states_diff).max() > pow(10, -6):
+                raise VICTestError('Restart causes inexact state outputs!')
+            else:
+                return
+        # If BINARY state file, check if exactly the same
+        elif state_format=='BINARY':
+            if states!=states_full_run:
+                raise VICTestError('Restart causes inexact state outputs!')
+            else:
+                return
 
 # -------------------------------------------------------------------- #
 
@@ -1249,6 +1268,28 @@ def read_ascii_state(state_fname):
         for i, item in enumerate(list_states):
             list_states[i] = float(item)
     return np.asarray(list_states)
+# -------------------------------------------------------------------- #
+
+# -------------------------------------------------------------------- #
+def read_binary_state(state_fname):
+    ''' Read in ascii format state file and convert to a list of numbers
+
+    Parameters
+    ----------
+    state_fname: <str>
+        Path of the state file to be read
+
+    Returns
+    ----------
+    states: <bytes>
+        The full binary state file content
+    '''
+
+    with open(state_fname, 'rb') as f:
+        states = f.read()
+    return states
+
+# -------------------------------------------------------------------- #
 
 # -------------------------------------------------------------------- #
 if __name__ == '__main__':

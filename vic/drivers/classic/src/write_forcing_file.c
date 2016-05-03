@@ -112,7 +112,7 @@ write_forcing_file(atmos_data_struct    *atmos,
                 out_data[OUT_VPD].aggdata[0] *= PA_PER_KPA;
             }
 
-            if (options.BINARY_OUTPUT) {
+            if (options.OUT_FORMAT == BINARY) {
                 for (v = 0; v < N_OUTVAR_TYPES; v++) {
                     for (i = 0; i < out_data[v].nelem; i++) {
                         out_data[v].aggdata[i] *= out_data[v].mult;

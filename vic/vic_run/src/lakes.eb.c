@@ -290,15 +290,16 @@ solve_lake(double           snowfall,
         *  6. Calculate initial energy balance over ice.
         **********************************************************************/
 
+        windi = (wind * log((2. + soil_con.snow_rough) / soil_con.snow_rough) /
+                 log(wind_h / soil_con.snow_rough));
+        if (windi < 1.0) {
+            windi = 1.0;
+        }
+
         if (fracprv >= param.LAKE_FRACLIM) {
             freezeflag = 0;   /* Calculation for ice. */
             Le = calc_latent_heat_of_sublimation(tair); /* ice*/
-            windi =
-                (wind * log((2. + soil_con.snow_rough) / soil_con.snow_rough) /
-                 log(wind_h / soil_con.snow_rough));
-            if (windi < 1.0) {
-                windi = 1.0;
-            }
+
             lake->aero_resist =
                 (log((2. + soil_con.snow_rough) / soil_con.snow_rough) *
                  log(wind_h /
@@ -840,6 +841,7 @@ eddy(int     freezeflag,
             de[k] = param.LAKE_DM;
         }
     }
+
     /**********************************************************************
     * Avoid too low wind speeds for computational stability.
     **********************************************************************/
@@ -1821,7 +1823,7 @@ water_balance(lake_var_struct *lake,
     int                        isave_n;
     double                     inflow_volume;
     double                     surfacearea, ldepth;
-    double                     i;
+    double                     i_dbl;
     double                     index;
     size_t                     j, k, frost_area;
     double                     Tnew[MAX_LAKE_NODES];
@@ -2130,56 +2132,7 @@ water_balance(lake_var_struct *lake,
     *  4. Adjust the activenodes and lake area array.
     **********************************************************************/
 
-    if (lake->ldepth > param.LAKE_MAX_SURFACE && lake->ldepth < 2 *
-        param.LAKE_MAX_SURFACE) {
-        /* Not quite enough for two full layers. */
-        lake->surfdz = lake->ldepth / 2.;
-        lake->dz = lake->ldepth / 2.;
-        lake->activenod = 2;
-    }
-    else if (lake->ldepth >= 2 * param.LAKE_MAX_SURFACE) {
-        /* More than two layers. */
-        lake->surfdz = param.LAKE_MAX_SURFACE;
-        lake->activenod = (int) (lake->ldepth / param.LAKE_MAX_SURFACE);
-        if (lake->activenod > MAX_LAKE_NODES) {
-            lake->activenod = MAX_LAKE_NODES;
-        }
-        lake->dz =
-            (lake->ldepth - lake->surfdz) / ((double) (lake->activenod - 1));
-    }
-    else if (lake->ldepth > DBL_EPSILON) {
-        lake->surfdz = lake->ldepth;
-        lake->dz = 0.0;
-        lake->activenod = 1;
-    }
-    else {
-        lake->runoff_out += (lake->volume - lake->ice_water_eq);
-        lake->volume = lake->ice_water_eq;
-        lake->surfdz = 0.0;
-        lake->dz = 0.0;
-        lake->activenod = 0;
-        lake->ldepth = 0.0;
-    }
-
-    // lake_con.basin equals the surface area at specific depths as input by
-    // the user in the lake parameter file or calculated in read_lakeparam(),
-    // lake->surface equals the area at the top of each dynamic solution layer
-
-    /* Re-calculate lake surface area  */
-    for (k = 0; k <= lake->activenod; k++) {
-        if (k == 0) {
-            ldepth = lake->ldepth;
-        }
-        else {
-            ldepth = lake->dz * (lake->activenod - k);
-        }
-
-        ErrorFlag = get_sarea(lake_con, ldepth, &(lake->surface[k]));
-        if (ErrorFlag == ERROR) {
-            log_err("Something went wrong in get_sarea; depth = "
-                    "%f, sarea = %e", ldepth, lake->surface[k]);
-        }
-    }
+    compute_derived_lake_dimensions(lake, lake_con);
 
     // Final lakefraction
     if (lake->new_ice_area > lake->surface[0]) {
@@ -2200,7 +2153,7 @@ water_balance(lake_var_struct *lake,
     if (lake->activenod != isave_n) {
         for (k = 0; k < lake->activenod; k++) {
             Tnew[k] = 0.0;
-            for (i = 0; i < isave_n; i++) {
+            for (i_dbl = 0; i_dbl < isave_n; i_dbl++) {
                 index += (1. / lake->activenod);
                 Tnew[k] += lake->temp[(int) floor(index)];
             }
@@ -2303,7 +2256,25 @@ water_balance(lake_var_struct *lake,
             }
         }
         else { // lake didn't exist at beginning of time step; create new lake
-            initialize_lake(lake, lake_con, &soil_con, &(cell[iveg][band]), 1);
+               // Reset all non-essential lake variables
+            initialize_lake(lake, lake_con, &soil_con, &(cell[iveg][band]),
+                            true);
+
+            // Compute lake dimensions from current lake depth
+            compute_derived_lake_dimensions(lake, lake_con);
+
+            // Assign initial temperatures
+            for (k = 0; k < lake->activenod; k++) {
+                lake->temp[k] = all_vars->energy[iveg][band].T[0];
+            }
+            lake->tempavg = lake->temp[0];
+            lake->energy.Tsurf = all_vars->energy[iveg][band].Tsurf;
+            for (k = 0; k < options.Nnode; k++) {
+                lake->energy.T[k] = all_vars->energy[iveg][band].T[k];
+            }
+            for (k = 0; k < options.Nlayer; k++) {
+                lake->soil.layer[k].T = all_vars->cell[iveg][band].layer[k].T;
+            }
         }
     }
     else if (lakefrac > 0.0) { // lake is gone at end of time step, but existed at beginning of step

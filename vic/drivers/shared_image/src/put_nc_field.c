@@ -104,7 +104,7 @@ put_nc_field_double(char   *nc_name,
 }
 
 /******************************************************************************
- * @brief    Put interger data field to netCDF.
+ * @brief    Put integer data field to netCDF.
  *****************************************************************************/
 int
 put_nc_field_int(char   *nc_name,

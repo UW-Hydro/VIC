@@ -388,6 +388,28 @@ get_global_param(FILE *gp)
             else if (strcasecmp("STATEDAY", optstr) == 0) {
                 sscanf(cmdstr, "%*s %hu", &global_param.stateday);
             }
+            else if (strcasecmp("STATESEC", optstr) == 0) {
+                sscanf(cmdstr, "%*s %u", &global_param.statesec);
+            }
+            else if (strcasecmp("STATE_FORMAT", optstr) == 0) {
+                sscanf(cmdstr, "%*s %s", flgstr);
+                if (strcasecmp("NETCDF3_CLASSIC", flgstr) == 0) {
+                    options.STATE_FORMAT = NETCDF3_CLASSIC;
+                }
+                else if (strcasecmp("NETCDF3_64BIT_OFFSET", flgstr) == 0) {
+                    options.STATE_FORMAT = NETCDF3_64BIT_OFFSET;
+                }
+                else if (strcasecmp("NETCDF4_CLASSIC", flgstr) == 0) {
+                    options.STATE_FORMAT = NETCDF4_CLASSIC;
+                }
+                else if (strcasecmp("NETCDF4", flgstr) == 0) {
+                    options.STATE_FORMAT = NETCDF4;
+                }
+                else {
+                    log_err("STATE_FORMAT must be either NETCDF3_CLASSIC, "
+                            "NETCDF3_64BIT_OFFSET, NETCDF4_CLASSIC, or NETCDF4.");
+                }
+            }
 
             /*************************************
                Define forcing files
@@ -1149,35 +1171,39 @@ get_global_param(FILE *gp)
         if (global_param.stateyear == 0 || global_param.statemonth == 0 ||
             global_param.stateday == 0) {
             log_err("Incomplete specification of the date to save state "
-                    "for state file (%s).\nSpecified date (yyyy-mm-dd): "
-                    "%04d-%02d-%02d\nMake sure STATEYEAR, STATEMONTH, and "
-                    "STATEDAY are set correctly in your global parameter "
+                    "for state file (%s).\nSpecified date (yyyy-mm-dd-sssss): "
+                    "%04d-%02d-%02d-%05u\nMake sure STATEYEAR, STATEMONTH, "
+                    "and STATEDAY are set correctly in your global parameter "
                     "file.", filenames.statefile, global_param.stateyear,
-                    global_param.statemonth, global_param.stateday);
+                    global_param.statemonth, global_param.stateday,
+                    global_param.statesec);
         }
         // Check for month, day in range
         make_lastday(global_param.stateyear, global_param.calendar,
                      lastday);
         if (global_param.stateday > lastday[global_param.statemonth - 1] ||
-            global_param.statemonth > MONTHS_PER_YEAR ||
             global_param.statemonth < 1 ||
-            global_param.stateday < 1) {
-            log_err("Unusual specification of the date to save state for "
-                    "state file (%s).\nSpecified date (yyyy-mm-dd): "
-                    "%04d-%02d-%02d\nMake sure STATEYEAR, STATEMONTH, and "
-                    "STATEDAY are set correctly in your global parameter "
-                    "file.", filenames.statefile, global_param.stateyear,
-                    global_param.statemonth, global_param.stateday);
+            global_param.statemonth > MONTHS_PER_YEAR ||
+            global_param.stateday < 1 || global_param.stateday > 31 ||
+            global_param.statesec > SEC_PER_DAY) {
+            log_err("Unusual specification of the date to save state "
+                    "for state file (%s).\nSpecified date (yyyy-mm-dd-sssss): "
+                    "%04d-%02d-%02d-%05u\nMake sure STATEYEAR, STATEMONTH, "
+                    "STATEDAY and STATESEC are set correctly in your global "
+                    "parameter file.", filenames.statefile,
+                    global_param.stateyear, global_param.statemonth,
+                    global_param.stateday, global_param.statesec);
         }
     }
-    // Set the statename here to be able to compare with INIT_STATE name
+    // Set the statename here temporarily to compare with INIT_STATE name
     if (options.SAVE_STATE) {
-        sprintf(filenames.statefile, "%s_%04i%02i%02i", filenames.statefile,
-                global_param.stateyear, global_param.statemonth,
-                global_param.stateday);
+        sprintf(flgstr2, "%s.%04i%02i%02i_%05u.nc",
+                filenames.statefile, global_param.stateyear,
+                global_param.statemonth, global_param.stateday,
+                global_param.statesec);
     }
     if (options.INIT_STATE && options.SAVE_STATE &&
-        (strcmp(filenames.init_state, filenames.statefile) == 0)) {
+        (strcmp(filenames.init_state, flgstr2) == 0)) {
         log_err("The save state file (%s) has the same name as the "
                 "initialize state file (%s).  The initialize state file "
                 "will be destroyed when the save state file is opened.",
@@ -1228,6 +1254,9 @@ get_global_param(FILE *gp)
     }
 
     // Validate treeline option
+    if (options.COMPUTE_TREELINE) {
+        log_err("COMPUTE_TREELINE not implemented in image driver");
+    }
     if (options.COMPUTE_TREELINE && !options.JULY_TAVG_SUPPLIED) {
         log_err("COMPUTE_TREELINE is TRUE but JULY_TAVG_SUPPLIED is "
                 "FALSE.\n You must supply July average temperature if"
@@ -1250,6 +1279,14 @@ get_global_param(FILE *gp)
             log_err("LAKES = TRUE and COMPUTE_TREELINE = TRUE are "
                     "incompatible options.");
         }
+    }
+
+    // Default file formats (if unset)
+    if (options.SAVE_STATE && options.STATE_FORMAT == UNSET_FILE_FORMAT) {
+        options.STATE_FORMAT = NETCDF4_CLASSIC;
+    }
+    if (options.OUT_FORMAT == UNSET_FILE_FORMAT) {
+        options.OUT_FORMAT = NETCDF4_CLASSIC;
     }
 
     /*********************************

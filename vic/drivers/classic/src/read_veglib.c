@@ -38,6 +38,7 @@ read_veglib(FILE   *veglib,
 {
     extern option_struct     options;
     extern parameters_struct param;
+    extern global_param_struct global_param;
 
     veg_lib_struct          *temp;
     size_t                   i, j;
@@ -205,6 +206,36 @@ read_veglib(FILE   *veglib,
                 "the file has the right number of columns.");
     }
     *Ntype = Nveg_type;
+
+    // Assign properties of bare soil to default bare soil tile
+    temp[i].NVegLibTypes = Nveg_type;
+    temp[i].veg_class = Nveg_type + 1;
+    temp[i].overstory = false;
+    temp[i].rarc = param.SOIL_RARC;
+    temp[i].rmin = 0.0;
+    for (j = 0; j < MONTHS_PER_YEAR; j++) {
+        temp[i].LAI[j] = 0.0;
+        temp[i].Wdmax[j] = 0.0;
+        temp[i].fcanopy[j] = MIN_FCANOPY;
+        temp[i].albedo[j] = param.ALBEDO_BARE_SOIL;
+        // These will be assigned in read_soilparam.c
+        temp[i].roughness[j] = MISSING;
+        temp[i].displacement[j] = MISSING;
+    }
+    temp[i].wind_h = global_param.wind_h;
+    temp[i].RGL = 0.0;
+    temp[i].rad_atten = 0.0;
+    temp[i].wind_atten = 0.0;
+    temp[i].trunk_ratio = 0.0;
+    if (options.VEGLIB_PHOTO) {
+        temp[i].Ctype = PHOTO_C3;
+        temp[i].MaxETransport = 0.0;
+        temp[i].CO2Specificity = 0.0;
+        temp[i].LightUseEff = 0.0;
+        temp[i].NscaleFlag = 0;
+        temp[i].Wnpp_inhib = 1.0;
+        temp[i].NPPfactor_sat = 1.0;
+    }
 
     return temp;
 }

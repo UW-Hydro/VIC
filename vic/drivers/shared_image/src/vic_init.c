@@ -46,7 +46,6 @@ vic_init(void)
     extern parameters_struct   param;
 
     bool                       found;
-    bool                       no_overstory;
     char                       locstr[MAXSTRING];
     double                     mean;
     double                     sum;
@@ -59,7 +58,7 @@ vic_init(void)
     size_t                     m;
     size_t                     nveg;
     size_t                     max_numnod;
-    int                        veg_class;
+    size_t                     Nnodes;
     int                        vidx;
     size_t                     d2count[2];
     size_t                     d2start[2];
@@ -68,6 +67,8 @@ vic_init(void)
     size_t                     d4count[4];
     size_t                     d4start[4];
     int                        tmp_lake_idx;
+    double                     Zsum, dp;
+    double                     tmpdp, tmpadj, Bexp;
 
     // allocate memory for Cv_sum
     Cv_sum = malloc(local_domain.ncells_active * sizeof(*Cv_sum));
@@ -115,8 +116,7 @@ vic_init(void)
 
     // read_veglib()
 
-    // TBD: Check that options.NVEGTYPES is the right number. Bare soil is
-    // the complicating factor here
+    // Assign veg class ids
     for (i = 0; i < local_domain.ncells_active; i++) {
         Cv_sum[i] = 0.;
 
@@ -679,7 +679,10 @@ vic_init(void)
         for (i = 0; i < local_domain.ncells_active; i++) {
             soil_con[i].max_snow_distrib_slope = (double) dvar[i];
         }
+    }
 
+    // spatial frost
+    if (options.SPATIAL_FROST) {
         // frost_slope: slope of frozen soil distribution
         get_scatter_nc_field_double(filenames.soil, "frost_slope",
                                     d2start, d2count, dvar);
@@ -687,17 +690,25 @@ vic_init(void)
             soil_con[i].frost_slope = (double) dvar[i];
         }
     }
-
-    if (options.COMPUTE_TREELINE) {
-        // avgJulyAirTemp: average July air temperature
-        get_scatter_nc_field_double(filenames.soil, "avgJulyAirTemp",
-                                    d2start, d2count, dvar);
-        for (i = 0; i < local_domain.ncells_active; i++) {
-            soil_con[i].avgJulyAirTemp = (double) dvar[i];
+    for (k = 0; k < options.Nfrost; k++) {
+        if (options.Nfrost == 1) {
+            soil_con[i].frost_fract[k] = 1.;
+        }
+        else if (options.Nfrost == 2) {
+            soil_con[i].frost_fract[k] = 0.5;
+        }
+        else {
+            soil_con[i].frost_fract[k] = 1. / (options.Nfrost - 1);
+            if (k == 0 || k == options.Nfrost - 1) {
+                soil_con[i].frost_fract[k] /= 2.;
+            }
         }
     }
 
+    // TODO: read avgJulyAirTemp for compute treeline option
+
     // Additional processing of the soil variables
+    // (compute derived parameters)
     for (i = 0; i < local_domain.ncells_active; i++) {
         for (j = 0; j < options.Nlayer; j++) {
             // compute layer properties
@@ -802,6 +813,120 @@ vic_init(void)
 
         soil_moisture_from_water_table(&(soil_con[i]), options.Nlayer);
 
+        // Soil thermal node thicknesses and positions
+        Nnodes = options.Nnode;
+        dp = soil_con[i].dp;
+        if (options.QUICK_FLUX) {
+            /* node thicknesses */
+            soil_con[i].dz_node[0] = soil_con[i].depth[0];
+            soil_con[i].dz_node[1] = soil_con[i].depth[0];
+            soil_con[i].dz_node[2] = 2. * (dp - 1.5 * soil_con[i].depth[0]);
+
+            /* node depths (positions) */
+            soil_con[i].Zsum_node[0] = 0;
+            soil_con[i].Zsum_node[1] = soil_con[i].depth[0];
+            soil_con[i].Zsum_node[2] = dp;
+        }
+        else {
+            if (!options.EXP_TRANS) {
+                /* Compute soil node thicknesses
+                   Nodes set at surface, the depth of the first layer,
+                   twice the depth of the first layer, and at the
+                   damping depth.  Extra nodes are placed equal distance
+                   between the damping depth and twice the depth of the
+                   first layer. */
+
+                soil_con[i].dz_node[0] = soil_con[i].depth[0];
+                soil_con[i].dz_node[1] = soil_con[i].depth[0];
+                soil_con[i].dz_node[2] = soil_con[i].depth[0];
+                soil_con[i].Zsum_node[0] = 0;
+                soil_con[i].Zsum_node[1] = soil_con[0].depth[0];
+                Zsum = 2. * soil_con[0].depth[0];
+                soil_con[i].Zsum_node[2] = Zsum;
+                tmpdp = dp - soil_con[0].depth[0] * 2.5;
+                tmpadj = 3.5;
+                for (j = 3; j < Nnodes - 1; j++) {
+                    soil_con[i].dz_node[j] = tmpdp /
+                                             (((double) Nnodes - tmpadj));
+                    Zsum +=
+                        (soil_con[i].dz_node[j] + soil_con[i].dz_node[j - 1]) /
+                        2.;
+                    soil_con[i].Zsum_node[j] = Zsum;
+                }
+                soil_con[i].dz_node[Nnodes -
+                                    1] =
+                    (dp - Zsum - soil_con[i].dz_node[Nnodes - 2] / 2.) * 2.;
+                Zsum +=
+                    (soil_con[i].dz_node[Nnodes - 2] +
+                     soil_con[i].dz_node[Nnodes - 1]) / 2.;
+                soil_con[i].Zsum_node[Nnodes - 1] = Zsum;
+                if ((int) (Zsum * MM_PER_M + 0.5) !=
+                    (int) (dp * MM_PER_M + 0.5)) {
+                    log_err("Sum of thermal node thicknesses (%f) "
+                            "in initialize_model_state do not "
+                            "equal dp (%f), check initialization "
+                            "procedure", Zsum, dp);
+                }
+            }
+            else {
+                // exponential grid transformation, EXP_TRANS = TRUE
+                // calculate exponential function parameter
+                // to force Zsum=dp at bottom node
+                Bexp = logf(dp + 1.) / (double) (Nnodes - 1);
+                // validate Nnodes by requiring that there be at
+                // least 3 nodes in the top 50cm
+                if (Nnodes < 5 * logf(dp + 1.) + 1) {
+                    log_err("The number of soil thermal nodes (%zu) "
+                            "is too small for the supplied damping "
+                            "depth (%f) with EXP_TRANS set to "
+                            "TRUE, leading to fewer than 3 nodes "
+                            "in the top 50 cm of the soil column.  "
+                            "For EXP_TRANS=TRUE, Nnodes and dp "
+                            "must follow the relationship:\n"
+                            "5*ln(dp+1)<Nnodes-1\n"
+                            "Either set Nnodes to at least %d in "
+                            "the global param file or reduce "
+                            "damping depth to %f in the soil "
+                            "parameter file.  Or set EXP_TRANS to "
+                            "FALSE in the global parameter file.",
+                            Nnodes, dp, (int) (5 * logf(dp + 1.)) + 2,
+                            exp(0.2 * (Nnodes - 1)) + 1);
+                }
+                for (j = 0; j <= Nnodes - 1; j++) {
+                    soil_con[i].Zsum_node[j] = expf(Bexp * j) - 1.;
+                }
+                if (soil_con[i].Zsum_node[0] > soil_con[i].depth[0]) {
+                    log_err("Depth of first thermal node (%f) in "
+                            "initialize_model_state is greater "
+                            "than depth of first soil layer (%f); "
+                            "increase the number of nodes or "
+                            "decrease the thermal damping depth "
+                            "dp (%f)", soil_con[i].Zsum_node[0],
+                            soil_con[i].depth[0], dp);
+                }
+
+                // top node
+                j = 0;
+                soil_con[i].dz_node[j] = soil_con[i].Zsum_node[j + 1] -
+                                         soil_con[i].Zsum_node[j];
+                // middle nodes
+                for (j = 1; j < Nnodes - 1; j++) {
+                    soil_con[i].dz_node[j] =
+                        (soil_con[i].Zsum_node[j + 1] -
+                         soil_con[i].Zsum_node[j]) /
+                        2. +
+                        (soil_con[i].Zsum_node[j] -
+                         soil_con[i].Zsum_node[j - 1]) /
+                        2.;
+                }
+                // bottom node
+                j = Nnodes - 1;
+                soil_con[i].dz_node[j] = soil_con[i].Zsum_node[j] -
+                                         soil_con[i].Zsum_node[j - 1];
+            } // end if !EXP_TRANS
+        }
+
+        // Carbon parameters
         if (options.CARBON) {
             // TBD Remove hardcoded parameter values
             soil_con[i].AlbedoPar = 0.92 * param.ALBEDO_BARE_SOIL - 0.015;
@@ -937,20 +1062,7 @@ vic_init(void)
         }
     }
 
-    // logic from compute_treeline()
-    for (i = 0; i < local_domain.ncells_active; i++) {
-        for (j = 0; j < options.SNOW_BAND; j++) {
-            // Lapse average annual July air temperature
-            if (soil_con[i].avgJulyAirTemp + soil_con[i].Tfactor[j] <=
-                param.TREELINE_TEMPERATURE) {
-                // Snow band is above treeline
-                soil_con[i].AboveTreeLine[j] = true;
-            }
-            else {
-                soil_con[i].AboveTreeLine[j] = false;
-            }
-        }
-    }
+    // TODO: Determine which bands are above treeline
 
     // read_vegparam()
 
@@ -959,13 +1071,11 @@ vic_init(void)
     // the grid cell. The veg_con_map_struct is used to provide some of this
     // mapping
 
-    // number of vegetation types - in vic this is defined without the bare soil
-    // and the vegetation above the treeline
+    // number of vegetation types - in vic an extra veg tile is created
+    // for above-treeline vegetation in some cases
+    // TODO: handle above treeline vegetation tile
     for (i = 0; i < local_domain.ncells_active; i++) {
         nveg = veg_con_map[i].nv_active - 1;
-        if (options.AboveTreelineVeg >= 0) {
-            nveg -= 1;
-        }
         for (j = 0; j < veg_con_map[i].nv_active; j++) {
             veg_con[i][j].vegetat_type_num = (int) nveg;
         }
@@ -993,20 +1103,26 @@ vic_init(void)
                 veg_con[i][k].Cv = veg_con_map[i].Cv[j];
                 veg_con[i][k].veg_class = j;
                 for (m = 0; m < MONTHS_PER_YEAR; m++) {
+                    if (options.ALB_SRC == FROM_VEGLIB ||
+                        options.ALB_SRC == FROM_VEGPARAM) {
+                        veg_con[i][k].albedo[m] = veg_lib[i][j].albedo[m];
+                    }
+                    if (options.FCAN_SRC == FROM_DEFAULT ||
+                        options.FCAN_SRC == FROM_VEGLIB ||
+                        options.FCAN_SRC == FROM_VEGPARAM) {
+                        veg_con[i][k].fcanopy[m] = veg_lib[i][j].fcanopy[m];
+                    }
                     if (options.LAI_SRC == FROM_VEGLIB ||
                         options.LAI_SRC == FROM_VEGPARAM) {
                         veg_con[i][k].LAI[m] = veg_lib[i][j].LAI[m];
                         veg_con[i][k].Wdmax[m] = param.VEG_LAI_WATER_FACTOR *
                                                  veg_con[i][k].LAI[m];
                     }
-                    if (options.ALB_SRC == FROM_VEGLIB ||
-                        options.ALB_SRC == FROM_VEGPARAM) {
-                        veg_con[i][k].albedo[m] = veg_lib[i][j].albedo[m];
-                    }
-                    if (options.FCAN_SRC == FROM_VEGLIB ||
-                        options.FCAN_SRC == FROM_VEGPARAM) {
-                        veg_con[i][k].fcanopy[m] = veg_lib[i][j].fcanopy[m];
-                    }
+                    // displacement and roughness are the same in veg_lib
+                    // and veg_con
+                    veg_con[i][k].displacement[m] =
+                        veg_lib[i][j].displacement[m];
+                    veg_con[i][k].roughness[m] = veg_lib[i][j].roughness[m];
                 }
                 k++;
             }
@@ -1055,8 +1171,8 @@ vic_init(void)
 
     // Run some checks and corrections for vegetation
     for (i = 0; i < local_domain.ncells_active; i++) {
-        no_overstory = false;
-        // Only run to options.NVEGTYPES - 1, since bare soil is the last type
+        // Only run to options.NVEGTYPES - 1, assuming bare soil
+        // is the last type
         for (j = 0; j < options.NVEGTYPES - 1; j++) {
             vidx = veg_con_map[i].vidx[j];
             if (vidx != NODATA_VEG) {
@@ -1102,134 +1218,16 @@ vic_init(void)
                             locstr);
                 }
                 Cv_sum[i] += veg_con[i][vidx].Cv;
-
-                // check for overstory
-                if (!veg_lib[i][j].overstory) {
-                    no_overstory = true;
-                }
             }
         }
+
         // handle the bare soil portion of the tile
         vidx = veg_con_map[i].vidx[options.NVEGTYPES - 1];
-        Cv_sum[i] += veg_con[i][vidx].Cv;
-
-        // handle the vegetation for the treeline option. This is somewhat
-        // confusingly handled in VIC. If I am not mistaken, in VIC classic
-        // this is handled in the following way:
-        //
-        // The treeline option is only active if there is more than one snow
-        // band and options.COMPUTE_TREELINE is explicitly set in the global
-        // file. If the treeline option is active, then there a few cases:
-        //
-        // 1. The grid cell contains one or more vegetation types that
-        // do not have an overstory (either bare soil or vegetation). Nothing
-        // further needs to be done to the input. For the elevation bands above
-        // the treeline, the values from vegetation with an overstory are simply
-        // ignored and the understory and bare ground values are scaled so they
-        // cover the entire band. This scaling is done in put_data()
-        //
-        // 2. The grid cell contains only vegetation with an overstory.
-        // In that case a small area of bare soil or vegetation without an
-        // overstory must be created.  This will have almost no effect
-        // on the results for most elevation bands, but above the treeline, the
-        // elevation band will consists entirely of bare soil or the understory
-        // vegetation (because of the scaling in put_data(). There are two
-        // cases:
-        //
-        // 2.a. options.AboveTreelineVeg < 0. In that case a small amount of
-        // bare soil is created (fraction is 0.001).
-        //
-        // 2.b. options.AboveTreelineVeg > 0. In that case a small amount of
-        // the new vegetation is created (fraction is 0.001). This vegetation
-        // should not have an overstory.
-        //
-        // The tricky parts are:
-        //
-        // Ensure that the correct number of vegetation types are reflected
-        // for each cell.
-        //
-        // Ensure that bare soil remains the last vegetation type (the one with
-        // the highest number). This will seem odd, but that is how it is
-        // handled within VIC.
-        //
-        // Only case 2 needs to be handled explicitly
-
-        if (options.SNOW_BAND > 1 && options.COMPUTE_TREELINE &&
-            !no_overstory && Cv_sum[i] == 1.) {
-            // Use bare soil above treeline
-            if (options.AboveTreelineVeg < 0) {
-                for (j = 0; j < options.NVEGTYPES; j++) {
-                    vidx = veg_con_map[i].vidx[j];
-                    if (vidx != NODATA_VEG) {
-                        veg_con[i][vidx].Cv -=
-                            0.001 / veg_con[i][vidx].vegetat_type_num;
-                    }
-                }
-                Cv_sum[i] -= 0.001;
-            }
-            // Use defined vegetation type above treeline
-            else {
-                for (j = 0; j < options.NVEGTYPES; j++) {
-                    vidx = veg_con_map[i].vidx[j];
-                    if (vidx != NODATA_VEG) {
-                        veg_con[i][vidx].Cv -=
-                            0.001 / veg_con[i][vidx].vegetat_type_num;
-                        veg_con[i][vidx].vegetat_type_num += 1;
-                    }
-                }
-                veg_con[i][options.NVEGTYPES - 1].Cv = 0.001;
-                veg_con[i][options.NVEGTYPES - 1].veg_class =
-                    options.AboveTreelineVeg;
-                veg_con[i][options.NVEGTYPES - 1].vegetat_type_num =
-                    veg_con[i][0].vegetat_type_num;
-                // Since root zones are not defined they are copied from another
-                // vegetation type.
-                for (j = 0; j < options.ROOT_ZONES; j++) {
-                    veg_con[i][options.NVEGTYPES - 1].zone_depth[j] =
-                        veg_con[i][0].zone_depth[j];
-                    veg_con[i][options.NVEGTYPES - 1].zone_fract[j] =
-                        veg_con[i][0].zone_fract[j];
-                }
-                // redo the mapping to ensure that the veg type is active
-                k = 0;
-                for (j = 0; j < options.NVEGTYPES; j++) {
-                    if (veg_con_map[i].Cv[j] > 0) {
-                        veg_con_map[i].vidx[j] = k;
-                        veg_con[i][k].Cv = veg_con_map[i].Cv[j];
-                        veg_con[i][k].veg_class = j;
-                        k++;
-                    }
-                    else {
-                        veg_con_map[i].vidx[j] = NODATA_VEG;
-                    }
-                }
-                // check that the vegetation type is defined in the vegetation
-                // library
-                found = false;
-                for (k = 0; k < options.NVEGTYPES; k++) {
-                    if (veg_con[i][vidx].veg_class == veg_lib[i][k].veg_class) {
-                        found = true;
-                        break;
-                    }
-                }
-                if (!found) {
-                    sprint_location(locstr, &(local_domain.locations[i]));
-                    log_err("The vegetation class id %i in vegetation tile %i "
-                            "from cell %zd is not defined in the vegetation "
-                            "library\n%s", veg_con[i][vidx].veg_class, vidx, i,
-                            locstr);
-                }
-                // make sure it has no overstory
-                veg_class = veg_con[i][options.NVEGTYPES - 1].veg_class;
-                if (veg_lib[i][veg_class].overstory) {
-                    sprint_location(locstr, &(local_domain.locations[i]));
-                    log_err("Vegetation class %i is defined to have overstory, "
-                            "so it cannot be used as the default vegetation "
-                            "type for above canopy snow bands.\n%s", veg_class,
-                            locstr);
-                }
-            }
+        if (vidx != NODATA_VEG) {
+            Cv_sum[i] += veg_con[i][vidx].Cv;
         }
+
+        // TODO: handle bare soil adjustment for compute treeline option
 
         // If the sum of the tile fractions is not within a tolerance, throw an error
         if (!assert_close_double(Cv_sum[i], 1., 0., 0.001)) {
@@ -1538,7 +1536,7 @@ vic_init(void)
         }
     }
 
-    // initialize structures with default values
+    // initialize state variables with default values
     for (i = 0; i < local_domain.ncells_active; i++) {
         nveg = veg_con[i][0].vegetat_type_num;
         initialize_snow(all_vars[i].snow, nveg);
@@ -1551,7 +1549,7 @@ vic_init(void)
             }
             initialize_lake(&(all_vars[i].lake_var), lake_con[i],
                             &(soil_con[i]),
-                            &(all_vars[i].cell[tmp_lake_idx][0]), 0);
+                            &(all_vars[i].cell[tmp_lake_idx][0]), false);
         }
         initialize_energy(all_vars[i].energy, nveg);
     }

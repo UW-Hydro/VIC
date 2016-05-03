@@ -14,7 +14,7 @@ Bohn, T. J., B. Livneh, J. W. Oyler, S. W. Running, B. Nijssen, and D. P. Letten
 
 Bohn, T. J., E. Podest, R. Schroeder, N. Pinto, K. C. McDonald, M. Glagolev, I. Filippov, S. Maksyutov, M. Heimann, X. Chen, and D. P. Lettenmaier, 2013b: Modeling the effects of surface moisture heterogeneity on wetland carbon fluxes in the West Siberian Lowland, _Biogeosciences_, **10**, 6559-6576, [doi:10.5194/bg-10-6559-2013](http://dx.doi.org/10.5194/bg-10-6559-2013).
 
-Bohn, T. J., and E. R. Vivoni, 2015: Process-based characterization of evapotranspiration sources in the North American monsoon region, _Water Resour. Res._, accepted.
+Bohn, T. J., and E. R. Vivoni, 2016: Process-based characterization of evapotranspiration sources in the North American monsoon region, _Water Resour. Res._, **52**(1), 358-384, doi: 10.1002/2015WR017934.
 
 Bowling, L. C., J. W. Pomeroy and D. P. Lettenmaier, 2004: Parameterization of blowing snow sublimation in a macroscale hydrology model, _J. Hydromet._, **5**(5), 745-762, doi: 10.1175/1525-7541.
 

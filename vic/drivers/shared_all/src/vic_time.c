@@ -29,7 +29,7 @@
 
 #include <vic_driver_shared_all.h>
 
-#define small_offset 0.00005  // Small offset to handle precision issues in rounding
+#define small_offset 0.000005  // Small offset to handle precision issues in rounding
 
 /******************************************************************************
  * @brief   Get fractional day of month from dmy structure.
@@ -247,7 +247,7 @@ dmy_julian_day(double             julian,
     // get the day (Z) and the fraction of the day (F)
     // add 0.000005 which is 452 ms in case of jd being after
     // second 23:59:59 of a day we want to round to the next day
-    Z = (int) round(julian + small_offset);
+    Z = (int) round(julian);
     F = (double) (julian + 0.5 - Z);
     if (calendar == CALENDAR_STANDARD || calendar == CALENDAR_GREGORIAN) {
         alpha = (int) ((((double) Z - 1867216.0) - 0.25) / 36524.25);
@@ -276,7 +276,7 @@ dmy_julian_day(double             julian,
     E = (int) (((double) (B - D)) / 30.6001);
 
     // Convert to date
-    day = floor(B - D - floor(30.6001 * (double) E) + F + small_offset);
+    day = floor(B - D - floor(30.6001 * (double) E) + F);
     if (day < 1) {
         day = 1;
     }
@@ -343,9 +343,9 @@ dmy_no_leap_day(double      julian,
     F = modf(julian + 0.5, &I);
     A = (unsigned int) I;
     B = A + 1524;
-    C = (unsigned int) ((B - 122.1) / DAYS_PER_YEAR);
-    D = (unsigned int) (DAYS_PER_YEAR * C);
-    E = (unsigned int) ((B - D) / 30.6001);
+    C = (unsigned int) ((B - 122.1) / (double) DAYS_PER_YEAR);
+    D = (unsigned int) ((double) DAYS_PER_YEAR * C);
+    E = (unsigned int) ((double) (B - D) / 30.6001);
 
     // Convert to date
     day = B - D - (unsigned int) (30.6001 * E) + F;
@@ -580,7 +580,8 @@ num2date(double             origin,
         log_err("Unknown Time Units Flag: %hu", time_units);
     }
 
-    jd = jdelta + origin;
+    // Small offset is added to handle subsecond precision issues.
+    jd = jdelta + origin + small_offset;
 
     if (calendar == CALENDAR_JULIAN ||
         calendar == CALENDAR_STANDARD ||
@@ -704,8 +705,8 @@ initialize_time()
  * @return 0 if ok, else return > 0
  *****************************************************************************/
 int
-valid_date(unsigned short int calendar,
-           dmy_struct        *dmy)
+invalid_date(unsigned short int calendar,
+             dmy_struct        *dmy)
 {
     unsigned short int lastday[MONTHS_PER_YEAR];
     unsigned short int days_in_year;
@@ -720,7 +721,7 @@ valid_date(unsigned short int calendar,
         days_in_year += lastday[i];
     }
 
-    if (dmy->dayseconds > (SEC_PER_DAY)) {
+    if (dmy->dayseconds >= SEC_PER_DAY) {
         return 1;
     }
     else if (dmy->month > MONTHS_PER_YEAR) {

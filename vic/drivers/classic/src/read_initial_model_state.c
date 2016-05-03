@@ -42,29 +42,30 @@ read_initial_model_state(FILE            *init_state,
                          int              Nveg,
                          int              Nbands,
                          int              cellnum,
-                         soil_con_struct *soil_con)
+                         soil_con_struct *soil_con,
+                         lake_con_struct  lake_con)
 {
-    extern option_struct options;
+    extern option_struct     options;
 
-    char                 tmpstr[MAXSTRING];
-    char                 tmpchar;
-    int                  veg, iveg;
-    int                  band, iband;
-    size_t               lidx;
-    size_t               nidx;
-    int                  tmp_cellnum;
-    int                  tmp_Nveg;
-    int                  tmp_Nband;
-    int                  tmp_char;
-    int                  byte, Nbytes;
-    int                  node;
-    size_t               frost_area;
+    char                     tmpstr[MAXSTRING];
+    char                     tmpchar;
+    int                      veg, iveg;
+    int                      band, iband;
+    size_t                   lidx;
+    size_t                   nidx;
+    int                      tmp_cellnum;
+    int                      tmp_Nveg;
+    int                      tmp_Nband;
+    int                      tmp_char;
+    int                      byte, Nbytes;
+    int                      node;
+    size_t                   frost_area;
 
-    cell_data_struct   **cell;
-    snow_data_struct   **snow;
-    energy_bal_struct  **energy;
-    veg_var_struct     **veg_var;
-    lake_var_struct     *lake_var;
+    cell_data_struct       **cell;
+    snow_data_struct       **snow;
+    energy_bal_struct      **energy;
+    veg_var_struct         **veg_var;
+    lake_var_struct         *lake_var;
 
     cell = all_vars->cell;
     veg_var = all_vars->veg_var;
@@ -73,7 +74,7 @@ read_initial_model_state(FILE            *init_state,
     lake_var = &all_vars->lake_var;
 
     /* read cell information */
-    if (options.BINARY_STATE_FILE) {
+    if (options.STATE_FORMAT == BINARY) {
         fread(&tmp_cellnum, sizeof(int), 1, init_state);
         fread(&tmp_Nveg, sizeof(int), 1, init_state);
         fread(&tmp_Nband, sizeof(int), 1, init_state);
@@ -84,7 +85,7 @@ read_initial_model_state(FILE            *init_state,
     }
     // Skip over unused cell information
     while (tmp_cellnum != cellnum && !feof(init_state)) {
-        if (options.BINARY_STATE_FILE) {
+        if (options.STATE_FORMAT == BINARY) {
             // skip rest of current cells info
             for (byte = 0; byte < Nbytes; byte++) {
                 fread(&tmpchar, 1, 1, init_state);
@@ -129,7 +130,7 @@ read_initial_model_state(FILE            *init_state,
 
     /* Read soil thermal node deltas */
     for (nidx = 0; nidx < options.Nnode; nidx++) {
-        if (options.BINARY_STATE_FILE) {
+        if (options.STATE_FORMAT == BINARY) {
             fread(&soil_con->dz_node[nidx], sizeof(double), 1, init_state);
         }
         else {
@@ -142,7 +143,7 @@ read_initial_model_state(FILE            *init_state,
 
     /* Read soil thermal node depths */
     for (nidx = 0; nidx < options.Nnode; nidx++) {
-        if (options.BINARY_STATE_FILE) {
+        if (options.STATE_FORMAT == BINARY) {
             fread(&soil_con->Zsum_node[nidx], sizeof(double), 1, init_state);
         }
         else {
@@ -164,7 +165,7 @@ read_initial_model_state(FILE            *init_state,
         /* Input for all snow bands */
         for (band = 0; band < Nbands; band++) {
             /* Read cell identification information */
-            if (options.BINARY_STATE_FILE) {
+            if (options.STATE_FORMAT == BINARY) {
                 if (fread(&iveg, sizeof(int), 1, init_state) != 1) {
                     log_err("End of model state file found unexpectedly");
                 }
@@ -188,7 +189,7 @@ read_initial_model_state(FILE            *init_state,
 
             /* Read total soil moisture */
             for (lidx = 0; lidx < options.Nlayer; lidx++) {
-                if (options.BINARY_STATE_FILE) {
+                if (options.STATE_FORMAT == BINARY) {
                     if (fread(&cell[veg][band].layer[lidx].moist,
                               sizeof(double), 1, init_state) != 1) {
                         log_err("End of model state file found unexpectedly");
@@ -206,7 +207,7 @@ read_initial_model_state(FILE            *init_state,
             for (lidx = 0; lidx < options.Nlayer; lidx++) {
                 for (frost_area = 0; frost_area < options.Nfrost;
                      frost_area++) {
-                    if (options.BINARY_STATE_FILE) {
+                    if (options.STATE_FORMAT == BINARY) {
                         if (fread(&cell[veg][band].layer[lidx].ice[frost_area],
                                   sizeof(double), 1, init_state) != 1) {
                             log_err("End of model state file found"
@@ -227,7 +228,7 @@ read_initial_model_state(FILE            *init_state,
 
             if (veg < Nveg) {
                 /* Read dew storage */
-                if (options.BINARY_STATE_FILE) {
+                if (options.STATE_FORMAT == BINARY) {
                     if (fread(&veg_var[veg][band].Wdew, sizeof(double), 1,
                               init_state) != 1) {
                         log_err("End of model state file found unexpectedly");
@@ -241,7 +242,7 @@ read_initial_model_state(FILE            *init_state,
                 }
 
                 if (options.CARBON) {
-                    if (options.BINARY_STATE_FILE) {
+                    if (options.STATE_FORMAT == BINARY) {
                         /* Read cumulative annual NPP */
                         if (fread(&(veg_var[veg][band].AnnualNPP),
                                   sizeof(double), 1, init_state) != 1) {
@@ -293,7 +294,7 @@ read_initial_model_state(FILE            *init_state,
             }
 
             /* Read snow data */
-            if (options.BINARY_STATE_FILE) {
+            if (options.STATE_FORMAT == BINARY) {
                 if (fread(&snow[veg][band].last_snow, sizeof(int), 1,
                           init_state) != 1) {
                     log_err("End of model state file found unexpectedly");
@@ -363,7 +364,7 @@ read_initial_model_state(FILE            *init_state,
 
             /* Read soil thermal node temperatures */
             for (nidx = 0; nidx < options.Nnode; nidx++) {
-                if (options.BINARY_STATE_FILE) {
+                if (options.STATE_FORMAT == BINARY) {
                     if (fread(&energy[veg][band].T[nidx], sizeof(double), 1,
                               init_state) != 1) {
                         log_err("End of model state file found unexpectedly");
@@ -376,10 +377,25 @@ read_initial_model_state(FILE            *init_state,
                     }
                 }
             }
+
+            /* Read foliage temperature*/
+            if (options.STATE_FORMAT == BINARY) {
+                if (fread(&energy[veg][band].Tfoliage, sizeof(double), 1,
+                          init_state) != 1) {
+                    log_err("End of model state file found unexpectedly");
+                }
+            }
+            else {
+                if (fscanf(init_state, " %lf",
+                           &energy[veg][band].Tfoliage) == EOF) {
+                    log_err("End of model state file found unexpectedly");
+                }
+            }
+
         }
     }
     if (options.LAKES) {
-        if (options.BINARY_STATE_FILE) {
+        if (options.STATE_FORMAT == BINARY) {
             /* Read total soil moisture */
             for (lidx = 0; lidx < options.Nlayer; lidx++) {
                 if (fread(&lake_var->soil.layer[lidx].moist, sizeof(double), 1,
@@ -688,4 +704,58 @@ read_initial_model_state(FILE            *init_state,
             }
         }
     }
+
+    // Check that soil moisture does not exceed maximum allowed
+    for (veg = 0; veg <= Nveg; veg++) {
+        for (band = 0; band < Nbands; band++) {
+            for (lidx = 0; lidx < options.Nlayer; lidx++) {
+                if (cell[veg][band].layer[lidx].moist >
+                    soil_con->max_moist[lidx]) {
+                    log_warn("Initial soil moisture (%f mm) exceeds "
+                             "maximum (%f mm) in layer %zu for veg tile "
+                             "%d and snow band %d.  Resetting to maximum.",
+                             cell[veg][band].layer[lidx].moist,
+                             soil_con->max_moist[lidx], lidx, veg, band);
+                    for (frost_area = 0;
+                         frost_area < options.Nfrost;
+                         frost_area++) {
+                        cell[veg][band].layer[lidx].ice[frost_area] *=
+                            soil_con->max_moist[lidx] /
+                            cell[veg][band].layer[lidx].moist;
+                    }
+                    cell[veg][band].layer[lidx].moist =
+                        soil_con->max_moist[lidx];
+                }
+
+                for (frost_area = 0;
+                     frost_area < options.Nfrost;
+                     frost_area++) {
+                    if (cell[veg][band].layer[lidx].ice[frost_area] >
+                        cell[veg][band].layer[lidx].moist) {
+                        cell[veg][band].layer[lidx].ice[frost_area] =
+                            cell[veg][band].layer[lidx].moist;
+                    }
+                }
+            }
+        }
+
+        // Override possible bad values of soil moisture under lake coming from state file
+        // (ideally we wouldn't store these in the state file in the first place)
+        if (options.LAKES && (int) veg == lake_con.lake_idx) {
+            for (lidx = 0; lidx < options.Nlayer; lidx++) {
+                lake_var->soil.layer[lidx].moist =
+                    soil_con->max_moist[lidx];
+                for (frost_area = 0;
+                     frost_area < options.Nfrost;
+                     frost_area++) {
+                    if (lake_var->soil.layer[lidx].ice[frost_area] >
+                        lake_var->soil.layer[lidx].moist) {
+                        lake_var->soil.layer[lidx].ice[frost_area] =
+                            lake_var->soil.layer[lidx].moist;
+                    }
+                }
+            }
+        }
+    }
+
 }

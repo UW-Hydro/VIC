@@ -113,6 +113,8 @@ free_atmos(atmos_data_struct *atmos)
     }
 
     free(atmos->air_temp);
+    free(atmos->density);
+    free(atmos->longwave);
     free(atmos->prec);
     free(atmos->pressure);
     free(atmos->shortwave);

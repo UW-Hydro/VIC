@@ -52,6 +52,9 @@ vic_finalize(void)
     extern veg_con_struct    **veg_con;
     extern veg_hist_struct   **veg_hist;
     extern veg_lib_struct    **veg_lib;
+    extern MPI_Datatype mpi_nc_file_struct_type;
+    extern MPI_Datatype mpi_option_struct_type;
+    extern MPI_Datatype mpi_param_struct_type;
 
     size_t                     i;
     size_t                     j;
@@ -85,7 +88,7 @@ vic_finalize(void)
             }
             free_veg_hist(&(veg_hist[i][j]));
         }
-        free_all_vars(&(all_vars[i]), veg_con[i][0].vegetat_type_num);
+        free_all_vars(&(all_vars[i]), veg_con_map[i].nv_active);
         free_out_data(&(out_data[i]));
         free(veg_con_map[i].vidx);
         free(veg_con_map[i].Cv);
@@ -103,8 +106,7 @@ vic_finalize(void)
     free(out_data);
     free(save_data);
     free(local_domain.locations);
-    // TODO: free dmy for image driver only
-    // free(dmy);
+    free(dmy);
     if (mpi_rank == 0) {
         free(filter_active_cells);
         free(global_domain.locations);
@@ -112,5 +114,8 @@ vic_finalize(void)
         free(mpi_map_global_array_offsets);
         free(mpi_map_mapping_array);
     }
+    MPI_Type_free(&mpi_nc_file_struct_type);
+    MPI_Type_free(&mpi_option_struct_type);
+    MPI_Type_free(&mpi_param_struct_type);
     finalize_logging();
 }

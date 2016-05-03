@@ -302,8 +302,9 @@ def run_system(config_file, vic_exe, test_data_dir, out_dir, driver):
 
         # ------------------------------------------------------------ #
         # If restart test, prepare running periods
-        # (1) Find STATESEC option
+        # (1) Find STATESEC option (and STATE_FORMAT option for later use)
         statesec = find_global_param_value(global_param, 'STATESEC')
+        state_format = find_global_param_value(global_param, 'STATE_FORMAT')
         # (2) Prepare running periods and initial state file info for restart test
         if 'restart' in test_dict:
             run_periods = prepare_restart_run_periods(
@@ -428,6 +429,8 @@ def run_system(config_file, vic_exe, test_data_dir, out_dir, driver):
                 # check for exact restarts
                 if 'exact_restart' in test_dict['check']:
                     check_exact_restart_fluxes(dirs['results'], driver, run_periods)
+                    check_exact_restart_states(dirs['state'], driver,
+                                               run_periods, statesec, state_format)
             # -------------------------------------------------------- #
 
             # -------------------------------------------------------- #
@@ -1111,6 +1114,7 @@ def check_exact_restart_fluxes(result_basedir, driver, run_periods):
 
     Returns
     ----------
+    None
     '''
 
     #--- Extract full run period ---#
@@ -1136,31 +1140,115 @@ def check_exact_restart_fluxes(result_basedir, driver, run_periods):
         # Extract running period
         start_date = run_period['start_date']
         end_date = run_period['end_date']
-        # Read in each of the output flux files
+        # Loop over each of the output flux files
         result_dir = os.path.join(
             result_basedir,
             '{}_{}'.format(start_date.strftime('%Y%m%d'),
                            end_date.strftime('%Y%m%d')))
-        for flux_basename in dict_df_full_run.keys():
-            fname = os.path.join(result_dir, flux_basename)
-            df = read_vic_ascii(fname, header=True)
-            # Extract the same period from the full run
-            df_full_run_split_period = dict_df_full_run[flux_basename].truncate(
-                                                     before=start_date,
-                                                     after=end_date)
-            # Compare split run fluxes with full run
-            df_diff = df - df_full_run_split_period
-            if np.absolute(df_diff.max().max()) > 0:
-                raise VICTestError('Restart causes inexact flux outputs '
-                                   'for running period {} - {} at grid cell {}!'.
-                            format(start_date.strftime('%Y%m%d'),
-                                   end_date.strftime('%Y%m%d'),
-                                   flux_basename))
-            else:
-                continue
+        if driver=='classic':
+            for flux_basename in dict_df_full_run.keys():
+                # Read in flux data
+                fname = os.path.join(result_dir, flux_basename)
+                df = read_vic_ascii(fname, header=True)
+                # Extract the same period from the full run
+                df_full_run_split_period = dict_df_full_run[flux_basename].truncate(
+                                                         before=start_date,
+                                                         after=end_date)
+                # Compare split run fluxes with full run
+                df_diff = df - df_full_run_split_period
+                if np.absolute(df_diff).max().max() > 0:
+                    raise VICTestError('Restart causes inexact flux outputs '
+                                       'for running period {} - {} at grid cell {}!'.
+                                format(start_date.strftime('%Y%m%d'),
+                                       end_date.strftime('%Y%m%d'),
+                                       flux_basename))
+                else:
+                    continue
     return
 
 # -------------------------------------------------------------------- #
+
+# -------------------------------------------------------------------- #
+def check_exact_restart_states(state_basedir, driver, run_periods, statesec, state_format='ASCII'):
+    ''' Checks whether all the states are the same w/ or w/o restart.
+        Only test the state at the last time step.
+
+    Parameters
+    ----------
+    state_basedir: <str>
+        Base directory of output state results; running periods are subdirectories under the base directory
+    driver: <str>
+        'classic' or 'image'
+    run_periods: <list>
+        A list of running periods. Return from prepare_restart_run_periods()
+    statesec: <int>
+        STATESEC option in global parameter file
+    state_format: <str>
+        state file format, 'ASCII' or 'BINARY'; only need to specify when driver=='classic'
+
+    Returns
+    ----------
+    None
+    '''
+
+    #--- Read the state at the end of the full run ---#
+    # Extract full run period
+    run_full_start_date = run_periods[0]['start_date']
+    run_full_end_date = run_periods[0]['end_date']
+    # Read the state file
+    if driver=='classic':
+        state_fname = os.path.join(
+            state_basedir,
+            '{}_{}'.format(run_full_start_date.strftime('%Y%m%d'),
+                           run_full_end_date.strftime('%Y%m%d')),
+            'states_{}_{}'.format(run_full_end_date.strftime('%Y%m%d'), statesec))
+        if state_format=='ASCII':
+            states_full_run = read_ascii_state(state_fname)
+
+    #--- Read the state at the end of the last period of run ---#
+    # Extract the last split run period
+    run_last_period_start_date = run_periods[-1]['start_date']
+    run_last_period_end_date = run_periods[-1]['end_date']
+    # Read the state file
+    if driver=='classic':
+        state_fname = os.path.join(
+            state_basedir,
+            '{}_{}'.format(run_last_period_start_date.strftime('%Y%m%d'),
+                           run_last_period_end_date.strftime('%Y%m%d')),
+            'states_{}_{}'.format(run_last_period_end_date.strftime('%Y%m%d'), statesec))
+        if state_format=='ASCII':
+            states = read_ascii_state(state_fname)
+
+    #--- Compare split run states with full run ---#
+    if driver=='classic':
+        states_diff = states - states_full_run
+        if np.absolute(states_diff).max() > pow(10, -6):
+            raise VICTestError('Restart causes inexact state outputs!')
+        else:
+            return
+
+# -------------------------------------------------------------------- #
+
+# -------------------------------------------------------------------- #
+def read_ascii_state(state_fname):
+    ''' Read in ascii format state file and convert to a list of numbers
+
+    Parameters
+    ----------
+    state_fname: <str>
+        Path of the state file to be read
+
+    Returns
+    ----------
+    states: <np.array>
+        A np.array of float numbers of the state file
+    '''
+
+    with open(state_fname, 'r') as f:
+        list_states = f.read().split()
+        for i, item in enumerate(list_states):
+            list_states[i] = float(item)
+    return np.asarray(list_states)
 
 # -------------------------------------------------------------------- #
 if __name__ == '__main__':

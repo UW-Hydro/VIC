@@ -60,6 +60,9 @@ vic_force(void)
     size_t                     d4count[4];
     size_t                     d4start[4];
 
+    cv_converter              *converter;
+    char                      *units = NULL;
+
     // allocate memory for variables to be read
     dvar = malloc(local_domain.ncells_active * sizeof(*dvar));
     if (dvar == NULL) {
@@ -89,8 +92,13 @@ vic_force(void)
         get_scatter_nc_field_double(filenames.forcing[0],
                                     param_set.TYPE[AIR_TEMP].varname,
                                     d3start, d3count, dvar);
+        get_nc_var_attr(filenames.forcing[0],
+                        param_set.TYPE[AIR_TEMP].varname,
+                        "units", &units);
+        converter = udunits_conversion(units, "Celsius");
         for (i = 0; i < local_domain.ncells_active; i++) {
-            atmos[i].air_temp[j] = (double) dvar[i];
+            atmos[i].air_temp[j] =
+                cv_convert_double(converter, (double) dvar[i]);
         }
     }
 
@@ -100,8 +108,12 @@ vic_force(void)
         get_scatter_nc_field_double(filenames.forcing[0],
                                     param_set.TYPE[PREC].varname,
                                     d3start, d3count, dvar);
+        get_nc_var_attr(filenames.forcing[0],
+                        param_set.TYPE[PREC].varname,
+                        "units", &units);
+        converter = udunits_conversion(units, "kg m-2 s-1");
         for (i = 0; i < local_domain.ncells_active; i++) {
-            atmos[i].prec[j] = (double) dvar[i];
+            atmos[i].prec[j] = cv_convert_double(converter, (double) dvar[i]);
         }
     }
 
@@ -111,8 +123,12 @@ vic_force(void)
         get_scatter_nc_field_double(filenames.forcing[0],
                                     param_set.TYPE[SWDOWN].varname,
                                     d3start, d3count, dvar);
+        get_nc_var_attr(filenames.forcing[0],
+                        param_set.TYPE[SWDOWN].varname,
+                        "units", &units);
+        converter = udunits_conversion(units, "W m-2");
         for (i = 0; i < local_domain.ncells_active; i++) {
-            atmos[i].shortwave[j] = (double) dvar[i];
+            atmos[i].shortwave[j] = cv_convert_double(converter, (double) dvar[i]);
         }
     }
 
@@ -122,8 +138,12 @@ vic_force(void)
         get_scatter_nc_field_double(filenames.forcing[0],
                                     param_set.TYPE[LWDOWN].varname,
                                     d3start, d3count, dvar);
+        get_nc_var_attr(filenames.forcing[0],
+                        param_set.TYPE[LWDOWN].varname,
+                        "units", &units);
+        converter = udunits_conversion(units, "W m-2");
         for (i = 0; i < local_domain.ncells_active; i++) {
-            atmos[i].longwave[j] = (double) dvar[i];
+            atmos[i].longwave[j] = cv_convert_double(converter, (double) dvar[i]);
         }
     }
 
@@ -133,8 +153,12 @@ vic_force(void)
         get_scatter_nc_field_double(filenames.forcing[0],
                                     param_set.TYPE[WIND].varname,
                                     d3start, d3count, dvar);
+        get_nc_var_attr(filenames.forcing[0],
+                        param_set.TYPE[VP].varname,
+                        "units", &units);
+        converter = udunits_conversion(units, "m s-2");
         for (i = 0; i < local_domain.ncells_active; i++) {
-            atmos[i].wind[j] = (double) dvar[i];
+            atmos[i].wind[j] = cv_convert_double(converter, (double) dvar[i]);
         }
     }
 
@@ -144,8 +168,12 @@ vic_force(void)
         get_scatter_nc_field_double(filenames.forcing[0],
                                     param_set.TYPE[VP].varname,
                                     d3start, d3count, dvar);
+        get_nc_var_attr(filenames.forcing[0],
+                        param_set.TYPE[VP].varname,
+                        "units", &units);
+        converter = udunits_conversion(units, "kPa");
         for (i = 0; i < local_domain.ncells_active; i++) {
-            atmos[i].vp[j] = (double) dvar[i];
+            atmos[i].vp[j] = cv_convert_double(converter, (double) dvar[i]);
         }
     }
 
@@ -155,10 +183,16 @@ vic_force(void)
         get_scatter_nc_field_double(filenames.forcing[0],
                                     param_set.TYPE[PRESSURE].varname,
                                     d3start, d3count, dvar);
+        get_nc_var_attr(filenames.forcing[0],
+                        param_set.TYPE[PRESSURE].varname,
+                        "units", &units);
+        converter = udunits_conversion(units, "kPa");
         for (i = 0; i < local_domain.ncells_active; i++) {
-            atmos[i].pressure[j] = (double) dvar[i];
+            atmos[i].pressure[j] =
+                cv_convert_double(converter, (double) dvar[i]);
         }
     }
+
     // Optional inputs
     if (options.LAKES) {
         // Channel inflow to lake
@@ -327,15 +361,12 @@ vic_force(void)
     else {
         t_offset = 0;
     }
+
     // Convert forcings into what we need and calculate missing ones
     for (i = 0; i < local_domain.ncells_active; i++) {
         for (j = 0; j < NF; j++) {
-            // temperature in Celsius
-            atmos[i].air_temp[j] -= CONST_TKFRZ;
             // precipitation in mm/period
             atmos[i].prec[j] *= global_param.snow_dt;
-            // pressure in kPa
-            atmos[i].pressure[j] /= PA_PER_KPA;
             // vapor pressure in kPa (we read specific humidity in kg/kg)
             atmos[i].vp[j] = q_to_vp(atmos[i].vp[j], atmos[i].pressure[j]);
             // vapor pressure deficit

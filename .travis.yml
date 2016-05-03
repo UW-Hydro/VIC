@@ -12,6 +12,7 @@ matrix:
     env: TESTID='image'
     addons:
       apt_packages:
+        - libudunits2-dev
         - libnetcdf-dev
         - gfortran
         - valgrind

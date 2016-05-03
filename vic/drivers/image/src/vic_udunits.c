@@ -1,7 +1,7 @@
 /******************************************************************************
  * @section DESCRIPTION
  *
- * Header file for vic_driver_image routines
+ * Save model state.
  *
  * @section LICENSE
  *
@@ -24,22 +24,35 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  *****************************************************************************/
 
-#ifndef VIC_DRIVER_IMAGE_H
-#define VIC_DRIVER_IMAGE_H
+#include <vic_driver_image.h>
 
-#include <vic_driver_shared_image.h>
-#include <udunits2.h>
+/******************************************************************************
+ * @brief    udunits2 support.
+ *****************************************************************************/
+cv_converter*
+udunits_conversion(const char *const from,
+                   const char *const to)
+{
+    ut_system    *unitSystem;
+    ut_unit      *ut_from;
+    ut_unit      *ut_to;
+    cv_converter *converter;
 
-#define VIC_DRIVER "Image"
+    // Read udunits unitSystem
+    ut_set_error_message_handler(ut_ignore);
+    unitSystem = ut_read_xml(NULL);
 
-bool check_save_state_flag(size_t);
-void display_current_settings(int);
-void get_forcing_file_info(param_set_struct *param_set, size_t file_num);
-void get_global_param(FILE *);
-void vic_force(void);
-void vic_image_init(void);
-void vic_image_start(void);
-void vic_populate_model_state(void);
-cv_converter *udunits_conversion(const char *const from, const char *const to);
+    ut_from = ut_parse(unitSystem, from, UT_ASCII);
+    ut_to = ut_parse(unitSystem, to, UT_ASCII);
 
-#endif
+    // Check
+    if (!ut_are_convertible(ut_from, ut_to)) {
+        log_warn(
+            "Cannot convert, or does not recognize the unit %s, assuming %s",
+            from, to);
+        ut_from = ut_to;
+    }
+
+    converter = ut_get_converter(ut_from, ut_to);
+    return(converter);
+}

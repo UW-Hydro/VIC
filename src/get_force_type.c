@@ -205,7 +205,12 @@ void get_force_type(char   *cmdstr,
     type = WIND_N;
   }
 
-  /* type 28: unused (blank) data */
+  /* type 28: sunshine duration [h] */
+  else if(strcasecmp("SD",optstr)==0){
+    type = SD;
+  }
+
+  /* type 29: unused (blank) data */
   else if(strcasecmp("SKIP",optstr)==0){
     type = SKIP;
   }

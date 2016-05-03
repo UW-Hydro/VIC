@@ -38,7 +38,7 @@ void make_in_and_outfiles(filep_struct         *filep,
 {
   extern option_struct    options;
   extern param_set_struct param_set;
-  extern FILE *open_file(char string[], char type[]);
+  extern FILE *open_file(const char string[], char type[]);
 
   char   latchar[20], lngchar[20], junk[6];
   int filenum;

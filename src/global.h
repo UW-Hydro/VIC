@@ -22,6 +22,9 @@
   2013-Dec-27 Removed QUICK_FS option.					TJB
   2014-May-20 Added ref_veg_vegcover.					TJB
 **********************************************************************/
+#ifndef GLOBAL_H
+#define GLOBAL_H
+
 char *version = "4.2.b 2015-January-22";
 char *optstring = "g:vo";
 int flag;
@@ -66,3 +69,4 @@ param_set_struct param_set;
   /* One element for each PET type (non-natural or natural) */
   char ref_veg_ref_crop[] = { FALSE, FALSE, TRUE, TRUE, FALSE, FALSE };
 
+#endif

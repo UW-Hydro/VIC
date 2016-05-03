@@ -20,6 +20,7 @@ global_param_struct get_global_param(filenames_struct *names,
 
   This routine reads the VIC model global control file, getting
   values for global parameters, model options, and debugging controls.
+  此函数读取VIC模型的全局参数文件并从中获取全局参数，模型设定以及调试控制等。
 
   NOTE: any additions or removals of parameters in this file must also
   be made in display_current_settings.c.

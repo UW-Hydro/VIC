@@ -5,7 +5,7 @@
 
 static char vcid[] = "$Id$";
 
-FILE *open_file(char string[],char type[])
+FILE *open_file(const char string[],char type[])
 
 /******************************************************************/
 /*  Open a file named by string and associate a stream with it.   */

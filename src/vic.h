@@ -1,17 +1,34 @@
 //
 // Created by sibada on 16-5-2.
 //
+/**********************************************************************
 
-#ifndef VICNL_VIC_H
-#define VICNL_VIC_H
+  Define VIC APIs for C++.
 
-#include <vicNl.h>
+  Created by Sibada on 2016-05-02.
+
+
+*********************************************************************/
+#ifndef VIC_H
+#define VIC_H
+
 #include <string>
-#include <vector>
 
-using std::vector;
+extern "C"{
+#include <cstdio>
+#include <string>
+#include <vicNl.h>
+#include <vicNl_def.h>
+#include <global.h>
+};
+
 using std::string;
 
-int get_soil_param(vector<soil_con_struct*> * soil_params, string soil_path);
+int get_global(string global_path);
 
-#endif //VICNL_VIC_H
+int get_veg_lib(string veglib_path);
+
+int get_soil_param(soil_con_struct ** soil_params, int ncell, string soil_path);
+void destory_soil_param(soil_con_struct** soil_params, int ncell);
+
+#endif //VIC_H

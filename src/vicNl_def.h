@@ -159,7 +159,7 @@ extern "C"{
 #include <snow.h>
 
 /***** If TRUE include all model messages to stdout, and stderr *****/
-#define VERBOSE TRUE
+#define VERBOSE FALSE
 
 /***** Model Constants *****/
 #define MAXSTRING    2048
@@ -448,8 +448,8 @@ extern char ref_veg_ref_crop[];
 #define SNOW 1
 #endif
 
-#define min(a, b) (a < b) ? a : b
-#define max(a, b) (a > b) ? a : b
+#define min(a, b) a < b ? a : b
+#define max(a, b) a > b ? a : b
 
 
 /***** Forcing Variable Types *****/

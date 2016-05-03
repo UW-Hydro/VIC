@@ -126,8 +126,8 @@
 	      calc_veg_roughness().					TJB
 ************************************************************************/
 
-#ifndef VICNL_H_
-#define VICNL_H_
+#ifndef VICNL_H
+#define VICNL_H
 
 #if defined(__cplusplus)||defined(c_plusplus)
 extern "C" {
@@ -356,7 +356,7 @@ int    newt_raph(void (*vecfunc)(double *, double *, int, int, ...),
                double *, int);
 void   nrerror(char *);
 
-FILE  *open_file(char string[], char type[]);
+FILE  *open_file(const char string[], char type[]);
 FILE  *open_state_file(global_param_struct *, filenames_struct, int, int);
 
 void parse_output_info(filenames_struct *, FILE *, out_data_file_struct **, out_data_struct *);

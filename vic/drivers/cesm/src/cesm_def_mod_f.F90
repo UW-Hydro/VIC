@@ -68,6 +68,7 @@ MODULE vic_cesm_def_mod
   !!          vic_cesm_def.h
   !--------------------------------------------------------------------------
   TYPE, bind(C) :: location_struct
+    LOGICAL(C_BOOL)   :: run          !< TRUE: run grid cell. FALSE: do not run grid cell
     REAL(C_DOUBLE)    :: latitude     !< latitude of grid cell center
     REAL(C_DOUBLE)    :: longitude    !< longitude of grid cell center
     REAL(C_DOUBLE)    :: area         !< area of grid cell
@@ -79,16 +80,35 @@ MODULE vic_cesm_def_mod
   END TYPE location_struct
 
   !--------------------------------------------------------------------------
+  !> @brief   This type stores information about the domain file. See also
+  !!          vic_cesm_def.h.
+  !! @note    Order is important and any changes here must be echoed in
+  !!          vic_cesm_def.h
+  !--------------------------------------------------------------------------
+  TYPE, bind(C) :: domain_info_struct
+    CHARACTER(KIND=C_CHAR) :: lat_var(VICMAXSTRING)   !< latitude variable name in the domain file
+    CHARACTER(KIND=C_CHAR) :: lon_var(VICMAXSTRING)   !< longitude variable name in the domain file
+    CHARACTER(KIND=C_CHAR) :: mask_var(VICMAXSTRING)  !< mask variable name in the domain file
+    CHARACTER(KIND=C_CHAR) :: area_var(VICMAXSTRING)  !< area variable name in the domain file
+    CHARACTER(KIND=C_CHAR) :: frac_var(VICMAXSTRING)  !< fraction variable name in the domain file
+    CHARACTER(KIND=C_CHAR) :: y_dim(VICMAXSTRING)     !< y dimension name in the domain file
+    CHARACTER(KIND=C_CHAR) :: x_dim(VICMAXSTRING)     !< x dimension name in the domain file
+    INTEGER(C_SIZE_T)      :: n_coord_dims            !< number of x/y coordinates
+  END TYPE domain_info_struct
+
+  !--------------------------------------------------------------------------
   !> @brief   This type stores domain information. See also
   !!          vic_cesm_def.h.
   !! @note    Order is important and any changes here must be echoed in
   !!          vic_cesm_def.h
   !--------------------------------------------------------------------------
   TYPE, bind(C) :: domain_struct
-    INTEGER(C_SIZE_T) :: ncells     !< number of active grid cell in domain
-    INTEGER(C_SIZE_T) :: n_nx       !< size of x-index
-    INTEGER(C_SIZE_T) :: n_ny       !< size of y-index
-    TYPE(C_PTR)       :: locations  !< locations structs for local domain
+    INTEGER(C_SIZE_T)        :: ncells_total   !< total number of grid cells on domain
+    INTEGER(C_SIZE_T)        :: ncells_active  !< number of active grid cells on domain
+    INTEGER(C_SIZE_T)        :: n_nx           !< size of x-index
+    INTEGER(C_SIZE_T)        :: n_ny           !< size of y-index
+    TYPE(C_PTR)              :: locations      !< locations structs for local domain
+    TYPE(domain_info_struct) :: info           !< structure storing domain file info
   END TYPE domain_struct
 
   !--------------------------------------------------------------------------

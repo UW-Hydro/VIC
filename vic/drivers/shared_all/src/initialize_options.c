@@ -90,12 +90,12 @@ initialize_options()
     options.VEGPARAM_FCAN = false;
     options.VEGPARAM_LAI = false;
     // state options
-    options.BINARY_STATE_FILE = false;
+    options.STATE_FORMAT = UNSET_FILE_FORMAT;
     options.INIT_STATE = false;
     options.SAVE_STATE = false;
     // output options
     options.ALMA_OUTPUT = false;
-    options.BINARY_OUTPUT = false;
+    options.OUT_FORMAT = UNSET_FILE_FORMAT;
     options.COMPRESS = false;
     options.MOISTFRACT = false;
     options.Noutfiles = 2;

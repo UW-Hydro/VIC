@@ -33,12 +33,14 @@
 
 #define BINHEADERSIZE 256
 #define MAX_VEGPARAM_LINE_LENGTH 500
+#define ASCII_STATE_FLOAT_FMT "%.16g"
 
 void alloc_atmos(int, atmos_data_struct **);
 void alloc_veg_hist(int nrecs, int nveg, veg_hist_struct ***veg_hist);
 void calc_netlongwave(double *, double, double, double);
 double calc_netshort(double, int, double, double *);
 void check_files(filep_struct *, filenames_struct *);
+bool check_save_state_flag(dmy_struct *, size_t);
 FILE  *check_state_file(char *, size_t, size_t, int *);
 void close_files(filep_struct *, out_data_file_struct *, filenames_struct *);
 size_t count_n_outfiles(FILE *gp);
@@ -53,20 +55,16 @@ void get_force_type(char *, int, int *);
 void get_global_param(FILE *);
 void init_output_list(out_data_struct *, int, char *, int, double);
 void initialize_forcing_files(void);
-int initialize_model_state(all_vars_struct *, global_param_struct *,
-                           filep_struct, size_t, size_t, size_t, double,
-                           soil_con_struct *, veg_con_struct *,
-                           lake_con_struct);
 void make_in_and_outfiles(filep_struct *, filenames_struct *, soil_con_struct *,
                           out_data_file_struct *);
-FILE *open_state_file(global_param_struct *, filenames_struct, int, int);
+FILE *open_state_file(global_param_struct *, filenames_struct, size_t, size_t);
 void print_atmos_data(atmos_data_struct *atmos, size_t nr);
 void parse_output_info(FILE *, out_data_file_struct **, out_data_struct *);
 void read_atmos_data(FILE *, global_param_struct, int, int, double **,
                      double ***);
 double **read_forcing_data(FILE **, global_param_struct, double ****);
 void read_initial_model_state(FILE *, all_vars_struct *, int, int, int,
-                              soil_con_struct *);
+                              soil_con_struct *, lake_con_struct);
 lake_con_struct read_lakeparam(FILE *, soil_con_struct, veg_con_struct *);
 void read_snowband(FILE *, soil_con_struct *);
 soil_con_struct read_soilparam(FILE *, char *, char *);
@@ -75,6 +73,9 @@ veg_con_struct *read_vegparam(FILE *, int, size_t);
 out_data_file_struct *set_output_defaults(out_data_struct *);
 void vic_force(atmos_data_struct *, dmy_struct *, FILE **, veg_con_struct *,
                veg_hist_struct **, soil_con_struct *);
+void vic_populate_model_state(all_vars_struct *, filep_struct, size_t,
+                              soil_con_struct *, veg_con_struct *,
+                              lake_con_struct);
 void write_data(out_data_file_struct *, out_data_struct *, dmy_struct *,
                 double);
 void write_forcing_file(atmos_data_struct *, int, out_data_file_struct *,

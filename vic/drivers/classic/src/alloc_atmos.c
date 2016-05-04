@@ -94,6 +94,10 @@ alloc_atmos(int                 nrecs,
             if ((*atmos)[i].Catm == NULL) {
                 log_err("Memory allocation error in alloc_atmos().");
             }
+            (*atmos)[i].coszen = calloc(NR + 1, sizeof(*(*atmos)[i].coszen));
+            if ((*atmos)[i].coszen == NULL) {
+                log_err("Memory allocation error in alloc_atmos().");
+            }
             (*atmos)[i].fdir = calloc(NR + 1, sizeof(*(*atmos)[i].fdir));
             if ((*atmos)[i].fdir == NULL) {
                 log_err("Memory allocation error in alloc_atmos().");
@@ -136,6 +140,7 @@ free_atmos(int                 nrecs,
         }
         if (options.CARBON) {
             free((*atmos)[i].Catm);
+            free((*atmos)[i].coszen);
             free((*atmos)[i].fdir);
             free((*atmos)[i].par);
         }

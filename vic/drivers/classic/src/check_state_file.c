@@ -47,7 +47,7 @@ check_state_file(char  *init_state_name,
     unsigned short int   startday, startmonth, startyear;
 
     /* open state file */
-    if (options.BINARY_STATE_FILE) {
+    if (options.STATE_FORMAT == BINARY) {
         init_state = open_file(init_state_name, "rb");
     }
     else {
@@ -58,7 +58,7 @@ check_state_file(char  *init_state_name,
     *startrec = 0;
 
     /* Check state date information */
-    if (options.BINARY_STATE_FILE) {
+    if (options.STATE_FORMAT == BINARY) {
         fread(&startyear, sizeof(int), 1, init_state);
         fread(&startmonth, sizeof(int), 1, init_state);
         fread(&startday, sizeof(int), 1, init_state);
@@ -68,9 +68,9 @@ check_state_file(char  *init_state_name,
     }
 
     /* Check simulation options */
-    if (options.BINARY_STATE_FILE) {
-        fread(&tmp_Nlayer, sizeof(int), 1, init_state);
-        fread(&tmp_Nnodes, sizeof(int), 1, init_state);
+    if (options.STATE_FORMAT == BINARY) {
+        fread(&tmp_Nlayer, sizeof(size_t), 1, init_state);
+        fread(&tmp_Nnodes, sizeof(size_t), 1, init_state);
     }
     else {
         fscanf(init_state, "%zu %zu\n", &tmp_Nlayer, &tmp_Nnodes);

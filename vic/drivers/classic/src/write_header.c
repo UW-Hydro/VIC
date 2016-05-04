@@ -58,7 +58,7 @@ write_header(out_data_file_struct *out_data_files,
         tmp_ALMA_OUTPUT = 0;
     }
 
-    if (options.BINARY_OUTPUT) { // BINARY
+    if (options.OUT_FORMAT == BINARY) {
         tmp_str = calloc(BINHEADERSIZE, sizeof(*tmp_str));
 
         // Binary header format:
@@ -298,22 +298,22 @@ write_header(out_data_file_struct *out_data_files,
             }
         }
     }
-    else { // ASCII
-           // ASCII header format:
-           //
-           // # NRECS: (nrecs)
-           // # DT: (dt)
-           // # STARTDATE: yyyy-mm-dd hh:00:00
-           // # ALMA_OUTPUT: (0 or 1)
-           // # NVARS: (Nvars)
-           // # VARNAME    VARNAME   VARNAME   ...
-           //
-           // where
-           // nrecs       = Number of records in the file
-           // dt          = Output time step length in seconds
-           // start date  = Date and time of first record of file
-           // ALMA_OUTPUT = Indicates units of the variables; 0 = standard VIC units; 1 = ALMA units
-           // Nvars       = Number of variables in the file, including date fields
+    else if (options.OUT_FORMAT == ASCII) {
+        // ASCII header format:
+        //
+        // # NRECS: (nrecs)
+        // # DT: (dt)
+        // # STARTDATE: yyyy-mm-dd hh:00:00
+        // # ALMA_OUTPUT: (0 or 1)
+        // # NVARS: (Nvars)
+        // # VARNAME    VARNAME   VARNAME   ...
+        //
+        // where
+        // nrecs       = Number of records in the file
+        // dt          = Output time step length in seconds
+        // start date  = Date and time of first record of file
+        // ALMA_OUTPUT = Indicates units of the variables; 0 = standard VIC units; 1 = ALMA units
+        // Nvars       = Number of variables in the file, including date fields
 
         // Loop over output files
         for (file_idx = 0; file_idx < options.Noutfiles; file_idx++) {
@@ -367,5 +367,8 @@ write_header(out_data_file_struct *out_data_files,
             }
             fprintf(out_data_files[file_idx].fh, "\n");
         }
+    }
+    else {
+        log_err("Unrecognized OUT_FORMAT option");
     }
 }

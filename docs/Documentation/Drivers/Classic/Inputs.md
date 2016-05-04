@@ -11,6 +11,7 @@ To run VIC, several sets of input data are necessary:
 *   [Vegetation Parameter File](VegParam.md): Landcover types, fractional areas, rooting depths, and seasonal LAIs of the various landcover tiles within each grid cell.
 
 And a few more are optional:
+
 *   [Constants File](../../Constants.md): Model parameters that are constant in time and space.
 *   [Initial State File](StateFile.md): Moisture storages (soil moisture, snow pack, etc), energy storages (soil temperatures, etc) and other information describing the current state of the system. A state file saved from a previous VIC simulation may be used as the initial state for another run.
 *   [Elevation Band File](SnowBand.md): File summarizing the distribution of elevations in each grid cell. By default, VIC assumes grid cells are flat.

@@ -67,7 +67,7 @@ vic_run(atmos_data_struct   *atmos,
     double                   displacement[3];
     double                   roughness[3];
     double                   ref_height[3];
-    double                  *aero_resist;
+    double                   aero_resist[3];
     double                   Cv;
     double                   Le;
     double                   Melt[2 * MAX_BANDS];
@@ -98,9 +98,6 @@ vic_run(atmos_data_struct   *atmos,
     // grid cell is used within vic_run. For simplicity sake, use vic_run_veg_lib
     // everywhere within vic_run
     vic_run_veg_lib = veg_lib;
-
-    /* Allocate aero_resist array */
-    aero_resist = calloc(3, sizeof(*aero_resist));
 
     /* set local pointers */
     cell = all_vars->cell;
@@ -248,10 +245,8 @@ vic_run(atmos_data_struct   *atmos,
             tmp_wind[2] = MISSING;
 
             /* Set surface descriptive variables */
-            displacement[0] =
-                vic_run_veg_lib[veg_class].displacement[dmy->month - 1];
-            roughness[0] =
-                vic_run_veg_lib[veg_class].roughness[dmy->month - 1];
+            displacement[0] = veg_var[iveg][0].displacement;
+            roughness[0] = veg_var[iveg][0].roughness;
             if (roughness[0] == 0) {
                 roughness[0] = soil_con->rough;
             }
@@ -290,27 +285,21 @@ vic_run(atmos_data_struct   *atmos,
                 }
             }
 
-            /******************************
-               Compute nitrogen scaling factors and initialize other veg vars
-            ******************************/
+            // Compute nitrogen scaling factors and initialize other veg vars
             if (options.CARBON && iveg < Nveg) {
                 for (band = 0; band < Nbands; band++) {
                     for (cidx = 0; cidx < options.Ncanopy; cidx++) {
                         veg_var[iveg][band].rsLayer[cidx] = param.HUGE_RESIST;
                     }
                     veg_var[iveg][band].aPAR = 0;
-                    if (dmy->dayseconds == 0) {
-                        calc_Nscale_factors(
-                            vic_run_veg_lib[veg_class].NscaleFlag,
-                            veg_con[iveg].CanopLayerBnd,
-                            vic_run_veg_lib[veg_class].LAI[dmy->month - 1],
-                            soil_con->lat,
-                            soil_con->lng,
-                            soil_con->time_zone_lng,
-                            dmy->day_in_year,
-                            veg_var[iveg][band].NscaleFactor);
-                    }
-                    if (dmy->month == 1 && dmy->day == 1) {
+                    calc_Nscale_factors(
+                        vic_run_veg_lib[veg_class].NscaleFlag,
+                        veg_con[iveg].CanopLayerBnd,
+                        veg_var[iveg][band].LAI,
+                        atmos->coszen[NR],
+                        veg_var[iveg][band].NscaleFactor);
+                    // TBD: move this outside of vic_run()
+                    if (dmy->day_in_year == 1) {
                         veg_var[iveg][band].AnnualNPPPrev =
                             veg_var[iveg][band].AnnualNPP;
                         veg_var[iveg][band].AnnualNPP = 0;
@@ -392,8 +381,6 @@ vic_run(atmos_data_struct   *atmos,
             veg_var[iveg][band].Wdmax *= veg_var[iveg][band].fcanopy;
         }
     }
-
-    free((char *) aero_resist);
 
     /****************************
        Run Lake Model

@@ -42,6 +42,7 @@ vic_force(void)
     extern filenames_struct    filenames;
     extern global_param_struct global_param;
     extern option_struct       options;
+    extern soil_con_struct    *soil_con;
     extern veg_con_map_struct *veg_con_map;
     extern veg_con_struct    **veg_con;
     extern veg_hist_struct   **veg_hist;
@@ -129,7 +130,7 @@ vic_force(void)
     // Wind speed: wind
     for (j = 0; j < NF; j++) {
         d3start[0] = global_param.forceoffset[0] + j;
-        get_scatter_nc_field_double(filenames.forcing[0], 
+        get_scatter_nc_field_double(filenames.forcing[0],
                                     param_set.TYPE[WIND].varname,
                                     d3start, d3count, dvar);
         for (i = 0; i < local_domain.ncells_active; i++) {
@@ -182,6 +183,16 @@ vic_force(void)
                 atmos[i].Catm[j] = (double) dvar[i];
             }
         }
+        // Cosine of solar zenith angle
+        for (j = 0; j < NF; j++) {
+            for (i = 0; i < local_domain.ncells_active; i++) {
+                atmos[i].coszen[j] = compute_coszen(
+                    local_domain.locations[i].latitude,
+                    local_domain.locations[i].longitude,
+                    soil_con[i].time_zone_lng, dmy[current].day_in_year,
+                    dmy[current].dayseconds);
+            }
+        }
         // Fraction of shortwave that is direct
         for (j = 0; j < NF; j++) {
             d3start[0] = global_param.forceoffset[0] + j;
@@ -217,10 +228,14 @@ vic_force(void)
                 for (j = 0; j < NF; j++) {
                     veg_hist[i][vidx].albedo[j] =
                         veg_con[i][vidx].albedo[dmy[current].month - 1];
-                    veg_hist[i][vidx].LAI[j] =
-                        veg_con[i][vidx].LAI[dmy[current].month - 1];
+                    veg_hist[i][vidx].displacement[j] =
+                        veg_con[i][vidx].displacement[dmy[current].month - 1];
                     veg_hist[i][vidx].fcanopy[j] =
                         veg_con[i][vidx].fcanopy[dmy[current].month - 1];
+                    veg_hist[i][vidx].LAI[j] =
+                        veg_con[i][vidx].LAI[dmy[current].month - 1];
+                    veg_hist[i][vidx].roughness[j] =
+                        veg_con[i][vidx].roughness[dmy[current].month - 1];
                 }
             }
         }
@@ -380,9 +395,13 @@ vic_force(void)
                 // the model step)
                 veg_hist[i][vidx].albedo[NR] = average(veg_hist[i][vidx].albedo,
                                                        NF);
-                veg_hist[i][vidx].LAI[NR] = average(veg_hist[i][vidx].LAI, NF);
+                veg_hist[i][vidx].displacement[NR] = average(
+                    veg_hist[i][vidx].displacement, NF);
                 veg_hist[i][vidx].fcanopy[NR] = average(
                     veg_hist[i][vidx].fcanopy, NF);
+                veg_hist[i][vidx].LAI[NR] = average(veg_hist[i][vidx].LAI, NF);
+                veg_hist[i][vidx].roughness[NR] = average(
+                    veg_hist[i][vidx].roughness, NF);
             }
         }
 
@@ -394,6 +413,11 @@ vic_force(void)
             atmos[i].Catm[NR] = average(atmos[i].Catm, NF);
             atmos[i].fdir[NR] = average(atmos[i].fdir, NF);
             atmos[i].par[NR] = average(atmos[i].par, NF);
+            // for coszen, use value at noon
+            atmos[i].coszen[NR] = compute_coszen(
+                local_domain.locations[i].latitude,
+                local_domain.locations[i].longitude, soil_con[i].time_zone_lng,
+                dmy[current].day_in_year, SEC_PER_DAY / 2);
         }
     }
 

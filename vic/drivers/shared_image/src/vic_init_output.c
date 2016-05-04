@@ -428,7 +428,6 @@ initialize_history_file(nc_file_struct *nc)
     else {
         log_err("n_coord_dims should be 1 or 2");
     }
-
 }
 
 /******************************************************************************
@@ -458,14 +457,15 @@ get_nc_mode(unsigned short int format)
  * @brief    Set global
  *****************************************************************************/
 void
-set_global_nc_attributes(int ncid, unsigned short int file_type) {
+set_global_nc_attributes(int                ncid,
+                         unsigned short int file_type)
+{
+    char       tmpstr[MAXSTRING];
+    char       userstr[MAXSTRING];
+    char       hoststr[MAXSTRING];
 
-    char tmpstr[MAXSTRING];
-    char userstr[MAXSTRING];
-    char hoststr[MAXSTRING];
-
-    time_t curr_date_time;
-    struct tm * timeinfo;
+    time_t     curr_date_time;
+    struct tm *timeinfo;
 
     // datestr
     curr_date_time = time(NULL);
@@ -513,5 +513,4 @@ set_global_nc_attributes(int ncid, unsigned short int file_type) {
     put_nc_attr(ncid, NC_GLOBAL, "VIC_Model_Version", VERSION);
     // TODO: pass in driver as an argmument to this function
     put_nc_attr(ncid, NC_GLOBAL, "VIC_Driver", "Image");
-
 }

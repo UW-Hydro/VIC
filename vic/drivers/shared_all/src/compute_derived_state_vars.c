@@ -240,5 +240,4 @@ compute_derived_state_vars(all_vars_struct *all_vars,
             }
         }
     }
-
 }

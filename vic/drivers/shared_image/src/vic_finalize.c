@@ -51,9 +51,9 @@ vic_finalize(void)
     extern veg_con_struct    **veg_con;
     extern veg_hist_struct   **veg_hist;
     extern veg_lib_struct    **veg_lib;
-    extern MPI_Datatype mpi_nc_file_struct_type;
-    extern MPI_Datatype mpi_option_struct_type;
-    extern MPI_Datatype mpi_param_struct_type;
+    extern MPI_Datatype        mpi_nc_file_struct_type;
+    extern MPI_Datatype        mpi_option_struct_type;
+    extern MPI_Datatype        mpi_param_struct_type;
 
     size_t                     i;
     size_t                     j;

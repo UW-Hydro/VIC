@@ -200,7 +200,8 @@ vic_cesm_put_data()
                 }
 
                 if (aero_resist < DBL_EPSILON) {
-                    log_warn("aero_resist (%f) is < %f", aero_resist, DBL_EPSILON);
+                    log_warn("aero_resist (%f) is < %f", aero_resist,
+                             DBL_EPSILON);
                     aero_resist = param.HUGE_RESIST;
                 }
 
@@ -312,7 +313,8 @@ vic_cesm_put_data()
         }
 
         if (!assert_close_double(AreaFactorSum, 1., 0., 1e-3)) {
-            log_warn("AreaFactorSum (%f) is not 1 in cesm_put_data.c", AreaFactorSum);
+            log_warn("AreaFactorSum (%f) is not 1 in cesm_put_data.c",
+                     AreaFactorSum);
         }
     }
 }

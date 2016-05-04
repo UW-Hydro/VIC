@@ -201,7 +201,7 @@ void vic_nc_info(nc_file_struct *nc_hist_file, out_data_struct **out_data,
                  nc_var_struct *nc_vars);
 void vic_restore(void);
 void vic_start(void);
-void vic_store(dmy_struct *dmy_current);
+void vic_store(void);
 void vic_write(dmy_struct *dmy_current);
 
 #endif

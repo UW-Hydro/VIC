@@ -296,7 +296,7 @@ def run_system(config_file, vic_exe, test_data_dir, out_dir, driver):
 
         # ------------------------------------------------------------ #
         # read template global parameter file
-        infile = os.path.join(test_data_dir + 'image/Stehekin/parameters/', 
+        infile = os.path.join(test_dir, 'system', 
                               test_dict['global_parameter_file'])
 
         with open(infile, 'r') as global_file:
@@ -343,8 +343,6 @@ def run_system(config_file, vic_exe, test_data_dir, out_dir, driver):
         test_comment = ''
         error_message = ''
 
-        print(vic_exe) 
-
         try:
             returncode = vic_exe.run(test_global_file, logdir=dirs['logs'])
             test_complete = True
@@ -358,36 +356,37 @@ def run_system(config_file, vic_exe, test_data_dir, out_dir, driver):
 
             # -------------------------------------------------------- #
             # check output files (different tests depending on driver)
-            if driver == "classic":
-                if test_dict['check']:
+            if test_dict['check']:
                     if 'complete' in test_dict['check']:
                         start = None
                         end = None
+                        
+                        if driver == "classic": 
+                    
+                            for fname in glob.glob(os.path.join(dirs['results'], '*')):
+                                df = read_vic_ascii(fname, header=True)
+                                # do numeric tests
 
-                    for fname in glob.glob(os.path.join(dirs['results'], '*')):
-                        df = read_vic_ascii(fname, header=True)
-                        # do numeric tests
+                                # check that each dataframe includes all timestamps
+                                if (start is not None) and (end is not None):
+                                    check_completed(df, start, end)
+                                else:
+                                    start = df.index[0]
+                                    end = df.index[-1]
 
-                        # check that each dataframe includes all timestamps
-                        if 'complete' in test_dict['check']:
-                            if (start is not None) and (end is not None):
-                                check_completed(df, start, end)
-                            else:
-                                start = df.index[0]
-                                end = df.index[-1]
-            elif driver == "image": 
-                if test_dict['check']:
-                    # check for nans in the df
-                    if 'nonans' in test_dict['check']:
-                        check_for_nans(df)
-            
-                    # check for nans in domain file  
-                    if 'output_nans' in test_dict['check']:
-                        print(test_dict['domain_file'])
-                        ds_domain = xr.open_dataset(os.path.join(test_data_dir + 'image/Stehekin/parameters/',
-                                                    test_dict['domain_file']))
-                        ds_output = xr.open_dataset(os.path.join(dirs['results'], 'Stehekin.history.nc')) 
-                        assert_nan_equal(ds_domain, ds_output) 
+                    if 'output_file_nans' in test_dict['check']:
+
+                        if driver == "classic": 
+                            # check for nans in the df 
+                            check_for_nans(df) 
+
+                        elif driver == "image": 
+                            # check for nans in domain file  
+                            ds_domain = xr.open_dataset(os.path.join(test_dir, 'system', 
+                                                        test_dict['domain_file']))
+                            ds_output = xr.open_dataset(os.path.join(dirs['results'], 
+                                                        'Stehekin.history.nc')) 
+                            assert_nan_equal(ds_domain, ds_output) 
 
             # -------------------------------------------------------- #
             # if we got this far, the test passed.
@@ -781,16 +780,15 @@ def replace_global_values(gp, replace):
        replace dictionary'''
     gpl = []
     for line in iter(gp.splitlines()):
-        line_list = line.split()
-        if line_list == []:
-            continue
-        key = line_list[0]
-        if key in replace:
-            value = replace.pop(key)
-            val = list([str(value)])
-        else:
-            val = line_list[1:]
-        gpl.append('{0: <20} {1}\n'.format(key, ' '.join(val)))
+        line_list = line.split() 
+        if line_list: 
+            key = line_list[0]
+            if key in replace:
+                value = replace.pop(key)
+                val = list([str(value)])
+            else:
+                val = line_list[1:]
+            gpl.append('{0: <20} {1}\n'.format(key, ' '.join(val)))
 
     if replace:
         for key, val in replace.items():

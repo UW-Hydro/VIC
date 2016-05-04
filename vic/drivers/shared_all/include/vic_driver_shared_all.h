@@ -473,7 +473,6 @@ void display_current_settings(int);
 double fractional_day_from_dmy(dmy_struct *dmy);
 void free_all_vars(all_vars_struct *all_vars, int Nveg);
 void free_dmy(dmy_struct **dmy);
-void free_out_data_files(out_data_file_struct **);
 void free_out_data(out_data_struct **);
 void free_vegcon(veg_con_struct **veg_con);
 void generate_default_state(all_vars_struct *, soil_con_struct *,
@@ -490,8 +489,7 @@ void initialize_global(void);
 void initialize_options(void);
 void initialize_parameters(void);
 void initialize_snow(snow_data_struct **snow, size_t veg_num);
-void initialize_soil(cell_data_struct **cell, soil_con_struct *soil_con,
-                     size_t veg_num);
+void initialize_soil(cell_data_struct **cell, size_t veg_num);
 void initialize_time(void);
 void initialize_veg(veg_var_struct **veg_var, size_t nveg);
 double julian_day_from_dmy(dmy_struct *dmy, unsigned short int calendar);

@@ -96,6 +96,7 @@ main(int   argc,
     /** Read Global Control File **/
     filep.globalparam = open_file(filenames.global, "r");
     get_global_param(filep.globalparam);
+    fclose(filep.globalparam);
 
     // Set Log Destination
     setup_logging(MISSING);
@@ -110,8 +111,6 @@ main(int   argc,
 
     /** Set up output data structures **/
     out_data = create_output_list();
-    out_data_files = set_output_defaults(out_data);
-    fclose(filep.globalparam);
     filep.globalparam = open_file(filenames.global, "r");
     parse_output_info(filep.globalparam, &out_data_files, out_data);
     for (filenum = 0; filenum < options.Noutfiles; filenum++) {

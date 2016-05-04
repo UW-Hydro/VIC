@@ -60,16 +60,10 @@ parse_output_info(FILE                  *gp,
 
     // Count the number of output files listed in the global param file
     noutfiles = count_n_outfiles(gp);
-    if (noutfiles > 0) {
-        options.Noutfiles = noutfiles;
-    }
-    else {
-        return;
-    }
 
     // only parse the output info if there are output files to parse
-    if (options.Noutfiles > 0) {
-        free_out_data_files(out_data_files);
+    if (noutfiles > 0) {
+        options.Noutfiles = noutfiles;
 
         *out_data_files = calloc(options.Noutfiles, sizeof(*(*out_data_files)));
         if (*out_data_files == NULL) {
@@ -158,6 +152,10 @@ parse_output_info(FILE                  *gp,
             }
             fgets(cmdstr, MAXSTRING, gp);
         }
+    }
+    // Otherwise, set output files and their contents to default configuration
+    else {
+        *out_data_files = set_output_defaults(out_data);
     }
     fclose(gp);
 }

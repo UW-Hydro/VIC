@@ -454,7 +454,7 @@ get_nc_mode(unsigned short int format)
 }
 
 /******************************************************************************
- * @brief    Set global
+ * @brief    Set global netcdf attributes (either history or state file)
  *****************************************************************************/
 void
 set_global_nc_attributes(int                ncid,

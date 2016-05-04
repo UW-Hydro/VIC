@@ -33,6 +33,7 @@
 
 #define BINHEADERSIZE 256
 #define MAX_VEGPARAM_LINE_LENGTH 500
+#define ASCII_STATE_FLOAT_FMT "%.16g"
 
 void alloc_atmos(int, atmos_data_struct **);
 void alloc_veg_hist(int nrecs, int nveg, veg_hist_struct ***veg_hist);
@@ -47,6 +48,7 @@ void compute_cell_area(soil_con_struct *);
 size_t count_outfile_nvars(FILE *gp);
 out_data_struct *create_output_list();
 void free_atmos(int nrecs, atmos_data_struct **atmos);
+void free_out_data_files(out_data_file_struct **);
 void free_veg_hist(int nrecs, int nveg, veg_hist_struct ***veg_hist);
 void free_veglib(veg_lib_struct **);
 double get_dist(double lat1, double long1, double lat2, double long2);
@@ -56,7 +58,7 @@ void init_output_list(out_data_struct *, int, char *, int, double);
 void initialize_forcing_files(void);
 void make_in_and_outfiles(filep_struct *, filenames_struct *, soil_con_struct *,
                           out_data_file_struct *);
-FILE *open_state_file(global_param_struct *, filenames_struct, int, int);
+FILE *open_state_file(global_param_struct *, filenames_struct, size_t, size_t);
 void print_atmos_data(atmos_data_struct *atmos, size_t nr);
 void parse_output_info(FILE *, out_data_file_struct **, out_data_struct *);
 void read_atmos_data(FILE *, global_param_struct, int, int, double **,

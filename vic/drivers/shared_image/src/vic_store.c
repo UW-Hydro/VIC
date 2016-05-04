@@ -30,7 +30,7 @@
  * @brief    Save model state.
  *****************************************************************************/
 void
-vic_store(dmy_struct *dmy_current)
+vic_store(void)
 {
     extern size_t              current;
     extern dmy_struct         *dmy;

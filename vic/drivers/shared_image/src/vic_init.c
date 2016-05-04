@@ -1540,7 +1540,7 @@ vic_init(void)
     for (i = 0; i < local_domain.ncells_active; i++) {
         nveg = veg_con[i][0].vegetat_type_num;
         initialize_snow(all_vars[i].snow, nveg);
-        initialize_soil(all_vars[i].cell, &(soil_con[i]), nveg);
+        initialize_soil(all_vars[i].cell, nveg);
         initialize_veg(all_vars[i].veg_var, nveg);
         if (options.LAKES) {
             tmp_lake_idx = (int)lake_con[i].lake_idx;
@@ -1557,4 +1557,5 @@ vic_init(void)
     // cleanup
     free(dvar);
     free(ivar);
+    free(Cv_sum);
 }

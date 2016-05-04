@@ -472,7 +472,6 @@ void display_current_settings(int);
 double fractional_day_from_dmy(dmy_struct *dmy);
 void free_all_vars(all_vars_struct *all_vars, int Nveg);
 void free_dmy(dmy_struct **dmy);
-void free_out_data_files(out_data_file_struct **);
 void free_out_data(out_data_struct **);
 void free_vegcon(veg_con_struct **veg_con);
 void generate_default_state(all_vars_struct *, soil_con_struct *,
@@ -489,8 +488,7 @@ void initialize_global(void);
 void initialize_options(void);
 void initialize_parameters(void);
 void initialize_snow(snow_data_struct **snow, size_t veg_num);
-void initialize_soil(cell_data_struct **cell, soil_con_struct *soil_con,
-                     size_t veg_num);
+void initialize_soil(cell_data_struct **cell, size_t veg_num);
 void initialize_time(void);
 void initialize_veg(veg_var_struct **veg_var, size_t nveg);
 double julian_day_from_dmy(dmy_struct *dmy, unsigned short int calendar);
@@ -523,7 +521,8 @@ void print_global_param(global_param_struct *gp);
 void print_lake_con(lake_con_struct *lcon, size_t nlnodes);
 void print_lake_var(lake_var_struct *lvar, size_t nlnodes, size_t nfronts,
                     size_t nlayers, size_t nnodes, size_t nfrost);
-void print_layer_data(layer_data_struct *ldata, size_t nfrost);
+void print_layer_data_states(layer_data_struct *ldata, size_t nfrost);
+void print_layer_data_fluxes(layer_data_struct *ldata);
 void print_license(void);
 void print_option(option_struct *option);
 void print_out_data(out_data_struct *out, size_t nelem);

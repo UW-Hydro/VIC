@@ -445,7 +445,7 @@ print_lake_var(lake_var_struct *lvar,
  *****************************************************************************/
 void
 print_layer_data_states(layer_data_struct *ldata,
-                 size_t             nfrost)
+                        size_t             nfrost)
 {
     size_t i;
 
@@ -1219,7 +1219,7 @@ print_veg_var(veg_var_struct *vvar,
 {
     extern option_struct options;
 
-    size_t i;
+    size_t               i;
 
     // Print state variables
     fprintf(LOG_DEST, "veg_var - states:\n");

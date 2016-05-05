@@ -29,7 +29,7 @@
 
 #include <vic_run.h>
 
-#define VERSION "5.0 beta 2015-Septeber-2"
+#define VERSION "5.0 beta 2016 April 25"
 #define SHORT_VERSION "5.0.beta"
 
 /***** Define maximum array sizes for driver level objects *****/

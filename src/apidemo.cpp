@@ -5,7 +5,6 @@
  * Testing APIs.
  */
 #include <iostream>
-
 #include <vic.h>
 
 using namespace std;
@@ -13,11 +12,20 @@ using namespace std;
 int main(int argc, char** argv){
     extern veg_lib_struct* veg_lib;
 
-    string soilpath = "/home/victi/VIClab/testdata/soil.v";
     string globalpath = "/home/victi/VIClab/testdata/global.v";
+
+
+    string soilpath = "/home/victi/VIClab/testdata/soil.v";
+    string vegpath = "/home/victi/VIClab/testdata/veg.v";
     int nvegtype = 0;
     int ncell = 17723;
-    soil_con_struct** soilps = new soil_con_struct* [ncell];;
+
+//    _run_all(globalpath);
+
+    soil_con_struct** soilps = new soil_con_struct* [ncell];
+    veg_con_struct** vegps = new veg_con_struct* [ncell];
+
+    lake_con_struct lake_con;
 
     get_global(globalpath);
 
@@ -26,10 +34,19 @@ int main(int argc, char** argv){
 
     veg_lib_struct *veglibclone = veg_lib;
 
-    get_soil_param(soilps, ncell, soilpath);
-    cout<<ncell<<endl;
+    get_soil_params(soilps, ncell, soilpath);
+    get_veg_param(vegps, nvegtype, soilps, ncell, vegpath);
 
-    destory_soil_param(soilps,ncell);
+    int cell = 8;
+    soil_con_struct* si = soilps[cell];
+    veg_con_struct* vi = vegps[cell];
+
+    for(int i = 0; i < 8; i++)
+        run_a_cell(soilps[i], vegps[i], &lake_con);
+
+    destory_veg_param(vegps, ncell);
+
+    destory_soil_param(soilps, ncell);
 
     cout<<"done\n";
     return 0;

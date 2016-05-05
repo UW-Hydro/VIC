@@ -176,7 +176,7 @@ int main(int argc, char *argv[])
 
   /** Make Date Data Structure **/
   /** 建立日期数据结构 **/
-  dmy      = make_dmy(&global_param);
+  dmy = make_dmy(&global_param);
 
   /** allocate memory for the atmos_data_struct **/
   /** 为气象参数数据分配内存空间 **/

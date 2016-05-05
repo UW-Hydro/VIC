@@ -241,16 +241,16 @@ int  put_data(all_vars_struct   *all_vars,
     if ( AboveTreeLine[band] ) {
       Cv = 0;
       for ( veg = 0 ; veg < veg_con[0].vegetat_type_num ; veg++ ) {
-	if ( veg_lib[veg_con[veg].veg_class].overstory ) {
+	    if ( veg_lib[veg_con[veg].veg_class].overstory ) {
           if (options.LAKES && veg_con[veg].LAKE) {
             if (band == 0) {
               // Fraction of tile that is flooded
               Clake = lake_var.sarea/lake_con->basin[0];
-	      Cv += veg_con[veg].Cv*(1-Clake);
+	          Cv += veg_con[veg].Cv*(1-Clake);
             }
           }
           else {
-	    Cv += veg_con[veg].Cv;
+	        Cv += veg_con[veg].Cv;
           }
         }
       }

@@ -159,7 +159,7 @@ extern "C"{
 #include <snow.h>
 
 /***** If TRUE include all model messages to stdout, and stderr *****/
-#define VERBOSE FALSE
+#define VERBOSE TRUE
 
 /***** Model Constants *****/
 #define MAXSTRING    2048
@@ -1834,7 +1834,7 @@ typedef struct {
 /*****************************************************************
   This structure stores all variables needed to solve, or save 
   solututions for all versions of this model.
-  该结构存储所有需要被处理计算的数据参数的数据结构
+  该结构存储VIC的处理结果数据
 *****************************************************************/
 typedef struct {
     cell_data_struct **cell;

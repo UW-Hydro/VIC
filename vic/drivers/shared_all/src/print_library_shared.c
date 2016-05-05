@@ -540,11 +540,10 @@ print_option(option_struct *option)
     fprintf(LOG_DEST, "\tSTATE_FORMAT         : %d\n", option->STATE_FORMAT);
     fprintf(LOG_DEST, "\tINIT_STATE           : %d\n", option->INIT_STATE);
     fprintf(LOG_DEST, "\tSAVE_STATE           : %d\n", option->SAVE_STATE);
-    fprintf(LOG_DEST, "\tALMA_OUTPUT          : %d\n", option->ALMA_OUTPUT);
     fprintf(LOG_DEST, "\tOUT_FORMAT           : %d\n", option->OUT_FORMAT);
     fprintf(LOG_DEST, "\tCOMPRESS             : %d\n", option->COMPRESS);
     fprintf(LOG_DEST, "\tMOISTFRACT           : %d\n", option->MOISTFRACT);
-    fprintf(LOG_DEST, "\tNoutfiles            : %zu\n", option->Noutfiles);
+    fprintf(LOG_DEST, "\tNoutstreams          : %zu\n", option->Noutstreams);
     fprintf(LOG_DEST, "\tPRT_HEADER           : %d\n", option->PRT_HEADER);
     fprintf(LOG_DEST, "\tPRT_SNOW_BAND        : %d\n", option->PRT_SNOW_BAND);
 }
@@ -553,41 +552,73 @@ print_option(option_struct *option)
  * @brief    Print out data structure.
  *****************************************************************************/
 void
-print_out_data(out_data_struct *out,
-               size_t           nelem)
+print_out_data(double              **out_data,
+               out_metadata_struct  *metadata)
 {
     size_t i;
+    size_t j;
 
     fprintf(LOG_DEST, "out_data:\n");
-    fprintf(LOG_DEST, "\tvarname: %s\n", out->varname);
-    fprintf(LOG_DEST, "\twrite: %d\n", out->write);
-    fprintf(LOG_DEST, "\tformat: %s\n", out->format);
-    fprintf(LOG_DEST, "\ttype: %d\n", out->type);
-    fprintf(LOG_DEST, "\tmult: %.4f\n", out->mult);
-    fprintf(LOG_DEST, "\tnelem: %d\n", out->nelem);
-    fprintf(LOG_DEST, "\tdata:");
-    for (i = 0; i < nelem; i++) {
-        fprintf(LOG_DEST, "\t%.4f", out->data[i]);
-    }
-    fprintf(LOG_DEST, "\n");
-    fprintf(LOG_DEST, "\taggdata:");
-    for (i = 0; i < nelem; i++) {
-        fprintf(LOG_DEST, "\t%.4f", out->aggdata[i]);
+
+    for (i = 0; i < N_OUTVAR_TYPES; i++) {
+        fprintf(LOG_DEST, "\tvarname: %s\n", metadata[i].varname);
+        fprintf(LOG_DEST, "\t\tnelem: %zu\n", metadata[i].nelem);
+        fprintf(LOG_DEST, "\t\tdata:");
+        for (j = 0; j < metadata[i].nelem; j++) {
+            fprintf(LOG_DEST, "\t%.4f", out_data[i][j]);
+        }
+        fprintf(LOG_DEST, "\n");
     }
     fprintf(LOG_DEST, "\n");
 }
 
 /******************************************************************************
- * @brief    Print out data file structure.
+ * @brief    Print stream_file_struct.
  *****************************************************************************/
 void
-print_out_data_file(out_data_file_struct *outf)
+print_stream_file(stream_file_struct  *sf,
+                  stream_struct       *stream,
+                  out_metadata_struct *metadata)
 {
-    fprintf(LOG_DEST, "\tprefix: %s\n", outf->prefix);
-    fprintf(LOG_DEST, "\tfilename: %s\n", outf->filename);
-    fprintf(LOG_DEST, "\tfh: %p\n", outf->fh);
-    fprintf(LOG_DEST, "\tnvars: %zu\n", outf->nvars);
-    fprintf(LOG_DEST, "\tvarid: %p\n", outf->varid);
+
+    size_t       i;
+    unsigned int varid;
+
+    fprintf(LOG_DEST, "stream_file_struct:\n");
+
+    fprintf(LOG_DEST, "\tprefix: %s\n", sf->prefix);
+    fprintf(LOG_DEST, "\tfilename: %s\n", sf->filename);
+    fprintf(LOG_DEST, "\tfh: %p\n", sf->fh);
+    fprintf(LOG_DEST, "\tnvars: %zu\n", stream->nvars);
+    fprintf(LOG_DEST, "\t# \tVARID \tVARNAME \tTYPE \tMULT \tFORMAT\n");
+    for (i = 0; i < stream->nvars; i++) {
+        varid = stream->varid[i];
+        fprintf(LOG_DEST, "\t%zu \t%u \t%s \t%hu \t%f \t%s\n",
+                i, varid, metadata[varid].varname,
+                sf->type[i], sf->mult[i], sf->format[i]);
+    }
+    fprintf(LOG_DEST, "\n");
+}
+
+/******************************************************************************
+ * @brief    Print stream_file_struct.
+ *****************************************************************************/
+void
+print_out_metadata(out_metadata_struct *metadata)
+{
+    size_t i;
+
+    fprintf(LOG_DEST, "out_metadata_struct: \n");
+    fprintf(LOG_DEST, "\tN_OUTVAR_TYPES: %d\n", N_OUTVAR_TYPES);
+
+    for (i = 0; i < N_OUTVAR_TYPES; i++) {
+        fprintf(LOG_DEST, "\tvarname: %s\n", metadata[i].varname);
+        fprintf(LOG_DEST, "\t\tlong_name: %s\n", metadata[i].long_name);
+        fprintf(LOG_DEST, "\t\tunits: %s\n", metadata[i].units);
+        fprintf(LOG_DEST, "\t\tdescription: %s\n", metadata[i].description);
+        fprintf(LOG_DEST, "\t\tnelem: %zu\n", metadata[i].nelem);
+    }
+    fprintf(LOG_DEST, "\n");
 }
 
 /******************************************************************************

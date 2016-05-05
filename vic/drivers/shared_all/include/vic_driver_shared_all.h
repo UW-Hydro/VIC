@@ -32,6 +32,9 @@
 #define VERSION "5.0 beta 2015-Septeber-2"
 #define SHORT_VERSION "5.0.beta"
 
+/***** Define maximum array sizes for driver level objects *****/
+#define MAX_FORCE_FILES 2
+
 /******************************************************************************
  * @brief   Met file formats
  *****************************************************************************/
@@ -126,75 +129,75 @@ enum
     OUT_ZWT,              /**< water table position [cm] (zwt within lowest unsaturated layer) */
     OUT_ZWT_LUMPED,       /**< lumped water table position [cm] (zwt of total moisture across all layers, lumped together) */
     // Water Balance Terms - fluxes
-    OUT_BASEFLOW,         /**< baseflow out of the bottom layer  [mm] (ALMA_OUTPUT: [mm/s]) */
+    OUT_BASEFLOW,         /**< baseflow out of the bottom layer  [mm] */
     OUT_DELINTERCEPT,     /**< change in canopy interception storage  [mm] */
     OUT_DELSOILMOIST,     /**< change in soil water content  [mm] */
     OUT_DELSURFSTOR,      /**< change in surface liquid water storage  [mm] */
     OUT_DELSWE,           /**< change in snow water equivalent  [mm] */
-    OUT_EVAP,             /**< total net evaporation [mm] (ALMA_OUTPUT: [mm/s]) */
-    OUT_EVAP_BARE,        /**< net evaporation from bare soil [mm] (ALMA_OUTPUT: [mm/s]) */
-    OUT_EVAP_CANOP,       /**< net evaporation from canopy interception [mm] (ALMA_OUTPUT: [mm/s]) */
-    OUT_INFLOW,           /**< moisture that reaches top of soil column [mm] (ALMA_OUTPUT: [mm/s]) */
-    OUT_LAKE_BF_IN,       /**< incoming baseflow from lake catchment [mm] (ALMA_OUTPUT: [mm/s]) */
-    OUT_LAKE_BF_IN_V,     /**< incoming volumetric baseflow from lake catchment [m3] (ALMA_OUTPUT: [m3/s]) */
-    OUT_LAKE_BF_OUT,      /**< outgoing baseflow from lake [mm] (ALMA_OUTPUT: [mm/s]) */
-    OUT_LAKE_BF_OUT_V,    /**< outgoing volumetric baseflow from lake [m3] (ALMA_OUTPUT: [m3/s]) */
-    OUT_LAKE_CHAN_IN,     /**< channel inflow into lake [mm] (ALMA_OUTPUT: [mm/s]) */
-    OUT_LAKE_CHAN_IN_V,   /**< volumetric channel inflow into lake [m3] (ALMA_OUTPUT: [m3/s]) */
-    OUT_LAKE_CHAN_OUT,    /**< channel outflow from lake [mm] (ALMA_OUTPUT: [mm/s]) */
-    OUT_LAKE_CHAN_OUT_V,  /**< volumetric channel outflow from lake [m3] (ALMA_OUTPUT: [m3/s]) */
-    OUT_LAKE_DSTOR,       /**< change in lake moisture storage (liquid plus ice cover) [mm] (ALMA_OUTPUT: [mm/s]) */
-    OUT_LAKE_DSTOR_V,     /**< volumetric change in lake moisture storage (liquid plus ice cover) [m3] (ALMA_OUTPUT: [m3/s]) */
-    OUT_LAKE_DSWE,        /**< change in swe on top of lake ice [mm] (ALMA_OUTPUT: [mm/s]) */
-    OUT_LAKE_DSWE_V,      /**< volumetric change in swe on top of lake ice [m3] (ALMA_OUTPUT: [m3/s]) */
-    OUT_LAKE_EVAP,        /**< net evaporation from lake surface [mm] (ALMA_OUTPUT: [mm/s]) */
-    OUT_LAKE_EVAP_V,      /**< net volumetric evaporation from lake surface [m3] (ALMA_OUTPUT: [m3/s]) */
-    OUT_LAKE_PREC_V,      /**< volumetric precipitation over lake surface [m3] (ALMA_OUTPUT: [m3/s]) */
-    OUT_LAKE_RCHRG,       /**< recharge from lake to surrounding wetland [mm] (ALMA_OUTPUT: [mm/s]) */
-    OUT_LAKE_RCHRG_V,     /**< volumetric recharge from lake to surrounding wetland [m3] (ALMA_OUTPUT: [m3/s]) */
-    OUT_LAKE_RO_IN,       /**< incoming runoff from lake catchment [mm] (ALMA_OUTPUT: [mm/s]) */
-    OUT_LAKE_RO_IN_V,     /**< incoming volumetric runoff from lake catchment [m3] (ALMA_OUTPUT: [m3/s]) */
-    OUT_LAKE_VAPFLX,      /**< outgoing sublimation from snow on top of lake ice [mm] (ALMA_OUTPUT: [mm/s]) */
-    OUT_LAKE_VAPFLX_V,    /**< outgoing volumetric sublimation from snow on top of lake ice [m3] (ALMA_OUTPUT: [m3/s]) */
-    OUT_PET,              /**< Potential evapotranspiration (= area-weighted sum of potential transpiration and potential soil evaporation).  Potential transpiration is computed using the Penman-Monteith eqn with architectural resistance and LAI of the current veg cover. [mm] (ALMA_OUTPUT: [mm/s]) */
-    OUT_PREC,             /**< incoming precipitation [mm] (ALMA_OUTPUT: [mm/s]) */
-    OUT_RAINF,            /**< rainfall  [mm] (ALMA_OUTPUT: [mm/s]) */
-    OUT_REFREEZE,         /**< refreezing of water in the snow  [mm] (ALMA_OUTPUT: [mm/s]) */
-    OUT_RUNOFF,           /**< surface runoff [mm] (ALMA_OUTPUT: [mm/s]) */
-    OUT_SNOW_MELT,        /**< snow melt  [mm] (ALMA_OUTPUT: [mm/s]) */
-    OUT_SNOWF,            /**< snowfall  [mm] (ALMA_OUTPUT: [mm/s]) */
-    OUT_SUB_BLOWING,      /**< net sublimation of blowing snow [mm] (ALMA_OUTPUT: [mm/s]) */
-    OUT_SUB_CANOP,        /**< net sublimation from snow stored in canopy [mm] (ALMA_OUTPUT: [mm/s]) */
-    OUT_SUB_SNOW,         /**< total net sublimation from snow pack (surface and blowing) [mm] (ALMA_OUTPUT: [mm/s]) */
-    OUT_SUB_SURFACE,      /**< net sublimation from snow pack surface [mm] (ALMA_OUTPUT: [mm/s]) */
-    OUT_TRANSP_VEG,       /**< net transpiration from vegetation [mm] (ALMA_OUTPUT: [mm/s]) */
+    OUT_EVAP,             /**< total net evaporation [mm] */
+    OUT_EVAP_BARE,        /**< net evaporation from bare soil [mm] */
+    OUT_EVAP_CANOP,       /**< net evaporation from canopy interception [mm] */
+    OUT_INFLOW,           /**< moisture that reaches top of soil column [mm] */
+    OUT_LAKE_BF_IN,       /**< incoming baseflow from lake catchment [mm] */
+    OUT_LAKE_BF_IN_V,     /**< incoming volumetric baseflow from lake catchment [m3] */
+    OUT_LAKE_BF_OUT,      /**< outgoing baseflow from lake [mm] */
+    OUT_LAKE_BF_OUT_V,    /**< outgoing volumetric baseflow from lake [m3] */
+    OUT_LAKE_CHAN_IN,     /**< channel inflow into lake [mm] */
+    OUT_LAKE_CHAN_IN_V,   /**< volumetric channel inflow into lake [m3] */
+    OUT_LAKE_CHAN_OUT,    /**< channel outflow from lake [mm] */
+    OUT_LAKE_CHAN_OUT_V,  /**< volumetric channel outflow from lake [m3] */
+    OUT_LAKE_DSTOR,       /**< change in lake moisture storage (liquid plus ice cover) [mm] */
+    OUT_LAKE_DSTOR_V,     /**< volumetric change in lake moisture storage (liquid plus ice cover) [m3] */
+    OUT_LAKE_DSWE,        /**< change in swe on top of lake ice [mm] */
+    OUT_LAKE_DSWE_V,      /**< volumetric change in swe on top of lake ice [m3] */
+    OUT_LAKE_EVAP,        /**< net evaporation from lake surface [mm] */
+    OUT_LAKE_EVAP_V,      /**< net volumetric evaporation from lake surface [m3] */
+    OUT_LAKE_PREC_V,      /**< volumetric precipitation over lake surface [m3] */
+    OUT_LAKE_RCHRG,       /**< recharge from lake to surrounding wetland [mm] */
+    OUT_LAKE_RCHRG_V,     /**< volumetric recharge from lake to surrounding wetland [m3] */
+    OUT_LAKE_RO_IN,       /**< incoming runoff from lake catchment [mm] */
+    OUT_LAKE_RO_IN_V,     /**< incoming volumetric runoff from lake catchment [m3] */
+    OUT_LAKE_VAPFLX,      /**< outgoing sublimation from snow on top of lake ice [mm] */
+    OUT_LAKE_VAPFLX_V,    /**< outgoing volumetric sublimation from snow on top of lake ice [m3] */
+    OUT_PET,              /**< Potential evapotranspiration (= area-weighted sum of potential transpiration and potential soil evaporation).  Potential transpiration is computed using the Penman-Monteith eqn with architectural resistance and LAI of the current veg cover. [mm] */
+    OUT_PREC,             /**< incoming precipitation [mm] */
+    OUT_RAINF,            /**< rainfall  [mm] */
+    OUT_REFREEZE,         /**< refreezing of water in the snow  [mm] */
+    OUT_RUNOFF,           /**< surface runoff [mm] */
+    OUT_SNOW_MELT,        /**< snow melt  [mm] */
+    OUT_SNOWF,            /**< snowfall  [mm] */
+    OUT_SUB_BLOWING,      /**< net sublimation of blowing snow [mm] */
+    OUT_SUB_CANOP,        /**< net sublimation from snow stored in canopy [mm] */
+    OUT_SUB_SNOW,         /**< total net sublimation from snow pack (surface and blowing) [mm] */
+    OUT_SUB_SURFACE,      /**< net sublimation from snow pack surface [mm] */
+    OUT_TRANSP_VEG,       /**< net transpiration from vegetation [mm] */
     OUT_WATER_ERROR,      /**< water budget error [mm] */
     // Energy Balance Terms - state variables
     OUT_ALBEDO,           /**< average surface albedo [fraction] */
-    OUT_BARESOILT,        /**< bare soil surface temperature [C] (ALMA_OUTPUT: [K]) */
-    OUT_FDEPTH,           /**< depth of freezing fronts [cm] (ALMA_OUTPUT: [m]) for each freezing front */
-    OUT_LAKE_ICE_TEMP,    /**< temperature of lake ice [C] (ALMA_OUTPUT: [K]) */
-    OUT_LAKE_SURF_TEMP,   /**< lake surface temperature [C] (ALMA_OUTPUT: [K]) */
+    OUT_BARESOILT,        /**< bare soil surface temperature [C] */
+    OUT_FDEPTH,           /**< depth of freezing fronts [cm] */
+    OUT_LAKE_ICE_TEMP,    /**< temperature of lake ice [C] */
+    OUT_LAKE_SURF_TEMP,   /**< lake surface temperature [C] */
     OUT_RAD_TEMP,         /**< average radiative surface temperature [K] */
     OUT_SALBEDO,          /**< snow pack albedo [fraction] */
-    OUT_SNOW_PACK_TEMP,   /**< snow pack temperature [C] (ALMA_OUTPUT: [K]) */
-    OUT_SNOW_SURF_TEMP,   /**< snow surface temperature [C] (ALMA_OUTPUT: [K]) */
+    OUT_SNOW_PACK_TEMP,   /**< snow pack temperature [C] */
+    OUT_SNOW_SURF_TEMP,   /**< snow surface temperature [C] */
     OUT_SNOWT_FBFLAG,     /**< snow surface temperature fallback flag */
-    OUT_SOIL_TEMP,        /**< soil temperature [C] (ALMA_OUTPUT: [K]) for each soil layer */
-    OUT_SOIL_TNODE,       /**< soil temperature [C] (ALMA_OUTPUT: [K]) for each soil thermal node */
-    OUT_SOIL_TNODE_WL,    /**< soil temperature [C] (ALMA_OUTPUT: [K]) for each soil thermal node in the wetland */
+    OUT_SOIL_TEMP,        /**< soil temperature [C] */
+    OUT_SOIL_TNODE,       /**< soil temperature [C] */
+    OUT_SOIL_TNODE_WL,    /**< soil temperature [C] */
     OUT_SOILT_FBFLAG,     /**< soil temperature flag for each soil thermal node */
-    OUT_SURF_TEMP,        /**< average surface temperature [C] (ALMA_OUTPUT: [K]) */
+    OUT_SURF_TEMP,        /**< average surface temperature [C] */
     OUT_SURFT_FBFLAG,     /**< surface temperature flag */
     OUT_TCAN_FBFLAG,      /**< Tcanopy flag */
-    OUT_TDEPTH,           /**< depth of thawing fronts [cm] (ALMA_OUTPUT: [m]) for each thawing front */
+    OUT_TDEPTH,           /**< depth of thawing fronts [cm] */
     OUT_TFOL_FBFLAG,      /**< Tfoliage flag */
-    OUT_VEGT,             /**< average vegetation canopy temperature [C] (ALMA_OUTPUT: [K]) */
+    OUT_VEGT,             /**< average vegetation canopy temperature [C] */
     // Energy Balance Terms - fluxes
     OUT_ADV_SENS,         /**< net sensible flux advected to snow pack [W/m2] */
     OUT_ADVECTION,        /**< advected energy [W/m2] */
-    OUT_DELTACC,          /**< rate of change in cold content in snow pack [W/m2] (ALMA_OUTPUT: [J/m2]) */
-    OUT_DELTAH,           /**< rate of change in heat storage [W/m2] (ALMA_OUTPUT: [J/m2]) */
+    OUT_DELTACC,          /**< rate of change in cold content in snow pack [W/m2] */
+    OUT_DELTAH,           /**< rate of change in heat storage [W/m2] */
     OUT_ENERGY_ERROR,     /**< energy budget error [W/m2] */
     OUT_FUSION,           /**< net energy used to melt/freeze soil moisture [W/m2] */
     OUT_GRND_FLUX,        /**< net heat flux into ground [W/m2] */
@@ -215,7 +218,7 @@ enum
     OUT_AERO_RESIST,      /**< "scene"canopy aerodynamic resistance [s/m]  (tiles with overstory contribute overstory resistance; others contribute surface resistance)*/
     OUT_AERO_RESIST1,     /**< surface aerodynamic resistance [s/m] */
     OUT_AERO_RESIST2,     /**< overstory aerodynamic resistance [s/m] */
-    OUT_AIR_TEMP,         /**< air temperature [C] (ALMA_OUTPUT: [K])*/
+    OUT_AIR_TEMP,         /**< air temperature [C] */
     OUT_CATM,             /**< atmospheric CO2 concentrtaion [ppm]*/
     OUT_DENSITY,          /**< near-surface atmospheric density [kg/m3]*/
     OUT_FCANOPY,          /**< fractional area covered by plant canopy [fraction] */
@@ -223,13 +226,13 @@ enum
     OUT_LAI,              /**< leaf area index [m2/m2] */
     OUT_LWDOWN,           /**< incoming longwave [W/m2] */
     OUT_PAR,              /**< incoming photosynthetically active radiation [W/m2] */
-    OUT_PRESSURE,         /**< near surface atmospheric pressure [kPa] (ALMA_OUTPUT: [Pa])*/
+    OUT_PRESSURE,         /**< near surface atmospheric pressure [kPa] */
     OUT_QAIR,             /**< specific humidity [kg/kg] */
     OUT_REL_HUMID,        /**< relative humidity [%]*/
     OUT_SWDOWN,           /**< incoming shortwave [W/m2] */
     OUT_SURF_COND,        /**< surface conductance [m/s] */
-    OUT_VP,               /**< near surface vapor pressure [kPa] (ALMA_OUTPUT: [Pa]) */
-    OUT_VPD,              /**< near surface vapor pressure deficit [kPa] (ALMA_OUTPUT: [Pa]) */
+    OUT_VP,               /**< near surface vapor pressure [kPa] */
+    OUT_VPD,              /**< near surface vapor pressure deficit [kPa] */
     OUT_WIND,             /**< near surface wind speed [m/s] */
     // Band-specific quantities
     OUT_ADV_SENS_BAND,    /**< net sensible heat flux advected to snow pack [W/m2] */
@@ -249,9 +252,9 @@ enum
     OUT_SNOW_COVER_BAND,  /**< fractional area of snow cover [fraction] */
     OUT_SNOW_DEPTH_BAND,  /**< depth of snow pack [cm] */
     OUT_SNOW_FLUX_BAND,   /**< energy flux through snow pack [W/m2] */
-    OUT_SNOW_MELT_BAND,   /**< snow melt [mm] (ALMA_OUTPUT: [mm/s]) */
-    OUT_SNOW_PACKT_BAND,  /**< snow pack temperature [C] (ALMA_OUTPUT: [K]) */
-    OUT_SNOW_SURFT_BAND,  /**< snow surface temperature [C] (ALMA_OUTPUT: [K]) */
+    OUT_SNOW_MELT_BAND,   /**< snow melt [mm] */
+    OUT_SNOW_PACKT_BAND,  /**< snow pack temperature [C] */
+    OUT_SNOW_SURFT_BAND,  /**< snow surface temperature [C] */
     OUT_SWE_BAND,         /**< snow water equivalent in snow pack [mm] */
     // Carbon-Cycling Terms
     OUT_APAR,             /**< absorbed PAR [W/m2] */
@@ -336,6 +339,44 @@ enum time_units
 };
 
 /******************************************************************************
+ * @brief   file structures
+ *****************************************************************************/
+typedef struct {
+    FILE *forcing[MAX_FORCE_FILES];   /**< atmospheric forcing data files */
+    FILE *globalparam;  /**< global parameters file */
+    FILE *constants;    /**< model constants parameter file */
+    FILE *domain;       /**< domain file */
+    FILE *init_state;   /**< initial model state file */
+    FILE *lakeparam;    /**< lake parameter file */
+    FILE *snowband;     /**< snow elevation band data file */
+    FILE *soilparam;    /**< soil parameters for all grid cells */
+    FILE *statefile;    /**< output model state file */
+    FILE *veglib;       /**< vegetation parameters for all vege types */
+    FILE *vegparam;     /**< fractional coverage info for grid cell */
+    FILE *logfile;      /**< log file */
+} filep_struct;
+
+/******************************************************************************
+ * @brief   This structure stores input and output filenames.
+ *****************************************************************************/
+typedef struct {
+    char forcing[MAX_FORCE_FILES][MAXSTRING];    /**< atmospheric forcing data file names */
+    char f_path_pfx[MAX_FORCE_FILES][MAXSTRING]; /**< path and prefix for atmospheric forcing data file names */
+    char global[MAXSTRING];        /**< global control file name */
+    char domain[MAXSTRING];        /**< domain file name */
+    char constants[MAXSTRING];     /**< model constants file name */
+    char init_state[MAXSTRING];    /**< initial model state file name */
+    char lakeparam[MAXSTRING];     /**< lake model constants file */
+    char result_dir[MAXSTRING];    /**< directory where results will be written */
+    char snowband[MAXSTRING];      /**< snow band parameter file name */
+    char soil[MAXSTRING];          /**< soil parameter file name */
+    char statefile[MAXSTRING];     /**< name of file in which to store model state */
+    char veg[MAXSTRING];           /**< vegetation grid coverage file */
+    char veglib[MAXSTRING];        /**< vegetation parameter library file */
+    char log_path[MAXSTRING];      /**< Location to write log file to*/
+} filenames_struct;
+
+/******************************************************************************
  * @brief    Stores forcing file input information.
  *****************************************************************************/
 typedef struct {
@@ -370,12 +411,29 @@ typedef struct {
     char prefix[MAXSTRING];  /**< prefix of the file name, e.g. "fluxes" */
     char filename[MAXSTRING];        /**< complete file name */
     FILE *fh;                /**< filehandle */
+    unsigned short int *type;  /**< type, when written to a binary file;
+                                 OUT_TYPE_USINT  = unsigned short int
+                                 OUT_TYPE_SINT   = short int
+                                 OUT_TYPE_FLOAT  = single precision floating point
+                                 OUT_TYPE_DOUBLE = double precision floating point */
+    double              *mult;  /**< multiplier, when written to a binary file [shape=(nvars, )] */
+    char               **format;  /**< format, when written to disk [shape=(nvars, )] */
+} stream_file_struct;
+
+/******************************************************************************
+ * @brief   Thiss structure stores output information for one output stream.
+ *****************************************************************************/
+typedef struct {
     size_t nvars;            /**< number of variables to store in the file */
+    unsigned int counter;
+    unsigned int nextagg;
     unsigned int *varid;         /**< id numbers of the variables to store in the file
                                     (a variable's id number is its index in the out_data array).
                                     The order of the id numbers in the varid array
                                     is the order in which the variables will be written. */
-} out_data_file_struct;
+    unsigned short int  *aggtype;  /**< type of aggregation to use [shape=(nvars, )] */
+    double            ***aggdata;  /**< array of aggregated data values [shape=(nvars, nelem, nsteps)] */
+} stream_struct;
 
 /******************************************************************************
  * @brief   This structure stores moisture state information for differencing
@@ -390,31 +448,15 @@ typedef struct {
 } save_data_struct;
 
 /******************************************************************************
- * @brief   This structure stores output information for one variable.
+ * @brief   This structure stores output information for individual history streams
  *****************************************************************************/
 typedef struct {
     char varname[MAXSTRING];  /**< name of variable */
-    bool write;               /**< FALSE = don't write; TRUE = write */
-    char format[MAXSTRING];   /**< format, when written to an ascii file;
-                                   should match the desired fprintf format
-                                   specifier, e.g. %.4f */
-    unsigned short int type;  /**< type, when written to a binary file;
-                                 OUT_TYPE_USunsigned short  = unsigned short int
-                                 OUT_TYPE_SINT   = short int
-                                 OUT_TYPE_FLOAT  = single precision floating point
-                                 OUT_TYPE_DOUBLE = double precision floating point */
-    double mult;             /**< multiplier, when written to a binary file */
-    unsigned short int aggtype;  /**< type of aggregation to use;
-                                    AGG_TYPE_AVG    = take average value over agg interval
-                                    AGG_TYPE_BEG    = take value at beginning of agg interval
-                                    AGG_TYPE_END    = take value at end of agg interval
-                                    AGG_TYPE_MAX    = take maximum value over agg interval
-                                    AGG_TYPE_MIN    = take minimum value over agg interval
-                                    AGG_TYPE_SUM    = take sum over agg interval */
-    unsigned int nelem;          /**< number of data values */
-    double *data;            /**< array of data values */
-    double *aggdata;         /**< array of aggregated data values */
-} out_data_struct;
+    char long_name[MAXSTRING];  /**< cf long_name of variable */
+    char units[MAXSTRING];  /**< units of variable */
+    char description[MAXSTRING];  /**< descripition of variable */
+    size_t nelem;          /**< number of data values */
+} out_metadata_struct;
 
 /******************************************************************************
  * @brief   This structure holds all variables needed for the error handling
@@ -426,8 +468,8 @@ typedef struct {
     energy_bal_struct *energy;
     filep_struct filep;
     size_t rec;
-    out_data_struct *out_data;
-    out_data_file_struct *out_data_files;
+    double **out_data;
+    stream_struct *output_streams;
     snow_data_struct *snow;
     soil_con_struct soil_con;
     veg_con_struct *veg_con;
@@ -435,6 +477,7 @@ typedef struct {
 } Error_struct;
 
 double air_density(double t, double p);
+void agg_stream_data(stream_struct *stream, double **out_data);
 double all_30_day_from_dmy(dmy_struct *dmy);
 double all_leap_from_dmy(dmy_struct *dmy);
 double average(double *ar, size_t n);
@@ -444,11 +487,11 @@ double calc_water_balance_error(double, double, double, double);
 unsigned short int calendar_from_chars(char *cal_chars);
 bool check_write_flag(int rec);
 void collect_eb_terms(energy_bal_struct, snow_data_struct, cell_data_struct,
-                      double, double, double, int, int, double, int, int,
-                      double *, double, out_data_struct *);
+                      double, double, double, bool, bool, double, bool, int,
+                      double *, double, double **);
 void collect_wb_terms(cell_data_struct, veg_var_struct, snow_data_struct,
-                      double, double, double, int, double, int, double *,
-                      double *, out_data_struct *);
+                      double, double, double, bool, double, bool, double *,
+                      double *, double **);
 void compute_derived_state_vars(all_vars_struct *, soil_con_struct *,
                                 veg_con_struct *);
 void compute_lake_params(lake_con_struct *, soil_con_struct);
@@ -457,7 +500,8 @@ void compute_treeline(atmos_data_struct *, dmy_struct *, double, double *,
 size_t count_force_vars(FILE *gp);
 void cmd_proc(int argc, char **argv, char *globalfilename);
 void compress_files(char string[]);
-out_data_struct *create_output_list(void);
+double **create_outdata(void);
+stream_struct create_outstream(stream_struct *output_streams);
 void get_current_datetime(char *cdt);
 double date2num(double origin, dmy_struct *date, double tzoffset,
                 unsigned short int calendar, unsigned short int time_units);
@@ -472,14 +516,16 @@ void display_current_settings(int);
 double fractional_day_from_dmy(dmy_struct *dmy);
 void free_all_vars(all_vars_struct *all_vars, int Nveg);
 void free_dmy(dmy_struct **dmy);
-void free_out_data(out_data_struct **);
+void free_out_data(double **);
+void free_out_data_files(stream_file_struct **out_data_files);
+void free_out_data_streams(stream_struct **streams);
 void free_vegcon(veg_con_struct **veg_con);
 void generate_default_state(all_vars_struct *, soil_con_struct *,
                             veg_con_struct *);
 void generate_default_lake_state(all_vars_struct *, soil_con_struct *,
                                  lake_con_struct);
 void get_parameters(FILE *paramfile);
-void init_output_list(out_data_struct *out_data, int write, char *format,
+void init_output_list(double **out_data, int write, char *format,
                       int type, double mult);
 void initialize_energy(energy_bal_struct **energy, size_t nveg);
 void initialize_filenames(void);
@@ -487,6 +533,7 @@ void initialize_fileps(void);
 void initialize_global(void);
 void initialize_options(void);
 void initialize_parameters(void);
+void initialize_put_data();
 void initialize_snow(snow_data_struct **snow, size_t veg_num);
 void initialize_soil(cell_data_struct **cell, size_t veg_num);
 void initialize_time(void);
@@ -510,7 +557,7 @@ void parse_nc_time_units(char *nc_unit_chars, unsigned short int *units,
                          dmy_struct *dmy);
 void put_data(all_vars_struct *, atmos_data_struct *, soil_con_struct *,
               veg_con_struct *, veg_lib_struct *veg_lib, lake_con_struct *,
-              out_data_struct *, save_data_struct *, int);
+              double **out_data, save_data_struct *);
 void print_cell_data(cell_data_struct *cell, size_t nlayers, size_t nfrost);
 void print_dmy(dmy_struct *dmy);
 void print_energy_bal(energy_bal_struct *eb, size_t nnodes, size_t nfronts);
@@ -525,14 +572,17 @@ void print_layer_data_states(layer_data_struct *ldata, size_t nfrost);
 void print_layer_data_fluxes(layer_data_struct *ldata);
 void print_license(void);
 void print_option(option_struct *option);
-void print_out_data(out_data_struct *out, size_t nelem);
-void print_out_data_file(out_data_file_struct *outf);
+void print_out_data(double **out_data, out_metadata_struct *metadata);
+void print_out_metadata(out_metadata_struct *metadata);
+void print_output_streams(stream_struct *outf);
 void print_param_set(param_set_struct *param_set);
 void print_parameters(parameters_struct *param);
 void print_save_data(save_data_struct *save);
 void print_snow_data(snow_data_struct *snow);
 void print_soil_con(soil_con_struct *scon, size_t nlayers, size_t nnodes,
                     size_t nfrost, size_t nbands, size_t nzwt);
+void print_stream_file(stream_file_struct *sf, stream_struct *stream,
+                       out_metadata_struct *metadata);
 void print_veg_con(veg_con_struct *vcon, size_t nroots, char blowing, char lake,
                    char carbon, size_t ncanopy);
 void print_veg_lib(veg_lib_struct *vlib, char carbon);
@@ -540,8 +590,14 @@ void print_veg_var(veg_var_struct *vvar, size_t ncanopy);
 void print_version(char *);
 void print_usage(char *);
 double q_to_vp(double q, double p);
-int set_output_var(out_data_file_struct *, int, int, out_data_struct *, char *,
-                   int, char *, int, double);
+void reset_stream(stream_struct *stream);
+void set_output_var(stream_struct *stream, stream_file_struct *out_data_file,
+                    char *varname, size_t varnum, char *format,
+                    unsigned short int type, double mult);
+unsigned int get_default_outvar_aggtype(unsigned int varid);
+void set_output_met_data_info();
+void setup_stream(stream_struct *stream, stream_file_struct *stream_file,
+                  size_t nvars, unsigned int nextagg);
 void soil_moisture_from_water_table(soil_con_struct *soil_con, size_t nlayers);
 void sprint_dmy(char *str, dmy_struct *dmy);
 unsigned short int timeunits_from_chars(char *units_chars);
@@ -550,6 +606,6 @@ int invalid_date(unsigned short int calendar, dmy_struct *dmy);
 void validate_parameters(void);
 char will_it_snow(double *t, double t_offset, double max_snow_temp,
                   double *prcp, size_t n);
-void zero_output_list(out_data_struct *);
+void zero_output_list(double **);
 
 #endif

@@ -31,7 +31,7 @@
  *****************************************************************************/
 void
 close_files(filep_struct         *filep,
-            out_data_file_struct *out_data_files,
+            stream_file_struct   *out_data_files,
             filenames_struct     *fnames)
 {
     extern option_struct options;
@@ -55,7 +55,7 @@ close_files(filep_struct         *filep,
     /*******************
        Close Output Files
     *******************/
-    for (filenum = 0; filenum < options.Noutfiles; filenum++) {
+    for (filenum = 0; filenum < options.Noutstreams; filenum++) {
         fclose(out_data_files[filenum].fh);
         if (options.COMPRESS) {
             compress_files(out_data_files[filenum].filename);

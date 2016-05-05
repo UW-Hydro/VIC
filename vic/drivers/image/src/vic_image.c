@@ -53,7 +53,8 @@ int                 mpi_size;
 nc_file_struct      nc_hist_file;
 nc_var_struct       nc_vars[N_OUTVAR_TYPES];
 option_struct       options;
-out_data_struct   **out_data;
+out_metadata_struct out_var_metadata[N_OUTVAR_TYPES];
+double           ***out_data;  // [ncells, nvars, nelem]
 parameters_struct   param;
 param_set_struct    param_set;
 save_data_struct   *save_data;

@@ -38,6 +38,7 @@ vic_alloc(void)
     extern option_struct       options;
     extern out_data_struct   **out_data;
     extern save_data_struct   *save_data;
+    extern stream_struct     **out_streams;
     extern soil_con_struct    *soil_con;
     extern veg_con_map_struct *veg_con_map;
     extern veg_con_struct    **veg_con;
@@ -108,6 +109,13 @@ vic_alloc(void)
     if (save_data == NULL) {
         log_err("Memory allocation error in vic_alloc().");
     }
+
+    // allocate memory for output streams structure
+    out_streams = malloc(local_domain.ncells_active * sizeof(*out_streams));
+    if (out_streams == NULL) {
+        log_err("Memory allocation error in vic_alloc().");
+    }
+
 
     // allocate memory for individual grid cells
     for (i = 0; i < local_domain.ncells_active; i++) {
@@ -200,7 +208,11 @@ vic_alloc(void)
 
         all_vars[i] = make_all_vars(veg_con_map[i].nv_active);
 
-        out_data[i] = create_output_list();
+        out_data[i] = create_outdata(nvars, varids);
+
+        for (j = 0; j < options.Noutfiles; j++) {
+            out_streams[i][j] = create_outstream();
+        }
 
         // allocate memory for veg_hist
         veg_hist[i] = calloc(veg_con_map[i].nv_active, sizeof(*(veg_hist[i])));

@@ -1,7 +1,7 @@
 /******************************************************************************
  * @section DESCRIPTION
  *
- * This routine frees the list of output files.
+ * Put attribute to netCDF file
  *
  * @section LICENSE
  *
@@ -24,20 +24,22 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  *****************************************************************************/
 
-#include <vic_driver_classic.h>
+#include <vic_driver_shared_image.h>
 
 /******************************************************************************
- * @brief    This routine frees the memory in the out_data_files array.
- *****************************************************************************/
+* @brief    Put text attribute to netCDF.
+*****************************************************************************/
 void
-free_out_data_files(out_data_file_struct **out_data_files)
+put_nc_attr(int         nc_id,
+            int         var_id,
+            const char *name,
+            const char *value)
 {
-    extern option_struct options;
-    size_t               filenum;
 
-    for (filenum = 0; filenum < options.Noutfiles; filenum++) {
-        free((char*) (*out_data_files)[filenum].varid);
+    int status;
+
+    status = nc_put_att_text(nc_id, var_id, name, strlen(value), value);
+    if (status != NC_NOERR) {
+        log_err("Error adding %s attribute in ncid %d", name, nc_id);
     }
-    free((char*) (*out_data_files));
 }
-

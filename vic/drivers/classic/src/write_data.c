@@ -30,17 +30,19 @@
  * @brief    write all variables to output files.
  *****************************************************************************/
 void
-write_data(out_data_file_struct *out_data_files,
-           out_data_struct      *out_data,
-           dmy_struct           *dmy,
-           double                dt)
+write_data(stream_file_struct *out_data_file,
+           stream_struct      *stream,
+           dmy_struct         *dmy,
+           double              dt)
 {
-    extern option_struct options;
+    extern option_struct        options;
+    extern out_metadata_struct *out_metadata;
+
     size_t               n;
-    size_t               file_idx;
     size_t               var_idx;
     size_t               elem_idx;
     size_t               ptr_idx;
+    unsigned int         varid;
     char                *tmp_cptr;
     short int           *tmp_siptr;
     unsigned short int  *tmp_usiptr;
@@ -64,115 +66,67 @@ write_data(out_data_file_struct *out_data_files,
         tmp_iptr[2] = dmy->day;
         tmp_iptr[3] = dmy->dayseconds;
 
-        // Loop over output files
-        for (file_idx = 0; file_idx < options.Noutfiles; file_idx++) {
-            // Write the date
-            if (dt < SEC_PER_DAY) {
-                // Write year, month, day, and sec
-                fwrite(tmp_iptr, sizeof(int), 4,
-                       out_data_files[file_idx].fh);
-            }
-            else {
-                // Only write year, month, and day
-                fwrite(tmp_iptr, sizeof(int), 3,
-                       out_data_files[file_idx].fh);
-            }
+        // Write the date
+        if (dt < SEC_PER_DAY) {
+            // Write year, month, day, and sec
+            fwrite(tmp_iptr, sizeof(int), 4,
+                   out_data_file->fh);
+        }
+        else {
+            // Only write year, month, and day
+            fwrite(tmp_iptr, sizeof(int), 3,
+                   out_data_file->fh);
+        }
 
-            // Loop over this output file's data variables
-            for (var_idx = 0;
-                 var_idx < out_data_files[file_idx].nvars;
-                 var_idx++) {
-                // Loop over this variable's elements
-                ptr_idx = 0;
-                if (out_data[out_data_files[file_idx].varid[var_idx]].type ==
-                    OUT_TYPE_CHAR) {
-                    for (elem_idx = 0;
-                         elem_idx <
-                         out_data[out_data_files[file_idx].varid[var_idx]].nelem;
-                         elem_idx++) {
-                        tmp_cptr[ptr_idx++] =
-                            (char)out_data[out_data_files[file_idx].varid[
-                                               var_idx]].
-                            aggdata[elem_idx];
-                    }
-                    fwrite(tmp_cptr, sizeof(char), ptr_idx,
-                           out_data_files[file_idx].fh);
+        // Loop over this output file's data variables
+        for (var_idx = 0; var_idx < stream->nvars; var_idx++) {
+            varid = stream->varid[var_idx];
+            // Loop over this variable's elements
+            ptr_idx = 0;
+            if (out_data_file->type[var_idx] == OUT_TYPE_CHAR) {
+                for (elem_idx = 0; elem_idx < out_metadata[varid].nelem; elem_idx++) {
+                    tmp_cptr[ptr_idx++] =
+                        (char) stream->aggdata[var_idx][elem_idx][0];
                 }
-                else if (out_data[out_data_files[file_idx].varid[var_idx]].type
-                         ==
-                         OUT_TYPE_SINT) {
-                    for (elem_idx = 0;
-                         elem_idx <
-                         out_data[out_data_files[file_idx].varid[var_idx]].nelem;
-                         elem_idx++) {
-                        tmp_siptr[ptr_idx++] =
-                            (short int)out_data[out_data_files[file_idx].varid[
-                                                    var_idx]].aggdata[elem_idx];
-                    }
-                    fwrite(tmp_siptr, sizeof(short int), ptr_idx,
-                           out_data_files[file_idx].fh);
+                fwrite(tmp_cptr, sizeof(char), ptr_idx,
+                       out_data_file->fh);
+            }
+            else if (out_data_file->type[var_idx] == OUT_TYPE_SINT) {
+                for (elem_idx = 0; elem_idx < out_metadata[varid].nelem;
+                     elem_idx++) {
+                    tmp_siptr[ptr_idx++] =
+                        (short int) stream->aggdata[var_idx][elem_idx][0];
                 }
-                else if (out_data[out_data_files[file_idx].varid[var_idx]].type
-                         ==
-                         OUT_TYPE_USINT) {
-                    for (elem_idx = 0;
-                         elem_idx <
-                         out_data[out_data_files[file_idx].varid[var_idx]].nelem;
-                         elem_idx++) {
-                        tmp_usiptr[ptr_idx++] =
-                            (unsigned short int)out_data[out_data_files[file_idx
-                                                         ].
-                                                         varid[var_idx]].aggdata
-                            [elem_idx];
-                    }
-                    fwrite(tmp_usiptr, sizeof(unsigned short int), ptr_idx,
-                           out_data_files[file_idx].fh);
+                fwrite(tmp_siptr, sizeof(short int), ptr_idx,
+                       out_data_file->fh);
+            }
+            else if (out_data_file->type[var_idx] == OUT_TYPE_USINT) {
+                for (elem_idx = 0; elem_idx < out_metadata[varid].nelem; elem_idx++) {
+                    tmp_usiptr[ptr_idx++] = (unsigned short int) stream->aggdata[var_idx][elem_idx][0];
                 }
-                else if (out_data[out_data_files[file_idx].varid[var_idx]].type
-                         ==
-                         OUT_TYPE_INT) {
-                    for (elem_idx = 0;
-                         elem_idx <
-                         out_data[out_data_files[file_idx].varid[var_idx]].nelem;
-                         elem_idx++) {
-                        tmp_iptr[ptr_idx++] =
-                            (int)out_data[out_data_files[file_idx].varid[var_idx
-                                          ]].
-                            aggdata[elem_idx];
-                    }
-                    fwrite(tmp_iptr, sizeof(int), ptr_idx,
-                           out_data_files[file_idx].fh);
+                fwrite(tmp_usiptr, sizeof(unsigned short int), ptr_idx,
+                       out_data_file->fh);
+            }
+            else if (out_data_file->type[var_idx] == OUT_TYPE_INT) {
+                for (elem_idx = 0; elem_idx < out_metadata[varid].nelem; elem_idx++) {
+                    tmp_iptr[ptr_idx++] = (int) stream->aggdata[var_idx][elem_idx][0];
                 }
-                else if (out_data[out_data_files[file_idx].varid[var_idx]].type
-                         ==
-                         OUT_TYPE_FLOAT) {
-                    for (elem_idx = 0;
-                         elem_idx <
-                         out_data[out_data_files[file_idx].varid[var_idx]].nelem;
-                         elem_idx++) {
-                        tmp_fptr[ptr_idx++] =
-                            (float)out_data[out_data_files[file_idx].varid[
-                                                var_idx]]
-                            .aggdata[elem_idx];
-                    }
-                    fwrite(tmp_fptr, sizeof(float), ptr_idx,
-                           out_data_files[file_idx].fh);
+                fwrite(tmp_iptr, sizeof(int), ptr_idx,
+                       out_data_file->fh);
+            }
+            else if (out_data_file->type[var_idx] == OUT_TYPE_FLOAT) {
+                for (elem_idx = 0; elem_idx < out_metadata[varid].nelem; elem_idx++) {
+                    tmp_fptr[ptr_idx++] = (float) stream->aggdata[var_idx][elem_idx][0];
                 }
-                else if (out_data[out_data_files[file_idx].varid[var_idx]].type
-                         ==
-                         OUT_TYPE_DOUBLE) {
-                    for (elem_idx = 0;
-                         elem_idx <
-                         out_data[out_data_files[file_idx].varid[var_idx]].nelem;
-                         elem_idx++) {
-                        tmp_dptr[ptr_idx++] =
-                            (double)out_data[out_data_files[file_idx].varid[
-                                                 var_idx]
-                            ].aggdata[elem_idx];
-                    }
-                    fwrite(tmp_dptr, sizeof(double), ptr_idx,
-                           out_data_files[file_idx].fh);
+                fwrite(tmp_fptr, sizeof(float), ptr_idx,
+                       out_data_file->fh);
+            }
+            else if (out_data_file->type[var_idx] == OUT_TYPE_DOUBLE) {
+                for (elem_idx = 0; elem_idx < out_metadata[varid].nelem; elem_idx++) {
+                    tmp_dptr[ptr_idx++] = (double) stream->aggdata[var_idx][elem_idx][0];
                 }
+                fwrite(tmp_dptr, sizeof(double), ptr_idx,
+                       out_data_file->fh);
             }
         }
 
@@ -185,42 +139,37 @@ write_data(out_data_file_struct *out_data_files,
         free((char *) tmp_dptr);
     }
     else if (options.OUT_FORMAT == ASCII) {
-        // Loop over output files
-        for (file_idx = 0; file_idx < options.Noutfiles; file_idx++) {
-            // Write the date
-            if (dt < SEC_PER_DAY) {
-                // Write year, month, day, and sec
-                fprintf(out_data_files[file_idx].fh,
-                        "%04u\t%02hu\t%02hu\t%05u\t",
-                        dmy->year, dmy->month, dmy->day, dmy->dayseconds);
-            }
-            else {
-                // Only write year, month, and day
-                fprintf(out_data_files[file_idx].fh,
-                        "%04u\t%02hu\t%02hu\t",
-                        dmy->year, dmy->month, dmy->day);
-            }
-
-            // Loop over this output file's data variables
-            for (var_idx = 0;
-                 var_idx < out_data_files[file_idx].nvars;
-                 var_idx++) {
-                // Loop over this variable's elements
-                for (elem_idx = 0;
-                     elem_idx <
-                     out_data[out_data_files[file_idx].varid[var_idx]].nelem;
-                     elem_idx++) {
-                    if (!(var_idx == 0 && elem_idx == 0)) {
-                        fprintf(out_data_files[file_idx].fh, "\t ");
-                    }
-                    fprintf(out_data_files[file_idx].fh,
-                            out_data[out_data_files[file_idx].varid[var_idx]].format,
-                            out_data[out_data_files[file_idx].varid[var_idx]].aggdata[
-                                elem_idx]);
-                }
-            }
-            fprintf(out_data_files[file_idx].fh, "\n");
+        // Write the date
+        if (dt < SEC_PER_DAY) {
+            // Write year, month, day, and sec
+            fprintf(out_data_file->fh,
+                    "%04u\t%02hu\t%02hu\t%05u\t",
+                    dmy->year, dmy->month, dmy->day, dmy->dayseconds);
         }
+        else {
+            // Only write year, month, and day
+            fprintf(out_data_file->fh,
+                    "%04u\t%02hu\t%02hu\t",
+                    dmy->year, dmy->month, dmy->day);
+        }
+
+        // Loop over this output file's data variables
+        for (var_idx = 0; var_idx < stream->nvars; var_idx++) {
+            varid = stream->varid[var_idx];
+            // Loop over this variable's elements
+            for (elem_idx = 0;
+                 elem_idx <
+                 out_metadata[varid].nelem;
+                 elem_idx++) {
+                if (!(var_idx == 0 && elem_idx == 0)) {
+                    fprintf(out_data_file->fh, "\t ");
+                }
+                fprintf(out_data_file->fh,
+                        out_data_file->format[var_idx],
+                        stream->aggdata[var_idx][elem_idx][0]);
+            }
+        }
+        fprintf(out_data_file->fh, "\n");
     }
     else {
         log_err("Unrecognized OUT_FORMAT option");

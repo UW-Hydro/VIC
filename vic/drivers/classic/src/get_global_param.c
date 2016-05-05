@@ -759,15 +759,6 @@ get_global_param(FILE *gp)
                     log_err("OUT_FORMAT must be either ASCII or BINARY.");
                 }
             }
-            else if (strcasecmp("ALMA_OUTPUT", optstr) == 0) {
-                sscanf(cmdstr, "%*s %s", flgstr);
-                if (strcasecmp("TRUE", flgstr) == 0) {
-                    options.ALMA_OUTPUT = true;
-                }
-                else {
-                    options.ALMA_OUTPUT = false;
-                }
-            }
             else if (strcasecmp("MOISTFRACT", optstr) == 0) {
                 sscanf(cmdstr, "%*s %s", flgstr);
                 if (strcasecmp("TRUE", flgstr) == 0) {
@@ -833,7 +824,10 @@ get_global_param(FILE *gp)
                 log_err("BINARY_STATE_FILE has been replaced with STATE_FORMAT, "
                         "update your global parameter file accordingly");
             }
-
+            else if (strcasecmp("ALMA_OUTPUT", optstr) == 0) {
+                log_err("ALMA_OUTPUT has been deprecated, update your global "
+                        "parameter file accordingly");
+            }
             /***********************************
                Unrecognized Global Parameter Flag
             ***********************************/

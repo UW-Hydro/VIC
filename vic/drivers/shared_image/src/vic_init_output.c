@@ -109,6 +109,7 @@ initialize_history_file(nc_file_struct *nc)
     char                       strCalendar[50];
 
     size_t                     i;
+    size_t                     j;
     size_t                     ndims;
     size_t                     dcount[MAXDIMS];
     size_t                     dstart[MAXDIMS];
@@ -116,6 +117,7 @@ initialize_history_file(nc_file_struct *nc)
     int                        time_var_id;
     int                        lon_var_id;
     int                        lat_var_id;
+    int                        var_id;
     double                    *dvar;
 
     sprintf(nc->fname, "%s", filenames.result_dir);
@@ -353,6 +355,38 @@ initialize_history_file(nc_file_struct *nc)
                              strlen("latitude"), "latitude");
     if (status != NC_NOERR) {
         log_err("Error adding attribute in %s", nc->fname);
+    }
+
+    // create output variables
+    for (j = 0; j < N_OUTVAR_TYPES; j++) {
+        if (!nc_vars[j].nc_write) {
+            continue;
+        }
+
+        // define the variable
+        status = nc_def_var(*nc_id,
+                            nc_vars[j].nc_var_name,
+                            nc_vars[j].nc_type,
+                            nc_vars[j].nc_dims,
+                            nc_vars[j].nc_dimids,
+                            &var_id);
+        if (status != NC_NOERR) {
+            log_err("Error defining variable %s in %s", nc_vars[j].nc_var_nam,
+                    nc->fname);
+        }
+        // set the fill value attribute
+        if (nc_vars[j].nc_type == NC_DOUBLE){
+            status = nc_put_att_double(*nc_id, var_id, "_FillValue", NC_DOUBLE, 1,
+                                       NC_FILL_DOUBLE);
+            if (status != NC_NOERR) {
+                log_err("Error putting _FillValue attribute to %s in %s", var_name,
+                        nc_name)
+            }
+        }
+        // Set the standard attributes (units, )
+        fi
+        put_nc_attr(ncid, NC_GLOBAL, "title", "VIC History File");
+
     }
 
     // leave define mode

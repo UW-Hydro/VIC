@@ -121,13 +121,9 @@ typedef struct {
  *****************************************************************************/
 typedef struct {
     char nc_var_name[MAXSTRING]; /**< variable name */
-    char nc_units[MAXSTRING]; /**< variable name */
     int nc_dimids[MAXDIMS]; /**< ids of dimensions */
     int nc_counts[MAXDIMS]; /**< size of dimid */
-    int nc_type; /**< netcdf type */
-    int nc_aggtype; /**< aggregation type as defined in vic_def.h */
     int nc_dims; /**< number of dimensions */
-    int nc_write; /**< TRUE: write to file; FALSE: don't */
 } nc_var_struct;
 
 /******************************************************************************
@@ -150,7 +146,7 @@ void alloc_atmos(atmos_data_struct *atmos);
 void alloc_veg_hist(veg_hist_struct *veg_hist);
 double air_density(double t, double p);
 double average(double *ar, size_t n);
-out_data_struct *create_output_list(void);
+double **create_output_list(void);
 void check_init_state_file(void);
 void free_atmos(atmos_data_struct *atmos);
 void free_veg_hist(veg_hist_struct *veg_hist);
@@ -177,7 +173,7 @@ int initialize_model_state(all_vars_struct *all_vars, size_t Nveg,
                            soil_con_struct *soil_con, veg_con_struct *veg_con);
 void initialize_soil_con(soil_con_struct *soil_con);
 void initialize_veg_con(veg_con_struct *veg_con);
-int parse_output_info(FILE *gp, out_data_struct **out_data);
+int parse_output_info(FILE *gp, double **out_data);
 void print_atmos_data(atmos_data_struct *atmos);
 void print_domain(domain_struct *domain, bool print_loc);
 void print_location(location_struct *location);
@@ -197,7 +193,7 @@ void vic_finalize(void);
 void vic_image_run(dmy_struct *dmy_current);
 void vic_init(void);
 void vic_init_output(void);
-void vic_nc_info(nc_file_struct *nc_hist_file, out_data_struct **out_data,
+void vic_nc_info(nc_file_struct *nc_hist_file, double ***out_data,
                  nc_var_struct *nc_vars);
 void vic_restore(void);
 void vic_start(void);

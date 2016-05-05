@@ -31,15 +31,16 @@
  * @brief    Get output info from global parameter file.
  *****************************************************************************/
 void
-parse_output_info(FILE                  *gp,
-                  out_data_file_struct **out_data_files,
-                  out_data_struct       *out_data)
+parse_output_info(FILE               *gp,
+                  stream_struct      **output_streams,
+                  stream_file_struct **out_data_files)
 {
-    extern option_struct options;
+    extern option_struct       options;
+    extern global_param_struct global_param;
 
     char                 cmdstr[MAXSTRING];
     char                 optstr[MAXSTRING];
-    short int            outfilenum;
+    short int            streamnum;
     char                 varname[MAXSTRING];
     int                  outvarnum;
     char                 format[MAXSTRING];
@@ -47,7 +48,9 @@ parse_output_info(FILE                  *gp,
     int                  type;
     char                 multstr[MAXSTRING];
     double               mult;
-    size_t               noutfiles;
+    size_t               nstreams;
+    size_t               nvars;
+    unsigned int         nextagg;
 
     strcpy(format, "*");
 
@@ -55,23 +58,26 @@ parse_output_info(FILE                  *gp,
 
     fgets(cmdstr, MAXSTRING, gp);
 
-    outfilenum = -1;
+    streamnum = -1;
     outvarnum = 0;
 
     // Count the number of output files listed in the global param file
-    noutfiles = count_n_outfiles(gp);
+    nstreams = count_n_outfiles(gp);
 
     // only parse the output info if there are output files to parse
-    if (noutfiles > 0) {
-        options.Noutfiles = noutfiles;
+    if (nstreams > 0) {
+        options.Noutstreams = nstreams;
 
-        *out_data_files = calloc(options.Noutfiles, sizeof(*(*out_data_files)));
-        if (*out_data_files == NULL) {
+        output_streams = calloc(options.Noutstreams, sizeof(*(output_streams)));
+        if (output_streams == NULL) {
             log_err("Memory allocation error in parse_output_info().");
         }
-        init_output_list(out_data, false, "%.4g", OUT_TYPE_FLOAT, 1);
+        out_data_files = calloc(options.Noutstreams, sizeof(*(out_data_files)));
+        if (out_data_files == NULL) {
+            log_err("Memory allocation error in parse_output_info().");
+        }
 
-        // PRT_SNOW_BAND is ignored if options.Noutfiles > 0
+        // PRT_SNOW_BAND is ignored if options.Noutstreams > 0
         options.PRT_SNOW_BAND = false;
 
         while (!feof(gp)) {
@@ -79,31 +85,29 @@ parse_output_info(FILE                  *gp,
                 sscanf(cmdstr, "%s", optstr);
 
                 if (strcasecmp("OUTFILE", optstr) == 0) {
-                    outfilenum++;
-                    if (outfilenum >= (short int)options.Noutfiles) {
+                    streamnum++;
+                    if (streamnum >= (short int) options.Noutstreams) {
                         log_err("Found too many output files, was expecting "
-                                "%zu but found %hu", options.Noutfiles,
-                                outfilenum);
+                                "%zu but found %hu", options.Noutstreams,
+                                streamnum);
                     }
-                    sscanf(cmdstr, "%*s %s",
-                           (*out_data_files)[outfilenum].prefix);
+                    sscanf(cmdstr, "%*s %s", out_data_files[streamnum]->prefix);
 
                     // determine how many variable will be in this file before
                     // allocating (GH: 209)
-                    (*out_data_files)[outfilenum].nvars =
-                        count_outfile_nvars(gp);
+                    nvars = count_outfile_nvars(gp);
 
-                    (*out_data_files)[outfilenum].varid =
-                        calloc((*out_data_files)[outfilenum].nvars,
-                               sizeof(*((*out_data_files)[outfilenum].varid)));
-                    if ((*out_data_files)[outfilenum].varid == NULL) {
-                        log_err(
-                            "Memory allocation error in parse_output_info().");
-                    }
+                    // TODO: parse stream specific agg period info from global param
+                    nextagg = (unsigned int) ((int) global_param.out_dt / (int) global_param.dt);
+
+                    setup_stream(output_streams[streamnum],
+                                 out_data_files[streamnum],
+                                 nvars, nextagg);
+
                     outvarnum = 0;
                 }
                 else if (strcasecmp("OUTVAR", optstr) == 0) {
-                    if (outfilenum < 0) {
+                    if (streamnum < 0) {
                         log_err("Error in global param file: \"OUTFILE\" must be "
                                 "specified before you can specify \"OUTVAR\".");
                     }
@@ -140,12 +144,9 @@ parse_output_info(FILE                  *gp,
                             mult = (double) atof(multstr);
                         }
                     }
-                    if (set_output_var((*out_data_files), true, outfilenum,
-                                       out_data, varname, outvarnum, format,
-                                       type,
-                                       mult) != 0) {
-                        log_err("Invalid output variable specification.");
-                    }
+                    set_output_var(output_streams[streamnum],
+                                   out_data_files[streamnum],
+                                   varname, outvarnum, format, type, mult);
                     strcpy(format, "");
                     outvarnum++;
                 }
@@ -155,7 +156,7 @@ parse_output_info(FILE                  *gp,
     }
     // Otherwise, set output files and their contents to default configuration
     else {
-        *out_data_files = set_output_defaults(out_data);
+        set_output_defaults(output_streams, out_data_files);
     }
     fclose(gp);
 }

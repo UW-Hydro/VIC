@@ -34,7 +34,7 @@ void
 make_in_and_outfiles(filep_struct         *filep,
                      filenames_struct     *filenames,
                      soil_con_struct      *soil,
-                     out_data_file_struct *out_data_files)
+                     stream_file_struct   *out_data_files)
 {
     extern option_struct    options;
     extern param_set_struct param_set;
@@ -80,7 +80,7 @@ make_in_and_outfiles(filep_struct         *filep,
        Output Files
     ********************************/
 
-    for (filenum = 0; filenum < options.Noutfiles; filenum++) {
+    for (filenum = 0; filenum < options.Noutstreams; filenum++) {
         strcpy(out_data_files[filenum].filename, filenames->result_dir);
         strcat(out_data_files[filenum].filename, "/");
         strcat(out_data_files[filenum].filename,

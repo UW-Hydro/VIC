@@ -30,13 +30,16 @@
  * @brief    This routine resets the values of all output variables to 0.
  *****************************************************************************/
 void
-zero_output_list(out_data_struct *out_data)
+zero_output_list(double **out_data)
 {
+
+    extern out_metadata_struct *out_metadata;
+
     size_t varid, i;
 
     for (varid = 0; varid < N_OUTVAR_TYPES; varid++) {
-        for (i = 0; i < out_data[varid].nelem; i++) {
-            out_data[varid].data[i] = 0;
+        for (i = 0; i < out_metadata[varid].nelem; i++) {
+            out_data[varid][i] = 0.;
         }
     }
 }

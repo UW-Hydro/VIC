@@ -433,12 +433,6 @@ display_current_settings(int mode)
     fprintf(LOG_DEST, "Output Data:\n");
     fprintf(LOG_DEST, "Result dir:\t\t%s\n", filenames.result_dir);
     fprintf(LOG_DEST, "OUT_STEP\t\t%f\n", global_param.out_dt);
-    if (options.ALMA_OUTPUT) {
-        fprintf(LOG_DEST, "ALMA_OUTPUT\t\tTRUE\n");
-    }
-    else {
-        fprintf(LOG_DEST, "ALMA_OUTPUT\t\tFALSE\n");
-    }
     if (options.OUT_FORMAT == ASCII) {
         fprintf(LOG_DEST, "OUT_FORMAT\t\tASCII\n");
     }

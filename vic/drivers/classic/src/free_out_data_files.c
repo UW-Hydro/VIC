@@ -1,7 +1,7 @@
 /******************************************************************************
  * @section DESCRIPTION
  *
- * Header file for vic_driver_image routines
+ * This routine frees the list of output files.
  *
  * @section LICENSE
  *
@@ -24,21 +24,19 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  *****************************************************************************/
 
-#ifndef VIC_DRIVER_IMAGE_H
-#define VIC_DRIVER_IMAGE_H
+#include <vic_driver_classic.h>
 
-#include <vic_driver_shared_image.h>
+/******************************************************************************
+ * @brief    This routine frees the memory in the out_data_files array.
+ *****************************************************************************/
+void
+free_out_data_files(out_data_file_struct **out_data_files)
+{
+    extern option_struct options;
+    size_t               filenum;
 
-#define VIC_DRIVER "Image"
-
-bool check_save_state_flag(size_t);
-void display_current_settings(int);
-void get_forcing_file_info(param_set_struct *param_set, size_t file_num);
-void get_global_param(FILE *);
-void vic_force(void);
-void vic_image_init(void);
-void vic_image_finalize();
-void vic_image_start(void);
-void vic_populate_model_state(void);
-
-#endif
+    for (filenum = 0; filenum < options.Noutfiles; filenum++) {
+        free((char*) (*out_data_files)[filenum].varid);
+    }
+    free((char*) (*out_data_files));
+}

@@ -144,6 +144,9 @@ initialize_history_file(nc_file_struct *nc)
     }
     nc->open = true;
 
+    // Set netcdf file global attributes
+    set_global_nc_attributes(nc->nc_id, NC_HISTORY_FILE);
+
     // set the NC_FILL attribute
     status = nc_set_fill(nc->nc_id, NC_FILL, &old_fill_mode);
     if (status != NC_NOERR) {
@@ -448,4 +451,66 @@ get_nc_mode(unsigned short int format)
     else {
         log_err("Unrecognized netCDF file format");
     }
+}
+
+/******************************************************************************
+ * @brief    Set global netcdf attributes (either history or state file)
+ *****************************************************************************/
+void
+set_global_nc_attributes(int                ncid,
+                         unsigned short int file_type)
+{
+    char       tmpstr[MAXSTRING];
+    char       userstr[MAXSTRING];
+    char       hoststr[MAXSTRING];
+
+    time_t     curr_date_time;
+    struct tm *timeinfo;
+
+    // datestr
+    curr_date_time = time(NULL);
+    if (curr_date_time == -1) {
+        log_err("Something went wrong getting the current time!");
+    }
+    timeinfo = localtime(&curr_date_time);
+
+    // username
+    if (getlogin_r(userstr, MAXSTRING) != 0) {
+        log_err("Error getting username");
+    }
+    // hostname
+    if (gethostname(hoststr, MAXSTRING) != 0) {
+        log_err("Error getting hostname");
+    }
+
+    // Set global attributes
+    if (file_type == NC_HISTORY_FILE) {
+        put_nc_attr(ncid, NC_GLOBAL, "title", "VIC History File");
+    }
+    else if (file_type == NC_STATE_FILE) {
+        put_nc_attr(ncid, NC_GLOBAL, "title", "VIC State File");
+    }
+    else {
+        put_nc_attr(ncid, NC_GLOBAL, "title", "Unknown");
+    }
+
+    // TODO: pass in driver as an argmument to this function
+    put_nc_attr(ncid, NC_GLOBAL, "source", "VIC Image Driver");
+    sprintf(tmpstr, "Created by %s on %s on %s",
+            userstr, hoststr, asctime(timeinfo));
+    put_nc_attr(ncid, NC_GLOBAL, "history", tmpstr);
+    put_nc_attr(ncid, NC_GLOBAL, "references",
+                "Primary Historical Reference for VIC: Liang, X., D. P. "
+                "Lettenmaier, E. F. Wood, and S. J. Burges, 1994: A Simple "
+                "hydrologically Based Model of Land Surface Water and Energy "
+                "Fluxes for GSMs, J. Geophys. Res., 99(D7), 14,415-14,428.");
+    put_nc_attr(ncid, NC_GLOBAL, "comment",
+                "Output from the Variable Infiltration Capacity (VIC)"
+                "Macroscale Hydrologic Model");
+    put_nc_attr(ncid, NC_GLOBAL, "Conventions", "CF-1.6");
+
+    // Useful attributes from VIC
+    put_nc_attr(ncid, NC_GLOBAL, "VIC_Model_Version", VERSION);
+    // TODO: pass in driver as an argmument to this function
+    put_nc_attr(ncid, NC_GLOBAL, "VIC_Driver", "Image");
 }

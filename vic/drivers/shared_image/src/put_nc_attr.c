@@ -1,7 +1,7 @@
 /******************************************************************************
  * @section DESCRIPTION
  *
- * Header file for vic_driver_image routines
+ * Put attribute to netCDF file
  *
  * @section LICENSE
  *
@@ -24,21 +24,21 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  *****************************************************************************/
 
-#ifndef VIC_DRIVER_IMAGE_H
-#define VIC_DRIVER_IMAGE_H
-
 #include <vic_driver_shared_image.h>
 
-#define VIC_DRIVER "Image"
+/******************************************************************************
+ * @brief    Put double precision data field to netCDF.
+ *****************************************************************************/
+void
+put_nc_attr(int         nc_id,
+            int         var_id,
+            const char *name,
+            const char *value)
+{
+    int status;
 
-bool check_save_state_flag(size_t);
-void display_current_settings(int);
-void get_forcing_file_info(param_set_struct *param_set, size_t file_num);
-void get_global_param(FILE *);
-void vic_force(void);
-void vic_image_init(void);
-void vic_image_finalize();
-void vic_image_start(void);
-void vic_populate_model_state(void);
-
-#endif
+    status = nc_put_att_text(nc_id, var_id, name, strlen(value), value);
+    if (status != NC_NOERR) {
+        log_err("Error adding %s attribute in ncid %d", name, nc_id);
+    }
+}

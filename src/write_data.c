@@ -85,6 +85,7 @@ void write_data(out_data_file_struct *out_data_files,
   int                 var_idx;
   int                 elem_idx;
   int                 ptr_idx;
+  int                 var_id;
   char               *tmp_cptr;
   short int          *tmp_siptr;
   unsigned short int *tmp_usiptr;
@@ -190,6 +191,7 @@ void write_data(out_data_file_struct *out_data_files,
   else {  // ASCII
 
     // Loop over output files
+    // 遍历所有的输出文件
     for (file_idx = 0; file_idx < options.Noutfiles; file_idx++) {
 
       if (!options.OUTPUT_FORCE) {
@@ -209,17 +211,19 @@ void write_data(out_data_file_struct *out_data_files,
       }
 
       // Loop over this output file's data variables
+      // 遍历该输出文件所有的数据类型
       for (var_idx = 0; var_idx < out_data_files[file_idx].nvars; var_idx++) {
         // Loop over this variable's elements
-        for (elem_idx = 0; elem_idx < out_data[out_data_files[file_idx].varid[var_idx]].nelem; elem_idx++) {
-          if (!(var_idx == 0 && elem_idx == 0)) {
+        // 遍历该类型的所有输出数据
+        var_id = out_data_files[file_idx].varid[var_idx];
+        int nelem = out_data[var_id].nelem;
+        for (elem_idx = 0; elem_idx < out_data[var_id].nelem; elem_idx++) {
+          if (!(var_idx == 0 && elem_idx == 0))
             fprintf(out_data_files[file_idx].fh, "\t ");
-          }
-          fprintf(out_data_files[file_idx].fh, out_data[out_data_files[file_idx].varid[var_idx]].format, out_data[out_data_files[file_idx].varid[var_idx]].aggdata[elem_idx]);
+          fprintf(out_data_files[file_idx].fh, out_data[var_id].format, out_data[var_id].aggdata[elem_idx]);
         }
       }
       fprintf(out_data_files[file_idx].fh, "\n");
-
     }
 
   }

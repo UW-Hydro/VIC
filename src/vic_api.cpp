@@ -10,7 +10,16 @@
 using namespace std;
 using namespace vic;
 
+/* **************************************************************
+ *
+ * Read in all soil parameter data and create data series.
+ * 读入所有土壤参数并生成序列。
+ *
+ * **************************************************************
+ */
 int get_veg_param(veg_con_struct ** veg_params, int Nveg_type, soil_con_struct ** soil_params, int ncell, string veg_path) {
+
+    if(!_veglib_gotten || !_soil_gotten) return ERROR;
 
     FILE * veg_in;
     veg_in = open_file(veg_path.c_str(), "r");
@@ -31,7 +40,16 @@ int get_veg_param(veg_con_struct ** veg_params, int Nveg_type, soil_con_struct *
     return 0;
 }
 
+/* **************************************************************
+ *
+ * Read in all vegetation parameter data and create data series.
+ * 读入所有植被覆盖参数并生成序列。
+ *
+ * **************************************************************
+ */
 int get_soil_params(soil_con_struct **soil_params, int ncell, string soil_path){
+
+    if(!_veglib_gotten) return ERROR;
 
     extern veg_lib_struct* veg_lib;
     if(veg_lib == NULL)return ERROR;
@@ -61,7 +79,14 @@ int get_soil_params(soil_con_struct **soil_params, int ncell, string soil_path){
     return 0;
 }
 
-void destory_soil_param(soil_con_struct** soil_params, int ncell){
+/* **************************************************************
+ *
+ * Destroy soil parameter data series.
+ * 删除土壤参数数据序列。
+ *
+ * **************************************************************
+ */
+void destroy_soil_param(soil_con_struct **soil_params, int ncell){
     for(int i = 0; i < ncell; i++){
         if(soil_params[i] == NULL)continue;
         free((char *)soil_params[i]->AreaFract);
@@ -75,7 +100,14 @@ void destory_soil_param(soil_con_struct** soil_params, int ncell){
     _soil_gotten = FALSE;
 }
 
-void destory_veg_param(veg_con_struct** veg_params, int ncell){
+/* **************************************************************
+ *
+ * Destroy vegetation parameter data series.
+ * 删除植被覆盖数据序列。
+ *
+ * **************************************************************
+ */
+void destroy_veg_param(veg_con_struct **veg_params, int ncell){
     extern option_struct options;
 
     for(int c = 0; c < ncell; c++){
@@ -116,12 +148,13 @@ int get_veg_lib(string veglib_path){
     veg_lib = read_veglib(veglib_in, &n_veg_type);
 
     fclose(veglib_in);
+    _veglib_gotten = TRUE;
     return n_veg_type;
 }
 
 /* **************************************************************
  *
- * Get global parameters and initiate model.
+ * Get global parameters and initiate.
  * 获取全局参数并初步初始化。
  *
  * **************************************************************
@@ -154,8 +187,6 @@ int get_global(string global_path){
     _atmos_inited = FALSE;
 
     atmos = NULL;
-//    _out_data_files = NULL;
-//    _out_data = NULL;
 
     return 0;
 }
@@ -167,10 +198,9 @@ int get_global(string global_path){
  *
  * **************************************************************
  */
-
 int run_a_cell(soil_con_struct* soil_con,
                veg_con_struct* veg_con,
-               lake_con_struct* lake_con){
+               lake_con_struct* lake_con, double* out_runoffs) {
 
     if(!_soil_gotten || !_vegparam_gotten)return -1;
 
@@ -196,73 +226,95 @@ int run_a_cell(soil_con_struct* soil_con,
     }
 
     /** Build Gridded Filenames, and Open **/
+    /** 生成各网格的输入和输出文件名并打开 **/
     make_in_and_outfiles(&_filep, &_filenames, soil_con, _out_data_files);
 
     /** Write output file headers
      * 写表头 **/
-    if (options.PRT_HEADER) write_header(_out_data_files, _out_data, _dmy, global_param);
+    if (out_runoffs == NULL && options.PRT_HEADER) write_header(_out_data_files, _out_data, _dmy, global_param);
 
-    if (!options.OUTPUT_FORCE) {
-        /** Make Top-level Control Structure **/
-        all_vars = make_all_vars(veg_con[0].vegetat_type_num);
-        /** allocate memory for the veg_hist_struct **/
-        alloc_veg_hist(global_param.nrecs, veg_con[0].vegetat_type_num, &veg_hist);
-    } /* !OUTPUT_FORCE */
+    /** Make Top-level Control Structure **/
+    all_vars = make_all_vars(veg_con[0].vegetat_type_num);
+
+    /** allocate memory for the veg_hist_struct **/
+    /** 为植被时间序列结构分配内存空间 **/
+    alloc_veg_hist(global_param.nrecs, veg_con[0].vegetat_type_num, &veg_hist);
 
     /**************************************************
-       Initialize Meteological Forcing Values That
-       Have not Been Specifically Set
-       初始化气象驱动数据
-     **************************************************/
-
+        Initialize Variables
+        初始化变量
+    **************************************************/
     initialize_atmos(atmos, _dmy, _filep.forcing, veg_lib, veg_con, veg_hist,
                      soil_con, _out_data_files, _out_data);
 
-    if (!options.OUTPUT_FORCE) {
-        /**************************************************
-          Initialize Energy Balance and Snow Variables
-          初始化数据
-        **************************************************/
-        ErrorFlag = initialize_model_state(&all_vars, _dmy[0], &global_param, _filep,
-                                           soil_con->gridcel, veg_con[0].vegetat_type_num,
-                                           options.Nnode,
-                                           atmos[0].air_temp[NR],
-                                           soil_con, veg_con, *lake_con);
-        if ( ErrorFlag == ERROR ){
-            return ERROR;
-        }
-        /** Update Error Handling Structure **/
-        Error.filep = _filep;
-        Error.out_data_files = _out_data_files;
+    ErrorFlag = initialize_model_state(&all_vars, _dmy[0], &global_param, _filep,
+                                       soil_con->gridcel, veg_con[0].vegetat_type_num,
+                                       options.Nnode,
+                                       atmos[0].air_temp[NR],
+                                       soil_con, veg_con, *lake_con);
+    if ( ErrorFlag == ERROR ){
+        return ERROR;
+    }
+    /** Update Error Handling Structure **/
+    /** 更新错误控制结构 **/
+    Error.filep = _filep;
+    Error.out_data_files = _out_data_files;
 
-        /** Initialize the storage terms in the water and energy balances **/
-        /** Sending a negative record number (-global_param.nrecs) to put_data() will accomplish this **/
+    /** Initialize the storage terms in the water and energy balances **/
+    /** Sending a negative record number (-global_param.nrecs) to put_data() will accomplish this **/
+    if(out_runoffs != NULL)
         ErrorFlag = put_data(&all_vars, &atmos[0], soil_con, veg_con, lake_con, _out_data_files, _out_data, &_save_data, &_dmy[0], -global_param.nrecs);
 
+    /**************************************************
+      Run at each time step.
+      在每个时间步运行
+    **************************************************/
+    int startrec = 0;
+    for (int rec = startrec ; rec < global_param.nrecs; rec++ ) {
+
+        /* VIC核心函数 能量/水量平衡计算 */
+        ErrorFlag = full_energy(cellnum, rec, &atmos[rec], &all_vars, _dmy, &global_param, lake_con, soil_con, veg_con, veg_hist);
+
         /**************************************************
-          Run at each time step.
-          在每个时间步运行
+          Write cell average values for current time step
+          导出每个时间步的数据
         **************************************************/
-        int startrec = 0;
-        for (int rec = startrec ; rec < global_param.nrecs; rec++ ) {
 
-            /* VIC核心函数 能量/水量平衡计算 */
-            ErrorFlag = full_energy(cellnum, rec, &atmos[rec], &all_vars, _dmy, &global_param, lake_con, soil_con, veg_con, veg_hist);
-
-            /**************************************************
-              Write cell average values for current time step
-              导出每个时间步的数据
-            **************************************************/
-            ErrorFlag = put_data(&all_vars, &atmos[rec], soil_con, veg_con, lake_con, _out_data_files, _out_data, &_save_data, &_dmy[rec], rec);
-
-        } /* End Rec Loop */
-
-    } /* !OUTPUT_FORCE */
-    if (!options.OUTPUT_FORCE) {
-        free_veg_hist(global_param.nrecs, veg_con[0].vegetat_type_num, &veg_hist);
-        free_all_vars(&all_vars, veg_con[0].vegetat_type_num);
+        if(out_runoffs == NULL)ErrorFlag = put_data(&all_vars, &atmos[rec], soil_con, veg_con, lake_con, _out_data_files, _out_data, &_save_data, &_dmy[rec], rec);
+        else out_runoffs[rec] = _get_runoff(all_vars.cell, soil_con, veg_con);
     }
+
+    free_veg_hist(global_param.nrecs, veg_con[0].vegetat_type_num, &veg_hist);
+    free_all_vars(&all_vars, veg_con[0].vegetat_type_num);
 
     close_files(&_filep, _out_data_files, &_filenames);
     return 0;
+}
+
+double _get_runoff(cell_data_struct** cell, soil_con_struct* soil_con, veg_con_struct* veg_con){
+
+    double Cv;
+    double treeAdj;
+    double areaFract;
+    double runoff = 0.0;
+
+    int Nbands = options.SNOW_BAND;
+    int Nvegs = veg_con[0].vegetat_type_num;
+
+    for(int band = 0; band < Nbands; band++){
+        areaFract = soil_con->AreaFract[band];
+        if(!soil_con->AboveTreeLine[band]) treeAdj = 1.0;
+        else{
+            Cv = 0;
+            for(int veg = 0; veg < Nvegs; veg++)
+                if(veg_lib[veg_con[veg].veg_class].overstory ) Cv += veg_con[veg].Cv;
+            treeAdj = Cv / (1.0 - Cv);
+        }
+        for(int veg = 0; veg <= Nvegs; veg++){
+            Cv = veg_con[veg].Cv;
+            double i_runoff = cell[veg][band].baseflow + cell[veg][band].runoff;
+            runoff += i_runoff * Cv * areaFract * treeAdj;
+        }
+    }
+    return runoff;
 }

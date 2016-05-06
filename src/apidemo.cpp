@@ -41,12 +41,18 @@ int main(int argc, char** argv){
     soil_con_struct* si = soilps[cell];
     veg_con_struct* vi = vegps[cell];
 
-    for(int i = 0; i < 8; i++)
-        run_a_cell(soilps[i], vegps[i], &lake_con);
+    double rs[global_param.nrecs];
 
-    destory_veg_param(vegps, ncell);
+    for(int i = 0; i < 8; i++){
+        run_a_cell(soilps[i], vegps[i], &lake_con, rs);
+        for(int d = 0; d < 10; d++)cout<<rs[d]<<endl;
+        cout<<endl;
+    }
 
-    destory_soil_param(soilps, ncell);
+
+    destroy_veg_param(vegps, ncell);
+
+    destroy_soil_param(soilps, ncell);
 
     cout<<"done\n";
     return 0;

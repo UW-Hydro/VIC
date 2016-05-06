@@ -1870,9 +1870,11 @@ typedef struct {
     /* name of variable */
     int write;
     /* FALSE = don't write; TRUE = write */
+    /* 是否输出 */
     char format[10];
     /* format, when written to an ascii file;
-                          should match the desired fprintf format specifier, e.g. %.4f */
+                          should match the desired fprintf format specifier, e.g.
+       输出为ASCII文件时的输出格式，fprintf函数用，格式如 %.4f */
     int type;
     /* type, when written to a binary file;
                     OUT_TYPE_USINT  = unsigned short int
@@ -1891,6 +1893,7 @@ typedef struct {
                AGG_TYPE_SUM    = take sum over agg interval */
     int nelem;
     /* number of data values */
+    /* 变量的数目(如土壤湿度数据数目为土壤层数） */
     double *data;
     /* array of data values */
     double *aggdata;    /* array of aggregated data values */
@@ -1903,12 +1906,15 @@ typedef struct {
 typedef struct {
     char prefix[20];
     /* prefix of the file name, e.g. "fluxes" */
+    /* 输出文件前缀，如"fluxes" */
     char filename[MAXSTRING];
     /* complete file name */
+    /* 文件全名 */
     FILE *fh;
     /* filehandle */
     int nvars;
     /* number of variables to store in the file */
+    /* 输出到文件的数据类型种数 */
     int *varid;      /* id numbers of the variables to store in the file
 		                (a variable's id number is its index in the out_data array).
 		                The order of the id numbers in the varid array

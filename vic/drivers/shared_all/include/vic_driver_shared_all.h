@@ -35,8 +35,10 @@
 /***** Define maximum array sizes for driver level objects *****/
 #define MAX_FORCE_FILES 2
 
+#define DEFAULT_COMPRESSION_LVL -1
+
 /******************************************************************************
- * @brief   Met file formats
+ * @brief   File formats
  *****************************************************************************/
 enum
 {
@@ -120,6 +122,8 @@ enum
     OUT_SNOW_DEPTH,       /**< depth of snow pack [cm] */
     OUT_SOIL_ICE,         /**< soil ice content  [mm] for each soil layer */
     OUT_SOIL_LIQ,         /**< soil liquid content  [mm] for each soil layer */
+    OUT_SOIL_ICE_FRAC,    /**< soil ice content fraction of column volume [1] for each soil layer */
+    OUT_SOIL_LIQ_FRAC,    /**< soil liquid content fraction of column volume [1] for each soil layer */
     OUT_SOIL_MOIST,       /**< soil total moisture content  [mm] for each soil layer */
     OUT_SOIL_WET,         /**< vertical average of (soil moisture - wilting point)/(maximum soil moisture - wilting point) [mm/mm] */
     OUT_SURFSTOR,         /**< storage of liquid water and ice (not snow) on surface (ponding) [mm] */
@@ -408,10 +412,16 @@ typedef struct {
  * @brief   This structure stores output information for one output file.
  *****************************************************************************/
 typedef struct {
-    char prefix[MAXSTRING];  /**< prefix of the file name, e.g. "fluxes" */
-    char filename[MAXSTRING];        /**< complete file name */
-    FILE *fh;                /**< filehandle */
-    unsigned short int *type;  /**< type, when written to a binary file;
+    char                 prefix[MAXSTRING];   /**< prefix of the file name, e.g. "fluxes" */
+    char                 filename[MAXSTRING]; /**< complete file name */
+    FILE                *fh;                /**< filehandle */
+    unsigned short int   file_format;  /**< output file format */
+    short int            compress; /**< Compress all output files */
+    size_t               output_steps_per_day;  /**< Number of output timesteps per day */
+    double               out_dt;  /**< output timestep in seconds */
+    unsigned short int   skipyear;  /**< Number of years to skip before writing
+                                      output data */
+    unsigned short int  *type;  /**< type, when written to a binary file;
                                  OUT_TYPE_USINT  = unsigned short int
                                  OUT_TYPE_SINT   = short int
                                  OUT_TYPE_FLOAT  = single precision floating point
@@ -499,7 +509,7 @@ void compute_treeline(atmos_data_struct *, dmy_struct *, double, double *,
                       bool *);
 size_t count_force_vars(FILE *gp);
 void cmd_proc(int argc, char **argv, char *globalfilename);
-void compress_files(char string[]);
+void compress_files(char string[], short int level);
 double **create_outdata(void);
 stream_struct create_outstream(stream_struct *output_streams);
 void get_current_datetime(char *cdt);
@@ -604,6 +614,7 @@ unsigned short int timeunits_from_chars(char *units_chars);
 int update_step_vars(all_vars_struct *, veg_con_struct *, veg_hist_struct *);
 int invalid_date(unsigned short int calendar, dmy_struct *dmy);
 void validate_parameters(void);
+void validate_stream_settings(stream_file_struct **out_data_file);
 char will_it_snow(double *t, double t_offset, double max_snow_temp,
                   double *prcp, size_t n);
 void zero_output_list(double **);

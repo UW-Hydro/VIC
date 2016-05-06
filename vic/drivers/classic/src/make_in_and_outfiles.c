@@ -34,7 +34,9 @@ void
 make_in_and_outfiles(filep_struct         *filep,
                      filenames_struct     *filenames,
                      soil_con_struct      *soil,
-                     stream_file_struct   *out_data_files)
+                     stream_file_struct  **out_data_files,
+                     stream_struct       **streams,
+                     dmy_struct           *dmy)
 {
     extern option_struct    options;
     extern param_set_struct param_set;
@@ -81,26 +83,29 @@ make_in_and_outfiles(filep_struct         *filep,
     ********************************/
 
     for (filenum = 0; filenum < options.Noutstreams; filenum++) {
-        strcpy(out_data_files[filenum].filename, filenames->result_dir);
-        strcat(out_data_files[filenum].filename, "/");
-        strcat(out_data_files[filenum].filename,
-               out_data_files[filenum].prefix);
-        strcat(out_data_files[filenum].filename, "_");
-        strcat(out_data_files[filenum].filename, latchar);
-        strcat(out_data_files[filenum].filename, "_");
-        strcat(out_data_files[filenum].filename, lngchar);
-        if (options.OUT_FORMAT == BINARY) {
-            strcat(out_data_files[filenum].filename, ".bin");
-            out_data_files[filenum].fh = open_file(
-                out_data_files[filenum].filename, "wb");
+        strcpy(out_data_files[filenum]->filename, filenames->result_dir);
+        strcat(out_data_files[filenum]->filename, "/");
+        strcat(out_data_files[filenum]->filename,
+               out_data_files[filenum]->prefix);
+        strcat(out_data_files[filenum]->filename, "_");
+        strcat(out_data_files[filenum]->filename, latchar);
+        strcat(out_data_files[filenum]->filename, "_");
+        strcat(out_data_files[filenum]->filename, lngchar);
+        if (out_data_files[filenum]->file_format == BINARY) {
+            strcat(out_data_files[filenum]->filename, ".bin");
+            out_data_files[filenum]->fh = open_file(
+                out_data_files[filenum]->filename, "wb");
         }
-        else if (options.OUT_FORMAT == ASCII) {
-            strcat(out_data_files[filenum].filename, ".txt");
-            out_data_files[filenum].fh = open_file(
-                out_data_files[filenum].filename, "w");
+        else if (out_data_files[filenum]->file_format == ASCII) {
+            strcat(out_data_files[filenum]->filename, ".txt");
+            out_data_files[filenum]->fh = open_file(
+                out_data_files[filenum]->filename, "w");
         }
         else {
             log_err("Unrecognized OUT_FORMAT option");
         }
+
     }
+    /** Write output file headers **/
+    write_header(out_data_files, streams, dmy);
 }

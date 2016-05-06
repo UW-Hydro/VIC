@@ -42,8 +42,7 @@ double calc_netshort(double, int, double, double *);
 void check_files(filep_struct *, filenames_struct *);
 bool check_save_state_flag(dmy_struct *, size_t);
 FILE  *check_state_file(char *, size_t, size_t, int *);
-void close_files(filep_struct *filep, stream_file_struct *out_data_files,
-                 filenames_struct *fnames);
+void close_files(filep_struct *filep, stream_file_struct **out_data_files);
 size_t count_n_outfiles(FILE *gp);
 void compute_cell_area(soil_con_struct *);
 size_t count_outfile_nvars(FILE *gp);
@@ -56,8 +55,10 @@ void get_force_type(char *, int, int *);
 void get_global_param(FILE *);
 void init_output_list(double **, int, char *, int, double);
 void initialize_forcing_files(void);
-void make_in_and_outfiles(filep_struct *, filenames_struct *, soil_con_struct *,
-                          stream_file_struct *);
+void make_in_and_outfiles(filep_struct *filep, filenames_struct *filenames,
+                          soil_con_struct *soil,
+                          stream_file_struct **out_data_files,
+                          stream_struct **streams, dmy_struct *dmy);
 FILE *open_state_file(global_param_struct *, filenames_struct, size_t, size_t);
 void print_atmos_data(atmos_data_struct *atmos, size_t nr);
 void parse_output_info(FILE *gp, stream_struct **output_streams, stream_file_struct **out_data_files);
@@ -79,10 +80,10 @@ void vic_populate_model_state(all_vars_struct *, filep_struct, size_t,
                               lake_con_struct);
 void write_data(stream_file_struct *out_data_files, stream_struct *streams,
                 dmy_struct *dmy, double dt);
-void write_header(stream_file_struct *out_data_files, stream_struct *streams,
-                  dmy_struct *dmy, global_param_struct global);
+void write_header(stream_file_struct **out_data_files, stream_struct **streams,
+                  dmy_struct *dmy);
 void write_model_state(all_vars_struct *, int, int, filep_struct *,
                        soil_con_struct *);
-void write_output(stream_file_struct *out_data_files, stream_struct *streams,
+void write_output(stream_file_struct **out_data_files, stream_struct **streams,
                   dmy_struct *dmy, int rec);
 #endif

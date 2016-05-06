@@ -30,23 +30,22 @@
  * @brief    Write output data and convert units if necessary.
  *****************************************************************************/
 void
-write_output(stream_file_struct *out_data_files,
-             stream_struct      *streams,
-             dmy_struct         *dmy,
-             int                 rec)
+write_output(stream_file_struct **out_data_files,
+             stream_struct      **streams,
+             dmy_struct          *dmy,
+             int                  rec)
 {
-    extern global_param_struct global_param;
-    extern option_struct       options;
+    extern option_struct options;
 
     size_t               stream_idx;
 
     // Write data
-    if (rec >= global_param.skipyear) {
-        for (stream_idx = 0; stream_idx < options.Noutstreams; stream_idx++) {
-            if (streams[stream_idx].counter == streams[stream_idx].nextagg) {
-                write_data(&(out_data_files[stream_idx]), &(streams[stream_idx]),
-                           dmy, global_param.out_dt);
-                reset_stream(&(streams[stream_idx]));
+    for (stream_idx = 0; stream_idx < options.Noutstreams; stream_idx++) {
+        if (rec >= out_data_files[stream_idx]->skipyear) {
+            if (streams[stream_idx]->counter == streams[stream_idx]->nextagg) {
+                write_data(out_data_files[stream_idx], streams[stream_idx],
+                           dmy, out_data_files[stream_idx]->out_dt);
+                reset_stream(streams[stream_idx]);
             }
         }
 

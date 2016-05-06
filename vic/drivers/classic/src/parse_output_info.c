@@ -40,6 +40,7 @@ parse_output_info(FILE               *gp,
 
     char                 cmdstr[MAXSTRING];
     char                 optstr[MAXSTRING];
+    char                 flgstr[MAXSTRING];
     short int            streamnum;
     char                 varname[MAXSTRING];
     int                  outvarnum;
@@ -77,9 +78,6 @@ parse_output_info(FILE               *gp,
             log_err("Memory allocation error in parse_output_info().");
         }
 
-        // PRT_SNOW_BAND is ignored if options.Noutstreams > 0
-        options.PRT_SNOW_BAND = false;
-
         while (!feof(gp)) {
             if (cmdstr[0] != '#' && cmdstr[0] != '\n' && cmdstr[0] != '\0') {
                 sscanf(cmdstr, "%s", optstr);
@@ -98,7 +96,8 @@ parse_output_info(FILE               *gp,
                     nvars = count_outfile_nvars(gp);
 
                     // TODO: parse stream specific agg period info from global param
-                    nextagg = (unsigned int) ((int) global_param.out_dt / (int) global_param.dt);
+                    // nextagg = (unsigned int) ((int) global_param.out_dt / (int) global_param.dt);
+                    nextagg = 1;
 
                     setup_stream(output_streams[streamnum],
                                  out_data_files[streamnum],
@@ -106,6 +105,48 @@ parse_output_info(FILE               *gp,
 
                     outvarnum = 0;
                 }
+                else if (strcasecmp("OUTPUT_STEPS_PER_DAY", optstr) == 0) {
+                    sscanf(cmdstr, "%*s %zu", &out_data_files[streamnum]->output_steps_per_day);
+
+                    // nextagg = ;
+
+                }
+                else if (strcasecmp("SKIPYEAR", optstr) == 0) {
+                    sscanf(cmdstr, "%*s %hu", &out_data_files[streamnum]->skipyear);
+                    // skiprec = 0;
+                    // for ( i = 0; i < &out_data_files[streamnum]->skipyear; i++ ) {
+                    //   if(LEAPYR(temp[skiprec].year)) skiprec += 366 * 24 / global->dt;
+                    //   else skiprec += 365 * 24 / global->dt;
+                    // }
+                    // &out_data_files[streamnum]->skipyear = skiprec;
+                }
+
+                else if (strcasecmp("COMPRESS", optstr) == 0) {
+                    sscanf(cmdstr, "%*s %s", flgstr);
+                    if (strcasecmp("TRUE", flgstr) == 0) {
+                        out_data_files[streamnum]->compress = DEFAULT_COMPRESSION_LVL;
+                    }
+                    else if (strcasecmp("FALSE", flgstr) == 0) {
+                        out_data_files[streamnum]->compress = 0;
+                    }
+                    else {
+                        out_data_files[streamnum]->compress = atoi(flgstr);
+                    }
+                }
+
+                else if (strcasecmp("OUT_FORMAT", optstr) == 0) {
+                    sscanf(cmdstr, "%*s %s", flgstr);
+                    if (strcasecmp("ASCII", flgstr) == 0) {
+                        out_data_files[streamnum]->file_format = DEFAULT_COMPRESSION_LVL;
+                    }
+                    else if (strcasecmp("BINARY", flgstr) == 0) {
+                        out_data_files[streamnum]->file_format = 0;
+                    }
+                    else {
+                        log_err("File format must be ASCII or BINARY [stream=%hu]", streamnum);
+                    }
+                }
+
                 else if (strcasecmp("OUTVAR", optstr) == 0) {
                     if (streamnum < 0) {
                         log_err("Error in global param file: \"OUTFILE\" must be "
@@ -159,6 +200,9 @@ parse_output_info(FILE               *gp,
         set_output_defaults(output_streams, out_data_files);
     }
     fclose(gp);
+
+    // Validate the streams
+    validate_stream_settings(out_data_files);
 }
 
 /******************************************************************************

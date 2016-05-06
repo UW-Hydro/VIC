@@ -94,10 +94,5 @@ initialize_options()
     options.INIT_STATE = false;
     options.SAVE_STATE = false;
     // output options
-    options.OUT_FORMAT = UNSET_FILE_FORMAT;
-    options.COMPRESS = false;
-    options.MOISTFRACT = false;
     options.Noutstreams = 2;
-    options.PRT_HEADER = false;
-    options.PRT_SNOW_BAND = false;
 }

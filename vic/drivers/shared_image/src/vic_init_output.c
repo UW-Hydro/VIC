@@ -44,7 +44,7 @@ vic_init_output(void)
     extern nc_file_struct      nc_hist_file;
     extern nc_var_struct       nc_vars[N_OUTVAR_TYPES];
     extern lake_con_struct     lake_con;
-    extern out_data_struct   **out_data;
+    extern double           ***out_data;
     extern save_data_struct   *save_data;
     extern soil_con_struct    *soil_con;
     extern veg_con_struct    **veg_con;
@@ -56,8 +56,7 @@ vic_init_output(void)
     // initialize the output data structures
     for (i = 0; i < local_domain.ncells_active; i++) {
         put_data(&(all_vars[i]), &(atmos[i]), &(soil_con[i]), veg_con[i],
-                 veg_lib[i], &lake_con, out_data[i], &(save_data[i]),
-                 -global_param.nrecs);
+                 veg_lib[i], &lake_con, out_data[i], &(save_data[i]));
     }
 
     if (mpi_rank == 0) {
@@ -386,9 +385,8 @@ initialize_history_file(nc_file_struct *nc)
                         nc_name)
             }
         }
-        // Set the standard attributes (units, )
-        fi
-        put_nc_attr(ncid, NC_GLOBAL, "title", "VIC History File");
+
+        // TODO: compress variables if out_data_file.compress is set
 
     }
 

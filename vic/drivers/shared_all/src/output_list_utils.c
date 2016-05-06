@@ -162,6 +162,18 @@ set_output_met_data_info()
     strcpy(out_metadata[OUT_SOIL_LIQ].units, "mm");
     strcpy(out_metadata[OUT_SOIL_LIQ].description, "soil liquid moisture content for each soil layer");
 
+    /* soil ice content [1] for each soil layer */
+    strcpy(out_metadata[OUT_SOIL_ICE_FRAC].varname, "OUT_SOIL_ICE_FRAC");
+    strcpy(out_metadata[OUT_SOIL_ICE_FRAC].long_name, "soil_moisture_ice_depth_fraction");
+    strcpy(out_metadata[OUT_SOIL_ICE_FRAC].units, "1");
+    strcpy(out_metadata[OUT_SOIL_ICE_FRAC].description, "soil ice content fraction for each soil layer");
+
+    /* soil liquid moisture content [1] for each soil layer */
+    strcpy(out_metadata[OUT_SOIL_LIQ_FRAC].varname, "OUT_SOIL_LIQ_FRAC");
+    strcpy(out_metadata[OUT_SOIL_LIQ_FRAC].long_name, "soil_moisture_liquid_depth_fraction");
+    strcpy(out_metadata[OUT_SOIL_LIQ_FRAC].units, "1");
+    strcpy(out_metadata[OUT_SOIL_LIQ_FRAC].description, "soil liquid moisture content fraction for each soil layer");
+
     /* soil total moisture content [mm] for each soil layer */
     strcpy(out_metadata[OUT_SOIL_MOIST].varname, "OUT_SOIL_MOIST");
     strcpy(out_metadata[OUT_SOIL_MOIST].long_name, "unset");
@@ -1099,6 +1111,11 @@ setup_stream(stream_struct      *stream,
     stream->nextagg = nextagg;
     stream->counter = 0;
 
+    stream_file->file_format = UNSET_FILE_FORMAT;
+    stream_file->compress = false;
+    stream_file->output_steps_per_day = 1;
+    stream_file->output_steps_per_day = 0;
+
     // Allocate stream members of shape [nvars]
     stream->varid = calloc(nvars, sizeof(*(stream->varid)));
     if (stream->varid == NULL) {
@@ -1375,4 +1392,58 @@ free_out_data(double **out_data)
     }
 
     free((char*) (*out_data));
+}
+
+/******************************************************************************
+ * @brief    Validate the streams settings.
+ *****************************************************************************/
+void
+validate_stream_settings(stream_file_struct **out_data_file)
+{
+
+    extern global_param_struct global_param;
+    extern option_struct options;
+
+    size_t i;
+
+    for (i = 0; i < options.Noutstreams; i++) {
+
+        // Validate the output step
+        if (out_data_file[i]->output_steps_per_day == 0) {
+            out_data_file[i]->output_steps_per_day = global_param.model_steps_per_day;
+        }
+        if (out_data_file[i]->output_steps_per_day > global_param.model_steps_per_day) {
+            log_err("[stream=%zu] Invalid value for OUTPUT_STEPS_PER_DAY (%zu). "
+                    "OUTPUT_STEPS_PER_DAY must be <= MODEL_STEPS_PER_DAY (%zu)",
+                    i, out_data_file[i]->output_steps_per_day,
+                    global_param.model_steps_per_day);
+        }
+        else if (global_param.model_steps_per_day % out_data_file[i]->output_steps_per_day != 0) {
+            log_err("[stream=%zu] Invalid value for OUTPUT_STEPS_PER_DAY (%zu). "
+                    "MODEL_STEPS_PER_DAY (%zu) must be a multiple of "
+                    "OUTPUT_STEPS_PER_DAY.", i,
+                    out_data_file[i]->output_steps_per_day,
+                    global_param.model_steps_per_day);
+        }
+        else if (out_data_file[i]->output_steps_per_day != 1 &&
+                 out_data_file[i]->output_steps_per_day < MIN_SUBDAILY_STEPS_PER_DAY) {
+            log_err("[stream=%zu] The specified number of output steps per day "
+                    "(%zu) > 1 and < the minimum number of subdaily steps per "
+                    "day (%d). Make sure that the global file defines "
+                    "OUTPUT_STEPS_PER_DAY of at least (%d).", i,
+                    global_param.model_steps_per_day,
+                    MIN_SUBDAILY_STEPS_PER_DAY, MIN_SUBDAILY_STEPS_PER_DAY);
+        }
+        else if (out_data_file[i]->output_steps_per_day > MAX_SUBDAILY_STEPS_PER_DAY) {
+            log_err("[stream=%zu] The specified number of model steps per day "
+                    "(%zu) > the the maximum number of subdaily steps per day "
+                    "(%d). Make sure that the global file defines "
+                    "MODEL_STEPS_PER_DAY of at most (%d).", i,
+                    global_param.model_steps_per_day,
+                    MAX_SUBDAILY_STEPS_PER_DAY, MAX_SUBDAILY_STEPS_PER_DAY);
+        }
+        else {
+            out_data_file[i]->out_dt = SEC_PER_DAY / (double) out_data_file[i]->output_steps_per_day;
+        }
+    }
 }

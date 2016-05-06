@@ -132,10 +132,6 @@ create_MPI_global_struct_type(MPI_Datatype *mpi_type)
     offsets[i] = offsetof(global_param_struct, atmos_dt);
     mpi_types[i++] = MPI_DOUBLE;
 
-    // double out_dt;
-    offsets[i] = offsetof(global_param_struct, out_dt);
-    mpi_types[i++] = MPI_DOUBLE;
-
     // size_t model_steps_per_day;
     offsets[i] = offsetof(global_param_struct, model_steps_per_day);
     mpi_types[i++] = MPI_AINT;
@@ -150,10 +146,6 @@ create_MPI_global_struct_type(MPI_Datatype *mpi_type)
 
     // size_t atmos_steps_per_day;
     offsets[i] = offsetof(global_param_struct, atmos_steps_per_day);
-    mpi_types[i++] = MPI_AINT;
-
-    // size_t output_steps_per_day;
-    offsets[i] = offsetof(global_param_struct, output_steps_per_day);
     mpi_types[i++] = MPI_AINT;
 
     // unsigned short endday;
@@ -201,10 +193,6 @@ create_MPI_global_struct_type(MPI_Datatype *mpi_type)
     // size_t nrecs;
     offsets[i] = offsetof(global_param_struct, nrecs);
     mpi_types[i++] = MPI_AINT;
-
-    // unsigned short int skipyear;
-    offsets[i] = offsetof(global_param_struct, skipyear);
-    mpi_types[i++] = MPI_UNSIGNED_SHORT;
 
     // unsigned short int startday;
     offsets[i] = offsetof(global_param_struct, startday);
@@ -702,7 +690,7 @@ create_MPI_option_struct_type(MPI_Datatype *mpi_type)
     MPI_Datatype *mpi_types;
 
     // nitems has to equal the number of elements in option_struct
-    nitems = 60;
+    nitems = 53;
     blocklengths = malloc(nitems * sizeof(*blocklengths));
     if (blocklengths == NULL) {
         log_err("Memory allocation error in create_MPI_option_struct_type().")
@@ -936,34 +924,6 @@ create_MPI_option_struct_type(MPI_Datatype *mpi_type)
 
     // bool SAVE_STATE;
     offsets[i] = offsetof(option_struct, SAVE_STATE);
-    mpi_types[i++] = MPI_C_BOOL;
-
-    // bool ALMA_OUTPUT;
-    offsets[i] = offsetof(option_struct, ALMA_OUTPUT);
-    mpi_types[i++] = MPI_C_BOOL;
-
-    // unsigned short OUT_FORMAT;
-    offsets[i] = offsetof(option_struct, OUT_FORMAT);
-    mpi_types[i++] = MPI_UNSIGNED_SHORT;
-
-    // bool COMPRESS;
-    offsets[i] = offsetof(option_struct, COMPRESS);
-    mpi_types[i++] = MPI_C_BOOL;
-
-    // bool MOISTFRACT;
-    offsets[i] = offsetof(option_struct, MOISTFRACT);
-    mpi_types[i++] = MPI_C_BOOL;
-
-    // size_t Noutfiles;
-    offsets[i] = offsetof(option_struct, Noutfiles);
-    mpi_types[i++] = MPI_AINT; // note there is no MPI_SIZE_T equivalent
-
-    // bool PRT_HEADER;
-    offsets[i] = offsetof(option_struct, PRT_HEADER);
-    mpi_types[i++] = MPI_C_BOOL;
-
-    // bool PRT_SNOW_BAND;
-    offsets[i] = offsetof(option_struct, PRT_SNOW_BAND);
     mpi_types[i++] = MPI_C_BOOL;
 
     // make sure that the we have the right number of elements

@@ -179,12 +179,8 @@ main(int   argc,
             }
 
             /** Build Gridded Filenames, and Open **/
-            make_in_and_outfiles(&filep, &filenames, &soil_con, out_data_files);
-
-            if (options.PRT_HEADER) {
-                /** Write output file headers **/
-                write_header(out_data_files, output_streams, dmy, global_param);
-            }
+            make_in_and_outfiles(&filep, &filenames, &soil_con, &out_data_files,
+                                 &output_streams, dmy);
 
             /** Read Elevation Band Data if Used **/
             read_snowband(filep.snowband, &soil_con);
@@ -249,7 +245,7 @@ main(int   argc,
                          &lake_con, out_data, &save_data);
 
                 // Write cell average values for current time step
-                write_output(out_data_files, output_streams, &dmy[rec], rec);
+                write_output(&out_data_files, &output_streams, &dmy[rec], rec);
 
                 /************************************
                    Save model state at assigned date
@@ -283,7 +279,7 @@ main(int   argc,
                 }
             } /* End Rec Loop */
 
-            close_files(&filep, out_data_files, &filenames);
+            close_files(&filep, &out_data_files);
 
             free_veg_hist(global_param.nrecs, veg_con[0].vegetat_type_num,
                           &veg_hist);

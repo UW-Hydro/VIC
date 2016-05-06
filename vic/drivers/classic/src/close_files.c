@@ -31,10 +31,10 @@
  *****************************************************************************/
 void
 close_files(filep_struct         *filep,
-            stream_file_struct   *out_data_files,
-            filenames_struct     *fnames)
+            stream_file_struct  **out_data_files)
 {
     extern option_struct options;
+
     size_t               filenum;
 
     /**********************
@@ -42,23 +42,19 @@ close_files(filep_struct         *filep,
     **********************/
 
     fclose(filep->forcing[0]);
-    if (options.COMPRESS) {
-        compress_files(fnames->forcing[0]);
-    }
+
     if (filep->forcing[1] != NULL) {
         fclose(filep->forcing[1]);
-        if (options.COMPRESS) {
-            compress_files(fnames->forcing[1]);
-        }
     }
 
     /*******************
        Close Output Files
     *******************/
     for (filenum = 0; filenum < options.Noutstreams; filenum++) {
-        fclose(out_data_files[filenum].fh);
-        if (options.COMPRESS) {
-            compress_files(out_data_files[filenum].filename);
+        fclose(out_data_files[filenum]->fh);
+        if (out_data_files[filenum]->compress) {
+            compress_files(out_data_files[filenum]->filename,
+                           out_data_files[filenum]->compress);
         }
     }
 }

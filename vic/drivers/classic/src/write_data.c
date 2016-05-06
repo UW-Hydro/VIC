@@ -50,7 +50,7 @@ write_data(stream_file_struct *out_data_file,
     float               *tmp_fptr;
     double              *tmp_dptr;
 
-    if (options.OUT_FORMAT == BINARY) {
+    if (out_data_file->file_format == BINARY) {
         n = N_OUTVAR_TYPES * options.Nlayer * options.SNOW_BAND;
         // Initialize pointers
         tmp_cptr = calloc(n, sizeof(*tmp_cptr));
@@ -138,7 +138,7 @@ write_data(stream_file_struct *out_data_file,
         free((char *) tmp_fptr);
         free((char *) tmp_dptr);
     }
-    else if (options.OUT_FORMAT == ASCII) {
+    else if (out_data_file->file_format == ASCII) {
         // Write the date
         if (dt < SEC_PER_DAY) {
             // Write year, month, day, and sec

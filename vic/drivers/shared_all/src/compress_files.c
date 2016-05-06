@@ -30,11 +30,20 @@
  * @brief    This subroutine compresses the file "string" using a system call.
  *****************************************************************************/
 void
-compress_files(char string[])
+compress_files(char string[], short int level)
 {
     char command[MAXSTRING];
 
-    /** uncompress and open zipped file **/
-    sprintf(command, "nice gzip -f %s &", string);
+    // Compress the file
+    if (level == DEFAULT_COMPRESSION_LVL) {
+        sprintf(command, "nice gzip -f %s &", string);
+    }
+    else if (level > 0) {
+        sprintf(command, "nice gzip -%d -f %s &", level, string);
+    }
+    else if (level <= 0) {
+        log_err("Invalid compression level for gzip, must be an integer 1-9");
+    }
+
     system(command);
 }

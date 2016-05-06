@@ -375,13 +375,7 @@ typedef struct {
     unsigned short int STATE_FORMAT;
     _Bool INIT_STATE;
     _Bool SAVE_STATE;
-    _Bool ALMA_OUTPUT;
-    unsigned short int OUT_FORMAT;
-    _Bool COMPRESS;
-    _Bool MOISTFRACT;
-    size_t Noutfiles;
-    _Bool PRT_HEADER;
-    _Bool PRT_SNOW_BAND;
+    size_t Noutstreams;
 } option_struct;
 typedef struct {
     double wind_h;

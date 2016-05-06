@@ -282,15 +282,7 @@ typedef struct {
     bool SAVE_STATE;     /**< TRUE = save state file */
 
     // output options
-    unsigned short int OUT_FORMAT;  /**< TRUE = output files are in binary, not ASCII */
-    bool COMPRESS;       /**< TRUE = Compress all output files */
-    bool MOISTFRACT;     /**< TRUE = output soil moisture as fractional moisture content */
     size_t Noutstreams;  /**< Number of output stream */
-    bool PRT_HEADER;     /**< TRUE = insert header at beginning of output file; FALSE = no header */
-    bool PRT_SNOW_BAND;  /**< TRUE = print snow parameters for each snow band. This is only used when default
-                                   output files are used (for backwards-compatibility); if outfiles and
-                                   variables are explicitly mentioned in global parameter file, this option
-                                   is ignored. */
 } option_struct;
 
 /******************************************************************************
@@ -303,12 +295,10 @@ typedef struct {
     double snow_dt;                /**< Snow model time step in seconds */
     double runoff_dt;              /**< Runoff time step in seconds */
     double atmos_dt;               /**< Atmos time step in seconds */
-    double out_dt;                 /**< Output time step in seconds */
     size_t model_steps_per_day;    /**< Number of model timesteps per day */
     size_t snow_steps_per_day;     /**< Number of snow timesteps per day */
     size_t runoff_steps_per_day;   /**< Number of runoff timesteps per day */
     size_t atmos_steps_per_day;    /**< Number of atmos timesteps per day */
-    size_t output_steps_per_day;   /**< Number of output timesteps per day */
     unsigned short int endday;     /**< Last day of model simulation */
     unsigned short int endmonth;   /**< Last month of model simulation */
     unsigned short int endyear;    /**< Last year of model simulation */
@@ -322,8 +312,6 @@ typedef struct {
                                       the start of the forcing file */
     unsigned short int forceyear[2];  /**< year forcing files start */
     size_t nrecs;                /**< Number of time steps simulated */
-    unsigned short int skipyear;  /**< Number of years to skip before writing
-                                      output data */
     unsigned short int startday;  /**< Starting day of the simulation */
     unsigned short int startmonth;  /**< Starting month of the simulation */
     unsigned int startsec;          /**< Seconds since midnight when simulation

@@ -304,7 +304,6 @@ print_global_param(global_param_struct *gp)
     fprintf(LOG_DEST, "\tdt                  : %.4f\n", gp->dt);
     fprintf(LOG_DEST, "\tsnow_dt             : %.4f\n", gp->snow_dt);
     fprintf(LOG_DEST, "\trunoff_dt           : %.4f\n", gp->runoff_dt);
-    fprintf(LOG_DEST, "\tout_dt              : %.4f\n", gp->out_dt);
     fprintf(LOG_DEST, "\tmodel_steps_per_day : %zu\n", gp->model_steps_per_day);
     fprintf(LOG_DEST, "\tsnow_steps_per_day  : %zu\n", gp->snow_steps_per_day);
     fprintf(LOG_DEST, "\trunoff_steps_per_day: %zu\n",
@@ -323,7 +322,6 @@ print_global_param(global_param_struct *gp)
         fprintf(LOG_DEST, "\tforceyear[%zd]      : %hu\n", i, gp->forceyear[i]);
     }
     fprintf(LOG_DEST, "\tnrecs               : %zu\n", gp->nrecs);
-    fprintf(LOG_DEST, "\tskipyear            : %hu\n", gp->skipyear);
     fprintf(LOG_DEST, "\tstartday            : %hu\n", gp->startday);
     fprintf(LOG_DEST, "\tstartsec            : %u\n", gp->startsec);
     fprintf(LOG_DEST, "\tstartmonth          : %hu\n", gp->startmonth);
@@ -540,12 +538,7 @@ print_option(option_struct *option)
     fprintf(LOG_DEST, "\tSTATE_FORMAT         : %d\n", option->STATE_FORMAT);
     fprintf(LOG_DEST, "\tINIT_STATE           : %d\n", option->INIT_STATE);
     fprintf(LOG_DEST, "\tSAVE_STATE           : %d\n", option->SAVE_STATE);
-    fprintf(LOG_DEST, "\tOUT_FORMAT           : %d\n", option->OUT_FORMAT);
-    fprintf(LOG_DEST, "\tCOMPRESS             : %d\n", option->COMPRESS);
-    fprintf(LOG_DEST, "\tMOISTFRACT           : %d\n", option->MOISTFRACT);
     fprintf(LOG_DEST, "\tNoutstreams          : %zu\n", option->Noutstreams);
-    fprintf(LOG_DEST, "\tPRT_HEADER           : %d\n", option->PRT_HEADER);
-    fprintf(LOG_DEST, "\tPRT_SNOW_BAND        : %d\n", option->PRT_SNOW_BAND);
 }
 
 /******************************************************************************

@@ -43,14 +43,11 @@ set_output_defaults(stream_struct      **output_streams,
     size_t        nvars;
     unsigned int  nextagg;
 
-    nextagg = (unsigned int) ((int) global_param.out_dt / (int) global_param.dt);
+    nextagg = global_param.model_steps_per_day;
 
     // Output files
     options.Noutstreams = 2;
     if (options.FROZEN_SOIL) {
-        options.Noutstreams++;
-    }
-    if (options.PRT_SNOW_BAND) {
         options.Noutstreams++;
     }
     if (options.LAKES) {
@@ -106,20 +103,6 @@ set_output_defaults(stream_struct      **output_streams,
                      out_data_files[streamnum],
                      nvars, nextagg);
         strcpy(out_data_files[streamnum]->prefix, "fdepth");
-    }
-    if (options.PRT_SNOW_BAND) {
-        streamnum++;
-        if (options.FULL_ENERGY) {
-            nvars = 13;
-        }
-        else {
-            nvars = 9;
-        }
-        debug("setting up stream %zu", streamnum);
-        setup_stream(output_streams[streamnum],
-                     out_data_files[streamnum],
-                     nvars, nextagg);
-        strcpy(out_data_files[streamnum]->prefix, "snowband");
     }
     if (options.LAKES) {
         streamnum++;
@@ -251,48 +234,7 @@ set_output_defaults(stream_struct      **output_streams,
                        "OUT_SURF_FROST_FRAC", varnum++, "%.4f",
                        OUT_TYPE_FLOAT, 1);
     }
-    if (options.PRT_SNOW_BAND) {
-        streamnum++;
-        varnum = 0;
-        set_output_var(output_streams[streamnum], out_data_files[streamnum],
-                       "OUT_SWE_BAND", varnum++, "%.4f", OUT_TYPE_FLOAT, 1);
-        set_output_var(output_streams[streamnum], out_data_files[streamnum],
-                       "OUT_SNOW_DEPTH_BAND", varnum++, "%.4f",
-                       OUT_TYPE_FLOAT, 1);
-        set_output_var(output_streams[streamnum], out_data_files[streamnum],
-                       "OUT_SNOW_CANOPY_BAND", varnum++, "%.4f",
-                       OUT_TYPE_FLOAT, 1);
-        if (options.FULL_ENERGY) {
-            set_output_var(output_streams[streamnum], out_data_files[streamnum],
-                           "OUT_ADVECTION_BAND", varnum++, "%.4f",
-                           OUT_TYPE_FLOAT, 1);
-            set_output_var(output_streams[streamnum], out_data_files[streamnum],
-                           "OUT_DELTACC_BAND", varnum++, "%.4f",
-                           OUT_TYPE_FLOAT, 1);
-            set_output_var(output_streams[streamnum], out_data_files[streamnum],
-                           "OUT_SNOW_FLUX_BAND", varnum++, "%.4f",
-                           OUT_TYPE_FLOAT, 1);
-            set_output_var(output_streams[streamnum], out_data_files[streamnum],
-                           "OUT_RFRZ_ENERGY_BAND", varnum++, "%.4f",
-                           OUT_TYPE_FLOAT, 1);
-        }
-        set_output_var(output_streams[streamnum], out_data_files[streamnum],
-                       "OUT_SWNET_BAND", varnum++, "%.4f",
-                       OUT_TYPE_FLOAT, 1);
-        set_output_var(output_streams[streamnum], out_data_files[streamnum],
-                       "OUT_LWNET_BAND", varnum++, "%.4f",
-                       OUT_TYPE_FLOAT, 1);
-        set_output_var(output_streams[streamnum], out_data_files[streamnum],
-                       "OUT_ALBEDO_BAND", varnum++, "%.4f", OUT_TYPE_FLOAT, 1);
-        set_output_var(output_streams[streamnum], out_data_files[streamnum],
-                       "OUT_LATENT_BAND", varnum++, "%.4f", OUT_TYPE_FLOAT, 1);
-        set_output_var(output_streams[streamnum], out_data_files[streamnum],
-                       "OUT_SENSIBLE_BAND", varnum++, "%.4f",
-                       OUT_TYPE_FLOAT, 1);
-        set_output_var(output_streams[streamnum], out_data_files[streamnum],
-                       "OUT_GRND_FLUX_BAND", varnum++, "%.4f",
-                       OUT_TYPE_FLOAT, 1);
-    }
+
     if (options.LAKES) {
         streamnum++;
         varnum = 0;

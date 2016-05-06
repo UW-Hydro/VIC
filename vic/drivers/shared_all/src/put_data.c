@@ -71,8 +71,6 @@ put_data(all_vars_struct   *all_vars,
     double                     ThisTreeAdjust;
     size_t                     i;
     double                     dt_sec;
-    double                     out_dt_sec;
-    unsigned int               out_step_ratio;
 
     cell_data_struct         **cell;
     energy_bal_struct        **energy;
@@ -92,8 +90,6 @@ put_data(all_vars_struct   *all_vars,
     frost_fract = soil_con->frost_fract;
     frost_slope = soil_con->frost_slope;
     dt_sec = global_param.dt;
-    out_dt_sec = global_param.out_dt;
-    out_step_ratio = (unsigned int) (out_dt_sec / dt_sec);
 
     // Compute treeline adjustment factors
     for (band = 0; band < options.SNOW_BAND; band++) {
@@ -350,10 +346,8 @@ put_data(all_vars_struct   *all_vars,
                         }
                         out_data[OUT_LAKE_DSWE_V][0] = lake_var.swe -
                                                             lake_var.swe_save;  // m3
-                        out_data[OUT_LAKE_DSWE][0] =
-                            (lake_var.swe -
-                             lake_var.swe_save) * MM_PER_M /
-                            soil_con->cell_area;  // mm over gridcell
+                        // same as OUT_LAKE_MOIST
+                        out_data[OUT_LAKE_DSWE][0] = (lake_var.swe - lake_var.swe_save) * MM_PER_M / soil_con->cell_area;
 
                         // Lake dimensions
                         out_data[OUT_LAKE_AREA_FRAC][0] = Cv * Clake;
@@ -372,18 +366,15 @@ put_data(all_vars_struct   *all_vars,
                                                              lake_var.
                                                              volume_save;
                         // mm over gridcell
-                        out_data[OUT_LAKE_DSTOR][0] =
-                            (lake_var.volume - lake_var.volume_save) * MM_PER_M / soil_con->cell_area;
+                        out_data[OUT_LAKE_DSTOR][0] = (lake_var.volume - lake_var.volume_save) * MM_PER_M / soil_con->cell_area;
 
                         // Other lake characteristics
                         out_data[OUT_LAKE_SURF_TEMP][0] = lake_var.temp[0];
                         if (out_data[OUT_LAKE_SURF_AREA][0] > 0) {
-                            out_data[OUT_LAKE_MOIST][0] =
-                                (lake_var.volume /
-                                 soil_con->cell_area) * MM_PER_M;  // mm over gridcell
-                            out_data[OUT_SURFSTOR][0] =
-                                (lake_var.volume /
-                                 soil_con->cell_area) * MM_PER_M;  // same as OUT_LAKE_MOIST
+                            // mm over gridcell
+                            out_data[OUT_LAKE_MOIST][0] = (lake_var.volume / soil_con->cell_area) * MM_PER_M;
+                            // same as OUT_LAKE_MOIST
+                            out_data[OUT_SURFSTOR][0] = (lake_var.volume / soil_con->cell_area) * MM_PER_M;
                         }
                         else {
                             out_data[OUT_LAKE_MOIST][0] = 0;
@@ -414,15 +405,17 @@ put_data(all_vars_struct   *all_vars,
                         out_data[OUT_LAKE_CHAN_OUT][0] =
                             lake_var.runoff_out * MM_PER_M /
                             soil_con->cell_area;  // mm over gridcell
-                        out_data[OUT_LAKE_EVAP][0] = lake_var.evapw *
-                                                          MM_PER_M /
-                                                          soil_con->cell_area;  // mm over gridcell
+                        // mm over gridcell
+                        out_data[OUT_LAKE_EVAP][0] = lake_var.evapw * MM_PER_M /
+                                                          soil_con->cell_area;
+                        // mm over gridcell
                         out_data[OUT_LAKE_RCHRG][0] = lake_var.recharge *
                                                            MM_PER_M /
-                                                           soil_con->cell_area;  // mm over gridcell
+                                                           soil_con->cell_area;
+                        // mm over gridcell
                         out_data[OUT_LAKE_RO_IN][0] = lake_var.runoff_in *
                                                            MM_PER_M /
-                                                           soil_con->cell_area;  // mm over gridcell
+                                                           soil_con->cell_area;
                         out_data[OUT_LAKE_VAPFLX][0] =
                             lake_var.vapor_flux * MM_PER_M /
                             soil_con->cell_area;  // mm over gridcell
@@ -457,15 +450,13 @@ put_data(all_vars_struct   *all_vars,
 
     // Aerodynamic conductance and resistance
     if (out_data[OUT_AERO_COND1][0] > DBL_EPSILON) {
-        out_data[OUT_AERO_RESIST1][0] = 1 /
-                                             out_data[OUT_AERO_COND1][0];
+        out_data[OUT_AERO_RESIST1][0] = 1 / out_data[OUT_AERO_COND1][0];
     }
     else {
         out_data[OUT_AERO_RESIST1][0] = param.HUGE_RESIST;
     }
     if (out_data[OUT_AERO_COND2][0] > DBL_EPSILON) {
-        out_data[OUT_AERO_RESIST2][0] = 1 /
-                                             out_data[OUT_AERO_COND2][0];
+        out_data[OUT_AERO_RESIST2][0] = 1 / out_data[OUT_AERO_COND2][0];
     }
     else {
         out_data[OUT_AERO_RESIST2][0] = param.HUGE_RESIST;
@@ -489,27 +480,21 @@ put_data(all_vars_struct   *all_vars,
         out_data[OUT_DELSOILMOIST][0] +=
             out_data[OUT_SOIL_MOIST][index];
 
-        out_data[OUT_SMLIQFRAC][index] =
-            out_data[OUT_SOIL_LIQ][index] /
-            out_data[OUT_SOIL_MOIST][index];
-        out_data[OUT_SMFROZFRAC][index] = 1 -
-                                               out_data[OUT_SMLIQFRAC][
-            index];
+        out_data[OUT_SMLIQFRAC][index] = out_data[OUT_SOIL_LIQ][index] / out_data[OUT_SOIL_MOIST][index];
+        out_data[OUT_SMFROZFRAC][index] = 1 - out_data[OUT_SMLIQFRAC][index];
     }
     out_data[OUT_DELSOILMOIST][0] -= save_data->total_soil_moist;
     out_data[OUT_DELSWE][0] = out_data[OUT_SWE][0] +
                                    out_data[OUT_SNOW_CANOPY][0] -
                                    save_data->swe;
-    out_data[OUT_DELINTERCEPT][0] = out_data[OUT_WDEW][0] -
-                                         save_data->wdew;
+    out_data[OUT_DELINTERCEPT][0] = out_data[OUT_WDEW][0] - save_data->wdew;
     out_data[OUT_DELSURFSTOR][0] = out_data[OUT_SURFSTOR][0] -
                                         save_data->surfstor;
 
     // Energy terms
     out_data[OUT_REFREEZE][0] =
         (out_data[OUT_RFRZ_ENERGY][0] / CONST_LATICE) * dt_sec;
-    out_data[OUT_R_NET][0] = out_data[OUT_SWNET][0] +
-                                  out_data[OUT_LWNET][0];
+    out_data[OUT_R_NET][0] = out_data[OUT_SWNET][0] + out_data[OUT_LWNET][0];
 
     // Save current moisture state for use in next time step
     save_data->total_soil_moist = 0;
@@ -517,15 +502,13 @@ put_data(all_vars_struct   *all_vars,
         save_data->total_soil_moist += out_data[OUT_SOIL_MOIST][index];
     }
     save_data->surfstor = out_data[OUT_SURFSTOR][0];
-    save_data->swe = out_data[OUT_SWE][0] +
-                     out_data[OUT_SNOW_CANOPY][0];
+    save_data->swe = out_data[OUT_SWE][0] + out_data[OUT_SNOW_CANOPY][0];
     save_data->wdew = out_data[OUT_WDEW][0];
 
     // Carbon Terms
     if (options.CARBON) {
         out_data[OUT_RHET][0] *= dt_sec / SEC_PER_DAY;  // convert to gC/m2d
-        out_data[OUT_NEE][0] = out_data[OUT_NPP][0] -
-                                    out_data[OUT_RHET][0];
+        out_data[OUT_NEE][0] = out_data[OUT_NPP][0] - out_data[OUT_RHET][0];
     }
 
     /********************
@@ -536,16 +519,8 @@ put_data(all_vars_struct   *all_vars,
               out_data[OUT_BASEFLOW][0];  // mm over grid cell
     storage = 0.;
     for (index = 0; index < options.Nlayer; index++) {
-        if (options.MOISTFRACT) {
-            storage +=
-                (out_data[OUT_SOIL_LIQ][index] +
-                 out_data[OUT_SOIL_ICE][index]) *
-                depth[index] * MM_PER_M;
-        }
-        else {
-            storage += out_data[OUT_SOIL_LIQ][index] +
-                       out_data[OUT_SOIL_ICE][index];
-        }
+        storage += out_data[OUT_SOIL_LIQ][index] +
+                   out_data[OUT_SOIL_ICE][index];
     }
     storage += out_data[OUT_SWE][0] + out_data[OUT_SNOW_CANOPY][0] +
                out_data[OUT_WDEW][0] + out_data[OUT_SURFSTOR][0];
@@ -706,12 +681,13 @@ collect_wb_terms(cell_data_struct cell,
                 (cell.layer[index].ice[frost_area] * frost_fract[frost_area]);
         }
         tmp_moist -= tmp_ice;
-        if (options.MOISTFRACT) {
-            tmp_moist /= depth[index] * MM_PER_M;
-            tmp_ice /= depth[index] * MM_PER_M;
-        }
+
         out_data[OUT_SOIL_LIQ][index] += tmp_moist * AreaFactor;
         out_data[OUT_SOIL_ICE][index] += tmp_ice * AreaFactor;
+
+        out_data[OUT_SOIL_LIQ][index] = tmp_moist * AreaFactor / depth[index] * MM_PER_M;
+        out_data[OUT_SOIL_ICE][index] = tmp_ice * AreaFactor / depth[index] * MM_PER_M;
+
     }
     out_data[OUT_SOIL_WET][0] += cell.wetness * AreaFactor;
     out_data[OUT_ROOTMOIST][0] += cell.rootmoist * AreaFactor;

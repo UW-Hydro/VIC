@@ -422,21 +422,6 @@ set_output_var(out_data_file_struct *out_data_files,
 }
 
 /******************************************************************************
- * @brief    This routine frees the memory in the out_data_files array.
- *****************************************************************************/
-void
-free_out_data_files(out_data_file_struct **out_data_files)
-{
-    extern option_struct options;
-    size_t               filenum;
-
-    for (filenum = 0; filenum < options.Noutfiles; filenum++) {
-        free((char*) (*out_data_files)[filenum].varid);
-    }
-    free((char*) (*out_data_files));
-}
-
-/******************************************************************************
  * @brief    This routine frees the memory in the out_data array.
  *****************************************************************************/
 void

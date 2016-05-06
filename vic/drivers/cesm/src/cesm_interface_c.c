@@ -120,7 +120,7 @@ vic_cesm_run(vic_clock *vclock)
     // if save:
     if (vclock->state_flag) {
         log_warn("Skipping state file write");
-        // vic_store();
+        vic_store(&dmy_current);
     }
 
     // reset x2l fields

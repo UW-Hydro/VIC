@@ -32,7 +32,6 @@
  *****************************************************************************/
 void
 initialize_soil(cell_data_struct **cell,
-                soil_con_struct   *soil_con,
                 size_t             veg_num)
 {
     extern option_struct options;

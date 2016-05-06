@@ -130,7 +130,7 @@ main(int    argc,
     }
 
     // clean up
-    vic_finalize();
+    vic_image_finalize();
 
     // finalize MPI
     status = MPI_Finalize();

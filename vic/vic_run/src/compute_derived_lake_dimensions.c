@@ -101,5 +101,4 @@ compute_derived_lake_dimensions(lake_var_struct *lake,
                 "setting to maximum; record = %d", 0);
     }
     lake->volume = tmp_volume + lake->ice_water_eq;
-
 }

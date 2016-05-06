@@ -36,6 +36,8 @@
 #include <strings.h>
 #include <stdbool.h>
 #include <stddef.h>
+#include <unistd.h>
+#include <time.h>
 
 #include <vic_physical_constants.h>
 #include <vic_log.h>
@@ -803,7 +805,6 @@ typedef struct {
     // Fluxes
     double bare_evap_frac;  /**< fraction of evapotranspiration coming from bare soil evap, from soil layer (mm) */
     double evap;            /**< evapotranspiration from soil layer (mm) */
-
 } layer_data_struct;
 
 /******************************************************************************
@@ -843,7 +844,6 @@ typedef struct {
     double RhInter;                    /**< soil respiration from intermediate pool [gC/m2] */
     double RhSlow;                     /**< soil respiration from slow pool [gC/m2] */
     double RhTot;                      /**< total soil respiration over all pools [gC/m2] (=RhLitter2Atm+RhInter+RhSlow) */
-
 } cell_data_struct;
 
 /******************************************************************************

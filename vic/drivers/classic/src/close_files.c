@@ -30,8 +30,8 @@
  * @brief    This routine closes all forcing data files, and output files.
  *****************************************************************************/
 void
-close_files(filep_struct         *filep,
-            stream_file_struct  **out_data_files)
+close_files(filep_struct        *filep,
+            stream_file_struct **out_data_files)
 {
     extern option_struct options;
 

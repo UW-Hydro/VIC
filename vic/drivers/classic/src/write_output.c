@@ -48,6 +48,5 @@ write_output(stream_file_struct **out_data_files,
                 reset_stream(streams[stream_idx]);
             }
         }
-
     }
 }

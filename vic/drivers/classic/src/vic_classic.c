@@ -56,28 +56,28 @@ main(int   argc,
      char *argv[])
 {
     /** Variable Declarations **/
-    extern FILE          *LOG_DEST;
+    extern FILE        *LOG_DEST;
 
-    char                  MODEL_DONE;
-    char                  RUN_MODEL;
-    char                  dmy_str[MAXSTRING];
-    size_t                rec;
-    size_t                Nveg_type;
-    int                   cellnum;
-    int                   startrec;
-    int                   ErrorFlag;
-    size_t                streamnum;
-    dmy_struct           *dmy;
-    atmos_data_struct    *atmos;
-    veg_hist_struct     **veg_hist;
-    veg_con_struct       *veg_con;
-    soil_con_struct       soil_con;
-    all_vars_struct       all_vars;
-    lake_con_struct       lake_con;
-    stream_struct        *output_streams = NULL;
-    stream_file_struct   *out_data_files = NULL;
-    double              **out_data;  // [nvars, nelem]
-    save_data_struct      save_data;
+    char                MODEL_DONE;
+    char                RUN_MODEL;
+    char                dmy_str[MAXSTRING];
+    size_t              rec;
+    size_t              Nveg_type;
+    int                 cellnum;
+    int                 startrec;
+    int                 ErrorFlag;
+    size_t              streamnum;
+    dmy_struct         *dmy;
+    atmos_data_struct  *atmos;
+    veg_hist_struct   **veg_hist;
+    veg_con_struct     *veg_con;
+    soil_con_struct     soil_con;
+    all_vars_struct     all_vars;
+    lake_con_struct     lake_con;
+    stream_struct      *output_streams = NULL;
+    stream_file_struct *out_data_files = NULL;
+    double            **out_data;    // [nvars, nelem]
+    save_data_struct    save_data;
 
     // Initialize Log Destination
     initialize_log();
@@ -211,7 +211,8 @@ main(int   argc,
             Error.output_streams = output_streams;
 
             /** Initialize the storage terms in the water and energy balances **/
-            initialize_put_data(&all_vars, &atmos[0], &soil_con, veg_con, veg_lib,
+            initialize_put_data(&all_vars, &atmos[0], &soil_con, veg_con,
+                                veg_lib,
                                 &lake_con, out_data, &save_data);
 
             /******************************************

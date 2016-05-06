@@ -377,17 +377,18 @@ initialize_history_file(nc_file_struct *nc)
                     nc->fname);
         }
         // set the fill value attribute
-        if (nc_vars[j].nc_type == NC_DOUBLE){
-            status = nc_put_att_double(*nc_id, var_id, "_FillValue", NC_DOUBLE, 1,
+        if (nc_vars[j].nc_type == NC_DOUBLE) {
+            status = nc_put_att_double(*nc_id, var_id, "_FillValue", NC_DOUBLE,
+                                       1,
                                        NC_FILL_DOUBLE);
             if (status != NC_NOERR) {
-                log_err("Error putting _FillValue attribute to %s in %s", var_name,
+                log_err("Error putting _FillValue attribute to %s in %s",
+                        var_name,
                         nc_name)
             }
         }
 
         // TODO: compress variables if out_data_file.compress is set
-
     }
 
     // leave define mode

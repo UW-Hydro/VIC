@@ -38,17 +38,17 @@ write_data(stream_file_struct *out_data_file,
     extern option_struct        options;
     extern out_metadata_struct *out_metadata;
 
-    size_t               n;
-    size_t               var_idx;
-    size_t               elem_idx;
-    size_t               ptr_idx;
-    unsigned int         varid;
-    char                *tmp_cptr;
-    short int           *tmp_siptr;
-    unsigned short int  *tmp_usiptr;
-    int                 *tmp_iptr;
-    float               *tmp_fptr;
-    double              *tmp_dptr;
+    size_t                      n;
+    size_t                      var_idx;
+    size_t                      elem_idx;
+    size_t                      ptr_idx;
+    unsigned int                varid;
+    char                       *tmp_cptr;
+    short int                  *tmp_siptr;
+    unsigned short int         *tmp_usiptr;
+    int                        *tmp_iptr;
+    float                      *tmp_fptr;
+    double                     *tmp_dptr;
 
     if (out_data_file->file_format == BINARY) {
         n = N_OUTVAR_TYPES * options.Nlayer * options.SNOW_BAND;
@@ -84,7 +84,9 @@ write_data(stream_file_struct *out_data_file,
             // Loop over this variable's elements
             ptr_idx = 0;
             if (out_data_file->type[var_idx] == OUT_TYPE_CHAR) {
-                for (elem_idx = 0; elem_idx < out_metadata[varid].nelem; elem_idx++) {
+                for (elem_idx = 0;
+                     elem_idx < out_metadata[varid].nelem;
+                     elem_idx++) {
                     tmp_cptr[ptr_idx++] =
                         (char) stream->aggdata[var_idx][elem_idx][0];
                 }
@@ -101,29 +103,42 @@ write_data(stream_file_struct *out_data_file,
                        out_data_file->fh);
             }
             else if (out_data_file->type[var_idx] == OUT_TYPE_USINT) {
-                for (elem_idx = 0; elem_idx < out_metadata[varid].nelem; elem_idx++) {
-                    tmp_usiptr[ptr_idx++] = (unsigned short int) stream->aggdata[var_idx][elem_idx][0];
+                for (elem_idx = 0;
+                     elem_idx < out_metadata[varid].nelem;
+                     elem_idx++) {
+                    tmp_usiptr[ptr_idx++] =
+                        (unsigned short int) stream->aggdata[var_idx][elem_idx][
+                            0];
                 }
                 fwrite(tmp_usiptr, sizeof(unsigned short int), ptr_idx,
                        out_data_file->fh);
             }
             else if (out_data_file->type[var_idx] == OUT_TYPE_INT) {
-                for (elem_idx = 0; elem_idx < out_metadata[varid].nelem; elem_idx++) {
-                    tmp_iptr[ptr_idx++] = (int) stream->aggdata[var_idx][elem_idx][0];
+                for (elem_idx = 0;
+                     elem_idx < out_metadata[varid].nelem;
+                     elem_idx++) {
+                    tmp_iptr[ptr_idx++] =
+                        (int) stream->aggdata[var_idx][elem_idx][0];
                 }
                 fwrite(tmp_iptr, sizeof(int), ptr_idx,
                        out_data_file->fh);
             }
             else if (out_data_file->type[var_idx] == OUT_TYPE_FLOAT) {
-                for (elem_idx = 0; elem_idx < out_metadata[varid].nelem; elem_idx++) {
-                    tmp_fptr[ptr_idx++] = (float) stream->aggdata[var_idx][elem_idx][0];
+                for (elem_idx = 0;
+                     elem_idx < out_metadata[varid].nelem;
+                     elem_idx++) {
+                    tmp_fptr[ptr_idx++] =
+                        (float) stream->aggdata[var_idx][elem_idx][0];
                 }
                 fwrite(tmp_fptr, sizeof(float), ptr_idx,
                        out_data_file->fh);
             }
             else if (out_data_file->type[var_idx] == OUT_TYPE_DOUBLE) {
-                for (elem_idx = 0; elem_idx < out_metadata[varid].nelem; elem_idx++) {
-                    tmp_dptr[ptr_idx++] = (double) stream->aggdata[var_idx][elem_idx][0];
+                for (elem_idx = 0;
+                     elem_idx < out_metadata[varid].nelem;
+                     elem_idx++) {
+                    tmp_dptr[ptr_idx++] =
+                        (double) stream->aggdata[var_idx][elem_idx][0];
                 }
                 fwrite(tmp_dptr, sizeof(double), ptr_idx,
                        out_data_file->fh);

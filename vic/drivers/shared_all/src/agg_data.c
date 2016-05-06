@@ -31,19 +31,18 @@
  *****************************************************************************/
 void
 agg_stream_data(stream_struct *stream,
-                double       **out_data) {
-
+                double       **out_data)
+{
     extern out_metadata_struct *out_metadata;
 
-    size_t       i;
-    size_t       j;
-    size_t       nelem;
-    unsigned int varid;
+    size_t                      i;
+    size_t                      j;
+    size_t                      nelem;
+    unsigned int                varid;
 
     stream->counter++;
 
     for (i = 0; i < stream->nvars; i++) {
-
         varid = stream->varid[i];
         nelem = out_metadata[varid].nelem;
 
@@ -71,13 +70,15 @@ agg_stream_data(stream_struct *stream,
         // Maximum over the period
         else if (stream->aggtype[i] == AGG_TYPE_MAX) {
             for (j = 0; j < nelem; j++) {
-                stream->aggdata[i][j][0] += min(stream->aggdata[i][j][0], out_data[i][j]);
+                stream->aggdata[i][j][0] += min(stream->aggdata[i][j][0],
+                                                out_data[i][j]);
             }
         }
         // Minimum over the period
         else if (stream->aggtype[i] == AGG_TYPE_MAX) {
             for (j = 0; j < nelem; j++) {
-                stream->aggdata[i][j][0] += max(stream->aggdata[i][j][0], out_data[i][j]);
+                stream->aggdata[i][j][0] += max(stream->aggdata[i][j][0],
+                                                out_data[i][j]);
             }
         }
         // Average over the period if counter is full

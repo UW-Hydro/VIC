@@ -30,7 +30,8 @@
  * @brief    This subroutine compresses the file "string" using a system call.
  *****************************************************************************/
 void
-compress_files(char string[], short int level)
+compress_files(char      string[],
+               short int level)
 {
     char command[MAXSTRING];
 

@@ -32,10 +32,9 @@
 void
 zero_output_list(double **out_data)
 {
-
     extern out_metadata_struct *out_metadata;
 
-    size_t varid, i;
+    size_t                      varid, i;
 
     for (varid = 0; varid < N_OUTVAR_TYPES; varid++) {
         for (i = 0; i < out_metadata[varid].nelem; i++) {

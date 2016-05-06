@@ -412,22 +412,22 @@ typedef struct {
  * @brief   This structure stores output information for one output file.
  *****************************************************************************/
 typedef struct {
-    char                 prefix[MAXSTRING];   /**< prefix of the file name, e.g. "fluxes" */
-    char                 filename[MAXSTRING]; /**< complete file name */
-    FILE                *fh;                /**< filehandle */
-    unsigned short int   file_format;  /**< output file format */
-    short int            compress; /**< Compress all output files */
-    size_t               output_steps_per_day;  /**< Number of output timesteps per day */
-    double               out_dt;  /**< output timestep in seconds */
-    unsigned short int   skipyear;  /**< Number of years to skip before writing
-                                      output data */
-    unsigned short int  *type;  /**< type, when written to a binary file;
-                                 OUT_TYPE_USINT  = unsigned short int
-                                 OUT_TYPE_SINT   = short int
-                                 OUT_TYPE_FLOAT  = single precision floating point
-                                 OUT_TYPE_DOUBLE = double precision floating point */
-    double              *mult;  /**< multiplier, when written to a binary file [shape=(nvars, )] */
-    char               **format;  /**< format, when written to disk [shape=(nvars, )] */
+    char prefix[MAXSTRING];                   /**< prefix of the file name, e.g. "fluxes" */
+    char filename[MAXSTRING];                 /**< complete file name */
+    FILE *fh;                               /**< filehandle */
+    unsigned short int file_format;    /**< output file format */
+    short int compress;            /**< Compress all output files */
+    size_t output_steps_per_day;                /**< Number of output timesteps per day */
+    double out_dt;                /**< output timestep in seconds */
+    unsigned short int skipyear;    /**< Number of years to skip before writing
+                                       output data */
+    unsigned short int *type;   /**< type, when written to a binary file;
+                                   OUT_TYPE_USINT  = unsigned short int
+                                   OUT_TYPE_SINT   = short int
+                                   OUT_TYPE_FLOAT  = single precision floating point
+                                   OUT_TYPE_DOUBLE = double precision floating point */
+    double *mult;               /**< multiplier, when written to a binary file [shape=(nvars, )] */
+    char **format;                /**< format, when written to disk [shape=(nvars, )] */
 } stream_file_struct;
 
 /******************************************************************************
@@ -441,8 +441,8 @@ typedef struct {
                                     (a variable's id number is its index in the out_data array).
                                     The order of the id numbers in the varid array
                                     is the order in which the variables will be written. */
-    unsigned short int  *aggtype;  /**< type of aggregation to use [shape=(nvars, )] */
-    double            ***aggdata;  /**< array of aggregated data values [shape=(nvars, nelem, nsteps)] */
+    unsigned short int *aggtype;   /**< type of aggregation to use [shape=(nvars, )] */
+    double ***aggdata;             /**< array of aggregated data values [shape=(nvars, nelem, nsteps)] */
 } stream_struct;
 
 /******************************************************************************
@@ -535,8 +535,8 @@ void generate_default_state(all_vars_struct *, soil_con_struct *,
 void generate_default_lake_state(all_vars_struct *, soil_con_struct *,
                                  lake_con_struct);
 void get_parameters(FILE *paramfile);
-void init_output_list(double **out_data, int write, char *format,
-                      int type, double mult);
+void init_output_list(double **out_data, int write, char *format, int type,
+                      double mult);
 void initialize_energy(energy_bal_struct **energy, size_t nveg);
 void initialize_filenames(void);
 void initialize_fileps(void);

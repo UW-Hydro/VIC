@@ -38,24 +38,23 @@ write_header(stream_file_struct **out_data_files,
     extern global_param_struct  global_param;
     extern out_metadata_struct *out_metadata;
 
-    size_t               stream_idx;
-    size_t               var_idx;
-    unsigned             elem_idx;
-    size_t               i;
-    unsigned int         varid;
-    unsigned short int   Identifier;
-    unsigned short int   Nbytes;
-    unsigned short int   Nbytes1;
-    unsigned short int   Nbytes2;
-    size_t               nvars;
-    char                 tmp_len;
-    char                *tmp_str;
-    char                 tmp_type;
-    float                tmp_mult;
+    size_t                      stream_idx;
+    size_t                      var_idx;
+    unsigned                    elem_idx;
+    size_t                      i;
+    unsigned int                varid;
+    unsigned short int          Identifier;
+    unsigned short int          Nbytes;
+    unsigned short int          Nbytes1;
+    unsigned short int          Nbytes2;
+    size_t                      nvars;
+    char                        tmp_len;
+    char                       *tmp_str;
+    char                        tmp_type;
+    float                       tmp_mult;
 
     // Loop over output files
     for (stream_idx = 0; stream_idx < options.Noutstreams; stream_idx++) {
-
         if (out_data_files[stream_idx]->file_format == BINARY) {
             tmp_str = calloc(BINHEADERSIZE, sizeof(*tmp_str));
 
@@ -127,9 +126,12 @@ write_header(stream_file_struct **out_data_files,
             for (var_idx = 0; var_idx < streams[stream_idx]->nvars; var_idx++) {
                 varid = streams[stream_idx]->varid[var_idx];
                 // Loop over this variable's elements
-                for (elem_idx = 0; elem_idx < out_metadata[varid].nelem; elem_idx++) {
+                for (elem_idx = 0;
+                     elem_idx < out_metadata[varid].nelem;
+                     elem_idx++) {
                     if (out_metadata[varid].nelem > 1) {
-                        sprintf(tmp_str, "%s_%d", out_metadata[varid].varname, elem_idx);
+                        sprintf(tmp_str, "%s_%d", out_metadata[varid].varname,
+                                elem_idx);
                     }
                     else {
                         strcpy(tmp_str,
@@ -171,7 +173,8 @@ write_header(stream_file_struct **out_data_files,
                    out_data_files[stream_idx]->fh);
 
             // start date (year, month, day, sec)
-            fwrite(&(dmy->year), sizeof(int), 1, out_data_files[stream_idx]->fh);
+            fwrite(&(dmy->year), sizeof(int), 1,
+                   out_data_files[stream_idx]->fh);
             fwrite(&(dmy->month), sizeof(unsigned short int), 1,
                    out_data_files[stream_idx]->fh);
             fwrite(&(dmy->day), sizeof(unsigned short int), 1,
@@ -245,7 +248,9 @@ write_header(stream_file_struct **out_data_files,
             for (var_idx = 0; var_idx < streams[stream_idx]->nvars; var_idx++) {
                 varid = streams[stream_idx]->varid[var_idx];
                 // Loop over this variable's elements
-                for (elem_idx = 0; elem_idx < out_metadata[varid].nelem; elem_idx++) {
+                for (elem_idx = 0;
+                     elem_idx < out_metadata[varid].nelem;
+                     elem_idx++) {
                     if (out_metadata[varid].nelem > 1) {
                         sprintf(tmp_str, "%s_%d", out_metadata[varid].varname,
                                 elem_idx);
@@ -311,14 +316,17 @@ write_header(stream_file_struct **out_data_files,
             for (var_idx = 0; var_idx < streams[stream_idx]->nvars; var_idx++) {
                 varid = streams[stream_idx]->varid[var_idx];
                 // Loop over this variable's elements
-                for (elem_idx = 0; elem_idx < out_metadata[varid].nelem; elem_idx++) {
+                for (elem_idx = 0;
+                     elem_idx < out_metadata[varid].nelem;
+                     elem_idx++) {
                     if (!(var_idx == 0 && elem_idx == 0)) {
                         fprintf(out_data_files[stream_idx]->fh, "\t ");
                     }
                     fprintf(out_data_files[stream_idx]->fh, "%s",
                             out_metadata[varid].varname);
                     if (out_metadata[varid].nelem > 1) {
-                        fprintf(out_data_files[stream_idx]->fh, "_%d", elem_idx);
+                        fprintf(out_data_files[stream_idx]->fh, "_%d",
+                                elem_idx);
                     }
                 }
             }

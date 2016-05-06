@@ -794,11 +794,14 @@ get_global_param(FILE *gp)
             }
             else if (strcasecmp("PRT_HEADER", optstr) == 0) {
                 log_err("PRT_HEADER has been deprecated. All output files "
-                        "include a header including pertinent metadata.");            }
+                        "include a header including pertinent metadata.");
+            }
             else if (strcasecmp("PRT_SNOW_BAND", optstr) == 0) {
                 log_err("PRT_SNOW_BAND has been deprecated. To output band "
                         "specific variables, directly specify them in the "
-                        "global parameter file");         }
+                        "global parameter file");
+            }
+
             /***********************************
                Unrecognized Global Parameter Flag
             ***********************************/

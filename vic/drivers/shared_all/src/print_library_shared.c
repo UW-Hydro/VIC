@@ -545,8 +545,8 @@ print_option(option_struct *option)
  * @brief    Print out data structure.
  *****************************************************************************/
 void
-print_out_data(double              **out_data,
-               out_metadata_struct  *metadata)
+print_out_data(double             **out_data,
+               out_metadata_struct *metadata)
 {
     size_t i;
     size_t j;
@@ -573,7 +573,6 @@ print_stream_file(stream_file_struct  *sf,
                   stream_struct       *stream,
                   out_metadata_struct *metadata)
 {
-
     size_t       i;
     unsigned int varid;
 

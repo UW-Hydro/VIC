@@ -31,27 +31,27 @@
  * @brief    Get output info from global parameter file.
  *****************************************************************************/
 void
-parse_output_info(FILE               *gp,
+parse_output_info(FILE                *gp,
                   stream_struct      **output_streams,
                   stream_file_struct **out_data_files)
 {
     extern option_struct       options;
     extern global_param_struct global_param;
 
-    char                 cmdstr[MAXSTRING];
-    char                 optstr[MAXSTRING];
-    char                 flgstr[MAXSTRING];
-    short int            streamnum;
-    char                 varname[MAXSTRING];
-    int                  outvarnum;
-    char                 format[MAXSTRING];
-    char                 typestr[MAXSTRING];
-    int                  type;
-    char                 multstr[MAXSTRING];
-    double               mult;
-    size_t               nstreams;
-    size_t               nvars;
-    unsigned int         nextagg;
+    char                       cmdstr[MAXSTRING];
+    char                       optstr[MAXSTRING];
+    char                       flgstr[MAXSTRING];
+    short int                  streamnum;
+    char                       varname[MAXSTRING];
+    int                        outvarnum;
+    char                       format[MAXSTRING];
+    char                       typestr[MAXSTRING];
+    int                        type;
+    char                       multstr[MAXSTRING];
+    double                     mult;
+    size_t                     nstreams;
+    size_t                     nvars;
+    unsigned int               nextagg;
 
     strcpy(format, "*");
 
@@ -106,25 +106,26 @@ parse_output_info(FILE               *gp,
                     outvarnum = 0;
                 }
                 else if (strcasecmp("OUTPUT_STEPS_PER_DAY", optstr) == 0) {
-                    sscanf(cmdstr, "%*s %zu", &out_data_files[streamnum]->output_steps_per_day);
+                    sscanf(cmdstr, "%*s %zu",
+                           &out_data_files[streamnum]->output_steps_per_day);
 
                     // nextagg = ;
-
                 }
                 else if (strcasecmp("SKIPYEAR", optstr) == 0) {
-                    sscanf(cmdstr, "%*s %hu", &out_data_files[streamnum]->skipyear);
+                    sscanf(cmdstr, "%*s %hu",
+                           &out_data_files[streamnum]->skipyear);
                     // skiprec = 0;
                     // for ( i = 0; i < &out_data_files[streamnum]->skipyear; i++ ) {
-                    //   if(LEAPYR(temp[skiprec].year)) skiprec += 366 * 24 / global->dt;
-                    //   else skiprec += 365 * 24 / global->dt;
+                    // if(LEAPYR(temp[skiprec].year)) skiprec += 366 * 24 / global->dt;
+                    // else skiprec += 365 * 24 / global->dt;
                     // }
                     // &out_data_files[streamnum]->skipyear = skiprec;
                 }
-
                 else if (strcasecmp("COMPRESS", optstr) == 0) {
                     sscanf(cmdstr, "%*s %s", flgstr);
                     if (strcasecmp("TRUE", flgstr) == 0) {
-                        out_data_files[streamnum]->compress = DEFAULT_COMPRESSION_LVL;
+                        out_data_files[streamnum]->compress =
+                            DEFAULT_COMPRESSION_LVL;
                     }
                     else if (strcasecmp("FALSE", flgstr) == 0) {
                         out_data_files[streamnum]->compress = 0;
@@ -133,20 +134,21 @@ parse_output_info(FILE               *gp,
                         out_data_files[streamnum]->compress = atoi(flgstr);
                     }
                 }
-
                 else if (strcasecmp("OUT_FORMAT", optstr) == 0) {
                     sscanf(cmdstr, "%*s %s", flgstr);
                     if (strcasecmp("ASCII", flgstr) == 0) {
-                        out_data_files[streamnum]->file_format = DEFAULT_COMPRESSION_LVL;
+                        out_data_files[streamnum]->file_format =
+                            DEFAULT_COMPRESSION_LVL;
                     }
                     else if (strcasecmp("BINARY", flgstr) == 0) {
                         out_data_files[streamnum]->file_format = 0;
                     }
                     else {
-                        log_err("File format must be ASCII or BINARY [stream=%hu]", streamnum);
+                        log_err(
+                            "File format must be ASCII or BINARY [stream=%hu]",
+                            streamnum);
                     }
                 }
-
                 else if (strcasecmp("OUTVAR", optstr) == 0) {
                     if (streamnum < 0) {
                         log_err("Error in global param file: \"OUTFILE\" must be "

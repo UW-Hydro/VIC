@@ -135,10 +135,10 @@ put_data(all_vars_struct   *all_vars,
     out_data[OUT_PREC][0] = atmos->out_prec;  // mm over grid cell
     out_data[OUT_PRESSURE][0] = atmos->pressure[NR] / PA_PER_KPA;
     out_data[OUT_QAIR][0] = CONST_EPS * atmos->vp[NR] /
-                                 atmos->pressure[NR];
+                            atmos->pressure[NR];
     out_data[OUT_RAINF][0] = atmos->out_rain;   // mm over grid cell
     out_data[OUT_REL_HUMID][0] = FRACT_TO_PERCENT * atmos->vp[NR] /
-                                      (atmos->vp[NR] + atmos->vpd[NR]);
+                                 (atmos->vp[NR] + atmos->vpd[NR]);
     if (options.LAKES && lake_con->Cl[0] > 0) {
         out_data[OUT_LAKE_CHAN_IN][0] = atmos->channel_in[NR];  // mm over grid cell
     }
@@ -334,7 +334,7 @@ put_data(all_vars_struct   *all_vars,
                             out_data[OUT_LAKE_ICE_HEIGHT][0] =
                                 lake_var.hice;
                             out_data[OUT_LAKE_SWE][0] = lake_var.swe /
-                                                             lake_var.areai;  // m over lake ice
+                                                        lake_var.areai;       // m over lake ice
                             out_data[OUT_LAKE_SWE_V][0] = lake_var.swe;  // m3
                         }
                         else {
@@ -345,9 +345,11 @@ put_data(all_vars_struct   *all_vars,
                             out_data[OUT_LAKE_SWE_V][0] = 0.0;
                         }
                         out_data[OUT_LAKE_DSWE_V][0] = lake_var.swe -
-                                                            lake_var.swe_save;  // m3
+                                                       lake_var.swe_save;       // m3
                         // same as OUT_LAKE_MOIST
-                        out_data[OUT_LAKE_DSWE][0] = (lake_var.swe - lake_var.swe_save) * MM_PER_M / soil_con->cell_area;
+                        out_data[OUT_LAKE_DSWE][0] =
+                            (lake_var.swe - lake_var.swe_save) * MM_PER_M /
+                            soil_con->cell_area;
 
                         // Lake dimensions
                         out_data[OUT_LAKE_AREA_FRAC][0] = Cv * Clake;
@@ -363,18 +365,25 @@ put_data(all_vars_struct   *all_vars,
                         }
                         out_data[OUT_LAKE_VOLUME][0] = lake_var.volume;
                         out_data[OUT_LAKE_DSTOR_V][0] = lake_var.volume -
-                                                             lake_var.
-                                                             volume_save;
+                                                        lake_var.
+                                                        volume_save;
                         // mm over gridcell
-                        out_data[OUT_LAKE_DSTOR][0] = (lake_var.volume - lake_var.volume_save) * MM_PER_M / soil_con->cell_area;
+                        out_data[OUT_LAKE_DSTOR][0] =
+                            (lake_var.volume - lake_var.volume_save) *
+                            MM_PER_M /
+                            soil_con->cell_area;
 
                         // Other lake characteristics
                         out_data[OUT_LAKE_SURF_TEMP][0] = lake_var.temp[0];
                         if (out_data[OUT_LAKE_SURF_AREA][0] > 0) {
                             // mm over gridcell
-                            out_data[OUT_LAKE_MOIST][0] = (lake_var.volume / soil_con->cell_area) * MM_PER_M;
+                            out_data[OUT_LAKE_MOIST][0] =
+                                (lake_var.volume / soil_con->cell_area) *
+                                MM_PER_M;
                             // same as OUT_LAKE_MOIST
-                            out_data[OUT_SURFSTOR][0] = (lake_var.volume / soil_con->cell_area) * MM_PER_M;
+                            out_data[OUT_SURFSTOR][0] =
+                                (lake_var.volume / soil_con->cell_area) *
+                                MM_PER_M;
                         }
                         else {
                             out_data[OUT_LAKE_MOIST][0] = 0;
@@ -407,15 +416,15 @@ put_data(all_vars_struct   *all_vars,
                             soil_con->cell_area;  // mm over gridcell
                         // mm over gridcell
                         out_data[OUT_LAKE_EVAP][0] = lake_var.evapw * MM_PER_M /
-                                                          soil_con->cell_area;
+                                                     soil_con->cell_area;
                         // mm over gridcell
                         out_data[OUT_LAKE_RCHRG][0] = lake_var.recharge *
-                                                           MM_PER_M /
-                                                           soil_con->cell_area;
+                                                      MM_PER_M /
+                                                      soil_con->cell_area;
                         // mm over gridcell
                         out_data[OUT_LAKE_RO_IN][0] = lake_var.runoff_in *
-                                                           MM_PER_M /
-                                                           soil_con->cell_area;
+                                                      MM_PER_M /
+                                                      soil_con->cell_area;
                         out_data[OUT_LAKE_VAPFLX][0] =
                             lake_var.vapor_flux * MM_PER_M /
                             soil_con->cell_area;  // mm over gridcell
@@ -480,16 +489,17 @@ put_data(all_vars_struct   *all_vars,
         out_data[OUT_DELSOILMOIST][0] +=
             out_data[OUT_SOIL_MOIST][index];
 
-        out_data[OUT_SMLIQFRAC][index] = out_data[OUT_SOIL_LIQ][index] / out_data[OUT_SOIL_MOIST][index];
+        out_data[OUT_SMLIQFRAC][index] = out_data[OUT_SOIL_LIQ][index] /
+                                         out_data[OUT_SOIL_MOIST][index];
         out_data[OUT_SMFROZFRAC][index] = 1 - out_data[OUT_SMLIQFRAC][index];
     }
     out_data[OUT_DELSOILMOIST][0] -= save_data->total_soil_moist;
     out_data[OUT_DELSWE][0] = out_data[OUT_SWE][0] +
-                                   out_data[OUT_SNOW_CANOPY][0] -
-                                   save_data->swe;
+                              out_data[OUT_SNOW_CANOPY][0] -
+                              save_data->swe;
     out_data[OUT_DELINTERCEPT][0] = out_data[OUT_WDEW][0] - save_data->wdew;
     out_data[OUT_DELSURFSTOR][0] = out_data[OUT_SURFSTOR][0] -
-                                        save_data->surfstor;
+                                   save_data->surfstor;
 
     // Energy terms
     out_data[OUT_REFREEZE][0] =
@@ -554,7 +564,6 @@ put_data(all_vars_struct   *all_vars,
     else {
         out_data[OUT_ENERGY_ERROR][0] = MISSING;
     }
-
 }
 
 /******************************************************************************
@@ -594,29 +603,29 @@ collect_wb_terms(cell_data_struct cell,
         tmp_evap += cell.layer[index].evap;
         if (HasVeg) {
             out_data[OUT_EVAP_BARE][0] += cell.layer[index].evap *
-                                               cell.layer[index].bare_evap_frac
-                                               *
-                                               AreaFactor;
+                                          cell.layer[index].bare_evap_frac
+                                          *
+                                          AreaFactor;
             out_data[OUT_TRANSP_VEG][0] += cell.layer[index].evap *
-                                                (1 -
-                                                 cell.layer[index].
-                                                 bare_evap_frac) * AreaFactor;
+                                           (1 -
+                                            cell.layer[index].
+                                            bare_evap_frac) * AreaFactor;
         }
         else {
             out_data[OUT_EVAP_BARE][0] += cell.layer[index].evap *
-                                               AreaFactor;
+                                          AreaFactor;
         }
     }
     tmp_evap += snow.vapor_flux * MM_PER_M;
     out_data[OUT_SUB_SNOW][0] += snow.vapor_flux * MM_PER_M * AreaFactor;
     out_data[OUT_SUB_SURFACE][0] += snow.surface_flux * MM_PER_M *
-                                         AreaFactor;
+                                    AreaFactor;
     out_data[OUT_SUB_BLOWING][0] += snow.blowing_flux * MM_PER_M *
-                                         AreaFactor;
+                                    AreaFactor;
     if (HasVeg) {
         tmp_evap += snow.canopy_vapor_flux * MM_PER_M;
         out_data[OUT_SUB_CANOP][0] += snow.canopy_vapor_flux * MM_PER_M *
-                                           AreaFactor;
+                                      AreaFactor;
     }
     if (HasVeg) {
         tmp_evap += veg_var.canopyevap;
@@ -685,9 +694,10 @@ collect_wb_terms(cell_data_struct cell,
         out_data[OUT_SOIL_LIQ][index] += tmp_moist * AreaFactor;
         out_data[OUT_SOIL_ICE][index] += tmp_ice * AreaFactor;
 
-        out_data[OUT_SOIL_LIQ][index] = tmp_moist * AreaFactor / depth[index] * MM_PER_M;
-        out_data[OUT_SOIL_ICE][index] = tmp_ice * AreaFactor / depth[index] * MM_PER_M;
-
+        out_data[OUT_SOIL_LIQ][index] = tmp_moist * AreaFactor / depth[index] *
+                                        MM_PER_M;
+        out_data[OUT_SOIL_ICE][index] = tmp_ice * AreaFactor / depth[index] *
+                                        MM_PER_M;
     }
     out_data[OUT_SOIL_WET][0] += cell.wetness * AreaFactor;
     out_data[OUT_ROOTMOIST][0] += cell.rootmoist * AreaFactor;
@@ -721,7 +731,7 @@ collect_wb_terms(cell_data_struct cell,
     /** record canopy intercepted snow **/
     if (HasVeg) {
         out_data[OUT_SNOW_CANOPY][0] += (snow.snow_canopy) * AreaFactor *
-                                             MM_PER_M;
+                                        MM_PER_M;
     }
 
     /** record snowpack melt **/
@@ -736,14 +746,14 @@ collect_wb_terms(cell_data_struct cell,
     if (options.CARBON) {
         out_data[OUT_APAR][0] += veg_var.aPAR * AreaFactor;
         out_data[OUT_GPP][0] += veg_var.GPP * CONST_MWC / MOLE_PER_KMOLE *
-                                     CONST_CDAY *
-                                     AreaFactor;
+                                CONST_CDAY *
+                                AreaFactor;
         out_data[OUT_RAUT][0] += veg_var.Raut * CONST_MWC /
-                                      MOLE_PER_KMOLE * CONST_CDAY *
-                                      AreaFactor;
+                                 MOLE_PER_KMOLE * CONST_CDAY *
+                                 AreaFactor;
         out_data[OUT_NPP][0] += veg_var.NPP * CONST_MWC / MOLE_PER_KMOLE *
-                                     CONST_CDAY *
-                                     AreaFactor;
+                                CONST_CDAY *
+                                AreaFactor;
         out_data[OUT_LITTERFALL][0] += veg_var.Litterfall * AreaFactor;
         out_data[OUT_RHET][0] += cell.RhTot * AreaFactor;
         out_data[OUT_CLITTER][0] += cell.CLitter * AreaFactor;
@@ -790,11 +800,11 @@ collect_eb_terms(energy_bal_struct energy,
         for (index = 0; index < MAX_FRONTS; index++) {
             if (energy.fdepth[index] != MISSING) {
                 out_data[OUT_FDEPTH][index] += energy.fdepth[index] *
-                                                    AreaFactor * CM_PER_M;
+                                               AreaFactor * CM_PER_M;
             }
             if (energy.tdepth[index] != MISSING) {
                 out_data[OUT_TDEPTH][index] += energy.tdepth[index] *
-                                                    AreaFactor * CM_PER_M;
+                                               AreaFactor * CM_PER_M;
             }
         }
     }
@@ -869,7 +879,7 @@ collect_eb_terms(energy_bal_struct energy,
     out_data[OUT_SURFT_FBFLAG][0] += energy.Tsurf_fbflag * AreaFactor;
     for (index = 0; index < options.Nnode; index++) {
         out_data[OUT_SOILT_FBFLAG][index] += energy.T_fbflag[index] *
-                                                  AreaFactor;
+                                             AreaFactor;
     }
     out_data[OUT_SNOWT_FBFLAG][0] += snow.surf_temp_fbflag * AreaFactor;
     out_data[OUT_TFOL_FBFLAG][0] += energy.Tfoliage_fbflag * AreaFactor;
@@ -935,7 +945,7 @@ collect_eb_terms(energy_bal_struct energy,
     /** record refreeze energy **/
     if (snow.snow && overstory) {
         out_data[OUT_RFRZ_ENERGY][0] += energy.canopy_refreeze *
-                                             AreaFactor;
+                                        AreaFactor;
     }
     out_data[OUT_RFRZ_ENERGY][0] += energy.refreeze_energy * AreaFactor;
 
@@ -956,12 +966,12 @@ collect_eb_terms(energy_bal_struct energy,
 
     /** record band snowpack depth **/
     out_data[OUT_SNOW_DEPTH_BAND][band] += snow.depth * Cv * lakefactor *
-                                                CM_PER_M;
+                                           CM_PER_M;
 
     /** record band canopy intercepted snow **/
     if (HasVeg) {
         out_data[OUT_SNOW_CANOPY_BAND][band] += (snow.snow_canopy) * Cv *
-                                                     lakefactor * MM_PER_M;
+                                                lakefactor * MM_PER_M;
     }
 
     /** record band snow melt **/
@@ -975,52 +985,52 @@ collect_eb_terms(energy_bal_struct energy,
 
     /** record band advection **/
     out_data[OUT_ADVECTION_BAND][band] += energy.advection * Cv *
-                                               lakefactor;
+                                          lakefactor;
 
     /** record band snow flux **/
     out_data[OUT_SNOW_FLUX_BAND][band] += energy.snow_flux * Cv *
-                                               lakefactor;
+                                          lakefactor;
 
     /** record band refreeze energy **/
     out_data[OUT_RFRZ_ENERGY_BAND][band] += energy.refreeze_energy * Cv *
-                                                 lakefactor;
+                                            lakefactor;
 
     /** record band melt energy **/
     out_data[OUT_MELT_ENERGY_BAND][band] += energy.melt_energy * Cv *
-                                                 lakefactor;
+                                            lakefactor;
 
     /** record band advected sensble heat **/
     out_data[OUT_ADV_SENS_BAND][band] -= energy.advected_sensible * Cv *
-                                              lakefactor;
+                                         lakefactor;
 
     /** record surface layer temperature **/
     out_data[OUT_SNOW_SURFT_BAND][band] += snow.surf_temp * Cv *
-                                                lakefactor;
+                                           lakefactor;
 
     /** record pack layer temperature **/
     out_data[OUT_SNOW_PACKT_BAND][band] += snow.pack_temp * Cv *
-                                                lakefactor;
+                                           lakefactor;
 
     /** record latent heat of sublimation **/
     out_data[OUT_LATENT_SUB_BAND][band] += energy.latent_sub * Cv *
-                                                lakefactor;
+                                           lakefactor;
 
     /** record band net downwards shortwave radiation **/
     out_data[OUT_SWNET_BAND][band] += energy.NetShortAtmos * Cv *
-                                           lakefactor;
+                                      lakefactor;
 
     /** record band net downwards longwave radiation **/
     out_data[OUT_LWNET_BAND][band] += energy.NetLongAtmos * Cv *
-                                           lakefactor;
+                                      lakefactor;
 
     /** record band albedo **/
     if (snow.snow && overstory) {
         out_data[OUT_ALBEDO_BAND][band] += energy.AlbedoOver * Cv *
-                                                lakefactor;
+                                           lakefactor;
     }
     else {
         out_data[OUT_ALBEDO_BAND][band] += energy.AlbedoUnder * Cv *
-                                                lakefactor;
+                                           lakefactor;
     }
 
     /** record band net latent heat flux **/
@@ -1031,15 +1041,15 @@ collect_eb_terms(energy_bal_struct energy,
 
     /** record band net ground heat flux **/
     out_data[OUT_GRND_FLUX_BAND][band] -= energy.grnd_flux * Cv *
-                                               lakefactor;
+                                          lakefactor;
 }
 
 /******************************************************************************
  * @brief    Initialize the structures used in put_data
  *****************************************************************************/
 void
-initialize_put_data() {
-
+initialize_put_data()
+{
     // TODO: do required initialization here.
 }
 

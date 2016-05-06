@@ -31,12 +31,12 @@
  * @brief    Build files names for input and output of grided data files.
  *****************************************************************************/
 void
-make_in_and_outfiles(filep_struct         *filep,
-                     filenames_struct     *filenames,
-                     soil_con_struct      *soil,
-                     stream_file_struct  **out_data_files,
-                     stream_struct       **streams,
-                     dmy_struct           *dmy)
+make_in_and_outfiles(filep_struct        *filep,
+                     filenames_struct    *filenames,
+                     soil_con_struct     *soil,
+                     stream_file_struct **out_data_files,
+                     stream_struct      **streams,
+                     dmy_struct          *dmy)
 {
     extern option_struct    options;
     extern param_set_struct param_set;
@@ -104,7 +104,6 @@ make_in_and_outfiles(filep_struct         *filep,
         else {
             log_err("Unrecognized OUT_FORMAT option");
         }
-
     }
     /** Write output file headers **/
     write_header(out_data_files, streams, dmy);

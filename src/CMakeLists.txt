@@ -1,13 +1,23 @@
 cmake_minimum_required(VERSION 2.4)
 project(vicNl)
 
-set(VIC_VERSION 4.2)
+set(VIC_VERSION 4.2.b)
 set(SO_VERSION 0.1)
 
 set(CMAKE_C_COMPILER gcc)
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS}  -I. -g -Wall -Wno-unused")
 include_directories( "." )
+
+set(HEADERS
+    global.h
+    LAKE.h
+    mtclim_constants_vic.h
+    mtclim_parameters_vic.h
+    snow.h
+    vicNl.h
+    vicNl_def.h
+    vic.h)
 
 set(SOURCE_FILES
     advected_sensible_heat.c
@@ -144,3 +154,11 @@ TARGET_LINK_LIBRARIES(vic_shared m)
 
 TARGET_LINK_LIBRARIES(vicNl vic_static)
 TARGET_LINK_LIBRARIES(demo vic_shared)
+
+set(LIBS
+        build/libvic.so
+        build/libvic.so.${VIC_VERSION}
+        build/libvic.so.${SO_VERSION})
+set(install_prefix /usr)
+INSTALL(FILES ${HEADERS} DESTINATION ${install_prefix}/include)
+INSTALL(FILES ${LIBS} DESTINATION ${install_prefix}/lib)

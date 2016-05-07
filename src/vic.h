@@ -22,9 +22,15 @@ extern "C"{
 #include <global.h>
 };
 
+#define INFILT 0
+#define DS     1
+#define DS_MAX 2
+#define WS     3
+#define D1     4
+#define D2     5
+#define D3     6
+
 using std::string;
-
-
 
 namespace vic {
     /* **************************************************************
@@ -69,6 +75,10 @@ int run_a_cell(soil_con_struct *soil_con,
                lake_con_struct *lake_con,
                double* out_runoffs);
 
-double _get_runoff(cell_data_struct** cell, soil_con_struct* soil_con, veg_con_struct* veg_con);
+void modify_soil_params(soil_con_struct** soil_params,
+                        int* cellids,
+                        int cellnum,
+                        int param_type,
+                        double value);
 
 #endif //VIC_H

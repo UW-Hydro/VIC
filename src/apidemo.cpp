@@ -1,6 +1,3 @@
-//
-// Created by victi on 16-5-3.
-//
 /*
  * Testing APIs.
  */
@@ -13,7 +10,6 @@ int main(int argc, char** argv){
     extern veg_lib_struct* veg_lib;
 
     string globalpath = "/home/victi/VIClab/testdata/global.v";
-
 
     string soilpath = "/home/victi/VIClab/testdata/soil.v";
     string vegpath = "/home/victi/VIClab/testdata/veg.v";
@@ -43,15 +39,18 @@ int main(int argc, char** argv){
 
     double rs[global_param.nrecs];
 
-    for(int i = 0; i < 8; i++){
-        run_a_cell(soilps[i], vegps[i], &lake_con, rs);
-        for(int d = 0; d < 10; d++)cout<<rs[d]<<endl;
-        cout<<endl;
-    }
+    run_a_cell(soilps[6], vegps[6], &lake_con, rs);
+    for(int d = 0; d < 10; d++)cout<<rs[d]<<endl;
+    cout<<endl;
 
+    int basin0[] = {0, 5, 6, 12, 13};
+    modify_soil_params(soilps, basin0, 5, D2, 0.15);
+
+    run_a_cell(soilps[6], vegps[6], &lake_con, rs);
+    for(int d = 0; d < 10; d++)cout<<rs[d]<<endl;
+    cout<<endl;
 
     destroy_veg_param(vegps, ncell);
-
     destroy_soil_param(soilps, ncell);
 
     cout<<"done\n";

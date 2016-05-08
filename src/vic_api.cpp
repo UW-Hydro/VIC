@@ -2,7 +2,7 @@
 #include <cstring>
 
 #include <vic.h>
-#include "vicNl_def.h"
+#include <global.h>
 
 using namespace std;
 using namespace vic;
@@ -25,8 +25,7 @@ void _close_in_files(filep_struct *filep, filenames_struct *fnames);
  * Read in all soil parameter data and create data series.
  * 读入所有土壤参数并生成序列。
  *
- * **************************************************************
- */
+ * **************************************************************/
 int get_veg_param(veg_con_struct ** veg_params, int Nveg_type, soil_con_struct ** soil_params, int ncell, string veg_path) {
 
     if(!_veglib_gotten || !_soil_gotten) return ERROR;
@@ -58,8 +57,7 @@ int get_veg_param(veg_con_struct ** veg_params, int Nveg_type, soil_con_struct *
  * Read in all vegetation parameter data and create data series.
  * 读入所有植被覆盖参数并生成序列。
  *
- * **************************************************************
- */
+ * **************************************************************/
 int get_soil_params(soil_con_struct **soil_params, int ncell, string soil_path){
 
     if(!_veglib_gotten) return ERROR;
@@ -99,8 +97,7 @@ int get_soil_params(soil_con_struct **soil_params, int ncell, string soil_path){
  * Destroy soil parameter data series.
  * 删除土壤参数数据序列。
  *
- * **************************************************************
- */
+ * **************************************************************/
 void destroy_soil_param(soil_con_struct **soil_params, int ncell){
     if(!_soil_gotten) return;
     for(int i = 0; i < ncell; i++){
@@ -123,8 +120,7 @@ void destroy_soil_param(soil_con_struct **soil_params, int ncell){
  * Destroy vegetation parameter data series.
  * 删除植被覆盖数据序列。
  *
- * **************************************************************
- */
+ * **************************************************************/
 void destroy_veg_param(veg_con_struct **veg_params, int ncell){
     if(!_vegparam_gotten) return;
 
@@ -151,8 +147,7 @@ void destroy_veg_param(veg_con_struct **veg_params, int ncell){
  * Get veg library data.
  * 获取植被库数据。
  *
- * **************************************************************
- */
+ * **************************************************************/
 int get_veg_lib(string veglib_path){
     if(_n_global_inited){
         cout<<"Error: Global did not initiated.\n";
@@ -181,8 +176,7 @@ int get_veg_lib(string veglib_path){
  * Get global parameters and initiate.
  * 获取全局参数并初步初始化。
  *
- * **************************************************************
- */
+ * **************************************************************/
 int get_global(string global_path){
     extern global_param_struct global_param;
 
@@ -221,8 +215,7 @@ int get_global(string global_path){
  * Run at a single cell.
  * 在单个网格上运行。
  *
- * **************************************************************
- */
+ * **************************************************************/
 int run_a_cell(soil_con_struct* soil_con,
                veg_con_struct* veg_con,
                lake_con_struct* lake_con, double* out_runoffs) {
@@ -317,50 +310,6 @@ int run_a_cell(soil_con_struct* soil_con,
 
 /* **************************************************************
  *
- * 2016-05-06 Zhong Ruida
- *
- * Get runoff value from each time step without other output data
- * replacing function put_data.
- * 在每个时间步只获取产流量数据。用于取代put_data。
- *
- * (Situation with Lake/Wetland Parameter File input is not supported
- * at preasent.)
- * (目前尚不支持带有湖泊/湿地参数输入的情况。)
- *
- * **************************************************************
- */
-double _get_runoff(cell_data_struct** cell,
-                   soil_con_struct* soil_con,
-                   veg_con_struct* veg_con) {
-
-    double Cv;
-    double treeAdj;
-    double areaFract;
-    double runoff = 0.0;
-
-    int Nbands = options.SNOW_BAND;
-    int Nvegs = veg_con[0].vegetat_type_num;
-
-    for(int band = 0; band < Nbands; band++){
-        areaFract = soil_con->AreaFract[band];
-        if(!soil_con->AboveTreeLine[band]) treeAdj = 1.0;
-        else{
-            Cv = 0;
-            for(int veg = 0; veg < Nvegs; veg++)
-                if(veg_lib[veg_con[veg].veg_class].overstory ) Cv += veg_con[veg].Cv;
-            treeAdj = Cv / (1.0 - Cv);
-        }
-        for(int veg = 0; veg <= Nvegs; veg++){
-            Cv = veg_con[veg].Cv;
-            double i_runoff = cell[veg][band].baseflow + cell[veg][band].runoff;
-            runoff += i_runoff * Cv * areaFract * treeAdj;
-        }
-    }
-    return runoff;
-}
-
-/* **************************************************************
- *
  * 2016-05-07 Zhong Ruida
  *
  * Modify soil parameters to be calibrated, including INFILT, DS,
@@ -415,6 +364,19 @@ void modify_soil_params(soil_con_struct** soil_params,
         return;
     }
 }
+/* **************************************************************
+ *
+ * 2016-05-08 Zhong Ruida
+ *
+ * Get length of time steps.
+ * 获取时间步数。
+ *
+ * **************************************************************
+ */
+int get_timesteps(){
+    extern global_param_struct global_param;
+    return global_param.nrecs;
+}
 
 /***************************************************************
  *
@@ -425,6 +387,52 @@ void modify_soil_params(soil_con_struct** soil_params,
 
 /* **************************************************************
  *
+ * 2016-05-06 Zhong Ruida
+ *
+ * Get runoff value from each time step without other output data
+ * replacing function put_data.
+ * 在每个时间步只获取产流量数据。用于取代put_data。
+ *
+ * (Situation with Lake/Wetland Parameter File input is not supported
+ * at preasent.)
+ * (目前尚不支持带有湖泊/湿地参数输入的情况。)
+ *
+ * **************************************************************/
+double _get_runoff(cell_data_struct** cell,
+                   soil_con_struct* soil_con,
+                   veg_con_struct* veg_con) {
+    extern option_struct options;
+    extern veg_lib_struct* veg_lib;
+
+    double Cv;
+    double treeAdj;
+    double areaFract;
+    double runoff = 0.0;
+
+    int Nbands = options.SNOW_BAND;
+    int Nvegs = veg_con[0].vegetat_type_num;
+
+    for(int band = 0; band < Nbands; band++){
+        areaFract = soil_con->AreaFract[band];
+        if(!soil_con->AboveTreeLine[band]) treeAdj = 1.0;
+        else{
+            Cv = 0;
+            for(int veg = 0; veg < Nvegs; veg++)
+                if(veg_lib[veg_con[veg].veg_class].overstory ) Cv += veg_con[veg].Cv;
+            treeAdj = Cv / (1.0 - Cv);
+        }
+        for(int veg = 0; veg <= Nvegs; veg++){
+            Cv = veg_con[veg].Cv;
+            double i_runoff = cell[veg][band].baseflow + cell[veg][band].runoff;
+            runoff += i_runoff * Cv * areaFract * treeAdj;
+        }
+    }
+    return runoff;
+}
+
+
+/* **************************************************************
+ *
  * 2016-05-07 Zhong Ruida
  *
  * Builds the files names for input and output of grided data files and open.
@@ -432,8 +440,7 @@ void modify_soil_params(soil_con_struct** soil_params,
  *
  * (Code copied from make_in_and_outfile)
  *
- * **************************************************************
- */
+ * **************************************************************/
 void _make_in_files(filep_struct *filep,
                     filenames_struct *filenames,
                     soil_con_struct *soil)
@@ -482,8 +489,7 @@ void _make_in_files(filep_struct *filep,
  *
  * (Code copied from close_files)
  *
- * **************************************************************
- */
+ * **************************************************************/
 void _close_in_files(filep_struct *filep,
                      filenames_struct *fnames) {
     extern option_struct options;

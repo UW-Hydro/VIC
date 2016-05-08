@@ -159,6 +159,7 @@ set(LIBS
         build/libvic.so
         build/libvic.so.${VIC_VERSION}
         build/libvic.so.${SO_VERSION})
+
 set(install_prefix /usr)
 INSTALL(FILES ${HEADERS} DESTINATION ${install_prefix}/include)
 INSTALL(FILES ${LIBS} DESTINATION ${install_prefix}/lib)

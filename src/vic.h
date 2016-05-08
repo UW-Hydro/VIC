@@ -1,6 +1,3 @@
-//
-// Created by sibada on 16-5-2.
-//
 /**********************************************************************
 
   Define VIC APIs for C++.
@@ -14,13 +11,12 @@
 
 #include <string>
 
-extern "C"{
-#include <cstdio>
-#include <string>
+#include <stdio.h>
+#include <string.h>
+
+extern "C" {
 #include <vicNl.h>
-#include <vicNl_def.h>
-#include <global.h>
-};
+}
 
 #define INFILT 0
 #define DS     1
@@ -80,5 +76,7 @@ void modify_soil_params(soil_con_struct** soil_params,
                         int cellnum,
                         int param_type,
                         double value);
+
+int get_timesteps();
 
 #endif //VIC_H

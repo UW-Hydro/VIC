@@ -1333,7 +1333,7 @@ setup_stream(stream_struct      *stream,
              size_t              nvars,
              unsigned int        nextagg)
 {
-    // size_t i;
+    size_t i;
 
     stream->nvars = nvars;
     stream->nextagg = nextagg;
@@ -1342,7 +1342,6 @@ setup_stream(stream_struct      *stream,
     stream_file->file_format = UNSET_FILE_FORMAT;
     stream_file->compress = false;
     stream_file->output_steps_per_day = 1;
-    stream_file->output_steps_per_day = 0;
 
     // Allocate stream members of shape [nvars]
     stream->varid = calloc(nvars, sizeof(*(stream->varid)));
@@ -1351,10 +1350,6 @@ setup_stream(stream_struct      *stream,
     }
     stream->aggtype = calloc(nvars, sizeof(*(stream->aggtype)));
     if (stream->aggtype == NULL) {
-        log_err("Memory allocation error in setup_stream().");
-    }
-    stream->aggdata = calloc(nvars, sizeof(*(stream->aggdata)));
-    if (stream->aggdata == NULL) {
         log_err("Memory allocation error in setup_stream().");
     }
 
@@ -1367,18 +1362,54 @@ setup_stream(stream_struct      *stream,
     if (stream_file->mult == NULL) {
         log_err("Memory allocation error in setup_stream_file().");
     }
-    // // Question: do we have to dynamically allocate the length of each string
-    // stream_file->format = calloc(nvars, sizeof(*(stream_file->format)));
-    // if (stream_file->format == NULL) {
-    //     log_err("Memory allocation error in setup_stream().");
-    // }
-    // for (i = 0; i < nvars; i++) {
-    //     stream_file->format[i] =
-    //         calloc(MAXSTRING, sizeof(*(stream_file->format[i])));
-    //     if (stream_file->format[i] == NULL) {
-    //         log_err("Memory allocation error in setup_stream().");
-    //     }
-    // }
+    // Question: do we have to dynamically allocate the length of each string
+     stream_file->format = calloc(nvars, sizeof(*(stream_file->format)));
+     if (stream_file->format == NULL) {
+         log_err("Memory allocation error in setup_stream().");
+     }
+     for (i = 0; i < nvars; i++) {
+         stream_file->format[i] =
+             calloc(MAXSTRING, sizeof(*(stream_file->format[i])));
+         if (stream_file->format[i] == NULL) {
+             log_err("Memory allocation error in setup_stream().");
+         }
+     }
+}
+
+
+/******************************************************************************
+ * @brief   This routine resets an output stream
+ *****************************************************************************/
+void
+alloc_aggdata(stream_struct *stream)
+{
+    extern out_metadata_struct out_metadata[N_OUTVAR_TYPES];
+
+    size_t i;
+    size_t j;
+    unsigned int varid;
+
+    debug("Allocating stream aggdata for %zu vars", stream->nvars);
+
+    stream->aggdata = calloc(stream->nvars, sizeof(*(stream->aggdata)));
+    if (stream->aggdata == NULL) {
+        log_err("Memory allocation error in setup_stream().");
+    }
+    for (i = 0; i < stream->nvars; i++) {
+        varid = stream->varid[i];
+        stream->aggdata[i] = calloc(out_metadata[varid].nelem,
+                                    sizeof(*(stream->aggdata[i])));
+        if (stream->aggdata[i] == NULL) {
+            log_err("Memory allocation error in setup_stream().");
+        }
+        for (j = 0; j < out_metadata[varid].nelem; j++) {
+            // TODO: Also allocate for nbins
+            stream->aggdata[i][j] = calloc(1, sizeof(*(stream->aggdata[i][j])));
+            if (stream->aggdata[i][j] == NULL) {
+                log_err("Memory allocation error in setup_stream().");
+            }
+        }
+    }
 }
 
 /******************************************************************************
@@ -1535,12 +1566,12 @@ set_output_var(stream_struct      *stream,
     }
 
     // Set stream_file_struct members
-    // if (strcmp(format, "*") != 0) {
-    //     strcpy(out_data_file->format[varnum], format);
-    // }
-    // else {
-    //     strcpy(out_data_file->format[varnum], "%.4f");
-    // }
+     if (strcmp(format, "*") != 0) {
+         strcpy(out_data_file->format[varnum], format);
+     }
+     else {
+         strcpy(out_data_file->format[varnum], "%.4f");
+     }
     if (type != 0) {
         out_data_file->type[varnum] = type;
     }
@@ -1572,30 +1603,42 @@ free_out_data_files(stream_file_struct **out_data_files)
 
     // free output
     for (i = 0; i < options.Noutstreams; i++) {
-        free((char*) out_data_files[i]->type);
-        free((char*) out_data_files[i]->mult);
-        free((char*) out_data_files[i]->format);
+        free((char*) (*out_data_files)[i].type);
+        free((char*) (*out_data_files)[i].mult);
+        free((char*) (*out_data_files)[i].format);
     }
-    free((char*) out_data_files);
+    free((char*) *out_data_files);
 }
 
 /******************************************************************************
  * @brief    This routine frees the memory in the streams array.
  *****************************************************************************/
 void
-free_out_data_streams(stream_struct **streams)
+free_out_data_streams(stream_struct      **streams)
 {
-    extern option_struct options;
-    size_t               i;
+    extern option_struct       options;
+    extern out_metadata_struct out_metadata[N_OUTVAR_TYPES];
+
+    size_t streamnum;
+    size_t i;
+    size_t j;
+    size_t varid;
 
     // free output
-    for (i = 0; i < options.Noutstreams; i++) {
-        free((char*) streams[i]->varid);
-        free((char*) streams[i]->aggtype);
-        // TODO: Free all 3 dimensions
-        free((char*) streams[i]->aggdata);
+    for (streamnum = 0; streamnum < options.Noutstreams; streamnum++) {
+        // Free aggdata first
+        for (i = 0; i < (*streams)[streamnum].nvars; i++) {
+            varid = (*streams)[streamnum].varid[i];
+            for (j = 0; j < out_metadata[varid].nelem; j++) {
+                free((char*) (*streams)[streamnum].aggdata[i][j]);
+            }
+            free((char*) (*streams)[streamnum].aggdata[i]);
+        }
+        free((char*) (*streams)[streamnum].aggdata);
+        free((char*) (*streams)[streamnum].varid);
+        free((char*) (*streams)[streamnum].aggtype);
     }
-    free((char*) streams);
+    free((char*) *streams);
 }
 
 /******************************************************************************
@@ -1616,64 +1659,57 @@ free_out_data(double **out_data)
         free(out_data[varid]);
     }
 
-    free((char*) (*out_data));
+    free((char*) out_data);
 }
 
 /******************************************************************************
  * @brief    Validate the streams settings.
  *****************************************************************************/
 void
-validate_stream_settings(stream_file_struct **out_data_file)
+validate_stream_settings(stream_file_struct *out_data_file)
 {
     extern global_param_struct global_param;
     extern option_struct       options;
 
-    size_t                     i;
-
-    for (i = 0; i < options.Noutstreams; i++) {
-        // Validate the output step
-        if (out_data_file[i]->output_steps_per_day == 0) {
-            out_data_file[i]->output_steps_per_day =
-                global_param.model_steps_per_day;
-        }
-        if (out_data_file[i]->output_steps_per_day >
-            global_param.model_steps_per_day) {
-            log_err("[stream=%zu] Invalid value for OUTPUT_STEPS_PER_DAY (%zu). "
-                    "OUTPUT_STEPS_PER_DAY must be <= MODEL_STEPS_PER_DAY (%zu)",
-                    i, out_data_file[i]->output_steps_per_day,
-                    global_param.model_steps_per_day);
-        }
-        else if (global_param.model_steps_per_day %
-                 out_data_file[i]->output_steps_per_day != 0) {
-            log_err("[stream=%zu] Invalid value for OUTPUT_STEPS_PER_DAY (%zu). "
-                    "MODEL_STEPS_PER_DAY (%zu) must be a multiple of "
-                    "OUTPUT_STEPS_PER_DAY.", i,
-                    out_data_file[i]->output_steps_per_day,
-                    global_param.model_steps_per_day);
-        }
-        else if (out_data_file[i]->output_steps_per_day != 1 &&
-                 out_data_file[i]->output_steps_per_day <
-                 MIN_SUBDAILY_STEPS_PER_DAY) {
-            log_err("[stream=%zu] The specified number of output steps per day "
-                    "(%zu) > 1 and < the minimum number of subdaily steps per "
-                    "day (%d). Make sure that the global file defines "
-                    "OUTPUT_STEPS_PER_DAY of at least (%d).", i,
-                    global_param.model_steps_per_day,
-                    MIN_SUBDAILY_STEPS_PER_DAY, MIN_SUBDAILY_STEPS_PER_DAY);
-        }
-        else if (out_data_file[i]->output_steps_per_day >
-                 MAX_SUBDAILY_STEPS_PER_DAY) {
-            log_err("[stream=%zu] The specified number of model steps per day "
-                    "(%zu) > the the maximum number of subdaily steps per day "
-                    "(%d). Make sure that the global file defines "
-                    "MODEL_STEPS_PER_DAY of at most (%d).", i,
-                    global_param.model_steps_per_day,
-                    MAX_SUBDAILY_STEPS_PER_DAY, MAX_SUBDAILY_STEPS_PER_DAY);
-        }
-        else {
-            out_data_file[i]->out_dt = SEC_PER_DAY /
-                                       (double) out_data_file[i]->
-                                       output_steps_per_day;
-        }
+    // Validate the output step
+    if (out_data_file->output_steps_per_day == 0) {
+        out_data_file->output_steps_per_day = global_param.model_steps_per_day;
+    }
+    if (out_data_file->output_steps_per_day > global_param.model_steps_per_day) {
+        log_err("Invalid value for OUTPUT_STEPS_PER_DAY (%zu). "
+                "OUTPUT_STEPS_PER_DAY must be <= MODEL_STEPS_PER_DAY (%zu)",
+                out_data_file->output_steps_per_day,
+                global_param.model_steps_per_day);
+    }
+    else if (global_param.model_steps_per_day %
+             out_data_file->output_steps_per_day != 0) {
+        log_err("Invalid value for OUTPUT_STEPS_PER_DAY (%zu). "
+                "MODEL_STEPS_PER_DAY (%zu) must be a multiple of "
+                "OUTPUT_STEPS_PER_DAY.",
+                out_data_file->output_steps_per_day,
+                global_param.model_steps_per_day);
+    }
+    else if (out_data_file->output_steps_per_day != 1 &&
+             out_data_file->output_steps_per_day <
+             MIN_SUBDAILY_STEPS_PER_DAY) {
+        log_err("The specified number of output steps per day "
+                "(%zu) > 1 and < the minimum number of subdaily steps per "
+                "day (%d). Make sure that the global file defines "
+                "OUTPUT_STEPS_PER_DAY of at least (%d).",
+                global_param.model_steps_per_day,
+                MIN_SUBDAILY_STEPS_PER_DAY, MIN_SUBDAILY_STEPS_PER_DAY);
+    }
+    else if (out_data_file->output_steps_per_day >
+             MAX_SUBDAILY_STEPS_PER_DAY) {
+        log_err("The specified number of model steps per day "
+                "(%zu) > the the maximum number of subdaily steps per day "
+                "(%d). Make sure that the global file defines "
+                "MODEL_STEPS_PER_DAY of at most (%d).",
+                global_param.model_steps_per_day,
+                MAX_SUBDAILY_STEPS_PER_DAY, MAX_SUBDAILY_STEPS_PER_DAY);
+    }
+    else {
+        out_data_file->out_dt = SEC_PER_DAY /
+                                   (double) out_data_file->output_steps_per_day;
     }
 }

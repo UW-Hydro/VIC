@@ -36,7 +36,7 @@ write_data(stream_file_struct *out_data_file,
            double              dt)
 {
     extern option_struct        options;
-    extern out_metadata_struct *out_metadata;
+    extern out_metadata_struct  out_metadata[N_OUTVAR_TYPES];
 
     size_t                      n;
     size_t                      var_idx;
@@ -172,10 +172,7 @@ write_data(stream_file_struct *out_data_file,
         for (var_idx = 0; var_idx < stream->nvars; var_idx++) {
             varid = stream->varid[var_idx];
             // Loop over this variable's elements
-            for (elem_idx = 0;
-                 elem_idx <
-                 out_metadata[varid].nelem;
-                 elem_idx++) {
+            for (elem_idx = 0; elem_idx < out_metadata[varid].nelem; elem_idx++) {
                 if (!(var_idx == 0 && elem_idx == 0)) {
                     fprintf(out_data_file->fh, "\t ");
                 }

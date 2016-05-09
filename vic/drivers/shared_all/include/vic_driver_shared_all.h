@@ -490,6 +490,7 @@ double air_density(double t, double p);
 void agg_stream_data(stream_struct *stream, double **out_data);
 double all_30_day_from_dmy(dmy_struct *dmy);
 double all_leap_from_dmy(dmy_struct *dmy);
+void alloc_aggdata(stream_struct *stream);
 double average(double *ar, size_t n);
 double calc_energy_balance_error(double, double, double, double, double);
 void calc_root_fractions(veg_con_struct *veg_con, soil_con_struct *soil_con);
@@ -610,12 +611,12 @@ void setup_stream(stream_struct *stream, stream_file_struct *stream_file,
                   size_t nvars, unsigned int nextagg);
 void soil_moisture_from_water_table(soil_con_struct *soil_con, size_t nlayers);
 void sprint_dmy(char *str, dmy_struct *dmy);
-bool strtotrueorfalse(char str[]);
+bool str_to_bool(char str[]);
 unsigned short int timeunits_from_chars(char *units_chars);
 int update_step_vars(all_vars_struct *, veg_con_struct *, veg_hist_struct *);
 int invalid_date(unsigned short int calendar, dmy_struct *dmy);
 void validate_parameters(void);
-void validate_stream_settings(stream_file_struct **out_data_file);
+void validate_stream_settings(stream_file_struct *out_data_file);
 char will_it_snow(double *t, double t_offset, double max_snow_temp,
                   double *prcp, size_t n);
 void zero_output_list(double **);

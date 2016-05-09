@@ -201,8 +201,15 @@ parse_output_info(FILE                *gp,
     }
     fclose(gp);
 
-    // Validate the streams
-    validate_stream_settings(out_data_files);
+    for (streamnum = 0; streamnum < options.Noutstreams; streamnum++) {
+
+        // Validate the streams
+        validate_stream_settings(&((*out_data_files)[streamnum]));
+
+        // Allocate memory for the stream aggdata arrays
+        alloc_aggdata(&(*output_streams)[streamnum]);
+    }
+
 }
 
 /******************************************************************************

@@ -97,7 +97,7 @@ read_snowband(FILE            *snowband,
             avg_elev += soil_con->BandElev[band] * soil_con->AreaFract[band];
         }
         if (fabs(avg_elev - soil_con->elevation) > 1.0) {
-            log_warn("average band elevation %f not equal to grid_cell"
+            log_warn("average band elevation %f not equal to grid_cell "
                      "average elevation %f; setting grid cell elevation to "
                      "average band elevation.", avg_elev,
                      soil_con->elevation);

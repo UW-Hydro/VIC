@@ -33,7 +33,7 @@ void
 agg_stream_data(stream_struct *stream,
                 double       **out_data)
 {
-    extern out_metadata_struct *out_metadata;
+    extern out_metadata_struct out_metadata[N_OUTVAR_TYPES];
 
     size_t                      i;
     size_t                      j;
@@ -46,39 +46,41 @@ agg_stream_data(stream_struct *stream,
         varid = stream->varid[i];
         nelem = out_metadata[varid].nelem;
 
+        debug("Agging data for varid %u, with nelem %zu", varid, nelem);
+
         // Instantaneous at the beginning of the period
         if ((stream->aggtype[i] == AGG_TYPE_END) &&
             (stream->counter == stream->nextagg)) {
             for (j = 0; j < nelem; j++) {
-                stream->aggdata[i][j][0] = out_data[i][j];
+                stream->aggdata[i][j][0] = out_data[varid][j];
             }
         }
         // Instantaneous at the end of the period
         else if ((stream->aggtype[i] == AGG_TYPE_BEG) &&
                  (stream->counter == 1)) {
             for (j = 0; j < nelem; j++) {
-                stream->aggdata[i][j][0] = out_data[i][j];
+                stream->aggdata[i][j][0] = out_data[varid][j];
             }
         }
         // Sum over the period
         else if ((stream->aggtype[i] == AGG_TYPE_SUM) ||
                  (stream->aggtype[i] == AGG_TYPE_AVG)) {
             for (j = 0; j < nelem; j++) {
-                stream->aggdata[i][j][0] += out_data[i][j];
+                stream->aggdata[i][j][0] += out_data[varid][j];
             }
         }
         // Maximum over the period
         else if (stream->aggtype[i] == AGG_TYPE_MAX) {
             for (j = 0; j < nelem; j++) {
                 stream->aggdata[i][j][0] += min(stream->aggdata[i][j][0],
-                                                out_data[i][j]);
+                                                out_data[varid][j]);
             }
         }
         // Minimum over the period
         else if (stream->aggtype[i] == AGG_TYPE_MAX) {
             for (j = 0; j < nelem; j++) {
                 stream->aggdata[i][j][0] += max(stream->aggdata[i][j][0],
-                                                out_data[i][j]);
+                                                out_data[varid][j]);
             }
         }
         // Average over the period if counter is full

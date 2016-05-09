@@ -51,10 +51,10 @@ close_files(filep_struct        *filep,
        Close Output Files
     *******************/
     for (filenum = 0; filenum < options.Noutstreams; filenum++) {
-        fclose(out_data_files[filenum]->fh);
-        if (out_data_files[filenum]->compress) {
-            compress_files(out_data_files[filenum]->filename,
-                           out_data_files[filenum]->compress);
+        fclose((*out_data_files)[filenum].fh);
+        if ((*out_data_files)[filenum].compress) {
+            compress_files((*out_data_files)[filenum].filename,
+                           (*out_data_files)[filenum].compress);
         }
     }
 }

@@ -604,7 +604,7 @@ print_out_metadata(out_metadata_struct *metadata)
     fprintf(LOG_DEST, "\tN_OUTVAR_TYPES: %d\n", N_OUTVAR_TYPES);
 
     for (i = 0; i < N_OUTVAR_TYPES; i++) {
-        fprintf(LOG_DEST, "\tvarname: %s\n", metadata[i].varname);
+        fprintf(LOG_DEST, "\t%s (%zu)\n", metadata[i].varname, i);
         fprintf(LOG_DEST, "\t\tlong_name: %s\n", metadata[i].long_name);
         fprintf(LOG_DEST, "\t\tunits: %s\n", metadata[i].units);
         fprintf(LOG_DEST, "\t\tdescription: %s\n", metadata[i].description);

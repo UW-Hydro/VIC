@@ -1,8 +1,7 @@
 /******************************************************************************
  * @section DESCRIPTION
  *
- * This routine reads the VIC model global control file, getting values for
- * global parameters, model options, and debugging controls.
+ * This file includes routines to help parse and process VIC input files.
  *
  * @section LICENSE
  *
@@ -28,7 +27,7 @@
 #include <vic_driver_shared_all.h>
 
 /******************************************************************************
- * @brief
+ * @brief   String to bool conversion
  *****************************************************************************/
 bool
 str_to_bool(char str[]) {

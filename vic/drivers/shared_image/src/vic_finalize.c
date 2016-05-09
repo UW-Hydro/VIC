@@ -51,9 +51,9 @@ vic_finalize(void)
     extern veg_con_struct    **veg_con;
     extern veg_hist_struct   **veg_hist;
     extern veg_lib_struct    **veg_lib;
-    extern MPI_Datatype mpi_nc_file_struct_type;
-    extern MPI_Datatype mpi_option_struct_type;
-    extern MPI_Datatype mpi_param_struct_type;
+    extern MPI_Datatype        mpi_nc_file_struct_type;
+    extern MPI_Datatype        mpi_option_struct_type;
+    extern MPI_Datatype        mpi_param_struct_type;
 
     size_t                     i;
     size_t                     j;
@@ -105,7 +105,6 @@ vic_finalize(void)
     free(out_data);
     free(save_data);
     free(local_domain.locations);
-    free(dmy);
     if (mpi_rank == 0) {
         free(filter_active_cells);
         free(global_domain.locations);

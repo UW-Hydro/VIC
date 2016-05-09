@@ -36,18 +36,18 @@ veg_lib_struct *
 read_veglib(FILE   *veglib,
             size_t *Ntype)
 {
-    extern option_struct     options;
-    extern parameters_struct param;
+    extern option_struct       options;
+    extern parameters_struct   param;
     extern global_param_struct global_param;
 
-    veg_lib_struct          *temp;
-    size_t                   i, j;
-    int                      tmpflag;
-    size_t                   Nveg_type;
-    char                     str[MAXSTRING];
-    double                   maxd;
-    char                     tmpstr[MAXSTRING];
-    double                   tmp_double;
+    veg_lib_struct            *temp;
+    size_t                     i, j;
+    int                        tmpflag;
+    size_t                     Nveg_type;
+    char                       str[MAXSTRING];
+    double                     maxd;
+    char                       tmpstr[MAXSTRING];
+    double                     tmp_double;
 
     rewind(veglib);
     fgets(str, MAXSTRING, veglib);

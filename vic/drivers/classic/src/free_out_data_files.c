@@ -40,4 +40,3 @@ free_out_data_files(out_data_file_struct **out_data_files)
     }
     free((char*) (*out_data_files));
 }
-

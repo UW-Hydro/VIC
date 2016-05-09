@@ -147,7 +147,8 @@ write_model_state(all_vars_struct *all_vars,
                    filep->statefile);
         }
         else {
-            fprintf(filep->statefile, " "ASCII_STATE_FLOAT_FMT, soil_con->dz_node[nidx]);
+            fprintf(filep->statefile, " "ASCII_STATE_FLOAT_FMT,
+                    soil_con->dz_node[nidx]);
         }
     }
     /* Write soil thermal node depths */
@@ -157,7 +158,8 @@ write_model_state(all_vars_struct *all_vars,
                    filep->statefile);
         }
         else {
-            fprintf(filep->statefile, " "ASCII_STATE_FLOAT_FMT, soil_con->Zsum_node[nidx]);
+            fprintf(filep->statefile, " "ASCII_STATE_FLOAT_FMT,
+                    soil_con->Zsum_node[nidx]);
         }
     }
     if (options.STATE_FORMAT == ASCII) {
@@ -197,7 +199,8 @@ write_model_state(all_vars_struct *all_vars,
                         fwrite(&tmpval, sizeof(double), 1, filep->statefile);
                     }
                     else {
-                        fprintf(filep->statefile, " "ASCII_STATE_FLOAT_FMT, tmpval);
+                        fprintf(filep->statefile, " "ASCII_STATE_FLOAT_FMT,
+                                tmpval);
                     }
                 }
             }
@@ -218,14 +221,16 @@ write_model_state(all_vars_struct *all_vars,
                         fwrite(&tmpval, sizeof(double), 1, filep->statefile);
                     }
                     else {
-                        fprintf(filep->statefile, " "ASCII_STATE_FLOAT_FMT, tmpval);
+                        fprintf(filep->statefile, " "ASCII_STATE_FLOAT_FMT,
+                                tmpval);
                     }
                     tmpval = veg_var[veg][band].AnnualNPPPrev;
                     if (options.STATE_FORMAT == BINARY) {
                         fwrite(&tmpval, sizeof(double), 1, filep->statefile);
                     }
                     else {
-                        fprintf(filep->statefile, " "ASCII_STATE_FLOAT_FMT, tmpval);
+                        fprintf(filep->statefile, " "ASCII_STATE_FLOAT_FMT,
+                                tmpval);
                     }
                     /* Write soil carbon storages */
                     tmpval = cell[veg][band].CLitter;
@@ -233,21 +238,24 @@ write_model_state(all_vars_struct *all_vars,
                         fwrite(&tmpval, sizeof(double), 1, filep->statefile);
                     }
                     else {
-                        fprintf(filep->statefile, " "ASCII_STATE_FLOAT_FMT, tmpval);
+                        fprintf(filep->statefile, " "ASCII_STATE_FLOAT_FMT,
+                                tmpval);
                     }
                     tmpval = cell[veg][band].CInter;
                     if (options.STATE_FORMAT == BINARY) {
                         fwrite(&tmpval, sizeof(double), 1, filep->statefile);
                     }
                     else {
-                        fprintf(filep->statefile, " "ASCII_STATE_FLOAT_FMT, tmpval);
+                        fprintf(filep->statefile, " "ASCII_STATE_FLOAT_FMT,
+                                tmpval);
                     }
                     tmpval = cell[veg][band].CSlow;
                     if (options.STATE_FORMAT == BINARY) {
                         fwrite(&tmpval, sizeof(double), 1, filep->statefile);
                     }
                     else {
-                        fprintf(filep->statefile, " "ASCII_STATE_FLOAT_FMT, tmpval);
+                        fprintf(filep->statefile, " "ASCII_STATE_FLOAT_FMT,
+                                tmpval);
                     }
                 }
             }
@@ -279,10 +287,10 @@ write_model_state(all_vars_struct *all_vars,
             }
             else {
                 fprintf(filep->statefile, " %i %i "
-                        ASCII_STATE_FLOAT_FMT" "ASCII_STATE_FLOAT_FMT" "
-                        ASCII_STATE_FLOAT_FMT" "ASCII_STATE_FLOAT_FMT" "
-                        ASCII_STATE_FLOAT_FMT" "ASCII_STATE_FLOAT_FMT" "
-                        ASCII_STATE_FLOAT_FMT" "ASCII_STATE_FLOAT_FMT" "
+                        ASCII_STATE_FLOAT_FMT " "ASCII_STATE_FLOAT_FMT " "
+                        ASCII_STATE_FLOAT_FMT " "ASCII_STATE_FLOAT_FMT " "
+                        ASCII_STATE_FLOAT_FMT " "ASCII_STATE_FLOAT_FMT " "
+                        ASCII_STATE_FLOAT_FMT " "ASCII_STATE_FLOAT_FMT " "
                         ASCII_STATE_FLOAT_FMT,
                         snow[veg][band].last_snow, (int)snow[veg][band].MELTING,
                         snow[veg][band].coverage, snow[veg][band].swq,
@@ -299,7 +307,8 @@ write_model_state(all_vars_struct *all_vars,
                            filep->statefile);
                 }
                 else {
-                    fprintf(filep->statefile, " "ASCII_STATE_FLOAT_FMT, energy[veg][band].T[nidx]);
+                    fprintf(filep->statefile, " "ASCII_STATE_FLOAT_FMT,
+                            energy[veg][band].T[nidx]);
                 }
             }
 
@@ -309,7 +318,8 @@ write_model_state(all_vars_struct *all_vars,
                        filep->statefile);
             }
             else {
-                fprintf(filep->statefile, " "ASCII_STATE_FLOAT_FMT, energy[veg][band].Tfoliage);
+                fprintf(filep->statefile, " "ASCII_STATE_FLOAT_FMT,
+                        energy[veg][band].Tfoliage);
             }
 
             if (options.STATE_FORMAT == ASCII) {

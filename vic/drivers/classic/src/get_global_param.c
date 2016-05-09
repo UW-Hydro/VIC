@@ -122,11 +122,11 @@ get_global_param(FILE *gp)
             }
             else if (strcasecmp("FULL_ENERGY", optstr) == 0) {
                 sscanf(cmdstr, "%*s %s", flgstr);
-                options.FULL_ENERGY = strtotrueorfalse(flgstr);
+                options.FULL_ENERGY = str_to_bool(flgstr);
             }
             else if (strcasecmp("FROZEN_SOIL", optstr) == 0) {
                 sscanf(cmdstr, "%*s %s", flgstr);
-                options.FROZEN_SOIL = strtotrueorfalse(flgstr);
+                options.FROZEN_SOIL = str_to_bool(flgstr);
                 // TODO: move these steps to a option validation
                 if (options.FROZEN_SOIL) {
                     options.QUICK_FLUX = false;
@@ -138,25 +138,25 @@ get_global_param(FILE *gp)
             }
             else if (strcasecmp("QUICK_FLUX", optstr) == 0) {
                 sscanf(cmdstr, "%*s %s", flgstr);
-                options.QUICK_FLUX = strtotrueorfalse(flgstr);
+                options.QUICK_FLUX = str_to_bool(flgstr);
             }
             else if (strcasecmp("QUICK_SOLVE", optstr) == 0) {
                 sscanf(cmdstr, "%*s %s", flgstr);
-                options.QUICK_SOLVE = strtotrueorfalse(flgstr);
+                options.QUICK_SOLVE = str_to_bool(flgstr);
             }
             else if ((strcasecmp("NOFLUX",
                                  optstr) == 0) ||
                      (strcasecmp("NO_FLUX", optstr) == 0)) {
                 sscanf(cmdstr, "%*s %s", flgstr);
-                options.NOFLUX = strtotrueorfalse(flgstr);
+                options.NOFLUX = str_to_bool(flgstr);
             }
             else if (strcasecmp("IMPLICIT", optstr) == 0) {
                 sscanf(cmdstr, "%*s %s", flgstr);
-                options.IMPLICIT = strtotrueorfalse(flgstr);
+                options.IMPLICIT = str_to_bool(flgstr);
             }
             else if (strcasecmp("EXP_TRANS", optstr) == 0) {
                 sscanf(cmdstr, "%*s %s", flgstr);
-                options.EXP_TRANS = strtotrueorfalse(flgstr);
+                options.EXP_TRANS = str_to_bool(flgstr);
             }
             else if (strcasecmp("SNOW_DENSITY", optstr) == 0) {
                 sscanf(cmdstr, "%*s %s", flgstr);
@@ -169,39 +169,39 @@ get_global_param(FILE *gp)
             }
             else if (strcasecmp("BLOWING", optstr) == 0) {
                 sscanf(cmdstr, "%*s %s", flgstr);
-                options.BLOWING = strtotrueorfalse(flgstr);
+                options.BLOWING = str_to_bool(flgstr);
             }
             else if (strcasecmp("BLOWING_VAR_THRESHOLD", optstr) == 0) {
                 sscanf(cmdstr, "%*s %s", flgstr);
-                options.BLOWING_VAR_THRESHOLD = strtotrueorfalse(flgstr);
+                options.BLOWING_VAR_THRESHOLD = str_to_bool(flgstr);
             }
             else if (strcasecmp("BLOWING_CALC_PROB", optstr) == 0) {
                 sscanf(cmdstr, "%*s %s", flgstr);
-                options.BLOWING_CALC_PROB = strtotrueorfalse(flgstr);
+                options.BLOWING_CALC_PROB = str_to_bool(flgstr);
             }
             else if (strcasecmp("BLOWING_SIMPLE", optstr) == 0) {
                 sscanf(cmdstr, "%*s %s", flgstr);
-                options.BLOWING_SIMPLE = strtotrueorfalse(flgstr);
+                options.BLOWING_SIMPLE = str_to_bool(flgstr);
             }
             else if (strcasecmp("BLOWING_FETCH", optstr) == 0) {
                 sscanf(cmdstr, "%*s %s", flgstr);
-                options.BLOWING_FETCH = strtotrueorfalse(flgstr);
+                options.BLOWING_FETCH = str_to_bool(flgstr);
             }
             else if (strcasecmp("BLOWING_SPATIAL_WIND", optstr) == 0) {
                 sscanf(cmdstr, "%*s %s", flgstr);
-                options.BLOWING_SPATIAL_WIND = strtotrueorfalse(flgstr);
+                options.BLOWING_SPATIAL_WIND = str_to_bool(flgstr);
             }
             else if (strcasecmp("CORRPREC", optstr) == 0) {
                 sscanf(cmdstr, "%*s %s", flgstr);
-                options.CORRPREC = strtotrueorfalse(flgstr);
+                options.CORRPREC = str_to_bool(flgstr);
             }
             else if (strcasecmp("CLOSE_ENERGY", optstr) == 0) {
                 sscanf(cmdstr, "%*s %s", flgstr);
-                options.CLOSE_ENERGY = strtotrueorfalse(flgstr);
+                options.CLOSE_ENERGY = str_to_bool(flgstr);
             }
             else if (strcasecmp("CONTINUEONERROR", optstr) == 0) {
                 sscanf(cmdstr, "%*s %s", flgstr);
-                options.CONTINUEONERROR = strtotrueorfalse(flgstr);
+                options.CONTINUEONERROR = str_to_bool(flgstr);
             }
             else if (strcasecmp("COMPUTE_TREELINE", optstr) == 0) {
                 sscanf(cmdstr, "%*s %s", flgstr);
@@ -215,7 +215,7 @@ get_global_param(FILE *gp)
             }
             else if (strcasecmp("EQUAL_AREA", optstr) == 0) {
                 sscanf(cmdstr, "%*s %s", flgstr);
-                options.EQUAL_AREA = strtotrueorfalse(flgstr);
+                options.EQUAL_AREA = str_to_bool(flgstr);
             }
             else if (strcasecmp("RESOLUTION", optstr) == 0) {
                 sscanf(cmdstr, "%*s %lf", &global_param.resolution);
@@ -246,29 +246,29 @@ get_global_param(FILE *gp)
             }
             else if (strcasecmp("SPATIAL_FROST", optstr) == 0) {
                 sscanf(cmdstr, "%*s %s %s", flgstr, flgstr2);
-                options.SPATIAL_FROST = strtotrueorfalse(flgstr);
+                options.SPATIAL_FROST = str_to_bool(flgstr);
                 if (options.SPATIAL_FROST) {
                     options.Nfrost = atoi(flgstr2);
                 }
             }
             else if (strcasecmp("SPATIAL_SNOW", optstr) == 0) {
                 sscanf(cmdstr, "%*s %s", flgstr);
-                options.SPATIAL_SNOW = strtotrueorfalse(flgstr);
+                options.SPATIAL_SNOW = str_to_bool(flgstr);
             }
             else if (strcasecmp("TFALLBACK", optstr) == 0) {
                 sscanf(cmdstr, "%*s %s", flgstr);
-                options.TFALLBACK = strtotrueorfalse(flgstr);
+                options.TFALLBACK = str_to_bool(flgstr);
             }
             else if (strcasecmp("SHARE_LAYER_MOIST", optstr) == 0) {
                 sscanf(cmdstr, "%*s %s", flgstr);
-                options.SHARE_LAYER_MOIST = strtotrueorfalse(flgstr);
+                options.SHARE_LAYER_MOIST = str_to_bool(flgstr);
             }
             else if (strcasecmp("CANOPY_LAYERS", optstr) == 0) {
                 sscanf(cmdstr, "%*s %zu", &options.Ncanopy);
             }
             else if (strcasecmp("CARBON", optstr) == 0) {
                 sscanf(cmdstr, "%*s %s", flgstr);
-                options.CARBON = strtotrueorfalse(flgstr);
+                options.CARBON = str_to_bool(flgstr);
             }
             else if (strcasecmp("RC_MODE", optstr) == 0) {
                 sscanf(cmdstr, "%*s %s", flgstr);
@@ -428,29 +428,29 @@ get_global_param(FILE *gp)
             }
             else if (strcasecmp("JULY_TAVG_SUPPLIED", optstr) == 0) {
                 sscanf(cmdstr, "%*s %s", flgstr);
-                options.JULY_TAVG_SUPPLIED = strtotrueorfalse(flgstr);
+                options.JULY_TAVG_SUPPLIED = str_to_bool(flgstr);
             }
             else if (strcasecmp("ORGANIC_FRACT", optstr) == 0) {
                 sscanf(cmdstr, "%*s %s", flgstr);
-                options.ORGANIC_FRACT = strtotrueorfalse(flgstr);
+                options.ORGANIC_FRACT = str_to_bool(flgstr);
             }
             else if (strcasecmp("VEGLIB", optstr) == 0) {
                 sscanf(cmdstr, "%*s %s", filenames.veglib);
             }
             else if (strcasecmp("VEGLIB_PHOTO", optstr) == 0) {
                 sscanf(cmdstr, "%*s %s", flgstr);
-                options.VEGLIB_PHOTO = strtotrueorfalse(flgstr);
+                options.VEGLIB_PHOTO = str_to_bool(flgstr);
             }
             else if (strcasecmp("VEGLIB_FCAN", optstr) == 0) {
                 sscanf(cmdstr, "%*s %s", flgstr);
-                options.VEGLIB_FCAN = strtotrueorfalse(flgstr);
+                options.VEGLIB_FCAN = str_to_bool(flgstr);
             }
             else if (strcasecmp("VEGPARAM", optstr) == 0) {
                 sscanf(cmdstr, "%*s %s", filenames.veg);
             }
             else if (strcasecmp("VEGPARAM_LAI", optstr) == 0) {
                 sscanf(cmdstr, "%*s %s", flgstr);
-                options.VEGPARAM_LAI = strtotrueorfalse(flgstr);
+                options.VEGPARAM_LAI = str_to_bool(flgstr);
             }
             else if (strcasecmp("LAI_SRC", optstr) == 0) {
                 sscanf(cmdstr, "%*s %s", flgstr);
@@ -470,7 +470,7 @@ get_global_param(FILE *gp)
             }
             else if (strcasecmp("VEGPARAM_FCAN", optstr) == 0) {
                 sscanf(cmdstr, "%*s %s", flgstr);
-                options.VEGPARAM_FCAN = strtotrueorfalse(flgstr);
+                options.VEGPARAM_FCAN = str_to_bool(flgstr);
             }
             else if (strcasecmp("FCAN_SRC", optstr) == 0) {
                 sscanf(cmdstr, "%*s %s", flgstr);
@@ -493,7 +493,7 @@ get_global_param(FILE *gp)
             }
             else if (strcasecmp("VEGPARAM_ALB", optstr) == 0) {
                 sscanf(cmdstr, "%*s %s", flgstr);
-                options.VEGPARAM_ALB = strtotrueorfalse(flgstr);
+                options.VEGPARAM_ALB = str_to_bool(flgstr);
             }
             else if (strcasecmp("ALB_SRC", optstr) == 0) {
                 sscanf(cmdstr, "%*s %s", flgstr);
@@ -530,7 +530,7 @@ get_global_param(FILE *gp)
             }
             else if (strcasecmp("LAKE_PROFILE", optstr) == 0) {
                 sscanf(cmdstr, "%*s %s", flgstr);
-                options.LAKE_PROFILE = strtotrueorfalse(flgstr);
+                options.LAKE_PROFILE = str_to_bool(flgstr);
             }
 
             /*************************************

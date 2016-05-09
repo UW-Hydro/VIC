@@ -76,7 +76,7 @@ main(int   argc,
     lake_con_struct     lake_con;
     stream_struct      *output_streams = NULL;
     stream_file_struct *out_data_files = NULL;
-    double            **out_data;    // [nvars, nelem]
+    double            **out_data;  // [nvars, nelem]
     save_data_struct    save_data;
 
     // Initialize Log Destination

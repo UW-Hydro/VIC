@@ -69,12 +69,12 @@ parse_output_info(FILE                *gp,
     if (nstreams > 0) {
         options.Noutstreams = nstreams;
 
-        output_streams = calloc(options.Noutstreams, sizeof(*(output_streams)));
-        if (output_streams == NULL) {
+        *output_streams = calloc(options.Noutstreams, sizeof(*(*output_streams)));
+        if (*output_streams == NULL) {
             log_err("Memory allocation error in parse_output_info().");
         }
-        out_data_files = calloc(options.Noutstreams, sizeof(*(out_data_files)));
-        if (out_data_files == NULL) {
+        *out_data_files = calloc(options.Noutstreams, sizeof(*(*out_data_files)));
+        if (*out_data_files == NULL) {
             log_err("Memory allocation error in parse_output_info().");
         }
 
@@ -89,7 +89,7 @@ parse_output_info(FILE                *gp,
                                 "%zu but found %hu", options.Noutstreams,
                                 streamnum);
                     }
-                    sscanf(cmdstr, "%*s %s", out_data_files[streamnum]->prefix);
+                    sscanf(cmdstr, "%*s %s", (*out_data_files)[streamnum].prefix);
 
                     // determine how many variable will be in this file before
                     // allocating (GH: 209)
@@ -106,42 +106,40 @@ parse_output_info(FILE                *gp,
                     outvarnum = 0;
                 }
                 else if (strcasecmp("OUTPUT_STEPS_PER_DAY", optstr) == 0) {
-                    sscanf(cmdstr, "%*s %zu",
-                           &out_data_files[streamnum]->output_steps_per_day);
+                    sscanf(cmdstr, "%*s %zu", (&(*out_data_files)[streamnum].output_steps_per_day));
 
                     // nextagg = ;
                 }
                 else if (strcasecmp("SKIPYEAR", optstr) == 0) {
-                    sscanf(cmdstr, "%*s %hu",
-                           &out_data_files[streamnum]->skipyear);
+                    sscanf(cmdstr, "%*s %hu", (&(*out_data_files)[streamnum].skipyear));
                     // skiprec = 0;
-                    // for ( i = 0; i < &out_data_files[streamnum]->skipyear; i++ ) {
+                    // for ( i = 0; i < (*out_data_files)[streamnum].skipyear; i++ ) {
                     // if(LEAPYR(temp[skiprec].year)) skiprec += 366 * 24 / global->dt;
                     // else skiprec += 365 * 24 / global->dt;
                     // }
-                    // &out_data_files[streamnum]->skipyear = skiprec;
+                    // (*out_data_files)[streamnum].skipyear = skiprec;
                 }
                 else if (strcasecmp("COMPRESS", optstr) == 0) {
                     sscanf(cmdstr, "%*s %s", flgstr);
                     if (strcasecmp("TRUE", flgstr) == 0) {
-                        out_data_files[streamnum]->compress =
+                        (*out_data_files)[streamnum].compress =
                             DEFAULT_COMPRESSION_LVL;
                     }
                     else if (strcasecmp("FALSE", flgstr) == 0) {
-                        out_data_files[streamnum]->compress = 0;
+                        (*out_data_files)[streamnum].compress = 0;
                     }
                     else {
-                        out_data_files[streamnum]->compress = atoi(flgstr);
+                        (*out_data_files)[streamnum].compress = atoi(flgstr);
                     }
                 }
                 else if (strcasecmp("OUT_FORMAT", optstr) == 0) {
                     sscanf(cmdstr, "%*s %s", flgstr);
                     if (strcasecmp("ASCII", flgstr) == 0) {
-                        out_data_files[streamnum]->file_format =
+                        (*out_data_files)[streamnum].file_format =
                             DEFAULT_COMPRESSION_LVL;
                     }
                     else if (strcasecmp("BINARY", flgstr) == 0) {
-                        out_data_files[streamnum]->file_format = 0;
+                        (*out_data_files)[streamnum].file_format = 0;
                     }
                     else {
                         log_err(

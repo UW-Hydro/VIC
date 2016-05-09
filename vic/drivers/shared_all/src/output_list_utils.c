@@ -1333,7 +1333,7 @@ setup_stream(stream_struct      *stream,
              size_t              nvars,
              unsigned int        nextagg)
 {
-    size_t i;
+    // size_t i;
 
     stream->nvars = nvars;
     stream->nextagg = nextagg;
@@ -1367,18 +1367,18 @@ setup_stream(stream_struct      *stream,
     if (stream_file->mult == NULL) {
         log_err("Memory allocation error in setup_stream_file().");
     }
-    // Question: do we have to dynamically allocate the length of each string
-    stream_file->format = calloc(nvars, sizeof(*(stream_file->format)));
-    if (stream_file->format == NULL) {
-        log_err("Memory allocation error in setup_stream().");
-    }
-    for (i = 0; i < nvars; i++) {
-        stream_file->format[i] =
-            calloc(MAXSTRING, sizeof(*(stream_file->format[i])));
-        if (stream_file->format[i] == NULL) {
-            log_err("Memory allocation error in setup_stream().");
-        }
-    }
+    // // Question: do we have to dynamically allocate the length of each string
+    // stream_file->format = calloc(nvars, sizeof(*(stream_file->format)));
+    // if (stream_file->format == NULL) {
+    //     log_err("Memory allocation error in setup_stream().");
+    // }
+    // for (i = 0; i < nvars; i++) {
+    //     stream_file->format[i] =
+    //         calloc(MAXSTRING, sizeof(*(stream_file->format[i])));
+    //     if (stream_file->format[i] == NULL) {
+    //         log_err("Memory allocation error in setup_stream().");
+    //     }
+    // }
 }
 
 /******************************************************************************
@@ -1535,12 +1535,12 @@ set_output_var(stream_struct      *stream,
     }
 
     // Set stream_file_struct members
-    if (strcmp(format, "*") != 0) {
-        strcpy(out_data_file->format[varnum], format);
-    }
-    else {
-        strcpy(out_data_file->format[varnum], "%.4f");
-    }
+    // if (strcmp(format, "*") != 0) {
+    //     strcpy(out_data_file->format[varnum], format);
+    // }
+    // else {
+    //     strcpy(out_data_file->format[varnum], "%.4f");
+    // }
     if (type != 0) {
         out_data_file->type[varnum] = type;
     }

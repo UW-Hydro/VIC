@@ -269,7 +269,13 @@ vic_init(void)
         if (options.FCAN_SRC == FROM_DEFAULT) {
             for (k = 0; k < MONTHS_PER_YEAR; k++) {
                 for (i = 0; i < local_domain.ncells_active; i++) {
-                    veg_lib[i][j].fcanopy[k] = 1.0;
+                    if (j < options.NVEGTYPES - 1) {
+                        veg_lib[i][j].fcanopy[k] = 1.0;
+                    }
+                    // Assuming the last type is bare soil
+                    else {
+                        veg_lib[i][j].fcanopy[k] = MIN_FCANOPY;
+                    }
                 }
             }
         }

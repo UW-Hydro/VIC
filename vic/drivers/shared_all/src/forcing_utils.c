@@ -76,7 +76,7 @@ q_to_vp(double q,
 }
 
 /******************************************************************************
- * @brief   convert surface pressure (kPa) to density (kg/m3) based on
+ * @brief   convert surface pressure (Pa) to density (kg/m3) based on
  *          pressure (p), vapor pressure (vp), and temperature
  *
  * @param t temperature

@@ -696,8 +696,8 @@ vic_init(void)
             soil_con[i].frost_slope = (double) dvar[i];
         }
     }
-    for (k = 0; k < options.Nfrost; k++) {
-        for (i = 0; i < local_domain.ncells_active; i++) {
+    for (i = 0; i < local_domain.ncells_active; i++) {
+        for (k = 0; k < options.Nfrost; k++) {
             if (options.Nfrost == 1) {
                 soil_con[i].frost_fract[k] = 1.;
             }

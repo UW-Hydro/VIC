@@ -691,16 +691,18 @@ vic_init(void)
         }
     }
     for (k = 0; k < options.Nfrost; k++) {
-        if (options.Nfrost == 1) {
-            soil_con[i].frost_fract[k] = 1.;
-        }
-        else if (options.Nfrost == 2) {
-            soil_con[i].frost_fract[k] = 0.5;
-        }
-        else {
-            soil_con[i].frost_fract[k] = 1. / (options.Nfrost - 1);
-            if (k == 0 || k == options.Nfrost - 1) {
-                soil_con[i].frost_fract[k] /= 2.;
+        for (i = 0; i < local_domain.ncells_active; i++) {
+            if (options.Nfrost == 1) {
+                soil_con[i].frost_fract[k] = 1.;
+            }
+            else if (options.Nfrost == 2) {
+                soil_con[i].frost_fract[k] = 0.5;
+            }
+            else {
+                soil_con[i].frost_fract[k] = 1. / (options.Nfrost - 1);
+                if (k == 0 || k == options.Nfrost - 1) {
+                    soil_con[i].frost_fract[k] /= 2.;
+                }
             }
         }
     }

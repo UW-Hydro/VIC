@@ -48,6 +48,7 @@ void compute_cell_area(soil_con_struct *);
 size_t count_outfile_nvars(FILE *gp);
 out_data_struct *create_output_list();
 void free_atmos(int nrecs, atmos_data_struct **atmos);
+void free_out_data_files(out_data_file_struct **);
 void free_veg_hist(int nrecs, int nveg, veg_hist_struct ***veg_hist);
 void free_veglib(veg_lib_struct **);
 double get_dist(double lat1, double long1, double lat2, double long2);

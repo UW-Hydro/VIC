@@ -358,7 +358,7 @@ vic_run(atmos_data_struct   *atmos,
                     cell[iveg][band].rootmoist = 0;
                     cell[iveg][band].wetness = 0;
                     for (lidx = 0; lidx < options.Nlayer; lidx++) {
-                        if (veg_con->root[lidx] > 0) {
+                        if (veg_con[iveg].root[lidx] > 0) {
                             cell[iveg][band].rootmoist +=
                                 cell[iveg][band].layer[lidx].moist;
                         }

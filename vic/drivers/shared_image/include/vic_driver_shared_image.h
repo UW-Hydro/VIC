@@ -35,6 +35,15 @@
 #define MAXDIMS 10
 
 /******************************************************************************
+ * @brief   NetCDF file types
+ *****************************************************************************/
+enum
+{
+    NC_HISTORY_FILE,
+    NC_STATE_FILE,
+};
+
+/******************************************************************************
  * @brief    Structure to store location information for individual grid cells.
  * @details  The global and local indices show the position of the grid cell
  *           within the global and local (processor) domains. When the model is
@@ -184,6 +193,7 @@ void print_location(location_struct *location);
 void print_nc_file(nc_file_struct *nc);
 void print_nc_var(nc_var_struct *nc_var, size_t ndims);
 void print_veg_con_map(veg_con_map_struct *veg_con_map);
+void put_nc_attr(int nc_id, int var_id, const char *name, const char *value);
 int put_nc_field_double(char *nc_name, bool *open, int *nc_id, double fillval,
                         int *dimids, int ndims, char *var_name, size_t *start,
                         size_t *count, double *var);
@@ -191,6 +201,7 @@ int put_nc_field_int(char *nc_name, bool *open, int *nc_id, int fillval,
                      int *dimids, int ndims, char *var_name, size_t *start,
                      size_t *count, int *var);
 void set_force_type(char *cmdstr, int file_num, int *field);
+void set_global_nc_attributes(int ncid, unsigned short int file_type);
 void sprint_location(char *str, location_struct *loc);
 void vic_alloc(void);
 void vic_finalize(void);

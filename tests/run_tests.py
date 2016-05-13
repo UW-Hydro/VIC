@@ -382,7 +382,6 @@ def run_system(config_file, vic_exe, test_data_dir, out_dir, driver):
 
                         elif driver == "image": 
                             # check for nans in all output files
-                            print(glob.glob(os.path.join(dirs['results'], '*.nc')))
                             for fname in glob.glob(os.path.join(dirs['results'], '*.nc')):  
                                 ds_domain = xr.open_dataset(os.path.join(test_dir, 'system', 
                                                             test_dict['domain_file']))

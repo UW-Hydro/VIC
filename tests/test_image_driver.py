@@ -12,8 +12,8 @@ def assert_nan_equal(ds_domain, ds_output):
     dataset for image driver 
     """
 
-    # get lat/lng dim names from domain file 
-    match_vars = ds_domain.coords
+    # get lat/lng coordinate names from domain file mask 
+    match_vars = ds_domain['mask'].coords
     
     # check to be sure that mask, lats and lons match between domain file and output file
     

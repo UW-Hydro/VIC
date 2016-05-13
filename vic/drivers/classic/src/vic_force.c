@@ -132,13 +132,13 @@ vic_force(atmos_data_struct *atmos,
             atmos[rec].shortwave[i] = forcing_data[SWDOWN][uidx];
             // downward longwave in W/m2
             atmos[rec].longwave[i] = forcing_data[LWDOWN][uidx];
-            // pressure in kPa
+            // pressure in Pa
             atmos[rec].pressure[i] = forcing_data[PRESSURE][uidx] * PA_PER_KPA;
-            // vapor pressure in kPa
+            // vapor pressure in Pa
             atmos[rec].vp[i] = forcing_data[VP][uidx] * PA_PER_KPA;
-            // vapor pressure deficit in kPa
+            // vapor pressure deficit in Pa
             atmos[rec].vpd[i] = svp(atmos[rec].air_temp[i]) - atmos[rec].vp[i];
-            // air density
+            // air density in kg/m3
             atmos[rec].density[i] = air_density(atmos[rec].air_temp[i],
                                                 atmos[rec].pressure[i]);
             // wind speed in m/s

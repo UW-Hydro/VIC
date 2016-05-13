@@ -373,7 +373,7 @@ def run_system(config_file, vic_exe, test_data_dir, out_dir, driver):
                                 else:
                                     start = df.index[0]
                                     end = df.index[-1]
-
+                    
                     if 'output_file_nans' in test_dict['check']:
 
                         if driver == "classic": 
@@ -381,13 +381,14 @@ def run_system(config_file, vic_exe, test_data_dir, out_dir, driver):
                             check_for_nans(df) 
 
                         elif driver == "image": 
-                            # check for nans in domain file  
-                            ds_domain = xr.open_dataset(os.path.join(test_dir, 'system', 
-                                                        test_dict['domain_file']))
-                            ds_output = xr.open_dataset(os.path.join(dirs['results'], 
-                                                        'Stehekin.history.nc')) 
-                            assert_nan_equal(ds_domain, ds_output) 
-
+                            # check for nans in all output files
+                            print(glob.glob(os.path.join(dirs['results'], '*.nc')))
+                            for fname in glob.glob(os.path.join(dirs['results'], '*.nc')):  
+                                ds_domain = xr.open_dataset(os.path.join(test_dir, 'system', 
+                                                            test_dict['domain_file']))
+                                ds_output = xr.open_dataset(os.path.join(dirs['results'], fname)) 
+                                assert_nan_equal(ds_domain, ds_output) 
+                    
             # -------------------------------------------------------- #
             # if we got this far, the test passed.
             test_passed = True

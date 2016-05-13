@@ -26,14 +26,11 @@ def assert_nan_equal(ds_domain, ds_output):
     # check all variables in the dataset 
     for da in ds_output.data_vars: 
         
-        if (len(ds_output[da].dims) > 3):
-            # check all layers and timesteps 
-            da_isnull_reduced = ds_output[da].isnull().all(dim=('time', 'nlayer')) 
-            npt.assert_array_equal(da_isnull_reduced.values, 
-                                    np.isnan(ds_domain['mask']))
-
-        else: 
-            # check all timesteps 
-            da_isnull_reduced = ds_output[da].isnull().all(dim=('time')) 
-            npt.assert_array_equal(da_isnull_reduced.values, 
-                                    np.isnan(ds_domain['mask'])) 
+        # get dimensions to reduce DataArray on
+        dim_diff = set(ds_domain['mask'].dims).symmetric_difference(set(ds_output[da].dims))
+        
+        # reduce DataArray
+        da_null_reduced = ds_output[da].isnull().all(dim=dim_diff)
+        
+        # raise AssertionError if NaNs do not match 
+        npt.assert_array_equal(da_null_reduced.values, np.isnan(ds_domain['mask'])) 

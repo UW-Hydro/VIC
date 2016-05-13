@@ -79,7 +79,7 @@ vic_start(void)
 
         // add the number of vegetation type to the location info in the
         // global domain struct. This just makes life easier
-        add_nveg_to_global_domain(filenames.veglib, &global_domain);
+        add_nveg_to_global_domain(filenames.veg, &global_domain);
 
         // decompose the mask
         mpi_map_decomp_domain(global_domain.ncells_active, mpi_size,

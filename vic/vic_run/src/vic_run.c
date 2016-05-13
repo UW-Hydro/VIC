@@ -476,7 +476,8 @@ vic_run(atmos_data_struct   *atmos,
         **********************************************************************/
 
         ErrorFlag = water_balance(lake_var, *lake_con, gp->dt, all_vars,
-                                  iveg, band, lakefrac, *soil_con, *veg_con);
+                                  iveg, band, lakefrac, *soil_con,
+                                  veg_con[iveg]);
         if (ErrorFlag == ERROR) {
             return (ERROR);
         }

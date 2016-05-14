@@ -616,7 +616,7 @@ def run_examples(config_file, vic_exe, test_data_dir, out_dir, driver):
 
         # ------------------------------------------------------------ #
         # read template global parameter file
-        infile = os.path.join(test_dir, 'examples', test_dict['global_parameter_file'])
+        infile = os.path.join(test_dir, 'examples', test_dict['global_parameter_file'])       
 
         with open(infile, 'r') as global_file:
             global_param = global_file.read()
@@ -661,27 +661,39 @@ def run_examples(config_file, vic_exe, test_data_dir, out_dir, driver):
                                          'check VIC logs for test')
 
             # -------------------------------------------------------- #
-            # check output files
+            # check output files (different tests depending on driver) 
             if test_dict['check']:
                 if 'complete' in test_dict['check']:
                     start = None
                     end = None
 
-                for fname in glob.glob(os.path.join(dirs['results'], '*')):
-                    df = read_vic_ascii(fname, header=True)
-                    # do numeric tests
+                    if driver == "classic": 
 
-                    # check that each dataframe includes all timestamps
-                    if 'complete' in test_dict['check']:
-                        if (start is not None) and (end is not None):
-                            check_completed(df, start, end)
-                        else:
-                            start = df.index[0]
-                            end = df.index[-1]
+                        for fname in glob.glob(os.path.join(dirs['results'], '*')):
+                            df = read_vic_ascii(fname, header=True)
+                            # do numeric tests
 
-                    # check for nans in the df
-                    if 'nonans' in test_dict['check']:
+                            # check that each dataframe includes all timestamps
+                            if (start is not None) and (end is not None):
+                                check_completed(df, start, end)
+                            else:
+                                start = df.index[0]
+                                end = df.index[-1]
+
+                if 'output_file_nans' in test_dict['check']: 
+
+                    if driver == "classic":
+                        # check for nans in the df
                         check_for_nans(df)
+
+                    elif driver == "image":
+                        # check for nans in all example files 
+                        for fname in glob.glob(os.path.join(dirs['results'], '*.nc')):
+                            ds_domain = xr.open_dataset(os.path.join(test_dir, 'examples', 
+                                                                    test_dict['domain_file']), decode_times=False)
+                            ds_output = xr.open_dataset(os.path.join(dirs['results'], fname), decode_times=False)
+                            assert_nan_equal(ds_domain, ds_output)
+                    
             # -------------------------------------------------------- #
 
             # -------------------------------------------------------- #

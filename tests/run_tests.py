@@ -349,6 +349,7 @@ def run_system(config_file, vic_exe, test_data_dir, out_dir, driver):
             # Run the VIC simulation
             returncode = vic_exe.run(test_global_file, logdir=dirs['logs'],
                                      **run_kwargs)
+            print('---->DEBUG--->', vic_exe.argstring)
             test_complete = True
 
             # Check return code
@@ -485,6 +486,7 @@ def run_science(config_file, vic_exe, test_data_dir, out_dir, driver):
             # Run the VIC simulation
             returncode = vic_exe.run(test_global_file, logdir=dirs['logs'],
                                      **run_kwargs)
+            print('---->DEBUG--->', vic_exe.argstring)
             test_complete = True
 
             # Check return code
@@ -629,6 +631,7 @@ def run_examples(config_file, vic_exe, test_data_dir, out_dir, driver):
             # Run the VIC simulation
             returncode = vic_exe.run(test_global_file, logdir=dirs['logs'],
                                      **run_kwargs)
+            print('---->DEBUG--->', vic_exe.argstring)
             test_complete = True
 
             # Check return code

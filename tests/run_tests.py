@@ -658,7 +658,7 @@ def run_examples(config_file, vic_exe, test_data_dir, out_dir, driver):
 
         # Handle errors
         except Exception as e:
-            test_comment, error_message, tail = process_error(e)
+            test_comment, error_message, tail = process_error(e, vic_exe)
 
         if test_comment or error_message:
             print('\t{0}'.format(test_comment))

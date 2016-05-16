@@ -58,7 +58,7 @@ function vic_script {
     $DRIVER_EXE -o
 
     # Run test package
-    ./tests/run_tests.py unit examples \
+    ./tests/run_tests.py unit examples system \
         --vic_exe=${DRIVER_EXE} \
         --driver=${TESTID} \
         --data_dir=${SAMPLES_PATH}/data \

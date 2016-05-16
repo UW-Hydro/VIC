@@ -9,6 +9,9 @@ import argparse
 import datetime
 from collections import OrderedDict
 import string
+import numpy as np
+import xarray as xr
+import numpy.testing as npt 
 
 import pytest
 import pandas as pd
@@ -16,6 +19,7 @@ import pandas as pd
 from tonic.models.vic.vic import VIC, VICRuntimeError  # , read_vic_ascii
 from tonic.io import read_config, read_configobj
 from tonic.testing import check_completed, check_for_nans, VICTestError
+from test_image_driver import assert_nan_equal 
 
 test_dir = os.path.dirname(os.path.abspath(__file__))
 
@@ -292,7 +296,7 @@ def run_system(config_file, vic_exe, test_data_dir, out_dir, driver):
 
         # ------------------------------------------------------------ #
         # read template global parameter file
-        infile = os.path.join(test_dir, 'samples',
+        infile = os.path.join(test_dir, 'system',
                               test_dict['global_parameter_file'])
 
         with open(infile, 'r') as global_file:
@@ -351,29 +355,39 @@ def run_system(config_file, vic_exe, test_data_dir, out_dir, driver):
                                                         expectation))
 
             # -------------------------------------------------------- #
-            # check output files
+            # check output files (different tests depending on driver)
             if test_dict['check']:
-                if 'complete' in test_dict['check']:
-                    start = None
-                    end = None
-
-                for fname in glob.glob(os.path.join(dirs['results'], '*')):
-                    df = read_vic_ascii(fname, header=True)
-                    # do numeric tests
-
-                    # check that each dataframe includes all timestamps
                     if 'complete' in test_dict['check']:
-                        if (start is not None) and (end is not None):
-                            check_completed(df, start, end)
-                        else:
-                            start = df.index[0]
-                            end = df.index[-1]
+                        start = None
+                        end = None
+                        
+                        if driver == "classic": 
+                    
+                            for fname in glob.glob(os.path.join(dirs['results'], '*')):
+                                df = read_vic_ascii(fname, header=True)
+                                # do numeric tests
 
-                    # check for nans in the df
-                    if 'nonans' in test_dict['check']:
-                        check_for_nans(df)
-            # -------------------------------------------------------- #
+                                # check that each dataframe includes all timestamps
+                                if (start is not None) and (end is not None):
+                                    check_completed(df, start, end)
+                                else:
+                                    start = df.index[0]
+                                    end = df.index[-1]
+                    
+                    if 'output_file_nans' in test_dict['check']:
 
+                        if driver == "classic": 
+                            # check for nans in the df 
+                            check_for_nans(df) 
+
+                        elif driver == "image": 
+                            # check for nans in all output files
+                            for fname in glob.glob(os.path.join(dirs['results'], '*.nc')):  
+                                ds_domain = xr.open_dataset(os.path.join(test_dir, 'system', 
+                                                            test_dict['domain_file']))
+                                ds_output = xr.open_dataset(os.path.join(dirs['results'], fname)) 
+                                assert_nan_equal(ds_domain, ds_output) 
+                    
             # -------------------------------------------------------- #
             # if we got this far, the test passed.
             test_passed = True
@@ -647,27 +661,39 @@ def run_examples(config_file, vic_exe, test_data_dir, out_dir, driver):
                                          'check VIC logs for test')
 
             # -------------------------------------------------------- #
-            # check output files
+            # check output files (different tests depending on driver) 
             if test_dict['check']:
                 if 'complete' in test_dict['check']:
                     start = None
                     end = None
 
-                for fname in glob.glob(os.path.join(dirs['results'], '*')):
-                    df = read_vic_ascii(fname, header=True)
-                    # do numeric tests
+                    if driver == "classic": 
 
-                    # check that each dataframe includes all timestamps
-                    if 'complete' in test_dict['check']:
-                        if (start is not None) and (end is not None):
-                            check_completed(df, start, end)
-                        else:
-                            start = df.index[0]
-                            end = df.index[-1]
+                        for fname in glob.glob(os.path.join(dirs['results'], '*')):
+                            df = read_vic_ascii(fname, header=True)
+                            # do numeric tests
 
-                    # check for nans in the df
-                    if 'nonans' in test_dict['check']:
+                            # check that each dataframe includes all timestamps
+                            if (start is not None) and (end is not None):
+                                check_completed(df, start, end)
+                            else:
+                                start = df.index[0]
+                                end = df.index[-1]
+
+                if 'output_file_nans' in test_dict['check']: 
+
+                    if driver == "classic":
+                        # check for nans in the df
                         check_for_nans(df)
+
+                    elif driver == "image":
+                        # check for nans in all example files 
+                        for fname in glob.glob(os.path.join(dirs['results'], '*.nc')):
+                            ds_domain = xr.open_dataset(os.path.join(test_dir, 'examples', 
+                                                                    test_dict['domain_file']), decode_times=False)
+                            ds_output = xr.open_dataset(os.path.join(dirs['results'], fname), decode_times=False)
+                            assert_nan_equal(ds_domain, ds_output)
+                    
             # -------------------------------------------------------- #
 
             # -------------------------------------------------------- #
@@ -766,14 +792,15 @@ def replace_global_values(gp, replace):
        replace dictionary'''
     gpl = []
     for line in iter(gp.splitlines()):
-        line_list = line.split()
-        key = line_list[0]
-        if key in replace:
-            value = replace.pop(key)
-            val = list([str(value)])
-        else:
-            val = line_list[1:]
-        gpl.append('{0: <20} {1}\n'.format(key, ' '.join(val)))
+        line_list = line.split() 
+        if line_list: 
+            key = line_list[0]
+            if key in replace:
+                value = replace.pop(key)
+                val = list([str(value)])
+            else:
+                val = line_list[1:]
+            gpl.append('{0: <20} {1}\n'.format(key, ' '.join(val)))
 
     if replace:
         for key, val in replace.items():

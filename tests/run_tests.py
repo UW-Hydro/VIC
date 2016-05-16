@@ -802,7 +802,7 @@ def test_classic_driver_all_complete(fnames):
     '''
     start = None
     end = None
-    for fname in glob.glob(fnames):
+    for fname in fnames:
         df = read_vic_ascii(fname, header=True)
 
         # check that each dataframe includes all timestamps
@@ -815,7 +815,7 @@ def test_classic_driver_all_complete(fnames):
 
 def test_classic_driver_no_output_file_nans(fnames):
     '''Test that all VIC classic driver output files in fnames have no nans'''
-    for fname in glob.glob(fnames):
+    for fname in fnames:
         df = read_vic_ascii(fname, header=True)
         check_for_nans(df)
 

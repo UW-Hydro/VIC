@@ -24,7 +24,6 @@ matrix:
       apt_packages:
         - libnetcdf-dev
         - gfortran
-        - valgrind
         # open-mpi is built from source in cesm.travis
   # Classic Driver
   - compiler: clang

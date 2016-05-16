@@ -8,6 +8,8 @@ dependencies:
   - cffi
   - pandas
   - configobj
+  - xarray
+  - bottleneck
   - pip:
     - git+https://github.com/UW-Hydro/tonic.git
     - engarde

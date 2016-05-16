@@ -38,7 +38,7 @@ initialize_snow(snow_data_struct **snow,
 
     for (i = 0; i <= veg_num; i++) {
         for (j = 0; j < options.SNOW_BAND; j++) {
-            // State vars
+            // Prognostic states
             snow[i][j].albedo = 0.0;
             snow[i][j].canopy_albedo = 0.0;
             snow[i][j].coldcontent = 0.0;
@@ -56,8 +56,8 @@ initialize_snow(snow_data_struct **snow,
             snow[i][j].store_snow = false;
             snow[i][j].store_swq = 0.0;
             snow[i][j].surf_temp = 0.0;
-            snow[i][j].surf_temp_fbflag = false;
             snow[i][j].surf_temp_fbcount = 0;
+            snow[i][j].surf_temp_fbflag = false;
             snow[i][j].surf_water = 0.0;
             snow[i][j].swq = 0.0;
             snow[i][j].snow_distrib_slope = 0.0;

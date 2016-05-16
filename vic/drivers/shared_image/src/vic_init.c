@@ -269,7 +269,13 @@ vic_init(void)
         if (options.FCAN_SRC == FROM_DEFAULT) {
             for (k = 0; k < MONTHS_PER_YEAR; k++) {
                 for (i = 0; i < local_domain.ncells_active; i++) {
-                    veg_lib[i][j].fcanopy[k] = 1.0;
+                    if (j < options.NVEGTYPES - 1) {
+                        veg_lib[i][j].fcanopy[k] = 1.0;
+                    }
+                    // Assuming the last type is bare soil
+                    else {
+                        veg_lib[i][j].fcanopy[k] = MIN_FCANOPY;
+                    }
                 }
             }
         }
@@ -690,17 +696,19 @@ vic_init(void)
             soil_con[i].frost_slope = (double) dvar[i];
         }
     }
-    for (k = 0; k < options.Nfrost; k++) {
-        if (options.Nfrost == 1) {
-            soil_con[i].frost_fract[k] = 1.;
-        }
-        else if (options.Nfrost == 2) {
-            soil_con[i].frost_fract[k] = 0.5;
-        }
-        else {
-            soil_con[i].frost_fract[k] = 1. / (options.Nfrost - 1);
-            if (k == 0 || k == options.Nfrost - 1) {
-                soil_con[i].frost_fract[k] /= 2.;
+    for (i = 0; i < local_domain.ncells_active; i++) {
+        for (k = 0; k < options.Nfrost; k++) {
+            if (options.Nfrost == 1) {
+                soil_con[i].frost_fract[k] = 1.;
+            }
+            else if (options.Nfrost == 2) {
+                soil_con[i].frost_fract[k] = 0.5;
+            }
+            else {
+                soil_con[i].frost_fract[k] = 1. / (options.Nfrost - 1);
+                if (k == 0 || k == options.Nfrost - 1) {
+                    soil_con[i].frost_fract[k] /= 2.;
+                }
             }
         }
     }
@@ -1540,7 +1548,7 @@ vic_init(void)
     for (i = 0; i < local_domain.ncells_active; i++) {
         nveg = veg_con[i][0].vegetat_type_num;
         initialize_snow(all_vars[i].snow, nveg);
-        initialize_soil(all_vars[i].cell, &(soil_con[i]), nveg);
+        initialize_soil(all_vars[i].cell, nveg);
         initialize_veg(all_vars[i].veg_var, nveg);
         if (options.LAKES) {
             tmp_lake_idx = (int)lake_con[i].lake_idx;
@@ -1557,4 +1565,5 @@ vic_init(void)
     // cleanup
     free(dvar);
     free(ivar);
+    free(Cv_sum);
 }

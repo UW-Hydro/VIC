@@ -45,27 +45,27 @@ read_initial_model_state(FILE            *init_state,
                          soil_con_struct *soil_con,
                          lake_con_struct  lake_con)
 {
-    extern option_struct     options;
+    extern option_struct options;
 
-    char                     tmpstr[MAXSTRING];
-    char                     tmpchar;
-    int                      veg, iveg;
-    int                      band, iband;
-    size_t                   lidx;
-    size_t                   nidx;
-    int                      tmp_cellnum;
-    int                      tmp_Nveg;
-    int                      tmp_Nband;
-    int                      tmp_char;
-    int                      byte, Nbytes;
-    int                      node;
-    size_t                   frost_area;
+    char                 tmpstr[MAXSTRING];
+    char                 tmpchar;
+    int                  veg, iveg;
+    int                  band, iband;
+    size_t               lidx;
+    size_t               nidx;
+    int                  tmp_cellnum;
+    int                  tmp_Nveg;
+    int                  tmp_Nband;
+    int                  tmp_char;
+    int                  byte, Nbytes;
+    int                  node;
+    size_t               frost_area;
 
-    cell_data_struct       **cell;
-    snow_data_struct       **snow;
-    energy_bal_struct      **energy;
-    veg_var_struct         **veg_var;
-    lake_var_struct         *lake_var;
+    cell_data_struct   **cell;
+    snow_data_struct   **snow;
+    energy_bal_struct  **energy;
+    veg_var_struct     **veg_var;
+    lake_var_struct     *lake_var;
 
     cell = all_vars->cell;
     veg_var = all_vars->veg_var;
@@ -375,6 +375,20 @@ read_initial_model_state(FILE            *init_state,
                                &energy[veg][band].T[nidx]) == EOF) {
                         log_err("End of model state file found unexpectedly");
                     }
+                }
+            }
+
+            /* Read foliage temperature*/
+            if (options.STATE_FORMAT == BINARY) {
+                if (fread(&energy[veg][band].Tfoliage, sizeof(double), 1,
+                          init_state) != 1) {
+                    log_err("End of model state file found unexpectedly");
+                }
+            }
+            else {
+                if (fscanf(init_state, " %lf",
+                           &energy[veg][band].Tfoliage) == EOF) {
+                    log_err("End of model state file found unexpectedly");
                 }
             }
         }
@@ -742,5 +756,4 @@ read_initial_model_state(FILE            *init_state,
             }
         }
     }
-
 }

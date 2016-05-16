@@ -42,7 +42,42 @@ initialize_energy(energy_bal_struct **energy,
     // initialize miscellaneous energy balance terms
     for (veg = 0; veg <= Nveg; veg++) {
         for (band = 0; band < options.SNOW_BAND; band++) {
-            /* Set fluxes to 0 */
+            // Prognostic states
+            energy[veg][band].AlbedoLake = 0.0;
+            energy[veg][band].AlbedoOver = 0.0;
+            energy[veg][band].AlbedoUnder = 0.0;
+            energy[veg][band].Cs[0] = 0.0;
+            energy[veg][band].Cs[1] = 0.0;
+            energy[veg][band].frozen = false;
+            energy[veg][band].kappa[0] = 0.0;
+            energy[veg][band].kappa[1] = 0.0;
+            energy[veg][band].Nfrost = 0;
+            energy[veg][band].Nthaw = 0;
+            energy[veg][band].T1_index = 0;
+            energy[veg][band].Tcanopy = 0;
+            energy[veg][band].Tcanopy_fbflag = false;
+            energy[veg][band].Tcanopy_fbcount = 0;
+            energy[veg][band].Tfoliage = 0.0;
+            energy[veg][band].Tfoliage_fbflag = false;
+            energy[veg][band].Tfoliage_fbcount = 0;
+            energy[veg][band].Tsurf = 0.0;
+            energy[veg][band].Tsurf_fbflag = false;
+            energy[veg][band].Tsurf_fbcount = 0;
+            energy[veg][band].unfrozen = 0.0;
+            for (index = 0; index < options.Nnode - 1; index++) {
+                energy[veg][band].Cs_node[index] = 0.0;
+                energy[veg][band].ice[index] = 0.0;
+                energy[veg][band].kappa_node[index] = 0.0;
+                energy[veg][band].moist[index] = 0.0;
+                energy[veg][band].T[index] = 0.0;
+                energy[veg][band].T_fbflag[index] = false;
+                energy[veg][band].T_fbcount[index] = 0;
+            }
+            for (index = 0; index < MAX_FRONTS - 1; index++) {
+                energy[veg][band].fdepth[index] = 0.0;
+                energy[veg][band].tdepth[index] = 0.0;
+            }
+            // Fluxes
             energy[veg][band].advected_sensible = 0.0;
             energy[veg][band].advection = 0.0;
             energy[veg][band].AtmosError = 0.0;
@@ -81,23 +116,6 @@ initialize_energy(energy_bal_struct **energy,
             energy[veg][band].ShortOverIn = 0.0;
             energy[veg][band].ShortUnderIn = 0.0;
             energy[veg][band].snow_flux = 0.0;
-            for (index = 0; index < options.Nnode - 1; index++) {
-                energy[veg][band].T[index] = 0.0;
-            }
-            energy[veg][band].LongUnderOut = 0.0;
-            energy[veg][band].Tfoliage = 0.0;
-        }
-    }
-
-    // initialize Tfallback counters
-    for (veg = 0; veg <= Nveg; veg++) {
-        for (band = 0; band < options.SNOW_BAND; band++) {
-            energy[veg][band].Tfoliage_fbcount = 0;
-            energy[veg][band].Tcanopy_fbcount = 0;
-            energy[veg][band].Tsurf_fbcount = 0;
-            for (index = 0; index < options.Nnode - 1; index++) {
-                energy[veg][band].T_fbcount[index] = 0;
-            }
         }
     }
 }

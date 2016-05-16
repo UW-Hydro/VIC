@@ -334,13 +334,12 @@ vic_force(void)
             atmos[i].air_temp[j] -= CONST_TKFRZ;
             // precipitation in mm/period
             atmos[i].prec[j] *= global_param.snow_dt;
-            // pressure in kPa
-            atmos[i].pressure[j] /= PA_PER_KPA;
-            // vapor pressure in kPa (we read specific humidity in kg/kg)
+            // pressure in Pa
+            // vapor pressure in Pa (we read specific humidity in kg/kg)
             atmos[i].vp[j] = q_to_vp(atmos[i].vp[j], atmos[i].pressure[j]);
-            // vapor pressure deficit
+            // vapor pressure deficit in Pa
             atmos[i].vpd[j] = svp(atmos[i].air_temp[j]) - atmos[i].vp[j];
-            // air density
+            // air density in kg/m3
             atmos[i].density[j] = air_density(atmos[i].air_temp[j],
                                               atmos[i].pressure[j]);
             // snow flag

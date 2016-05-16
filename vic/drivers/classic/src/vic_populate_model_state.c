@@ -66,7 +66,7 @@ vic_populate_model_state(all_vars_struct *all_vars,
     Nveg = veg_con[0].vegetat_type_num;
 
     // Initialize all data structures to 0
-    initialize_soil(cell, soil_con, Nveg);
+    initialize_soil(cell, Nveg);
     initialize_snow(snow, Nveg);
     initialize_veg(veg_var, Nveg);
     if (options.LAKES) {

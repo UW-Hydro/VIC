@@ -69,8 +69,8 @@ check_state_file(char  *init_state_name,
 
     /* Check simulation options */
     if (options.STATE_FORMAT == BINARY) {
-        fread(&tmp_Nlayer, sizeof(int), 1, init_state);
-        fread(&tmp_Nnodes, sizeof(int), 1, init_state);
+        fread(&tmp_Nlayer, sizeof(size_t), 1, init_state);
+        fread(&tmp_Nnodes, sizeof(size_t), 1, init_state);
     }
     else {
         fscanf(init_state, "%zu %zu\n", &tmp_Nlayer, &tmp_Nnodes);

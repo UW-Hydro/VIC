@@ -296,7 +296,7 @@ def run_system(config_file, vic_exe, test_data_dir, out_dir, driver):
 
         # ------------------------------------------------------------ #
         # read template global parameter file
-        infile = os.path.join(test_dir, 'system', 
+        infile = os.path.join(test_dir, 'system',
                               test_dict['global_parameter_file'])
 
         with open(infile, 'r') as global_file:
@@ -616,7 +616,7 @@ def run_examples(config_file, vic_exe, test_data_dir, out_dir, driver):
 
         # ------------------------------------------------------------ #
         # read template global parameter file
-        infile = os.path.join(test_dir, 'examples', test_dict['global_parameter_file'])       
+        infile = os.path.join(test_dir, 'examples', test_dict['global_parameter_file'])
 
         with open(infile, 'r') as global_file:
             global_param = global_file.read()

@@ -95,10 +95,13 @@ snow_density(snow_data_struct *snow,
 
         /* Settling due to destructive metamorphism */
         if (new_snow > 0.0 && density_new > 0.0) {
-            // what is 1.15?
-            dm =
-                (param.SNOW_DENS_DMLIMIT > 1.15 *
-                 density_new) ? param.SNOW_DENS_DMLIMIT : 1.15 * density_new;
+            if (param.SNOW_DENS_DMLIMIT >
+                param.SNOW_DENS_DMLIMIT_FACTOR * density_new) {
+                dm = param.SNOW_DENS_DMLIMIT;
+            }
+            else {
+                dm = param.SNOW_DENS_DMLIMIT_FACTOR * density_new;
+            }
         }
         else {
             dm = param.SNOW_DENS_DMLIMIT;
@@ -108,13 +111,13 @@ snow_density(snow_data_struct *snow,
             c3 = param.SNOW_DENS_C3;
         }
         else {
-            // what is -0.046?
-            c3 = exp(-0.046 * (density - dm));
+            c3 = exp(param.SNOW_DENS_C3_CONST * (density - dm));
         }
         c4 = param.SNOW_DENS_C4;
 
         if (snow->depth > 0) {
-            if ((snow->surf_water + snow->pack_water) / snow->depth > MIN_SNOW_WETFRAC) {
+            if ((snow->surf_water + snow->pack_water) / snow->depth >
+                MIN_SNOW_WETFRAC) {
                 /* presence of wet snow */
                 c4 = param.SNOW_DENS_C4WET;
             }
@@ -143,7 +146,7 @@ snow_density(snow_data_struct *snow,
 
         /* Calculate compaction rate and new snow density */
         CR = -ddz1 - ddz2;
-        density = density * (1. + CR * dt);
+        density *= 1. + CR * dt;
     }
     else if (options.SNOW_DENSITY == DENS_BRAS) {
         depth = snow->depth;
@@ -155,10 +158,11 @@ snow_density(snow_data_struct *snow,
         if (new_snow > 0) {
             if (depth > 0.) {
                 /* Compact current snowpack by weight of new snowfall */
-                // what are 10 and 0.35?
                 delta_depth =
-                    (((new_snow / MM_PER_IN) * (depth / M_PER_IN)) / (swq / M_PER_IN) *
-                     pow((depth / M_PER_IN) / 10., 0.35)) * M_PER_IN;
+                    (((new_snow / MM_PER_IN) * (depth * IN_PER_M)) /
+                     (swq * IN_PER_M) *
+                     pow((depth * IN_PER_M) / param.SNOW_DENS_DENOM,
+                         param.SNOW_DENS_EXP)) / IN_PER_M;
                 if (delta_depth > param.SNOW_DENS_MAX_CHANGE * depth) {
                     delta_depth = param.SNOW_DENS_MAX_CHANGE * depth;
                 }
@@ -211,16 +215,17 @@ new_snow_density(double air_temp)
     density_new = 0.0;
 
     if (options.SNOW_DENSITY == DENS_SNTHRM) {
-        // what are 67.9, 51.3, 2.6
-        density_new = 67.9 + 51.3 * exp(air_temp / 2.6);
+        // new snow density based on Hedstrom and Pomeroy (1998)
+        density_new = param.SNOW_NEW_SNT_C1 + param.SNOW_NEW_SNT_C2 * exp(
+            air_temp / param.SNOW_NEW_SNT_C3);
     }
     else if (options.SNOW_DENSITY == DENS_BRAS) {
-        // why are we converting to F?
+        // equation 6.2 in Bras 1990
         air_temp = C_TO_F(air_temp);
         if (air_temp > 0) {
-            // what?
-            density_new = param.SNOW_NEW_SNOW_DENSITY + 1000. *
-                          (air_temp / 100.) * (air_temp / 100.);
+            density_new = param.SNOW_NEW_SNOW_DENSITY + GRAMS_PER_KG *
+                          (air_temp / param.SNOW_NEW_BRAS_DENOM) *
+                          (air_temp / param.SNOW_NEW_BRAS_DENOM);
         }
         else {
             density_new = param.SNOW_NEW_SNOW_DENSITY;

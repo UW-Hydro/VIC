@@ -51,7 +51,7 @@
 #define CM_PER_M 100  /**< centimeters per meter */
 #define MM_PER_CM 10  /**< milimeters per centimeter */
 #define MM_PER_IN 25.4  /**< milimeters per inch */
-#define M_PER_IN (MM_PER_IN / MM_PER_M)  /**< meters per inch */
+#define IN_PER_M (MM_PER_IN * MM_PER_M)  /**< inches per meter */
 #define MOLE_PER_KMOLE 1000 /**< moles per kilomole */
 #define FRACT_TO_PERCENT 100
 #define PPM_to_MIXRATIO 1.0e-6

@@ -69,11 +69,13 @@ parse_output_info(FILE                *gp,
     if (nstreams > 0) {
         options.Noutstreams = nstreams;
 
-        *output_streams = calloc(options.Noutstreams, sizeof(*(*output_streams)));
+        *output_streams =
+            calloc(options.Noutstreams, sizeof(*(*output_streams)));
         if (*output_streams == NULL) {
             log_err("Memory allocation error in parse_output_info().");
         }
-        *out_data_files = calloc(options.Noutstreams, sizeof(*(*out_data_files)));
+        *out_data_files =
+            calloc(options.Noutstreams, sizeof(*(*out_data_files)));
         if (*out_data_files == NULL) {
             log_err("Memory allocation error in parse_output_info().");
         }
@@ -89,7 +91,8 @@ parse_output_info(FILE                *gp,
                                 "%zu but found %hu", options.Noutstreams,
                                 streamnum);
                     }
-                    sscanf(cmdstr, "%*s %s", (*out_data_files)[streamnum].prefix);
+                    sscanf(cmdstr, "%*s %s",
+                           (*out_data_files)[streamnum].prefix);
 
                     // determine how many variable will be in this file before
                     // allocating (GH: 209)
@@ -106,12 +109,14 @@ parse_output_info(FILE                *gp,
                     outvarnum = 0;
                 }
                 else if (strcasecmp("OUTPUT_STEPS_PER_DAY", optstr) == 0) {
-                    sscanf(cmdstr, "%*s %zu", (&(*out_data_files)[streamnum].output_steps_per_day));
+                    sscanf(cmdstr, "%*s %zu",
+                           (&(*out_data_files)[streamnum].output_steps_per_day));
 
                     // nextagg = ;
                 }
                 else if (strcasecmp("SKIPYEAR", optstr) == 0) {
-                    sscanf(cmdstr, "%*s %hu", (&(*out_data_files)[streamnum].skipyear));
+                    sscanf(cmdstr, "%*s %hu",
+                           (&(*out_data_files)[streamnum].skipyear));
                     // skiprec = 0;
                     // for ( i = 0; i < (*out_data_files)[streamnum].skipyear; i++ ) {
                     // if(LEAPYR(temp[skiprec].year)) skiprec += 366 * 24 / global->dt;
@@ -123,7 +128,7 @@ parse_output_info(FILE                *gp,
                     sscanf(cmdstr, "%*s %s", flgstr);
                     if (strcasecmp("TRUE", flgstr) == 0) {
                         (*out_data_files)[streamnum].compress =
-                            DEFAULT_COMPRESSION_LVL;
+                            UNSET_COMPRESSION_LVL;
                     }
                     else if (strcasecmp("FALSE", flgstr) == 0) {
                         (*out_data_files)[streamnum].compress = 0;
@@ -136,10 +141,10 @@ parse_output_info(FILE                *gp,
                     sscanf(cmdstr, "%*s %s", flgstr);
                     if (strcasecmp("ASCII", flgstr) == 0) {
                         (*out_data_files)[streamnum].file_format =
-                            DEFAULT_COMPRESSION_LVL;
+                            ASCII;
                     }
                     else if (strcasecmp("BINARY", flgstr) == 0) {
-                        (*out_data_files)[streamnum].file_format = 0;
+                        (*out_data_files)[streamnum].file_format = BINARY;
                     }
                     else {
                         log_err(
@@ -159,35 +164,14 @@ parse_output_info(FILE                *gp,
                            multstr);
                     if (strcasecmp("", format) == 0) {
                         strcpy(format, "*");
-                        type = OUT_TYPE_DEFAULT;
-                        mult = 0; // 0 means default multiplier
                     }
-                    else {
-                        if (strcasecmp("OUT_TYPE_USINT", typestr) == 0) {
-                            type = OUT_TYPE_USINT;
-                        }
-                        else if (strcasecmp("OUT_TYPE_SINT", typestr) == 0) {
-                            type = OUT_TYPE_SINT;
-                        }
-                        else if (strcasecmp("OUT_TYPE_FLOAT", typestr) == 0) {
-                            type = OUT_TYPE_FLOAT;
-                        }
-                        else if (strcasecmp("OUT_TYPE_DOUBLE", typestr) == 0) {
-                            type = OUT_TYPE_DOUBLE;
-                        }
-                        else {
-                            type = OUT_TYPE_DEFAULT;
-                        }
-                        if (strcmp("*", multstr) == 0) {
-                            mult = 0; // 0 means use default multiplier
-                        }
-                        else {
-                            mult = (double) atof(multstr);
-                        }
-                    }
+                    agg_type = agg_type_from_str(aggstr);
+                    type = out_type_from_str(typestr);
+                    mult = out_mult_from_str(multstr);
+
                     set_output_var(output_streams[streamnum],
                                    out_data_files[streamnum],
-                                   varname, outvarnum, format, type, mult);
+                                   varname, outvarnum, format, type, mult, agg_type);
                     strcpy(format, "");
                     outvarnum++;
                 }
@@ -202,98 +186,10 @@ parse_output_info(FILE                *gp,
     fclose(gp);
 
     for (streamnum = 0; streamnum < options.Noutstreams; streamnum++) {
-
         // Validate the streams
         validate_stream_settings(&((*out_data_files)[streamnum]));
 
         // Allocate memory for the stream aggdata arrays
         alloc_aggdata(&(*output_streams)[streamnum]);
     }
-
-}
-
-/******************************************************************************
- * @brief    This routine determines the counts the number of output variables
-             in each output file specified in the global parameter file.
- *****************************************************************************/
-size_t
-count_outfile_nvars(FILE *gp)
-{
-    size_t        nvars;
-    unsigned long start_position;
-    char          cmdstr[MAXSTRING];
-    char          optstr[MAXSTRING];
-    // Figure out where we are in the input file
-    fflush(gp);
-    start_position = ftell(gp);
-
-    // read the first line
-    fgets(cmdstr, MAXSTRING, gp);
-
-    // initalize nvars
-    nvars = 0;
-
-    // Loop through the lines
-    while (!feof(gp)) {
-        if (cmdstr[0] != '#' && cmdstr[0] != '\n' && cmdstr[0] != '\0') {
-            // line is not blank or a comment
-            sscanf(cmdstr, "%s", optstr);
-
-            // if the line starts with OUTFILE
-            if (strcasecmp("OUTVAR", optstr) == 0) {
-                nvars++;
-            }
-            // else we're done with this file so break out of loop
-            else {
-                break;
-            }
-        }
-        fgets(cmdstr, MAXSTRING, gp);
-    }
-
-    // put the position in the file back to where we started
-    fseek(gp, start_position, SEEK_SET);
-
-    return nvars;
-}
-
-/******************************************************************************
- * @brief    This routine determines the counts the number of output files
-             specified in the global parameter file.
- *****************************************************************************/
-size_t
-count_n_outfiles(FILE *gp)
-{
-    size_t        n_outfiles;
-    unsigned long start_position;
-    char          cmdstr[MAXSTRING];
-    char          optstr[MAXSTRING];
-    // Figure out where we are in the input file
-    fflush(gp);
-    start_position = ftell(gp);
-
-    // read the first line
-    fgets(cmdstr, MAXSTRING, gp);
-
-    // initalize n_outfiles
-    n_outfiles = 0;
-
-    // Loop through the lines
-    while (!feof(gp)) {
-        if (cmdstr[0] != '#' && cmdstr[0] != '\n' && cmdstr[0] != '\0') {
-            // line is not blank or a comment
-            sscanf(cmdstr, "%s", optstr);
-
-            // if the line starts with OUTFILE
-            if (strcasecmp("OUTFILE", optstr) == 0) {
-                n_outfiles++;
-            }
-        }
-        fgets(cmdstr, MAXSTRING, gp);
-    }
-
-    // put the position in the file back to where we started
-    fseek(gp, start_position, SEEK_SET);
-
-    return n_outfiles;
 }

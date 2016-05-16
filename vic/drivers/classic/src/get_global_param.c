@@ -114,11 +114,11 @@ get_global_param(FILE *gp)
             }
             else if (strcasecmp("CALENDAR", optstr) == 0) {
                 sscanf(cmdstr, "%*s %s", flgstr);
-                global_param.calendar = calendar_from_chars(flgstr);
+                global_param.calendar = str_to_calendar(flgstr);
             }
             else if (strcasecmp("OUT_TIME_UNITS", optstr) == 0) {
                 sscanf(cmdstr, "%*s %s", flgstr);
-                global_param.time_units = timeunits_from_chars(flgstr);
+                global_param.time_units = str_to_timeunits(flgstr);
             }
             else if (strcasecmp("FULL_ENERGY", optstr) == 0) {
                 sscanf(cmdstr, "%*s %s", flgstr);

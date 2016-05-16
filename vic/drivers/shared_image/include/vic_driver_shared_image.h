@@ -90,11 +90,22 @@ typedef struct {
 } domain_struct;
 
 /******************************************************************************
+ * @brief    Structure for netcdf variable information
+ *****************************************************************************/
+typedef struct {
+    char nc_var_name[MAXSTRING]; /**< variable name */
+    int nc_varid;                /**< variable netcdf id */
+    int nc_type;                 /**< variable netcdf type */
+    int nc_dimids[MAXDIMS];      /**< ids of dimensions */
+    int nc_counts[MAXDIMS];      /**< size of dimid */
+    int nc_dims;                 /**< number of dimensions */
+} nc_var_struct;
+
+/******************************************************************************
  * @brief    Structure for netcdf file information. Initially to store
  *           information for the output files (state and history)
  *****************************************************************************/
 typedef struct {
-    char fname[MAXSTRING + 1];
     char c_fillvalue;
     int i_fillvalue;
     double d_fillvalue;
@@ -123,17 +134,8 @@ typedef struct {
     size_t time_size;
     size_t veg_size;
     bool open;
+    nc_var_struct *nc_vars;
 } nc_file_struct;
-
-/******************************************************************************
- * @brief    Structure for netcdf variable information
- *****************************************************************************/
-typedef struct {
-    char nc_var_name[MAXSTRING]; /**< variable name */
-    int nc_dimids[MAXDIMS]; /**< ids of dimensions */
-    int nc_counts[MAXDIMS]; /**< size of dimid */
-    int nc_dims; /**< number of dimensions */
-} nc_var_struct;
 
 /******************************************************************************
  * @brief    Structure for mapping the vegetation types for each grid cell as
@@ -155,7 +157,6 @@ void alloc_atmos(atmos_data_struct *atmos);
 void alloc_veg_hist(veg_hist_struct *veg_hist);
 double air_density(double t, double p);
 double average(double *ar, size_t n);
-double **create_output_list(void);
 void check_init_state_file(void);
 void free_atmos(atmos_data_struct *atmos);
 void free_veg_hist(veg_hist_struct *veg_hist);
@@ -175,14 +176,17 @@ int get_nc_mode(unsigned short int format);
 void initialize_domain(domain_struct *domain);
 void initialize_domain_info(domain_info_struct *info);
 void initialize_global_structures(void);
-void initialize_history_file(nc_file_struct *nc);
+void initialize_history_file(nc_file_struct *nc, stream_file_struct *stream_file,
+                             stream_struct *stream);
 void initialize_location(location_struct *location);
 int initialize_model_state(all_vars_struct *all_vars, size_t Nveg,
                            size_t Nnodes, double surf_temp,
                            soil_con_struct *soil_con, veg_con_struct *veg_con);
+void initialize_nc_file(nc_file_struct *nc_file, size_t nvars, unsigned int *varids);
 void initialize_soil_con(soil_con_struct *soil_con);
 void initialize_veg_con(veg_con_struct *veg_con);
-int parse_output_info(FILE *gp, double **out_data);
+void parse_output_info(FILE *gp, stream_struct **output_streams,
+                       stream_file_struct **out_data_files);
 void print_atmos_data(atmos_data_struct *atmos);
 void print_domain(domain_struct *domain, bool print_loc);
 void print_location(location_struct *location);
@@ -198,14 +202,16 @@ int put_nc_field_int(char *nc_name, bool *open, int *nc_id, int fillval,
                      size_t *count, int *var);
 void set_force_type(char *cmdstr, int file_num, int *field);
 void set_global_nc_attributes(int ncid, unsigned short int file_type);
+void set_nc_var_info(unsigned int varid, nc_file_struct *nc_hist_file,
+                     nc_var_struct *nc_var);
+void set_output_defaults(stream_struct **output_streams,
+                         stream_file_struct **out_data_files);
 void sprint_location(char *str, location_struct *loc);
 void vic_alloc(void);
 void vic_finalize(void);
 void vic_image_run(dmy_struct *dmy_current);
 void vic_init(void);
 void vic_init_output(void);
-void vic_nc_info(nc_file_struct *nc_hist_file, double ***out_data,
-                 nc_var_struct *nc_vars);
 void vic_restore(void);
 void vic_start(void);
 void vic_store(dmy_struct *dmy_current);

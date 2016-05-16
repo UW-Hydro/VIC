@@ -34,24 +34,24 @@ write_header(stream_file_struct **out_data_files,
              stream_struct      **streams,
              dmy_struct          *dmy)
 {
-    extern option_struct        options;
-    extern global_param_struct  global_param;
-    extern out_metadata_struct  out_metadata[N_OUTVAR_TYPES];
+    extern option_struct       options;
+    extern global_param_struct global_param;
+    extern out_metadata_struct out_metadata[N_OUTVAR_TYPES];
 
-    size_t                      stream_idx;
-    size_t                      var_idx;
-    unsigned                    elem_idx;
-    size_t                      i;
-    unsigned int                varid;
-    unsigned short int          Identifier;
-    unsigned short int          Nbytes;
-    unsigned short int          Nbytes1;
-    unsigned short int          Nbytes2;
-    size_t                      nvars;
-    char                        tmp_len;
-    char                       *tmp_str;
-    char                        tmp_type;
-    float                       tmp_mult;
+    size_t                     stream_idx;
+    size_t                     var_idx;
+    unsigned                   elem_idx;
+    size_t                     i;
+    unsigned int               varid;
+    unsigned short int         Identifier;
+    unsigned short int         Nbytes;
+    unsigned short int         Nbytes1;
+    unsigned short int         Nbytes2;
+    size_t                     nvars;
+    char                       tmp_len;
+    char                      *tmp_str;
+    char                       tmp_type;
+    float                      tmp_mult;
 
     // Loop over output files
     for (stream_idx = 0; stream_idx < options.Noutstreams; stream_idx++) {
@@ -123,7 +123,8 @@ write_header(stream_file_struct **out_data_files,
             }
 
             // Loop over this output file's data variables
-            for (var_idx = 0; var_idx < (*streams)[stream_idx].nvars; var_idx++) {
+            for (var_idx = 0; var_idx < (*streams)[stream_idx].nvars;
+                 var_idx++) {
                 varid = (*streams)[stream_idx].varid[var_idx];
                 // Loop over this variable's elements
                 for (elem_idx = 0;
@@ -206,7 +207,8 @@ write_header(stream_file_struct **out_data_files,
             fwrite(&tmp_len, sizeof(char), 1, (*out_data_files)[stream_idx].fh);
             fwrite(tmp_str, sizeof(char), tmp_len,
                    (*out_data_files)[stream_idx].fh);
-            fwrite(&tmp_type, sizeof(char), 1, (*out_data_files)[stream_idx].fh);
+            fwrite(&tmp_type, sizeof(char), 1,
+                   (*out_data_files)[stream_idx].fh);
             fwrite(&tmp_mult, sizeof(float), 1,
                    (*out_data_files)[stream_idx].fh);
 
@@ -216,7 +218,8 @@ write_header(stream_file_struct **out_data_files,
             fwrite(&tmp_len, sizeof(char), 1, (*out_data_files)[stream_idx].fh);
             fwrite(tmp_str, sizeof(char), tmp_len,
                    (*out_data_files)[stream_idx].fh);
-            fwrite(&tmp_type, sizeof(char), 1, (*out_data_files)[stream_idx].fh);
+            fwrite(&tmp_type, sizeof(char), 1,
+                   (*out_data_files)[stream_idx].fh);
             fwrite(&tmp_mult, sizeof(float), 1,
                    (*out_data_files)[stream_idx].fh);
 
@@ -226,7 +229,8 @@ write_header(stream_file_struct **out_data_files,
             fwrite(&tmp_len, sizeof(char), 1, (*out_data_files)[stream_idx].fh);
             fwrite(tmp_str, sizeof(char), tmp_len,
                    (*out_data_files)[stream_idx].fh);
-            fwrite(&tmp_type, sizeof(char), 1, (*out_data_files)[stream_idx].fh);
+            fwrite(&tmp_type, sizeof(char), 1,
+                   (*out_data_files)[stream_idx].fh);
             fwrite(&tmp_mult, sizeof(float), 1,
                    (*out_data_files)[stream_idx].fh);
 
@@ -245,7 +249,8 @@ write_header(stream_file_struct **out_data_files,
             }
 
             // Loop over this output file's data variables
-            for (var_idx = 0; var_idx < (*streams)[stream_idx].nvars; var_idx++) {
+            for (var_idx = 0; var_idx < (*streams)[stream_idx].nvars;
+                 var_idx++) {
                 varid = (*streams)[stream_idx].varid[var_idx];
                 // Loop over this variable's elements
                 for (elem_idx = 0;
@@ -313,10 +318,13 @@ write_header(stream_file_struct **out_data_files,
             }
 
             // Loop over this output file's data variables
-            for (var_idx = 0; var_idx < (*streams)[stream_idx].nvars; var_idx++) {
+            for (var_idx = 0; var_idx < (*streams)[stream_idx].nvars;
+                 var_idx++) {
                 varid = (*streams)[stream_idx].varid[var_idx];
                 // Loop over this variable's elements
-                for (elem_idx = 0; elem_idx < out_metadata[varid].nelem; elem_idx++) {
+                for (elem_idx = 0;
+                     elem_idx < out_metadata[varid].nelem;
+                     elem_idx++) {
                     if (!(var_idx == 0 && elem_idx == 0)) {
                         fprintf((*out_data_files)[stream_idx].fh, "\t ");
                     }

@@ -35,20 +35,20 @@ write_data(stream_file_struct *out_data_file,
            dmy_struct         *dmy,
            double              dt)
 {
-    extern option_struct        options;
-    extern out_metadata_struct  out_metadata[N_OUTVAR_TYPES];
+    extern option_struct       options;
+    extern out_metadata_struct out_metadata[N_OUTVAR_TYPES];
 
-    size_t                      n;
-    size_t                      var_idx;
-    size_t                      elem_idx;
-    size_t                      ptr_idx;
-    unsigned int                varid;
-    char                       *tmp_cptr;
-    short int                  *tmp_siptr;
-    unsigned short int         *tmp_usiptr;
-    int                        *tmp_iptr;
-    float                      *tmp_fptr;
-    double                     *tmp_dptr;
+    size_t                     n;
+    size_t                     var_idx;
+    size_t                     elem_idx;
+    size_t                     ptr_idx;
+    unsigned int               varid;
+    char                      *tmp_cptr;
+    short int                 *tmp_siptr;
+    unsigned short int        *tmp_usiptr;
+    int                       *tmp_iptr;
+    float                     *tmp_fptr;
+    double                    *tmp_dptr;
 
     if (out_data_file->file_format == BINARY) {
         n = N_OUTVAR_TYPES * options.Nlayer * options.SNOW_BAND;
@@ -172,7 +172,8 @@ write_data(stream_file_struct *out_data_file,
         for (var_idx = 0; var_idx < stream->nvars; var_idx++) {
             varid = stream->varid[var_idx];
             // Loop over this variable's elements
-            for (elem_idx = 0; elem_idx < out_metadata[varid].nelem; elem_idx++) {
+            for (elem_idx = 0; elem_idx < out_metadata[varid].nelem;
+                 elem_idx++) {
                 if (!(var_idx == 0 && elem_idx == 0)) {
                     fprintf(out_data_file->fh, "\t ");
                 }

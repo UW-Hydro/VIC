@@ -327,6 +327,7 @@ typedef struct {
     unsigned short int calendar;  /**< Date/time calendar */
     unsigned short int time_units;  /**< Units for numeric times */
     double time_origin_num;        /**< Numeric date origin */
+    char time_origin_str[MAXSTRING];  /**< string date origin */
 } global_param_struct;
 
 /******************************************************************************

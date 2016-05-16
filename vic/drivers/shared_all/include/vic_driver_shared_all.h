@@ -35,7 +35,9 @@
 /***** Define maximum array sizes for driver level objects *****/
 #define MAX_FORCE_FILES 2
 
-#define DEFAULT_COMPRESSION_LVL -1
+#define DEFAULT_OUT_MULT 0  // Why is this not 1?
+#define UNSET_COMPRESSION_LVL -1
+#define DEFAULT_COMPRESSION_LVL 5
 
 /******************************************************************************
  * @brief   File formats
@@ -296,14 +298,31 @@ enum
  *****************************************************************************/
 enum
 {
+    AGG_TYPE_DEFAULT, /**< Default aggregation type */
     AGG_TYPE_AVG,     /**< average over agg interval */
     AGG_TYPE_BEG,     /**< value at beginning of agg interval */
     AGG_TYPE_END,     /**< value at end of agg interval */
     AGG_TYPE_MAX,     /**< maximum value over agg interval */
     AGG_TYPE_MIN,     /**< minimum value over agg interval */
-    AGG_TYPE_SUM     /**< sum over agg interval */
+    AGG_TYPE_SUM      /**< sum over agg interval */
 };
 
+/******************************************************************************
+ * @brief   Frequency flags for raising alarms/flags
+ *****************************************************************************/
+enum
+{
+    FREQ_NEVER,      /**< Flag for never raising alarm */
+    FREQ_NSTEPS,     /**< Flag for raising alarm every nsteps */
+    FREQ_NSECONDS,   /**< Flag for raising alarm every nseconds */
+    FREQ_NMINUTES,   /**< Flag for raising alarm every nminutes */
+    FREQ_NHOURS,     /**< Flag for raising alarm every nhours */
+    FREQ_NDAYS,      /**< Flag for raising alarm every ndays */
+    FREQ_NMONTHS,    /**< Flag for raising alarm every nmonths */
+    FREQ_NYEARS,     /**< Flag for raising alarm every nyears */
+    FREQ_DATE,       /**< Flag for raising alarm on a specific date */
+    FREQ_END         /**< Flag for raising alarm at the end of a simulation */
+};
 
 /******************************************************************************
  * @brief   Codes for displaying version information
@@ -461,8 +480,8 @@ typedef struct {
  * @brief   This structure stores output information for individual history streams
  *****************************************************************************/
 typedef struct {
-    char varname[MAXSTRING];  /**< name of variable */
-    char long_name[MAXSTRING];  /**< cf long_name of variable */
+    char long_name[MAXSTRING];  /**< name of variable */
+    char standard_name[MAXSTRING];  /**< cf long_name of variable */
     char units[MAXSTRING];  /**< units of variable */
     char description[MAXSTRING];  /**< descripition of variable */
     size_t nelem;          /**< number of data values */
@@ -495,7 +514,7 @@ double average(double *ar, size_t n);
 double calc_energy_balance_error(double, double, double, double, double);
 void calc_root_fractions(veg_con_struct *veg_con, soil_con_struct *soil_con);
 double calc_water_balance_error(double, double, double, double);
-unsigned short int calendar_from_chars(char *cal_chars);
+bool cell_method_from_agg_type(unsigned short int aggtype, char cell_method[]);
 bool check_write_flag(int rec);
 void collect_eb_terms(energy_bal_struct, snow_data_struct, cell_data_struct,
                       double, double, double, bool, bool, double, bool, int,
@@ -509,6 +528,8 @@ void compute_lake_params(lake_con_struct *, soil_con_struct);
 void compute_treeline(atmos_data_struct *, dmy_struct *, double, double *,
                       bool *);
 size_t count_force_vars(FILE *gp);
+size_t count_n_outfiles(FILE *gp);
+size_t count_outfile_nvars(FILE *gp);
 void cmd_proc(int argc, char **argv, char *globalfilename);
 void compress_files(char string[], short int level);
 double **create_outdata(void);
@@ -611,8 +632,15 @@ void setup_stream(stream_struct *stream, stream_file_struct *stream_file,
                   size_t nvars, unsigned int nextagg);
 void soil_moisture_from_water_table(soil_con_struct *soil_con, size_t nlayers);
 void sprint_dmy(char *str, dmy_struct *dmy);
+void str_from_calendar(unsigned short int calendar, char *calendar_str);
+void str_from_time_units(unsigned short int time_units, char *unit_str);
+unsigned short int str_to_agg_type(char aggstr[]);
 bool str_to_bool(char str[]);
-unsigned short int timeunits_from_chars(char *units_chars);
+unsigned short int str_to_calendar(char *cal_chars);
+unsigned short int str_to_freq_flag(char freq[]);
+double str_to_out_mult(char multstr[]);
+unsigned short int str_to_out_type(char typestr[]);
+unsigned short int str_to_timeunits(char units_chars[]);
 int update_step_vars(all_vars_struct *, veg_con_struct *, veg_hist_struct *);
 int invalid_date(unsigned short int calendar, dmy_struct *dmy);
 void validate_parameters(void);

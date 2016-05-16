@@ -30,43 +30,160 @@
 /******************************************************************************
  * @brief    Get output info from global parameter file.
  *****************************************************************************/
-int
-parse_output_info(FILE             *gp,
-                  out_data_struct **out_data)
+void
+parse_output_info(FILE               *gp,
+                  stream_struct      **output_streams,
+                  stream_file_struct **out_data_files)
 {
-    char   cmdstr[MAXSTRING];
-    char   optstr[MAXSTRING];
-    char   varname[MAXSTRING];
-    bool   found;
-    int    outvarnum;
-    size_t i;
+    extern option_struct       options;
+    extern global_param_struct global_param;
 
-    rewind(gp);
+    char                       cmdstr[MAXSTRING];
+    char                       optstr[MAXSTRING];
+    char                       flgstr[MAXSTRING];
+    short int                  streamnum;
+    char                       varname[MAXSTRING];
+    int                        outvarnum;
+    char                       aggstr[MAXSTRING];
+    short unsigned int         aggtype;
+    char                       typestr[MAXSTRING];
+    int                        type;
+    char                       multstr[MAXSTRING];
+    double                     mult;
+    size_t                     nstreams;
+    size_t                     nvars;
+    unsigned int               nextagg;
+
+    /** Read through global control file to find output info **/
+
     fgets(cmdstr, MAXSTRING, gp);
+
+    streamnum = -1;
     outvarnum = 0;
-    while (!feof(gp)) {
-        found = false;
-        if (cmdstr[0] != '#' && cmdstr[0] != '\n' && cmdstr[0] != '\0') {
-            sscanf(cmdstr, "%s", optstr);
-            if (strcasecmp("OUTVAR", optstr) == 0) {
-                sscanf(cmdstr, "%*s %s", varname);
-                for (i = 0; i < N_OUTVAR_TYPES; i++) {
-                    if (strcmp(out_data[0][i].varname, varname) == 0) {
-                        found = true;
-                        out_data[0][i].write = true;
+
+    // Count the number of output files listed in the global param file
+    nstreams = count_n_outfiles(gp);
+
+    // only parse the output info if there are output files to parse
+    if (nstreams > 0) {
+        options.Noutstreams = nstreams;
+
+        *output_streams =
+            calloc(options.Noutstreams, sizeof(*(*output_streams)));
+        if (*output_streams == NULL) {
+            log_err("Memory allocation error in parse_output_info().");
+        }
+        *out_data_files =
+            calloc(options.Noutstreams, sizeof(*(*out_data_files)));
+        if (*out_data_files == NULL) {
+            log_err("Memory allocation error in parse_output_info().");
+        }
+
+        while (!feof(gp)) {
+            if (cmdstr[0] != '#' && cmdstr[0] != '\n' && cmdstr[0] != '\0') {
+                sscanf(cmdstr, "%s", optstr);
+
+                if (strcasecmp("OUTFILE", optstr) == 0) {
+                    streamnum++;
+                    if (streamnum >= (short int) options.Noutstreams) {
+                        log_err("Found too many output files, was expecting "
+                                "%zu but found %hu", options.Noutstreams,
+                                streamnum);
+                    }
+                    sscanf(cmdstr, "%*s %s",
+                           (*out_data_files)[streamnum].prefix);
+
+                    // determine how many variable will be in this file before
+                    // allocating (GH: 209)
+                    nvars = count_outfile_nvars(gp);
+
+                    // TODO: parse stream specific agg period info from global param
+                    // nextagg = (unsigned int) ((int) global_param.out_dt / (int) global_param.dt);
+                    nextagg = 1;
+
+                    setup_stream(output_streams[streamnum],
+                                 out_data_files[streamnum],
+                                 nvars, nextagg);
+
+                    outvarnum = 0;
+                }
+                else if (strcasecmp("OUTPUT_STEPS_PER_DAY", optstr) == 0) {
+                    sscanf(cmdstr, "%*s %zu",
+                           (&(*out_data_files)[streamnum].output_steps_per_day));
+                }
+                else if (strcasecmp("SKIPYEAR", optstr) == 0) {
+                    sscanf(cmdstr, "%*s %hu",
+                           (&(*out_data_files)[streamnum].skipyear));
+                    // skiprec = 0;
+                    // for ( i = 0; i < (*out_data_files)[streamnum].skipyear; i++ ) {
+                    // if(LEAPYR(temp[skiprec].year)) skiprec += 366 * 24 / global->dt;
+                    // else skiprec += 365 * 24 / global->dt;
+                    // }
+                    // (*out_data_files)[streamnum].skipyear = skiprec;
+                }
+                else if (strcasecmp("COMPRESS", optstr) == 0) {
+                    sscanf(cmdstr, "%*s %s", flgstr);
+                    if (strcasecmp("TRUE", flgstr) == 0) {
+                        (*out_data_files)[streamnum].compress =
+                            DEFAULT_COMPRESSION_LVL;
+                    }
+                    else if (strcasecmp("FALSE", flgstr) == 0) {
+                        (*out_data_files)[streamnum].compress = 0;
+                    }
+                    else {
+                        (*out_data_files)[streamnum].compress = atoi(flgstr);
                     }
                 }
-                if (!found) {
-                    log_err("\"%s\" was not found in the list of supported "
-                            "output variable names.  Please use "
-                            "the exact name listed in vic_def.h.",
-                            varname);
+                else if (strcasecmp("OUT_FORMAT", optstr) == 0) {
+                    sscanf(cmdstr, "%*s %s", flgstr);
+                    if (strcasecmp("ASCII", flgstr) == 0) {
+                        (*out_data_files)[streamnum].file_format =
+                            DEFAULT_COMPRESSION_LVL;
+                    }
+                    else if (strcasecmp("BINARY", flgstr) == 0) {
+                        (*out_data_files)[streamnum].file_format = 0;
+                    }
+                    else {
+                        log_err(
+                            "File format must be ASCII or BINARY [stream=%hu]",
+                            streamnum);
+                    }
                 }
-                outvarnum++;
-            }
-        }
-        fgets(cmdstr, MAXSTRING, gp);
-    }
+                else if (strcasecmp("OUTVAR", optstr) == 0) {
+                    if (streamnum < 0) {
+                        log_err("Error in global param file: \"OUTFILE\" must be "
+                                "specified before you can specify \"OUTVAR\".");
+                    }
+                    strcpy(aggstr, "");
+                    strcpy(typestr, "");
+                    strcpy(multstr, "");
+                    sscanf(cmdstr, "%*s %s %s %s %s", varname, aggstr, typestr,
+                           multstr);
 
-    return outvarnum;
+                    agg_type = agg_type_from_str(aggstr);
+                    type = out_type_from_str(typestr);
+                    mult = out_mult_from_str(multstr);
+
+                    set_output_var(output_streams[streamnum],
+                                   out_data_files[streamnum],
+                                   varname, outvarnum, "*", type, mult);
+                    outvarnum++;
+                }
+            }
+            fgets(cmdstr, MAXSTRING, gp);
+        }
+    }
+    // Otherwise, set output files and their contents to default configuration
+    else {
+        set_output_defaults(output_streams, out_data_files);
+    }
+    fclose(gp);
+
+    for (streamnum = 0; streamnum < options.Noutstreams; streamnum++) {
+        // Validate the streams
+        validate_stream_settings(&((*out_data_files)[streamnum]));
+
+        // Allocate memory for the stream aggdata arrays
+        alloc_aggdata(&(*output_streams)[streamnum]);
+    }
 }

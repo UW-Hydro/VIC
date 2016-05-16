@@ -35,10 +35,10 @@ agg_stream_data(stream_struct *stream,
 {
     extern out_metadata_struct out_metadata[N_OUTVAR_TYPES];
 
-    size_t                      i;
-    size_t                      j;
-    size_t                      nelem;
-    unsigned int                varid;
+    size_t                     i;
+    size_t                     j;
+    size_t                     nelem;
+    unsigned int               varid;
 
     stream->counter++;
 

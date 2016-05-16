@@ -53,8 +53,6 @@ int                 mpi_size;
 nc_file_struct      nc_hist_file;
 nc_var_struct       nc_vars[N_OUTVAR_TYPES];
 option_struct       options;
-out_metadata_struct out_var_metadata[N_OUTVAR_TYPES];
-double           ***out_data;  // [ncells, nvars, nelem]
 parameters_struct   param;
 param_set_struct    param_set;
 save_data_struct   *save_data;
@@ -63,6 +61,10 @@ veg_con_map_struct *veg_con_map = NULL;
 veg_con_struct    **veg_con = NULL;
 veg_hist_struct   **veg_hist = NULL;
 veg_lib_struct    **veg_lib = NULL;
+out_metadata_struct out_var_metadata[N_OUTVAR_TYPES];
+double           ***out_data = NULL;   // [ncells, nvars, nelem]
+stream_struct     **output_streams = NULL;   // [ncells, nstreams]
+stream_file_struct *out_data_files = NULL;  // [nstreams]
 
 /******************************************************************************
  * @brief   Stand-alone image mode driver of the VIC model

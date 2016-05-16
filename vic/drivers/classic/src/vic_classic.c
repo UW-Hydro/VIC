@@ -112,7 +112,6 @@ main(int   argc,
 
     /** Set up output data structures **/
     set_output_met_data_info();
-    print_out_metadata(out_metadata);
     out_data = create_outdata();
     fclose(filep.globalparam);
     filep.globalparam = open_file(filenames.global, "r");
@@ -246,7 +245,9 @@ main(int   argc,
                 put_data(&all_vars, &atmos[rec], &soil_con, veg_con, veg_lib,
                          &lake_con, out_data, &save_data);
 
-                for (streamnum = 0; streamnum < options.Noutstreams; streamnum++) {
+                for (streamnum = 0;
+                     streamnum < options.Noutstreams;
+                     streamnum++) {
                     agg_stream_data(&(output_streams[streamnum]), out_data);
                 }
 

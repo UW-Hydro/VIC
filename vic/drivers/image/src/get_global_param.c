@@ -107,11 +107,11 @@ get_global_param(FILE *gp)
             }
             else if (strcasecmp("CALENDAR", optstr) == 0) {
                 sscanf(cmdstr, "%*s %s", flgstr);
-                global_param.calendar = calendar_from_chars(flgstr);
+                global_param.calendar = str_to_calendar(flgstr);
             }
             else if (strcasecmp("OUT_TIME_UNITS", optstr) == 0) {
                 sscanf(cmdstr, "%*s %s", flgstr);
-                global_param.time_units = timeunits_from_chars(flgstr);
+                global_param.time_units = str_to_timeunits(flgstr);
             }
             else if (strcasecmp("FULL_ENERGY", optstr) == 0) {
                 sscanf(cmdstr, "%*s %s", flgstr);
@@ -615,39 +615,6 @@ get_global_param(FILE *gp)
             else if (strcasecmp("RESULT_DIR", optstr) == 0) {
                 sscanf(cmdstr, "%*s %s", filenames.result_dir);
             }
-            else if (strcasecmp("OUTPUT_STEPS_PER_DAY", optstr) == 0) {
-                sscanf(cmdstr, "%*s %zu", &global_param.output_steps_per_day);
-            }
-            else if (strcasecmp("SKIPYEAR", optstr) == 0) {
-                sscanf(cmdstr, "%*s %hu", &global_param.skipyear);
-            }
-            else if (strcasecmp("ALMA_OUTPUT", optstr) == 0) {
-                sscanf(cmdstr, "%*s %s", flgstr);
-                if (strcasecmp("TRUE", flgstr) == 0) {
-                    options.ALMA_OUTPUT = true;
-                }
-                else {
-                    options.ALMA_OUTPUT = false;
-                }
-            }
-            else if (strcasecmp("MOISTFRACT", optstr) == 0) {
-                sscanf(cmdstr, "%*s %s", flgstr);
-                if (strcasecmp("TRUE", flgstr) == 0) {
-                    options.MOISTFRACT = true;
-                }
-                else {
-                    options.MOISTFRACT = false;
-                }
-            }
-            else if (strcasecmp("PRT_SNOW_BAND", optstr) == 0) {
-                sscanf(cmdstr, "%*s %s", flgstr);
-                if (strcasecmp("TRUE", flgstr) == 0) {
-                    options.PRT_SNOW_BAND = true;
-                }
-                else {
-                    options.PRT_SNOW_BAND = false;
-                }
-            }
 
             /*************************************
                Define output file contents
@@ -656,6 +623,18 @@ get_global_param(FILE *gp)
                 ; // do nothing
             }
             else if (strcasecmp("OUTVAR", optstr) == 0) {
+                ; // do nothing
+            }
+            else if (strcasecmp("OUTPUT_STEPS_PER_DAY", optstr) == 0) {
+                ; // do nothing
+            }
+            else if (strcasecmp("SKIPYEAR", optstr) == 0) {
+                ; // do nothing
+            }
+            else if (strcasecmp("COMPRESS", optstr) == 0) {
+                ; // do nothing
+            }
+            else if (strcasecmp("OUT_FORMAT", optstr) == 0) {
                 ; // do nothing
             }
             // vegetation history not yet implemented in image mode
@@ -737,6 +716,21 @@ get_global_param(FILE *gp)
             }
             else if (strcasecmp("FORCESEC", optstr) == 0) {
                 log_err("FORCESEC has been deprecated in the image driver");
+            }
+            else if (strcasecmp("ALMA_OUTPUT", optstr) == 0) {
+                log_err("ALMA_OUTPUT has been deprecated, update your global "
+                        "parameter file accordingly");
+            }
+            else if (strcasecmp("MOISTFRACT", optstr) == 0) {
+                log_err("MOISTFRACT has been deprecated and has been replaced "
+                        "with two new output variables OUT_SOIL_ICE_FRAC and "
+                        "OUT_SOIL_LIQ_FRAC, update your global parameter file "
+                        "accordingly");
+            }
+            else if (strcasecmp("PRT_SNOW_BAND", optstr) == 0) {
+                log_err("PRT_SNOW_BAND has been deprecated. To output band "
+                        "specific variables, directly specify them in the "
+                        "global parameter file");
             }
 
             /*************************************
@@ -894,47 +888,6 @@ get_global_param(FILE *gp)
     }
     global_param.atmos_dt = SEC_PER_DAY /
                             (double) global_param.atmos_steps_per_day;
-
-    // Validate the output step
-    if (global_param.output_steps_per_day == 0) {
-        global_param.output_steps_per_day = global_param.model_steps_per_day;
-    }
-    if (global_param.output_steps_per_day > global_param.model_steps_per_day) {
-        log_err("Invalid value for OUTPUT_STEPS_PER_DAY (%zu).  "
-                "OUTPUT_STEPS_PER_DAY must be <= MODEL_STEPS_PER_DAY (%zu)",
-                global_param.output_steps_per_day,
-                global_param.model_steps_per_day);
-    }
-    else if (global_param.model_steps_per_day %
-             global_param.output_steps_per_day != 0) {
-        log_err("Invalid value for OUTPUT_STEPS_PER_DAY (%zu).  "
-                "MODEL_STEPS_PER_DAY (%zu) must be a multiple of "
-                "OUTPUT_STEPS_PER_DAY.",
-                global_param.output_steps_per_day,
-                global_param.model_steps_per_day);
-    }
-    else if (global_param.output_steps_per_day != 1 &&
-             global_param.output_steps_per_day < MIN_SUBDAILY_STEPS_PER_DAY) {
-        log_err("The specified number of output steps per day (%zu) > 1 and < "
-                "the minimum number of subdaily steps per day (%d).  Make "
-                "sure that the global file defines OUTPUT_STEPS_PER_DAY of at "
-                "least (%d).", global_param.model_steps_per_day,
-                MIN_SUBDAILY_STEPS_PER_DAY,
-                MIN_SUBDAILY_STEPS_PER_DAY);
-    }
-    else if (global_param.output_steps_per_day >
-             MAX_SUBDAILY_STEPS_PER_DAY) {
-        log_err("The specified number of model steps per day (%zu) > the "
-                "the maximum number of subdaily steps per day (%d).  Make "
-                "sure that the global file defines MODEL_STEPS_PER_DAY of at "
-                "most (%d).", global_param.model_steps_per_day,
-                MAX_SUBDAILY_STEPS_PER_DAY,
-                MAX_SUBDAILY_STEPS_PER_DAY);
-    }
-    else {
-        global_param.out_dt = SEC_PER_DAY /
-                              (double) global_param.output_steps_per_day;
-    }
 
     // set NR and NF
     NF = global_param.snow_steps_per_day / global_param.model_steps_per_day;
@@ -1284,9 +1237,6 @@ get_global_param(FILE *gp)
     // Default file formats (if unset)
     if (options.SAVE_STATE && options.STATE_FORMAT == UNSET_FILE_FORMAT) {
         options.STATE_FORMAT = NETCDF4_CLASSIC;
-    }
-    if (options.OUT_FORMAT == UNSET_FILE_FORMAT) {
-        options.OUT_FORMAT = NETCDF4_CLASSIC;
     }
 
     /*********************************

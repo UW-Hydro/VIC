@@ -23,6 +23,7 @@ from test_image_driver import assert_nan_equal
 test_dir = os.path.dirname(os.path.abspath(__file__))
 
 OUTPUT_WIDTH = 100
+ERROR_TAIL = 20  # lines
 
 description = '''
                             VIC Test Suite
@@ -84,11 +85,11 @@ class TestResults(object):
                                                                   self.comment)
 
 
-class VICReturnCodeError(BaseException):
+class VICReturnCodeError(Exception):
     pass
 
 
-class VICValgrindError(BaseException):
+class VICValgrindError(Exception):
     pass
 
 
@@ -291,6 +292,10 @@ def run_system(config_file, vic_exe, test_data_dir, out_dir, driver):
 
     # Get setup
     config = read_configobj(config_file)
+
+    # drop invalid driver tests
+    config = drop_tests(config, driver)
+
     test_results = OrderedDict()
 
     # Run individual system tests
@@ -337,7 +342,7 @@ def run_system(config_file, vic_exe, test_data_dir, out_dir, driver):
                 f.write(line)
 
         # Get optional kwargs for run executable
-        run_kwargs = pop_run_kwargs(config)
+        run_kwargs = pop_run_kwargs(test_dict)
 
         # run VIC
         test_complete = False
@@ -349,8 +354,6 @@ def run_system(config_file, vic_exe, test_data_dir, out_dir, driver):
             # Run the VIC simulation
             returncode = vic_exe.run(test_global_file, logdir=dirs['logs'],
                                      **run_kwargs)
-            print('---->DEBUG--->', run_kwargs)
-            print('---->DEBUG--->', vic_exe.argstring)
             test_complete = True
 
             # Check return code
@@ -371,7 +374,6 @@ def run_system(config_file, vic_exe, test_data_dir, out_dir, driver):
                     elif driver == 'image':
                         domain_file = os.path.join(test_data_dir,
                                                    test_dict['domain_file'])
-                        print('---->DEBUG--->', domain_file)
                         test_image_driver_no_output_file_nans(fnames, domain_file)
                     else:
                         raise ValueError('unknown driver')
@@ -381,11 +383,7 @@ def run_system(config_file, vic_exe, test_data_dir, out_dir, driver):
 
         # Handle errors
         except Exception as e:
-            test_comment, error_message, _ = process_error(e, vic_exe)
-
-        if test_comment or error_message:
-            print('\t{0}'.format(test_comment))
-            print('\t{0}'.format(error_message))
+            test_comment, error_message = process_error(e, vic_exe)
 
         # record the test results
         test_results[testname] = TestResults(testname,
@@ -439,6 +437,9 @@ def run_science(config_file, vic_exe, test_data_dir, out_dir, driver):
     # Get setup
     config = read_config(config_file)
 
+    # drop invalid driver tests
+    config = drop_tests(config, driver)
+
     test_results = OrderedDict()
 
     # Run individual tests
@@ -476,7 +477,7 @@ def run_science(config_file, vic_exe, test_data_dir, out_dir, driver):
             f.write(global_param)
 
         # Get optional kwargs for run executable
-        run_kwargs = pop_run_kwargs(config)
+        run_kwargs = pop_run_kwargs(test_dict)
 
         # run VIC
         test_complete = False
@@ -488,7 +489,6 @@ def run_science(config_file, vic_exe, test_data_dir, out_dir, driver):
             # Run the VIC simulation
             returncode = vic_exe.run(test_global_file, logdir=dirs['logs'],
                                      **run_kwargs)
-            print('---->DEBUG--->', vic_exe.argstring)
             test_complete = True
 
             # Check return code
@@ -509,7 +509,6 @@ def run_science(config_file, vic_exe, test_data_dir, out_dir, driver):
                     elif driver == 'image':
                         domain_file = os.path.join(test_data_dir,
                                                    test_dict['domain_file'])
-                        print('---->DEBUG--->', domain_file)
                         test_image_driver_no_output_file_nans(fnames, domain_file)
                     else:
                         raise ValueError('unknown driver')
@@ -519,11 +518,7 @@ def run_science(config_file, vic_exe, test_data_dir, out_dir, driver):
 
         # Handle errors
         except Exception as e:
-            test_comment, error_message, _ = process_error(e, vic_exe)
-
-        if test_comment or error_message:
-            print('\t{0}'.format(test_comment))
-            print('\t{0}'.format(error_message))
+            test_comment, error_message = process_error(e, vic_exe)
 
         # record the test results
         test_results[testname] = TestResults(testname,
@@ -578,12 +573,7 @@ def run_examples(config_file, vic_exe, test_data_dir, out_dir, driver):
     config = read_config(config_file)
 
     # drop invalid driver tests
-    drop_tests = []
-    for key, test_cfg in config.items():
-        if test_cfg['driver'].lower() != driver.lower():
-            drop_tests.append(key)
-    for test in drop_tests:
-        del config[test]
+    config = drop_tests(config, driver)
 
     test_results = OrderedDict()
 
@@ -622,7 +612,7 @@ def run_examples(config_file, vic_exe, test_data_dir, out_dir, driver):
             f.write(global_param)
 
         # Get optional kwargs for run executable
-        run_kwargs = pop_run_kwargs(config)
+        run_kwargs = pop_run_kwargs(test_dict)
 
         # run VIC
         test_complete = False
@@ -634,7 +624,6 @@ def run_examples(config_file, vic_exe, test_data_dir, out_dir, driver):
             # Run the VIC simulation
             returncode = vic_exe.run(test_global_file, logdir=dirs['logs'],
                                      **run_kwargs)
-            print('---->DEBUG--->', vic_exe.argstring)
             test_complete = True
 
             # Check return code
@@ -655,7 +644,6 @@ def run_examples(config_file, vic_exe, test_data_dir, out_dir, driver):
                     elif driver == 'image':
                         domain_file = os.path.join(test_data_dir,
                                                    test_dict['domain_file'])
-                        print('---->DEBUG--->', domain_file)
                         test_image_driver_no_output_file_nans(fnames, domain_file)
                     else:
                         raise ValueError('unknown driver')
@@ -665,14 +653,7 @@ def run_examples(config_file, vic_exe, test_data_dir, out_dir, driver):
 
         # Handle errors
         except Exception as e:
-            test_comment, error_message, tail = process_error(e, vic_exe)
-
-        if test_comment or error_message:
-            print('\t{0}'.format(test_comment))
-            print('\t{0}'.format(error_message))
-            if tail is not None:
-                print('\tLast 10 lines of standard out:')
-                print_tail(tail)
+            test_comment, error_message = process_error(e, vic_exe)
 
         # record the test results
         test_results[testname] = TestResults(testname,
@@ -723,10 +704,10 @@ def print_test_dict(d):
         print('-'.ljust(OUTPUT_WIDTH, '-'))
 
 
-def print_tail(string, n=10, indent='\t--->'):
+def print_tail(string, n=20, indent='\t--->'):
     '''print tail of multiline string'''
     lines = string.decode().splitlines()
-    for l in lines[-10:]:
+    for l in lines[-n:]:
         print('{0}{1}'.format(indent, l))
 
 
@@ -757,6 +738,18 @@ def replace_global_values(gp, replace):
     return gpl
 
 
+def drop_tests(config, driver):
+    '''helper function to remove tests that should not be run for driver'''
+    new = {}
+    for key, test_cfg in config.items():
+        try:
+            if test_cfg['driver'].lower() == driver.lower():
+                new[key] = test_cfg
+        except KeyError:
+            raise KeyError('test configuration must specify driver')
+    return new
+
+
 def pop_run_kwargs(config):
     '''pop run kwargs for VIC executable'''
     run_kwargs = {}
@@ -777,7 +770,7 @@ def check_returncode(returncode, expected=0):
 
 
 def process_error(error, vic_exe):
-    ''' '''
+    '''Helper function to process possible error raised during testing'''
     if isinstance(error, VICRuntimeError):
         test_comment = 'Test failed during simulation'
         error_message = error
@@ -797,7 +790,13 @@ def process_error(error, vic_exe):
     else:
         raise error
 
-    return test_comment, error_message, tail
+    print('\t{0}'.format(test_comment))
+    print('\t{0}'.format(error_message))
+    if tail is not None:
+        print('\tLast {0} lines of standard out:'.format(ERROR_TAIL))
+        print_tail(tail, n=ERROR_TAIL)
+
+    return test_comment, error_message
 
 
 def test_classic_driver_all_complete(fnames):

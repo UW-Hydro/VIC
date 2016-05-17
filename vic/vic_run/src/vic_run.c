@@ -358,7 +358,7 @@ vic_run(atmos_data_struct   *atmos,
                     cell[iveg][band].rootmoist = 0;
                     cell[iveg][band].wetness = 0;
                     for (lidx = 0; lidx < options.Nlayer; lidx++) {
-                        if (veg_con->root[lidx] > 0) {
+                        if (veg_con[iveg].root[lidx] > 0) {
                             cell[iveg][band].rootmoist +=
                                 cell[iveg][band].layer[lidx].moist;
                         }
@@ -476,7 +476,8 @@ vic_run(atmos_data_struct   *atmos,
         **********************************************************************/
 
         ErrorFlag = water_balance(lake_var, *lake_con, gp->dt, all_vars,
-                                  iveg, band, lakefrac, *soil_con, *veg_con);
+                                  iveg, band, lakefrac, *soil_con,
+                                  veg_con[iveg]);
         if (ErrorFlag == ERROR) {
             return (ERROR);
         }

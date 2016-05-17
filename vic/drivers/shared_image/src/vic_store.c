@@ -1288,6 +1288,78 @@ vic_store(dmy_struct *dmy_current)
         dimids[i] = -1;
     }
 
+    // Outgoing longwave from understory: energy[veg][band].LongUnderOut
+    // This is a flux, and saving it to state file is a temporary solution!!
+    ndims = 4;
+    dimids[0] = nc_state_file.veg_dimid;
+    dimids[1] = nc_state_file.band_dimid;
+    dimids[2] = nc_state_file.nj_dimid;
+    dimids[3] = nc_state_file.ni_dimid;
+    for (m = 0; m < options.NVEGTYPES; m++) {
+        d4start[0] = m;
+        for (k = 0; k < options.SNOW_BAND; k++) {
+            d4start[1] = k;
+            for (i = 0; i < local_domain.ncells_active; i++) {
+                v = veg_con_map[i].vidx[m];
+                if (v >= 0) {
+                    dvar[i] = (double)
+                              all_vars[i].energy[v][k].LongUnderOut;
+                }
+                else {
+                    dvar[i] = nc_state_file.d_fillvalue;
+                }
+            }
+            gather_put_nc_field_double(nc_state_file.fname,
+                                       &(nc_state_file.open),
+                                       &(nc_state_file.nc_id),
+                                       nc_state_file.d_fillvalue,
+                                       dimids, ndims, "Energy_LongUnderOut",
+                                       d4start, d4count, dvar);
+            for (i = 0; i < local_domain.ncells_active; i++) {
+                dvar[i] = nc_state_file.d_fillvalue;
+            }
+        }
+    }
+    for (i = 0; i < ndims; i++) {
+        dimids[i] = -1;
+    }
+
+    // Thermal flux through the snow pack: energy[veg][band].snow_flux
+    // This is a flux, and saving it to state file is a temporary solution!!
+    ndims = 4;
+    dimids[0] = nc_state_file.veg_dimid;
+    dimids[1] = nc_state_file.band_dimid;
+    dimids[2] = nc_state_file.nj_dimid;
+    dimids[3] = nc_state_file.ni_dimid;
+    for (m = 0; m < options.NVEGTYPES; m++) {
+        d4start[0] = m;
+        for (k = 0; k < options.SNOW_BAND; k++) {
+            d4start[1] = k;
+            for (i = 0; i < local_domain.ncells_active; i++) {
+                v = veg_con_map[i].vidx[m];
+                if (v >= 0) {
+                    dvar[i] = (double)
+                              all_vars[i].energy[v][k].snow_flux;
+                }
+                else {
+                    dvar[i] = nc_state_file.d_fillvalue;
+                }
+            }
+            gather_put_nc_field_double(nc_state_file.fname,
+                                       &(nc_state_file.open),
+                                       &(nc_state_file.nc_id),
+                                       nc_state_file.d_fillvalue,
+                                       dimids, ndims, "Energy_snow_flux",
+                                       d4start, d4count, dvar);
+            for (i = 0; i < local_domain.ncells_active; i++) {
+                dvar[i] = nc_state_file.d_fillvalue;
+            }
+        }
+    }
+    for (i = 0; i < ndims; i++) {
+        dimids[i] = -1;
+    }
+
     if (options.LAKES) {
         // total soil moisture
         ndims = 3;

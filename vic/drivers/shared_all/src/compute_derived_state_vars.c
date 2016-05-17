@@ -109,11 +109,9 @@ compute_derived_state_vars(all_vars_struct *all_vars,
         }
     }
 
-
     /******************************************
        Compute soil thermal node properties
     ******************************************/
-
     FIRST_VEG = true;
     for (veg = 0; veg <= Nveg; veg++) {
         // Initialize soil for existing vegetation types

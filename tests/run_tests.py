@@ -507,8 +507,9 @@ def run_science(config_file, vic_exe, test_data_dir, out_dir, driver):
                     if driver == 'classic':
                         test_classic_driver_no_output_file_nans(fnames)
                     elif driver == 'image':
-                        domain_file = os.path.join(test_dir, 'system',
+                        domain_file = os.path.join(test_data_dir,
                                                    test_dict['domain_file'])
+                        print('---->DEBUG--->', domain_file)
                         test_image_driver_no_output_file_nans(fnames, domain_file)
                     else:
                         raise ValueError('unknown driver')
@@ -652,8 +653,9 @@ def run_examples(config_file, vic_exe, test_data_dir, out_dir, driver):
                     if driver == 'classic':
                         test_classic_driver_no_output_file_nans(fnames)
                     elif driver == 'image':
-                        domain_file = os.path.join(test_dir, 'system',
+                        domain_file = os.path.join(test_data_dir,
                                                    test_dict['domain_file'])
+                        print('---->DEBUG--->', domain_file)
                         test_image_driver_no_output_file_nans(fnames, domain_file)
                     else:
                         raise ValueError('unknown driver')

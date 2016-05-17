@@ -357,10 +357,6 @@ read_initial_model_state(FILE            *init_state,
                 }
                 snow[veg][band].MELTING = (char)tmp_char;
             }
-            if (snow[veg][band].density > 0.) {
-                snow[veg][band].depth = MM_PER_M * snow[veg][band].swq /
-                                        snow[veg][band].density;
-            }
 
             /* Read soil thermal node temperatures */
             for (nidx = 0; nidx < options.Nnode; nidx++) {

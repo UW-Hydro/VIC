@@ -57,9 +57,11 @@ compute_derived_state_vars(all_vars_struct *all_vars,
 
     cell_data_struct         **cell;
     energy_bal_struct        **energy;
+    snow_data_struct         **snow;
 
     cell = all_vars->cell;
     energy = all_vars->energy;
+    snow = all_vars->snow;
     Nveg = veg_con[0].vegetat_type_num;
 
     /******************************************
@@ -94,6 +96,19 @@ compute_derived_state_vars(all_vars_struct *all_vars,
             }
         }
     }
+
+    /******************************************
+       Compute derived soil snow state vars
+    ******************************************/
+    for (veg = 0; veg <= Nveg; veg++) {
+        for (band = 0; band < options.SNOW_BAND; band++) {
+            if (snow[veg][band].density > 0.) {
+                snow[veg][band].depth = MM_PER_M * snow[veg][band].swq /
+                                        snow[veg][band].density;
+            }
+        }
+    }
+
 
     /******************************************
        Compute soil thermal node properties

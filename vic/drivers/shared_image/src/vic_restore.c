@@ -486,6 +486,59 @@ vic_restore(void)
         }
     }
 
+    // Foliage temperature: energy[veg][band].Tfoliage
+    for (m = 0; m < options.NVEGTYPES; m++) {
+        d4start[0] = m;
+        for (k = 0; k < options.SNOW_BAND; k++) {
+            d4start[1] = k;
+            get_scatter_nc_field_double(filenames.init_state,
+                                        "Foliage_temperature",
+                                        d4start, d4count, dvar);
+            for (i = 0; i < local_domain.ncells_active; i++) {
+                v = veg_con_map[i].vidx[m];
+                if (v >= 0) {
+                    all_vars[i].energy[v][k].Tfoliage = dvar[i];
+                }
+            }
+        }
+    }
+
+    // Outgoing longwave from understory: energy[veg][band].LongUnderOut
+    // This is a flux. Saving it to state file is a temporary solution!!
+    for (m = 0; m < options.NVEGTYPES; m++) {
+        d4start[0] = m;
+        for (k = 0; k < options.SNOW_BAND; k++) {
+            d4start[1] = k;
+            get_scatter_nc_field_double(filenames.init_state,
+                                        "Energy_LongUnderOut",
+                                        d4start, d4count, dvar);
+            for (i = 0; i < local_domain.ncells_active; i++) {
+                v = veg_con_map[i].vidx[m];
+                if (v >= 0) {
+                    all_vars[i].energy[v][k].LongUnderOut = dvar[i];
+                }
+            }
+        }
+    }
+
+    // Thermal flux through the snow pack: energy[veg][band].snow_flux
+    // This is a flux. Saving it to state file is a temporary solution!!
+    for (m = 0; m < options.NVEGTYPES; m++) {
+        d4start[0] = m;
+        for (k = 0; k < options.SNOW_BAND; k++) {
+            d4start[1] = k;
+            get_scatter_nc_field_double(filenames.init_state,
+                                        "Energy_snow_flux",
+                                        d4start, d4count, dvar);
+            for (i = 0; i < local_domain.ncells_active; i++) {
+                v = veg_con_map[i].vidx[m];
+                if (v >= 0) {
+                    all_vars[i].energy[v][k].snow_flux = dvar[i];
+                }
+            }
+        }
+    }
+
     if (options.LAKES) {
         // total soil moisture
         for (j = 0; j < options.Nlayer; j++) {

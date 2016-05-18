@@ -100,7 +100,9 @@ write_model_state(all_vars_struct *all_vars,
                   (Nveg + 1) * Nbands * sizeof(char) + // MELTING
                   (Nveg + 1) * Nbands * sizeof(double) * 9 + // other snow parameters
                   (Nveg + 1) * Nbands * options.Nnode * sizeof(double) + // soil temperatures
-                  (Nveg + 1) * Nbands * sizeof(double); // Tfoliage
+                  (Nveg + 1) * Nbands * sizeof(double) + // Tfoliage
+                  (Nveg + 1) * Nbands * sizeof(double) + // energy.LongUnderOut
+                  (Nveg + 1) * Nbands * sizeof(double); // energy.snow_flux
         if (options.LAKES) {
             /* Lake/wetland tiles have lake-specific state vars */
             Nbytes += sizeof(int) + // activenod
@@ -320,6 +322,28 @@ write_model_state(all_vars_struct *all_vars,
             else {
                 fprintf(filep->statefile, " "ASCII_STATE_FLOAT_FMT,
                         energy[veg][band].Tfoliage);
+            }
+
+            /* Write outgoing longwave from understory */
+            /* TO-DO: this is a flux. Saving it to the state file is a temporary solution! */
+            if (options.STATE_FORMAT == BINARY) {
+                fwrite(&energy[veg][band].LongUnderOut, sizeof(double), 1,
+                       filep->statefile);
+            }
+            else {
+                fprintf(filep->statefile, " "ASCII_STATE_FLOAT_FMT,
+                        energy[veg][band].LongUnderOut);
+            }
+
+            /* Write thermal flux through the snow pack */
+            /* TO-DO: this is a flux. Saving it to the state file is a temporary solution! */
+            if (options.STATE_FORMAT == BINARY) {
+                fwrite(&energy[veg][band].snow_flux, sizeof(double), 1,
+                       filep->statefile);
+            }
+            else {
+                fprintf(filep->statefile, " "ASCII_STATE_FLOAT_FMT,
+                        energy[veg][band].snow_flux);
             }
 
             if (options.STATE_FORMAT == ASCII) {

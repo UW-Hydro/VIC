@@ -695,7 +695,7 @@ def setup_test_dirs(testname, out_dir, mkdirs=['results', 'state',
 
 
 def print_test_dict(d):
-    '''print a nicely formatated set of test results'''
+    '''print a nicely formatted set of test results'''
     print('{0: <48} | {1: <6} | {2}'.format('Test Name', 'Passed', 'Comment'))
     print('-'.ljust(OUTPUT_WIDTH, '-'))
     for k, v in d.items():
@@ -780,7 +780,7 @@ def process_error(error, vic_exe):
         error_message = error
         tail = None
     elif isinstance(error, VICValgrindError):
-        test_comment = 'Test failed do to memory error detected by valgrind'
+        test_comment = 'Test failed due to memory error detected by valgrind'
         error_message = error
         tail = vic_exe.stderr
     elif isinstance(error, VICReturnCodeError):

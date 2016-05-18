@@ -9,22 +9,21 @@ import argparse
 import datetime
 from collections import OrderedDict
 import string
-import numpy as np
 import xarray as xr
-import numpy.testing as npt 
 
 import pytest
 import pandas as pd
 
-from tonic.models.vic.vic import VIC, VICRuntimeError  # , read_vic_ascii
+from tonic.models.vic.vic import (VIC, VICRuntimeError,
+                                  default_vic_valgrind_error_code)
 from tonic.io import read_config, read_configobj
 from tonic.testing import check_completed, check_for_nans, VICTestError
-from test_image_driver import assert_nan_equal 
+from test_image_driver import assert_nan_equal
 
 test_dir = os.path.dirname(os.path.abspath(__file__))
 
-
 OUTPUT_WIDTH = 100
+ERROR_TAIL = 20  # lines
 
 description = '''
                             VIC Test Suite
@@ -86,25 +85,23 @@ class TestResults(object):
                                                                   self.comment)
 
 
-# -------------------------------------------------------------------- #
-class VICReturnCodeError(BaseException):
+class VICReturnCodeError(Exception):
     pass
-# -------------------------------------------------------------------- #
 
 
-# -------------------------------------------------------------------- #
+class VICValgrindError(Exception):
+    pass
+
+
 def main():
     '''
     Run VIC tests
     '''
 
-    # ---------------------------------------------------------------- #
     # dates and times
     starttime = datetime.datetime.now()
     ymd = starttime.strftime('%Y%m%d')
-    # ---------------------------------------------------------------- #
 
-    # ---------------------------------------------------------------- #
     # Parse arguments
     test_results = OrderedDict()
 
@@ -142,42 +139,32 @@ def main():
                         help='directory to find test data',
                         default='./samples/VIC_sample_data')
     args = parser.parse_args()
-    # ---------------------------------------------------------------- #
 
-    # ---------------------------------------------------------------- #
     # Define test directories
     data_dir = args.data_dir
     out_dir = os.path.expandvars(args.output_dir)
     os.makedirs(out_dir, exist_ok=True)
-    # ---------------------------------------------------------------- #
 
-    # ---------------------------------------------------------------- #
     # Validate input directories
     if not (len(args.tests) == 1 and args.tests[0] == 'unit'):
         for d in [data_dir, test_dir]:
             if not os.path.exists(d):
                 raise VICTestError('Directory: {0} does not exist'.format(d))
-    # ---------------------------------------------------------------- #
 
-    # ---------------------------------------------------------------- #
     # Print welcome information
     print(description)
     print('\nStarting tests now...Start Time: {0}\n'.format(starttime))
     print('Running Test Set: {0}'.format(', '.join(args.tests)))
-    # ---------------------------------------------------------------- #
 
-    # ---------------------------------------------------------------- #
     # Setup VIC executable
     if not (len(args.tests) == 1 and args.tests[0] == 'unit'):
         vic_exe = VIC(args.vic_exe)
         print('VIC version string:\n{0}'.format(vic_exe.version.decode()))
-    # ---------------------------------------------------------------- #
 
-    # ---------------------------------------------------------------- #
     # run test sets
     # unit
     if any(i in ['all', 'unit'] for i in args.tests):
-        test_results['unit'] = run_unit_tests()
+        test_results['unit'] = run_unit_tests(test_dir)
 
     # system
     if any(i in ['all', 'system'] for i in args.tests):
@@ -187,7 +174,8 @@ def main():
     # science
     if any(i in ['all', 'science'] for i in args.tests):
         test_results['science'] = run_science(args.science, vic_exe, data_dir,
-                                              os.path.join(out_dir, 'science'))
+                                              os.path.join(out_dir, 'science'),
+                                              args.driver)
     # examples
     if any(i in ['all', 'examples'] for i in args.tests):
         test_results['examples'] = run_examples(args.examples, vic_exe, data_dir,
@@ -196,9 +184,7 @@ def main():
     # release
     if any(i in ['all', 'release'] for i in args.tests):
         test_results['release'] = run_release(args.release)
-    # ---------------------------------------------------------------- #
 
-    # ---------------------------------------------------------------- #
     # Print test results
     summary = OrderedDict()
     failed = 0
@@ -221,28 +207,38 @@ def main():
     for test_set, r in summary.items():
         print('Failed tests in {0}: {1}'.format(test_set, r))
     print('-'.ljust(OUTPUT_WIDTH, '-'))
-    # ---------------------------------------------------------------- #
 
-    # ---------------------------------------------------------------- #
     # end date and times
     endtime = datetime.datetime.now()
     elapsed = endtime - starttime
     print('\nFinished testing VIC. Endtime: {0}'.format(endtime))
     print('Time elapsed during testing:  {0}\n'.format(elapsed))
-    # ---------------------------------------------------------------- #
 
-    # ---------------------------------------------------------------- #
     # return exit code
     sys.exit(failed)
-    # ---------------------------------------------------------------- #
-
-    return
-# -------------------------------------------------------------------- #
 
 
-# -------------------------------------------------------------------- #
-def run_unit_tests():
-    '''Run unittests from config file'''
+def run_unit_tests(test_dir):
+    '''Run unittests in test_dir
+
+    Parameters
+    ----------
+    test_dir : str
+        Path to unittests
+
+    Returns
+    -------
+    test_results : dict
+        Test results for all tests in config_file.
+
+    See Also
+    --------
+    run_system
+    run_examples
+    run_science
+    run_release
+
+    '''
 
     print('\n-'.ljust(OUTPUT_WIDTH + 1, '-'))
     print('Running Unit Tests')
@@ -258,75 +254,85 @@ def run_unit_tests():
     print('\n-'.ljust(OUTPUT_WIDTH + 1, '-'))
     print('Finished unit tests.')
     print('-'.ljust(OUTPUT_WIDTH, '-'))
-# -------------------------------------------------------------------- #
 
 
-# -------------------------------------------------------------------- #
 def run_system(config_file, vic_exe, test_data_dir, out_dir, driver):
-    '''Run system tests from config file'''
+    '''Run system tests from config file
 
-    # ---------------------------------------------------------------- #
+    Parameters
+    ----------
+    config_file : str
+        Configuration file for system tests.
+    vic_exe : VIC (object)
+        VIC executable object (see tonic documentation).
+    test_data_dir : str
+        Path to test data sets.
+    out_dir : str
+        Path to output location
+    driver : {'classic', 'image'}
+        Driver to run tests on.
+
+    Returns
+    -------
+    test_results : dict
+        Test results for all tests in config_file.
+
+    See Also
+    --------
+    run_unit_tests
+    run_examples
+    run_science
+    run_release
+    '''
+
     # Print test set welcome
     print('\n-'.ljust(OUTPUT_WIDTH + 1, '-'))
     print('Running System Tests')
     print('-'.ljust(OUTPUT_WIDTH, '-'))
-    # ---------------------------------------------------------------- #
 
-    # ---------------------------------------------------------------- #
     # Get setup
     config = read_configobj(config_file)
-    test_results = OrderedDict()
-    # ---------------------------------------------------------------- #
 
-    # ---------------------------------------------------------------- #
+    # drop invalid driver tests
+    config = drop_tests(config, driver)
+
+    test_results = OrderedDict()
+
     # Run individual system tests
     for i, (testname, test_dict) in enumerate(config.items()):
 
-        # ------------------------------------------------------------ #
         # print out status info
         print('Running test {0}/{1}: {2}'.format(i + 1, len(config.items()),
                                                  testname))
-        # ------------------------------------------------------------ #
 
-        # ------------------------------------------------------------ #
         # Setup directories for test
         dirs = setup_test_dirs(testname, out_dir,
                                mkdirs=['results', 'state', 'logs', 'plots'])
-        # ------------------------------------------------------------ #
 
-        # ------------------------------------------------------------ #
         # read template global parameter file
         infile = os.path.join(test_dir, 'system',
                               test_dict['global_parameter_file'])
 
         with open(infile, 'r') as global_file:
             global_param = global_file.read()
-        # ------------------------------------------------------------ #
 
-        # ------------------------------------------------------------ #
         # create template string
         s = string.Template(global_param)
-        # ------------------------------------------------------------ #
 
-        # ------------------------------------------------------------ #
         # fill in global parameter options
         global_param = s.safe_substitute(test_data_dir=test_data_dir,
                                          result_dir=dirs['results'],
                                          state_dir=dirs['state'],
                                          testname=testname,
                                          test_root=test_dir)
-        # ------------------------------------------------------------ #
 
-        # ------------------------------------------------------------ #
         # replace global options from config file
         if 'options' in test_dict:
             replacements = test_dict['options']
         else:
             replacements = OrderedDict()
         global_param = replace_global_values(global_param, replacements)
-        # ------------------------------------------------------------ #
 
-        # ------------------------------------------------------------ #
         # write global parameter file
         test_global_file = os.path.join(dirs['test'],
                                         '{0}_globalparam.txt'.format(testname))
@@ -334,9 +340,10 @@ def run_system(config_file, vic_exe, test_data_dir, out_dir, driver):
         with open(test_global_file, mode='w') as f:
             for line in global_param:
                 f.write(line)
-        # ------------------------------------------------------------ #
 
-        # ------------------------------------------------------------ #
+        # Get optional kwargs for run executable
+        run_kwargs = pop_run_kwargs(test_dict)
+
         # run VIC
         test_complete = False
         test_passed = False
@@ -344,72 +351,40 @@ def run_system(config_file, vic_exe, test_data_dir, out_dir, driver):
         error_message = ''
 
         try:
-            returncode = vic_exe.run(test_global_file, logdir=dirs['logs'])
+            # Run the VIC simulation
+            returncode = vic_exe.run(test_global_file, logdir=dirs['logs'],
+                                     **run_kwargs)
             test_complete = True
 
-            expectation = test_dict['expected_retval']
-            if returncode != int(test_dict['expected_retval']):
-                raise VICReturnCodeError('VIC return code ({0}) '
-                                         'does not match expected '
-                                         '({1})'.format(returncode,
-                                                        expectation))
+            # Check return code
+            check_returncode(returncode, test_dict.pop('expected_retval', 0))
 
-            # -------------------------------------------------------- #
             # check output files (different tests depending on driver)
             if test_dict['check']:
-                    if 'complete' in test_dict['check']:
-                        start = None
-                        end = None
-                        
-                        if driver == "classic": 
-                    
-                            for fname in glob.glob(os.path.join(dirs['results'], '*')):
-                                df = read_vic_ascii(fname, header=True)
-                                # do numeric tests
+                fnames = glob.glob(os.path.join(dirs['results'], '*'))
 
-                                # check that each dataframe includes all timestamps
-                                if (start is not None) and (end is not None):
-                                    check_completed(df, start, end)
-                                else:
-                                    start = df.index[0]
-                                    end = df.index[-1]
-                    
-                    if 'output_file_nans' in test_dict['check']:
+                # Check that the simulation completed for all grid cells
+                if 'complete' in test_dict['check'] and driver == 'classic':
+                    test_classic_driver_all_complete(fnames)
 
-                        if driver == "classic": 
-                            # check for nans in the df 
-                            check_for_nans(df) 
+                # check for nans in all example files
+                if 'output_file_nans' in test_dict['check']:
+                    if driver == 'classic':
+                        test_classic_driver_no_output_file_nans(fnames)
+                    elif driver == 'image':
+                        domain_file = os.path.join(test_data_dir,
+                                                   test_dict['domain_file'])
+                        test_image_driver_no_output_file_nans(fnames, domain_file)
+                    else:
+                        raise ValueError('unknown driver')
 
-                        elif driver == "image": 
-                            # check for nans in all output files
-                            for fname in glob.glob(os.path.join(dirs['results'], '*.nc')):  
-                                ds_domain = xr.open_dataset(os.path.join(test_dir, 'system', 
-                                                            test_dict['domain_file']))
-                                ds_output = xr.open_dataset(os.path.join(dirs['results'], fname)) 
-                                assert_nan_equal(ds_domain, ds_output) 
-                    
-            # -------------------------------------------------------- #
             # if we got this far, the test passed.
             test_passed = True
-            # -------------------------------------------------------- #
 
         # Handle errors
-        except VICRuntimeError as e:
-            test_comment = 'Test failed during simulation'
-            error_message = e
-        except VICTestError as e:
-            test_comment = 'Test failed during testing of output files'
-            error_message = e
-        except VICReturnCodeError as e:
-            test_comment = 'Test failed due to incorrect return code'
-            error_message = e
+        except Exception as e:
+            test_comment, error_message = process_error(e, vic_exe)
 
-        if test_comment or error_message:
-            print('\t{0}'.format(test_comment))
-            print('\t{0}'.format(error_message))
-        # ------------------------------------------------------------ #
-
-        # ------------------------------------------------------------ #
         # record the test results
         test_results[testname] = TestResults(testname,
                                              test_complete=test_complete,
@@ -417,65 +392,76 @@ def run_system(config_file, vic_exe, test_data_dir, out_dir, driver):
                                              comment=test_comment,
                                              error_message=error_message,
                                              returncode=returncode)
-        # ------------------------------------------------------------ #
 
     print('-'.ljust(OUTPUT_WIDTH, '-'))
     print('Finished testing system tests.')
     print('-'.ljust(OUTPUT_WIDTH, '-'))
-    # ---------------------------------------------------------------- #
 
     return test_results
-# -------------------------------------------------------------------- #
 
 
-# -------------------------------------------------------------------- #
-def run_science(config_file, vic_exe, test_data_dir, out_dir):
-    '''Run science tests from config file'''
+def run_science(config_file, vic_exe, test_data_dir, out_dir, driver):
+    '''Run science tests from config file
 
-    # ---------------------------------------------------------------- #
+    Parameters
+    ----------
+    config_file : str
+        Configuration file for science tests.
+    vic_exe : VIC (object)
+        VIC executable object (see tonic documentation).
+    test_data_dir : str
+        Path to test data sets.
+    out_dir : str
+        Path to output location
+    driver : {'classic', 'image'}
+        Driver to run tests on.
+
+    Returns
+    -------
+    test_results : dict
+        Test results for all tests in config_file.
+
+    See Also
+    --------
+    run_unit_tests
+    run_examples
+    run_system
+    run_release
+    '''
+
     # Print test set welcome
     print('\n-'.ljust(OUTPUT_WIDTH + 1, '-'))
     print('Running Science Tests')
     print('-'.ljust(OUTPUT_WIDTH, '-'))
-    # ---------------------------------------------------------------- #
 
-    # ---------------------------------------------------------------- #
     # Get setup
     config = read_config(config_file)
 
-    test_results = OrderedDict()
-    # ---------------------------------------------------------------- #
+    # drop invalid driver tests
+    config = drop_tests(config, driver)
 
-    # ---------------------------------------------------------------- #
+    test_results = OrderedDict()
+
     # Run individual tests
     for i, (testname, test_dict) in enumerate(config.items()):
 
-        # ------------------------------------------------------------ #
         # print out status info
         print('Running test {0}/{1}: {2}'.format(i + 1, len(config.items()),
                                                  testname))
-        # ------------------------------------------------------------ #
 
-        # ------------------------------------------------------------ #
         # Setup directories for test
         dirs = setup_test_dirs(testname, out_dir,
                                mkdirs=['results', 'state', 'logs', 'plots'])
-        # ------------------------------------------------------------ #
 
-        # ------------------------------------------------------------ #
         # read template global parameter file
         infile = os.path.join(test_dir, test_dict['global_parameter_file'])
 
         with open(infile, 'r') as global_file:
             global_param = global_file.read()
-        # ------------------------------------------------------------ #
 
-        # ------------------------------------------------------------ #
         # create template string
         s = string.Template(global_param)
-        # ------------------------------------------------------------ #
 
-        # ------------------------------------------------------------ #
         # fill in global parameter options
         global_param = s.safe_substitute(test_data_dir=test_data_dir,
                                          result_dir=dirs['results'],
@@ -485,15 +471,14 @@ def run_science(config_file, vic_exe, test_data_dir, out_dir):
 
         test_global_file = os.path.join(dirs['test'],
                                         '{0}_globalparam.txt'.format(testname))
-        # ------------------------------------------------------------ #
 
-        # ------------------------------------------------------------ #
         # write global parameter file
         with open(test_global_file, 'w') as f:
             f.write(global_param)
-        # ------------------------------------------------------------ #
 
-        # ------------------------------------------------------------ #
+        # Get optional kwargs for run executable
+        run_kwargs = pop_run_kwargs(test_dict)
+
         # run VIC
         test_complete = False
         test_passed = False
@@ -501,59 +486,40 @@ def run_science(config_file, vic_exe, test_data_dir, out_dir):
         error_message = ''
 
         try:
-            returncode = vic_exe.run(test_global_file, logdir=dirs['logs'])
+            # Run the VIC simulation
+            returncode = vic_exe.run(test_global_file, logdir=dirs['logs'],
+                                     **run_kwargs)
             test_complete = True
 
-            if returncode != 0:
-                raise VICReturnCodeError('VIC return code not equal to zero, '
-                                         'check VIC logs for test')
+            # Check return code
+            check_returncode(returncode)
 
-            # -------------------------------------------------------- #
-            # check output files
+            # check output files (different tests depending on driver)
             if test_dict['check']:
-                if 'complete' in test_dict['check']:
-                    start = None
-                    end = None
+                fnames = glob.glob(os.path.join(dirs['results'], '*'))
 
-                for fname in glob.glob(os.path.join(dirs['results'], '*')):
-                    df = read_vic_ascii(fname, header=True)
-                    # do numeric tests
+                # Check that the simulation completed for all grid cells
+                if 'complete' in test_dict['check'] and driver == 'classic':
+                    test_classic_driver_all_complete(fnames)
 
-                    # check that each dataframe includes all timestamps
-                    if 'complete' in test_dict['check']:
-                        if (start is not None) and (end is not None):
-                            check_completed(df, start, end)
-                        else:
-                            start = df.index[0]
-                            end = df.index[-1]
+                # check for nans in all example files
+                if 'output_file_nans' in test_dict['check']:
+                    if driver == 'classic':
+                        test_classic_driver_no_output_file_nans(fnames)
+                    elif driver == 'image':
+                        domain_file = os.path.join(test_data_dir,
+                                                   test_dict['domain_file'])
+                        test_image_driver_no_output_file_nans(fnames, domain_file)
+                    else:
+                        raise ValueError('unknown driver')
 
-                    # check for nans in the df
-                    if 'nonans' in test_dict['check']:
-                        check_for_nans(df)
-            # -------------------------------------------------------- #
-
-            # -------------------------------------------------------- #
             # if we got this far, the test passed.
             test_passed = True
-            # -------------------------------------------------------- #
 
         # Handle errors
-        except VICRuntimeError as e:
-            test_comment = 'Test failed during simulation'
-            error_message = e
-        except VICTestError as e:
-            test_comment = 'Test failed during testing of output files'
-            error_message = e
-        except VICReturnCodeError as e:
-            test_comment = 'Test failed due to incorrect return code'
-            error_message = e
+        except Exception as e:
+            test_comment, error_message = process_error(e, vic_exe)
 
-        if test_comment or error_message:
-            print('\t{0}'.format(test_comment))
-            print('\t{0}'.format(error_message))
-        # ------------------------------------------------------------ #
-
-        # ------------------------------------------------------------ #
         # record the test results
         test_results[testname] = TestResults(testname,
                                              test_complete=test_complete,
@@ -561,73 +527,76 @@ def run_science(config_file, vic_exe, test_data_dir, out_dir):
                                              comment=test_comment,
                                              error_message=error_message,
                                              returncode=returncode)
-        # ------------------------------------------------------------ #
 
     print('-'.ljust(OUTPUT_WIDTH, '-'))
     print('Finished testing science tests.')
     print('-'.ljust(OUTPUT_WIDTH, '-'))
-    # ---------------------------------------------------------------- #
 
     return test_results
-# -------------------------------------------------------------------- #
 
 
-# -------------------------------------------------------------------- #
 def run_examples(config_file, vic_exe, test_data_dir, out_dir, driver):
-    '''Run examples tests from config file '''
+    '''Run examples tests from config file
 
-    # ---------------------------------------------------------------- #
+    Parameters
+    ----------
+    config_file : str
+        Configuration file for example tests.
+    vic_exe : VIC (object)
+        VIC executable object (see tonic documentation).
+    test_data_dir : str
+        Path to test data sets.
+    out_dir : str
+        Path to output location
+    driver : {'classic', 'image'}
+        Driver to run tests on.
+
+    Returns
+    -------
+    test_results : dict
+        Test results for all tests in config_file.
+
+    See Also
+    --------
+    run_unit_tests
+    run_system
+    run_science
+    run_release
+    '''
+
     # Print test set welcome
     print('\n-'.ljust(OUTPUT_WIDTH + 1, '-'))
     print('Running Examples')
     print('-'.ljust(OUTPUT_WIDTH, '-'))
-    # ---------------------------------------------------------------- #
 
-    # ---------------------------------------------------------------- #
     # Get setup
     config = read_config(config_file)
 
     # drop invalid driver tests
-    drop_tests = []
-    for key, test_cfg in config.items():
-        if test_cfg['driver'].lower() != driver.lower():
-            drop_tests.append(key)
-    for test in drop_tests:
-        del config[test]
+    config = drop_tests(config, driver)
 
     test_results = OrderedDict()
-    # ---------------------------------------------------------------- #
 
-    # ---------------------------------------------------------------- #
     # Run individual examples
     for i, (testname, test_dict) in enumerate(config.items()):
 
-        # ------------------------------------------------------------ #
         # print out status info
         print('Running test {0}/{1}: {2}'.format(i + 1, len(config.items()),
                                                  testname))
-        # ------------------------------------------------------------ #
 
-        # ------------------------------------------------------------ #
         # Setup directories for test
         dirs = setup_test_dirs(testname, out_dir,
                                mkdirs=['results', 'state', 'logs', 'plots'])
-        # ------------------------------------------------------------ #
 
-        # ------------------------------------------------------------ #
         # read template global parameter file
         infile = os.path.join(test_dir, 'examples', test_dict['global_parameter_file'])
 
         with open(infile, 'r') as global_file:
             global_param = global_file.read()
-        # ------------------------------------------------------------ #
 
-        # ------------------------------------------------------------ #
         # create template string
         s = string.Template(global_param)
-        # ------------------------------------------------------------ #
 
-        # ------------------------------------------------------------ #
         # fill in global parameter options
         global_param = s.safe_substitute(test_data_dir=test_data_dir,
                                          result_dir=dirs['results'],
@@ -637,15 +606,14 @@ def run_examples(config_file, vic_exe, test_data_dir, out_dir, driver):
 
         test_global_file = os.path.join(dirs['test'],
                                         '{0}_globalparam.txt'.format(testname))
-        # ------------------------------------------------------------ #
 
-        # ------------------------------------------------------------ #
         # write global parameter file
         with open(test_global_file, 'w') as f:
             f.write(global_param)
-        # ------------------------------------------------------------ #
 
-        # ------------------------------------------------------------ #
+        # Get optional kwargs for run executable
+        run_kwargs = pop_run_kwargs(test_dict)
+
         # run VIC
         test_complete = False
         test_passed = False
@@ -653,77 +621,40 @@ def run_examples(config_file, vic_exe, test_data_dir, out_dir, driver):
         error_message = ''
 
         try:
-            returncode = vic_exe.run(test_global_file, logdir=dirs['logs'])
+            # Run the VIC simulation
+            returncode = vic_exe.run(test_global_file, logdir=dirs['logs'],
+                                     **run_kwargs)
             test_complete = True
 
-            if returncode != 0:
-                raise VICReturnCodeError('VIC return code not equal to zero, '
-                                         'check VIC logs for test')
+            # Check return code
+            check_returncode(returncode)
 
-            # -------------------------------------------------------- #
-            # check output files (different tests depending on driver) 
+            # check output files (different tests depending on driver)
             if test_dict['check']:
-                if 'complete' in test_dict['check']:
-                    start = None
-                    end = None
+                fnames = glob.glob(os.path.join(dirs['results'], '*'))
 
-                    if driver == "classic": 
+                # Check that the simulation completed for all grid cells
+                if 'complete' in test_dict['check'] and driver == 'classic':
+                    test_classic_driver_all_complete(fnames)
 
-                        for fname in glob.glob(os.path.join(dirs['results'], '*')):
-                            df = read_vic_ascii(fname, header=True)
-                            # do numeric tests
+                # check for nans in all example files
+                if 'output_file_nans' in test_dict['check']:
+                    if driver == 'classic':
+                        test_classic_driver_no_output_file_nans(fnames)
+                    elif driver == 'image':
+                        domain_file = os.path.join(test_data_dir,
+                                                   test_dict['domain_file'])
+                        test_image_driver_no_output_file_nans(fnames, domain_file)
+                    else:
+                        raise ValueError('unknown driver')
 
-                            # check that each dataframe includes all timestamps
-                            if (start is not None) and (end is not None):
-                                check_completed(df, start, end)
-                            else:
-                                start = df.index[0]
-                                end = df.index[-1]
-
-                if 'output_file_nans' in test_dict['check']: 
-
-                    if driver == "classic":
-                        # check for nans in the df
-                        check_for_nans(df)
-
-                    elif driver == "image":
-                        # check for nans in all example files 
-                        for fname in glob.glob(os.path.join(dirs['results'], '*.nc')):
-                            ds_domain = xr.open_dataset(os.path.join(test_dir, 'examples', 
-                                                                    test_dict['domain_file']), decode_times=False)
-                            ds_output = xr.open_dataset(os.path.join(dirs['results'], fname), decode_times=False)
-                            assert_nan_equal(ds_domain, ds_output)
-                    
-            # -------------------------------------------------------- #
-
-            # -------------------------------------------------------- #
             # if we got this far, the test passed.
             test_passed = True
-            # -------------------------------------------------------- #
 
         # Handle errors
-        except VICRuntimeError as e:
-            test_comment = 'Test failed during simulation'
-            error_message = e
-            tail = vic_exe.stderr
-        except VICTestError as e:
-            test_comment = 'Test failed during testing of output files'
-            error_message = e
-            tail = None
-        except VICReturnCodeError as e:
-            test_comment = 'Test failed due to incorrect return code'
-            error_message = e
-            tail = vic_exe.stderr
+        except Exception as e:
+            test_comment, error_message = process_error(e, vic_exe)
 
-        if test_comment or error_message:
-            print('\t{0}'.format(test_comment))
-            print('\t{0}'.format(error_message))
-            if tail is not None:
-                print('\tLast 10 lines of standard out:')
-                print_tail(tail)
-        # ------------------------------------------------------------ #
-
-        # ------------------------------------------------------------ #
         # record the test results
         test_results[testname] = TestResults(testname,
                                              test_complete=test_complete,
@@ -731,25 +662,23 @@ def run_examples(config_file, vic_exe, test_data_dir, out_dir, driver):
                                              comment=test_comment,
                                              error_message=error_message,
                                              returncode=returncode)
-        # ------------------------------------------------------------ #
 
+    # Print examples footer
     print('-'.ljust(OUTPUT_WIDTH, '-'))
     print('Finished testing examples.')
     print('-'.ljust(OUTPUT_WIDTH, '-'))
-    # ---------------------------------------------------------------- #
 
     return test_results
-# -------------------------------------------------------------------- #
 
 
-# -------------------------------------------------------------------- #
 def run_release(config_file):
-    '''Run release from config file'''
+    '''Run release from config file
+
+    NOT IMPLEMENTED
+    '''
     return OrderedDict()
-# -------------------------------------------------------------------- #
 
 
-# -------------------------------------------------------------------- #
 def setup_test_dirs(testname, out_dir, mkdirs=['results', 'state',
                                                'logs', 'plots']):
     '''create test directories for testname'''
@@ -763,37 +692,33 @@ def setup_test_dirs(testname, out_dir, mkdirs=['results', 'state',
         os.makedirs(dirname, exist_ok=True)
 
     return dirs
-# -------------------------------------------------------------------- #
 
 
-# -------------------------------------------------------------------- #
 def print_test_dict(d):
-    '''print a nicely formatated set of test results'''
+    '''print a nicely formatted set of test results'''
     print('{0: <48} | {1: <6} | {2}'.format('Test Name', 'Passed', 'Comment'))
     print('-'.ljust(OUTPUT_WIDTH, '-'))
     for k, v in d.items():
         print('{0: <48} | {1: <6} | {2}'.format(v.name, str(bool(v.passed)),
                                                 v.comment))
         print('-'.ljust(OUTPUT_WIDTH, '-'))
-    return
-# -------------------------------------------------------------------- #
 
 
-def print_tail(string, n=10, indent='\t--->'):
+def print_tail(string, n=20, indent='\t--->'):
+    '''print tail of multiline string'''
     lines = string.decode().splitlines()
-    for l in lines[-10:]:
+    for l in lines[-n:]:
         print('{0}{1}'.format(indent, l))
 
 
-# -------------------------------------------------------------------- #
 def replace_global_values(gp, replace):
     '''given a multiline string that represents a VIC global parameter file,
        loop through the string, replacing values with those found in the
        replace dictionary'''
     gpl = []
     for line in iter(gp.splitlines()):
-        line_list = line.split() 
-        if line_list: 
+        line_list = line.split()
+        if line_list:
             key = line_list[0]
             if key in replace:
                 value = replace.pop(key)
@@ -811,14 +736,108 @@ def replace_global_values(gp, replace):
             gpl.append('{0: <20} {1}\n'.format(key, value))
 
     return gpl
-# -------------------------------------------------------------------- #
+
+
+def drop_tests(config, driver):
+    '''helper function to remove tests that should not be run for driver'''
+    new = {}
+    for key, test_cfg in config.items():
+        try:
+            if test_cfg['driver'].lower() == driver.lower():
+                new[key] = test_cfg
+        except KeyError:
+            raise KeyError('test configuration must specify driver')
+    return new
+
+
+def pop_run_kwargs(config):
+    '''pop run kwargs for VIC executable'''
+    run_kwargs = {}
+    run_kwargs['valgrind'] = config.pop('valgrind', False)
+    run_kwargs['mpi_proc'] = config.pop('mpi_proc', None)
+    return run_kwargs
+
+
+def check_returncode(returncode, expected=0):
+    '''check return code given by VIC, raise error if appropriate'''
+    if returncode == expected:
+        return None
+    elif returncode == default_vic_valgrind_error_code:
+        raise VICValgrindError('Valgrind raised an error')
+    else:
+        raise VICReturnCodeError('VIC return code ({0}) does not match '
+                                 'expected ({1})'.format(returncode, expected))
+
+
+def process_error(error, vic_exe):
+    '''Helper function to process possible error raised during testing'''
+    if isinstance(error, VICRuntimeError):
+        test_comment = 'Test failed during simulation'
+        error_message = error
+        tail = vic_exe.stderr
+    elif isinstance(error, VICTestError):
+        test_comment = 'Test failed during testing of output files'
+        error_message = error
+        tail = None
+    elif isinstance(error, VICValgrindError):
+        test_comment = 'Test failed due to memory error detected by valgrind'
+        error_message = error
+        tail = vic_exe.stderr
+    elif isinstance(error, VICReturnCodeError):
+        test_comment = 'Test failed due to incorrect return code'
+        error_message = error
+        tail = vic_exe.stderr
+    else:
+        raise error
+
+    print('\t{0}'.format(test_comment))
+    print('\t{0}'.format(error_message))
+    if tail is not None:
+        print('\tLast {0} lines of standard out:'.format(ERROR_TAIL))
+        print_tail(tail, n=ERROR_TAIL)
+
+    return test_comment, error_message
+
+
+def test_classic_driver_all_complete(fnames):
+    '''
+    Test that all VIC files in fnames have the same first and last index position
+    '''
+    start = None
+    end = None
+    for fname in fnames:
+        df = read_vic_ascii(fname, header=True)
+
+        # check that each dataframe includes all timestamps
+        if (start is not None) and (end is not None):
+            check_completed(df, start, end)
+        else:
+            start = df.index[0]
+            end = df.index[-1]
+
+
+def test_classic_driver_no_output_file_nans(fnames):
+    '''Test that all VIC classic driver output files in fnames have no nans'''
+    for fname in fnames:
+        df = read_vic_ascii(fname, header=True)
+        check_for_nans(df)
+
+
+def test_image_driver_no_output_file_nans(fnames, domain_file):
+    '''
+    Test that all VIC image driver output files have the same nan structure as
+    the domain file
+    '''
+    for fname in fnames:
+        ds_domain = xr.open_dataset(domain_file)
+        ds_output = xr.open_dataset(fname)
+        assert_nan_equal(ds_domain, ds_output)
 
 
 # TODO: Update tonic version of this function, need to check that subdaily works
-# -------------------------------------------------------------------- #
 def read_vic_ascii(filepath, header=True, parse_dates=True,
                    datetime_index=None, names=None, **kwargs):
-    """Generic reader function for VIC ASCII output with a standard header
+    '''Generic reader function for VIC ASCII output with a standard header
     filepath: path to VIC output file
     header (True or False):  Standard VIC header is present
     parse_dates (True or False): Parse dates from file
@@ -826,7 +845,7 @@ def read_vic_ascii(filepath, header=True, parse_dates=True,
     datetime index names (list like): variable names
     **kwargs: passed to Pandas.read_table
     returns Pandas.DataFrame
-    """
+    '''
     kwargs['header'] = None
 
     if header:
@@ -858,10 +877,7 @@ def read_vic_ascii(filepath, header=True, parse_dates=True,
         df.index = datetime_index
 
     return df
-# -------------------------------------------------------------------- #
 
 
-# -------------------------------------------------------------------- #
 if __name__ == '__main__':
     main()
-# -------------------------------------------------------------------- #

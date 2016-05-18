@@ -155,6 +155,17 @@ This is a major update from VIC 4. The VIC 5.0.0 release aims to have nearly ide
 
 	Previously, if the soil thermal damping depth was shallower than the bottom of the deepest soil layer, and `FROZEN_SOIL==TRUE`, VIC would abort when estimating layer ice contents because it could not estimate a layer temperature if the thermal nodes did not completely span the layer.  Now, a layer temperature is estimated even when thermal nodes do not completely span the layer, and the error no longer occurs.
 
+3. Fix related to exact restart ([GH#481](https://github.com/UW-Hydro/VIC/pull/481), [GH#507](https://github.com/UW-Hydro/VIC/pull/507))
+
+	Previously, VIC did not produce the same results (fluxes and states) if a simulation is separated into multiple shorter-period runs by saving the state variables and restarting. This was due to: 1) the MTCLIM algorithm resulted in slightly different sub-daily meteorological variable values for different length of forcing (MTCLIM is deprecated in the current version); 2) a few bugs resulting in inexact restart. The following bugs have been fixed:
+
+	- The prognostic state variable `energy.Tfoliage` (foliage temperature) is now saved to the state file
+	- Two flux variables `energy.LongUnderOut` and `energy.snow_flux` are now saved to the state file. **TODO:** this is a temporary solution to ensure exact restart. A better way of handling the two flux variables needs to be done in the future (see [GH#479](https://github.com/UW-Hydro/VIC/issues/479))
+
+4. Fix for binary state file I/O ([GH#487](https://github.com/UW-Hydro/VIC/pull/487))
+
+	Fixed a bug so that the binary format state file I/O works correctly.
+
 ------------------------------
 
 ## VIC 4.2.c [![DOI](https://zenodo.org/badge/doi/10.5281/zenodo.35302.svg)](http://dx.doi.org/10.5281/zenodo.35302)

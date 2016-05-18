@@ -163,8 +163,11 @@ get_global_param(FILE *gp)
                 if (strcasecmp("DENS_SNTHRM", flgstr) == 0) {
                     options.SNOW_DENSITY = DENS_SNTHRM;
                 }
-                else {
+                else if (strcasecmp("DENS_BRAS", flgstr) == 0) {
                     options.SNOW_DENSITY = DENS_BRAS;
+                }
+                else {
+                    log_err("Unknown SNOW_DENSITY option: %s", flgstr);
                 }
             }
             else if (strcasecmp("BLOWING", optstr) == 0) {
@@ -234,6 +237,9 @@ get_global_param(FILE *gp)
                 else if (strcasecmp("AR_410", flgstr) == 0) {
                     options.AERO_RESIST_CANSNOW = AR_410;
                 }
+                else {
+                    log_err("Unknown AERO_RESIST_CANSNOW option: %s", flgstr);
+                }
             }
             else if (strcasecmp("GRND_FLUX_TYPE", optstr) == 0) {
                 sscanf(cmdstr, "%*s %s", flgstr);
@@ -242,6 +248,9 @@ get_global_param(FILE *gp)
                 }
                 else if (strcasecmp("GF_410", flgstr) == 0) {
                     options.GRND_FLUX_TYPE = GF_410;
+                }
+                else {
+                    log_err("Unknown GRND_FLUX_TYPE option: %s", flgstr);
                 }
             }
             else if (strcasecmp("SPATIAL_FROST", optstr) == 0) {
@@ -275,8 +284,11 @@ get_global_param(FILE *gp)
                 if (strcasecmp("RC_PHOTO", flgstr) == 0) {
                     options.RC_MODE = RC_PHOTO;
                 }
-                else {
+                else if (strcasecmp("RC_JARVIS", flgstr) == 0) {
                     options.RC_MODE = RC_JARVIS;
+                }
+                else {
+                    log_err("Unknown RC_MODE option: %s", flgstr);
                 }
             }
 

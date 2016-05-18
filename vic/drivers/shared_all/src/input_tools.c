@@ -346,25 +346,25 @@ str_from_calendar(unsigned short int calendar,
         sprintf(calendar_str, "gregorian");
     }
     else if (calendar == CALENDAR_PROLEPTIC_GREGORIAN) {
-        sprintf(calendar_str, "proleptic gregorian");
+        sprintf(calendar_str, "proleptic_gregorian");
     }
     else if (calendar == CALENDAR_NOLEAP) {
         sprintf(calendar_str, "noleap");
     }
     else if (calendar == CALENDAR_365_DAY) {
-        sprintf(calendar_str, "365 day");
+        sprintf(calendar_str, "365_day");
     }
     else if (calendar == CALENDAR_360_DAY) {
-        sprintf(calendar_str, "360 day");
+        sprintf(calendar_str, "360_day");
     }
     else if (calendar == CALENDAR_JULIAN) {
         sprintf(calendar_str, "julian");
     }
     else if (calendar == CALENDAR_ALL_LEAP) {
-        sprintf(calendar_str, "all leap");
+        sprintf(calendar_str, "all_leap");
     }
     else if (calendar == CALENDAR_366_DAY) {
-        sprintf(calendar_str, "366 day");
+        sprintf(calendar_str, "366_day");
     }
     else {
         log_err("Invalid, or no calendar specified");

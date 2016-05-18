@@ -136,7 +136,7 @@ unsigned short int
 str_to_agg_type(char aggstr[])
 {
     if (strcasecmp("", aggstr) == 0) {
-         return AGG_TYPE_DEFAULT;
+        return AGG_TYPE_DEFAULT;
     }
     else {
         if (strcasecmp("AGG_TYPE_AVG", aggstr) == 0) {
@@ -170,7 +170,8 @@ unsigned short int
 str_to_out_type(char typestr[])
 {
     if (strcasecmp("", typestr) == 0) {
-            return OUT_TYPE_DEFAULT;    }
+        return OUT_TYPE_DEFAULT;
+    }
     else {
         if (strcasecmp("OUT_TYPE_USINT", typestr) == 0) {
             return OUT_TYPE_USINT;
@@ -197,7 +198,8 @@ double
 str_to_out_mult(char multstr[])
 {
     if (strcasecmp("", multstr) == 0) {
-        return DEFAULT_OUT_MULT;    }
+        return OUT_MULT_DEFAULT;
+    }
     else {
         return (double) atof(multstr);
     }
@@ -309,7 +311,8 @@ str_to_timeunits(char units_chars[])
 }
 
 void
-str_from_time_units(unsigned short int time_units, char *unit_str)
+str_from_time_units(unsigned short int time_units,
+                    char              *unit_str)
 {
     if (time_units == TIME_UNITS_SECONDS) {
         sprintf(unit_str, "seconds");
@@ -333,7 +336,8 @@ str_from_time_units(unsigned short int time_units, char *unit_str)
  * @brief  get CF calendar string based on enum calendar value
  *****************************************************************************/
 void
-str_from_calendar(unsigned short int calendar, char *calendar_str)
+str_from_calendar(unsigned short int calendar,
+                  char              *calendar_str)
 {
     if (calendar == CALENDAR_STANDARD) {
         sprintf(calendar_str, "standard");
@@ -373,7 +377,8 @@ str_from_calendar(unsigned short int calendar, char *calendar_str)
  * @return bool true if aggtype is a windowed aggregation, otherwise false
  *****************************************************************************/
 bool
-cell_method_from_agg_type(unsigned short int aggtype, char cell_method[])
+cell_method_from_agg_type(unsigned short int aggtype,
+                          char               cell_method[])
 {
     if (aggtype == AGG_TYPE_AVG) {
         strcpy(cell_method, "time: mean");

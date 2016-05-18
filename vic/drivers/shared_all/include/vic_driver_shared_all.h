@@ -32,12 +32,17 @@
 #define VERSION "5.0 beta 2016 April 25"
 #define SHORT_VERSION "5.0.beta"
 
-/***** Define maximum array sizes for driver level objects *****/
+// Define maximum array sizes for driver level objects
 #define MAX_FORCE_FILES 2
 
-#define DEFAULT_OUT_MULT 0  // Why is this not 1?
-#define UNSET_COMPRESSION_LVL -1
-#define DEFAULT_COMPRESSION_LVL 5
+// Output compression setting
+#define COMPRESSION_LVL_UNSET -1
+#define COMPRESSION_LVL_DEFAULT 5
+
+// Default ouput values
+#define OUT_MULT_DEFAULT 0  // Why is this not 1?
+#define OUT_ASCII_FORMAT_DEFAULT "%.4f"
+
 
 /******************************************************************************
  * @brief   File formats
@@ -480,6 +485,7 @@ typedef struct {
  * @brief   This structure stores output information for individual history streams
  *****************************************************************************/
 typedef struct {
+    char varname[MAXSTRING];  /**< name of variable */
     char long_name[MAXSTRING];  /**< name of variable */
     char standard_name[MAXSTRING];  /**< cf long_name of variable */
     char units[MAXSTRING];  /**< units of variable */
@@ -533,6 +539,7 @@ size_t count_outfile_nvars(FILE *gp);
 void cmd_proc(int argc, char **argv, char *globalfilename);
 void compress_files(char string[], short int level);
 double **create_outdata(void);
+// this needs to be fixed
 stream_struct create_outstream(stream_struct *output_streams);
 void get_current_datetime(char *cdt);
 double date2num(double origin, dmy_struct *date, double tzoffset,

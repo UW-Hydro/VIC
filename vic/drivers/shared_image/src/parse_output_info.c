@@ -31,7 +31,7 @@
  * @brief    Get output info from global parameter file.
  *****************************************************************************/
 void
-parse_output_info(FILE               *gp,
+parse_output_info(FILE                *gp,
                   stream_struct      **output_streams,
                   stream_file_struct **out_data_files)
 {
@@ -45,7 +45,7 @@ parse_output_info(FILE               *gp,
     char                       varname[MAXSTRING];
     int                        outvarnum;
     char                       aggstr[MAXSTRING];
-    short unsigned int         aggtype;
+    short unsigned int         agg_type;
     char                       typestr[MAXSTRING];
     int                        type;
     char                       multstr[MAXSTRING];
@@ -125,7 +125,7 @@ parse_output_info(FILE               *gp,
                     sscanf(cmdstr, "%*s %s", flgstr);
                     if (strcasecmp("TRUE", flgstr) == 0) {
                         (*out_data_files)[streamnum].compress =
-                            DEFAULT_COMPRESSION_LVL;
+                            COMPRESSION_LVL_DEFAULT;
                     }
                     else if (strcasecmp("FALSE", flgstr) == 0) {
                         (*out_data_files)[streamnum].compress = 0;
@@ -138,7 +138,7 @@ parse_output_info(FILE               *gp,
                     sscanf(cmdstr, "%*s %s", flgstr);
                     if (strcasecmp("ASCII", flgstr) == 0) {
                         (*out_data_files)[streamnum].file_format =
-                            DEFAULT_COMPRESSION_LVL;
+                            COMPRESSION_LVL_DEFAULT;
                     }
                     else if (strcasecmp("BINARY", flgstr) == 0) {
                         (*out_data_files)[streamnum].file_format = 0;
@@ -160,9 +160,9 @@ parse_output_info(FILE               *gp,
                     sscanf(cmdstr, "%*s %s %s %s %s", varname, aggstr, typestr,
                            multstr);
 
-                    agg_type = agg_type_from_str(aggstr);
-                    type = out_type_from_str(typestr);
-                    mult = out_mult_from_str(multstr);
+                    agg_type = str_to_agg_type(aggstr);
+                    type = str_to_out_type(typestr);
+                    mult = str_to_out_mult(multstr);
 
                     set_output_var(output_streams[streamnum],
                                    out_data_files[streamnum],
@@ -179,7 +179,7 @@ parse_output_info(FILE               *gp,
     }
     fclose(gp);
 
-    for (streamnum = 0; streamnum < options.Noutstreams; streamnum++) {
+    for (streamnum = 0; streamnum < (short int) options.Noutstreams; streamnum++) {
         // Validate the streams
         validate_stream_settings(&((*out_data_files)[streamnum]));
 

@@ -30,9 +30,9 @@
  * @brief    Setup netCDF output variables.
  *****************************************************************************/
 void
-set_nc_var_info(unsigned int     varid,
-                nc_file_struct  *nc_hist_file,
-                nc_var_struct   *nc_var)
+set_nc_var_info(unsigned int    varid,
+                nc_file_struct *nc_hist_file,
+                nc_var_struct  *nc_var)
 {
     extern option_struct options;
 

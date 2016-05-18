@@ -171,7 +171,8 @@ parse_output_info(FILE                *gp,
 
                     set_output_var(output_streams[streamnum],
                                    out_data_files[streamnum],
-                                   varname, outvarnum, format, type, mult, agg_type);
+                                   varname, outvarnum, format, type, mult,
+                                   agg_type);
                     strcpy(format, "");
                     outvarnum++;
                 }

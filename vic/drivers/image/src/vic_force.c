@@ -466,7 +466,7 @@ get_forcing_file_info(param_set_struct *param_set,
     get_nc_var_attr(filenames.forcing[0], "time", "calendar", &calendar_char);
 
     // parse the calendar string and check to make sure it matches the global clock
-    calendar = calendar_from_chars(calendar_char);
+    calendar = str_to_calendar(calendar_char);
 
     // parse the time units
     parse_nc_time_units(nc_unit_chars, &time_units, &nc_origin_dmy);

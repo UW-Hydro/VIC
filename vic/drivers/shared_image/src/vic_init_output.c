@@ -33,20 +33,19 @@
 void
 vic_init_output(void)
 {
-
     extern option_struct options;
-    extern domain_struct  local_domain;
-    extern filep_struct   filep;
-    extern MPI_Comm       MPI_COMM_VIC;
-    extern MPI_Datatype   mpi_nc_file_struct_type;
-    extern int            mpi_rank;
+    extern domain_struct local_domain;
+    extern filep_struct  filep;
+    extern MPI_Comm      MPI_COMM_VIC;
+    extern MPI_Datatype  mpi_nc_file_struct_type;
+    extern int           mpi_rank;
 
-    double             ***out_data = NULL; // [ncells, nvars, nelem]
-    stream_struct       **output_streams = NULL; // [ncells, nstreams]
-    stream_file_struct   *out_data_files = NULL; // [ncells, nstreams]
-    nc_file_struct       *nc_hist_files = NULL; // [nstreams]
+    double            ***out_data = NULL;  // [ncells, nvars, nelem]
+    stream_struct      **output_streams = NULL;  // [ncells, nstreams]
+    stream_file_struct  *out_data_files = NULL;  // [ncells, nstreams]
+    nc_file_struct      *nc_hist_files = NULL;  // [nstreams]
 
-    size_t                i;
+    size_t               i;
 
     // initialize the output data structures
     set_output_met_data_info();
@@ -64,17 +63,20 @@ vic_init_output(void)
     // TODO: scatter output info
 
     // allocation of output structures
-    output_streams = calloc(local_domain.ncells_active, sizeof(*output_streams));
+    output_streams =
+        calloc(local_domain.ncells_active, sizeof(*output_streams));
     if (output_streams == NULL) {
         log_err("Memory allocation error in vic_init_output().");
     }
-    output_streams = calloc(local_domain.ncells_active, sizeof(*output_streams));
-                if (output_streams == NULL) {
+    output_streams =
+        calloc(local_domain.ncells_active, sizeof(*output_streams));
+    if (output_streams == NULL) {
         log_err("Memory allocation error in vic_init_output().");
     }
 
     for (i = 0; i < options.Noutstreams; i++) {
-        output_streams[i] = calloc(options.Noutstreams, sizeof(*output_streams[i]));
+        output_streams[i] =
+            calloc(options.Noutstreams, sizeof(*output_streams[i]));
         if (output_streams[i] == NULL) {
             log_err("Memory allocation error in vic_init_output().");
         }
@@ -87,10 +89,11 @@ vic_init_output(void)
         }
     }
 
-    if (mpi_rank == 0){
+    if (mpi_rank == 0) {
         for (i = 0; i < options.Noutstreams; i++) {
             // open the netcdf history file
-            initialize_history_file(&(nc_hist_files[i]), &(out_data_files[i]), output_streams[i]);
+            initialize_history_file(&(nc_hist_files[i]), &(out_data_files[i]),
+                                    output_streams[i]);
         }
     }
 
@@ -117,43 +120,46 @@ vic_init_output(void)
  * @brief    Initialize history files
  *****************************************************************************/
 void
-initialize_history_file(nc_file_struct *nc,
+initialize_history_file(nc_file_struct     *nc,
                         stream_file_struct *stream_file,
-                        stream_struct *stream)
+                        stream_struct      *stream)
 {
-    extern filenames_struct filenames;
-    extern domain_struct global_domain;
-    extern option_struct options;
+    extern filenames_struct    filenames;
+    extern domain_struct       global_domain;
+    extern option_struct       options;
     extern global_param_struct global_param;
     extern out_metadata_struct out_metadata[N_OUTVAR_TYPES];
 
-    int    status;
-    int    old_fill_mode;
+    int                        status;
+    int                        old_fill_mode;
 
-    char   str[MAXSTRING];
-    char   unit_str[MAXSTRING];
-    char   calendar_str[MAXSTRING];
-    char   cell_method[MAXSTRING];
+    char                       str[MAXSTRING];
+    char                       unit_str[MAXSTRING];
+    char                       calendar_str[MAXSTRING];
+    char                       cell_method[MAXSTRING];
 
-    size_t i;
-    size_t j;
-    size_t ndims;
-    size_t dcount[MAXDIMS];
-    size_t dstart[MAXDIMS];
-    int    dimids[MAXDIMS];
-    int    time_var_id;
-    int    lon_var_id;
-    int    lat_var_id;
-    unsigned int varid;
-    double *dvar;
+    size_t                     i;
+    size_t                     j;
+    size_t                     ndims;
+    size_t                     dcount[MAXDIMS];
+    size_t                     dstart[MAXDIMS];
+    int                        dimids[MAXDIMS];
+    int                        time_var_id;
+    int                        lon_var_id;
+    int                        lat_var_id;
+    unsigned int               varid;
+    double                    *dvar;
 
-    sprintf(stream_file->filename, "%s/%s.nc", filenames.result_dir, stream_file->prefix);
+    sprintf(stream_file->filename, "%s/%s.nc", filenames.result_dir,
+            stream_file->prefix);
 
 
     initialize_nc_file(nc, stream->nvars, stream->varid);
 
     // open the netcdf file
-    status = nc_create(stream_file->filename, get_nc_mode(stream_file->file_format), &(nc->nc_id));
+    status =
+        nc_create(stream_file->filename, get_nc_mode(stream_file->file_format),
+                  &(nc->nc_id));
     if (status != NC_NOERR) {
         log_err("Error creating %s", stream_file->filename);
     }
@@ -172,25 +178,29 @@ initialize_history_file(nc_file_struct *nc,
     status = nc_def_dim(nc->nc_id, "snow_band", nc->band_size,
                         &(nc->band_dimid));
     if (status != NC_NOERR) {
-        log_err("Error defining snow_band dimenension in %s", stream_file->filename);
+        log_err("Error defining snow_band dimenension in %s",
+                stream_file->filename);
     }
 
     status = nc_def_dim(nc->nc_id, "front", nc->front_size,
                         &(nc->front_dimid));
     if (status != NC_NOERR) {
-        log_err("Error defining front dimenension in %s", stream_file->filename);
+        log_err("Error defining front dimenension in %s",
+                stream_file->filename);
     }
 
     status = nc_def_dim(nc->nc_id, "frost_area", nc->frost_size,
                         &(nc->frost_dimid));
     if (status != NC_NOERR) {
-        log_err("Error defining frost_area dimenension in %s", stream_file->filename);
+        log_err("Error defining frost_area dimenension in %s",
+                stream_file->filename);
     }
 
     status = nc_def_dim(nc->nc_id, "nlayer", nc->layer_size,
                         &(nc->layer_dimid));
     if (status != NC_NOERR) {
-        log_err("Error defining nlayer dimenension in %s", stream_file->filename);
+        log_err("Error defining nlayer dimenension in %s",
+                stream_file->filename);
     }
 
     status = nc_def_dim(nc->nc_id, global_domain.info.x_dim, nc->ni_size,
@@ -214,13 +224,15 @@ initialize_history_file(nc_file_struct *nc,
     status = nc_def_dim(nc->nc_id, "root_zone", nc->root_zone_size,
                         &(nc->root_zone_dimid));
     if (status != NC_NOERR) {
-        log_err("Error defining root_zone dimenension in %s", stream_file->filename);
+        log_err("Error defining root_zone dimenension in %s",
+                stream_file->filename);
     }
 
     status = nc_def_dim(nc->nc_id, "veg_class", nc->veg_size,
                         &(nc->veg_dimid));
     if (status != NC_NOERR) {
-        log_err("Error defining veg_class dimenension in %s", stream_file->filename);
+        log_err("Error defining veg_class dimenension in %s",
+                stream_file->filename);
     }
 
     status = nc_def_dim(nc->nc_id, "time", nc->time_size,
@@ -344,47 +356,59 @@ initialize_history_file(nc_file_struct *nc,
                             nc->nc_vars[j].nc_dimids,
                             &(nc->nc_vars[j].nc_varid));
         if (status != NC_NOERR) {
-            log_err("Error defining variable %s in %s", nc->nc_vars[j].nc_var_name, stream_file->filename);
+            log_err("Error defining variable %s in %s",
+                    nc->nc_vars[j].nc_var_name, stream_file->filename);
         }
 
         // Add compression (only works for netCDF4 filetype)
         if (stream_file->compress) {
-            status = nc_def_var_deflate(nc->nc_id, nc->nc_vars[j].nc_varid, true, true, stream_file->compress);
+            status = nc_def_var_deflate(nc->nc_id, nc->nc_vars[j].nc_varid,
+                                        true, true, stream_file->compress);
             if (status != NC_NOERR) {
-                log_err("Error setting compression level in %s for variable: %s",
-                        stream_file->filename, nc->nc_vars[j].nc_var_name);
+                log_err(
+                    "Error setting compression level in %s for variable: %s",
+                    stream_file->filename, nc->nc_vars[j].nc_var_name);
             }
         }
 
         // set the fill value attribute
         if (nc->nc_vars[j].nc_type == NC_DOUBLE) {
             status = nc_put_att_double(nc->nc_id, nc->nc_vars[j].nc_varid,
-                                       "_FillValue", NC_DOUBLE, 1, &(nc->d_fillvalue));
+                                       "_FillValue", NC_DOUBLE, 1,
+                                       &(nc->d_fillvalue));
         }
         else if (nc->nc_vars[j].nc_type == NC_FLOAT) {
             status = nc_put_att_float(nc->nc_id, nc->nc_vars[j].nc_varid,
-                                      "_FillValue", NC_FLOAT, 1, &(nc->f_fillvalue));
+                                      "_FillValue", NC_FLOAT, 1,
+                                      &(nc->f_fillvalue));
         }
         else if (nc->nc_vars[j].nc_type == NC_INT) {
             status = nc_put_att_int(nc->nc_id, nc->nc_vars[j].nc_varid,
-                                    "_FillValue", NC_INT, 1, &(nc->i_fillvalue));
+                                    "_FillValue", NC_INT, 1,
+                                    &(nc->i_fillvalue));
         }
         else {
             // TODO: Add NC_SHORT, NC_CHAR, and NC_BYTE
-            log_err("NC_TYPE %d not supported at this time", nc->nc_vars[j].nc_type);
+            log_err("NC_TYPE %d not supported at this time",
+                    nc->nc_vars[j].nc_type);
         }
         if (status != NC_NOERR) {
             log_err("Error putting _FillValue attribute to %s in %s",
                     nc->nc_vars[j].nc_var_name, stream_file->filename);
         }
 
-        put_nc_attr(nc->nc_id, nc->nc_vars[j].nc_varid, "long_name", out_metadata[varid].long_name);
-        put_nc_attr(nc->nc_id, nc->nc_vars[j].nc_varid, "standard_name", out_metadata[varid].standard_name);
-        put_nc_attr(nc->nc_id, nc->nc_vars[j].nc_varid, "units", out_metadata[varid].units);
-        put_nc_attr(nc->nc_id, nc->nc_vars[j].nc_varid, "description", out_metadata[varid].description);
+        put_nc_attr(nc->nc_id, nc->nc_vars[j].nc_varid, "long_name",
+                    out_metadata[varid].long_name);
+        put_nc_attr(nc->nc_id, nc->nc_vars[j].nc_varid, "standard_name",
+                    out_metadata[varid].standard_name);
+        put_nc_attr(nc->nc_id, nc->nc_vars[j].nc_varid, "units",
+                    out_metadata[varid].units);
+        put_nc_attr(nc->nc_id, nc->nc_vars[j].nc_varid, "description",
+                    out_metadata[varid].description);
 
         if (cell_method_from_agg_type(stream->aggtype[j], cell_method)) {
-            put_nc_attr(nc->nc_id, nc->nc_vars[j].nc_varid, "cell_methods", cell_method);
+            put_nc_attr(nc->nc_id, nc->nc_vars[j].nc_varid, "cell_methods",
+                        cell_method);
             // NOTE: if cell_methods == variance, units should be ^2
         }
     }
@@ -419,7 +443,8 @@ initialize_history_file(nc_file_struct *nc,
         }
         dcount[0] = nc->nj_size;
         for (i = 0; i < nc->nj_size; i++) {
-            dvar[i] = (double) global_domain.locations[i * nc->ni_size].latitude;
+            dvar[i] =
+                (double) global_domain.locations[i * nc->ni_size].latitude;
         }
 
         status =
@@ -491,13 +516,13 @@ set_global_nc_attributes(int ncid,
                          unsigned short int
                          file_type)
 {
-    char tmpstr[MAXSTRING];
-    char userstr[MAXSTRING];
-    char hoststr[MAXSTRING];
-    char mpistr[MPI_MAX_LIBRARY_VERSION_STRING];
-    int  len;
-    int status;
-    time_t curr_date_time;
+    char       tmpstr[MAXSTRING];
+    char       userstr[MAXSTRING];
+    char       hoststr[MAXSTRING];
+    char       mpistr[MPI_MAX_LIBRARY_VERSION_STRING];
+    int        len;
+    int        status;
+    time_t     curr_date_time;
     struct tm *timeinfo;
 
     // datestr
@@ -557,12 +582,14 @@ set_global_nc_attributes(int ncid,
  * @brief    Set global netcdf attributes (either history or state file)
  *****************************************************************************/
 void
-initialize_nc_file(nc_file_struct *nc_file, size_t nvars, unsigned int *varids)
+initialize_nc_file(nc_file_struct *nc_file,
+                   size_t          nvars,
+                   unsigned int   *varids)
 {
     extern option_struct options;
     extern domain_struct global_domain;
 
-    size_t i;
+    size_t               i;
 
     // Set fill values
     nc_file->c_fillvalue = NC_FILL_CHAR;
@@ -572,16 +599,16 @@ initialize_nc_file(nc_file_struct *nc_file, size_t nvars, unsigned int *varids)
 
     // set ids to MISSING
     nc_file->nc_id = MISSING;
-    nc_file->band_dimid =MISSING;
-    nc_file->front_dimid MISSING;
-    nc_file->frost_dimid MISSING;
+    nc_file->band_dimid = MISSING;
+    nc_file->front_dimid     MISSING;
+    nc_file->frost_dimid     MISSING;
     nc_file->lake_node_dimid MISSING;
-    nc_file->layer_dimid MISSING;
-    nc_file->ni_dimid =  MISSING;
-    nc_file->nj_dimid =  MISSING;
-    nc_file->node_dimid =MISSING;
+    nc_file->layer_dimid     MISSING;
+    nc_file->ni_dimid = MISSING;
+    nc_file->nj_dimid = MISSING;
+    nc_file->node_dimid = MISSING;
     nc_file->root_zone_dimid MISSING;
-    nc_file->time_dimid =MISSING;
+    nc_file->time_dimid = MISSING;
     nc_file->veg_dimid = MISSING;
 
     // Set dimension sizes

@@ -36,7 +36,7 @@ vic_alloc(void)
     extern atmos_data_struct  *atmos;
     extern domain_struct       local_domain;
     extern option_struct       options;
-    extern out_data_struct   **out_data;
+    extern double            **out_data;
     extern save_data_struct   *save_data;
     extern stream_struct     **out_streams;
     extern soil_con_struct    *soil_con;
@@ -210,7 +210,7 @@ vic_alloc(void)
 
         out_data[i] = create_outdata(nvars, varids);
 
-        for (j = 0; j < options.Noutfiles; j++) {
+        for (j = 0; j < options.Noutstreams; j++) {
             out_streams[i][j] = create_outstream();
         }
 

@@ -176,13 +176,15 @@ int get_nc_mode(unsigned short int format);
 void initialize_domain(domain_struct *domain);
 void initialize_domain_info(domain_info_struct *info);
 void initialize_global_structures(void);
-void initialize_history_file(nc_file_struct *nc, stream_file_struct *stream_file,
-                             stream_struct *stream);
+void initialize_history_file(nc_file_struct     *nc,
+                             stream_file_struct *stream_file,
+                             stream_struct      *stream);
 void initialize_location(location_struct *location);
 int initialize_model_state(all_vars_struct *all_vars, size_t Nveg,
                            size_t Nnodes, double surf_temp,
                            soil_con_struct *soil_con, veg_con_struct *veg_con);
-void initialize_nc_file(nc_file_struct *nc_file, size_t nvars, unsigned int *varids);
+void initialize_nc_file(nc_file_struct *nc_file, size_t nvars,
+                        unsigned int *varids);
 void initialize_soil_con(soil_con_struct *soil_con);
 void initialize_veg_con(veg_con_struct *veg_con);
 void parse_output_info(FILE *gp, stream_struct **output_streams,
@@ -204,7 +206,7 @@ void set_force_type(char *cmdstr, int file_num, int *field);
 void set_global_nc_attributes(int ncid, unsigned short int file_type);
 void set_nc_var_info(unsigned int varid, nc_file_struct *nc_hist_file,
                      nc_var_struct *nc_var);
-void set_output_defaults(stream_struct **output_streams,
+void set_output_defaults(stream_struct      **output_streams,
                          stream_file_struct **out_data_files);
 void sprint_location(char *str, location_struct *loc);
 void vic_alloc(void);

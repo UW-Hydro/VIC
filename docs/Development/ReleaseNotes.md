@@ -159,10 +159,10 @@ This is a major update from VIC 4. The VIC 5.0.0 release aims to have nearly ide
 
 	Previously, VIC did not produce the same results (fluxes and states) if a simulation is separated into multiple shorter-period runs by saving the state variables and restarting. This was due to: 1) the MTCLIM algorithm resulted in slightly different sub-daily meteorological variable values for different length of forcing (MTCLIM is deprecated in the current version); 2) a few bugs resulting in inexact restart. The following bugs have been fixed:
 
-	- The prognostic state variable `energy.Tfoliage` (Foliage temperature) is now saved to the state file
-	- Two flux variables `energy.LongUnderOut` and `energy.snow_flux` are now saved to the state file. **TODO:** this is a temporary solution to ensure exact restart. A better way of handling the tw flux variables need to be done in the future (see [GH#479](https://github.com/UW-Hydro/VIC/issues/479))
+	- The prognostic state variable `energy.Tfoliage` (foliage temperature) is now saved to the state file
+	- Two flux variables `energy.LongUnderOut` and `energy.snow_flux` are now saved to the state file. **TODO:** this is a temporary solution to ensure exact restart. A better way of handling the two flux variables needs to be done in the future (see [GH#479](https://github.com/UW-Hydro/VIC/issues/479))
 
-4. Fix the binary state file I/O ([GH#487](https://github.com/UW-Hydro/VIC/pull/487))
+4. Fix for binary state file I/O ([GH#487](https://github.com/UW-Hydro/VIC/pull/487))
 
 	Fixed a bug so that the binary format state file I/O works correctly.
 

@@ -316,8 +316,9 @@ distribute_node_moisture_properties(double *moist_node,
 }
 
 /******************************************************************************
-* @brief    This subroutine estimates the ice content of all soil moisture
-*           layers based on the distribution of soil thermal node temperatures.
+* @brief    This subroutine estimates the temperature and ice content of all 
+*           soil moisture layers based on the distribution of soil thermal node 
+*           temperatures.
 ******************************************************************************/
 int
 estimate_layer_ice_content(layer_data_struct *layer,

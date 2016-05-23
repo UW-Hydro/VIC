@@ -54,6 +54,8 @@ compute_derived_state_vars(all_vars_struct *all_vars,
         MAX_FROST_AREAS];
     double                     dt_thresh;
     double                     tmp_runoff;
+    double                     tmpT[MAX_NODES][MAX_FROST_AREAS + 1];
+    double                     tmpZ[MAX_LAYERS][MAX_NODES];
 
     cell_data_struct         **cell;
     energy_bal_struct        **energy;
@@ -223,22 +225,44 @@ compute_derived_state_vars(all_vars_struct *all_vars,
                         }
                     }
                     else {
-                        ErrorFlag = estimate_layer_ice_content(
+                        estimate_frost_temperature_and_depth(
                             cell[veg][band].layer,
+                            tmpT,
+                            tmpZ,
                             soil_con->Zsum_node,
                             energy[veg][band].T,
+                            soil_con->depth,
+                            soil_con->frost_fract,
+                            soil_con->frost_slope,
+                            options.Nnode,
+                            options.Nlayer);
+                        ErrorFlag = estimate_layer_ice_content(
+                            cell[veg][band].layer,
+                            tmpT,
+                            tmpZ,
+                            soil_con->Zsum_node,
                             soil_con->depth,
                             soil_con->max_moist,
                             soil_con->expt,
                             soil_con->bubble,
-                            soil_con->frost_fract,
-                            soil_con->frost_slope,
                             options.Nnode,
                             options.Nlayer,
                             soil_con->FS_ACTIVE);
                         if (ErrorFlag == ERROR) {
                             log_err("Error in "
                                     "estimate_layer_ice_content");
+                        }
+                        ErrorFlag = estimate_layer_temperature(
+                            cell[veg][band].layer,
+                            tmpT,
+                            tmpZ,
+                            soil_con->Zsum_node,
+                            soil_con->depth,
+                            options.Nnode,
+                            options.Nlayer);
+                        if (ErrorFlag == ERROR) {
+                            log_err("Error in "
+                                    "estimate_layer_temperature");
                         }
                     }
 

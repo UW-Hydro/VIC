@@ -42,6 +42,8 @@ calc_layer_average_thermal_props(energy_bal_struct *energy,
 
     size_t               i;
     int                  ErrorFlag;
+    double               tmpT[MAX_NODES][MAX_FROST_AREAS + 1];
+    double               tmpZ[MAX_LAYERS][MAX_NODES];
 
     if (options.FROZEN_SOIL && soil_con->FS_ACTIVE) {
         find_0_degree_fronts(energy, soil_con->Zsum_node, T, Nnodes);
@@ -81,18 +83,37 @@ calc_layer_average_thermal_props(energy_bal_struct *energy,
         }
     }
     else {
+        estimate_frost_temperature_and_depth(layer,
+                                             tmpT,
+                                             tmpZ,
+                                             soil_con->Zsum_node,
+                                             energy->T,
+                                             soil_con->depth,
+                                             soil_con->frost_fract,
+                                             soil_con->frost_slope,
+                                             Nnodes,
+                                             options.Nlayer);
         ErrorFlag = estimate_layer_ice_content(layer,
+                                               tmpT,
+                                               tmpZ,
                                                soil_con->Zsum_node,
-                                               energy->T,
                                                soil_con->depth,
                                                soil_con->max_moist,
                                                soil_con->expt,
                                                soil_con->bubble,
-                                               soil_con->frost_fract,
-                                               soil_con->frost_slope,
                                                Nnodes,
                                                options.Nlayer,
                                                soil_con->FS_ACTIVE);
+        if (ErrorFlag == ERROR) {
+            return (ERROR);
+        }
+        ErrorFlag = estimate_layer_temperature(layer,
+                                               tmpT,
+                                               tmpZ,
+                                               soil_con->Zsum_node,
+                                               soil_con->depth,
+                                               Nnodes,
+                                               options.Nlayer);
         if (ErrorFlag == ERROR) {
             return (ERROR);
         }

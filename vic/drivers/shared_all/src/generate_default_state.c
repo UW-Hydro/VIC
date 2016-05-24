@@ -46,6 +46,9 @@ generate_default_state(all_vars_struct *all_vars,
     size_t                   k;
     double                   Cv;
     double                   tmp;
+    double                   tmpT[MAX_LAYERS][MAX_NODES][MAX_FROST_AREAS + 1];
+    double                   tmpZ[MAX_LAYERS][MAX_NODES];
+    int                      ErrorFlag;
 
     cell_data_struct       **cell;
     energy_bal_struct      **energy;
@@ -67,7 +70,7 @@ generate_default_state(all_vars_struct *all_vars,
         if (Cv > 0) {
             for (band = 0; band < options.SNOW_BAND; band++) {
                 if (soil_con->AreaFract[band] > 0.) {
-                    /* Initialize soil node temperatures */
+                    /* Initialize soil moistures */
                     for (lidx = 0; lidx < options.Nlayer; lidx++) {
                         cell[veg][band].layer[lidx].moist =
                             soil_con->init_moist[lidx];
@@ -106,6 +109,63 @@ generate_default_state(all_vars_struct *all_vars,
                                                                             param.EMISS_SNOW);
                     energy[veg][band].Tfoliage = energy[veg][band].T[0] +
                                                  soil_con->Tfactor[band];
+                }
+            }
+        }
+    }
+
+    /************************************************************************
+       Initialize soil layer ice content
+    ************************************************************************/
+
+    for (veg = 0; veg <= Nveg; veg++) {
+        Cv = veg_con[veg].Cv;
+        if (Cv > 0) {
+            for (band = 0; band < options.SNOW_BAND; band++) {
+                if (soil_con->AreaFract[band] > 0.) {
+                    if (options.QUICK_FLUX) {
+                        ErrorFlag = estimate_layer_ice_content_quick_flux(
+                                        cell[veg][band].layer,
+                                        soil_con->depth, soil_con->dp,
+                                        energy[veg][band].T[0], energy[veg][band].T[1],
+                                        soil_con->avg_temp, soil_con->max_moist,
+                                        soil_con->expt, soil_con->bubble,
+                                        soil_con->frost_fract, soil_con->frost_slope,
+                                        soil_con->FS_ACTIVE);
+                        if (ErrorFlag == ERROR) {
+                            log_err("Error in "
+                                    "estimate_layer_ice_content_quick_flux");
+                        }
+                    }
+                    else {
+                        estimate_frost_temperature_and_depth(
+                            cell[veg][band].layer,
+                            tmpT,
+                            tmpZ,
+                            soil_con->Zsum_node,
+                            energy[veg][band].T,
+                            soil_con->depth,
+                            soil_con->frost_fract,
+                            soil_con->frost_slope,
+                            options.Nnode,
+                            options.Nlayer);
+                        ErrorFlag = estimate_layer_ice_content(
+                            cell[veg][band].layer,
+                            tmpT,
+                            tmpZ,
+                            soil_con->Zsum_node,
+                            soil_con->depth,
+                            soil_con->max_moist,
+                            soil_con->expt,
+                            soil_con->bubble,
+                            options.Nnode,
+                            options.Nlayer,
+                            soil_con->FS_ACTIVE);
+                        if (ErrorFlag == ERROR) {
+                            log_err("Error in "
+                                    "estimate_layer_ice_content");
+                        }
+                    }
                 }
             }
         }

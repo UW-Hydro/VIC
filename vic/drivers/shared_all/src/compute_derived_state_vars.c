@@ -197,17 +197,7 @@ compute_derived_state_vars(all_vars_struct *all_vars,
                         }
                     }
 
-                    /* initialize layer moistures and ice contents */
-                    for (lidx = 0; lidx < options.Nlayer; lidx++) {
-                        cell[veg][band].layer[lidx].moist =
-                            moist[veg][band][lidx];
-                        for (frost_area = 0;
-                             frost_area < options.Nfrost;
-                             frost_area++) {
-                            cell[veg][band].layer[lidx].ice[frost_area] =
-                                ice[veg][band][lidx][frost_area];
-                        }
-                    }
+                    /* calculate soil layer temperatures  */
                     if (options.QUICK_FLUX) {
                         ErrorFlag =
                             estimate_layer_ice_content_quick_flux(
@@ -236,22 +226,6 @@ compute_derived_state_vars(all_vars_struct *all_vars,
                             soil_con->frost_slope,
                             options.Nnode,
                             options.Nlayer);
-                        ErrorFlag = estimate_layer_ice_content(
-                            cell[veg][band].layer,
-                            tmpT,
-                            tmpZ,
-                            soil_con->Zsum_node,
-                            soil_con->depth,
-                            soil_con->max_moist,
-                            soil_con->expt,
-                            soil_con->bubble,
-                            options.Nnode,
-                            options.Nlayer,
-                            soil_con->FS_ACTIVE);
-                        if (ErrorFlag == ERROR) {
-                            log_err("Error in "
-                                    "estimate_layer_ice_content");
-                        }
                         ErrorFlag = estimate_layer_temperature(
                             cell[veg][band].layer,
                             tmpT,

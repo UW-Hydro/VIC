@@ -210,18 +210,6 @@ compute_derived_state_vars(all_vars_struct *all_vars,
                             log_err("Error in "
                                     "estimate_layer_temperature_quick_flux");
                         }
-                        ErrorFlag =
-                            estimate_layer_ice_content_quick_flux(
-                                cell[veg][band].layer,
-                                soil_con->depth,
-                                soil_con->max_moist,
-                                soil_con->expt, soil_con->bubble,
-                                soil_con->frost_fract, soil_con->frost_slope,
-                                soil_con->FS_ACTIVE);
-                        if (ErrorFlag == ERROR) {
-                            log_err("Error in "
-                                    "estimate_layer_ice_content_quick_flux");
-                        }
                     }
                     else {
                         estimate_frost_temperature_and_depth(

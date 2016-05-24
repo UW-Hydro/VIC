@@ -424,6 +424,68 @@ estimate_frost_temperature_and_depth(layer_data_struct *layer,
 }
 
 /******************************************************************************
+* @brief    This subroutine estimates the temperature of all soil moisture 
+*           layers based on the distribution of soil thermal node temperatures.
+******************************************************************************/
+int
+estimate_layer_temperature(layer_data_struct *layer,
+                           double             tmpT[MAX_LAYERS][MAX_NODES][MAX_FROST_AREAS + 1],
+                           double             tmpZ[MAX_LAYERS][MAX_NODES],
+                           double            *Zsum_node,
+                           double            *depth,
+                           size_t             Nnodes,
+                           size_t             Nlayers)
+{
+    extern option_struct options;
+
+    size_t               nidx, min_nidx;
+    size_t               lidx, max_nidx;
+    double               Lsum[MAX_LAYERS + 1];
+
+    // compute cumulative layer depths
+    Lsum[0] = 0;
+    for (lidx = 1; lidx <= Nlayers; lidx++) {
+        Lsum[lidx] = depth[lidx - 1] + Lsum[lidx - 1];
+    }
+
+    // estimate soil layer average temperature
+    for (lidx = 0; lidx < Nlayers; lidx++) {
+        // Initialize layer temperature
+        layer[lidx].T = 0.;
+
+        // Bracket current layer between nodes
+        min_nidx = Nnodes - 2;
+        while (Lsum[lidx] < Zsum_node[min_nidx] && min_nidx > 0) {
+            min_nidx--;
+        }
+        max_nidx = 1;
+        while (Lsum[lidx + 1] > Zsum_node[max_nidx] && max_nidx < Nnodes) {
+            max_nidx++;
+        }
+        if (max_nidx >= Nnodes) {
+            log_warn("Soil thermal nodes do not extend below bottom "
+                     "soil layer; using deepest node temperature for "
+                     "all deeper depths.");
+            // If we get here, soil thermal nodes don't extend all the way
+            // down to the bottom of the lowest layer.  In this case, just
+            // use the deepest node to represent all deeper temperatures.
+            max_nidx = Nnodes - 1;
+        }
+
+        // Compute average soil layer temperature
+        for (nidx = min_nidx; nidx < max_nidx; nidx++) {
+            layer[lidx].T +=
+                (tmpZ[lidx][nidx + 1] - tmpZ[lidx][nidx]) *
+                (tmpT[lidx][nidx + 1][options.Nfrost] + 
+                 tmpT[lidx][nidx][options.Nfrost]) / 2.;
+        }
+        layer[lidx].T /= depth[lidx];
+    }
+
+    return (0);
+}
+
+/******************************************************************************
 * @brief    This subroutine estimates the ice content of all soil moisture 
 *           layers based on the distribution of soil thermal node temperatures.
 ******************************************************************************/
@@ -446,7 +508,6 @@ estimate_layer_ice_content(layer_data_struct *layer,
     size_t               lidx, frost_area, max_nidx;
     double               Lsum[MAX_LAYERS + 1];
     double               tmp_ice[MAX_NODES][MAX_FROST_AREAS];
-    double               min_temp, max_temp, tmp_fract;
 
     // compute cumulative layer depths
     Lsum[0] = 0;
@@ -523,70 +584,6 @@ estimate_layer_ice_content(layer_data_struct *layer,
 
 /******************************************************************************
 * @brief    This subroutine estimates the temperature of all soil moisture 
-*           layers based on the distribution of soil thermal node temperatures.
-******************************************************************************/
-int
-estimate_layer_temperature(layer_data_struct *layer,
-                           double             tmpT[MAX_LAYERS][MAX_NODES][MAX_FROST_AREAS + 1],
-                           double             tmpZ[MAX_LAYERS][MAX_NODES],
-                           double            *Zsum_node,
-                           double            *depth,
-                           size_t             Nnodes,
-                           size_t             Nlayers)
-{
-    extern option_struct options;
-
-    size_t               nidx, min_nidx;
-    size_t               lidx, frost_area, max_nidx;
-    double               Lsum[MAX_LAYERS + 1];
-    double               tmp_ice[MAX_NODES][MAX_FROST_AREAS];
-    double               min_temp, max_temp, tmp_fract;
-
-    // compute cumulative layer depths
-    Lsum[0] = 0;
-    for (lidx = 1; lidx <= Nlayers; lidx++) {
-        Lsum[lidx] = depth[lidx - 1] + Lsum[lidx - 1];
-    }
-
-    // estimate soil layer average temperature
-    for (lidx = 0; lidx < Nlayers; lidx++) {
-        // Initialize layer temperature
-        layer[lidx].T = 0.;
-
-        // Bracket current layer between nodes
-        min_nidx = Nnodes - 2;
-        while (Lsum[lidx] < Zsum_node[min_nidx] && min_nidx > 0) {
-            min_nidx--;
-        }
-        max_nidx = 1;
-        while (Lsum[lidx + 1] > Zsum_node[max_nidx] && max_nidx < Nnodes) {
-            max_nidx++;
-        }
-        if (max_nidx >= Nnodes) {
-            log_warn("Soil thermal nodes do not extend below bottom "
-                     "soil layer; using deepest node temperature for "
-                     "all deeper depths.");
-            // If we get here, soil thermal nodes don't extend all the way
-            // down to the bottom of the lowest layer.  In this case, just
-            // use the deepest node to represent all deeper temperatures.
-            max_nidx = Nnodes - 1;
-        }
-
-        // Compute average soil layer temperature
-        for (nidx = min_nidx; nidx < max_nidx; nidx++) {
-            layer[lidx].T +=
-                (tmpZ[lidx][nidx + 1] - tmpZ[lidx][nidx]) *
-                (tmpT[lidx][nidx + 1][options.Nfrost] + 
-                 tmpT[lidx][nidx][options.Nfrost]) / 2.;
-        }
-        layer[lidx].T /= depth[lidx];
-    }
-
-    return (0);
-}
-
-/******************************************************************************
-* @brief    This subroutine estimates the temperature of all soil moisture 
 *           layers based on the simplified soil T profile described in Liang 
 *           et al. (1999), and used when QUICK_FLUX is TRUE.
 *
@@ -607,10 +604,8 @@ estimate_layer_temperature_quick_flux(layer_data_struct *layer,
 {
     extern option_struct options;
 
-    size_t               lidx, frost_area;
+    size_t               lidx;
     double               Lsum[MAX_LAYERS + 1];
-    double               tmpT, tmp_fract, tmp_ice;
-    double               min_temp, max_temp;
 
     // compute cumulative layer depths
     Lsum[0] = 0;

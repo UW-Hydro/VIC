@@ -9,7 +9,7 @@ The order of the options in the global parameter file is not important, but the 
 
 # Define Simulation Parameters
 
-The following options determine the type of simulation that wil3l be performed.
+The following options determine the type of simulation that will be performed.
 
 ## Main Simulation Parameters
 
@@ -131,9 +131,9 @@ This section describes how to define the forcing files needed by the VIC model. 
 
 Unlike model parameters, for which 1 file contains data for all grid cells, the meteorological forcings are stored as a separate time series for each grid cell. The time step length of the input forcings must match the time step length at which VIC is running. Input files can be ASCII or Binary (signed or unsigned short ints) column formatted. Columns in the file must be in the same order as they are defined in the global control file.
 
-VIC will allow forcing data to be stored in two different files per grid cell (e.g., precip and wind speed in one file, tmin and tmax in another file; or meteorological variables in one file, and vegetation timeseries in another file). Note that if you are using two forcing files per grid cell, the parameters for the first file must be defined before those for the second. **Bold** numbers indicate the order in which these values should be defined, after each forcing file (FORCING1 or FORCING2). Options that do not have a bold number apply to both forcing file types and should appear after the numbered options.
+VIC will allow forcing data to be stored in two different files per grid cell (e.g., precip and wind speed in one file, tmin and tmax in another file; or meteorological variables in one file, and vegetation timeseries in another file). Note that if you are using two forcing files per grid cell, the parameters for the first file must be defined before those for the second. **Bold** numbers indicate the order in which these values should be defined, after each forcing file (`FORCING1` or `FORCING2`). Options that do not have a bold number apply to both forcing file types and should appear after the numbered options.
 
-All FORCING filenames are actually the pathname, and prefix for gridded data types: ex. DATA/forcing_YY.YYY_XX.XXX. Latitude and longitude index suffix is added by VIC based on GRID_DECIMAL parameter defined above, and the latitude and longitude values defined in the [soil parameter file](SoilParam.md).
+All FORCING filenames are actually the pathname, and prefix for gridded data types: ex. `DATA/forcing_YY.YYY_XX.XXX`. Latitude and longitude index suffix is added by VIC based on `GRID_DECIMAL` parameter defined above, and the latitude and longitude values defined in the [soil parameter file](SoilParam.md).
 
 | Name              | Type      | Units                     | Description                                                                                                                                                                                                                                                                                                                           |
 |------------------ |---------  |-------------------------- |------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------   |
@@ -149,7 +149,6 @@ All FORCING filenames are actually the pathname, and prefix for gridded data typ
 | (9) FORCEDAY      | integer   | day                       | Day meteorological forcing files start                                                                                                                                                                                                                                                                                                |
 | GRID_DECIMAL      | integer   | N/A                       | Number of decimals to use in gridded file name extensions                                                                                                                                                                                                                                                                             |
 | WIND_H            | float     | m                         | Height of wind speed measurement over bare soil and snow cover. ***Wind measurement height over vegetation is now read from the vegetation library file for all types, the value in the global file only controls the wind height over bare soil and over the snow pack when a vegetation canopy is not defined.***                   |
-| ALMA_INPUT        | string    | TRUE or FALSE             | This option tells VIC the units to expect for the input variables:  <li>**FALSE** = Use standard VIC units: for moisture fluxes, use cumulative mm over the time step; for temperature, use degrees C;  <li>**TRUE** = Use the units of the ALMA convention: for moisture fluxes, use the average rate in mm/s (or kg/m<sup>2</sup>s) over the time step; for temperature, use degrees K;  <br><br>Default = FALSE. |
 
 - If using one forcing file, use only FORCING1, if using two forcing files, define all parameters for FORCING1, and then define all forcing parameters for FORCING2\. All parameters need to be defined for both forcing files when a second file is used.
 
@@ -157,22 +156,41 @@ _Examples._ a standard four column daily forcing data file will be defined as:
 
 ## ASCII File
 
-    FORCING1   FORCING_DATA/LDAS_ONE_DEGREE/data_
-    N_TYPES     4
-    FORCE_TYPE  PREC
-    FORCE_TYPE  WIND
-    FORCE_FORMAT    ASCII
-    FORCE_STEPS_PER_DAY    24
+    FORCING1             forcings/full_data_
+    FORCE_FORMAT         ASCII
+    FORCE_TYPE           PREC
+    FORCE_TYPE           AIR_TEMP
+    FORCE_TYPE           SWDOWN
+    FORCE_TYPE           LWDOWN
+    FORCE_TYPE           SKIP  # This column is air density, which is not needed by VIC
+    FORCE_TYPE           PRESSURE
+    FORCE_TYPE           VP
+    FORCE_TYPE           WIND
+    FORCE_STEPS_PER_DAY  24    # Forcing time step length (hours)
+    FORCEYEAR            1949  # Year of first forcing record
+    FORCEMONTH           01    # Month of first forcing record
+    FORCEDAY             01    # Day of first forcing record
+    GRID_DECIMAL         4     # Number of digits after decimal point in forcing file names
+    WIND_H               10.0  # height of wind speed measurement (m)
 
 ## Binary File
 
-    FORCING1   FORCING_DATA/LDAS_ONE_DEGREE/data_
-    N_TYPES     4
-    FORCE_TYPE  PREC    UNSIGNED    40
-    FORCE_TYPE  WIND    SIGNED      100
-    FORCE_FORMAT    BINARY
-    FORCE_ENDIAN    LITTLE
-    FORCE_STEPS_PER_DAY    24
+    FORCING1             forcings/full_data_
+    FORCE_FORMAT         BINARY
+    FORCE_ENDIAN        LITTLE
+    FORCE_TYPE           PREC       UNSIGNED    40
+    FORCE_TYPE           AIR_TEMP   SIGNED      100
+    FORCE_TYPE           SWDOWN     UNSIGNED    100
+    FORCE_TYPE           LWDOWN     UNSIGNED    100
+    FORCE_TYPE           PRESSURE   UNSIGNED    100
+    FORCE_TYPE           VP         UNSIGNED    100
+    FORCE_TYPE           WIND       UNSIGNED    100
+    FORCE_STEPS_PER_DAY  24    # Forcing time step length (hours)
+    FORCEYEAR            1949  # Year of first forcing record
+    FORCEMONTH           01    # Month of first forcing record
+    FORCEDAY             01    # Day of first forcing record
+    GRID_DECIMAL         4     # Number of digits after decimal point in forcing file names
+    WIND_H               10.0  # height of wind speed measurement (m)
 
 
 # Define Parameter Files
@@ -184,7 +202,7 @@ The following options describe the input parameter files.
 | SOIL                  | string    | path/filename     | the Soil parameter file.                                                                                                                                                                                                                                                                                  |
 | BASEFLOW              | string    | N/A               | This option describes the form of the baseflow parameters in the soil parameter file: <li>**ARNO** = fields 5-8 of the soil parameter file are the standard VIC baseflow parameters <li>**NIJSSEN2001** = fields 5-8 of the soil parameter file are the baseflow parameters from Nijssen et al (2001) <br><br>Default = ARNO. |
 | JULY_TAVG_SUPPLIED    | string    | TRUE or FALSE     | If TRUE then VIC will expect an additional column (July_Tavg) in the soil parameter file to contain the grid cell's average July temperature. If your soil parameter file contains this optional column, you MUST set JULY_TAVG_SUPPLIED to TRUE so that VIC can read the soil parameter file correctly. <br><br>*NOTE*: Supplying July average temperature is only required if the COMPUTE_TREELINE option is set to TRUE. <br><br>Default = FALSE. |
-| ORGANIC_FRACT         | string    | TRUE or FALSE     | (release 4.1.2 and later) <li>**TRUE** = the soil parameter file contains `3*Nlayer` extra columns, listing, for each layer: the organic fraction, and the bulk density and soil particle density of the organic matter in the soil layer. <li>**FALSE** = the soil parameter file does not contain any information about organic soil, and organic fraction should be assumed to be 0. <br><br>Default = FALSE. |
+| ORGANIC_FRACT         | string    | TRUE or FALSE     | <li>**TRUE** = the soil parameter file contains `3*Nlayer` extra columns, listing, for each layer: the organic fraction, and the bulk density and soil particle density of the organic matter in the soil layer. <li>**FALSE** = the soil parameter file does not contain any information about organic soil, and organic fraction should be assumed to be 0. <br><br>Default = FALSE. |
 | VEGLIB                | string    | path/filename     | Vegetation library file name                                                                                                                                                                                                                                                                              |
 | VEGPARAM              | string    | path/filename     | Vegetation parameter file name                                                                                                                                                                                                                                                                            |
 | ROOT_ZONES            | integer   | N/A               | Number of defined root zones defined for root distribution.                                                                                                                                                                                                                                               |
@@ -212,50 +230,24 @@ The following options only take effect when the lake model is running.
 
 # Define Output Files
 
-The following options describe the output files. Click [here](OutputFormatting.md) for more information.
+The following options describe the location of the log and model history files. Click [here](OutputFormatting.md) for more information.
 
-| Name                  | Type      | Units             | Description                                                                                                                                                                               |
-|---------------------- |---------  |---------------    |----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------   |
-| LOG_DIR            | string    | path name         | Name of directory where log files should be written (optional, default is stdout) |
-| RESULT_DIR            | string    | path name         | Name of directory where model results are written                                                                                                                                         |
-| OUT_STEP              | integer   | hours             | Output time step length                                                                                                                                                                   |
-| SKIPYEAR              | integer   | years             | Number of years to skip before starting to write output file. Used to reduce output by not including spin-up years.                                                                       |
-| COMPRESS              | string    | TRUE or FALSE     | if TRUE compress input and output files when done (uses gzip)                                                                                                                             |
-| OUT_FORMAT            | string    | BINARY OR ASCII   | If BINARY write output files in binary (default is ASCII).                                                                                                                                  |
-| ALMA_OUTPUT           | string    | TRUE or FALSE     | Options for output units: <li>**FALSE** = standard VIC units. Moisture fluxes are in cumulative mm over the time step; temperatures are in degrees C <li>**TRUE** = units follow the ALMA convention. Moisture fluxes are in average mm/s (kg/m<sup>2</sup>s) over the time step; temperatures are in degrees K <br><br>Default = FALSE. [Click here for more information.](OutputFormatting.md)                                                                                                                                                                         |
-| MOISTFRACT            | string    | TRUE or FALSE     | Options for output soil moisture units (default is FALSE): <li>**FALSE** = Standard VIC units. Soil moisture is in mm over the grid cell area <li>**TRUE** = Soil moisture is volume fraction                                                                                                                                                   |
-| PRT_HEADER            | string    | TRUE or FALSE     | Options for output file headers (default is FALSE): <li>**FALSE** = output files contain no headers <li>**TRUE** = headers are inserted into the beginning of each output file, listing the names of the variables in each field of the file (if ASCII) and/or the variable data types (if BINARY) <br><br>[Click here for more information.](OutputFormatting.md)                                                                                                                                                          |
-| PRT_SNOW_BAND         | string    | TRUE or FALSE     | if TRUE then print snow variables for each snow band in a separate output file (`snow_band_*`). <br><br>*NOTE*: this option is ignored if output file contents are specified. |
-| OUTFILE\*               | <br> string <br> | <br>prefix <br> | Information about this output file: <br>Prefix of the output file (to which the lat and lon will be appended) <br> This should be specified once for each output file. [Click here for more information.](OutputFormatting.md) |
-| OUTVAR\*                | <br> string <br> string <br> string <br> integer <br> | <br> name <br> format <br> type <br> multiplier <br> | Information about this output variable:<br>Name (must match a name listed in vicNl_def.h) <br> Output format (C fprintf-style format code) <br>Data type (one of: OUT_TYPE_DEFAULT, OUT_TYPE_CHAR, OUT_TYPE_SINT, OUT_TYPE_USINT, OUT_TYPE_INT, OUT_TYPE_FLOAT,OUT_TYPE_DOUBLE) <br> Multiplier - number to multiply the data with in order to recover the original values (only valid with OUT_FORMAT=BINARY) <br><br> This should be specified once for each output variable. [Click here for more information.](OutputFormatting.md)|
+| Name                  | Type      | Units             | Description                                                                        |
+|---------------------- |---------  |---------------    |----------------------------------------------------------------------------------- |
+| LOG_DIR               | string    | path name         | Name of directory where log files should be written (optional, default is stdout)  |
+| RESULT_DIR            | string    | path name         | Name of directory where model results are written                                  |
 
-\* *Note: `OUTFILE`, and `OUTVAR` are optional; if omitted, traditional output files are produced. [Click here for details on using these instructions](OutputFormatting.md).*
+The following options describe the settings for each output stream:
 
-# Obsolete Options from Earlier Versions
+| Name        | Type      | Units             | Description                                                                        |
+|------------ |---------  |---------------    |----------------------------------------------------------------------------------- |
+| OUTFILE\*   | string    | prefix            | Information about this output file: <br>Prefix of the output file (to which the lat and lon will be appended3) <br> This should be specified once for each output file. [Click here for more information.](OutputFormatting.md) |
+| OUTFREQ     | string <br> [integer/string]   | frequency <br> count | Describes aggregation frequency for output stream.  Valid options for frequency are: FREQ_NEVER, FREQ_NSTEPS, FREQ_NSECONDS, FREQ_NMINUTES, FREQ_NHOURS, FREQ_NDAYS, FREQ_NMONTHS, FREQ_NYEARS, FREQ_DATE, FREQ_END. Count may be an positive integer or a string with date format YYYY-MM-DD[-SSSSS] in the case of FREQ_DATE. <br> Default `frequency` is `FREQ_NDAYS`. Default `count` is 1. |
+| COMPRESS    | string/integer | TRUE, FALSE, or lvl | if TRUE or > 0 compress input and output files when done (uses `gzip`), if an integer [1-9] is supplied, it is used to set the`gzip` compression level |
+| OUT_FORMAT  | string    | BINARY OR ASCII   | If BINARY write output files in binary (default is ASCII).                                                                                                                                  |
+| OUTVAR\*    | <br> string <br> string <br> string <br> integer <br> string <br> | <br> name <br> format <br> type <br> multiplier <br> <aggtype> <br> | Information about this output variable:<br>Name (must match a name listed in vic_def.h) <br> Output format (C fprintf-style format code) (only valid with OUT_FORMAT=ASCII) <br>Data type (one of: OUT_TYPE_DEFAULT, OUT_TYPE_CHAR, OUT_TYPE_SINT, OUT_TYPE_USINT, OUT_TYPE_INT, OUT_TYPE_FLOAT,OUT_TYPE_DOUBLE) <br> Multiplier - number to multiply the data with in order to recover the original values (only valid with OUT_FORMAT=BINARY) <br> Aggregation method - temporal aggregation method to use (one of: AGG_TYPE_DEFAULT, AGG_TYPE_AVG, AGG_TYPE_BEG, AGG_TYPE_END, AGG_TYPE_MAX, AGG_TYPE_MIN, AGG_TYPE_SUM) <br> <br> This should be specified once for each output variable. [Click here for more information.](OutputFormatting.md)|
 
-The following options are no longer supported.
-
-| Name          | Type      | Units             | Description                                                                                                                                                                                                                                   |
-|-------------  |--------   |-----------------  |---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| TIME_STEP     | integer   | hour      | Simulation time step length        |
-| SNOW_STEP     | integer   | hour      | Snow model time step length        |
-| STARTHOUR     | integer   | hour      | Hour model simulation starts        |
-| GRND_FLUX     | string    | TRUE or FALSE     | Versions 4.1.1 and earlier. If TRUE, compute ground heat flux and energy balance; if FALSE, do not compute ground heat flux. Default: If FULL_ENERGY or FROZEN_SOIL are TRUE, GRND_FLUX is automatically set to TRUE; otherwise GRND_FLUX is automatically set to FALSE.  |
-| MIN_LIQ       | string    | TRUE or FALSE     | Version 4.1.1 only. Options for handling minimum soil moisture in presence of ice (default is FALSE): <li>**FALSE** = Use residual moisture as lower bound on soil moisture in Brooks-Corey/Campbell and other relationships involving liquid water. <li>**TRUE** = Use (`residual moisture * unfrozen water fraction` as function of temperature) as lower bound on soil moisture in Brooks-Corey/Campbell and other relationships involving liquid water. |
-| GLOBAL_LAI    | string    | TRUE or FALSE     | If TRUE the vegetation parameter file contains an extra line for each vegetation type that defines monthly LAI values for each vegetation type for each grid cell. <br><br>*NOTE*: This option has been replaced by the two options LAI_SRC and VEGPARAM_LAI. |
-| OUTPUT_FORCE  | string    | TRUE or FALSE     | If TRUE, perform disaggregation of forcings, skip the simulation, and output the disaggregated forcings. |
-| FORCEHOUR    | integer   | hour                      | Hour meteorological forcing files start                             |
-| MEASURE_H    | decimal   | m      | Height of humidity measurement        |
-| PRT_FLUX      | string    | TRUE or FALSE     | Versions 4.1.1 and earlier. If TRUE print energy fluxes debugging files .  |
-| PRT_BALANCE   | string    | TRUE or FALSE     | Versions 4.1.1 and earlier. If TRUE print water balance debugging files .  |
-| PRT_SOIL      | string    | TRUE or FALSE     | Versions 4.1.1 and earlier. If TRUE print soil parameter debugging files .  |
-| PRT_VEGE      | string    | TRUE or FALSE     | Versions 4.1.1 and earlier. If TRUE print vegetation parameter debugging files .  |
-| PRT_GLOBAL    | string    | TRUE or FALSE     | Versions 4.1.1 and earlier. If TRUE print global parameter debugging files .  |
-| PRT_ATMOS     | string    | TRUE or FALSE     | Versions 4.1.1 and earlier. If TRUE print forcing data debugging files .  |
-| PRT_SNOW      | string    | TRUE or FALSE     | Versions 4.1.1 and earlier. If TRUE print snow debugging files .  |
-| PRT_MOIST     | string    | TRUE or FALSE     | Versions 4.1.1 and earlier. If TRUE print soil moisture debugging files .  |
-| PRT_TEMP      | string    | TRUE or FALSE     | Versions 4.1.1 and earlier. If TRUE print soil thermal debugging files .  |
-| DEBUG_DIR     | string    | char * pathname   | Versions 4.1.1 and earlier.  Debugging files output directory (default directory is the current directory, '.'). |
+ - *Note: `OUTFILE`, and `OUTVAR` are optional; if omitted, traditional output files are produced. [Click here for details on using these instructions](OutputFormatting.md).*
 
 ## Example Global Parameter File:
 ```
@@ -394,21 +386,22 @@ FROZEN_SOIL FALSE   # TRUE = calculate frozen soils.  Default = FALSE.
 #       or (ASCII):
 #           FORCE_TYPE  PREC
 #######################################################################
-FORCING1    (put the forcing path/prefix here)  # Forcing file path and prefix, ending in "_"
-FORCE_FORMAT    BINARY  # BINARY or ASCII
-FORCE_ENDIAN    LITTLE  # LITTLE (PC/Linux) or BIG (SUN)
-N_TYPES     4   # Number of variables (columns)
-FORCE_TYPE  PREC    UNSIGNED    40
-FORCE_TYPE  TMAX    SIGNED  100
-FORCE_TYPE  TMIN    SIGNED  100
-FORCE_TYPE  WIND    SIGNED  100
-FORCE_STEPS_PER_DAY    24  # Forcing time step length (hours)
-FORCEYEAR   2000    # Year of first forcing record
-FORCEMONTH  01  # Month of first forcing record
-FORCEDAY    01  # Day of first forcing record
-GRID_DECIMAL    4   # Number of digits after decimal point in forcing file names
-WIND_H          10.0    # height of wind speed measurement (m)
-ALMA_INPUT  FALSE   # TRUE = ALMA-compliant input variable units; FALSE = standard VIC units
+FORCING1             forcings/full_data_
+FORCE_FORMAT         ASCII
+FORCE_TYPE           PREC
+FORCE_TYPE           AIR_TEMP
+FORCE_TYPE           SWDOWN
+FORCE_TYPE           LWDOWN
+FORCE_TYPE           SKIP  # This column is air density, which is not needed by VIC
+FORCE_TYPE           PRESSURE
+FORCE_TYPE           VP
+FORCE_TYPE           WIND
+FORCE_STEPS_PER_DAY  24    # Forcing time step length (hours)
+FORCEYEAR            1949  # Year of first forcing record
+FORCEMONTH           01    # Month of first forcing record
+FORCEDAY             01    # Day of first forcing record
+GRID_DECIMAL         4     # Number of digits after decimal point in forcing file names
+WIND_H               10.0  # height of wind speed measurement (m)
 
 #######################################################################
 # Land Surface Files and Parameters
@@ -441,22 +434,15 @@ SNOW_BAND   1   # Number of snow bands; if number of snow bands > 1, you must in
 #######################################################################
 # Output Files and Parameters
 #######################################################################
+LOG_DIR         (put the log directory path here)       # Log directory path
 RESULT_DIR      (put the result directory path here)    # Results directory path
-OUTPUT_STEPS_PER_DAY   0      # Output interval (hours); if 0, OUT_STEP = MODEL_STEPS_PER_DAY
-SKIPYEAR    0   # Number of years of output to omit from the output files
-COMPRESS    FALSE   # TRUE = compress input and output files when done
-OUT_FORMAT  BINARY  # BINARY or ASCII
-ALMA_OUTPUT FALSE   # TRUE = ALMA-format output files; FALSE = standard VIC units
-MOISTFRACT  FALSE   # TRUE = output soil moisture as volumetric fraction; FALSE = standard VIC units
-PRT_SNOW_BAND   FALSE   # TRUE = write a "snowband" output file, containing band-specific values of snow variables.
 
 #######################################################################
 #
 # Output File Contents
 #
-# As of VIC 4.0.6 and 4.1.0, you can specify your output file names and
-# contents # in the global param file (see the README.txt file for more
-# information).
+# You can specify your output file names and contents in the global param file
+# (see the VIC documentation for more information).
 #
 # If you do not specify file names and contents in the global param
 # file, VIC will produce the same set of output files that it has
@@ -465,30 +451,43 @@ PRT_SNOW_BAND   FALSE   # TRUE = write a "snowband" output file, containing band
 # PRT_SNOW_BAND is TRUE.  These files will have the same contents and
 # format as in earlier versions.
 #
-# The OPTIMIZE and LDAS_OUTPUT options have been removed.  These
-# output configurations can be selected with the proper set of
-# instructions in the global param file.  (see the output.*.template
-# files included in this distribution for more information.)
-#
 # If you do specify the file names and contents in the global param file,
 # PRT_SNOW_BAND will have no effect.
 #
 # Format:
 #
 #   OUTFILE       <prefix>
-#   OUTVAR        <varname>       [<format>        <type>  <multiplier>]
-#   OUTVAR        <varname>       [<format>        <type>  <multiplier>]
-#   OUTVAR        <varname>       [<format>        <type>  <multiplier>]
+#   OUTFREQ       <freq>            <value>
+#   COMPRESS      <compress>
+#   OUT_FORMAT    <file_format>
+#   OUTVAR        <varname>       [ <format>       [ <type>  [ <multiplier>   [ <aggtype>]]]]
+#   OUTVAR        <varname>       [ <format>       [ <type>  [ <multiplier>   [ <aggtype>]]]]
+#   OUTVAR        <varname>       [ <format>       [ <type>  [ <multiplier>   [ <aggtype>]]]]
 #
 #   OUTFILE       <prefix>
-#   OUTVAR        <varname>       [<format>        <type>  <multiplier>]
-#   OUTVAR        <varname>       [<format>        <type>  <multiplier>]
-#   OUTVAR        <varname>       [<format>        <type>  <multiplier>]
+#   OUTVAR        <varname>       [ <format>       [ <type>  [ <multiplier>   [ <aggtype>]]]]
+#   OUTVAR        <varname>       [ <format>       [ <type>  [ <multiplier>   [ <aggtype>]]]]
+#   OUTVAR        <varname>       [ <format>       [ <type>  [ <multiplier>   [ <aggtype>]]]]
 #
 #
 # where
 #   <prefix>     = name of the output file, NOT including latitude
 #                  and longitude
+#   <freq>       = Describes aggregation frequency for output stream. Valid
+#                  options for frequency are:
+#                    FREQ_NEVER     = never write to history file
+#                    FREQ_NSTEPS    = write to history every <value> steps
+#                    FREQ_NSECONDS  = write to history every <value> seconds
+#                    FREQ_NMINUTES  = write to history every <value> minutes
+#                    FREQ_NHOURS    = write to history every <value> hours
+#                    FREQ_NDAYS     = write to history every <value> days
+#                    FREQ_NMONTHS   = write to history every <value> months
+#                    FREQ_NYEARS    = write to history every <value> years
+#                    FREQ_DATE      = write to history on the date: <value>
+#                    FREQ_END       = write to history at the end of the simulation
+#   <value>      = integer describing the number of <freq> intervals to pass
+#                  before writing to the history file.
+#   <compress>   = gzip compression option.  TRUE, FALSE, or integer between 1-9.
 #   <varname>    = name of the variable (this must be one of the
 #                  output variable names listed in vic_driver_shared.h.)
 #   <format>     = (for ascii output files) fprintf format string,
@@ -513,6 +512,15 @@ PRT_SNOW_BAND   FALSE   # TRUE = write a "snowband" output file, containing band
 #   <multiplier> = (for binary output files) factor to multiply
 #                  the data by before writing, to increase precision.
 #                    *    = use the default multiplier for this variable
+#   <aggtype>    = Aggregation method to use for temporal aggregation. Valid
+#                  options for aggtype are:
+#                    AGG_TYPE_DEFAULT = default aggregation type for variable
+#                    AGG_TYPE_AVG     = average over aggreation window
+#                    AGG_TYPE_BEG     = beginning of aggregation window
+#                    AGG_TYPE_END     = end of aggregation window
+#                    AGG_TYPE_MAX     = maximum in aggregation window
+#                    AGG_TYPE_MIN     = minimum in aggregation window
+#                    AGG_TYPE_SUM     = sum over aggregation window
 #
 #######################################################################
 ```

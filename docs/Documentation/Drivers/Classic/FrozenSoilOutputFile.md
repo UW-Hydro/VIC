@@ -2,7 +2,7 @@
 
 When the model is run with the frozen soil algorithms, a third output file is produced which contains soil thermal output parameters. Since the frozen soils algorithm only works in with the full energy balance, there is only one format for the output file.
 
-Each output file contains model output from one grid cell. The files use the naming convention "fdepth_xx.xx_yy.yy", where xx.xx is the latitude, and yy.yy is the longitude. The number of decimal places in the output filename is determined by GRID_DECIMAL in the [global parameter file](GlobalParam.md), while the latitude and longitude values come from the [soil parameter file](SoilParam.md).
+Each output file contains model output from one grid cell. The files use the naming convention `fdepth_xx.xx_yy.yy`, where `xx.xx` is the latitude, and `yy.yy` is the longitude. The number of decimal places in the output filename is determined by GRID_DECIMAL in the [global parameter file](GlobalParam.md), while the latitude and longitude values come from the [soil parameter file](SoilParam.md).
 
 * * *
 

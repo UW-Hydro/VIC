@@ -322,7 +322,7 @@ distribute_node_moisture_properties(double *moist_node,
 ******************************************************************************/
 int
 estimate_frost_temperature_and_depth(layer_data_struct *layer,
-                                     double             tmpT[MAX_NODES][MAX_FROST_AREAS + 1],
+                                     double             tmpT[MAX_LAYERS][MAX_NODES][MAX_FROST_AREAS + 1],
                                      double             tmpZ[MAX_LAYERS][MAX_NODES],
                                      double            *Zsum_node,
                                      double            *T,
@@ -369,7 +369,8 @@ estimate_frost_temperature_and_depth(layer_data_struct *layer,
 
         // Get soil node temperatures for current layer
         if (Zsum_node[min_nidx] < Lsum[lidx]) {
-            tmpT[min_nidx][options.Nfrost] = linear_interp(Lsum[lidx],
+            tmpT[lidx][min_nidx][options.Nfrost] = linear_interp(
+                                                           Lsum[lidx],
                                                            Zsum_node[min_nidx],
                                                            Zsum_node[min_nidx +
                                                                      1],
@@ -377,15 +378,16 @@ estimate_frost_temperature_and_depth(layer_data_struct *layer,
                                                            T[min_nidx + 1]);
         }
         else {
-            tmpT[min_nidx][options.Nfrost] = T[min_nidx];
+            tmpT[lidx][min_nidx][options.Nfrost] = T[min_nidx];
         }
         tmpZ[lidx][min_nidx] = Lsum[lidx];
         for (nidx = min_nidx + 1; nidx < max_nidx; nidx++) {
-            tmpT[nidx][options.Nfrost] = T[nidx];
+            tmpT[lidx][nidx][options.Nfrost] = T[nidx];
             tmpZ[lidx][nidx] = Zsum_node[nidx];
         }
         if (Zsum_node[max_nidx] > Lsum[lidx + 1]) {
-            tmpT[max_nidx][options.Nfrost] = linear_interp(Lsum[lidx + 1],
+            tmpT[lidx][max_nidx][options.Nfrost] = linear_interp(
+                                                           Lsum[lidx + 1],
                                                            Zsum_node[max_nidx -
                                                                      1],
                                                            Zsum_node[max_nidx],
@@ -393,13 +395,13 @@ estimate_frost_temperature_and_depth(layer_data_struct *layer,
                                                            T[max_nidx]);
         }
         else {
-            tmpT[max_nidx][options.Nfrost] = T[max_nidx];
+            tmpT[lidx][max_nidx][options.Nfrost] = T[max_nidx];
         }
         tmpZ[lidx][max_nidx] = Lsum[lidx + 1];
 
         // distribute temperatures for sub-areas
         for (nidx = min_nidx; nidx <= max_nidx; nidx++) {
-            min_temp = tmpT[nidx][options.Nfrost] - frost_slope / 2.;
+            min_temp = tmpT[lidx][nidx][options.Nfrost] - frost_slope / 2.;
             max_temp = min_temp + frost_slope;
             for (frost_area = 0; frost_area < options.Nfrost; frost_area++) {
                 if (options.Nfrost > 1) {
@@ -410,11 +412,11 @@ estimate_frost_temperature_and_depth(layer_data_struct *layer,
                         tmp_fract += (frost_fract[frost_area - 1] / 2. +
                                       frost_fract[frost_area] / 2.);
                     }
-                    tmpT[nidx][frost_area] = linear_interp(tmp_fract, 0, 1,
+                    tmpT[lidx][nidx][frost_area] = linear_interp(tmp_fract, 0, 1,
                                                            min_temp, max_temp);
                 }
                 else {
-                    tmpT[nidx][frost_area] = tmpT[nidx][options.Nfrost];
+                    tmpT[lidx][nidx][frost_area] = tmpT[lidx][nidx][options.Nfrost];
                 }
             }
         }
@@ -427,7 +429,7 @@ estimate_frost_temperature_and_depth(layer_data_struct *layer,
 ******************************************************************************/
 int
 estimate_layer_ice_content(layer_data_struct *layer,
-                           double             tmpT[MAX_NODES][MAX_FROST_AREAS + 1],
+                           double             tmpT[MAX_LAYERS][MAX_NODES][MAX_FROST_AREAS + 1],
                            double             tmpZ[MAX_LAYERS][MAX_NODES],
                            double            *Zsum_node,
                            double            *depth,
@@ -485,7 +487,7 @@ estimate_layer_ice_content(layer_data_struct *layer,
                      frost_area++) {
                     tmp_ice[nidx][frost_area] = layer[lidx].moist -
                                                 maximum_unfrozen_water(
-                        tmpT[nidx][frost_area], max_moist[lidx], bubble[lidx],
+                        tmpT[lidx][nidx][frost_area], max_moist[lidx], bubble[lidx],
                         expt[lidx]);
                     if (tmp_ice[nidx][frost_area] < 0) {
                         tmp_ice[nidx][frost_area] = 0.;
@@ -525,7 +527,7 @@ estimate_layer_ice_content(layer_data_struct *layer,
 ******************************************************************************/
 int
 estimate_layer_temperature(layer_data_struct *layer,
-                           double             tmpT[MAX_NODES][MAX_FROST_AREAS + 1],
+                           double             tmpT[MAX_LAYERS][MAX_NODES][MAX_FROST_AREAS + 1],
                            double             tmpZ[MAX_LAYERS][MAX_NODES],
                            double            *Zsum_node,
                            double            *depth,
@@ -548,10 +550,8 @@ estimate_layer_temperature(layer_data_struct *layer,
 
     // estimate soil layer average temperature
     for (lidx = 0; lidx < Nlayers; lidx++) {
-        // Initialize layer ice content
-        for (frost_area = 0; frost_area < options.Nfrost; frost_area++) {
-            layer[lidx].ice[frost_area] = 0.;
-        }
+        // Initialize layer temperature
+        layer[lidx].T = 0.;
 
         // Bracket current layer between nodes
         min_nidx = Nnodes - 2;
@@ -576,8 +576,8 @@ estimate_layer_temperature(layer_data_struct *layer,
         for (nidx = min_nidx; nidx < max_nidx; nidx++) {
             layer[lidx].T +=
                 (tmpZ[lidx][nidx + 1] - tmpZ[lidx][nidx]) *
-                (tmpT[nidx +
-                      1][options.Nfrost] + tmpT[nidx][options.Nfrost]) / 2.;
+                (tmpT[lidx][nidx + 1][options.Nfrost] + 
+                 tmpT[lidx][nidx][options.Nfrost]) / 2.;
         }
         layer[lidx].T /= depth[lidx];
     }

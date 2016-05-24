@@ -42,7 +42,7 @@ calc_layer_average_thermal_props(energy_bal_struct *energy,
 
     size_t               i;
     int                  ErrorFlag;
-    double               tmpT[MAX_NODES][MAX_FROST_AREAS + 1];
+    double               tmpT[MAX_LAYERS][MAX_NODES][MAX_FROST_AREAS + 1];
     double               tmpZ[MAX_LAYERS][MAX_NODES];
 
     if (options.FROZEN_SOIL && soil_con->FS_ACTIVE) {

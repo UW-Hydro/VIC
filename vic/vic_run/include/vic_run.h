@@ -145,17 +145,17 @@ double ErrorPrintIcePackEnergyBalance(double, va_list);
 int ErrorPrintSnowPackEnergyBalance(double, va_list);
 int ErrorSnowPackEnergyBalance(double Tsurf, ...);
 int estimate_frost_temperature_and_depth(layer_data_struct *,
-                                         double tmpT[MAX_NODES][MAX_FROST_AREAS+ 1],
+                                         double tmpT[MAX_LAYERS][MAX_NODES][MAX_FROST_AREAS+ 1],
                                          double tmpZ[MAX_LAYERS][MAX_NODES],
                                          double *, double *, double *, double *,
                                          double, size_t, size_t);
 int estimate_layer_ice_content(layer_data_struct *,
-                               double tmpT[MAX_NODES][MAX_FROST_AREAS + 1],
+                               double tmpT[MAX_LAYERS][MAX_NODES][MAX_FROST_AREAS + 1],
                                double tmpZ[MAX_LAYERS][MAX_NODES], double *,
                                double *, double *, double *, double *, size_t,
                                size_t, char);
 int estimate_layer_temperature(layer_data_struct *,
-                               double tmpT[MAX_NODES][MAX_FROST_AREAS + 1],
+                               double tmpT[MAX_LAYERS][MAX_NODES][MAX_FROST_AREAS + 1],
                                double tmpZ[MAX_LAYERS][MAX_NODES],
                                double *, double *, size_t, size_t);
 int estimate_layer_ice_content_quick_flux(layer_data_struct *, double *, double,

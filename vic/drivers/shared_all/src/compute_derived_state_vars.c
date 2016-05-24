@@ -54,7 +54,7 @@ compute_derived_state_vars(all_vars_struct *all_vars,
         MAX_FROST_AREAS];
     double                     dt_thresh;
     double                     tmp_runoff;
-    double                     tmpT[MAX_NODES][MAX_FROST_AREAS + 1];
+    double                     tmpT[MAX_LAYERS][MAX_NODES][MAX_FROST_AREAS + 1];
     double                     tmpZ[MAX_LAYERS][MAX_NODES];
 
     cell_data_struct         **cell;

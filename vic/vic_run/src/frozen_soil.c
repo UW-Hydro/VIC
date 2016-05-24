@@ -88,8 +88,7 @@ calc_layer_average_thermal_props(energy_bal_struct *energy,
         }
     }
     else {
-        estimate_frost_temperature_and_depth(layer,
-                                             tmpT,
+        estimate_frost_temperature_and_depth(tmpT,
                                              tmpZ,
                                              soil_con->Zsum_node,
                                              energy->T,

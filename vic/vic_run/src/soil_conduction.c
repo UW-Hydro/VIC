@@ -320,9 +320,8 @@ distribute_node_moisture_properties(double *moist_node,
 *           sub-ares within each soil thermal node based on the distribution of
 *           soil thermal node temperatures.
 ******************************************************************************/
-int
-estimate_frost_temperature_and_depth(layer_data_struct *layer,
-                                     double             tmpT[MAX_LAYERS][MAX_NODES][MAX_FROST_AREAS + 1],
+void
+estimate_frost_temperature_and_depth(double             tmpT[MAX_LAYERS][MAX_NODES][MAX_FROST_AREAS + 1],
                                      double             tmpZ[MAX_LAYERS][MAX_NODES],
                                      double            *Zsum_node,
                                      double            *T,

@@ -144,7 +144,6 @@ generate_default_state(all_vars_struct *all_vars,
                     }
                     else {
                         estimate_frost_temperature_and_depth(
-                            cell[veg][band].layer,
                             tmpT,
                             tmpZ,
                             soil_con->Zsum_node,

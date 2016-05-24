@@ -46,12 +46,9 @@ compute_derived_state_vars(all_vars_struct *all_vars,
     size_t                     veg;
     size_t                     lidx;
     size_t                     band;
-    size_t                     frost_area;
     int                        ErrorFlag;
     double                     Cv;
     double                     moist[MAX_VEG][MAX_BANDS][MAX_LAYERS];
-    double                     ice[MAX_VEG][MAX_BANDS][MAX_LAYERS][
-        MAX_FROST_AREAS];
     double                     dt_thresh;
     double                     tmp_runoff;
     double                     tmpT[MAX_LAYERS][MAX_NODES][MAX_FROST_AREAS + 1];
@@ -77,16 +74,10 @@ compute_derived_state_vars(all_vars_struct *all_vars,
             for (band = 0; band < options.SNOW_BAND; band++) {
                 // Initialize soil for existing snow elevation bands
                 if (soil_con->AreaFract[band] > 0.) {
-                    // set up temporary moist and ice arrays
+                    // set up temporary moist arrays
                     for (lidx = 0; lidx < options.Nlayer; lidx++) {
                         moist[veg][band][lidx] =
                             cell[veg][band].layer[lidx].moist;
-                        for (frost_area = 0;
-                             frost_area < options.Nfrost;
-                             frost_area++) {
-                            ice[veg][band][lidx][frost_area] =
-                                cell[veg][band].layer[lidx].ice[frost_area];
-                        }
                     }
 
                     // compute saturated area and water table
@@ -213,7 +204,6 @@ compute_derived_state_vars(all_vars_struct *all_vars,
                     }
                     else {
                         estimate_frost_temperature_and_depth(
-                            cell[veg][band].layer,
                             tmpT,
                             tmpZ,
                             soil_con->Zsum_node,

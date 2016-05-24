@@ -93,6 +93,16 @@ calc_layer_average_thermal_props(energy_bal_struct *energy,
                                              soil_con->frost_slope,
                                              Nnodes,
                                              options.Nlayer);
+        ErrorFlag = estimate_layer_temperature(layer,
+                                               tmpT,
+                                               tmpZ,
+                                               soil_con->Zsum_node,
+                                               soil_con->depth,
+                                               Nnodes,
+                                               options.Nlayer);
+        if (ErrorFlag == ERROR) {
+            return (ERROR);
+        }
         ErrorFlag = estimate_layer_ice_content(layer,
                                                tmpT,
                                                tmpZ,
@@ -104,16 +114,6 @@ calc_layer_average_thermal_props(energy_bal_struct *energy,
                                                Nnodes,
                                                options.Nlayer,
                                                soil_con->FS_ACTIVE);
-        if (ErrorFlag == ERROR) {
-            return (ERROR);
-        }
-        ErrorFlag = estimate_layer_temperature(layer,
-                                               tmpT,
-                                               tmpZ,
-                                               soil_con->Zsum_node,
-                                               soil_con->depth,
-                                               Nnodes,
-                                               options.Nlayer);
         if (ErrorFlag == ERROR) {
             return (ERROR);
         }

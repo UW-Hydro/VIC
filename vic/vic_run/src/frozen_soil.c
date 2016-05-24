@@ -86,7 +86,6 @@ calc_layer_average_thermal_props(energy_bal_struct *energy,
         if (ErrorFlag == ERROR) {
             return (ERROR);
         }
-
     }
     else {
         estimate_frost_temperature_and_depth(layer,

@@ -316,8 +316,8 @@ distribute_node_moisture_properties(double *moist_node,
 }
 
 /******************************************************************************
-* @brief    This subroutine estimates the temperature and depth of all frost 
-*           sub-ares within each soil thermal node based on the distribution of 
+* @brief    This subroutine estimates the temperature and depth of all frost
+*           sub-ares within each soil thermal node based on the distribution of
 *           soil thermal node temperatures.
 ******************************************************************************/
 int
@@ -347,7 +347,6 @@ estimate_frost_temperature_and_depth(layer_data_struct *layer,
 
     // estimate soil layer average variables
     for (lidx = 0; lidx < Nlayers; lidx++) {
-
         // Bracket current layer between nodes
         min_nidx = Nnodes - 2;
         while (Lsum[lidx] < Zsum_node[min_nidx] && min_nidx > 0) {
@@ -370,12 +369,12 @@ estimate_frost_temperature_and_depth(layer_data_struct *layer,
         // Get soil node temperatures for current layer
         if (Zsum_node[min_nidx] < Lsum[lidx]) {
             tmpT[lidx][min_nidx][options.Nfrost] = linear_interp(
-                                                           Lsum[lidx],
-                                                           Zsum_node[min_nidx],
-                                                           Zsum_node[min_nidx +
-                                                                     1],
-                                                           T[min_nidx],
-                                                           T[min_nidx + 1]);
+                Lsum[lidx],
+                Zsum_node[min_nidx],
+                Zsum_node[min_nidx +
+                          1],
+                T[min_nidx],
+                T[min_nidx + 1]);
         }
         else {
             tmpT[lidx][min_nidx][options.Nfrost] = T[min_nidx];
@@ -387,12 +386,12 @@ estimate_frost_temperature_and_depth(layer_data_struct *layer,
         }
         if (Zsum_node[max_nidx] > Lsum[lidx + 1]) {
             tmpT[lidx][max_nidx][options.Nfrost] = linear_interp(
-                                                           Lsum[lidx + 1],
-                                                           Zsum_node[max_nidx -
-                                                                     1],
-                                                           Zsum_node[max_nidx],
-                                                           T[max_nidx - 1],
-                                                           T[max_nidx]);
+                Lsum[lidx + 1],
+                Zsum_node[max_nidx -
+                          1],
+                Zsum_node[max_nidx],
+                T[max_nidx - 1],
+                T[max_nidx]);
         }
         else {
             tmpT[lidx][max_nidx][options.Nfrost] = T[max_nidx];
@@ -412,11 +411,14 @@ estimate_frost_temperature_and_depth(layer_data_struct *layer,
                         tmp_fract += (frost_fract[frost_area - 1] / 2. +
                                       frost_fract[frost_area] / 2.);
                     }
-                    tmpT[lidx][nidx][frost_area] = linear_interp(tmp_fract, 0, 1,
-                                                           min_temp, max_temp);
+                    tmpT[lidx][nidx][frost_area] = linear_interp(tmp_fract, 0,
+                                                                 1,
+                                                                 min_temp,
+                                                                 max_temp);
                 }
                 else {
-                    tmpT[lidx][nidx][frost_area] = tmpT[lidx][nidx][options.Nfrost];
+                    tmpT[lidx][nidx][frost_area] =
+                        tmpT[lidx][nidx][options.Nfrost];
                 }
             }
         }
@@ -424,7 +426,7 @@ estimate_frost_temperature_and_depth(layer_data_struct *layer,
 }
 
 /******************************************************************************
-* @brief    This subroutine estimates the temperature of all soil moisture 
+* @brief    This subroutine estimates the temperature of all soil moisture
 *           layers based on the distribution of soil thermal node temperatures.
 ******************************************************************************/
 int
@@ -476,7 +478,7 @@ estimate_layer_temperature(layer_data_struct *layer,
         for (nidx = min_nidx; nidx < max_nidx; nidx++) {
             layer[lidx].T +=
                 (tmpZ[lidx][nidx + 1] - tmpZ[lidx][nidx]) *
-                (tmpT[lidx][nidx + 1][options.Nfrost] + 
+                (tmpT[lidx][nidx + 1][options.Nfrost] +
                  tmpT[lidx][nidx][options.Nfrost]) / 2.;
         }
         layer[lidx].T /= depth[lidx];
@@ -486,7 +488,7 @@ estimate_layer_temperature(layer_data_struct *layer,
 }
 
 /******************************************************************************
-* @brief    This subroutine estimates the ice content of all soil moisture 
+* @brief    This subroutine estimates the ice content of all soil moisture
 *           layers based on the distribution of soil thermal node temperatures.
 ******************************************************************************/
 int
@@ -548,7 +550,8 @@ estimate_layer_ice_content(layer_data_struct *layer,
                      frost_area++) {
                     tmp_ice[nidx][frost_area] = layer[lidx].moist -
                                                 maximum_unfrozen_water(
-                        tmpT[lidx][nidx][frost_area], max_moist[lidx], bubble[lidx],
+                        tmpT[lidx][nidx][frost_area], max_moist[lidx],
+                        bubble[lidx],
                         expt[lidx]);
                     if (tmp_ice[nidx][frost_area] < 0) {
                         tmp_ice[nidx][frost_area] = 0.;
@@ -583,8 +586,8 @@ estimate_layer_ice_content(layer_data_struct *layer,
 }
 
 /******************************************************************************
-* @brief    This subroutine estimates the temperature of all soil moisture 
-*           layers based on the simplified soil T profile described in Liang 
+* @brief    This subroutine estimates the temperature of all soil moisture
+*           layers based on the simplified soil T profile described in Liang
 *           et al. (1999), and used when QUICK_FLUX is TRUE.
 *
 * @note     These temperature estimates are much less accurate than those of
@@ -629,8 +632,8 @@ estimate_layer_temperature_quick_flux(layer_data_struct *layer,
 }
 
 /******************************************************************************
-* @brief    This subroutine estimates the ice content of all soil moisture 
-*           layers based on the simplified soil T profile described in Liang 
+* @brief    This subroutine estimates the ice content of all soil moisture
+*           layers based on the simplified soil T profile described in Liang
 *           et al. (1999), and used when QUICK_FLUX is TRUE.
 *
 * @note     This function should be called after estimate_layer_temperature_

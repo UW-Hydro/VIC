@@ -200,12 +200,21 @@ compute_derived_state_vars(all_vars_struct *all_vars,
                     /* calculate soil layer temperatures  */
                     if (options.QUICK_FLUX) {
                         ErrorFlag =
-                            estimate_layer_ice_content_quick_flux(
+                            estimate_layer_temperature_quick_flux(
                                 cell[veg][band].layer,
                                 soil_con->depth, soil_con->dp,
-                                energy[
-                                    veg][band].T[0], energy[veg][band].T[1],
-                                soil_con->avg_temp, soil_con->max_moist,
+                                energy[veg][band].T[0],
+                                energy[veg][band].T[1],
+                                soil_con->avg_temp);
+                        if (ErrorFlag == ERROR) {
+                            log_err("Error in "
+                                    "estimate_layer_temperature_quick_flux");
+                        }
+                        ErrorFlag =
+                            estimate_layer_ice_content_quick_flux(
+                                cell[veg][band].layer,
+                                soil_con->depth,
+                                soil_con->max_moist,
                                 soil_con->expt, soil_con->bubble,
                                 soil_con->frost_fract, soil_con->frost_slope,
                                 soil_con->FS_ACTIVE);

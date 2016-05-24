@@ -586,9 +586,9 @@ estimate_layer_temperature(layer_data_struct *layer,
 }
 
 /******************************************************************************
-* @brief    This subroutine estimates the temperature and ice content of all
-*           soil moisture layers based on the simplified soil T profile
-*           described in Liang et al. (1999), and used when QUICK_FLUX is TRUE.
+* @brief    This subroutine estimates the temperature of all soil moisture 
+*           layers based on the simplified soil T profile described in Liang 
+*           et al. (1999), and used when QUICK_FLUX is TRUE.
 *
 * @note     These temperature estimates are much less accurate than those of
 *           the finite element method (Cherkauer et al. (1999);
@@ -598,18 +598,12 @@ estimate_layer_temperature(layer_data_struct *layer,
 *           is TRUE.
 ******************************************************************************/
 int
-estimate_layer_ice_content_quick_flux(layer_data_struct *layer,
+estimate_layer_temperature_quick_flux(layer_data_struct *layer,
                                       double            *depth,
                                       double             Dp,
                                       double             Tsurf,
                                       double             T1,
-                                      double             Tp,
-                                      double            *max_moist,
-                                      double            *expt,
-                                      double            *bubble,
-                                      double            *frost_fract,
-                                      double             frost_slope,
-                                      char               FS_ACTIVE)
+                                      double             Tp)
 {
     extern option_struct options;
 
@@ -634,6 +628,40 @@ estimate_layer_ice_content_quick_flux(layer_data_struct *layer,
                                     1] -
                                Lsum[1]) /
                              Dp) - exp(-(Lsum[lidx] - Lsum[1]) / Dp));
+    }
+
+    return (0);
+}
+
+/******************************************************************************
+* @brief    This subroutine estimates the ice content of all soil moisture 
+*           layers based on the simplified soil T profile described in Liang 
+*           et al. (1999), and used when QUICK_FLUX is TRUE.
+*
+* @note     This function should be called after estimate_layer_temperature_
+*           quick_flux
+******************************************************************************/
+int
+estimate_layer_ice_content_quick_flux(layer_data_struct *layer,
+                                      double            *depth,
+                                      double            *max_moist,
+                                      double            *expt,
+                                      double            *bubble,
+                                      double            *frost_fract,
+                                      double             frost_slope,
+                                      char               FS_ACTIVE)
+{
+    extern option_struct options;
+
+    size_t               lidx, frost_area;
+    double               Lsum[MAX_LAYERS + 1];
+    double               tmpT, tmp_fract, tmp_ice;
+    double               min_temp, max_temp;
+
+    // compute cumulative layer depths
+    Lsum[0] = 0;
+    for (lidx = 1; lidx <= options.Nlayer; lidx++) {
+        Lsum[lidx] = depth[lidx - 1] + Lsum[lidx - 1];
     }
 
     // estimate soil layer ice contents

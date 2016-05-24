@@ -66,12 +66,17 @@ calc_layer_average_thermal_props(energy_bal_struct *energy,
 
     /** Compute Soil Layer average  properties **/
     if (options.QUICK_FLUX) {
-        ErrorFlag = estimate_layer_ice_content_quick_flux(layer,
+        ErrorFlag = estimate_layer_temperature_quick_flux(layer,
                                                           soil_con->depth,
                                                           soil_con->dp,
                                                           energy->T[0],
                                                           energy->T[1],
-                                                          soil_con->avg_temp,
+                                                          soil_con->avg_temp);
+        if (ErrorFlag == ERROR) {
+            return (ERROR);
+        }
+        ErrorFlag = estimate_layer_ice_content_quick_flux(layer,
+                                                          soil_con->depth,
                                                           soil_con->max_moist,
                                                           soil_con->expt,
                                                           soil_con->bubble,
@@ -81,6 +86,7 @@ calc_layer_average_thermal_props(energy_bal_struct *energy,
         if (ErrorFlag == ERROR) {
             return (ERROR);
         }
+
     }
     else {
         estimate_frost_temperature_and_depth(layer,

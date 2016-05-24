@@ -124,7 +124,7 @@ generate_default_state(all_vars_struct *all_vars,
             for (band = 0; band < options.SNOW_BAND; band++) {
                 if (soil_con->AreaFract[band] > 0.) {
                     if (options.QUICK_FLUX) {
-                        ErrorFlag = estimate_layer_ice_content_quick_flux(
+                        /* ErrorFlag = estimate_layer_ice_content_quick_flux(
                                         cell[veg][band].layer,
                                         soil_con->depth, soil_con->dp,
                                         energy[veg][band].T[0], energy[veg][band].T[1],
@@ -135,7 +135,7 @@ generate_default_state(all_vars_struct *all_vars,
                         if (ErrorFlag == ERROR) {
                             log_err("Error in "
                                     "estimate_layer_ice_content_quick_flux");
-                        }
+                        } */
                     }
                     else {
                         estimate_frost_temperature_and_depth(

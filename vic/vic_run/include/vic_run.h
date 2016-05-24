@@ -158,10 +158,11 @@ int estimate_layer_temperature(layer_data_struct *,
                                double tmpT[MAX_LAYERS][MAX_NODES][MAX_FROST_AREAS + 1],
                                double tmpZ[MAX_LAYERS][MAX_NODES],
                                double *, double *, size_t, size_t);
-int estimate_layer_ice_content_quick_flux(layer_data_struct *, double *, double,
-                                          double, double, double, double *,
-                                          double *, double *, double *, double,
-                                          char);
+int estimate_layer_temperature_quick_flux(layer_data_struct *, double *, double,
+                                          double, double, double);
+int estimate_layer_ice_content_quick_flux(layer_data_struct *, double *,
+                                          double *, double *, double *, double *,
+                                          double, char);
 double estimate_T1(double, double, double, double, double, double, double,
                    double, double, double);
 void faparl(double *, double, double, double, double, double *, double *);

@@ -74,9 +74,8 @@ main(int   argc,
     soil_con_struct     soil_con;
     all_vars_struct     all_vars;
     lake_con_struct     lake_con;
-    stream_struct      *output_streams = NULL;
-    stream_file_struct *out_data_files = NULL;
-    double            **out_data;  // [nvars, nelem]
+    stream_struct      *streams = NULL;
+    double           ***out_data;  // [1, nvars, nelem]
     save_data_struct    save_data;
 
     // Initialize Log Destination
@@ -112,17 +111,11 @@ main(int   argc,
 
     /** Set up output data structures **/
     set_output_met_data_info();
-    out_data = create_outdata();
+    out_data = create_outdata(1);
     fclose(filep.globalparam);
     filep.globalparam = open_file(filenames.global, "r");
-    parse_output_info(filep.globalparam, &output_streams, &out_data_files);
-    for (streamnum = 0; streamnum < options.Noutstreams; streamnum++) {
-        if (output_streams[streamnum].nvars == 0) {
-            log_err("No output variables were set in OUTFILE %zu. "
-                    "Must set at least one output variable (OUTVAR) "
-                    "for each OUTFILE.", streamnum + 1);
-        }
-    }
+    parse_output_info(filep.globalparam, &streams);
+    // validate_streams(&streams);
 
     /** Check and Open Files **/
     check_files(&filep, &filenames);
@@ -179,8 +172,8 @@ main(int   argc,
             }
 
             /** Build Gridded Filenames, and Open **/
-            make_in_and_outfiles(&filep, &filenames, &soil_con, &out_data_files,
-                                 &output_streams, dmy);
+            make_in_and_outfiles(&filep, &filenames, &soil_con,
+                                 &streams, dmy);
 
             /** Read Elevation Band Data if Used **/
             read_snowband(filep.snowband, &soil_con);
@@ -208,7 +201,6 @@ main(int   argc,
 
             /** Update Error Handling Structure **/
             Error.filep = filep;
-            Error.output_streams = output_streams;
 
             /** Initialize the storage terms in the water and energy balances **/
             initialize_put_data(&all_vars, &atmos[0], &soil_con, veg_con,
@@ -243,16 +235,16 @@ main(int   argc,
                    Calculate cell average values for current time step
                 **************************************************/
                 put_data(&all_vars, &atmos[rec], &soil_con, veg_con, veg_lib,
-                         &lake_con, out_data, &save_data);
+                         &lake_con, out_data[0], &save_data);
 
                 for (streamnum = 0;
                      streamnum < options.Noutstreams;
                      streamnum++) {
-                    agg_stream_data(&(output_streams[streamnum]), out_data);
+                    agg_stream_data(&(streams[streamnum]), &(dmy[rec]), out_data);
                 }
 
                 // Write cell average values for current time step
-                write_output(&out_data_files, &output_streams, &dmy[rec], rec);
+                write_output(&streams, &dmy[rec]);
 
                 /************************************
                    Save model state at assigned date
@@ -286,7 +278,7 @@ main(int   argc,
                 }
             } /* End Rec Loop */
 
-            close_files(&filep, &out_data_files);
+            close_files(&filep, &streams);
 
             free_veg_hist(global_param.nrecs, veg_con[0].vegetat_type_num,
                           &veg_hist);
@@ -303,9 +295,8 @@ main(int   argc,
     /** cleanup **/
     free_atmos(global_param.nrecs, &atmos);
     free_dmy(&dmy);
-    free_out_data_files(&out_data_files);
-    free_out_data_streams(&output_streams);
-    free_out_data(out_data);
+    free_streams(&streams);
+    free_out_data(1, out_data);
     fclose(filep.soilparam);
     free_veglib(&veg_lib);
     fclose(filep.vegparam);

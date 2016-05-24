@@ -31,9 +31,8 @@
  * @brief    Get output info from global parameter file.
  *****************************************************************************/
 void
-parse_output_info(FILE                *gp,
-                  stream_struct      **output_streams,
-                  stream_file_struct **out_data_files)
+parse_output_info(FILE           *gp,
+                  stream_struct **streams)
 {
     extern option_struct       options;
     extern global_param_struct global_param;
@@ -44,15 +43,16 @@ parse_output_info(FILE                *gp,
     short int                  streamnum;
     char                       varname[MAXSTRING];
     int                        outvarnum;
-    char                       aggstr[MAXSTRING];
-    short unsigned int         agg_type;
+    char                       format[MAXSTRING];
     char                       typestr[MAXSTRING];
     int                        type;
     char                       multstr[MAXSTRING];
+    char                       aggstr[MAXSTRING];
     double                     mult;
     size_t                     nstreams;
     size_t                     nvars;
     unsigned int               nextagg;
+    unsigned short int         agg_type;
 
     /** Read through global control file to find output info **/
 
@@ -68,14 +68,8 @@ parse_output_info(FILE                *gp,
     if (nstreams > 0) {
         options.Noutstreams = nstreams;
 
-        *output_streams =
-            calloc(options.Noutstreams, sizeof(*(*output_streams)));
-        if (*output_streams == NULL) {
-            log_err("Memory allocation error in parse_output_info().");
-        }
-        *out_data_files =
-            calloc(options.Noutstreams, sizeof(*(*out_data_files)));
-        if (*out_data_files == NULL) {
+        *streams = calloc(options.Noutstreams, sizeof(*(*streams)));
+        if (*streams == NULL) {
             log_err("Memory allocation error in parse_output_info().");
         }
 
@@ -91,7 +85,7 @@ parse_output_info(FILE                *gp,
                                 streamnum);
                     }
                     sscanf(cmdstr, "%*s %s",
-                           (*out_data_files)[streamnum].prefix);
+                           (*streams)[streamnum].prefix);
 
                     // determine how many variable will be in this file before
                     // allocating (GH: 209)
@@ -101,47 +95,35 @@ parse_output_info(FILE                *gp,
                     // nextagg = (unsigned int) ((int) global_param.out_dt / (int) global_param.dt);
                     nextagg = 1;
 
-                    setup_stream(output_streams[streamnum],
-                                 out_data_files[streamnum],
-                                 nvars, nextagg);
+                    setup_stream(streams[streamnum], nvars);
 
                     outvarnum = 0;
                 }
                 else if (strcasecmp("OUTPUT_STEPS_PER_DAY", optstr) == 0) {
                     sscanf(cmdstr, "%*s %zu",
-                           (&(*out_data_files)[streamnum].output_steps_per_day));
-                }
-                else if (strcasecmp("SKIPYEAR", optstr) == 0) {
-                    sscanf(cmdstr, "%*s %hu",
-                           (&(*out_data_files)[streamnum].skipyear));
-                    // skiprec = 0;
-                    // for ( i = 0; i < (*out_data_files)[streamnum].skipyear; i++ ) {
-                    // if(LEAPYR(temp[skiprec].year)) skiprec += 366 * 24 / global->dt;
-                    // else skiprec += 365 * 24 / global->dt;
-                    // }
-                    // (*out_data_files)[streamnum].skipyear = skiprec;
+                           (&(*streams)[streamnum].output_steps_per_day));
                 }
                 else if (strcasecmp("COMPRESS", optstr) == 0) {
                     sscanf(cmdstr, "%*s %s", flgstr);
                     if (strcasecmp("TRUE", flgstr) == 0) {
-                        (*out_data_files)[streamnum].compress =
+                        (*streams)[streamnum].compress =
                             COMPRESSION_LVL_DEFAULT;
                     }
                     else if (strcasecmp("FALSE", flgstr) == 0) {
-                        (*out_data_files)[streamnum].compress = 0;
+                        (*streams)[streamnum].compress = 0;
                     }
                     else {
-                        (*out_data_files)[streamnum].compress = atoi(flgstr);
+                        (*streams)[streamnum].compress = atoi(flgstr);
                     }
                 }
                 else if (strcasecmp("OUT_FORMAT", optstr) == 0) {
                     sscanf(cmdstr, "%*s %s", flgstr);
                     if (strcasecmp("ASCII", flgstr) == 0) {
-                        (*out_data_files)[streamnum].file_format =
+                        (*streams)[streamnum].file_format =
                             COMPRESSION_LVL_DEFAULT;
                     }
                     else if (strcasecmp("BINARY", flgstr) == 0) {
-                        (*out_data_files)[streamnum].file_format = 0;
+                        (*streams)[streamnum].file_format = 0;
                     }
                     else {
                         log_err(
@@ -154,19 +136,23 @@ parse_output_info(FILE                *gp,
                         log_err("Error in global param file: \"OUTFILE\" must be "
                                 "specified before you can specify \"OUTVAR\".");
                     }
-                    strcpy(aggstr, "");
+                    strcpy(format, "");
                     strcpy(typestr, "");
                     strcpy(multstr, "");
-                    sscanf(cmdstr, "%*s %s %s %s %s", varname, aggstr, typestr,
-                           multstr);
+                    sscanf(cmdstr, "%*s %s %s %s %s %s", varname, format, typestr,
+                           multstr, aggstr);
+                    if (strcasecmp("", format) == 0) {
+                        strcpy(format, "*");
+                    }
 
                     agg_type = str_to_agg_type(aggstr);
                     type = str_to_out_type(typestr);
                     mult = str_to_out_mult(multstr);
 
-                    set_output_var(output_streams[streamnum],
-                                   out_data_files[streamnum],
-                                   varname, outvarnum, "*", type, mult);
+                    set_output_var(streams[streamnum],
+                                   varname, outvarnum, format, type, mult,
+                                   agg_type);
+                    strcpy(format, "");
                     outvarnum++;
                 }
             }
@@ -175,15 +161,15 @@ parse_output_info(FILE                *gp,
     }
     // Otherwise, set output files and their contents to default configuration
     else {
-        set_output_defaults(output_streams, out_data_files);
+        set_output_defaults(streams);
     }
     fclose(gp);
 
     for (streamnum = 0; streamnum < (short int) options.Noutstreams; streamnum++) {
         // Validate the streams
-        validate_stream_settings(&((*out_data_files)[streamnum]));
+        validate_stream_settings(&((*streams)[streamnum]));
 
         // Allocate memory for the stream aggdata arrays
-        alloc_aggdata(&(*output_streams)[streamnum]);
+        alloc_aggdata(&(*streams)[streamnum]);
     }
 }

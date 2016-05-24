@@ -31,89 +31,55 @@
  *           write
  *****************************************************************************/
 void
-vic_init_output(void)
+vic_init_output(dmy_struct *dmy_current)
 {
     extern option_struct options;
     extern domain_struct local_domain;
     extern filep_struct  filep;
     extern MPI_Comm      MPI_COMM_VIC;
-    extern MPI_Datatype  mpi_nc_file_struct_type;
     extern int           mpi_rank;
-
-    double            ***out_data = NULL;  // [ncells, nvars, nelem]
-    stream_struct      **output_streams = NULL;  // [ncells, nstreams]
-    stream_file_struct  *out_data_files = NULL;  // [ncells, nstreams]
-    nc_file_struct      *nc_hist_files = NULL;  // [nstreams]
+    extern double     ***out_data;
+    extern stream_struct **output_streams;
+    extern nc_file_struct *nc_hist_files;
 
     size_t               i;
 
     // initialize the output data structures
     set_output_met_data_info();
 
-    for (i = 0; i < local_domain.ncells_active; i++) {
-        // initialize_put_data();
-        out_data[i] = create_outdata();
-    }
+    out_data = create_outdata(local_domain.ncells_active);
 
     if (mpi_rank == 0) {
         // determine which variables will be written to the history file
-        parse_output_info(filep.globalparam, output_streams, &out_data_files);
+        parse_output_info(filep.globalparam, output_streams);
     }
 
-    // TODO: scatter output info
+    // for (i = 0; i < options.Noutstreams; i++) {
+    //     status = MPI_Bcast(&(output_streams[i]), 1, mpi_stream_struct_type, 0, MPI_COMM_VIC);
+    //     if (status != MPI_SUCCESS) {
+    //         log_err("MPI error in vic_init_output(): %d\n", status);
+    //     }
+    // }
 
     // allocation of output structures
-    output_streams =
-        calloc(local_domain.ncells_active, sizeof(*output_streams));
+    output_streams = calloc(local_domain.ncells_active, sizeof(*output_streams));
     if (output_streams == NULL) {
         log_err("Memory allocation error in vic_init_output().");
-    }
-    output_streams =
-        calloc(local_domain.ncells_active, sizeof(*output_streams));
-    if (output_streams == NULL) {
-        log_err("Memory allocation error in vic_init_output().");
-    }
-
-    for (i = 0; i < options.Noutstreams; i++) {
-        output_streams[i] =
-            calloc(options.Noutstreams, sizeof(*output_streams[i]));
-        if (output_streams[i] == NULL) {
-            log_err("Memory allocation error in vic_init_output().");
-        }
-    }
-
-    for (i = 0; i < options.Noutstreams; i++) {
-        nc_hist_files = calloc(options.Noutstreams, sizeof(*nc_hist_files));
-        if (nc_hist_files == NULL) {
-            log_err("Memory allocation error in vic_init_output().");
-        }
     }
 
     if (mpi_rank == 0) {
         for (i = 0; i < options.Noutstreams; i++) {
+            nc_hist_files = calloc(options.Noutstreams, sizeof(*nc_hist_files));
+            if (nc_hist_files == NULL) {
+                log_err("Memory allocation error in vic_init_output().");
+            }
+        }
+
+        for (i = 0; i < options.Noutstreams; i++) {
             // open the netcdf history file
-            initialize_history_file(&(nc_hist_files[i]), &(out_data_files[i]),
-                                    output_streams[i]);
+            initialize_history_file(&(nc_hist_files[i]), &(*output_streams[i]), dmy_current);
         }
     }
-
-    // broadcast which variables to write.
-    // for (i = 0; i < N_OUTVAR_TYPES; i++) {
-    // status = MPI_Bcast(&out_data[0][i].write, 1, MPI_C_BOOL,
-    // 0, MPI_COMM_VIC);
-    // if (status != MPI_SUCCESS) {
-    // log_err("MPI error in vic_init_output(): %d\n", status);
-    // }
-    // }
-
-    // broadcast history file info. Only the master process will write to it,
-    // but the slave processes need some of the information to initialize as
-    // well (particularly which variables to write and dimension sizes)
-    // status = MPI_Bcast(&nc_hist_file, 1, mpi_nc_file_struct_type,
-    // 0, MPI_COMM_VIC);
-    // if (status != MPI_SUCCESS) {
-    // log_err("MPI error in vic_init_output(): %d\n", status);
-    // }
 }
 
 /******************************************************************************
@@ -121,8 +87,8 @@ vic_init_output(void)
  *****************************************************************************/
 void
 initialize_history_file(nc_file_struct     *nc,
-                        stream_file_struct *stream_file,
-                        stream_struct      *stream)
+                        stream_struct      *stream,
+                        dmy_struct        *dmy_current)
 {
     extern filenames_struct    filenames;
     extern domain_struct       global_domain;
@@ -150,18 +116,38 @@ initialize_history_file(nc_file_struct     *nc,
     unsigned int               varid;
     double                    *dvar;
 
-    sprintf(stream_file->filename, "%s/%s.nc", filenames.result_dir,
-            stream_file->prefix);
 
+    // This could be further refined but for now, I've choosen a file naming
+    // Convention that goes like this:
+    // If FREQ_NDAYS -- filename = result_dir/prefix.YYYY-MM-DD.nc
+    if (stream->agg_alarm.freq == FREQ_NDAYS) {
+        sprintf(stream->filename, "%s/%s.%04d-%02d-%02d.nc", filenames.result_dir,
+                stream->prefix, dmy_current->year, dmy_current->month,
+                dmy_current->day);
+    }
+    // If FREQ_NMONTHS -- filename = result_dir/prefix.YYYY-MM.nc
+    else if (stream->agg_alarm.freq == FREQ_NMONTHS) {
+        sprintf(stream->filename, "%s/%s.%04d-%02d.nc", filenames.result_dir,
+                stream->prefix, dmy_current->year, dmy_current->month);
+    }
+    // If FREQ_NYEARS -- filename = result_dir/prefix.YYYY.nc
+    else if (stream->agg_alarm.freq == FREQ_NYEARS) {
+        sprintf(stream->filename, "%s/%s.%04d.nc", filenames.result_dir,
+                stream->prefix, dmy_current->year);
+    }
+    // For all other cases -- filename = result_dir/prefix.YYYY-MM-DD-SSSSS.nc
+    else {
+        sprintf(stream->filename, "%s/%s.%04d-%02d-%02d-%05u.nc", filenames.result_dir,
+                stream->prefix, dmy_current->year, dmy_current->month,
+                dmy_current->day, dmy_current->dayseconds);
+    }
 
     initialize_nc_file(nc, stream->nvars, stream->varid);
 
     // open the netcdf file
-    status =
-        nc_create(stream_file->filename, get_nc_mode(stream_file->file_format),
-                  &(nc->nc_id));
+    status = nc_create(stream->filename, get_nc_mode(stream->file_format), &(nc->nc_id));
     if (status != NC_NOERR) {
-        log_err("Error creating %s", stream_file->filename);
+        log_err("Error creating %s", stream->filename);
     }
     nc->open = true;
 
@@ -171,7 +157,7 @@ initialize_history_file(nc_file_struct     *nc,
     // set the NC_FILL attribute
     status = nc_set_fill(nc->nc_id, NC_FILL, &old_fill_mode);
     if (status != NC_NOERR) {
-        log_err("Error setting fill value in %s", stream_file->filename);
+        log_err("Error setting fill value in %s", stream->filename);
     }
 
     // define netcdf dimensions
@@ -179,78 +165,78 @@ initialize_history_file(nc_file_struct     *nc,
                         &(nc->band_dimid));
     if (status != NC_NOERR) {
         log_err("Error defining snow_band dimenension in %s",
-                stream_file->filename);
+                stream->filename);
     }
 
     status = nc_def_dim(nc->nc_id, "front", nc->front_size,
                         &(nc->front_dimid));
     if (status != NC_NOERR) {
         log_err("Error defining front dimenension in %s",
-                stream_file->filename);
+                stream->filename);
     }
 
     status = nc_def_dim(nc->nc_id, "frost_area", nc->frost_size,
                         &(nc->frost_dimid));
     if (status != NC_NOERR) {
         log_err("Error defining frost_area dimenension in %s",
-                stream_file->filename);
+                stream->filename);
     }
 
     status = nc_def_dim(nc->nc_id, "nlayer", nc->layer_size,
                         &(nc->layer_dimid));
     if (status != NC_NOERR) {
         log_err("Error defining nlayer dimenension in %s",
-                stream_file->filename);
+                stream->filename);
     }
 
     status = nc_def_dim(nc->nc_id, global_domain.info.x_dim, nc->ni_size,
                         &(nc->ni_dimid));
 
     if (status != NC_NOERR) {
-        log_err("Error defining x dimenension in %s", stream_file->filename);
+        log_err("Error defining x dimenension in %s", stream->filename);
     }
     status = nc_def_dim(nc->nc_id, global_domain.info.y_dim, nc->nj_size,
                         &(nc->nj_dimid));
 
     if (status != NC_NOERR) {
-        log_err("Error defining y dimenension in %s", stream_file->filename);
+        log_err("Error defining y dimenension in %s", stream->filename);
     }
 
     status = nc_def_dim(nc->nc_id, "node", nc->node_size, &(nc->node_dimid));
     if (status != NC_NOERR) {
-        log_err("Error defining node dimenension in %s", stream_file->filename);
+        log_err("Error defining node dimenension in %s", stream->filename);
     }
 
     status = nc_def_dim(nc->nc_id, "root_zone", nc->root_zone_size,
                         &(nc->root_zone_dimid));
     if (status != NC_NOERR) {
         log_err("Error defining root_zone dimenension in %s",
-                stream_file->filename);
+                stream->filename);
     }
 
     status = nc_def_dim(nc->nc_id, "veg_class", nc->veg_size,
                         &(nc->veg_dimid));
     if (status != NC_NOERR) {
         log_err("Error defining veg_class dimenension in %s",
-                stream_file->filename);
+                stream->filename);
     }
 
     status = nc_def_dim(nc->nc_id, "time", nc->time_size,
                         &(nc->time_dimid));
     if (status != NC_NOERR) {
-        log_err("Error defining time dimenension in %s", stream_file->filename);
+        log_err("Error defining time dimenension in %s", stream->filename);
     }
 
     // define the netcdf variable time
     status = nc_def_var(nc->nc_id, "time", NC_DOUBLE, 1,
                         &(nc->time_dimid), &(time_var_id));
     if (status != NC_NOERR) {
-        log_err("Error defining time variable in %s", stream_file->filename);
+        log_err("Error defining time variable in %s", stream->filename);
     }
     status = nc_put_att_text(nc->nc_id, time_var_id, "standard_name",
                              strlen("time"), "time");
     if (status != NC_NOERR) {
-        log_err("Error adding attribute in %s", stream_file->filename);
+        log_err("Error adding attribute in %s", stream->filename);
     }
 
     // adding units attribute to time variable
@@ -261,7 +247,7 @@ initialize_history_file(nc_file_struct     *nc,
     status = nc_put_att_text(nc->nc_id, time_var_id, "units",
                              strlen(str), str);
     if (status != NC_NOERR) {
-        log_err("Error adding attribute in %s", stream_file->filename);
+        log_err("Error adding attribute in %s", stream->filename);
     }
 
     // adding calendar attribute to time variable
@@ -270,7 +256,7 @@ initialize_history_file(nc_file_struct     *nc,
     status = nc_put_att_text(nc->nc_id, time_var_id, "calendar",
                              strlen(calendar_str), calendar_str);
     if (status != NC_NOERR) {
-        log_err("Error adding attribute in %s", stream_file->filename);
+        log_err("Error adding attribute in %s", stream->filename);
     }
 
     ndims = global_domain.info.n_coord_dims;
@@ -297,23 +283,23 @@ initialize_history_file(nc_file_struct     *nc,
         nc_def_var(nc->nc_id, global_domain.info.lon_var, NC_DOUBLE, ndims,
                    dimids, &(lon_var_id));
     if (status != NC_NOERR) {
-        log_err("Error defining lon variable in %s", stream_file->filename);
+        log_err("Error defining lon variable in %s", stream->filename);
     }
 
     status = nc_put_att_text(nc->nc_id, lon_var_id, "long_name",
                              strlen("longitude"), "longitude");
     if (status != NC_NOERR) {
-        log_err("Error adding attribute in %s", stream_file->filename);
+        log_err("Error adding attribute in %s", stream->filename);
     }
     status = nc_put_att_text(nc->nc_id, lon_var_id, "units",
                              strlen("degrees_east"), "degrees_east");
     if (status != NC_NOERR) {
-        log_err("Error adding attribute in %s", stream_file->filename);
+        log_err("Error adding attribute in %s", stream->filename);
     }
     status = nc_put_att_text(nc->nc_id, lon_var_id, "standard_name",
                              strlen("longitude"), "longitude");
     if (status != NC_NOERR) {
-        log_err("Error adding attribute in %s", stream_file->filename);
+        log_err("Error adding attribute in %s", stream->filename);
     }
 
     if (global_domain.info.n_coord_dims == 1) {
@@ -322,26 +308,24 @@ initialize_history_file(nc_file_struct     *nc,
     }
 
     // define the netcdf variable latitude
-    status =
-        nc_def_var(nc->nc_id, global_domain.info.lat_var, NC_DOUBLE, ndims,
-                   dimids, &(lat_var_id));
+    status = nc_def_var(nc->nc_id, global_domain.info.lat_var, NC_DOUBLE, ndims, dimids, &(lat_var_id));
     if (status != NC_NOERR) {
-        log_err("Error defining lat variable in %s", stream_file->filename);
+        log_err("Error defining lat variable in %s", stream->filename);
     }
     status = nc_put_att_text(nc->nc_id, lat_var_id, "long_name",
                              strlen("latitude"), "latitude");
     if (status != NC_NOERR) {
-        log_err("Error adding attribute in %s", stream_file->filename);
+        log_err("Error adding attribute in %s", stream->filename);
     }
     status = nc_put_att_text(nc->nc_id, lat_var_id, "units",
                              strlen("degrees_north"), "degrees_north");
     if (status != NC_NOERR) {
-        log_err("Error adding attribute in %s", stream_file->filename);
+        log_err("Error adding attribute in %s", stream->filename);
     }
     status = nc_put_att_text(nc->nc_id, lat_var_id, "standard_name",
                              strlen("latitude"), "latitude");
     if (status != NC_NOERR) {
-        log_err("Error adding attribute in %s", stream_file->filename);
+        log_err("Error adding attribute in %s", stream->filename);
     }
 
     // create output variables
@@ -357,17 +341,17 @@ initialize_history_file(nc_file_struct     *nc,
                             &(nc->nc_vars[j].nc_varid));
         if (status != NC_NOERR) {
             log_err("Error defining variable %s in %s",
-                    nc->nc_vars[j].nc_var_name, stream_file->filename);
+                    nc->nc_vars[j].nc_var_name, stream->filename);
         }
 
         // Add compression (only works for netCDF4 filetype)
-        if (stream_file->compress) {
+        if (stream->compress) {
             status = nc_def_var_deflate(nc->nc_id, nc->nc_vars[j].nc_varid,
-                                        true, true, stream_file->compress);
+                                        true, true, stream->compress);
             if (status != NC_NOERR) {
                 log_err(
                     "Error setting compression level in %s for variable: %s",
-                    stream_file->filename, nc->nc_vars[j].nc_var_name);
+                    stream->filename, nc->nc_vars[j].nc_var_name);
             }
         }
 
@@ -394,7 +378,7 @@ initialize_history_file(nc_file_struct     *nc,
         }
         if (status != NC_NOERR) {
             log_err("Error putting _FillValue attribute to %s in %s",
-                    nc->nc_vars[j].nc_var_name, stream_file->filename);
+                    nc->nc_vars[j].nc_var_name, stream->filename);
         }
 
         put_nc_attr(nc->nc_id, nc->nc_vars[j].nc_varid, "long_name",
@@ -416,7 +400,7 @@ initialize_history_file(nc_file_struct     *nc,
     // leave define mode
     status = nc_enddef(nc->nc_id);
     if (status != NC_NOERR) {
-        log_err("Error leaving define mode for %s", stream_file->filename);
+        log_err("Error leaving define mode for %s", stream->filename);
     }
 
     // fill the netcdf variables lat/lon
@@ -433,7 +417,7 @@ initialize_history_file(nc_file_struct     *nc,
         status =
             nc_put_vara_double(nc->nc_id, lon_var_id, dstart, dcount, dvar);
         if (status != NC_NOERR) {
-            log_err("Error adding data to lon in %s", stream_file->filename);
+            log_err("Error adding data to lon in %s", stream->filename);
         }
         free(dvar);
 
@@ -450,7 +434,7 @@ initialize_history_file(nc_file_struct     *nc,
         status =
             nc_put_vara_double(nc->nc_id, lat_var_id, dstart, dcount, dvar);
         if (status != NC_NOERR) {
-            log_err("Error adding data to lon in %s", stream_file->filename);
+            log_err("Error adding data to lon in %s", stream->filename);
         }
         free(dvar);
     }
@@ -466,7 +450,7 @@ initialize_history_file(nc_file_struct     *nc,
         status =
             nc_put_vara_double(nc->nc_id, lon_var_id, dstart, dcount, dvar);
         if (status != NC_NOERR) {
-            log_err("Error adding data to lon in %s", stream_file->filename);
+            log_err("Error adding data to lon in %s", stream->filename);
         }
 
         for (i = 0; i < nc->nj_size * nc->ni_size; i++) {
@@ -475,7 +459,7 @@ initialize_history_file(nc_file_struct     *nc,
         status =
             nc_put_vara_double(nc->nc_id, lat_var_id, dstart, dcount, dvar);
         if (status != NC_NOERR) {
-            log_err("Error adding data to lat in %s", stream_file->filename);
+            log_err("Error adding data to lat in %s", stream->filename);
         }
 
         free(dvar);

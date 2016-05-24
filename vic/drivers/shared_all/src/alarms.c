@@ -24,3 +24,54 @@
  * this program; if not, write to the Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  *****************************************************************************/
+
+#include <vic_driver_shared_all.h>
+
+/******************************************************************************
+ * @brief   This routine resets an alarm
+ *****************************************************************************/
+void
+reset_alarm(alarm_struct *alarm,
+            dmy_struct   *dmy_current)
+{
+    extern global_param_struct global_param;
+
+    alarm->count = 0;
+    alarm->next = MISSING;
+
+    if (alarm->freq == FREQ_NEVER) {
+        ;  // Do nothing, already set
+    }
+    else if (alarm->freq == FREQ_NSTEPS) {
+        alarm->next = alarm->n;
+    }
+    else if (alarm->freq == FREQ_DATE) {
+        ;  // Do nothing, already set
+    }
+    else if (alarm->freq == FREQ_END) {
+        ;  // Do nothing, already set
+    }
+    else {
+        alarm->next = global_param.model_steps_per_day * time_delta(dmy_current, alarm->freq, alarm->n);
+    }
+}
+
+/******************************************************************************
+ * @brief   This routine raises an alarm
+ *****************************************************************************/
+bool
+raise_alarm(alarm_struct *alarm,
+            dmy_struct   *dmy_current)
+{
+
+    if ((int) alarm->count == alarm->next) {
+        return true;
+    }
+    else if ((alarm->freq == FREQ_DATE) &&
+             (dmy_equal(dmy_current, &(alarm->date)))) {
+        return true;
+    }
+    else {
+        return false;
+    }
+}

@@ -35,7 +35,6 @@ initialize_mpi(void)
     extern MPI_Datatype mpi_global_struct_type;
     extern MPI_Datatype mpi_filenames_struct_type;
     extern MPI_Datatype mpi_location_struct_type;
-    extern MPI_Datatype mpi_nc_file_struct_type;
     extern MPI_Datatype mpi_option_struct_type;
     extern MPI_Datatype mpi_param_struct_type;
     extern MPI_Comm     MPI_COMM_VIC;
@@ -58,7 +57,6 @@ initialize_mpi(void)
     create_MPI_global_struct_type(&mpi_global_struct_type);
     create_MPI_filenames_struct_type(&mpi_filenames_struct_type);
     create_MPI_location_struct_type(&mpi_location_struct_type);
-    create_MPI_nc_file_struct_type(&mpi_nc_file_struct_type);
     create_MPI_option_struct_type(&mpi_option_struct_type);
     create_MPI_param_struct_type(&mpi_param_struct_type);
 }
@@ -480,189 +478,6 @@ create_MPI_location_struct_type(MPI_Datatype *mpi_type)
     status = MPI_Type_commit(mpi_type);
     if (status != MPI_SUCCESS) {
         log_err("MPI error in create_MPI_location_struct_type(): %d\n", status);
-    }
-
-    // cleanup
-    free(blocklengths);
-    free(offsets);
-    free(mpi_types);
-}
-
-/******************************************************************************
- * @brief   Create an MPI_Datatype that represents the nc_file_struct
- * @details This allows MPI operations in which the entire nc_file_struct can
- *          be treated as an MPI_Datatype. NOTE: This function needs to be kept
- *          in-sync with the nc_file_struct data type in vic_driver_image.h.
- *
- * @param mpi_type MPI_Datatype that can be used in MPI operations
- *****************************************************************************/
-void
-create_MPI_nc_file_struct_type(MPI_Datatype *mpi_type)
-{
-    int           nitems; // number of elements in struct
-    int           status;
-    int          *blocklengths;
-    size_t        i;
-    MPI_Aint     *offsets;
-    MPI_Datatype *mpi_types;
-
-    // nitems has to equal the number of elements in nc_file_struct
-    nitems = 29;
-    blocklengths = malloc(nitems * sizeof(*blocklengths));
-    if (blocklengths == NULL) {
-        log_err("Memory allocation error in create_MPI_nc_file_struct_type().")
-    }
-
-    offsets = malloc(nitems * sizeof(*offsets));
-    if (offsets == NULL) {
-        log_err("Memory allocation error in create_MPI_nc_file_struct_type().")
-    }
-
-    mpi_types = malloc(nitems * sizeof(*mpi_types));
-    if (mpi_types == NULL) {
-        log_err("Memory allocation error in create_MPI_nc_file_struct_type().")
-    }
-
-    // only the first element in nc_file_struct is an array
-    i = 0;
-    blocklengths[i] = MAXSTRING + 1;
-    for (i = 1; i < (size_t) nitems; i++) {
-        blocklengths[i] = 1;
-    }
-
-    // reset i
-    i = 0;
-
-    // char fname[MAXSTRING + 1];
-    offsets[i] = offsetof(nc_file_struct, fname);
-    mpi_types[i++] = MPI_CHAR;
-
-    // char c_fillvalue;
-    offsets[i] = offsetof(nc_file_struct, c_fillvalue);
-    mpi_types[i++] = MPI_CHAR;
-
-    // int i_fillvalue;
-    offsets[i] = offsetof(nc_file_struct, i_fillvalue);
-    mpi_types[i++] = MPI_INT;
-
-    // double d_fillvalue;
-    offsets[i] = offsetof(nc_file_struct, d_fillvalue);
-    mpi_types[i++] = MPI_DOUBLE;
-
-    // float f_fillvalue;
-    offsets[i] = offsetof(nc_file_struct, f_fillvalue);
-    mpi_types[i++] = MPI_FLOAT;
-
-    // int nc_id;
-    offsets[i] = offsetof(nc_file_struct, nc_id);
-    mpi_types[i++] = MPI_INT;
-
-    // int band_dimid;
-    offsets[i] = offsetof(nc_file_struct, band_dimid);
-    mpi_types[i++] = MPI_INT;
-
-    // int front_dimid;
-    offsets[i] = offsetof(nc_file_struct, front_dimid);
-    mpi_types[i++] = MPI_INT;
-
-    // int frost_dimid;
-    offsets[i] = offsetof(nc_file_struct, frost_dimid);
-    mpi_types[i++] = MPI_INT;
-
-    // int lake_node_dimid;
-    offsets[i] = offsetof(nc_file_struct, lake_node_dimid);
-    mpi_types[i++] = MPI_INT;
-
-    // int layer_dimid;
-    offsets[i] = offsetof(nc_file_struct, layer_dimid);
-    mpi_types[i++] = MPI_INT;
-
-    // int ni_dimid;
-    offsets[i] = offsetof(nc_file_struct, ni_dimid);
-    mpi_types[i++] = MPI_INT;
-
-    // int nj_dimid;
-    offsets[i] = offsetof(nc_file_struct, nj_dimid);
-    mpi_types[i++] = MPI_INT;
-
-    // int node_dimid;
-    offsets[i] = offsetof(nc_file_struct, node_dimid);
-    mpi_types[i++] = MPI_INT;
-
-    // int root_zone_dimid;
-    offsets[i] = offsetof(nc_file_struct, root_zone_dimid);
-    mpi_types[i++] = MPI_INT;
-
-    // int time_dimid;
-    offsets[i] = offsetof(nc_file_struct, time_dimid);
-    mpi_types[i++] = MPI_INT;
-
-    // int veg_dimid;
-    offsets[i] = offsetof(nc_file_struct, veg_dimid);
-    mpi_types[i++] = MPI_INT;
-
-    // size_t band_size;
-    offsets[i] = offsetof(nc_file_struct, band_size);
-    mpi_types[i++] = MPI_AINT;
-
-    // size_t front_size;
-    offsets[i] = offsetof(nc_file_struct, front_size);
-    mpi_types[i++] = MPI_AINT;
-
-    // size_t frost_size;
-    offsets[i] = offsetof(nc_file_struct, frost_size);
-    mpi_types[i++] = MPI_AINT;
-
-    // size_t lake_node_size;
-    offsets[i] = offsetof(nc_file_struct, lake_node_size);
-    mpi_types[i++] = MPI_AINT;
-
-    // size_t layer_size;
-    offsets[i] = offsetof(nc_file_struct, layer_size);
-    mpi_types[i++] = MPI_AINT;
-
-    // size_t ni_size;
-    offsets[i] = offsetof(nc_file_struct, ni_size);
-    mpi_types[i++] = MPI_AINT;
-
-    // size_t nj_size;
-    offsets[i] = offsetof(nc_file_struct, nj_size);
-    mpi_types[i++] = MPI_AINT;
-
-    // size_t node_size;
-    offsets[i] = offsetof(nc_file_struct, node_size);
-    mpi_types[i++] = MPI_AINT;
-
-    // size_t root_zone_size;
-    offsets[i] = offsetof(nc_file_struct, root_zone_size);
-    mpi_types[i++] = MPI_AINT;
-
-    // size_t time_size;
-    offsets[i] = offsetof(nc_file_struct, time_size);
-    mpi_types[i++] = MPI_AINT;
-
-    // size_t veg_size;
-    offsets[i] = offsetof(nc_file_struct, veg_size);
-    mpi_types[i++] = MPI_AINT;
-
-    // bool open;
-    offsets[i] = offsetof(nc_file_struct, open);
-    mpi_types[i++] = MPI_C_BOOL;
-
-    // make sure that the we have the right number of elements
-    if (i != (size_t) nitems) {
-        log_err("Miscount in create_MPI_nc_file_struct_type(): "
-                "%zd not equal to %d\n", i, nitems);
-    }
-
-    status = MPI_Type_create_struct(nitems, blocklengths, offsets, mpi_types,
-                                    mpi_type);
-    if (status != MPI_SUCCESS) {
-        log_err("MPI error in create_MPI_nc_file_struct_type(): %d\n", status);
-    }
-    status = MPI_Type_commit(mpi_type);
-    if (status != MPI_SUCCESS) {
-        log_err("MPI error in create_MPI_nc_file_struct_type(): %d\n", status);
     }
 
     // cleanup
@@ -2094,7 +1909,7 @@ domain_struct    local_domain;
 // lake_con_struct     lake_con;
 MPI_Datatype     mpi_global_struct_type;
 MPI_Datatype     mpi_location_struct_type;
-MPI_Datatype     mpi_nc_file_struct_type;
+MPI_Datatype     mpi_stream_struct_type;
 MPI_Datatype     mpi_option_struct_type;
 MPI_Datatype     mpi_param_struct_type;
 int             *mpi_map_local_array_sizes = NULL;
@@ -2155,7 +1970,7 @@ main(int    argc,
 
     create_MPI_global_struct_type(&mpi_global_struct_type);
     create_MPI_location_struct_type(&mpi_location_struct_type);
-    create_MPI_nc_file_struct_type(&mpi_nc_file_struct_type);
+    create_MPI_stream_struct_type(&mpi_stream_struct_type);
     create_MPI_option_struct_type(&mpi_option_struct_type);
     create_MPI_param_struct_type(&mpi_param_struct_type);
 
@@ -2207,7 +2022,7 @@ main(int    argc,
         log_err("MPI error in main(): %d\n", status);
     }
 
-    status = MPI_Bcast(&ncfile, 1, mpi_nc_file_struct_type,
+    status = MPI_Bcast(&ncfile, 1, mpi_stream_struct_type,
                        0, MPI_COMM_VIC);
     if (status != MPI_SUCCESS) {
         log_err("MPI error in main(): %d\n", status);

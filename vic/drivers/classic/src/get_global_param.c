@@ -564,9 +564,6 @@ get_global_param(FILE *gp)
             else if (strcasecmp("OUTPUT_STEPS_PER_DAY", optstr) == 0) {
                 ; // do nothing
             }
-            else if (strcasecmp("SKIPYEAR", optstr) == 0) {
-                ; // do nothing
-            }
             else if (strcasecmp("COMPRESS", optstr) == 0) {
                 ; // do nothing
             }
@@ -670,7 +667,10 @@ get_global_param(FILE *gp)
                         "specific variables, directly specify them in the "
                         "global parameter file");
             }
-
+            else if (strcasecmp("SKIPYEAR", optstr) == 0) {
+                log_err("SKIPYEAR has been deprecated. To avoid writting output"
+                        "to history files, set HIST_FREQ == FREQ_NEVER");
+            }
             /***********************************
                Unrecognized Global Parameter Flag
             ***********************************/

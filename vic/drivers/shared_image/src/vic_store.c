@@ -42,6 +42,7 @@ vic_store(dmy_struct *dmy_current)
     extern veg_con_map_struct *veg_con_map;
     extern int                 mpi_rank;
 
+    char                       filename[MAXSTRING];
     int                        status;
     int                        old_fill_mode;
     size_t                     dcount[MAXDIMS];
@@ -76,7 +77,7 @@ vic_store(dmy_struct *dmy_current)
     nc_file_struct             nc_state_file;
 
     // create netcdf file for storing model state
-    sprintf(nc_state_file.fname, "%s.%04d%02d%02d_%05u.nc",
+    sprintf(filename, "%s.%04d%02d%02d_%05u.nc",
             filenames.statefile, dmy_current->year, dmy_current->month,
             dmy_current->day, dmy_current->dayseconds);
 
@@ -99,10 +100,10 @@ vic_store(dmy_struct *dmy_current)
     // only open and initialize the netcdf file on the first thread
     if (mpi_rank == 0) {
         // open the netcdf file
-        status = nc_create(nc_state_file.fname, get_nc_mode(
+        status = nc_create(filename, get_nc_mode(
                                options.STATE_FORMAT), &(nc_state_file.nc_id));
         if (status != NC_NOERR) {
-            log_err("Error creating %s", nc_state_file.fname);
+            log_err("Error creating %s", filename);
         }
         nc_state_file.open = true;
 
@@ -112,7 +113,7 @@ vic_store(dmy_struct *dmy_current)
         // set the NC_FILL attribute
         status = nc_set_fill(nc_state_file.nc_id, NC_FILL, &old_fill_mode);
         if (status != NC_NOERR) {
-            log_err("Error setting fill value in %s", nc_state_file.fname);
+            log_err("Error setting fill value in %s", filename);
         }
 
         // define netcdf dimensions
@@ -120,48 +121,48 @@ vic_store(dmy_struct *dmy_current)
                             nc_state_file.ni_size, &(nc_state_file.ni_dimid));
         if (status != NC_NOERR) {
             log_err("Error defining \"%s\" in %s", global_domain.info.x_dim,
-                    nc_state_file.fname);
+                    filename);
         }
 
         status = nc_def_dim(nc_state_file.nc_id, global_domain.info.y_dim,
                             nc_state_file.nj_size, &(nc_state_file.nj_dimid));
         if (status != NC_NOERR) {
             log_err("Error defining \"%s\" in %s", global_domain.info.y_dim,
-                    nc_state_file.fname);
+                    filename);
         }
 
         status = nc_def_dim(nc_state_file.nc_id, "veg_class",
                             nc_state_file.veg_size, &(nc_state_file.veg_dimid));
         if (status != NC_NOERR) {
-            log_err("Error defining veg_class in %s", nc_state_file.fname);
+            log_err("Error defining veg_class in %s", filename);
         }
 
         status = nc_def_dim(nc_state_file.nc_id, "snow_band",
                             nc_state_file.band_size,
                             &(nc_state_file.band_dimid));
         if (status != NC_NOERR) {
-            log_err("Error defining snow_band in %s", nc_state_file.fname);
+            log_err("Error defining snow_band in %s", filename);
         }
 
         status = nc_def_dim(nc_state_file.nc_id, "nlayer",
                             nc_state_file.layer_size,
                             &(nc_state_file.layer_dimid));
         if (status != NC_NOERR) {
-            log_err("Error defining nlayer in %s", nc_state_file.fname);
+            log_err("Error defining nlayer in %s", filename);
         }
 
         status = nc_def_dim(nc_state_file.nc_id, "frost_area",
                             nc_state_file.frost_size,
                             &(nc_state_file.frost_dimid));
         if (status != NC_NOERR) {
-            log_err("Error defining frost_area in %s", nc_state_file.fname);
+            log_err("Error defining frost_area in %s", filename);
         }
 
         status = nc_def_dim(nc_state_file.nc_id, "soil_node",
                             nc_state_file.node_size,
                             &(nc_state_file.node_dimid));
         if (status != NC_NOERR) {
-            log_err("Error defining soil_node in %s", nc_state_file.fname);
+            log_err("Error defining soil_node in %s", filename);
         }
 
         if (options.LAKES) {
@@ -169,7 +170,7 @@ vic_store(dmy_struct *dmy_current)
                                 nc_state_file.lake_node_size,
                                 &(nc_state_file.lake_node_dimid));
             if (status != NC_NOERR) {
-                log_err("Error defining lake_node in %s", nc_state_file.fname);
+                log_err("Error defining lake_node in %s", filename);
             }
         }
 
@@ -204,24 +205,24 @@ vic_store(dmy_struct *dmy_current)
         status = nc_def_var(nc_state_file.nc_id, global_domain.info.lon_var,
                             NC_DOUBLE, ndims, dimids, &(lon_var_id));
         if (status != NC_NOERR) {
-            log_err("Error defining lon variable in %s", nc_state_file.fname);
+            log_err("Error defining lon variable in %s", filename);
         }
 
         status = nc_put_att_text(nc_state_file.nc_id, lon_var_id, "long_name", strlen(
                                      "longitude"), "longitude");
         if (status != NC_NOERR) {
-            log_err("Error adding attribute in %s", nc_state_file.fname);
+            log_err("Error adding attribute in %s", filename);
         }
         status = nc_put_att_text(nc_state_file.nc_id, lon_var_id, "units", strlen(
                                      "degrees_east"), "degrees_east");
         if (status != NC_NOERR) {
-            log_err("Error adding attribute in %s", nc_state_file.fname);
+            log_err("Error adding attribute in %s", filename);
         }
         status = nc_put_att_text(nc_state_file.nc_id, lon_var_id,
                                  "standard_name", strlen(
                                      "longitude"), "longitude");
         if (status != NC_NOERR) {
-            log_err("Error adding attribute in %s", nc_state_file.fname);
+            log_err("Error adding attribute in %s", filename);
         }
 
         if (global_domain.info.n_coord_dims == 1) {
@@ -233,29 +234,29 @@ vic_store(dmy_struct *dmy_current)
         status = nc_def_var(nc_state_file.nc_id, global_domain.info.lat_var,
                             NC_DOUBLE, ndims, dimids, &(lat_var_id));
         if (status != NC_NOERR) {
-            log_err("Error defining lat variable in %s", nc_state_file.fname);
+            log_err("Error defining lat variable in %s", filename);
         }
         status = nc_put_att_text(nc_state_file.nc_id, lat_var_id, "long_name", strlen(
                                      "latitude"), "latitude");
         if (status != NC_NOERR) {
-            log_err("Error adding attribute in %s", nc_state_file.fname);
+            log_err("Error adding attribute in %s", filename);
         }
         status = nc_put_att_text(nc_state_file.nc_id, lat_var_id, "units", strlen(
                                      "degrees_north"), "degrees_north");
         if (status != NC_NOERR) {
-            log_err("Error adding attribute in %s", nc_state_file.fname);
+            log_err("Error adding attribute in %s", filename);
         }
         status = nc_put_att_text(nc_state_file.nc_id, lat_var_id,
                                  "standard_name", strlen("latitude"),
                                  "latitude");
         if (status != NC_NOERR) {
-            log_err("Error adding attribute in %s", nc_state_file.fname);
+            log_err("Error adding attribute in %s", filename);
         }
 
         // leave define mode
         status = nc_enddef(nc_state_file.nc_id);
         if (status != NC_NOERR) {
-            log_err("Error leaving define mode for %s", nc_state_file.fname);
+            log_err("Error leaving define mode for %s", filename);
         }
 
         // populate lat/lon
@@ -273,7 +274,7 @@ vic_store(dmy_struct *dmy_current)
             status = nc_put_vara_double(nc_state_file.nc_id, lon_var_id, dstart,
                                         dcount, dvar);
             if (status != NC_NOERR) {
-                log_err("Error adding data to lon in %s", nc_state_file.fname);
+                log_err("Error adding data to lon in %s", filename);
             }
             free(dvar);
 
@@ -294,7 +295,7 @@ vic_store(dmy_struct *dmy_current)
             status = nc_put_vara_double(nc_state_file.nc_id, lat_var_id, dstart,
                                         dcount, dvar);
             if (status != NC_NOERR) {
-                log_err("Error adding data to lon in %s", nc_state_file.fname);
+                log_err("Error adding data to lon in %s", filename);
             }
             free(dvar);
         }
@@ -313,7 +314,7 @@ vic_store(dmy_struct *dmy_current)
             status = nc_put_vara_double(nc_state_file.nc_id, lon_var_id, dstart,
                                         dcount, dvar);
             if (status != NC_NOERR) {
-                log_err("Error adding data to lon in %s", nc_state_file.fname);
+                log_err("Error adding data to lon in %s", filename);
             }
 
             for (i = 0; i < nc_state_file.nj_size * nc_state_file.ni_size;
@@ -323,7 +324,7 @@ vic_store(dmy_struct *dmy_current)
             status = nc_put_vara_double(nc_state_file.nc_id, lat_var_id, dstart,
                                         dcount, dvar);
             if (status != NC_NOERR) {
-                log_err("Error adding data to lat in %s", nc_state_file.fname);
+                log_err("Error adding data to lat in %s", filename);
             }
 
             free(dvar);
@@ -346,7 +347,7 @@ vic_store(dmy_struct *dmy_current)
         for (j = 0; j < nc_state_file.veg_size; j++) {
             ivar[j] = (int) j + 1;
         }
-        put_nc_field_int(nc_state_file.fname, &(nc_state_file.open),
+        put_nc_field_int(filename, &(nc_state_file.open),
                          &(nc_state_file.nc_id), nc_state_file.d_fillvalue,
                          dimids, ndims,
                          "veg_class", d1start, d1count, ivar);
@@ -365,7 +366,7 @@ vic_store(dmy_struct *dmy_current)
         for (j = 0; j < nc_state_file.band_size; j++) {
             ivar[j] = (int) j;
         }
-        put_nc_field_int(nc_state_file.fname, &(nc_state_file.open),
+        put_nc_field_int(filename, &(nc_state_file.open),
                          &(nc_state_file.nc_id), nc_state_file.d_fillvalue,
                          dimids, ndims,
                          "snow_band", d1start, d1count, ivar);
@@ -384,7 +385,7 @@ vic_store(dmy_struct *dmy_current)
         for (j = 0; j < nc_state_file.layer_size; j++) {
             ivar[j] = (int) j;
         }
-        put_nc_field_int(nc_state_file.fname, &(nc_state_file.open),
+        put_nc_field_int(filename, &(nc_state_file.open),
                          &(nc_state_file.nc_id), nc_state_file.d_fillvalue,
                          dimids, ndims,
                          "layer", d1start, d1count, ivar);
@@ -403,7 +404,7 @@ vic_store(dmy_struct *dmy_current)
         for (j = 0; j < nc_state_file.frost_size; j++) {
             ivar[j] = (int) j;
         }
-        put_nc_field_int(nc_state_file.fname, &(nc_state_file.open),
+        put_nc_field_int(filename, &(nc_state_file.open),
                          &(nc_state_file.nc_id), nc_state_file.d_fillvalue,
                          dimids, ndims,
                          "frost_area", d1start, d1count, ivar);
@@ -415,7 +416,7 @@ vic_store(dmy_struct *dmy_current)
         // soil thermal node deltas
         dimids[0] = nc_state_file.node_dimid;
         d1count[0] = nc_state_file.node_size;
-        put_nc_field_double(nc_state_file.fname, &(nc_state_file.open),
+        put_nc_field_double(filename, &(nc_state_file.open),
                             &(nc_state_file.nc_id), nc_state_file.d_fillvalue,
                             dimids, ndims,
                             "dz_node", d1start, d1count, soil_con[0].dz_node);
@@ -426,7 +427,7 @@ vic_store(dmy_struct *dmy_current)
         // soil thermal node depths
         dimids[0] = nc_state_file.node_dimid;
         d1count[0] = nc_state_file.node_size;
-        put_nc_field_double(nc_state_file.fname, &(nc_state_file.open),
+        put_nc_field_double(filename, &(nc_state_file.open),
                             &(nc_state_file.nc_id), nc_state_file.d_fillvalue,
                             dimids, ndims,
                             "node_depth", d1start, d1count,
@@ -446,7 +447,7 @@ vic_store(dmy_struct *dmy_current)
             for (j = 0; j < nc_state_file.lake_node_size; j++) {
                 ivar[j] = (int) j;
             }
-            put_nc_field_int(nc_state_file.fname, &(nc_state_file.open),
+            put_nc_field_int(filename, &(nc_state_file.open),
                              &(nc_state_file.nc_id), nc_state_file.d_fillvalue,
                              dimids, ndims,
                              "lake_node", d1start, d1count, ivar);
@@ -558,7 +559,7 @@ vic_store(dmy_struct *dmy_current)
                         dvar[i] = nc_state_file.d_fillvalue;
                     }
                 }
-                gather_put_nc_field_double(nc_state_file.fname,
+                gather_put_nc_field_double(filename,
                                            &(nc_state_file.open),
                                            &(nc_state_file.nc_id),
                                            nc_state_file.d_fillvalue,
@@ -600,7 +601,7 @@ vic_store(dmy_struct *dmy_current)
                             dvar[i] = nc_state_file.d_fillvalue;
                         }
                     }
-                    gather_put_nc_field_double(nc_state_file.fname,
+                    gather_put_nc_field_double(filename,
                                                &(nc_state_file.open),
                                                &(nc_state_file.nc_id),
                                                nc_state_file.d_fillvalue,
@@ -637,7 +638,7 @@ vic_store(dmy_struct *dmy_current)
                     dvar[i] = nc_state_file.d_fillvalue;
                 }
             }
-            gather_put_nc_field_double(nc_state_file.fname,
+            gather_put_nc_field_double(filename,
                                        &(nc_state_file.open),
                                        &(nc_state_file.nc_id),
                                        nc_state_file.d_fillvalue,
@@ -673,7 +674,7 @@ vic_store(dmy_struct *dmy_current)
                         dvar[i] = nc_state_file.d_fillvalue;
                     }
                 }
-                gather_put_nc_field_double(nc_state_file.fname,
+                gather_put_nc_field_double(filename,
                                            &(nc_state_file.open),
                                            &(nc_state_file.nc_id),
                                            nc_state_file.d_fillvalue,
@@ -708,7 +709,7 @@ vic_store(dmy_struct *dmy_current)
                         dvar[i] = nc_state_file.d_fillvalue;
                     }
                 }
-                gather_put_nc_field_double(nc_state_file.fname,
+                gather_put_nc_field_double(filename,
                                            &(nc_state_file.open),
                                            &(nc_state_file.nc_id),
                                            nc_state_file.d_fillvalue,
@@ -743,7 +744,7 @@ vic_store(dmy_struct *dmy_current)
                         dvar[i] = nc_state_file.d_fillvalue;
                     }
                 }
-                gather_put_nc_field_double(nc_state_file.fname,
+                gather_put_nc_field_double(filename,
                                            &(nc_state_file.open),
                                            &(nc_state_file.nc_id),
                                            nc_state_file.d_fillvalue,
@@ -778,7 +779,7 @@ vic_store(dmy_struct *dmy_current)
                         dvar[i] = nc_state_file.d_fillvalue;
                     }
                 }
-                gather_put_nc_field_double(nc_state_file.fname,
+                gather_put_nc_field_double(filename,
                                            &(nc_state_file.open),
                                            &(nc_state_file.nc_id),
                                            nc_state_file.d_fillvalue,
@@ -813,7 +814,7 @@ vic_store(dmy_struct *dmy_current)
                         dvar[i] = nc_state_file.d_fillvalue;
                     }
                 }
-                gather_put_nc_field_double(nc_state_file.fname,
+                gather_put_nc_field_double(filename,
                                            &(nc_state_file.open),
                                            &(nc_state_file.nc_id),
                                            nc_state_file.d_fillvalue,
@@ -849,7 +850,7 @@ vic_store(dmy_struct *dmy_current)
                     ivar[i] = nc_state_file.i_fillvalue;
                 }
             }
-            gather_put_nc_field_int(nc_state_file.fname,
+            gather_put_nc_field_int(filename,
                                     &(nc_state_file.open),
                                     &(nc_state_file.nc_id),
                                     nc_state_file.i_fillvalue,
@@ -884,7 +885,7 @@ vic_store(dmy_struct *dmy_current)
                     ivar[i] = nc_state_file.i_fillvalue;
                 }
             }
-            gather_put_nc_field_int(nc_state_file.fname,
+            gather_put_nc_field_int(filename,
                                     &(nc_state_file.open),
                                     &(nc_state_file.nc_id),
                                     nc_state_file.i_fillvalue,
@@ -919,7 +920,7 @@ vic_store(dmy_struct *dmy_current)
                     dvar[i] = nc_state_file.d_fillvalue;
                 }
             }
-            gather_put_nc_field_double(nc_state_file.fname,
+            gather_put_nc_field_double(filename,
                                        &(nc_state_file.open),
                                        &(nc_state_file.nc_id),
                                        nc_state_file.d_fillvalue,
@@ -954,7 +955,7 @@ vic_store(dmy_struct *dmy_current)
                     dvar[i] = nc_state_file.d_fillvalue;
                 }
             }
-            gather_put_nc_field_double(nc_state_file.fname,
+            gather_put_nc_field_double(filename,
                                        &(nc_state_file.open),
                                        &(nc_state_file.nc_id),
                                        nc_state_file.d_fillvalue,
@@ -989,7 +990,7 @@ vic_store(dmy_struct *dmy_current)
                     dvar[i] = nc_state_file.d_fillvalue;
                 }
             }
-            gather_put_nc_field_double(nc_state_file.fname,
+            gather_put_nc_field_double(filename,
                                        &(nc_state_file.open),
                                        &(nc_state_file.nc_id),
                                        nc_state_file.d_fillvalue,
@@ -1024,7 +1025,7 @@ vic_store(dmy_struct *dmy_current)
                     dvar[i] = nc_state_file.d_fillvalue;
                 }
             }
-            gather_put_nc_field_double(nc_state_file.fname,
+            gather_put_nc_field_double(filename,
                                        &(nc_state_file.open),
                                        &(nc_state_file.nc_id),
                                        nc_state_file.d_fillvalue,
@@ -1059,7 +1060,7 @@ vic_store(dmy_struct *dmy_current)
                     dvar[i] = nc_state_file.d_fillvalue;
                 }
             }
-            gather_put_nc_field_double(nc_state_file.fname,
+            gather_put_nc_field_double(filename,
                                        &(nc_state_file.open),
                                        &(nc_state_file.nc_id),
                                        nc_state_file.d_fillvalue,
@@ -1094,7 +1095,7 @@ vic_store(dmy_struct *dmy_current)
                     dvar[i] = nc_state_file.d_fillvalue;
                 }
             }
-            gather_put_nc_field_double(nc_state_file.fname,
+            gather_put_nc_field_double(filename,
                                        &(nc_state_file.open),
                                        &(nc_state_file.nc_id),
                                        nc_state_file.d_fillvalue,
@@ -1129,7 +1130,7 @@ vic_store(dmy_struct *dmy_current)
                     dvar[i] = nc_state_file.d_fillvalue;
                 }
             }
-            gather_put_nc_field_double(nc_state_file.fname,
+            gather_put_nc_field_double(filename,
                                        &(nc_state_file.open),
                                        &(nc_state_file.nc_id),
                                        nc_state_file.d_fillvalue,
@@ -1164,7 +1165,7 @@ vic_store(dmy_struct *dmy_current)
                     dvar[i] = nc_state_file.d_fillvalue;
                 }
             }
-            gather_put_nc_field_double(nc_state_file.fname,
+            gather_put_nc_field_double(filename,
                                        &(nc_state_file.open),
                                        &(nc_state_file.nc_id),
                                        nc_state_file.d_fillvalue,
@@ -1199,7 +1200,7 @@ vic_store(dmy_struct *dmy_current)
                     dvar[i] = nc_state_file.d_fillvalue;
                 }
             }
-            gather_put_nc_field_double(nc_state_file.fname,
+            gather_put_nc_field_double(filename,
                                        &(nc_state_file.open),
                                        &(nc_state_file.nc_id),
                                        nc_state_file.d_fillvalue,
@@ -1237,7 +1238,7 @@ vic_store(dmy_struct *dmy_current)
                         dvar[i] = nc_state_file.d_fillvalue;
                     }
                 }
-                gather_put_nc_field_double(nc_state_file.fname,
+                gather_put_nc_field_double(filename,
                                            &(nc_state_file.open),
                                            &(nc_state_file.nc_id),
                                            nc_state_file.d_fillvalue,
@@ -1273,7 +1274,7 @@ vic_store(dmy_struct *dmy_current)
                     dvar[i] = nc_state_file.d_fillvalue;
                 }
             }
-            gather_put_nc_field_double(nc_state_file.fname,
+            gather_put_nc_field_double(filename,
                                        &(nc_state_file.open),
                                        &(nc_state_file.nc_id),
                                        nc_state_file.d_fillvalue,
@@ -1309,7 +1310,7 @@ vic_store(dmy_struct *dmy_current)
                     dvar[i] = nc_state_file.d_fillvalue;
                 }
             }
-            gather_put_nc_field_double(nc_state_file.fname,
+            gather_put_nc_field_double(filename,
                                        &(nc_state_file.open),
                                        &(nc_state_file.nc_id),
                                        nc_state_file.d_fillvalue,
@@ -1345,7 +1346,7 @@ vic_store(dmy_struct *dmy_current)
                     dvar[i] = nc_state_file.d_fillvalue;
                 }
             }
-            gather_put_nc_field_double(nc_state_file.fname,
+            gather_put_nc_field_double(filename,
                                        &(nc_state_file.open),
                                        &(nc_state_file.nc_id),
                                        nc_state_file.d_fillvalue,
@@ -1371,7 +1372,7 @@ vic_store(dmy_struct *dmy_current)
             for (i = 0; i < local_domain.ncells_active; i++) {
                 dvar[i] = (double) all_vars[i].lake_var.soil.layer[j].moist;
             }
-            gather_put_nc_field_double(nc_state_file.fname,
+            gather_put_nc_field_double(filename,
                                        &(nc_state_file.open),
                                        &(nc_state_file.nc_id),
                                        nc_state_file.d_fillvalue,
@@ -1399,7 +1400,7 @@ vic_store(dmy_struct *dmy_current)
                     dvar[i] = (double)
                               all_vars[i].lake_var.soil.layer[j].ice[p];
                 }
-                gather_put_nc_field_double(nc_state_file.fname,
+                gather_put_nc_field_double(filename,
                                            &(nc_state_file.open),
                                            &(nc_state_file.nc_id),
                                            nc_state_file.d_fillvalue,
@@ -1422,7 +1423,7 @@ vic_store(dmy_struct *dmy_current)
             for (i = 0; i < local_domain.ncells_active; i++) {
                 dvar[i] = (double) all_vars[i].lake_var.soil.CLitter;
             }
-            gather_put_nc_field_double(nc_state_file.fname,
+            gather_put_nc_field_double(filename,
                                        &(nc_state_file.open),
                                        &(nc_state_file.nc_id),
                                        nc_state_file.d_fillvalue,
@@ -1442,7 +1443,7 @@ vic_store(dmy_struct *dmy_current)
             for (i = 0; i < local_domain.ncells_active; i++) {
                 dvar[i] = (double) all_vars[i].lake_var.soil.CInter;
             }
-            gather_put_nc_field_double(nc_state_file.fname,
+            gather_put_nc_field_double(filename,
                                        &(nc_state_file.open),
                                        &(nc_state_file.nc_id),
                                        nc_state_file.d_fillvalue,
@@ -1462,7 +1463,7 @@ vic_store(dmy_struct *dmy_current)
             for (i = 0; i < local_domain.ncells_active; i++) {
                 dvar[i] = (double) all_vars[i].lake_var.soil.CSlow;
             }
-            gather_put_nc_field_double(nc_state_file.fname,
+            gather_put_nc_field_double(filename,
                                        &(nc_state_file.open),
                                        &(nc_state_file.nc_id),
                                        nc_state_file.d_fillvalue,
@@ -1483,7 +1484,7 @@ vic_store(dmy_struct *dmy_current)
         for (i = 0; i < local_domain.ncells_active; i++) {
             ivar[i] = (int) all_vars[i].lake_var.snow.last_snow;
         }
-        gather_put_nc_field_int(nc_state_file.fname,
+        gather_put_nc_field_int(filename,
                                 &(nc_state_file.open),
                                 &(nc_state_file.nc_id),
                                 nc_state_file.i_fillvalue,
@@ -1503,7 +1504,7 @@ vic_store(dmy_struct *dmy_current)
         for (i = 0; i < local_domain.ncells_active; i++) {
             ivar[i] = (int) all_vars[i].lake_var.snow.MELTING;
         }
-        gather_put_nc_field_int(nc_state_file.fname,
+        gather_put_nc_field_int(filename,
                                 &(nc_state_file.open),
                                 &(nc_state_file.nc_id),
                                 nc_state_file.i_fillvalue,
@@ -1523,7 +1524,7 @@ vic_store(dmy_struct *dmy_current)
         for (i = 0; i < local_domain.ncells_active; i++) {
             dvar[i] = (double) all_vars[i].lake_var.snow.coverage;
         }
-        gather_put_nc_field_double(nc_state_file.fname,
+        gather_put_nc_field_double(filename,
                                    &(nc_state_file.open),
                                    &(nc_state_file.nc_id),
                                    nc_state_file.d_fillvalue,
@@ -1543,7 +1544,7 @@ vic_store(dmy_struct *dmy_current)
         for (i = 0; i < local_domain.ncells_active; i++) {
             dvar[i] = (double) all_vars[i].lake_var.snow.swq;
         }
-        gather_put_nc_field_double(nc_state_file.fname,
+        gather_put_nc_field_double(filename,
                                    &(nc_state_file.open),
                                    &(nc_state_file.nc_id),
                                    nc_state_file.d_fillvalue,
@@ -1563,7 +1564,7 @@ vic_store(dmy_struct *dmy_current)
         for (i = 0; i < local_domain.ncells_active; i++) {
             dvar[i] = (double) all_vars[i].lake_var.snow.surf_temp;
         }
-        gather_put_nc_field_double(nc_state_file.fname,
+        gather_put_nc_field_double(filename,
                                    &(nc_state_file.open),
                                    &(nc_state_file.nc_id),
                                    nc_state_file.d_fillvalue,
@@ -1583,7 +1584,7 @@ vic_store(dmy_struct *dmy_current)
         for (i = 0; i < local_domain.ncells_active; i++) {
             dvar[i] = (double) all_vars[i].lake_var.snow.surf_water;
         }
-        gather_put_nc_field_double(nc_state_file.fname,
+        gather_put_nc_field_double(filename,
                                    &(nc_state_file.open),
                                    &(nc_state_file.nc_id),
                                    nc_state_file.d_fillvalue,
@@ -1603,7 +1604,7 @@ vic_store(dmy_struct *dmy_current)
         for (i = 0; i < local_domain.ncells_active; i++) {
             dvar[i] = (double) all_vars[i].lake_var.snow.pack_temp;
         }
-        gather_put_nc_field_double(nc_state_file.fname,
+        gather_put_nc_field_double(filename,
                                    &(nc_state_file.open),
                                    &(nc_state_file.nc_id),
                                    nc_state_file.d_fillvalue,
@@ -1623,7 +1624,7 @@ vic_store(dmy_struct *dmy_current)
         for (i = 0; i < local_domain.ncells_active; i++) {
             dvar[i] = (double) all_vars[i].lake_var.snow.pack_water;
         }
-        gather_put_nc_field_double(nc_state_file.fname,
+        gather_put_nc_field_double(filename,
                                    &(nc_state_file.open),
                                    &(nc_state_file.nc_id),
                                    nc_state_file.d_fillvalue,
@@ -1643,7 +1644,7 @@ vic_store(dmy_struct *dmy_current)
         for (i = 0; i < local_domain.ncells_active; i++) {
             dvar[i] = (double) all_vars[i].lake_var.snow.density;
         }
-        gather_put_nc_field_double(nc_state_file.fname,
+        gather_put_nc_field_double(filename,
                                    &(nc_state_file.open),
                                    &(nc_state_file.nc_id),
                                    nc_state_file.d_fillvalue,
@@ -1663,7 +1664,7 @@ vic_store(dmy_struct *dmy_current)
         for (i = 0; i < local_domain.ncells_active; i++) {
             dvar[i] = (double) all_vars[i].lake_var.snow.coldcontent;
         }
-        gather_put_nc_field_double(nc_state_file.fname,
+        gather_put_nc_field_double(filename,
                                    &(nc_state_file.open),
                                    &(nc_state_file.nc_id),
                                    nc_state_file.d_fillvalue,
@@ -1683,7 +1684,7 @@ vic_store(dmy_struct *dmy_current)
         for (i = 0; i < local_domain.ncells_active; i++) {
             dvar[i] = (double) all_vars[i].lake_var.snow.snow_canopy;
         }
-        gather_put_nc_field_double(nc_state_file.fname,
+        gather_put_nc_field_double(filename,
                                    &(nc_state_file.open),
                                    &(nc_state_file.nc_id),
                                    nc_state_file.d_fillvalue,
@@ -1706,7 +1707,7 @@ vic_store(dmy_struct *dmy_current)
             for (i = 0; i < local_domain.ncells_active; i++) {
                 dvar[i] = (double) all_vars[i].lake_var.soil.layer[j].moist;
             }
-            gather_put_nc_field_double(nc_state_file.fname,
+            gather_put_nc_field_double(filename,
                                        &(nc_state_file.open),
                                        &(nc_state_file.nc_id),
                                        nc_state_file.d_fillvalue,
@@ -1727,7 +1728,7 @@ vic_store(dmy_struct *dmy_current)
         for (i = 0; i < local_domain.ncells_active; i++) {
             ivar[i] = (int) all_vars[i].lake_var.activenod;
         }
-        gather_put_nc_field_int(nc_state_file.fname,
+        gather_put_nc_field_int(filename,
                                 &(nc_state_file.open),
                                 &(nc_state_file.nc_id),
                                 nc_state_file.i_fillvalue,
@@ -1747,7 +1748,7 @@ vic_store(dmy_struct *dmy_current)
         for (i = 0; i < local_domain.ncells_active; i++) {
             dvar[i] = (double) all_vars[i].lake_var.dz;
         }
-        gather_put_nc_field_double(nc_state_file.fname,
+        gather_put_nc_field_double(filename,
                                    &(nc_state_file.open),
                                    &(nc_state_file.nc_id),
                                    nc_state_file.d_fillvalue,
@@ -1767,7 +1768,7 @@ vic_store(dmy_struct *dmy_current)
         for (i = 0; i < local_domain.ncells_active; i++) {
             dvar[i] = (double) all_vars[i].lake_var.surfdz;
         }
-        gather_put_nc_field_double(nc_state_file.fname,
+        gather_put_nc_field_double(filename,
                                    &(nc_state_file.open),
                                    &(nc_state_file.nc_id),
                                    nc_state_file.d_fillvalue,
@@ -1787,7 +1788,7 @@ vic_store(dmy_struct *dmy_current)
         for (i = 0; i < local_domain.ncells_active; i++) {
             dvar[i] = (double) all_vars[i].lake_var.ldepth;
         }
-        gather_put_nc_field_double(nc_state_file.fname,
+        gather_put_nc_field_double(filename,
                                    &(nc_state_file.open),
                                    &(nc_state_file.nc_id),
                                    nc_state_file.d_fillvalue,
@@ -1810,7 +1811,7 @@ vic_store(dmy_struct *dmy_current)
             for (i = 0; i < local_domain.ncells_active; i++) {
                 dvar[i] = (double) all_vars[i].lake_var.surface[j];
             }
-            gather_put_nc_field_double(nc_state_file.fname,
+            gather_put_nc_field_double(filename,
                                        &(nc_state_file.open),
                                        &(nc_state_file.nc_id),
                                        nc_state_file.d_fillvalue,
@@ -1831,7 +1832,7 @@ vic_store(dmy_struct *dmy_current)
         for (i = 0; i < local_domain.ncells_active; i++) {
             dvar[i] = (double) all_vars[i].lake_var.sarea;
         }
-        gather_put_nc_field_double(nc_state_file.fname,
+        gather_put_nc_field_double(filename,
                                    &(nc_state_file.open),
                                    &(nc_state_file.nc_id),
                                    nc_state_file.d_fillvalue,
@@ -1851,7 +1852,7 @@ vic_store(dmy_struct *dmy_current)
         for (i = 0; i < local_domain.ncells_active; i++) {
             dvar[i] = (double) all_vars[i].lake_var.volume;
         }
-        gather_put_nc_field_double(nc_state_file.fname,
+        gather_put_nc_field_double(filename,
                                    &(nc_state_file.open),
                                    &(nc_state_file.nc_id),
                                    nc_state_file.d_fillvalue,
@@ -1874,7 +1875,7 @@ vic_store(dmy_struct *dmy_current)
             for (i = 0; i < local_domain.ncells_active; i++) {
                 dvar[i] = (double) all_vars[i].lake_var.temp[j];
             }
-            gather_put_nc_field_double(nc_state_file.fname,
+            gather_put_nc_field_double(filename,
                                        &(nc_state_file.open),
                                        &(nc_state_file.nc_id),
                                        nc_state_file.d_fillvalue,
@@ -1895,7 +1896,7 @@ vic_store(dmy_struct *dmy_current)
         for (i = 0; i < local_domain.ncells_active; i++) {
             dvar[i] = (double) all_vars[i].lake_var.tempavg;
         }
-        gather_put_nc_field_double(nc_state_file.fname,
+        gather_put_nc_field_double(filename,
                                    &(nc_state_file.open),
                                    &(nc_state_file.nc_id),
                                    nc_state_file.d_fillvalue,
@@ -1915,7 +1916,7 @@ vic_store(dmy_struct *dmy_current)
         for (i = 0; i < local_domain.ncells_active; i++) {
             dvar[i] = (double) all_vars[i].lake_var.areai;
         }
-        gather_put_nc_field_double(nc_state_file.fname,
+        gather_put_nc_field_double(filename,
                                    &(nc_state_file.open),
                                    &(nc_state_file.nc_id),
                                    nc_state_file.d_fillvalue,
@@ -1935,7 +1936,7 @@ vic_store(dmy_struct *dmy_current)
         for (i = 0; i < local_domain.ncells_active; i++) {
             dvar[i] = (double) all_vars[i].lake_var.new_ice_area;
         }
-        gather_put_nc_field_double(nc_state_file.fname,
+        gather_put_nc_field_double(filename,
                                    &(nc_state_file.open),
                                    &(nc_state_file.nc_id),
                                    nc_state_file.d_fillvalue,
@@ -1955,7 +1956,7 @@ vic_store(dmy_struct *dmy_current)
         for (i = 0; i < local_domain.ncells_active; i++) {
             dvar[i] = (double) all_vars[i].lake_var.ice_water_eq;
         }
-        gather_put_nc_field_double(nc_state_file.fname,
+        gather_put_nc_field_double(filename,
                                    &(nc_state_file.open),
                                    &(nc_state_file.nc_id),
                                    nc_state_file.d_fillvalue,
@@ -1975,7 +1976,7 @@ vic_store(dmy_struct *dmy_current)
         for (i = 0; i < local_domain.ncells_active; i++) {
             dvar[i] = (double) all_vars[i].lake_var.hice;
         }
-        gather_put_nc_field_double(nc_state_file.fname,
+        gather_put_nc_field_double(filename,
                                    &(nc_state_file.open),
                                    &(nc_state_file.nc_id),
                                    nc_state_file.d_fillvalue,
@@ -1995,7 +1996,7 @@ vic_store(dmy_struct *dmy_current)
         for (i = 0; i < local_domain.ncells_active; i++) {
             dvar[i] = (double) all_vars[i].lake_var.tempi;
         }
-        gather_put_nc_field_double(nc_state_file.fname,
+        gather_put_nc_field_double(filename,
                                    &(nc_state_file.open),
                                    &(nc_state_file.nc_id),
                                    nc_state_file.d_fillvalue,
@@ -2015,7 +2016,7 @@ vic_store(dmy_struct *dmy_current)
         for (i = 0; i < local_domain.ncells_active; i++) {
             dvar[i] = (double) all_vars[i].lake_var.swe;
         }
-        gather_put_nc_field_double(nc_state_file.fname,
+        gather_put_nc_field_double(filename,
                                    &(nc_state_file.open),
                                    &(nc_state_file.nc_id),
                                    nc_state_file.d_fillvalue,
@@ -2036,7 +2037,7 @@ vic_store(dmy_struct *dmy_current)
         for (i = 0; i < local_domain.ncells_active; i++) {
             dvar[i] = (double) all_vars[i].lake_var.surf_temp;
         }
-        gather_put_nc_field_double(nc_state_file.fname,
+        gather_put_nc_field_double(filename,
                                    &(nc_state_file.open),
                                    &(nc_state_file.nc_id),
                                    nc_state_file.d_fillvalue,
@@ -2056,7 +2057,7 @@ vic_store(dmy_struct *dmy_current)
         for (i = 0; i < local_domain.ncells_active; i++) {
             dvar[i] = (double) all_vars[i].lake_var.pack_temp;
         }
-        gather_put_nc_field_double(nc_state_file.fname,
+        gather_put_nc_field_double(filename,
                                    &(nc_state_file.open),
                                    &(nc_state_file.nc_id),
                                    nc_state_file.d_fillvalue,
@@ -2076,7 +2077,7 @@ vic_store(dmy_struct *dmy_current)
         for (i = 0; i < local_domain.ncells_active; i++) {
             dvar[i] = (double) all_vars[i].lake_var.coldcontent;
         }
-        gather_put_nc_field_double(nc_state_file.fname,
+        gather_put_nc_field_double(filename,
                                    &(nc_state_file.open),
                                    &(nc_state_file.nc_id),
                                    nc_state_file.d_fillvalue,
@@ -2096,7 +2097,7 @@ vic_store(dmy_struct *dmy_current)
         for (i = 0; i < local_domain.ncells_active; i++) {
             dvar[i] = (double) all_vars[i].lake_var.surf_water;
         }
-        gather_put_nc_field_double(nc_state_file.fname,
+        gather_put_nc_field_double(filename,
                                    &(nc_state_file.open),
                                    &(nc_state_file.nc_id),
                                    nc_state_file.d_fillvalue,
@@ -2116,7 +2117,7 @@ vic_store(dmy_struct *dmy_current)
         for (i = 0; i < local_domain.ncells_active; i++) {
             dvar[i] = (double) all_vars[i].lake_var.pack_water;
         }
-        gather_put_nc_field_double(nc_state_file.fname,
+        gather_put_nc_field_double(filename,
                                    &(nc_state_file.open),
                                    &(nc_state_file.nc_id),
                                    nc_state_file.d_fillvalue,
@@ -2136,7 +2137,7 @@ vic_store(dmy_struct *dmy_current)
         for (i = 0; i < local_domain.ncells_active; i++) {
             dvar[i] = (double) all_vars[i].lake_var.SAlbedo;
         }
-        gather_put_nc_field_double(nc_state_file.fname,
+        gather_put_nc_field_double(filename,
                                    &(nc_state_file.open),
                                    &(nc_state_file.nc_id),
                                    nc_state_file.d_fillvalue,
@@ -2156,7 +2157,7 @@ vic_store(dmy_struct *dmy_current)
         for (i = 0; i < local_domain.ncells_active; i++) {
             dvar[i] = (double) all_vars[i].lake_var.sdepth;
         }
-        gather_put_nc_field_double(nc_state_file.fname,
+        gather_put_nc_field_double(filename,
                                    &(nc_state_file.open),
                                    &(nc_state_file.nc_id),
                                    nc_state_file.d_fillvalue,
@@ -2174,7 +2175,7 @@ vic_store(dmy_struct *dmy_current)
     if (nc_state_file.open == true) {
         status = nc_close(nc_state_file.nc_id);
         if (status != NC_NOERR) {
-            log_err("Error closing %s", nc_state_file.fname);
+            log_err("Error closing %s", filename);
         }
     }
 

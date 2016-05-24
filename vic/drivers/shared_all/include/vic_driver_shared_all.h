@@ -433,40 +433,43 @@ typedef struct {
 } param_set_struct;
 
 /******************************************************************************
- * @brief   This structure stores output information for one output file.
+ * @brief   This structure stores alarm information
  *****************************************************************************/
 typedef struct {
-    char prefix[MAXSTRING];                   /**< prefix of the file name, e.g. "fluxes" */
-    char filename[MAXSTRING];                 /**< complete file name */
-    FILE *fh;                               /**< filehandle */
-    unsigned short int file_format;    /**< output file format */
-    short int compress;            /**< Compress all output files */
-    size_t output_steps_per_day;                /**< Number of output timesteps per day */
-    double out_dt;                /**< output timestep in seconds */
-    unsigned short int skipyear;    /**< Number of years to skip before writing
-                                       output data */
-    unsigned short int *type;   /**< type, when written to a binary file;
-                                   OUT_TYPE_USINT  = unsigned short int
-                                   OUT_TYPE_SINT   = short int
-                                   OUT_TYPE_FLOAT  = single precision floating point
-                                   OUT_TYPE_DOUBLE = double precision floating point */
-    double *mult;               /**< multiplier, when written to a binary file [shape=(nvars, )] */
-    char **format;                /**< format, when written to disk [shape=(nvars, )] */
-} stream_file_struct;
+    unsigned int count;  /**< current alarm count */
+    int next;            /**< next count to raise alarm at */
+    unsigned int freq;   /**< enum value to describing alarm frequency */
+    int n;               /**< variable that provides additional information with respect to alarm_freq */
+    dmy_struct date;     /**< date structure for when alarm_freq == FREQ_DATE */
+} alarm_struct;
 
 /******************************************************************************
- * @brief   Thiss structure stores output information for one output stream.
+ * @brief   This structure stores output information for one output stream.
  *****************************************************************************/
 typedef struct {
-    size_t nvars;            /**< number of variables to store in the file */
-    unsigned int counter;
-    unsigned int nextagg;
-    unsigned int *varid;         /**< id numbers of the variables to store in the file
-                                    (a variable's id number is its index in the out_data array).
-                                    The order of the id numbers in the varid array
-                                    is the order in which the variables will be written. */
-    unsigned short int *aggtype;   /**< type of aggregation to use [shape=(nvars, )] */
-    double ***aggdata;             /**< array of aggregated data values [shape=(nvars, nelem, nsteps)] */
+    char prefix[MAXSTRING];          /**< prefix of the file name, e.g. "fluxes" */
+    char filename[MAXSTRING];        /**< complete file name */
+    FILE *fh;                        /**< filehandle */
+    unsigned short int file_format;  /**< output file format */
+    short int compress;              /**< Compress output files in stream*/
+    size_t output_steps_per_day;     /**< Number of output timesteps per day */
+    double out_dt;                   /**< output timestep in seconds */
+    unsigned short int *type;        /**< type, when written to a binary file;
+                                          OUT_TYPE_USINT  = unsigned short int
+                                          OUT_TYPE_SINT   = short int
+                                          OUT_TYPE_FLOAT  = single precision floating point
+                                          OUT_TYPE_DOUBLE = double precision floating point */
+    double *mult;                    /**< multiplier, when written to a binary file [shape=(nvars, )] */
+    char **format;                    /**< format, when written to disk [shape=(nvars, )] */
+    size_t nvars;                    /**< number of variables to store in the file */
+    size_t ngridcells;               /**< number of grid cells in aggdata */
+    unsigned int *varid;             /**< id numbers of the variables to store in the file
+                                          (a variable's id number is its index in the out_data array).
+                                          The order of the id numbers in the varid array
+                                          is the order in which the variables will be written. */
+    unsigned short int *aggtype;     /**< type of aggregation to use [shape=(nvars, )] */
+    alarm_struct agg_alarm;          /**< alaram for stream aggregation */
+    double ****aggdata;              /**< array of aggregated data values [shape=(ngridcells, nvars, nelem, nbins)] */
 } stream_struct;
 
 /******************************************************************************
@@ -512,7 +515,7 @@ typedef struct {
 } Error_struct;
 
 double air_density(double t, double p);
-void agg_stream_data(stream_struct *stream, double **out_data);
+void agg_stream_data(stream_struct *stream, dmy_struct *dmy_current, double ***out_data);
 double all_30_day_from_dmy(dmy_struct *dmy);
 double all_leap_from_dmy(dmy_struct *dmy);
 void alloc_aggdata(stream_struct *stream);
@@ -538,14 +541,14 @@ size_t count_n_outfiles(FILE *gp);
 size_t count_outfile_nvars(FILE *gp);
 void cmd_proc(int argc, char **argv, char *globalfilename);
 void compress_files(char string[], short int level);
-double **create_outdata(void);
-// this needs to be fixed
+double ***create_outdata(size_t ngridcells);
 stream_struct create_outstream(stream_struct *output_streams);
 void get_current_datetime(char *cdt);
 double date2num(double origin, dmy_struct *date, double tzoffset,
                 unsigned short int calendar, unsigned short int time_units);
 void dmy_all_30_day(double julian, dmy_struct *dmy);
 void dmy_all_leap(double julian, dmy_struct *dmy);
+bool dmy_equal(dmy_struct *a, dmy_struct *b);
 void dmy_julian_day(double julian, unsigned short int calendar,
                     dmy_struct *dmy);
 void dmy_no_leap_day(double julian, dmy_struct *dmy);
@@ -555,9 +558,8 @@ void display_current_settings(int);
 double fractional_day_from_dmy(dmy_struct *dmy);
 void free_all_vars(all_vars_struct *all_vars, int Nveg);
 void free_dmy(dmy_struct **dmy);
-void free_out_data(double **);
-void free_out_data_files(stream_file_struct **out_data_files);
-void free_out_data_streams(stream_struct **streams);
+void free_out_data(size_t ngridcells, double ***out_data);
+void free_streams(stream_struct **streams);
 void free_vegcon(veg_con_struct **veg_con);
 void generate_default_state(all_vars_struct *, soil_con_struct *,
                             veg_con_struct *);
@@ -620,8 +622,7 @@ void print_save_data(save_data_struct *save);
 void print_snow_data(snow_data_struct *snow);
 void print_soil_con(soil_con_struct *scon, size_t nlayers, size_t nnodes,
                     size_t nfrost, size_t nbands, size_t nzwt);
-void print_stream_file(stream_file_struct *sf, stream_struct *stream,
-                       out_metadata_struct *metadata);
+void print_stream_file(stream_struct *stream, out_metadata_struct *metadata);
 void print_veg_con(veg_con_struct *vcon, size_t nroots, char blowing, char lake,
                    char carbon, size_t ncanopy);
 void print_veg_lib(veg_lib_struct *vlib, char carbon);
@@ -629,14 +630,15 @@ void print_veg_var(veg_var_struct *vvar, size_t ncanopy);
 void print_version(char *);
 void print_usage(char *);
 double q_to_vp(double q, double p);
-void reset_stream(stream_struct *stream);
-void set_output_var(stream_struct *stream, stream_file_struct *out_data_file,
-                    char *varname, size_t varnum, char *format,
-                    unsigned short int type, double mult);
+bool raise_alarm(alarm_struct *alarm, dmy_struct *dmy_current);
+void reset_alarm(alarm_struct *alarm, dmy_struct *dmy_current);
+void reset_stream(stream_struct *stream, dmy_struct *dmy_current);
+void set_output_var(stream_struct *stream,  char *varname, size_t varnum,
+                    char *format, unsigned short int type, double mult,
+                    unsigned short int aggtype);
 unsigned int get_default_outvar_aggtype(unsigned int varid);
 void set_output_met_data_info();
-void setup_stream(stream_struct *stream, stream_file_struct *stream_file,
-                  size_t nvars, unsigned int nextagg);
+void setup_stream(stream_struct *stream, size_t nvars);
 void soil_moisture_from_water_table(soil_con_struct *soil_con, size_t nlayers);
 void sprint_dmy(char *str, dmy_struct *dmy);
 void str_from_calendar(unsigned short int calendar, char *calendar_str);
@@ -648,10 +650,11 @@ unsigned short int str_to_freq_flag(char freq[]);
 double str_to_out_mult(char multstr[]);
 unsigned short int str_to_out_type(char typestr[]);
 unsigned short int str_to_timeunits(char units_chars[]);
+double time_delta(dmy_struct *dmy_current, unsigned short int freq, int n);
 int update_step_vars(all_vars_struct *, veg_con_struct *, veg_hist_struct *);
 int invalid_date(unsigned short int calendar, dmy_struct *dmy);
 void validate_parameters(void);
-void validate_stream_settings(stream_file_struct *out_data_file);
+void validate_stream_settings(stream_struct *stream);
 char will_it_snow(double *t, double t_offset, double max_snow_temp,
                   double *prcp, size_t n);
 void zero_output_list(double **);

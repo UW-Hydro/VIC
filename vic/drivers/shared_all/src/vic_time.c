@@ -806,3 +806,84 @@ parse_nc_time_units(char               *nc_unit_chars,
 
     *units = str_to_timeunits(unit_chars);
 }
+
+
+/******************************************************************************
+ * @brief   This function calculates the time_delta in days from a frequency
+            and number of steps.
+ *****************************************************************************/
+double
+time_delta(dmy_struct        *dmy_current,
+           unsigned short int freq,
+           int                n)
+{
+    extern global_param_struct global_param;
+
+    double     td, a, b;
+    dmy_struct dmy_next;
+
+    // uniform timedeltas
+    if (freq == FREQ_NSECONDS) {
+        td = n / SEC_PER_DAY;
+    }
+    else if (freq == FREQ_NMINUTES) {
+        td = n / MIN_PER_DAY;
+    }
+    else if (freq == FREQ_NDAYS) {
+        td = n;
+    }
+    // non-uniform timedeltas
+    else {
+
+        if (n < 1) {
+            log_err("Negative time delta's are not implemented yet")
+        }
+
+        // copy dmy structure
+        dmy_next = *dmy_current;
+
+        if (freq == FREQ_NMONTHS) {
+            dmy_next.month += n;
+            if (dmy_next.month > MONTHS_PER_YEAR) {
+                dmy_next.month -= MONTHS_PER_YEAR;
+                dmy_next.year += 1;
+            }
+        }
+        else if (freq == FREQ_NYEARS) {
+            dmy_next.year += n;
+        }
+        else {
+            log_err("Unknown frequency found during time_delta computation");
+        }
+
+        // Check to make sure this is a valid time
+        if (invalid_date(global_param.calendar, &dmy_next)) {
+            log_err("Invalid date found during time_delta computation");
+        }
+
+        // Get ordinal representation of these times
+        a = date2num(global_param.time_origin_num, dmy_current, 0,
+                     global_param.calendar, TIME_UNITS_DAYS);
+        b = date2num(global_param.time_origin_num, &dmy_next, 0,
+                     global_param.calendar, TIME_UNITS_DAYS);
+        td = b - a;
+    }
+
+    return td;
+
+}
+
+/******************************************************************************
+ * @brief   Compare two dmy_struct objects and return true if they are equal
+ *****************************************************************************/
+bool
+dmy_equal(dmy_struct *a, dmy_struct *b)
+{
+    if ((a->year == b->year) &&
+        (a->month == b->month) &&
+        (a->day == b->day) &&
+        (a->dayseconds == b->dayseconds)) {
+        return true;
+    }
+    return false;
+}

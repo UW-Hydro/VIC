@@ -38,7 +38,7 @@ vic_image_run(dmy_struct *dmy_current)
     extern domain_struct       local_domain;
     extern global_param_struct global_param;
     extern lake_con_struct     lake_con;
-    extern out_data_struct   **out_data;
+    extern double           ***out_data;
     extern save_data_struct   *save_data;
     extern soil_con_struct    *soil_con;
     extern veg_con_struct    **veg_con;
@@ -61,7 +61,6 @@ vic_image_run(dmy_struct *dmy_current)
         vic_run(&(atmos[i]), &(all_vars[i]), dmy_current, &global_param,
                 &lake_con, &(soil_con[i]), veg_con[i], veg_lib[i]);
         put_data(&(all_vars[i]), &(atmos[i]), &(soil_con[i]), veg_con[i],
-                 veg_lib[i], &lake_con, out_data[i], &(save_data[i]),
-                 current);
+                 veg_lib[i], &lake_con, out_data[i], &(save_data[i]));
     }
 }

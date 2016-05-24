@@ -26,6 +26,9 @@
 
 #include <vic_driver_shared_all.h>
 
+/******************************************************************************
+ * @brief    Set output met data information
+ *****************************************************************************/
 void
 set_output_met_data_info()
 {
@@ -1480,24 +1483,30 @@ set_output_met_data_info()
 /******************************************************************************
  * @brief    This routine creates the list of output data.
  *****************************************************************************/
-double **
-create_outdata()
+double ***
+create_outdata(size_t ngridcells)
 {
     extern out_metadata_struct out_metadata[N_OUTVAR_TYPES];
 
     size_t                     i;
     size_t                     j;
-    double                   **out_data;
+    size_t                     k;
+    double                  ***out_data;
 
-    out_data = calloc(N_OUTVAR_TYPES, sizeof(*out_data));
 
-    // Allocate space for data
-    for (i = 0; i < N_OUTVAR_TYPES; i++) {
-        out_data[i] = calloc(out_metadata[i].nelem, sizeof(*(out_data[i])));
+    out_data = calloc(ngridcells, sizeof(*out_data));
 
-        // initialize data member
-        for (j = 0; j < out_metadata[i].nelem; j++) {
-            out_data[i][j] = 0;
+    for (i = 0; i < ngridcells; i++) {
+        out_data[i] = calloc(N_OUTVAR_TYPES, sizeof(*(out_data[i])));
+
+        // Allocate space for data
+        for (j = 0; j < N_OUTVAR_TYPES; j++) {
+            out_data[i][j] = calloc(out_metadata[j].nelem, sizeof(*(out_data[i][j])));
+
+            // initialize data member
+            for (k = 0; k < out_metadata[i].nelem; k++) {
+                out_data[i][j][k] = 0;
+            }
         }
     }
 
@@ -1509,49 +1518,49 @@ create_outdata()
  *****************************************************************************/
 void
 setup_stream(stream_struct      *stream,
-             stream_file_struct *stream_file,
-             size_t              nvars,
-             unsigned int        nextagg)
+             size_t              nvars)
 {
     size_t i;
 
     stream->nvars = nvars;
-    stream->nextagg = nextagg;
-    stream->counter = 0;
 
-    stream_file->file_format = UNSET_FILE_FORMAT;
-    stream_file->compress = false;
-    stream_file->output_steps_per_day = 1;
+    stream->agg_alarm.count = 0;
+    stream->agg_alarm.next = 1;
+    stream->agg_alarm.freq = FREQ_NSTEPS;
+    // TODO: set stream->agg_alarm.date
+
+    stream->file_format = UNSET_FILE_FORMAT;
+    stream->compress = false;
+    stream->output_steps_per_day = 1;
 
     // Allocate stream members of shape [nvars]
     stream->varid = calloc(nvars, sizeof(*(stream->varid)));
     if (stream->varid == NULL) {
-        log_err("Memory allocation error in setup_stream().");
+        log_err("Memory allocation error.");
     }
     stream->aggtype = calloc(nvars, sizeof(*(stream->aggtype)));
     if (stream->aggtype == NULL) {
-        log_err("Memory allocation error in setup_stream().");
+        log_err("Memory allocation error.");
     }
 
-    // Allocate stream_file members of shape [nvars]
-    stream_file->type = calloc(nvars, sizeof(*(stream_file->type)));
-    if (stream_file->type == NULL) {
-        log_err("Memory allocation error in setup_stream_file().");
-    }
-    stream_file->mult = calloc(nvars, sizeof(*(stream_file->mult)));
-    if (stream_file->mult == NULL) {
-        log_err("Memory allocation error in setup_stream_file().");
-    }
-    // Question: do we have to dynamically allocate the length of each string
-    stream_file->format = calloc(nvars, sizeof(*(stream_file->format)));
-    if (stream_file->format == NULL) {
+    // Allocate stream members of shape [nvars]
+    stream->type = calloc(nvars, sizeof(*(stream->type)));
+    if (stream->type == NULL) {
         log_err("Memory allocation error in setup_stream().");
     }
+    stream->mult = calloc(nvars, sizeof(*(stream->mult)));
+    if (stream->mult == NULL) {
+        log_err("Memory allocation error in setup_stream().");
+    }
+    // Question: do we have to dynamically allocate the length of each string
+    stream->format = calloc(nvars, sizeof(*(stream->format)));
+    if (stream->format == NULL) {
+        log_err("Memory allocation error.");
+    }
     for (i = 0; i < nvars; i++) {
-        stream_file->format[i] =
-            calloc(MAXSTRING, sizeof(*(stream_file->format[i])));
-        if (stream_file->format[i] == NULL) {
-            log_err("Memory allocation error in setup_stream().");
+        stream->format[i] = calloc(MAXSTRING, sizeof(*(stream->format[i])));
+        if (stream->format[i] == NULL) {
+            log_err("Memory allocation error.");
         }
     }
 }
@@ -1572,20 +1581,20 @@ alloc_aggdata(stream_struct *stream)
 
     stream->aggdata = calloc(stream->nvars, sizeof(*(stream->aggdata)));
     if (stream->aggdata == NULL) {
-        log_err("Memory allocation error in setup_stream().");
+        log_err("Memory allocation error.");
     }
     for (i = 0; i < stream->nvars; i++) {
         varid = stream->varid[i];
         stream->aggdata[i] = calloc(out_metadata[varid].nelem,
                                     sizeof(*(stream->aggdata[i])));
         if (stream->aggdata[i] == NULL) {
-            log_err("Memory allocation error in setup_stream().");
+            log_err("Memory allocation error.");
         }
         for (j = 0; j < out_metadata[varid].nelem; j++) {
             // TODO: Also allocate for nbins
             stream->aggdata[i][j] = calloc(1, sizeof(*(stream->aggdata[i][j])));
             if (stream->aggdata[i][j] == NULL) {
-                log_err("Memory allocation error in setup_stream().");
+                log_err("Memory allocation error.");
             }
         }
     }
@@ -1595,20 +1604,25 @@ alloc_aggdata(stream_struct *stream)
  * @brief   This routine resets an output stream
  *****************************************************************************/
 void
-reset_stream(stream_struct *stream)
+reset_stream(stream_struct *stream,
+             dmy_struct    *dmy_current)
 {
     extern out_metadata_struct out_metadata[N_OUTVAR_TYPES];
 
     size_t                     i;
     size_t                     j;
-    size_t                     v;
+    size_t                     k;
+    size_t                     varid;
 
-    stream->counter = 0;
+    reset_alarm(&(stream->agg_alarm),
+                dmy_current);
 
-    for (i = 0; i < stream->nvars; i++) {
-        v = stream->varid[i];
-        for (j = 0; j < out_metadata[v].nelem; j++) {
-            stream->aggdata[i][j][0] = 0.;
+    for (i = 0; i < stream->ngridcells; i++) {
+        for (j = 0; j < stream->nvars; j++) {
+            varid = stream->varid[j];
+            for (k = 0; k < out_metadata[varid].nelem; k++) {
+                stream->aggdata[i][j][k][0] = 0.;
+            }
         }
     }
 }
@@ -1720,12 +1734,12 @@ get_default_outvar_aggtype(unsigned int varid)
  *****************************************************************************/
 void
 set_output_var(stream_struct      *stream,
-               stream_file_struct *out_data_file,
                char               *varname,
                size_t              varnum,
                char               *format,
                unsigned short int  type,
-               double              mult)
+               double              mult,
+               unsigned short int  aggtype)
 {
     extern out_metadata_struct out_metadata[N_OUTVAR_TYPES];
 
@@ -1733,7 +1747,7 @@ set_output_var(stream_struct      *stream,
     int                        found = false;
 
     for (varid = 0; varid < N_OUTVAR_TYPES; varid++) {
-        if (strcmp(out_metadata[varid].long_name, varname) == 0) {
+        if (strcmp(out_metadata[varid].varname, varname) == 0) {
             found = true;
             break;
         }
@@ -1744,78 +1758,73 @@ set_output_var(stream_struct      *stream,
                 "listed in vic_driver_shared.h.", varname);
     }
 
-    // Set stream_file_struct members
+    // Set stream_struct members
     if (strcmp(format, "*") != 0) {
-        strcpy(out_data_file->format[varnum], format);
+        strcpy(stream->format[varnum], format);
     }
     else {
-        strcpy(out_data_file->format[varnum], "%.4f");
+        strcpy(stream->format[varnum], "%.4f");
     }
     if (type != OUT_TYPE_DEFAULT) {
-        out_data_file->type[varnum] = type;
+        stream->type[varnum] = type;
     }
     else {
-        out_data_file->type[varnum] = OUT_TYPE_FLOAT;
+        stream->type[varnum] = OUT_TYPE_FLOAT;
     }
     if (mult != OUT_MULT_DEFAULT) {
-        out_data_file->mult[varnum] = mult;
+        stream->mult[varnum] = mult;
     }
     else {
-        out_data_file->mult[varnum] = 1.;
+        stream->mult[varnum] = 1.;
     }
 
     // Set stream members
     stream->varid[varnum] = varid;
 
     // TODO: set aggtype
-    stream->aggtype[varnum] = get_default_outvar_aggtype(varid);
-}
-
-/******************************************************************************
- * @brief    This routine frees the memory in the out_data_files array.
- *****************************************************************************/
-void
-free_out_data_files(stream_file_struct **out_data_files)
-{
-    extern option_struct options;
-    size_t               i;
-
-    // free output
-    for (i = 0; i < options.Noutstreams; i++) {
-        free((char*) (*out_data_files)[i].type);
-        free((char*) (*out_data_files)[i].mult);
-        free((char*) (*out_data_files)[i].format);
+    if (aggtype != AGG_TYPE_DEFAULT){
+        stream->aggtype[varnum] = aggtype;
     }
-    free((char*) *out_data_files);
+    else {
+        stream->aggtype[varnum] = get_default_outvar_aggtype(varid);
+    }
 }
 
 /******************************************************************************
  * @brief    This routine frees the memory in the streams array.
  *****************************************************************************/
 void
-free_out_data_streams(stream_struct **streams)
+free_streams(stream_struct **streams)
 {
     extern option_struct       options;
     extern out_metadata_struct out_metadata[N_OUTVAR_TYPES];
 
-    size_t                     streamnum;
-    size_t                     i;
-    size_t                     j;
-    size_t                     varid;
+    size_t streamnum;
+    size_t i;
+    size_t j;
+    size_t k;
+    size_t varid;
 
     // free output
     for (streamnum = 0; streamnum < options.Noutstreams; streamnum++) {
         // Free aggdata first
-        for (i = 0; i < (*streams)[streamnum].nvars; i++) {
-            varid = (*streams)[streamnum].varid[i];
-            for (j = 0; j < out_metadata[varid].nelem; j++) {
+        for (i = 0; i < (*streams)[streamnum].ngridcells; i++) {
+            for (j = 0; j < (*streams)[streamnum].nvars; j++) {
+                varid = (*streams)[streamnum].varid[i];
+                for (k = 0; k < out_metadata[varid].nelem; k++) {
+                    free((char*) (*streams)[streamnum].aggdata[i][j][k]);
+                }
                 free((char*) (*streams)[streamnum].aggdata[i][j]);
             }
             free((char*) (*streams)[streamnum].aggdata[i]);
         }
         free((char*) (*streams)[streamnum].aggdata);
-        free((char*) (*streams)[streamnum].varid);
-        free((char*) (*streams)[streamnum].aggtype);
+        // free remaining arrays
+        free((char*) (*streams)[i].type);
+        free((char*) (*streams)[i].mult);
+        free((char*) (*streams)[i].format);
+        free((char*) (*streams)[i].varid);
+        free((char*) (*streams)[i].aggtype);
     }
     free((char*) *streams);
 }
@@ -1824,18 +1833,22 @@ free_out_data_streams(stream_struct **streams)
  * @brief    This routine frees the memory in the out_data array.
  *****************************************************************************/
 void
-free_out_data(double **out_data)
+free_out_data(size_t ngridcells, double ***out_data)
 {
     extern out_metadata_struct out_metadata[N_OUTVAR_TYPES];
 
-    size_t                     varid;
+    size_t i;
+    size_t j;
 
     if (out_data == NULL) {
         return;
     }
 
-    for (varid = 0; varid < N_OUTVAR_TYPES; varid++) {
-        free(out_data[varid]);
+    for (i = 0; i < ngridcells; i++) {
+        for (j = 0; j < N_OUTVAR_TYPES; j++) {
+            free(out_data[i][j]);
+        }
+        free(out_data[i]);
     }
 
     free((char*) out_data);
@@ -1845,32 +1858,32 @@ free_out_data(double **out_data)
  * @brief    Validate the streams settings.
  *****************************************************************************/
 void
-validate_stream_settings(stream_file_struct *out_data_file)
+validate_stream_settings(stream_struct *stream)
 {
     extern global_param_struct global_param;
     extern option_struct       options;
 
     // Validate the output step
-    if (out_data_file->output_steps_per_day == 0) {
-        out_data_file->output_steps_per_day = global_param.model_steps_per_day;
+    if (stream->output_steps_per_day == 0) {
+        stream->output_steps_per_day = global_param.model_steps_per_day;
     }
-    if (out_data_file->output_steps_per_day >
+    if (stream->output_steps_per_day >
         global_param.model_steps_per_day) {
         log_err("Invalid value for OUTPUT_STEPS_PER_DAY (%zu). "
                 "OUTPUT_STEPS_PER_DAY must be <= MODEL_STEPS_PER_DAY (%zu)",
-                out_data_file->output_steps_per_day,
+                stream->output_steps_per_day,
                 global_param.model_steps_per_day);
     }
     else if (global_param.model_steps_per_day %
-             out_data_file->output_steps_per_day != 0) {
+             stream->output_steps_per_day != 0) {
         log_err("Invalid value for OUTPUT_STEPS_PER_DAY (%zu). "
                 "MODEL_STEPS_PER_DAY (%zu) must be a multiple of "
                 "OUTPUT_STEPS_PER_DAY.",
-                out_data_file->output_steps_per_day,
+                stream->output_steps_per_day,
                 global_param.model_steps_per_day);
     }
-    else if (out_data_file->output_steps_per_day != 1 &&
-             out_data_file->output_steps_per_day <
+    else if (stream->output_steps_per_day != 1 &&
+             stream->output_steps_per_day <
              MIN_SUBDAILY_STEPS_PER_DAY) {
         log_err("The specified number of output steps per day "
                 "(%zu) > 1 and < the minimum number of subdaily steps per "
@@ -1879,7 +1892,7 @@ validate_stream_settings(stream_file_struct *out_data_file)
                 global_param.model_steps_per_day,
                 MIN_SUBDAILY_STEPS_PER_DAY, MIN_SUBDAILY_STEPS_PER_DAY);
     }
-    else if (out_data_file->output_steps_per_day >
+    else if (stream->output_steps_per_day >
              MAX_SUBDAILY_STEPS_PER_DAY) {
         log_err("The specified number of model steps per day "
                 "(%zu) > the the maximum number of subdaily steps per day "
@@ -1889,7 +1902,7 @@ validate_stream_settings(stream_file_struct *out_data_file)
                 MAX_SUBDAILY_STEPS_PER_DAY, MAX_SUBDAILY_STEPS_PER_DAY);
     }
     else {
-        out_data_file->out_dt = SEC_PER_DAY /
-                                (double) out_data_file->output_steps_per_day;
+        stream->out_dt = SEC_PER_DAY /
+                                (double) stream->output_steps_per_day;
     }
 }

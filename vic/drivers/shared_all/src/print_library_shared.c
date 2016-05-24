@@ -569,8 +569,7 @@ print_out_data(double             **out_data,
  * @brief    Print stream_file_struct.
  *****************************************************************************/
 void
-print_stream_file(stream_file_struct  *sf,
-                  stream_struct       *stream,
+print_stream_file(stream_struct       *stream,
                   out_metadata_struct *metadata)
 {
     size_t       i;
@@ -578,19 +577,40 @@ print_stream_file(stream_file_struct  *sf,
 
     fprintf(LOG_DEST, "stream_file_struct:\n");
 
-    fprintf(LOG_DEST, "\tprefix: %s\n", sf->prefix);
-    fprintf(LOG_DEST, "\tfilename: %s\n", sf->filename);
-    fprintf(LOG_DEST, "\tfh: %p\n", sf->fh);
+    fprintf(LOG_DEST, "\tprefix: %s\n", stream->prefix);
+    fprintf(LOG_DEST, "\tfilename: %s\n", stream->filename);
+    fprintf(LOG_DEST, "\tfh: %p\n", stream->fh);
     fprintf(LOG_DEST, "\tnvars: %zu\n", stream->nvars);
     fprintf(LOG_DEST, "\t# \tVARID \tVARNAME \tTYPE \tMULT \tFORMAT\n");
     for (i = 0; i < stream->nvars; i++) {
         varid = stream->varid[i];
         fprintf(LOG_DEST, "\t%zu \t%u \t%s \t%hu \t%f \t%s\n",
                 i, varid, metadata[varid].varname,
-                sf->type[i], sf->mult[i], sf->format[i]);
+                stream->type[i], stream->mult[i], stream->format[i]);
     }
+    // TODO: Add alarm and other new members of stream_struct
     fprintf(LOG_DEST, "\n");
 }
+
+/******************************************************************************
+ * @brief    Print stream_file_struct.
+ *****************************************************************************/
+void
+print_alarm(alarm_struct *alarm)
+{
+
+    fprintf(LOG_DEST, "alarm_struct:\n");
+    fprintf(LOG_DEST, "\tcount: %u\n", alarm->count);
+    fprintf(LOG_DEST, "\tnext: %d\n", alarm->next);
+    fprintf(LOG_DEST, "\tfreq: %u\n", alarm->freq);
+    fprintf(LOG_DEST, "\tn: %d\n", alarm->n);
+    fprintf(LOG_DEST, "\tdate: \n");
+    print_dmy(&(alarm->date));
+
+    fprintf(LOG_DEST, "\n");
+
+}
+
 
 /******************************************************************************
  * @brief    Print stream_file_struct.

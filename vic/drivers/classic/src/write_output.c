@@ -30,10 +30,8 @@
  * @brief    Write output data and convert units if necessary.
  *****************************************************************************/
 void
-write_output(stream_file_struct **out_data_files,
-             stream_struct      **streams,
-             dmy_struct          *dmy,
-             int                  rec)
+write_output(stream_struct **streams,
+             dmy_struct     *dmy)
 {
     extern option_struct options;
 
@@ -41,14 +39,10 @@ write_output(stream_file_struct **out_data_files,
 
     // Write data
     for (stream_idx = 0; stream_idx < options.Noutstreams; stream_idx++) {
-        if (rec >= (*out_data_files)[stream_idx].skipyear) {
-            if ((*streams)[stream_idx].counter ==
-                (*streams)[stream_idx].nextagg) {
-                write_data(&((*out_data_files)[stream_idx]),
-                           &((*streams)[stream_idx]),
-                           dmy, (*out_data_files)[stream_idx].out_dt);
-                reset_stream((&(*streams)[stream_idx]));
-            }
+        if (raise_alarm(&(*streams)[stream_idx].agg_alarm, dmy)) {
+            write_data(&((*streams)[stream_idx]),
+                       dmy, (*streams)[stream_idx].out_dt);
+            reset_stream((&(*streams)[stream_idx]), dmy);
         }
     }
 }

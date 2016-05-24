@@ -251,16 +251,11 @@ get_global_param(FILE *gp)
             }
             else if (strcasecmp("TFALLBACK", optstr) == 0) {
                 sscanf(cmdstr, "%*s %s", flgstr);
-                if (strcasecmp("TRUE", flgstr) == 0) {
-                    options.TFALLBACK = true;
-                }
-                else {
-                    options.TFALLBACK = false;
-                }
+                options.TFALLBACK = str_to_bool(flgstr);
             }
             else if (strcasecmp("SHARE_LAYER_MOIST", optstr) == 0) {
                 sscanf(cmdstr, "%*s %s", flgstr);
-                options.TFALLBACK = str_to_bool(flgstr);
+                options.SHARE_LAYER_MOIST = str_to_bool(flgstr);
             }
             else if (strcasecmp("CANOPY_LAYERS", optstr) == 0) {
                 sscanf(cmdstr, "%*s %zu", &options.Ncanopy);

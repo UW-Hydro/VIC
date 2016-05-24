@@ -42,7 +42,7 @@ double calc_netshort(double, int, double, double *);
 void check_files(filep_struct *, filenames_struct *);
 bool check_save_state_flag(dmy_struct *, size_t);
 FILE  *check_state_file(char *, size_t, size_t, int *);
-void close_files(filep_struct *filep, stream_file_struct **out_data_files);
+void close_files(filep_struct *filep, stream_struct **streams);
 void compute_cell_area(soil_con_struct *);
 void free_atmos(int nrecs, atmos_data_struct **atmos);
 void free_veg_hist(int nrecs, int nveg, veg_hist_struct ***veg_hist);
@@ -53,13 +53,11 @@ void get_global_param(FILE *);
 void init_output_list(double **, int, char *, int, double);
 void initialize_forcing_files(void);
 void make_in_and_outfiles(filep_struct *filep, filenames_struct *filenames,
-                          soil_con_struct *soil,
-                          stream_file_struct **out_data_files,
-                          stream_struct **streams, dmy_struct *dmy);
+                          soil_con_struct *soil, stream_struct **streams,
+                          dmy_struct *dmy);
 FILE *open_state_file(global_param_struct *, filenames_struct, size_t, size_t);
 void print_atmos_data(atmos_data_struct *atmos, size_t nr);
-void parse_output_info(FILE *gp, stream_struct **output_streams,
-                       stream_file_struct **out_data_files);
+void parse_output_info(FILE *gp, stream_struct **output_streams);
 void read_atmos_data(FILE *, global_param_struct, int, int, double **,
                      double ***);
 double **read_forcing_data(FILE **, global_param_struct, double ****);
@@ -70,19 +68,15 @@ void read_snowband(FILE *, soil_con_struct *);
 soil_con_struct read_soilparam(FILE *, char *, char *);
 veg_lib_struct *read_veglib(FILE *, size_t *);
 veg_con_struct *read_vegparam(FILE *, int, size_t);
-void set_output_defaults(stream_struct      **output_streams,
-                         stream_file_struct **out_data_files);
+void set_output_defaults(stream_struct **output_streams);
 void vic_force(atmos_data_struct *, dmy_struct *, FILE **, veg_con_struct *,
                veg_hist_struct **, soil_con_struct *);
 void vic_populate_model_state(all_vars_struct *, filep_struct, size_t,
                               soil_con_struct *, veg_con_struct *,
                               lake_con_struct);
-void write_data(stream_file_struct *out_data_files, stream_struct *streams,
-                dmy_struct *dmy, double dt);
-void write_header(stream_file_struct **out_data_files, stream_struct **streams,
-                  dmy_struct *dmy);
+void write_data(stream_struct *streams, dmy_struct *dmy, double dt);
+void write_header(stream_struct **streams, dmy_struct *dmy);
 void write_model_state(all_vars_struct *, int, int, filep_struct *,
                        soil_con_struct *);
-void write_output(stream_file_struct **out_data_files, stream_struct **streams,
-                  dmy_struct *dmy, int rec);
+void write_output(stream_struct **streams, dmy_struct *dmy);
 #endif

@@ -30,9 +30,8 @@
  * @brief    Write a header for all output files.
  *****************************************************************************/
 void
-write_header(stream_file_struct **out_data_files,
-             stream_struct      **streams,
-             dmy_struct          *dmy)
+write_header(stream_struct **streams,
+             dmy_struct     *dmy)
 {
     extern option_struct       options;
     extern global_param_struct global_param;
@@ -55,7 +54,7 @@ write_header(stream_file_struct **out_data_files,
 
     // Loop over output files
     for (stream_idx = 0; stream_idx < options.Noutstreams; stream_idx++) {
-        if ((*out_data_files)[stream_idx].file_format == BINARY) {
+        if ((*streams)[stream_idx].file_format == BINARY) {
             tmp_str = calloc(BINHEADERSIZE, sizeof(*tmp_str));
 
             // Binary header format:
@@ -117,7 +116,7 @@ write_header(stream_file_struct **out_data_files,
                        sizeof(float);                                        // month
             Nbytes2 += sizeof(char) + 3 * sizeof(char) + sizeof(char) +
                        sizeof(float);                                        // day
-            if ((*out_data_files)[stream_idx].out_dt < SEC_PER_DAY) {
+            if ((*streams)[stream_idx].out_dt < SEC_PER_DAY) {
                 Nbytes2 += sizeof(char) + 4 * sizeof(char) + sizeof(char) +
                            sizeof(float);                                      // sec
             }
@@ -154,48 +153,48 @@ write_header(stream_file_struct **out_data_files,
             // 4 instances of Identifier
             for (i = 0; i < 4; i++) {
                 fwrite(&Identifier, sizeof(unsigned short), 1,
-                       (*out_data_files)[stream_idx].fh);
+                       (*streams)[stream_idx].fh);
             }
 
             // Nbytes
             fwrite(&Nbytes, sizeof(unsigned short), 1,
-                   (*out_data_files)[stream_idx].fh);
+                   (*streams)[stream_idx].fh);
 
             // Nbytes1
             fwrite(&Nbytes1, sizeof(unsigned short), 1,
-                   (*out_data_files)[stream_idx].fh);
+                   (*streams)[stream_idx].fh);
 
             // nrecs
             fwrite(&(global_param.nrecs), sizeof(size_t), 1,
-                   (*out_data_files)[stream_idx].fh);
+                   (*streams)[stream_idx].fh);
 
             // dt
-            fwrite(&((*out_data_files)[stream_idx].out_dt), sizeof(double), 1,
-                   (*out_data_files)[stream_idx].fh);
+            fwrite(&((*streams)[stream_idx].out_dt), sizeof(double), 1,
+                   (*streams)[stream_idx].fh);
 
             // start date (year, month, day, sec)
             fwrite(&(dmy->year), sizeof(int), 1,
-                   (*out_data_files)[stream_idx].fh);
+                   (*streams)[stream_idx].fh);
             fwrite(&(dmy->month), sizeof(unsigned short int), 1,
-                   (*out_data_files)[stream_idx].fh);
+                   (*streams)[stream_idx].fh);
             fwrite(&(dmy->day), sizeof(unsigned short int), 1,
-                   (*out_data_files)[stream_idx].fh);
+                   (*streams)[stream_idx].fh);
             fwrite(&(dmy->dayseconds), sizeof(unsigned int), 1,
-                   (*out_data_files)[stream_idx].fh);
+                   (*streams)[stream_idx].fh);
 
             // nvars
             nvars = (*streams)[stream_idx].nvars;
-            if ((*out_data_files)[stream_idx].out_dt < SEC_PER_DAY) {
+            if ((*streams)[stream_idx].out_dt < SEC_PER_DAY) {
                 nvars += 4;
             }
             else {
                 nvars += 3;
             }
-            fwrite(&nvars, sizeof(size_t), 1, (*out_data_files)[stream_idx].fh);
+            fwrite(&nvars, sizeof(size_t), 1, (*streams)[stream_idx].fh);
 
             // Nbytes2
             fwrite(&Nbytes2, sizeof(unsigned short), 1,
-                   (*out_data_files)[stream_idx].fh);
+                   (*streams)[stream_idx].fh);
 
             // Date fields
             tmp_type = OUT_TYPE_INT;
@@ -204,48 +203,48 @@ write_header(stream_file_struct **out_data_files,
             // year
             strcpy(tmp_str, "YEAR");
             tmp_len = strlen(tmp_str);
-            fwrite(&tmp_len, sizeof(char), 1, (*out_data_files)[stream_idx].fh);
+            fwrite(&tmp_len, sizeof(char), 1, (*streams)[stream_idx].fh);
             fwrite(tmp_str, sizeof(char), tmp_len,
-                   (*out_data_files)[stream_idx].fh);
+                   (*streams)[stream_idx].fh);
             fwrite(&tmp_type, sizeof(char), 1,
-                   (*out_data_files)[stream_idx].fh);
+                   (*streams)[stream_idx].fh);
             fwrite(&tmp_mult, sizeof(float), 1,
-                   (*out_data_files)[stream_idx].fh);
+                   (*streams)[stream_idx].fh);
 
             // month
             strcpy(tmp_str, "MONTH");
             tmp_len = strlen(tmp_str);
-            fwrite(&tmp_len, sizeof(char), 1, (*out_data_files)[stream_idx].fh);
+            fwrite(&tmp_len, sizeof(char), 1, (*streams)[stream_idx].fh);
             fwrite(tmp_str, sizeof(char), tmp_len,
-                   (*out_data_files)[stream_idx].fh);
+                   (*streams)[stream_idx].fh);
             fwrite(&tmp_type, sizeof(char), 1,
-                   (*out_data_files)[stream_idx].fh);
+                   (*streams)[stream_idx].fh);
             fwrite(&tmp_mult, sizeof(float), 1,
-                   (*out_data_files)[stream_idx].fh);
+                   (*streams)[stream_idx].fh);
 
             // day
             strcpy(tmp_str, "DAY");
             tmp_len = strlen(tmp_str);
-            fwrite(&tmp_len, sizeof(char), 1, (*out_data_files)[stream_idx].fh);
+            fwrite(&tmp_len, sizeof(char), 1, (*streams)[stream_idx].fh);
             fwrite(tmp_str, sizeof(char), tmp_len,
-                   (*out_data_files)[stream_idx].fh);
+                   (*streams)[stream_idx].fh);
             fwrite(&tmp_type, sizeof(char), 1,
-                   (*out_data_files)[stream_idx].fh);
+                   (*streams)[stream_idx].fh);
             fwrite(&tmp_mult, sizeof(float), 1,
-                   (*out_data_files)[stream_idx].fh);
+                   (*streams)[stream_idx].fh);
 
-            if ((*out_data_files)[stream_idx].out_dt < SEC_PER_DAY) {
+            if ((*streams)[stream_idx].out_dt < SEC_PER_DAY) {
                 // sec
                 strcpy(tmp_str, "SEC");
                 tmp_len = strlen(tmp_str);
                 fwrite(&tmp_len, sizeof(char), 1,
-                       (*out_data_files)[stream_idx].fh);
+                       (*streams)[stream_idx].fh);
                 fwrite(tmp_str, sizeof(char), tmp_len,
-                       (*out_data_files)[stream_idx].fh);
+                       (*streams)[stream_idx].fh);
                 fwrite(&tmp_type, sizeof(char), 1,
-                       (*out_data_files)[stream_idx].fh);
+                       (*streams)[stream_idx].fh);
                 fwrite(&tmp_mult, sizeof(float), 1,
-                       (*out_data_files)[stream_idx].fh);
+                       (*streams)[stream_idx].fh);
             }
 
             // Loop over this output file's data variables
@@ -265,19 +264,19 @@ write_header(stream_file_struct **out_data_files,
                     }
                     tmp_len = strlen(tmp_str);
                     fwrite(&tmp_len, sizeof(char), 1,
-                           (*out_data_files)[stream_idx].fh);
+                           (*streams)[stream_idx].fh);
                     fwrite(tmp_str, sizeof(char), tmp_len,
-                           (*out_data_files)[stream_idx].fh);
-                    tmp_type = (*out_data_files)[stream_idx].type[var_idx];
+                           (*streams)[stream_idx].fh);
+                    tmp_type = (*streams)[stream_idx].type[var_idx];
                     fwrite(&tmp_type, sizeof(char), 1,
-                           (*out_data_files)[stream_idx].fh);
-                    tmp_mult = (*out_data_files)[stream_idx].mult[var_idx];
+                           (*streams)[stream_idx].fh);
+                    tmp_mult = (*streams)[stream_idx].mult[var_idx];
                     fwrite(&tmp_mult, sizeof(float), 1,
-                           (*out_data_files)[stream_idx].fh);
+                           (*streams)[stream_idx].fh);
                 }
             }
         }
-        else if ((*out_data_files)[stream_idx].file_format == ASCII) {
+        else if ((*streams)[stream_idx].file_format == ASCII) {
             // ASCII header format:
             //
             // # NRECS: (nrecs)
@@ -294,27 +293,27 @@ write_header(stream_file_struct **out_data_files,
 
             // Header part 1: Global attributes
             nvars = (*streams)[stream_idx].nvars;
-            if ((*out_data_files)[stream_idx].out_dt < SEC_PER_DAY) {
+            if ((*streams)[stream_idx].out_dt < SEC_PER_DAY) {
                 nvars += 4;
             }
             else {
                 nvars += 3;
             }
-            fprintf((*out_data_files)[stream_idx].fh, "# SIMULATION: %s\n",
-                    (*out_data_files)[stream_idx].prefix);
-            fprintf((*out_data_files)[stream_idx].fh, "# MODEL_VERSION: %s\n",
+            fprintf((*streams)[stream_idx].fh, "# SIMULATION: %s\n",
+                    (*streams)[stream_idx].prefix);
+            fprintf((*streams)[stream_idx].fh, "# MODEL_VERSION: %s\n",
                     SHORT_VERSION);
 
             // Header part 2: Variables
             // Write the date
-            if ((*out_data_files)[stream_idx].out_dt < SEC_PER_DAY) {
+            if ((*streams)[stream_idx].out_dt < SEC_PER_DAY) {
                 // Write year, month, day, and sec
-                fprintf((*out_data_files)[stream_idx].fh,
+                fprintf((*streams)[stream_idx].fh,
                         "YEAR\tMONTH\tDAY\tSEC\t");
             }
             else {
                 // Only write year, month, and day
-                fprintf((*out_data_files)[stream_idx].fh, "YEAR\tMONTH\tDAY\t");
+                fprintf((*streams)[stream_idx].fh, "YEAR\tMONTH\tDAY\t");
             }
 
             // Loop over this output file's data variables
@@ -326,17 +325,17 @@ write_header(stream_file_struct **out_data_files,
                      elem_idx < out_metadata[varid].nelem;
                      elem_idx++) {
                     if (!(var_idx == 0 && elem_idx == 0)) {
-                        fprintf((*out_data_files)[stream_idx].fh, "\t ");
+                        fprintf((*streams)[stream_idx].fh, "\t ");
                     }
-                    fprintf((*out_data_files)[stream_idx].fh, "%s",
+                    fprintf((*streams)[stream_idx].fh, "%s",
                             out_metadata[varid].varname);
                     if (out_metadata[varid].nelem > 1) {
-                        fprintf((*out_data_files)[stream_idx].fh, "_%d",
+                        fprintf((*streams)[stream_idx].fh, "_%d",
                                 elem_idx);
                     }
                 }
             }
-            fprintf((*out_data_files)[stream_idx].fh, "\n");
+            fprintf((*streams)[stream_idx].fh, "\n");
         }
         else {
             log_err("Unrecognized OUT_FORMAT option");

@@ -56,27 +56,27 @@ main(int   argc,
      char *argv[])
 {
     /** Variable Declarations **/
-    extern FILE        *LOG_DEST;
+    extern FILE       *LOG_DEST;
 
-    char                MODEL_DONE;
-    char                RUN_MODEL;
-    char                dmy_str[MAXSTRING];
-    size_t              rec;
-    size_t              Nveg_type;
-    int                 cellnum;
-    int                 startrec;
-    int                 ErrorFlag;
-    size_t              streamnum;
-    dmy_struct         *dmy;
-    atmos_data_struct  *atmos;
-    veg_hist_struct   **veg_hist;
-    veg_con_struct     *veg_con;
-    soil_con_struct     soil_con;
-    all_vars_struct     all_vars;
-    lake_con_struct     lake_con;
-    stream_struct      *streams = NULL;
-    double           ***out_data;  // [1, nvars, nelem]
-    save_data_struct    save_data;
+    char               MODEL_DONE;
+    char               RUN_MODEL;
+    char               dmy_str[MAXSTRING];
+    size_t             rec;
+    size_t             Nveg_type;
+    int                cellnum;
+    int                startrec;
+    int                ErrorFlag;
+    size_t             streamnum;
+    dmy_struct        *dmy;
+    atmos_data_struct *atmos;
+    veg_hist_struct  **veg_hist;
+    veg_con_struct    *veg_con;
+    soil_con_struct    soil_con;
+    all_vars_struct    all_vars;
+    lake_con_struct    lake_con;
+    stream_struct     *streams = NULL;
+    double          ***out_data;   // [1, nvars, nelem]
+    save_data_struct   save_data;
 
     // Initialize Log Destination
     initialize_log();
@@ -240,7 +240,8 @@ main(int   argc,
                 for (streamnum = 0;
                      streamnum < options.Noutstreams;
                      streamnum++) {
-                    agg_stream_data(&(streams[streamnum]), &(dmy[rec]), out_data);
+                    agg_stream_data(&(streams[streamnum]), &(dmy[rec]),
+                                    out_data);
                 }
 
                 // Write cell average values for current time step

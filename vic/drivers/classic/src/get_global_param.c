@@ -671,6 +671,7 @@ get_global_param(FILE *gp)
                 log_err("SKIPYEAR has been deprecated. To avoid writting output"
                         "to history files, set HIST_FREQ == FREQ_NEVER");
             }
+
             /***********************************
                Unrecognized Global Parameter Flag
             ***********************************/

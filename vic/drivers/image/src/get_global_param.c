@@ -137,7 +137,9 @@ get_global_param(FILE *gp)
                 sscanf(cmdstr, "%*s %s", flgstr);
                 options.QUICK_SOLVE = str_to_bool(flgstr);
             }
-            else if ((strcasecmp("NOFLUX", optstr) == 0) || (strcasecmp("NO_FLUX", optstr) == 0)) {
+            else if ((strcasecmp("NOFLUX",
+                                 optstr) == 0) ||
+                     (strcasecmp("NO_FLUX", optstr) == 0)) {
                 sscanf(cmdstr, "%*s %s", flgstr);
                 if (strcasecmp("TRUE", flgstr) == 0) {
                     options.NOFLUX = str_to_bool(flgstr);
@@ -276,14 +278,12 @@ get_global_param(FILE *gp)
                     log_err("Unknown RC_MODE option: %s", flgstr);
                 }
             }
-
             /*************************************
                Define log directory
             *************************************/
             else if (strcasecmp("LOG_DIR", optstr) == 0) {
                 sscanf(cmdstr, "%*s %s", filenames.log_path);
             }
-
             /*************************************
                Define state files
             *************************************/
@@ -332,7 +332,6 @@ get_global_param(FILE *gp)
                             "NETCDF3_64BIT_OFFSET, NETCDF4_CLASSIC, or NETCDF4.");
                 }
             }
-
             /*************************************
                Define forcing files
             *************************************/
@@ -364,7 +363,6 @@ get_global_param(FILE *gp)
             else if (strcasecmp("WIND_H", optstr) == 0) {
                 sscanf(cmdstr, "%*s %lf", &global_param.wind_h);
             }
-
             /*************************************
                Define parameter files
             *************************************/
@@ -513,14 +511,12 @@ get_global_param(FILE *gp)
                 sscanf(cmdstr, "%*s %s", flgstr);
                 options.LAKE_PROFILE = str_to_bool(flgstr);
             }
-
             /*************************************
                Define output files
             *************************************/
             else if (strcasecmp("RESULT_DIR", optstr) == 0) {
                 sscanf(cmdstr, "%*s %s", filenames.result_dir);
             }
-
             /*************************************
                Define output file contents
             *************************************/
@@ -551,7 +547,6 @@ get_global_param(FILE *gp)
                 log_err("Time-varying vegetation parameters not implemented "
                         "in image mode");
             }
-
             /*************************************
                Fail when deprecated options are used.
             *************************************/
@@ -637,7 +632,6 @@ get_global_param(FILE *gp)
                         "specific variables, directly specify them in the "
                         "global parameter file");
             }
-
             /*************************************
                Fail when classic driver specific options are used
             *************************************/
@@ -649,7 +643,6 @@ get_global_param(FILE *gp)
                 log_err("OUTPUT_FORCE is not a valid option for this driver.  "
                         "Update your global parameter file accordingly.");
             }
-
             /***********************************
                Unrecognized Global Parameter Flag
             ***********************************/

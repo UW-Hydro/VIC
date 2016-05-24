@@ -32,16 +32,17 @@
 void
 vic_write_output(dmy_struct *dmy)
 {
-    extern option_struct options;
-    extern stream_struct *output_streams;
+    extern option_struct   options;
+    extern stream_struct  *output_streams;
     extern nc_file_struct *nc_hist_files;
 
-    size_t               stream_idx;
+    size_t                 stream_idx;
 
     // Write data
     for (stream_idx = 0; stream_idx < options.Noutstreams; stream_idx++) {
         if (raise_alarm(&(output_streams[stream_idx].agg_alarm), dmy)) {
-            vic_write(&(output_streams[stream_idx]), &(nc_hist_files[stream_idx]), dmy);
+            vic_write(&(output_streams[stream_idx]),
+                      &(nc_hist_files[stream_idx]), dmy);
             reset_stream(&(output_streams[stream_idx]), dmy);
             // reset_nc_file(&(nc_hist_files[stream_idx]));
         }
@@ -116,7 +117,8 @@ vic_write(stream_struct  *stream,
             gather_put_nc_field_double(stream->filename, &(nc_hist_file->open),
                                        &(nc_hist_file->nc_id),
                                        nc_hist_file->d_fillvalue,
-                                       dimids, ndims, nc_hist_file->nc_vars[k].nc_var_name,
+                                       dimids, ndims,
+                                       nc_hist_file->nc_vars[k].nc_var_name,
                                        dstart, dcount, dvar);
             for (i = 0; i < local_domain.ncells_active; i++) {
                 dvar[i] = nc_hist_file->d_fillvalue;

@@ -30,9 +30,9 @@
  * @brief    Perform temporal aggregation on stream data
  *****************************************************************************/
 void
-agg_stream_data(stream_struct   *stream,
-                dmy_struct      *dmy_current,
-                double        ***out_data)
+agg_stream_data(stream_struct *stream,
+                dmy_struct    *dmy_current,
+                double      ***out_data)
 {
     extern out_metadata_struct out_metadata[N_OUTVAR_TYPES];
 
@@ -76,13 +76,15 @@ agg_stream_data(stream_struct   *stream,
             // Maximum over the period
             else if (stream->aggtype[j] == AGG_TYPE_MAX) {
                 for (k = 0; k < nelem; k++) {
-                    stream->aggdata[i][j][k][0] += min(stream->aggdata[i][j][k][0], out_data[i][varid][k]);
+                    stream->aggdata[i][j][k][0] +=
+                        min(stream->aggdata[i][j][k][0], out_data[i][varid][k]);
                 }
             }
             // Minimum over the period
             else if (stream->aggtype[j] == AGG_TYPE_MAX) {
                 for (k = 0; k < nelem; k++) {
-                    stream->aggdata[i][j][k][0] += max(stream->aggdata[i][j][k][0], out_data[i][varid][k]);
+                    stream->aggdata[i][j][k][0] +=
+                        max(stream->aggdata[i][j][k][0], out_data[i][varid][k]);
                 }
             }
             // Average over the period if counter is full

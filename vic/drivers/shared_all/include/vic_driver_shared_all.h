@@ -515,7 +515,8 @@ typedef struct {
 } Error_struct;
 
 double air_density(double t, double p);
-void agg_stream_data(stream_struct *stream, dmy_struct *dmy_current, double ***out_data);
+void agg_stream_data(stream_struct *stream, dmy_struct *dmy_current,
+                     double ***out_data);
 double all_30_day_from_dmy(dmy_struct *dmy);
 double all_leap_from_dmy(dmy_struct *dmy);
 void alloc_aggdata(stream_struct *stream);
@@ -633,7 +634,7 @@ double q_to_vp(double q, double p);
 bool raise_alarm(alarm_struct *alarm, dmy_struct *dmy_current);
 void reset_alarm(alarm_struct *alarm, dmy_struct *dmy_current);
 void reset_stream(stream_struct *stream, dmy_struct *dmy_current);
-void set_output_var(stream_struct *stream,  char *varname, size_t varnum,
+void set_output_var(stream_struct *stream, char *varname, size_t varnum,
                     char *format, unsigned short int type, double mult,
                     unsigned short int aggtype);
 unsigned int get_default_outvar_aggtype(unsigned int varid);

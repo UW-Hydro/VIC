@@ -1240,7 +1240,7 @@ set_output_met_data_info()
     strcpy(out_metadata[OUT_ADV_SENS_BAND].description,
            out_metadata[OUT_ADV_SENS].description);
 
-           strcpy(out_metadata[OUT_ADV_SENS].varname, "OUT_ADV_SENS");
+    strcpy(out_metadata[OUT_ADV_SENS].varname, "OUT_ADV_SENS");
     strcpy(out_metadata[OUT_ADV_SENS].long_name, "adv_sens");
     strcpy(out_metadata[OUT_ADV_SENS].standard_name,
            "net_sensible_heat_flux_to_snow_pack");
@@ -1501,7 +1501,8 @@ create_outdata(size_t ngridcells)
 
         // Allocate space for data
         for (j = 0; j < N_OUTVAR_TYPES; j++) {
-            out_data[i][j] = calloc(out_metadata[j].nelem, sizeof(*(out_data[i][j])));
+            out_data[i][j] =
+                calloc(out_metadata[j].nelem, sizeof(*(out_data[i][j])));
 
             // initialize data member
             for (k = 0; k < out_metadata[i].nelem; k++) {
@@ -1517,8 +1518,8 @@ create_outdata(size_t ngridcells)
  * @brief    This routine creates the list of output streams.
  *****************************************************************************/
 void
-setup_stream(stream_struct      *stream,
-             size_t              nvars)
+setup_stream(stream_struct *stream,
+             size_t         nvars)
 {
     size_t i;
 
@@ -1733,13 +1734,13 @@ get_default_outvar_aggtype(unsigned int varid)
  *           variable.
  *****************************************************************************/
 void
-set_output_var(stream_struct      *stream,
-               char               *varname,
-               size_t              varnum,
-               char               *format,
-               unsigned short int  type,
-               double              mult,
-               unsigned short int  aggtype)
+set_output_var(stream_struct     *stream,
+               char              *varname,
+               size_t             varnum,
+               char              *format,
+               unsigned short int type,
+               double             mult,
+               unsigned short int aggtype)
 {
     extern out_metadata_struct out_metadata[N_OUTVAR_TYPES];
 
@@ -1782,7 +1783,7 @@ set_output_var(stream_struct      *stream,
     stream->varid[varnum] = varid;
 
     // TODO: set aggtype
-    if (aggtype != AGG_TYPE_DEFAULT){
+    if (aggtype != AGG_TYPE_DEFAULT) {
         stream->aggtype[varnum] = aggtype;
     }
     else {
@@ -1799,11 +1800,11 @@ free_streams(stream_struct **streams)
     extern option_struct       options;
     extern out_metadata_struct out_metadata[N_OUTVAR_TYPES];
 
-    size_t streamnum;
-    size_t i;
-    size_t j;
-    size_t k;
-    size_t varid;
+    size_t                     streamnum;
+    size_t                     i;
+    size_t                     j;
+    size_t                     k;
+    size_t                     varid;
 
     // free output
     for (streamnum = 0; streamnum < options.Noutstreams; streamnum++) {
@@ -1833,12 +1834,13 @@ free_streams(stream_struct **streams)
  * @brief    This routine frees the memory in the out_data array.
  *****************************************************************************/
 void
-free_out_data(size_t ngridcells, double ***out_data)
+free_out_data(size_t    ngridcells,
+              double ***out_data)
 {
     extern out_metadata_struct out_metadata[N_OUTVAR_TYPES];
 
-    size_t i;
-    size_t j;
+    size_t                     i;
+    size_t                     j;
 
     if (out_data == NULL) {
         return;
@@ -1903,6 +1905,6 @@ validate_stream_settings(stream_struct *stream)
     }
     else {
         stream->out_dt = SEC_PER_DAY /
-                                (double) stream->output_steps_per_day;
+                         (double) stream->output_steps_per_day;
     }
 }

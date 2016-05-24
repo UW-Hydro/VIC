@@ -102,84 +102,139 @@ set_output_defaults(stream_struct **streams)
     // Variables in first file
     streamnum = 0;
     varnum = 0;
-    set_output_var(&((*streams)[streamnum]), "OUT_PREC", varnum++, "%.4f", OUT_TYPE_FLOAT, 1, AGG_TYPE_DEFAULT);
-    set_output_var(&((*streams)[streamnum]), "OUT_EVAP", varnum++, "%.4f", OUT_TYPE_FLOAT, 1, AGG_TYPE_DEFAULT);
-    set_output_var(&((*streams)[streamnum]), "OUT_RUNOFF", varnum++, "%.4f", OUT_TYPE_FLOAT, 1, AGG_TYPE_DEFAULT);
-    set_output_var(&((*streams)[streamnum]), "OUT_BASEFLOW", varnum++, "%.4f", OUT_TYPE_FLOAT, 1, AGG_TYPE_DEFAULT);
-    set_output_var(&((*streams)[streamnum]), "OUT_WDEW", varnum++, "%.4f", OUT_TYPE_FLOAT, 1, AGG_TYPE_DEFAULT);
-    set_output_var(&((*streams)[streamnum]), "OUT_SOIL_LIQ", varnum++, "%.4f", OUT_TYPE_FLOAT, 1, AGG_TYPE_DEFAULT);
+    set_output_var(&((*streams)[streamnum]), "OUT_PREC", varnum++, "%.4f",
+                   OUT_TYPE_FLOAT, 1, AGG_TYPE_DEFAULT);
+    set_output_var(&((*streams)[streamnum]), "OUT_EVAP", varnum++, "%.4f",
+                   OUT_TYPE_FLOAT, 1, AGG_TYPE_DEFAULT);
+    set_output_var(&((*streams)[streamnum]), "OUT_RUNOFF", varnum++, "%.4f",
+                   OUT_TYPE_FLOAT, 1, AGG_TYPE_DEFAULT);
+    set_output_var(&((*streams)[streamnum]), "OUT_BASEFLOW", varnum++, "%.4f",
+                   OUT_TYPE_FLOAT, 1, AGG_TYPE_DEFAULT);
+    set_output_var(&((*streams)[streamnum]), "OUT_WDEW", varnum++, "%.4f",
+                   OUT_TYPE_FLOAT, 1, AGG_TYPE_DEFAULT);
+    set_output_var(&((*streams)[streamnum]), "OUT_SOIL_LIQ", varnum++, "%.4f",
+                   OUT_TYPE_FLOAT, 1, AGG_TYPE_DEFAULT);
     if (options.FULL_ENERGY || options.FROZEN_SOIL) {
-        set_output_var(&((*streams)[streamnum]), "OUT_RAD_TEMP", varnum++, "%.4f", OUT_TYPE_FLOAT, 1, AGG_TYPE_DEFAULT);
+        set_output_var(&((*streams)[streamnum]), "OUT_RAD_TEMP", varnum++,
+                       "%.4f", OUT_TYPE_FLOAT, 1, AGG_TYPE_DEFAULT);
     }
-    set_output_var(&((*streams)[streamnum]), "OUT_SWNET", varnum++, "%.4f", OUT_TYPE_FLOAT, 1, AGG_TYPE_DEFAULT);
-    set_output_var(&((*streams)[streamnum]), "OUT_R_NET", varnum++, "%.4f", OUT_TYPE_FLOAT, 1, AGG_TYPE_DEFAULT);
+    set_output_var(&((*streams)[streamnum]), "OUT_SWNET", varnum++, "%.4f",
+                   OUT_TYPE_FLOAT, 1, AGG_TYPE_DEFAULT);
+    set_output_var(&((*streams)[streamnum]), "OUT_R_NET", varnum++, "%.4f",
+                   OUT_TYPE_FLOAT, 1, AGG_TYPE_DEFAULT);
     if (options.FULL_ENERGY || options.FROZEN_SOIL) {
-        set_output_var(&((*streams)[streamnum]), "OUT_LATENT", varnum++, "%.4f", OUT_TYPE_FLOAT, 1, AGG_TYPE_DEFAULT);
+        set_output_var(&((*streams)[streamnum]), "OUT_LATENT", varnum++, "%.4f",
+                       OUT_TYPE_FLOAT, 1, AGG_TYPE_DEFAULT);
     }
-    set_output_var(&((*streams)[streamnum]), "OUT_EVAP_CANOP", varnum++, "%.4f", OUT_TYPE_FLOAT, 1, AGG_TYPE_DEFAULT);
-    set_output_var(&((*streams)[streamnum]), "OUT_TRANSP_VEG", varnum++, "%.4f", OUT_TYPE_FLOAT, 1, AGG_TYPE_DEFAULT);
-    set_output_var(&((*streams)[streamnum]), "OUT_EVAP_BARE", varnum++, "%.4f", OUT_TYPE_FLOAT, 1, AGG_TYPE_DEFAULT);
-    set_output_var(&((*streams)[streamnum]), "OUT_SUB_CANOP", varnum++, "%.4f", OUT_TYPE_FLOAT, 1, AGG_TYPE_DEFAULT);
-    set_output_var(&((*streams)[streamnum]), "OUT_SUB_SNOW", varnum++, "%.4f", OUT_TYPE_FLOAT, 1, AGG_TYPE_DEFAULT);
+    set_output_var(&((*streams)[streamnum]), "OUT_EVAP_CANOP", varnum++, "%.4f",
+                   OUT_TYPE_FLOAT, 1, AGG_TYPE_DEFAULT);
+    set_output_var(&((*streams)[streamnum]), "OUT_TRANSP_VEG", varnum++, "%.4f",
+                   OUT_TYPE_FLOAT, 1, AGG_TYPE_DEFAULT);
+    set_output_var(&((*streams)[streamnum]), "OUT_EVAP_BARE", varnum++, "%.4f",
+                   OUT_TYPE_FLOAT, 1, AGG_TYPE_DEFAULT);
+    set_output_var(&((*streams)[streamnum]), "OUT_SUB_CANOP", varnum++, "%.4f",
+                   OUT_TYPE_FLOAT, 1, AGG_TYPE_DEFAULT);
+    set_output_var(&((*streams)[streamnum]), "OUT_SUB_SNOW", varnum++, "%.4f",
+                   OUT_TYPE_FLOAT, 1, AGG_TYPE_DEFAULT);
     if (options.FULL_ENERGY || options.FROZEN_SOIL) {
-        set_output_var(&((*streams)[streamnum]), "OUT_SENSIBLE", varnum++, "%.4f", OUT_TYPE_FLOAT, 1, AGG_TYPE_DEFAULT);
-        set_output_var(&((*streams)[streamnum]), "OUT_GRND_FLUX", varnum++, "%.4f", OUT_TYPE_FLOAT, 1, AGG_TYPE_DEFAULT);
-        set_output_var(&((*streams)[streamnum]), "OUT_DELTAH", varnum++, "%.4f", OUT_TYPE_FLOAT, 1, AGG_TYPE_DEFAULT);
-        set_output_var(&((*streams)[streamnum]), "OUT_FUSION", varnum++, "%.4f", OUT_TYPE_FLOAT, 1, AGG_TYPE_DEFAULT);
+        set_output_var(&((*streams)[streamnum]), "OUT_SENSIBLE", varnum++,
+                       "%.4f", OUT_TYPE_FLOAT, 1, AGG_TYPE_DEFAULT);
+        set_output_var(&((*streams)[streamnum]), "OUT_GRND_FLUX", varnum++,
+                       "%.4f", OUT_TYPE_FLOAT, 1, AGG_TYPE_DEFAULT);
+        set_output_var(&((*streams)[streamnum]), "OUT_DELTAH", varnum++, "%.4f",
+                       OUT_TYPE_FLOAT, 1, AGG_TYPE_DEFAULT);
+        set_output_var(&((*streams)[streamnum]), "OUT_FUSION", varnum++, "%.4f",
+                       OUT_TYPE_FLOAT, 1, AGG_TYPE_DEFAULT);
     }
-    set_output_var(&((*streams)[streamnum]), "OUT_AERO_RESIST", varnum++, "%.4f", OUT_TYPE_FLOAT, 1, AGG_TYPE_DEFAULT);
-    set_output_var(&((*streams)[streamnum]), "OUT_SURF_TEMP", varnum++, "%.4f", OUT_TYPE_FLOAT, 1, AGG_TYPE_DEFAULT);
-    set_output_var(&((*streams)[streamnum]), "OUT_ALBEDO", varnum++, "%.4f", OUT_TYPE_FLOAT, 1, AGG_TYPE_DEFAULT);
-    set_output_var(&((*streams)[streamnum]), "OUT_REL_HUMID", varnum++, "%.4f", OUT_TYPE_FLOAT, 1, AGG_TYPE_DEFAULT);
-    set_output_var(&((*streams)[streamnum]), "OUT_IN_LONG", varnum++, "%.4f", OUT_TYPE_FLOAT, 1, AGG_TYPE_DEFAULT);
-    set_output_var(&((*streams)[streamnum]), "OUT_AIR_TEMP", varnum++, "%.4f", OUT_TYPE_FLOAT, 1, AGG_TYPE_DEFAULT);
-    set_output_var(&((*streams)[streamnum]), "OUT_WIND", varnum++, "%.4f", OUT_TYPE_FLOAT, 1, AGG_TYPE_DEFAULT);
+    set_output_var(&((*streams)[streamnum]), "OUT_AERO_RESIST", varnum++,
+                   "%.4f", OUT_TYPE_FLOAT, 1, AGG_TYPE_DEFAULT);
+    set_output_var(&((*streams)[streamnum]), "OUT_SURF_TEMP", varnum++, "%.4f",
+                   OUT_TYPE_FLOAT, 1, AGG_TYPE_DEFAULT);
+    set_output_var(&((*streams)[streamnum]), "OUT_ALBEDO", varnum++, "%.4f",
+                   OUT_TYPE_FLOAT, 1, AGG_TYPE_DEFAULT);
+    set_output_var(&((*streams)[streamnum]), "OUT_REL_HUMID", varnum++, "%.4f",
+                   OUT_TYPE_FLOAT, 1, AGG_TYPE_DEFAULT);
+    set_output_var(&((*streams)[streamnum]), "OUT_IN_LONG", varnum++, "%.4f",
+                   OUT_TYPE_FLOAT, 1, AGG_TYPE_DEFAULT);
+    set_output_var(&((*streams)[streamnum]), "OUT_AIR_TEMP", varnum++, "%.4f",
+                   OUT_TYPE_FLOAT, 1, AGG_TYPE_DEFAULT);
+    set_output_var(&((*streams)[streamnum]), "OUT_WIND", varnum++, "%.4f",
+                   OUT_TYPE_FLOAT, 1, AGG_TYPE_DEFAULT);
 
     // Variables in second file
     streamnum++;
     varnum = 0;
-    set_output_var(&((*streams)[streamnum]), "OUT_SWE", varnum++, "%.4f", OUT_TYPE_FLOAT, 1, AGG_TYPE_DEFAULT);
-    set_output_var(&((*streams)[streamnum]), "OUT_SNOW_DEPTH", varnum++, "%.4f", OUT_TYPE_FLOAT, 1, AGG_TYPE_DEFAULT);
-    set_output_var(&((*streams)[streamnum]), "OUT_SNOW_CANOPY", varnum++, "%.4f", OUT_TYPE_FLOAT, 1, AGG_TYPE_DEFAULT);
-    set_output_var(&((*streams)[streamnum]), "OUT_SNOW_COVER", varnum++, "%.4f", OUT_TYPE_FLOAT, 1, AGG_TYPE_DEFAULT);
+    set_output_var(&((*streams)[streamnum]), "OUT_SWE", varnum++, "%.4f",
+                   OUT_TYPE_FLOAT, 1, AGG_TYPE_DEFAULT);
+    set_output_var(&((*streams)[streamnum]), "OUT_SNOW_DEPTH", varnum++, "%.4f",
+                   OUT_TYPE_FLOAT, 1, AGG_TYPE_DEFAULT);
+    set_output_var(&((*streams)[streamnum]), "OUT_SNOW_CANOPY", varnum++,
+                   "%.4f", OUT_TYPE_FLOAT, 1, AGG_TYPE_DEFAULT);
+    set_output_var(&((*streams)[streamnum]), "OUT_SNOW_COVER", varnum++, "%.4f",
+                   OUT_TYPE_FLOAT, 1, AGG_TYPE_DEFAULT);
     if (options.FULL_ENERGY || options.FROZEN_SOIL) {
-        set_output_var(&((*streams)[streamnum]), "OUT_ADVECTION", varnum++, "%.4f", OUT_TYPE_FLOAT, 1, AGG_TYPE_DEFAULT);
-        set_output_var(&((*streams)[streamnum]), "OUT_DELTACC", varnum++, "%.4f", OUT_TYPE_FLOAT, 1, AGG_TYPE_DEFAULT);
-        set_output_var(&((*streams)[streamnum]), "OUT_SNOW_FLUX", varnum++, "%.4f", OUT_TYPE_FLOAT, 1, AGG_TYPE_DEFAULT);
-        set_output_var(&((*streams)[streamnum]), "OUT_RFRZ_ENERGY", varnum++, "%.4f", OUT_TYPE_FLOAT, 1, AGG_TYPE_DEFAULT);
-        set_output_var(&((*streams)[streamnum]), "OUT_MELT_ENERGY", varnum++, "%.4f", OUT_TYPE_FLOAT, 1, AGG_TYPE_DEFAULT);
-        set_output_var(&((*streams)[streamnum]), "OUT_ADV_SENS", varnum++, "%.4f", OUT_TYPE_FLOAT, 1, AGG_TYPE_DEFAULT);
-        set_output_var(&((*streams)[streamnum]), "OUT_LATENT_SUB", varnum++, "%.4f", OUT_TYPE_FLOAT, 1, AGG_TYPE_DEFAULT);
-        set_output_var(&((*streams)[streamnum]), "OUT_SNOW_SURF_TEMP", varnum++, "%.4f", OUT_TYPE_FLOAT, 1, AGG_TYPE_DEFAULT);
-        set_output_var(&((*streams)[streamnum]), "OUT_SNOW_PACK_TEMP", varnum++, "%.4f", OUT_TYPE_FLOAT, 1, AGG_TYPE_DEFAULT);
-        set_output_var(&((*streams)[streamnum]), "OUT_SNOW_MELT", varnum++, "%.4f", OUT_TYPE_FLOAT, 1, AGG_TYPE_DEFAULT);
+        set_output_var(&((*streams)[streamnum]), "OUT_ADVECTION", varnum++,
+                       "%.4f", OUT_TYPE_FLOAT, 1, AGG_TYPE_DEFAULT);
+        set_output_var(&((*streams)[streamnum]), "OUT_DELTACC", varnum++,
+                       "%.4f", OUT_TYPE_FLOAT, 1, AGG_TYPE_DEFAULT);
+        set_output_var(&((*streams)[streamnum]), "OUT_SNOW_FLUX", varnum++,
+                       "%.4f", OUT_TYPE_FLOAT, 1, AGG_TYPE_DEFAULT);
+        set_output_var(&((*streams)[streamnum]), "OUT_RFRZ_ENERGY", varnum++,
+                       "%.4f", OUT_TYPE_FLOAT, 1, AGG_TYPE_DEFAULT);
+        set_output_var(&((*streams)[streamnum]), "OUT_MELT_ENERGY", varnum++,
+                       "%.4f", OUT_TYPE_FLOAT, 1, AGG_TYPE_DEFAULT);
+        set_output_var(&((*streams)[streamnum]), "OUT_ADV_SENS", varnum++,
+                       "%.4f", OUT_TYPE_FLOAT, 1, AGG_TYPE_DEFAULT);
+        set_output_var(&((*streams)[streamnum]), "OUT_LATENT_SUB", varnum++,
+                       "%.4f", OUT_TYPE_FLOAT, 1, AGG_TYPE_DEFAULT);
+        set_output_var(&((*streams)[streamnum]), "OUT_SNOW_SURF_TEMP", varnum++,
+                       "%.4f", OUT_TYPE_FLOAT, 1, AGG_TYPE_DEFAULT);
+        set_output_var(&((*streams)[streamnum]), "OUT_SNOW_PACK_TEMP", varnum++,
+                       "%.4f", OUT_TYPE_FLOAT, 1, AGG_TYPE_DEFAULT);
+        set_output_var(&((*streams)[streamnum]), "OUT_SNOW_MELT", varnum++,
+                       "%.4f", OUT_TYPE_FLOAT, 1, AGG_TYPE_DEFAULT);
     }
     if (options.BLOWING) {
-        set_output_var(&((*streams)[streamnum]), "OUT_SUB_BLOWING", varnum++, "%.4f", OUT_TYPE_FLOAT, 1, AGG_TYPE_DEFAULT);
-        set_output_var(&((*streams)[streamnum]), "OUT_SUB_SURFACE", varnum++, "%.4f", OUT_TYPE_FLOAT, 1, AGG_TYPE_DEFAULT);
-        set_output_var(&((*streams)[streamnum]), "OUT_SUB_SNOW", varnum++, "%.4f", OUT_TYPE_FLOAT, 1, AGG_TYPE_DEFAULT);
+        set_output_var(&((*streams)[streamnum]), "OUT_SUB_BLOWING", varnum++,
+                       "%.4f", OUT_TYPE_FLOAT, 1, AGG_TYPE_DEFAULT);
+        set_output_var(&((*streams)[streamnum]), "OUT_SUB_SURFACE", varnum++,
+                       "%.4f", OUT_TYPE_FLOAT, 1, AGG_TYPE_DEFAULT);
+        set_output_var(&((*streams)[streamnum]), "OUT_SUB_SNOW", varnum++,
+                       "%.4f", OUT_TYPE_FLOAT, 1, AGG_TYPE_DEFAULT);
     }
 
     // Variables in other files
     if (options.FROZEN_SOIL) {
         streamnum++;
         varnum = 0;
-        set_output_var(&((*streams)[streamnum]), "OUT_FDEPTH", varnum++, "%.4f", OUT_TYPE_FLOAT, 1, AGG_TYPE_DEFAULT);
-        set_output_var(&((*streams)[streamnum]), "OUT_TDEPTH", varnum++, "%.4f", OUT_TYPE_FLOAT, 1, AGG_TYPE_DEFAULT);
-        set_output_var(&((*streams)[streamnum]), "OUT_SOIL_MOIST", varnum++, "%.4f", OUT_TYPE_FLOAT, 1, AGG_TYPE_DEFAULT);
-        set_output_var(&((*streams)[streamnum]), "OUT_SURF_FROST_FRAC", varnum++, "%.4f", OUT_TYPE_FLOAT, 1, AGG_TYPE_DEFAULT);
+        set_output_var(&((*streams)[streamnum]), "OUT_FDEPTH", varnum++, "%.4f",
+                       OUT_TYPE_FLOAT, 1, AGG_TYPE_DEFAULT);
+        set_output_var(&((*streams)[streamnum]), "OUT_TDEPTH", varnum++, "%.4f",
+                       OUT_TYPE_FLOAT, 1, AGG_TYPE_DEFAULT);
+        set_output_var(&((*streams)[streamnum]), "OUT_SOIL_MOIST", varnum++,
+                       "%.4f", OUT_TYPE_FLOAT, 1, AGG_TYPE_DEFAULT);
+        set_output_var(&((*streams)[streamnum]), "OUT_SURF_FROST_FRAC",
+                       varnum++, "%.4f", OUT_TYPE_FLOAT, 1, AGG_TYPE_DEFAULT);
     }
 
     if (options.LAKES) {
         streamnum++;
         varnum = 0;
-        set_output_var(&((*streams)[streamnum]), "OUT_LAKE_ICE_TEMP", varnum++, "%.4f", OUT_TYPE_FLOAT, 1, AGG_TYPE_DEFAULT);
-        set_output_var(&((*streams)[streamnum]), "OUT_LAKE_ICE_HEIGHT", varnum++, "%.4f", OUT_TYPE_FLOAT, 1, AGG_TYPE_DEFAULT);
-        set_output_var(&((*streams)[streamnum]), "OUT_LAKE_ICE_FRACT", varnum++, "%.4f", OUT_TYPE_FLOAT, 1, AGG_TYPE_DEFAULT);
-        set_output_var(&((*streams)[streamnum]), "OUT_LAKE_DEPTH", varnum++, "%.4f", OUT_TYPE_FLOAT, 1, AGG_TYPE_DEFAULT);
-        set_output_var(&((*streams)[streamnum]), "OUT_LAKE_SURF_AREA", varnum++, "%.4f", OUT_TYPE_FLOAT, 1, AGG_TYPE_DEFAULT);
-        set_output_var(&((*streams)[streamnum]), "OUT_LAKE_VOLUME", varnum++, "%.4f", OUT_TYPE_FLOAT, 1, AGG_TYPE_DEFAULT);
-        set_output_var(&((*streams)[streamnum]), "OUT_LAKE_SURF_TEMP", varnum++, "%.4f", OUT_TYPE_FLOAT, 1, AGG_TYPE_DEFAULT);
-        set_output_var(&((*streams)[streamnum]), "OUT_LAKE_EVAP", varnum++, "%.4f", OUT_TYPE_FLOAT, 1, AGG_TYPE_DEFAULT);
+        set_output_var(&((*streams)[streamnum]), "OUT_LAKE_ICE_TEMP", varnum++,
+                       "%.4f", OUT_TYPE_FLOAT, 1, AGG_TYPE_DEFAULT);
+        set_output_var(&((*streams)[streamnum]), "OUT_LAKE_ICE_HEIGHT",
+                       varnum++, "%.4f", OUT_TYPE_FLOAT, 1, AGG_TYPE_DEFAULT);
+        set_output_var(&((*streams)[streamnum]), "OUT_LAKE_ICE_FRACT", varnum++,
+                       "%.4f", OUT_TYPE_FLOAT, 1, AGG_TYPE_DEFAULT);
+        set_output_var(&((*streams)[streamnum]), "OUT_LAKE_DEPTH", varnum++,
+                       "%.4f", OUT_TYPE_FLOAT, 1, AGG_TYPE_DEFAULT);
+        set_output_var(&((*streams)[streamnum]), "OUT_LAKE_SURF_AREA", varnum++,
+                       "%.4f", OUT_TYPE_FLOAT, 1, AGG_TYPE_DEFAULT);
+        set_output_var(&((*streams)[streamnum]), "OUT_LAKE_VOLUME", varnum++,
+                       "%.4f", OUT_TYPE_FLOAT, 1, AGG_TYPE_DEFAULT);
+        set_output_var(&((*streams)[streamnum]), "OUT_LAKE_SURF_TEMP", varnum++,
+                       "%.4f", OUT_TYPE_FLOAT, 1, AGG_TYPE_DEFAULT);
+        set_output_var(&((*streams)[streamnum]), "OUT_LAKE_EVAP", varnum++,
+                       "%.4f", OUT_TYPE_FLOAT, 1, AGG_TYPE_DEFAULT);
     }
 }

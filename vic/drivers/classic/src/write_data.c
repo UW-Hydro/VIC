@@ -30,9 +30,9 @@
  * @brief    write all variables to output files.
  *****************************************************************************/
 void
-write_data(stream_struct      *stream,
-           dmy_struct         *dmy,
-           double              dt)
+write_data(stream_struct *stream,
+           dmy_struct    *dmy,
+           double         dt)
 {
     extern option_struct       options;
     extern out_metadata_struct out_metadata[N_OUTVAR_TYPES];

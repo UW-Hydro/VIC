@@ -111,7 +111,8 @@ vic_alloc(void)
     }
 
     // allocate memory for output streams structure
-    output_streams = malloc(local_domain.ncells_active * sizeof(*output_streams));
+    output_streams =
+        malloc(local_domain.ncells_active * sizeof(*output_streams));
     if (output_streams == NULL) {
         log_err("Memory allocation error in vic_alloc().");
     }

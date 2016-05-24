@@ -33,16 +33,16 @@
 void
 vic_init_output(dmy_struct *dmy_current)
 {
-    extern option_struct options;
-    extern domain_struct local_domain;
-    extern filep_struct  filep;
-    extern MPI_Comm      MPI_COMM_VIC;
-    extern int           mpi_rank;
-    extern double     ***out_data;
+    extern option_struct   options;
+    extern domain_struct   local_domain;
+    extern filep_struct    filep;
+    extern MPI_Comm        MPI_COMM_VIC;
+    extern int             mpi_rank;
+    extern double       ***out_data;
     extern stream_struct **output_streams;
     extern nc_file_struct *nc_hist_files;
 
-    size_t               i;
+    size_t                 i;
 
     // initialize the output data structures
     set_output_met_data_info();
@@ -55,14 +55,15 @@ vic_init_output(dmy_struct *dmy_current)
     }
 
     // for (i = 0; i < options.Noutstreams; i++) {
-    //     status = MPI_Bcast(&(output_streams[i]), 1, mpi_stream_struct_type, 0, MPI_COMM_VIC);
-    //     if (status != MPI_SUCCESS) {
-    //         log_err("MPI error in vic_init_output(): %d\n", status);
-    //     }
+    // status = MPI_Bcast(&(output_streams[i]), 1, mpi_stream_struct_type, 0, MPI_COMM_VIC);
+    // if (status != MPI_SUCCESS) {
+    // log_err("MPI error in vic_init_output(): %d\n", status);
+    // }
     // }
 
     // allocation of output structures
-    output_streams = calloc(local_domain.ncells_active, sizeof(*output_streams));
+    output_streams =
+        calloc(local_domain.ncells_active, sizeof(*output_streams));
     if (output_streams == NULL) {
         log_err("Memory allocation error in vic_init_output().");
     }
@@ -77,7 +78,8 @@ vic_init_output(dmy_struct *dmy_current)
 
         for (i = 0; i < options.Noutstreams; i++) {
             // open the netcdf history file
-            initialize_history_file(&(nc_hist_files[i]), &(*output_streams[i]), dmy_current);
+            initialize_history_file(&(nc_hist_files[i]), &(*output_streams[i]),
+                                    dmy_current);
         }
     }
 }
@@ -86,9 +88,9 @@ vic_init_output(dmy_struct *dmy_current)
  * @brief    Initialize history files
  *****************************************************************************/
 void
-initialize_history_file(nc_file_struct     *nc,
-                        stream_struct      *stream,
-                        dmy_struct        *dmy_current)
+initialize_history_file(nc_file_struct *nc,
+                        stream_struct  *stream,
+                        dmy_struct     *dmy_current)
 {
     extern filenames_struct    filenames;
     extern domain_struct       global_domain;
@@ -121,7 +123,8 @@ initialize_history_file(nc_file_struct     *nc,
     // Convention that goes like this:
     // If FREQ_NDAYS -- filename = result_dir/prefix.YYYY-MM-DD.nc
     if (stream->agg_alarm.freq == FREQ_NDAYS) {
-        sprintf(stream->filename, "%s/%s.%04d-%02d-%02d.nc", filenames.result_dir,
+        sprintf(stream->filename, "%s/%s.%04d-%02d-%02d.nc",
+                filenames.result_dir,
                 stream->prefix, dmy_current->year, dmy_current->month,
                 dmy_current->day);
     }
@@ -137,7 +140,8 @@ initialize_history_file(nc_file_struct     *nc,
     }
     // For all other cases -- filename = result_dir/prefix.YYYY-MM-DD-SSSSS.nc
     else {
-        sprintf(stream->filename, "%s/%s.%04d-%02d-%02d-%05u.nc", filenames.result_dir,
+        sprintf(stream->filename, "%s/%s.%04d-%02d-%02d-%05u.nc",
+                filenames.result_dir,
                 stream->prefix, dmy_current->year, dmy_current->month,
                 dmy_current->day, dmy_current->dayseconds);
     }
@@ -145,7 +149,9 @@ initialize_history_file(nc_file_struct     *nc,
     initialize_nc_file(nc, stream->nvars, stream->varid);
 
     // open the netcdf file
-    status = nc_create(stream->filename, get_nc_mode(stream->file_format), &(nc->nc_id));
+    status =
+        nc_create(stream->filename, get_nc_mode(stream->file_format),
+                  &(nc->nc_id));
     if (status != NC_NOERR) {
         log_err("Error creating %s", stream->filename);
     }
@@ -308,7 +314,8 @@ initialize_history_file(nc_file_struct     *nc,
     }
 
     // define the netcdf variable latitude
-    status = nc_def_var(nc->nc_id, global_domain.info.lat_var, NC_DOUBLE, ndims, dimids, &(lat_var_id));
+    status = nc_def_var(nc->nc_id, global_domain.info.lat_var, NC_DOUBLE, ndims,
+                        dimids, &(lat_var_id));
     if (status != NC_NOERR) {
         log_err("Error defining lat variable in %s", stream->filename);
     }

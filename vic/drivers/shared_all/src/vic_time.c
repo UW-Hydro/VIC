@@ -807,7 +807,6 @@ parse_nc_time_units(char               *nc_unit_chars,
     *units = str_to_timeunits(unit_chars);
 }
 
-
 /******************************************************************************
  * @brief   This function calculates the time_delta in days from a frequency
             and number of steps.
@@ -819,8 +818,8 @@ time_delta(dmy_struct        *dmy_current,
 {
     extern global_param_struct global_param;
 
-    double     td, a, b;
-    dmy_struct dmy_next;
+    double                     td, a, b;
+    dmy_struct                 dmy_next;
 
     // uniform timedeltas
     if (freq == FREQ_NSECONDS) {
@@ -834,7 +833,6 @@ time_delta(dmy_struct        *dmy_current,
     }
     // non-uniform timedeltas
     else {
-
         if (n < 1) {
             log_err("Negative time delta's are not implemented yet")
         }
@@ -870,14 +868,14 @@ time_delta(dmy_struct        *dmy_current,
     }
 
     return td;
-
 }
 
 /******************************************************************************
  * @brief   Compare two dmy_struct objects and return true if they are equal
  *****************************************************************************/
 bool
-dmy_equal(dmy_struct *a, dmy_struct *b)
+dmy_equal(dmy_struct *a,
+          dmy_struct *b)
 {
     if ((a->year == b->year) &&
         (a->month == b->month) &&

@@ -52,7 +52,9 @@ reset_alarm(alarm_struct *alarm,
         ;  // Do nothing, already set
     }
     else {
-        alarm->next = global_param.model_steps_per_day * time_delta(dmy_current, alarm->freq, alarm->n);
+        alarm->next = global_param.model_steps_per_day * time_delta(dmy_current,
+                                                                    alarm->freq,
+                                                                    alarm->n);
     }
 }
 
@@ -63,7 +65,6 @@ bool
 raise_alarm(alarm_struct *alarm,
             dmy_struct   *dmy_current)
 {
-
     if ((int) alarm->count == alarm->next) {
         return true;
     }

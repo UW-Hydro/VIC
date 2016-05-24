@@ -598,7 +598,6 @@ print_stream_file(stream_struct       *stream,
 void
 print_alarm(alarm_struct *alarm)
 {
-
     fprintf(LOG_DEST, "alarm_struct:\n");
     fprintf(LOG_DEST, "\tcount: %u\n", alarm->count);
     fprintf(LOG_DEST, "\tnext: %d\n", alarm->next);
@@ -608,9 +607,7 @@ print_alarm(alarm_struct *alarm)
     print_dmy(&(alarm->date));
 
     fprintf(LOG_DEST, "\n");
-
 }
-
 
 /******************************************************************************
  * @brief    Print stream_file_struct.

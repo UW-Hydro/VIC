@@ -139,7 +139,8 @@ parse_output_info(FILE           *gp,
                     strcpy(format, "");
                     strcpy(typestr, "");
                     strcpy(multstr, "");
-                    sscanf(cmdstr, "%*s %s %s %s %s %s", varname, format, typestr,
+                    sscanf(cmdstr, "%*s %s %s %s %s %s", varname, format,
+                           typestr,
                            multstr, aggstr);
                     if (strcasecmp("", format) == 0) {
                         strcpy(format, "*");
@@ -165,7 +166,9 @@ parse_output_info(FILE           *gp,
     }
     fclose(gp);
 
-    for (streamnum = 0; streamnum < (short int) options.Noutstreams; streamnum++) {
+    for (streamnum = 0;
+         streamnum < (short int) options.Noutstreams;
+         streamnum++) {
         // Validate the streams
         validate_stream_settings(&((*streams)[streamnum]));
 

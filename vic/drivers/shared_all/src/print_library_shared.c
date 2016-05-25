@@ -569,8 +569,8 @@ print_out_data(double             **out_data,
  * @brief    Print stream_file_struct.
  *****************************************************************************/
 void
-print_stream_file(stream_struct       *stream,
-                  out_metadata_struct *metadata)
+print_stream(stream_struct       *stream,
+             out_metadata_struct *metadata)
 {
     size_t       i;
     unsigned int varid;
@@ -580,15 +580,22 @@ print_stream_file(stream_struct       *stream,
     fprintf(LOG_DEST, "\tprefix: %s\n", stream->prefix);
     fprintf(LOG_DEST, "\tfilename: %s\n", stream->filename);
     fprintf(LOG_DEST, "\tfh: %p\n", stream->fh);
+    fprintf(LOG_DEST, "\tfile_format: %hu\n", stream->file_format);
     fprintf(LOG_DEST, "\tnvars: %zu\n", stream->nvars);
-    fprintf(LOG_DEST, "\t# \tVARID \tVARNAME \tTYPE \tMULT \tFORMAT\n");
+    fprintf(LOG_DEST, "\tngridcells: %zu\n", stream->ngridcells);
+    fprintf(LOG_DEST, "\tagg_alarm:\n    ");
+    print_alarm(&(stream->agg_alarm));
+    fprintf(LOG_DEST, "\t# \tVARID        \tVARNAME \tTYPE \tMULT \tFORMAT        \tAGGTYPE\n");
     for (i = 0; i < stream->nvars; i++) {
         varid = stream->varid[i];
-        fprintf(LOG_DEST, "\t%zu \t%u \t%s \t%hu \t%f \t%s\n",
+        fprintf(LOG_DEST, "\t%zu \t%u \t%20s \t%hu \t%f \t%10s \t%hu\n",
                 i, varid, metadata[varid].varname,
-                stream->type[i], stream->mult[i], stream->format[i]);
+                stream->type[i], stream->mult[i], stream->format[i],
+                stream->aggtype[i]);
     }
-    // TODO: Add alarm and other new members of stream_struct
+    fprintf(LOG_DEST, "\taggdata shape: (%zu, %zu, nelem, 1)\n",
+            stream->ngridcells, stream->nvars);
+
     fprintf(LOG_DEST, "\n");
 }
 
@@ -603,7 +610,7 @@ print_alarm(alarm_struct *alarm)
     fprintf(LOG_DEST, "\tnext: %d\n", alarm->next);
     fprintf(LOG_DEST, "\tfreq: %u\n", alarm->freq);
     fprintf(LOG_DEST, "\tn: %d\n", alarm->n);
-    fprintf(LOG_DEST, "\tdate: \n");
+    fprintf(LOG_DEST, "\tdate: \n    ");
     print_dmy(&(alarm->date));
 
     fprintf(LOG_DEST, "\n");

@@ -254,6 +254,18 @@ str_to_freq_flag(char freq[])
 }
 
 /******************************************************************************
+ * @brief    Convert string version of frequency flags to enum value
+ *****************************************************************************/
+void
+str_to_ascii_format(char *format)
+{
+    if ((strcasecmp("", format) == 0) || (strcasecmp("*", format) == 0)) {
+        strcpy(format, OUT_ASCII_FORMAT_DEFAULT);
+    }
+    // else do nothing
+}
+
+/******************************************************************************
  * @brief  Parse chars of calendar and return calendar integer
  * @return enum integer representing calendar
  *****************************************************************************/
@@ -317,6 +329,9 @@ str_to_timeunits(char units_chars[])
     }
 }
 
+/******************************************************************************
+ * @brief  Convert enum time units to string
+ *****************************************************************************/
 void
 str_from_time_units(unsigned short int time_units,
                     char              *unit_str)

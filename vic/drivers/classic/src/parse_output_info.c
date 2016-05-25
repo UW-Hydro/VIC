@@ -188,15 +188,17 @@ parse_output_info(FILE           *gp,
                     strcpy(typestr, "");
                     strcpy(multstr, "");
                     found = sscanf(cmdstr, "%*s %s %s %s %s %s", varname,
-                                   format,
-                                   typestr, multstr, aggstr);
+                                   format, typestr, multstr, aggstr);
                     if (!found) {
                         log_err("OUTVAR specified but no variable was listed");
                     }
+                    // interpret string options, set defaults if necessary
+                    str_to_ascii_format(format);
                     agg_type = str_to_agg_type(aggstr);
                     type = str_to_out_type(typestr);
                     mult = str_to_out_mult(multstr);
 
+                    // Add OUTVAR to stream
                     set_output_var(streams[streamnum], varname, outvarnum,
                                    format, type, mult, agg_type);
                     outvarnum++;

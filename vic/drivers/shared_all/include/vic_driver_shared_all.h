@@ -599,6 +599,7 @@ void parse_nc_time_units(char *nc_unit_chars, unsigned short int *units,
 void put_data(all_vars_struct *, atmos_data_struct *, soil_con_struct *,
               veg_con_struct *, veg_lib_struct *veg_lib, lake_con_struct *,
               double **out_data, save_data_struct *);
+void print_alarm(alarm_struct *alarm);
 void print_cell_data(cell_data_struct *cell, size_t nlayers, size_t nfrost);
 void print_dmy(dmy_struct *dmy);
 void print_energy_bal(energy_bal_struct *eb, size_t nnodes, size_t nfronts);
@@ -622,7 +623,7 @@ void print_save_data(save_data_struct *save);
 void print_snow_data(snow_data_struct *snow);
 void print_soil_con(soil_con_struct *scon, size_t nlayers, size_t nnodes,
                     size_t nfrost, size_t nbands, size_t nzwt);
-void print_stream_file(stream_struct *stream, out_metadata_struct *metadata);
+void print_stream(stream_struct *stream, out_metadata_struct *metadata);
 void print_veg_con(veg_con_struct *vcon, size_t nroots, char blowing, char lake,
                    char carbon, size_t ncanopy);
 void print_veg_lib(veg_lib_struct *vlib, char carbon);
@@ -646,6 +647,7 @@ void sprint_dmy(char *str, dmy_struct *dmy);
 void str_from_calendar(unsigned short int calendar, char *calendar_str);
 void str_from_time_units(unsigned short int time_units, char *unit_str);
 unsigned short int str_to_agg_type(char aggstr[]);
+void str_to_ascii_format(char *format);
 bool str_to_bool(char str[]);
 unsigned short int str_to_calendar(char *cal_chars);
 unsigned short int str_to_freq_flag(char freq[]);

@@ -242,7 +242,7 @@ The following options describe the settings for each output stream:
 | Name        | Type      | Units             | Description                                                                        |
 |------------ |---------  |---------------    |----------------------------------------------------------------------------------- |
 | OUTFILE\*   | string    | prefix            | Information about this output file: <br>Prefix of the output file (to which the lat and lon will be appended3) <br> This should be specified once for each output file. [Click here for more information.](OutputFormatting.md) |
-| OUTFREQ     | string <br> [integer/string]   | frequency <br> count | Describes aggregation frequency for output stream.  Valid options for frequency are: NEVER, NSTEPS, NSECONDS, NMINUTES, NHOURS, NDAYS, NMONTHS, NYEARS, DATE, END. Count may be an positive integer or a string with date format YYYY-MM-DD[-SSSSS] in the case of DATE. <br> Default `frequency` is `NDAYS`. Default `count` is 1. |
+| AGGFREQ     | string <br> [integer/string]   | frequency <br> count | Describes aggregation frequency for output stream.  Valid options for frequency are: NEVER, NSTEPS, NSECONDS, NMINUTES, NHOURS, NDAYS, NMONTHS, NYEARS, DATE, END. Count may be an positive integer or a string with date format YYYY-MM-DD[-SSSSS] in the case of DATE. <br> Default `frequency` is `NDAYS`. Default `count` is 1. |
 | COMPRESS    | string/integer | TRUE, FALSE, or lvl | if TRUE or > 0 compress input and output files when done (uses `gzip`), if an integer [1-9] is supplied, it is used to set the`gzip` compression level |
 | OUT_FORMAT  | string    | BINARY OR ASCII   | If BINARY write output files in binary (default is ASCII).                                                                                                                                  |
 | OUTVAR\*    | <br> string <br> string <br> string <br> integer <br> string <br> | <br> name <br> format <br> type <br> multiplier <br> aggtype <br> | Information about this output variable:<br>Name (must match a name listed in vic_driver_shared_all.h) <br> Output format (C fprintf-style format code) (only valid with OUT_FORMAT=ASCII) <br>Data type (one of: OUT_TYPE_DEFAULT, OUT_TYPE_CHAR, OUT_TYPE_SINT, OUT_TYPE_USINT, OUT_TYPE_INT, OUT_TYPE_FLOAT,OUT_TYPE_DOUBLE) <br> Multiplier - number to multiply the data with in order to recover the original values (only valid with OUT_FORMAT=BINARY) <br> Aggregation method - temporal aggregation method to use (one of: AGG_TYPE_DEFAULT, AGG_TYPE_AVG, AGG_TYPE_BEG, AGG_TYPE_END, AGG_TYPE_MAX, AGG_TYPE_MIN, AGG_TYPE_SUM) <br> <br> This should be specified once for each output variable. [Click here for more information.](OutputFormatting.md)|
@@ -457,7 +457,7 @@ RESULT_DIR      (put the result directory path here)    # Results directory path
 # Format:
 #
 #   OUTFILE       <prefix>
-#   OUTFREQ       <freq>            <value>
+#   AGGFREQ       <freq>            <value>
 #   COMPRESS      <compress>
 #   OUT_FORMAT    <file_format>
 #   OUTVAR        <varname>       [ <format>       [ <type>  [ <multiplier>   [ <aggtype>]]]]

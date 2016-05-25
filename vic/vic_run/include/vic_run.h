@@ -144,14 +144,14 @@ double ErrorIcePackEnergyBalance(double Tsurf, ...);
 double ErrorPrintIcePackEnergyBalance(double, va_list);
 int ErrorPrintSnowPackEnergyBalance(double, va_list);
 int ErrorSnowPackEnergyBalance(double Tsurf, ...);
-void estimate_frost_temperature_and_depth(double tmpT[MAX_LAYERS][MAX_NODES][MAX_FROST_AREAS + 1], double tmpZ[MAX_LAYERS][MAX_NODES], double *, double *, double *, double *, double, size_t,
-                                          size_t);
-int estimate_layer_ice_content(layer_data_struct *,
-                               double tmpT[MAX_LAYERS][MAX_NODES][MAX_FROST_AREAS + 1], double tmpZ[MAX_LAYERS][MAX_NODES], double *, double *, double *, double *, double *, size_t, size_t,
-                               char);
-int estimate_layer_temperature(layer_data_struct *,
-                               double tmpT[MAX_LAYERS][MAX_NODES][MAX_FROST_AREAS + 1], double tmpZ[MAX_LAYERS][MAX_NODES], double *, double *, size_t,
-                               size_t);
+void estimate_frost_temperature_and_depth(double ***, double **, double *,
+                                          double *, double *, double *,
+                                          double, size_t, size_t);
+int estimate_layer_ice_content(layer_data_struct *, double ***, double **,
+                               double *, double *, double *, double *, double *,
+                               size_t, size_t, char);
+int estimate_layer_temperature(layer_data_struct *, double ***, double **,
+                               double *, double *, size_t, size_t);
 int estimate_layer_temperature_quick_flux(layer_data_struct *, double *, double,
                                           double, double, double);
 int estimate_layer_ice_content_quick_flux(layer_data_struct *, double *,
@@ -164,6 +164,8 @@ void fda_heat_eqn(double *, double *, int, int, ...);
 void fdjac3(double *, double *, double *, double *, double *, void (*vecfunc)(
                 double *, double *, int, int, ...), int);
 void find_0_degree_fronts(energy_bal_struct *, double *, double *, int);
+void free_2d_double(size_t *shape, double **array);
+void free_3d_double(size_t *shape, double ***array);
 double func_atmos_energy_bal(double, va_list);
 double func_atmos_moist_bal(double, va_list);
 double func_canopy_energy_bal(double, va_list);
@@ -199,6 +201,8 @@ void latsens(double, double, double, double, double, double, double, double,
              double *, double *, double);
 double linear_interp(double, double, double, double, double);
 double lkdrag(double, double, double, double, double);
+void malloc_2d_double(size_t *shape, double ***array);
+void malloc_3d_double(size_t *shape, double ****array);
 void MassRelease(double *, double *, double *, double *);
 double maximum_unfrozen_water(double, double, double, double);
 double new_snow_density(double);

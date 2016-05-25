@@ -46,13 +46,20 @@ compute_derived_state_vars(all_vars_struct *all_vars,
     size_t                     veg;
     size_t                     lidx;
     size_t                     band;
+    size_t                     tmpTshape[] = {
+        MAX_LAYERS, MAX_NODES,
+        MAX_FROST_AREAS + 1
+    };
+    size_t                     tmpZshape[] = {
+        MAX_LAYERS, MAX_NODES
+    };
     int                        ErrorFlag;
     double                     Cv;
     double                     moist[MAX_VEG][MAX_BANDS][MAX_LAYERS];
     double                     dt_thresh;
     double                     tmp_runoff;
-    double                     tmpT[MAX_LAYERS][MAX_NODES][MAX_FROST_AREAS + 1];
-    double                     tmpZ[MAX_LAYERS][MAX_NODES];
+    double                  ***tmpT;
+    double                   **tmpZ;
 
     cell_data_struct         **cell;
     energy_bal_struct        **energy;
@@ -62,6 +69,10 @@ compute_derived_state_vars(all_vars_struct *all_vars,
     energy = all_vars->energy;
     snow = all_vars->snow;
     Nveg = veg_con[0].vegetat_type_num;
+
+    // allocate memory for tmpT and tmpZ
+    malloc_3d_double(tmpTshape, &tmpT);
+    malloc_2d_double(tmpZshape, &tmpZ);
 
     /******************************************
        Compute derived soil layer vars
@@ -238,4 +249,7 @@ compute_derived_state_vars(all_vars_struct *all_vars,
             }
         }
     }
+    // free memory for tmpT and tmpZ
+    free_3d_double(tmpTshape, tmpT);
+    free_2d_double(tmpZshape, tmpZ);
 }

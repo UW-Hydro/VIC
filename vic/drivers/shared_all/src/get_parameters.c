@@ -332,6 +332,9 @@ get_parameters(FILE *paramfile)
             else if (strcasecmp("SNOW_DENS_DMLIMIT", optstr) == 0) {
                 sscanf(cmdstr, "%*s %lf", &param.SNOW_DENS_DMLIMIT);
             }
+            else if (strcasecmp("SNOW_DENS_DMLIMIT_FACTOR", optstr) == 0) {
+                sscanf(cmdstr, "%*s %lf", &param.SNOW_DENS_DMLIMIT_FACTOR);
+            }
             else if (strcasecmp("SNOW_DENS_MAX_CHANGE", optstr) == 0) {
                 sscanf(cmdstr, "%*s %lf", &param.SNOW_DENS_MAX_CHANGE);
             }
@@ -344,6 +347,18 @@ get_parameters(FILE *paramfile)
             else if (strcasecmp("SNOW_DENS_C2", optstr) == 0) {
                 sscanf(cmdstr, "%*s %lf", &param.SNOW_DENS_C2);
             }
+            else if (strcasecmp("SNOW_DENS_C3", optstr) == 0) {
+                sscanf(cmdstr, "%*s %lf", &param.SNOW_DENS_C3);
+            }
+            else if (strcasecmp("SNOW_DENS_C3_CONST", optstr) == 0) {
+                sscanf(cmdstr, "%*s %lf", &param.SNOW_DENS_C3_CONST);
+            }
+            else if (strcasecmp("SNOW_DENS_C4", optstr) == 0) {
+                sscanf(cmdstr, "%*s %lf", &param.SNOW_DENS_C4);
+            }
+            else if (strcasecmp("SNOW_DENS_C4WET", optstr) == 0) {
+                sscanf(cmdstr, "%*s %lf", &param.SNOW_DENS_C4WET);
+            }
             else if (strcasecmp("SNOW_DENS_C5", optstr) == 0) {
                 sscanf(cmdstr, "%*s %lf", &param.SNOW_DENS_C5);
             }
@@ -352,6 +367,24 @@ get_parameters(FILE *paramfile)
             }
             else if (strcasecmp("SNOW_DENS_F", optstr) == 0) {
                 sscanf(cmdstr, "%*s %lf", &param.SNOW_DENS_F);
+            }
+            else if (strcasecmp("SNOW_DENS_EXP", optstr) == 0) {
+                sscanf(cmdstr, "%*s %lf", &param.SNOW_DENS_EXP);
+            }
+            else if (strcasecmp("SNOW_DENS_DENOM", optstr) == 0) {
+                sscanf(cmdstr, "%*s %lf", &param.SNOW_DENS_DENOM);
+            }
+            else if (strcasecmp("SNOW_NEW_SNT_C1", optstr) == 0) {
+                sscanf(cmdstr, "%*s %lf", &param.SNOW_NEW_SNT_C1);
+            }
+            else if (strcasecmp("SNOW_NEW_SNT_C2", optstr) == 0) {
+                sscanf(cmdstr, "%*s %lf", &param.SNOW_NEW_SNT_C2);
+            }
+            else if (strcasecmp("SNOW_NEW_SNT_C3", optstr) == 0) {
+                sscanf(cmdstr, "%*s %lf", &param.SNOW_NEW_SNT_C3);
+            }
+            else if (strcasecmp("SNOW_NEW_BRAS_DENOM", optstr) == 0) {
+                sscanf(cmdstr, "%*s %lf", &param.SNOW_NEW_BRAS_DENOM);
             }
             else if (strcasecmp("SNOW_MIN_SWQ_EB_THRES", optstr) == 0) {
                 sscanf(cmdstr, "%*s %lf", &param.SNOW_MIN_SWQ_EB_THRES);

@@ -15,6 +15,7 @@ STARTDAY	01 	# day model simulation starts
 ENDYEAR 	2000	# year model simulation ends
 ENDMONTH	12	# month model simulation ends
 ENDDAY		31	# day model simulation ends
+CALENDAR    PROLEPTIC_GREGORIAN
 
 # LOG_DIR (put the log directory path here)    # Log directory.  Default log output to stderr
 

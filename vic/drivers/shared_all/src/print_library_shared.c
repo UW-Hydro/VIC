@@ -1143,6 +1143,11 @@ print_veg_lib(veg_lib_struct *vlib,
         fprintf(LOG_DEST, "\t%.2f", vlib->albedo[i]);
     }
     fprintf(LOG_DEST, "\n");
+    fprintf(LOG_DEST, "\tfcanopy        :");
+    for (i = 0; i < MONTHS_PER_YEAR; i++) {
+        fprintf(LOG_DEST, "\t%.2f", vlib->fcanopy[i]);
+    }
+    fprintf(LOG_DEST, "\n");
     fprintf(LOG_DEST, "\tdisplacement  :");
     for (i = 0; i < MONTHS_PER_YEAR; i++) {
         fprintf(LOG_DEST, "\t%.2f", vlib->displacement[i]);

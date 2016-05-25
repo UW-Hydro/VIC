@@ -32,7 +32,6 @@
 void
 vic_image_finalize(void)
 {
-
     extern dmy_struct *dmy;
 
     // free data structures specific to to image driver

@@ -74,6 +74,13 @@ count_outfile_nvars(FILE *gp)
             if (strcasecmp("OUTVAR", optstr) == 0) {
                 nvars++;
             }
+            else if ((strcasecmp("AGGFREQ",
+                                 optstr) == 0) ||
+                     (strcasecmp("COMPRESS",
+                                 optstr) == 0) ||
+                     (strcasecmp("OUT_FORMAT", optstr) == 0)) {
+                ;  // Do nothing for these options
+            }
             // else we're done with this file so break out of loop
             else {
                 break;
@@ -135,7 +142,7 @@ count_n_outfiles(FILE *gp)
 unsigned short int
 str_to_agg_type(char aggstr[])
 {
-    if (strcasecmp("", aggstr) == 0) {
+    if ((strcasecmp("", aggstr) == 0) || (strcasecmp("*", aggstr) == 0)) {
         return AGG_TYPE_DEFAULT;
     }
     else {
@@ -169,7 +176,7 @@ str_to_agg_type(char aggstr[])
 unsigned short int
 str_to_out_type(char typestr[])
 {
-    if (strcasecmp("", typestr) == 0) {
+    if ((strcasecmp("", typestr) == 0) || (strcasecmp("*", typestr) == 0)) {
         return OUT_TYPE_DEFAULT;
     }
     else {
@@ -197,7 +204,7 @@ str_to_out_type(char typestr[])
 double
 str_to_out_mult(char multstr[])
 {
-    if (strcasecmp("", multstr) == 0) {
+    if ((strcasecmp("", multstr) == 0) || (strcasecmp("*", multstr) == 0)) {
         return OUT_MULT_DEFAULT;
     }
     else {
@@ -399,4 +406,25 @@ cell_method_from_agg_type(unsigned short int aggtype,
     else {
         return false;
     }
+}
+
+/******************************************************************************
+ * @brief  convert a string representation of a date/time to a dmy_struct
+ *****************************************************************************/
+void
+strpdmy(const char *s,
+        const char *format,
+        dmy_struct *dmy)
+{
+    struct tm t;
+
+    if (strptime(s, format, &t) != NULL) {
+        log_err("Error while parsing date/time string");
+    }
+
+    dmy->year = t.tm_year + 1900;
+    dmy->month = t.tm_mon;
+    dmy->day = t.tm_mday;
+    dmy->dayseconds = t.tm_hour * SEC_PER_HOUR + t.tm_min * SEC_PER_MIN +
+                      t.tm_sec;
 }

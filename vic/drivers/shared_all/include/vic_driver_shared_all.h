@@ -441,6 +441,7 @@ typedef struct {
     unsigned int freq;   /**< enum value to describing alarm frequency */
     int n;               /**< variable that provides additional information with respect to alarm_freq */
     dmy_struct date;     /**< date structure for when alarm_freq == FREQ_DATE */
+    bool is_subdaily;    /**< flag denoting if alarm will be raised more than once per day */
 } alarm_struct;
 
 /******************************************************************************
@@ -452,8 +453,6 @@ typedef struct {
     FILE *fh;                        /**< filehandle */
     unsigned short int file_format;  /**< output file format */
     short int compress;              /**< Compress output files in stream*/
-    size_t output_steps_per_day;     /**< Number of output timesteps per day */
-    double out_dt;                   /**< output timestep in seconds */
     unsigned short int *type;        /**< type, when written to a binary file;
                                           OUT_TYPE_USINT  = unsigned short int
                                           OUT_TYPE_SINT   = short int
@@ -638,8 +637,10 @@ void set_output_var(stream_struct *stream, char *varname, size_t varnum,
                     char *format, unsigned short int type, double mult,
                     unsigned short int aggtype);
 unsigned int get_default_outvar_aggtype(unsigned int varid);
+void set_alarm(dmy_struct *dmy_current, unsigned int freq, void*value,
+               alarm_struct *alarm);
 void set_output_met_data_info();
-void setup_stream(stream_struct *stream, size_t nvars);
+void setup_stream(stream_struct *stream, size_t nvars, size_t ngridcells);
 void soil_moisture_from_water_table(soil_con_struct *soil_con, size_t nlayers);
 void sprint_dmy(char *str, dmy_struct *dmy);
 void str_from_calendar(unsigned short int calendar, char *calendar_str);
@@ -651,6 +652,7 @@ unsigned short int str_to_freq_flag(char freq[]);
 double str_to_out_mult(char multstr[]);
 unsigned short int str_to_out_type(char typestr[]);
 unsigned short int str_to_timeunits(char units_chars[]);
+void strpdmy(const char *s, const char *format, dmy_struct *dmy);
 double time_delta(dmy_struct *dmy_current, unsigned short int freq, int n);
 int update_step_vars(all_vars_struct *, veg_con_struct *, veg_hist_struct *);
 int invalid_date(unsigned short int calendar, dmy_struct *dmy);

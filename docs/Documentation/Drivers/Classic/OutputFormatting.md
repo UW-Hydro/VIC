@@ -38,11 +38,13 @@ you can specify either NONE of these, or ALL of these.  If these
 are omitted, the default values will be used.
 
 _format_ = (for ascii output files) `fprintf` format string, e.g.
+
   - `%.4f` = floating point with 4 decimal places
   - `%.7e` = scientific notation w/ 7 decimal places
   - `*` = use the default format for this variable
 
 _type_ = (for `BINARY` output files) data type code. Must be one of:
+
   - `OUT_TYPE_DOUBLE` = double-precision floating point
   - `OUT_TYPE_FLOAT` = single-precision floating point
   - `OUT_TYPE_INT` = integer
@@ -54,7 +56,15 @@ _type_ = (for `BINARY` output files) data type code. Must be one of:
 _multiplier_ = (for `BINARY` output files) factor to multiply the data by before writing, to increase precision compared to not using the multiplier.
   - `*` = use the default multiplier for this variable
 
-_aggtype_ =
+_aggtype_ = Aggregation method to use for temporal aggregation. Valid options for aggtype are:
+
+  - `AGG_TYPE_DEFAULT` = default aggregation type for variable
+  - `AGG_TYPE_AVG` = average over aggregation window
+  - `AGG_TYPE_BEG` = beginning of aggregation window
+  - `AGG_TYPE_END` = end of aggregation window
+  - `AGG_TYPE_MAX` = maximum in aggregation window
+  - `AGG_TYPE_MIN` = minimum in aggregation window
+  - `AGG_TYPE_SUM` = sum over aggregation window
 
 Here's an example. To specify 2 output files, named `wbal` and `ebal`, and containing water balance and energy balance terms, respectively, you could do something like this:
 
@@ -103,7 +113,7 @@ Since variables like SOIL_MOIST have 1 value per soil layer, these variables wil
 
 **Snow band output:**
 
-To specify writing the values of variables in each snow band, append "BAND" to the variable name (this only works for some variables - see the list in vic_driver_shared_all.h). If you specify these variables, the value of the variable in each band will be written, one band per column. For example, for a cell having 2 snow bands:
+To specify writing the values of variables in each snow band, append "BAND" to the variable name (this only works for some variables - see the list in `vic_driver_shared_all.h`). If you specify these variables, the value of the variable in each band will be written, one band per column. For example, for a cell having 2 snow bands:
 
 ```
 OUTVAR	OUT_SWE_BAND
@@ -116,7 +126,7 @@ will result in an output file containing:
 
 ## Specifying Output Time Step
 
-VIC can now aggregate the output variables to a user-defined output interval, via the `OUTFREQ` setting in the [global parameter file](GlobalParam.md). When  `OUTFREQ` is set, it describes aggregation frequency for an output stream. Valid options for frequency are: FREQ_NEVER, FREQ_NSTEPS, FREQ_NSECONDS, FREQ_NMINUTES, FREQ_NHOURS, FREQ_NDAYS, FREQ_NMONTHS, FREQ_NYEARS, FREQ_DATE, FREQ_END. Count may be an positive integer or a string with date format YYYY-MM-DD[-SSSSS] in the case of FREQ_DATE. Default `frequency` is `FREQ_NDAYS`. Default `count` is 1.
+VIC can now aggregate the output variables to a user-defined output interval, via the `OUTFREQ` setting in the [global parameter file](GlobalParam.md). When  `OUTFREQ` is set, it describes aggregation frequency for an output stream. Valid options for frequency are: NEVER, NSTEPS, NSECONDS, NMINUTES, NHOURS, NDAYS, NMONTHS, NYEARS, DATE, END. Count may be an positive integer or a string with date format YYYY-MM-DD[-SSSSS] in the case of DATE. Default `frequency` is `NDAYS`. Default `count` is 1.
 
 ## Optional Output File Headers
 

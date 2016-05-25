@@ -32,7 +32,8 @@
              These can be overridden by the user in the global control file.
  *****************************************************************************/
 void
-set_output_defaults(stream_struct **streams)
+set_output_defaults(stream_struct **streams,
+                    dmy_struct     *dmy_current)
 {
     extern option_struct       options;
     extern global_param_struct global_param;
@@ -40,9 +41,10 @@ set_output_defaults(stream_struct **streams)
     size_t                     streamnum;
     size_t                     varnum;
     size_t                     nvars;
-    unsigned int               nextagg;
+    alarm_struct               default_alarm;
+    int                        default_freq_n = 1;
 
-    nextagg = global_param.model_steps_per_day;
+    set_alarm(dmy_current, FREQ_NDAYS, &default_freq_n, &default_alarm);
 
     // Output files
     options.Noutstreams = 2;
@@ -65,7 +67,8 @@ set_output_defaults(stream_struct **streams)
     else {
         nvars = 20;
     }
-    setup_stream(&((*streams)[streamnum]), nvars);
+    setup_stream(&((*streams)[streamnum]), nvars, 1);
+    (*streams)[streamnum].agg_alarm = default_alarm;
     strcpy((*streams)[streamnum].prefix, "fluxes");
     (*streams)[streamnum].file_format = ASCII;
 
@@ -79,7 +82,8 @@ set_output_defaults(stream_struct **streams)
     if (options.BLOWING) {
         nvars += 3;
     }
-    setup_stream(&((*streams)[streamnum]), nvars);
+    setup_stream(&((*streams)[streamnum]), nvars, 1);
+    (*streams)[streamnum].agg_alarm = default_alarm;
     strcpy((*streams)[streamnum].prefix, "snow");
     (*streams)[streamnum].file_format = ASCII;
 
@@ -87,14 +91,16 @@ set_output_defaults(stream_struct **streams)
         streamnum++;
         nvars = 4;
 
-        setup_stream(&((*streams)[streamnum]), nvars);
+        setup_stream(&((*streams)[streamnum]), nvars, 1);
+        (*streams)[streamnum].agg_alarm = default_alarm;
         strcpy((*streams)[streamnum].prefix, "fdepth");
         (*streams)[streamnum].file_format = ASCII;
     }
     if (options.LAKES) {
         streamnum++;
         nvars = 8;
-        setup_stream(&((*streams)[streamnum]), nvars);
+        setup_stream(&((*streams)[streamnum]), nvars, 1);
+        (*streams)[streamnum].agg_alarm = default_alarm;
         strcpy((*streams)[streamnum].prefix, "lake");
         (*streams)[streamnum].file_format = ASCII;
     }

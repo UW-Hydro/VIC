@@ -52,7 +52,6 @@ pages:
     - 'RunVIC': 'Documentation/Drivers/Classic/RunVIC.md'
     - 'Snow Band': 'Documentation/Drivers/Classic/SnowBand.md'
     - 'SnowBandOutputFiles': 'Documentation/Drivers/Classic/SnowBandOutputFiles.md'
-    - 'SnowOutputFile': 'Documentation/Drivers/Classic/SnowOutputFile.md'
     - 'Soil Param': 'Documentation/Drivers/Classic/SoilParam.md'
     - 'State File': 'Documentation/Drivers/Classic/StateFile.md'
     - 'Veg Lib': 'Documentation/Drivers/Classic/VegLib.md'

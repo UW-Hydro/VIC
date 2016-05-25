@@ -31,8 +31,7 @@
  *****************************************************************************/
 void
 write_data(stream_struct *stream,
-           dmy_struct    *dmy,
-           double         dt)
+           dmy_struct    *dmy)
 {
     extern option_struct       options;
     extern out_metadata_struct out_metadata[N_OUTVAR_TYPES];
@@ -66,7 +65,7 @@ write_data(stream_struct *stream,
         tmp_iptr[3] = dmy->dayseconds;
 
         // Write the date
-        if (dt < SEC_PER_DAY) {
+        if (stream->agg_alarm.is_subdaily) {
             // Write year, month, day, and sec
             fwrite(tmp_iptr, sizeof(int), 4,
                    stream->fh);
@@ -154,7 +153,7 @@ write_data(stream_struct *stream,
     }
     else if (stream->file_format == ASCII) {
         // Write the date
-        if (dt < SEC_PER_DAY) {
+        if (stream->agg_alarm.is_subdaily) {
             // Write year, month, day, and sec
             fprintf(stream->fh,
                     "%04u\t%02hu\t%02hu\t%05u\t",

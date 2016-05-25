@@ -42,9 +42,11 @@ VEGLIB	        $test_data_dir/image/Stehekin/parameters/Stehekin_test_params_201
 SNOW_BAND	    1 $test_data_dir/image/Stehekin/parameters/Stehekin_test_params_20160327.nc
 
 RESULT_DIR  $result_dir/Stehekin.history.nc
-OUTPUT_STEPS_PER_DAY 24
 
 OUTFILE     fluxes
+COMPRESS    FALSE
+OUT_FORMAT  ASCII
+AGGFREQ     NDAYS   1
 OUTVAR      OUT_PREC
 OUTVAR      OUT_RAINF
 OUTVAR      OUT_SNOWF

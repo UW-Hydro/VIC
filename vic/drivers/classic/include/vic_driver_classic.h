@@ -57,7 +57,8 @@ void make_in_and_outfiles(filep_struct *filep, filenames_struct *filenames,
                           dmy_struct *dmy);
 FILE *open_state_file(global_param_struct *, filenames_struct, size_t, size_t);
 void print_atmos_data(atmos_data_struct *atmos, size_t nr);
-void parse_output_info(FILE *gp, stream_struct **output_streams);
+void parse_output_info(FILE *gp, stream_struct **output_streams,
+                       dmy_struct *dmy_current);
 void read_atmos_data(FILE *, global_param_struct, int, int, double **,
                      double ***);
 double **read_forcing_data(FILE **, global_param_struct, double ****);
@@ -68,13 +69,14 @@ void read_snowband(FILE *, soil_con_struct *);
 soil_con_struct read_soilparam(FILE *, char *, char *);
 veg_lib_struct *read_veglib(FILE *, size_t *);
 veg_con_struct *read_vegparam(FILE *, int, size_t);
-void set_output_defaults(stream_struct **output_streams);
+void set_output_defaults(stream_struct **output_streams,
+                         dmy_struct     *dmy_current);
 void vic_force(atmos_data_struct *, dmy_struct *, FILE **, veg_con_struct *,
                veg_hist_struct **, soil_con_struct *);
 void vic_populate_model_state(all_vars_struct *, filep_struct, size_t,
                               soil_con_struct *, veg_con_struct *,
                               lake_con_struct);
-void write_data(stream_struct *streams, dmy_struct *dmy, double dt);
+void write_data(stream_struct *streams, dmy_struct *dmy);
 void write_header(stream_struct **streams, dmy_struct *dmy);
 void write_model_state(all_vars_struct *, int, int, filep_struct *,
                        soil_con_struct *);

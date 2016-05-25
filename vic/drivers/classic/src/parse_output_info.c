@@ -32,7 +32,8 @@
  *****************************************************************************/
 void
 parse_output_info(FILE           *gp,
-                  stream_struct **streams)
+                  stream_struct **streams,
+                  dmy_struct     *dmy_current)
 {
     extern option_struct       options;
     extern global_param_struct global_param;
@@ -43,6 +44,8 @@ parse_output_info(FILE           *gp,
     short int                  streamnum;
     char                       varname[MAXSTRING];
     int                        outvarnum;
+    char                       freq_type_str[MAXSTRING];
+    char                       freq_value_str[MAXSTRING];
     char                       format[MAXSTRING];
     char                       typestr[MAXSTRING];
     int                        type;
@@ -51,8 +54,11 @@ parse_output_info(FILE           *gp,
     double                     mult;
     size_t                     nstreams;
     size_t                     nvars;
-    unsigned int               nextagg;
+    unsigned short int         freq;
+    int                        freq_n;
+    dmy_struct                 freq_dmy;
     unsigned short int         agg_type;
+    int                        found;
     strcpy(format, "*");
 
     /** Read through global control file to find output info **/
@@ -85,25 +91,65 @@ parse_output_info(FILE           *gp,
                                 "%zu but found %hu", options.Noutstreams,
                                 streamnum);
                     }
-                    sscanf(cmdstr, "%*s %s", (*streams)[streamnum].prefix);
-
                     // determine how many variable will be in this file before
                     // allocating (GH: 209)
                     nvars = count_outfile_nvars(gp);
 
-                    // TODO: parse stream specific agg period info from global param
-                    // nextagg = (unsigned int) ((int) global_param.out_dt / (int) global_param.dt);
-                    nextagg = 1;
+                    // Setup stream
+                    setup_stream(streams[streamnum], nvars, 1);
 
-                    setup_stream(streams[streamnum], nvars);
+                    if (sscanf(cmdstr, "%*s %s",
+                               (*streams)[streamnum].prefix) != 1) {
+                        log_err("Invalid specification for OUTFILE");
+                    }
 
                     outvarnum = 0;
                 }
-                else if (strcasecmp("OUTPUT_STEPS_PER_DAY", optstr) == 0) {
-                    sscanf(cmdstr, "%*s %zu",
-                           (&(*streams)[streamnum].output_steps_per_day));
+                else if (strcasecmp("AGGFREQ", optstr) == 0) {
+                    if (streamnum < 0) {
+                        log_err("Error in global param file: \"OUTFILE\" must be "
+                                "specified before you can specify \"AGGFREQ\".");
+                    }
+                    found = sscanf(cmdstr, "%*s %s %s", freq_type_str,
+                                   freq_value_str);
+
+                    if (!found) {
+                        log_err("No arguments found after OUTFREQ");
+                    }
+                    // parse the frequency string to an enum value
+                    freq = str_to_freq_flag(freq_type_str);
+
+                    if (freq == FREQ_DATE) {
+                        // Make sure we have a datestring
+                        if (found != 2) {
+                            log_err(
+                                "AGGFREQ was set to DATE but no date string was found");
+                        }
+                        // parse date from freq_value_str
+                        strpdmy(freq_value_str, "%Y-%m-%d", &freq_dmy);
+                        // set the alarm
+                        set_alarm(dmy_current, freq, &freq_dmy,
+                                  (&(*streams)[streamnum].agg_alarm));
+                    }
+                    else {
+                        if (found != 2) {
+                            // Default frequency is 1
+                            freq_n = 1;
+                        }
+                        else {
+                            // get the frequency value as an integer
+                            freq_n = atoi(freq_value_str);
+                        }
+                        // set the alarm
+                        set_alarm(dmy_current, freq, &freq_n,
+                                  (&(*streams)[streamnum].agg_alarm));
+                    }
                 }
                 else if (strcasecmp("COMPRESS", optstr) == 0) {
+                    if (streamnum < 0) {
+                        log_err("Error in global param file: \"OUTFILE\" must be "
+                                "specified before you can specify \"COMPRESS\".");
+                    }
                     sscanf(cmdstr, "%*s %s", flgstr);
                     if (strcasecmp("TRUE", flgstr) == 0) {
                         (*streams)[streamnum].compress = COMPRESSION_LVL_UNSET;
@@ -116,18 +162,20 @@ parse_output_info(FILE           *gp,
                     }
                 }
                 else if (strcasecmp("OUT_FORMAT", optstr) == 0) {
+                    if (streamnum < 0) {
+                        log_err("Error in global param file: \"OUTFILE\" must be "
+                                "specified before you can specify \"OUT_FORMAT\".");
+                    }
                     sscanf(cmdstr, "%*s %s", flgstr);
                     if (strcasecmp("ASCII", flgstr) == 0) {
-                        (*streams)[streamnum].file_format =
-                            ASCII;
+                        (*streams)[streamnum].file_format = ASCII;
                     }
                     else if (strcasecmp("BINARY", flgstr) == 0) {
                         (*streams)[streamnum].file_format = BINARY;
                     }
                     else {
-                        log_err(
-                            "File format must be ASCII or BINARY [stream=%hu]",
-                            streamnum);
+                        log_err("Classic friver file format must be ASCII or "
+                                "BINARY [stream=%hu]", streamnum);
                     }
                 }
                 else if (strcasecmp("OUTVAR", optstr) == 0) {
@@ -135,24 +183,22 @@ parse_output_info(FILE           *gp,
                         log_err("Error in global param file: \"OUTFILE\" must be "
                                 "specified before you can specify \"OUTVAR\".");
                     }
+                    // parse outvar options
                     strcpy(format, "");
                     strcpy(typestr, "");
                     strcpy(multstr, "");
-                    sscanf(cmdstr, "%*s %s %s %s %s %s", varname, format,
-                           typestr,
-                           multstr, aggstr);
-                    if (strcasecmp("", format) == 0) {
-                        strcpy(format, "*");
+                    found = sscanf(cmdstr, "%*s %s %s %s %s %s", varname,
+                                   format,
+                                   typestr, multstr, aggstr);
+                    if (!found) {
+                        log_err("OUTVAR specified but no variable was listed");
                     }
-
                     agg_type = str_to_agg_type(aggstr);
                     type = str_to_out_type(typestr);
                     mult = str_to_out_mult(multstr);
 
-                    set_output_var(streams[streamnum],
-                                   varname, outvarnum, format, type, mult,
-                                   agg_type);
-                    strcpy(format, "");
+                    set_output_var(streams[streamnum], varname, outvarnum,
+                                   format, type, mult, agg_type);
                     outvarnum++;
                 }
             }
@@ -161,16 +207,13 @@ parse_output_info(FILE           *gp,
     }
     // Otherwise, set output files and their contents to default configuration
     else {
-        set_output_defaults(streams);
+        set_output_defaults(streams, dmy_current);
     }
     fclose(gp);
 
     for (streamnum = 0;
          streamnum < (short int) options.Noutstreams;
          streamnum++) {
-        // Validate the streams
-        validate_stream_settings(&((*streams)[streamnum]));
-
         // Allocate memory for the stream aggdata arrays
         alloc_aggdata(&(*streams)[streamnum]);
     }

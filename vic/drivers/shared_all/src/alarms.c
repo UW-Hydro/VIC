@@ -76,3 +76,47 @@ raise_alarm(alarm_struct *alarm,
         return false;
     }
 }
+
+/******************************************************************************
+ * @brief   This routine sets an alarm
+ *****************************************************************************/
+void
+set_alarm(dmy_struct   *dmy_current,
+          unsigned int  freq,
+          void         *value,
+          alarm_struct *alarm)
+{
+    extern global_param_struct global_param;
+
+    alarm->count = 0;
+    alarm->next = MISSING;
+    alarm->freq = freq;
+    alarm->n = MISSING;
+
+    if ((freq == FREQ_NSTEPS) || (freq == FREQ_NSECONDS) ||
+        (freq == FREQ_NMINUTES) || (freq == FREQ_NHOURS) ||
+        (freq == FREQ_NDAYS) || (freq == FREQ_NMONTHS) ||
+        (freq == FREQ_NYEARS)) {
+        alarm->n = *((int*) value);
+    }
+    else if (freq == FREQ_DATE) {
+        alarm->date = *((dmy_struct*) value);
+    }
+    else if ((freq == FREQ_NEVER) || (freq == FREQ_END)) {
+        ;  // Do nothing
+    }
+    else {
+        log_err("Did not recognize the frequency value %u", freq);
+    }
+
+    // Set alarm->next via reset_alarm
+    reset_alarm(alarm, dmy_current);
+
+    // Set subdaily attribute
+    if (alarm->next < (int) global_param.model_steps_per_day) {
+        alarm->is_subdaily = true;
+    }
+    else {
+        alarm->is_subdaily = false;
+    }
+}

@@ -242,10 +242,10 @@ The following options describe the settings for each output stream:
 | Name        | Type      | Units             | Description                                                                        |
 |------------ |---------  |---------------    |----------------------------------------------------------------------------------- |
 | OUTFILE\*   | string    | prefix            | Information about this output file: <br>Prefix of the output file (to which the lat and lon will be appended3) <br> This should be specified once for each output file. [Click here for more information.](OutputFormatting.md) |
-| OUTFREQ     | string <br> [integer/string]   | frequency <br> count | Describes aggregation frequency for output stream.  Valid options for frequency are: FREQ_NEVER, FREQ_NSTEPS, FREQ_NSECONDS, FREQ_NMINUTES, FREQ_NHOURS, FREQ_NDAYS, FREQ_NMONTHS, FREQ_NYEARS, FREQ_DATE, FREQ_END. Count may be an positive integer or a string with date format YYYY-MM-DD[-SSSSS] in the case of FREQ_DATE. <br> Default `frequency` is `FREQ_NDAYS`. Default `count` is 1. |
+| OUTFREQ     | string <br> [integer/string]   | frequency <br> count | Describes aggregation frequency for output stream.  Valid options for frequency are: NEVER, NSTEPS, NSECONDS, NMINUTES, NHOURS, NDAYS, NMONTHS, NYEARS, DATE, END. Count may be an positive integer or a string with date format YYYY-MM-DD[-SSSSS] in the case of DATE. <br> Default `frequency` is `NDAYS`. Default `count` is 1. |
 | COMPRESS    | string/integer | TRUE, FALSE, or lvl | if TRUE or > 0 compress input and output files when done (uses `gzip`), if an integer [1-9] is supplied, it is used to set the`gzip` compression level |
 | OUT_FORMAT  | string    | BINARY OR ASCII   | If BINARY write output files in binary (default is ASCII).                                                                                                                                  |
-| OUTVAR\*    | <br> string <br> string <br> string <br> integer <br> string <br> | <br> name <br> format <br> type <br> multiplier <br> <aggtype> <br> | Information about this output variable:<br>Name (must match a name listed in vic_def.h) <br> Output format (C fprintf-style format code) (only valid with OUT_FORMAT=ASCII) <br>Data type (one of: OUT_TYPE_DEFAULT, OUT_TYPE_CHAR, OUT_TYPE_SINT, OUT_TYPE_USINT, OUT_TYPE_INT, OUT_TYPE_FLOAT,OUT_TYPE_DOUBLE) <br> Multiplier - number to multiply the data with in order to recover the original values (only valid with OUT_FORMAT=BINARY) <br> Aggregation method - temporal aggregation method to use (one of: AGG_TYPE_DEFAULT, AGG_TYPE_AVG, AGG_TYPE_BEG, AGG_TYPE_END, AGG_TYPE_MAX, AGG_TYPE_MIN, AGG_TYPE_SUM) <br> <br> This should be specified once for each output variable. [Click here for more information.](OutputFormatting.md)|
+| OUTVAR\*    | <br> string <br> string <br> string <br> integer <br> string <br> | <br> name <br> format <br> type <br> multiplier <br> aggtype <br> | Information about this output variable:<br>Name (must match a name listed in vic_driver_shared_all.h) <br> Output format (C fprintf-style format code) (only valid with OUT_FORMAT=ASCII) <br>Data type (one of: OUT_TYPE_DEFAULT, OUT_TYPE_CHAR, OUT_TYPE_SINT, OUT_TYPE_USINT, OUT_TYPE_INT, OUT_TYPE_FLOAT,OUT_TYPE_DOUBLE) <br> Multiplier - number to multiply the data with in order to recover the original values (only valid with OUT_FORMAT=BINARY) <br> Aggregation method - temporal aggregation method to use (one of: AGG_TYPE_DEFAULT, AGG_TYPE_AVG, AGG_TYPE_BEG, AGG_TYPE_END, AGG_TYPE_MAX, AGG_TYPE_MIN, AGG_TYPE_SUM) <br> <br> This should be specified once for each output variable. [Click here for more information.](OutputFormatting.md)|
 
  - *Note: `OUTFILE`, and `OUTVAR` are optional; if omitted, traditional output files are produced. [Click here for details on using these instructions](OutputFormatting.md).*
 
@@ -339,7 +339,7 @@ FROZEN_SOIL FALSE   # TRUE = calculate frozen soils.  Default = FALSE.
 #VP_INTERP  TRUE    # This controls sub-daily humidity estimates; TRUE = interpolate daily VP estimates linearly between sunrise of one day to the next; FALSE = hold VP constant for entire day
 #LW_TYPE        LW_PRATA    # This controls the algorithm used to estimate clear-sky longwave radiation:
 #           # LW_TVA = Tennessee Valley Authority algorithm (1972) (this was traditional VIC algorithm)
-#           # other options listed in vic_driver_shared.h
+#           # other options listed in vic_driver_shared_all.h
 #           # default = LW_PRATA
 #LW_CLOUD   LW_CLOUD_DEARDORFF  # This controls the algorithm used to estimate the influence of clouds on total longwave:
 #           # LW_CLOUD_BRAS = method from Bras textbook (this was the traditional VIC algorithm)
@@ -475,21 +475,21 @@ RESULT_DIR      (put the result directory path here)    # Results directory path
 #                  and longitude
 #   <freq>       = Describes aggregation frequency for output stream. Valid
 #                  options for frequency are:
-#                    FREQ_NEVER     = never write to history file
-#                    FREQ_NSTEPS    = write to history every <value> steps
-#                    FREQ_NSECONDS  = write to history every <value> seconds
-#                    FREQ_NMINUTES  = write to history every <value> minutes
-#                    FREQ_NHOURS    = write to history every <value> hours
-#                    FREQ_NDAYS     = write to history every <value> days
-#                    FREQ_NMONTHS   = write to history every <value> months
-#                    FREQ_NYEARS    = write to history every <value> years
-#                    FREQ_DATE      = write to history on the date: <value>
-#                    FREQ_END       = write to history at the end of the simulation
+#                    NEVER     = never write to history file
+#                    NSTEPS    = write to history every <value> steps
+#                    NSECONDS  = write to history every <value> seconds
+#                    NMINUTES  = write to history every <value> minutes
+#                    NHOURS    = write to history every <value> hours
+#                    NDAYS     = write to history every <value> days
+#                    NMONTHS   = write to history every <value> months
+#                    NYEARS    = write to history every <value> years
+#                    DATE      = write to history on the date: <value>
+#                    END       = write to history at the end of the simulation
 #   <value>      = integer describing the number of <freq> intervals to pass
 #                  before writing to the history file.
 #   <compress>   = gzip compression option.  TRUE, FALSE, or integer between 1-9.
 #   <varname>    = name of the variable (this must be one of the
-#                  output variable names listed in vic_driver_shared.h.)
+#                  output variable names listed in vic_driver_shared_all.h.)
 #   <format>     = (for ascii output files) fprintf format string,
 #                  e.g.
 #                    %.4f = floating point with 4 decimal places
@@ -515,7 +515,7 @@ RESULT_DIR      (put the result directory path here)    # Results directory path
 #   <aggtype>    = Aggregation method to use for temporal aggregation. Valid
 #                  options for aggtype are:
 #                    AGG_TYPE_DEFAULT = default aggregation type for variable
-#                    AGG_TYPE_AVG     = average over aggreation window
+#                    AGG_TYPE_AVG     = average over aggregation window
 #                    AGG_TYPE_BEG     = beginning of aggregation window
 #                    AGG_TYPE_END     = end of aggregation window
 #                    AGG_TYPE_MAX     = maximum in aggregation window

@@ -109,12 +109,16 @@ main(int   argc,
     // Check that model parameters are valid
     validate_parameters();
 
+    /** Make Date Data Structure **/
+    initialize_time();
+    dmy = make_dmy(&global_param);
+
     /** Set up output data structures **/
     set_output_met_data_info();
     out_data = create_outdata(1);
     fclose(filep.globalparam);
     filep.globalparam = open_file(filenames.global, "r");
-    parse_output_info(filep.globalparam, &streams);
+    parse_output_info(filep.globalparam, &streams, &(dmy[0]));
     // validate_streams(&streams);
 
     /** Check and Open Files **/
@@ -125,10 +129,6 @@ main(int   argc,
 
     /** Initialize Parameters **/
     cellnum = -1;
-
-    /** Make Date Data Structure **/
-    initialize_time();
-    dmy = make_dmy(&global_param);
 
     /** allocate memory for the atmos_data_struct **/
     alloc_atmos(global_param.nrecs, &atmos);

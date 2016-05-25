@@ -561,7 +561,7 @@ get_global_param(FILE *gp)
             else if (strcasecmp("OUTVAR", optstr) == 0) {
                 ; // do nothing
             }
-            else if (strcasecmp("OUTPUT_STEPS_PER_DAY", optstr) == 0) {
+            else if (strcasecmp("AGGFREQ", optstr) == 0) {
                 ; // do nothing
             }
             else if (strcasecmp("COMPRESS", optstr) == 0) {
@@ -669,7 +669,7 @@ get_global_param(FILE *gp)
             }
             else if (strcasecmp("SKIPYEAR", optstr) == 0) {
                 log_err("SKIPYEAR has been deprecated. To avoid writting output"
-                        "to history files, set HIST_FREQ == FREQ_NEVER");
+                        "to history files, set AGGFREQ == FREQ_NEVER");
             }
 
             /***********************************

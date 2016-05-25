@@ -52,6 +52,7 @@ write_header(stream_struct **streams,
     char                       tmp_type;
     float                      tmp_mult;
 
+
     // Loop over output files
     for (stream_idx = 0; stream_idx < options.Noutstreams; stream_idx++) {
         if ((*streams)[stream_idx].file_format == BINARY) {
@@ -68,7 +69,6 @@ write_header(stream_struct **streams,
             // Part 1: Global Attributes
             // Nbytes1     (unsigned short)*1  Number of bytes in part 1
             // nrecs       (int)*1             Number of records in the file
-            // dt          (int)*1             Output time step length in seconds
             // startyear   (int)*1             Year of first record
             // startmonth  (int)*1             Month of first record
             // startday    (int)*1             Day of first record
@@ -94,9 +94,6 @@ write_header(stream_struct **streams,
             // nrecs
             Nbytes1 += sizeof(size_t);
 
-            // dt
-            Nbytes1 += sizeof(double);
-
             // start date (year, month, day, sec)
             Nbytes1 += sizeof(int) + 2 * sizeof(unsigned short int) +
                        sizeof(unsigned int);
@@ -116,7 +113,7 @@ write_header(stream_struct **streams,
                        sizeof(float);                                        // month
             Nbytes2 += sizeof(char) + 3 * sizeof(char) + sizeof(char) +
                        sizeof(float);                                        // day
-            if ((*streams)[stream_idx].out_dt < SEC_PER_DAY) {
+            if ((*streams)[stream_idx].agg_alarm.is_subdaily) {
                 Nbytes2 += sizeof(char) + 4 * sizeof(char) + sizeof(char) +
                            sizeof(float);                                      // sec
             }
@@ -168,10 +165,6 @@ write_header(stream_struct **streams,
             fwrite(&(global_param.nrecs), sizeof(size_t), 1,
                    (*streams)[stream_idx].fh);
 
-            // dt
-            fwrite(&((*streams)[stream_idx].out_dt), sizeof(double), 1,
-                   (*streams)[stream_idx].fh);
-
             // start date (year, month, day, sec)
             fwrite(&(dmy->year), sizeof(int), 1,
                    (*streams)[stream_idx].fh);
@@ -184,7 +177,7 @@ write_header(stream_struct **streams,
 
             // nvars
             nvars = (*streams)[stream_idx].nvars;
-            if ((*streams)[stream_idx].out_dt < SEC_PER_DAY) {
+            if ((*streams)[stream_idx].agg_alarm.is_subdaily) {
                 nvars += 4;
             }
             else {
@@ -233,7 +226,7 @@ write_header(stream_struct **streams,
             fwrite(&tmp_mult, sizeof(float), 1,
                    (*streams)[stream_idx].fh);
 
-            if ((*streams)[stream_idx].out_dt < SEC_PER_DAY) {
+            if ((*streams)[stream_idx].agg_alarm.is_subdaily) {
                 // sec
                 strcpy(tmp_str, "SEC");
                 tmp_len = strlen(tmp_str);
@@ -280,20 +273,18 @@ write_header(stream_struct **streams,
             // ASCII header format:
             //
             // # NRECS: (nrecs)
-            // # DT: (dt)
             // # STARTDATE: yyyy-mm-dd hh:00:00
             // # NVARS: (nvars)
             // # VARNAME    VARNAME   VARNAME   ...
             //
             // where
             // nrecs       = Number of records in the file
-            // dt          = Output time step length in seconds
             // start date  = Date and time of first record of file
             // nvars       = Number of variables in the file, including date fields
 
             // Header part 1: Global attributes
             nvars = (*streams)[stream_idx].nvars;
-            if ((*streams)[stream_idx].out_dt < SEC_PER_DAY) {
+            if ((*streams)[stream_idx].agg_alarm.is_subdaily) {
                 nvars += 4;
             }
             else {
@@ -306,7 +297,7 @@ write_header(stream_struct **streams,
 
             // Header part 2: Variables
             // Write the date
-            if ((*streams)[stream_idx].out_dt < SEC_PER_DAY) {
+            if ((*streams)[stream_idx].agg_alarm.is_subdaily) {
                 // Write year, month, day, and sec
                 fprintf((*streams)[stream_idx].fh,
                         "YEAR\tMONTH\tDAY\tSEC\t");

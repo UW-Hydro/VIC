@@ -806,7 +806,7 @@ def test_classic_driver_all_complete(fnames):
     start = None
     end = None
     for fname in fnames:
-        df = read_vic_ascii(fname, header=True)
+        df = read_vic_ascii(fname)
 
         # check that each dataframe includes all timestamps
         if (start is not None) and (end is not None):
@@ -819,7 +819,7 @@ def test_classic_driver_all_complete(fnames):
 def test_classic_driver_no_output_file_nans(fnames):
     '''Test that all VIC classic driver output files in fnames have no nans'''
     for fname in fnames:
-        df = read_vic_ascii(fname, header=True)
+        df = read_vic_ascii(fname)
         check_for_nans(df)
 
 
@@ -835,8 +835,8 @@ def test_image_driver_no_output_file_nans(fnames, domain_file):
 
 
 # TODO: Update tonic version of this function, need to check that subdaily works
-def read_vic_ascii(filepath, header=True, parse_dates=True,
-                   datetime_index=None, names=None, **kwargs):
+def read_vic_ascii(filepath, parse_dates=True, datetime_index=None, sep='\t',
+                   comment='#', **kwargs):
     '''Generic reader function for VIC ASCII output with a standard header
     filepath: path to VIC output file
     header (True or False):  Standard VIC header is present
@@ -846,32 +846,18 @@ def read_vic_ascii(filepath, header=True, parse_dates=True,
     **kwargs: passed to Pandas.read_table
     returns Pandas.DataFrame
     '''
-    kwargs['header'] = None
 
-    if header:
-        kwargs['skiprows'] = 6
+    df = pd.read_table(filepath, sep=sep, comment=comment, **kwargs)
 
-        # get names
-        if names is None:
-            with open(filepath) as f:
-                # skip lines 0 through 3
-                for _ in range(3):
-                    next(f)
-
-                # process header
-                names = next(f)
-                names = names.strip('#').replace('OUT_', '').split()
-
-    kwargs['names'] = names
+    if parse_dates and datetime_index:
+        raise ValueError('can not specify both parse_dates and datetime_index')
 
     if parse_dates:
         time_cols = ['YEAR', 'MONTH', 'DAY']
-        if 'SECONDS' in names:
+        if 'SECONDS' in df:
             time_cols.append('SECONDS')
-        kwargs['parse_dates'] = {'datetime': time_cols}
-        kwargs['index_col'] = 0
-
-    df = pd.read_table(filepath, **kwargs)
+        df.index = pd.to_datetime(df[time_cols])
+        df.drop(time_cols, axis=1)
 
     if datetime_index is not None:
         df.index = datetime_index

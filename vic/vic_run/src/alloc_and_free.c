@@ -36,13 +36,13 @@ malloc_2d_double(size_t   *shape,
 {
     size_t i;
 
-    *array = malloc(shape[0] * sizeof(**array));
+    *array = malloc(shape[0] * sizeof(*(*array)));
     if (*array == NULL) {
         log_err("Memory allocation error in malloc_2d_double().");
     }
     for (i = 0; i < shape[0]; i++) {
-        *(array[i]) = malloc(shape[1] * sizeof(*(*(array[i]))));
-        if (*(array[i]) == NULL) {
+        (*array)[i] = malloc(shape[1] * sizeof(*((*array)[i])));
+        if ((*array)[i] == NULL) {
             log_err("Memory allocation error in malloc_2d_double().");
         }
     }
@@ -58,19 +58,19 @@ malloc_3d_double(size_t    *shape,
     size_t i;
     size_t j;
 
-    *array = malloc(shape[0] * sizeof(**array));
+    *array = malloc(shape[0] * sizeof(*(*array)));
     if (*array == NULL) {
         log_err("Memory allocation error in malloc_3d_double().");
     }
 
     for (i = 0; i < shape[0]; i++) {
-        *(array[i]) = malloc(shape[1] * sizeof(*(*(array[i]))));
-        if (*(array[i]) == NULL) {
+        (*array)[i] = malloc(shape[1] * sizeof(*((*array)[i])));
+        if ((*array)[i] == NULL) {
             log_err("Memory allocation error in malloc_3d_double().");
         }
         for (j = 0; j < shape[1]; j++) {
-            *(array[i][j]) = malloc(shape[2] * sizeof(*(*(array[i][j]))));
-            if (*(array[i][j]) == NULL) {
+            (*array)[i][j] = malloc(shape[2] * sizeof(*((*array)[i][j])));
+            if ((*array)[i][j] == NULL) {
                 log_err("Memory allocation error in malloc_3d_double().");
             }
         }

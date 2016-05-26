@@ -1,22 +1,20 @@
+#!/usr/bin/env python
+'''
+    Preprocessed Headers for VIC Python Driver
+    Last updated 2016-05-26 15:04:03.413384
+'''
+
+
 headers = '''
 FILE *LOG_DEST;
 void finalize_logging(void);
-void get_current_datetime(char *cdt);
 void get_logname(const char *path, int id, char *filename);
 void initialize_log(void);
+void print_trace(void);
 void setup_logging(int id);
 extern size_t NR;
 extern size_t NF;
-enum
-{
-    ASCII,
-    BINARY
-};
-enum
-{
-    LITTLE,
-    BIG
-};
+char vic_run_ref_str[2048];
 enum
 {
     DENS_BRAS,
@@ -41,13 +39,6 @@ enum
 };
 enum
 {
-    FROM_DEFAULT,
-    FROM_VEGLIB,
-    FROM_VEGPARAM,
-    FROM_VEGHIST
-};
-enum
-{
     RC_JARVIS,
     RC_PHOTO
 };
@@ -60,236 +51,6 @@ enum
 {
     PHOTO_C3,
     PHOTO_C4
-};
-enum
-{
-    AIR_TEMP,
-    ALBEDO,
-    CATM,
-    CHANNEL_IN,
-    DENSITY,
-    FCANOPY,
-    FDIR,
-    LAI_IN,
-    LWDOWN,
-    PAR,
-    PREC,
-    PRESSURE,
-    QAIR,
-    REL_HUMID,
-    SWDOWN,
-    VP,
-    WIND,
-    SKIP,
-    N_FORCING_TYPES
-};
-enum
-{
-    OUT_ASAT,
-    OUT_LAKE_AREA_FRAC,
-    OUT_LAKE_DEPTH,
-    OUT_LAKE_ICE,
-    OUT_LAKE_ICE_FRACT,
-    OUT_LAKE_ICE_HEIGHT,
-    OUT_LAKE_MOIST,
-    OUT_LAKE_SURF_AREA,
-    OUT_LAKE_SWE,
-    OUT_LAKE_SWE_V,
-    OUT_LAKE_VOLUME,
-    OUT_ROOTMOIST,
-    OUT_SMFROZFRAC,
-    OUT_SMLIQFRAC,
-    OUT_SNOW_CANOPY,
-    OUT_SNOW_COVER,
-    OUT_SNOW_DEPTH,
-    OUT_SOIL_ICE,
-    OUT_SOIL_LIQ,
-    OUT_SOIL_MOIST,
-    OUT_SOIL_WET,
-    OUT_SURFSTOR,
-    OUT_SURF_FROST_FRAC,
-    OUT_SWE,
-    OUT_WDEW,
-    OUT_ZWT,
-    OUT_ZWT_LUMPED,
-    OUT_BASEFLOW,
-    OUT_DELINTERCEPT,
-    OUT_DELSOILMOIST,
-    OUT_DELSURFSTOR,
-    OUT_DELSWE,
-    OUT_EVAP,
-    OUT_EVAP_BARE,
-    OUT_EVAP_CANOP,
-    OUT_INFLOW,
-    OUT_LAKE_BF_IN,
-    OUT_LAKE_BF_IN_V,
-    OUT_LAKE_BF_OUT,
-    OUT_LAKE_BF_OUT_V,
-    OUT_LAKE_CHAN_IN,
-    OUT_LAKE_CHAN_IN_V,
-    OUT_LAKE_CHAN_OUT,
-    OUT_LAKE_CHAN_OUT_V,
-    OUT_LAKE_DSTOR,
-    OUT_LAKE_DSTOR_V,
-    OUT_LAKE_DSWE,
-    OUT_LAKE_DSWE_V,
-    OUT_LAKE_EVAP,
-    OUT_LAKE_EVAP_V,
-    OUT_LAKE_PREC_V,
-    OUT_LAKE_RCHRG,
-    OUT_LAKE_RCHRG_V,
-    OUT_LAKE_RO_IN,
-    OUT_LAKE_RO_IN_V,
-    OUT_LAKE_VAPFLX,
-    OUT_LAKE_VAPFLX_V,
-    OUT_PET,
-    OUT_PREC,
-    OUT_RAINF,
-    OUT_REFREEZE,
-    OUT_RUNOFF,
-    OUT_SNOW_MELT,
-    OUT_SNOWF,
-    OUT_SUB_BLOWING,
-    OUT_SUB_CANOP,
-    OUT_SUB_SNOW,
-    OUT_SUB_SURFACE,
-    OUT_TRANSP_VEG,
-    OUT_WATER_ERROR,
-    OUT_ALBEDO,
-    OUT_BARESOILT,
-    OUT_FDEPTH,
-    OUT_LAKE_ICE_TEMP,
-    OUT_LAKE_SURF_TEMP,
-    OUT_RAD_TEMP,
-    OUT_SALBEDO,
-    OUT_SNOW_PACK_TEMP,
-    OUT_SNOW_SURF_TEMP,
-    OUT_SNOWT_FBFLAG,
-    OUT_SOIL_TEMP,
-    OUT_SOIL_TNODE,
-    OUT_SOIL_TNODE_WL,
-    OUT_SOILT_FBFLAG,
-    OUT_SURF_TEMP,
-    OUT_SURFT_FBFLAG,
-    OUT_TCAN_FBFLAG,
-    OUT_TDEPTH,
-    OUT_TFOL_FBFLAG,
-    OUT_VEGT,
-    OUT_ADV_SENS,
-    OUT_ADVECTION,
-    OUT_DELTACC,
-    OUT_DELTAH,
-    OUT_ENERGY_ERROR,
-    OUT_FUSION,
-    OUT_GRND_FLUX,
-    OUT_IN_LONG,
-    OUT_LATENT,
-    OUT_LATENT_SUB,
-    OUT_MELT_ENERGY,
-    OUT_LWNET,
-    OUT_SWNET,
-    OUT_R_NET,
-    OUT_RFRZ_ENERGY,
-    OUT_SENSIBLE,
-    OUT_SNOW_FLUX,
-    OUT_AERO_COND,
-    OUT_AERO_COND1,
-    OUT_AERO_COND2,
-    OUT_AERO_RESIST,
-    OUT_AERO_RESIST1,
-    OUT_AERO_RESIST2,
-    OUT_AIR_TEMP,
-    OUT_CATM,
-    OUT_DENSITY,
-    OUT_FCANOPY,
-    OUT_FDIR,
-    OUT_LAI,
-    OUT_LWDOWN,
-    OUT_PAR,
-    OUT_PRESSURE,
-    OUT_QAIR,
-    OUT_REL_HUMID,
-    OUT_SWDOWN,
-    OUT_SURF_COND,
-    OUT_VP,
-    OUT_VPD,
-    OUT_WIND,
-    OUT_ADV_SENS_BAND,
-    OUT_ADVECTION_BAND,
-    OUT_ALBEDO_BAND,
-    OUT_DELTACC_BAND,
-    OUT_GRND_FLUX_BAND,
-    OUT_IN_LONG_BAND,
-    OUT_LATENT_BAND,
-    OUT_LATENT_SUB_BAND,
-    OUT_MELT_ENERGY_BAND,
-    OUT_LWNET_BAND,
-    OUT_SWNET_BAND,
-    OUT_RFRZ_ENERGY_BAND,
-    OUT_SENSIBLE_BAND,
-    OUT_SNOW_CANOPY_BAND,
-    OUT_SNOW_COVER_BAND,
-    OUT_SNOW_DEPTH_BAND,
-    OUT_SNOW_FLUX_BAND,
-    OUT_SNOW_MELT_BAND,
-    OUT_SNOW_PACKT_BAND,
-    OUT_SNOW_SURFT_BAND,
-    OUT_SWE_BAND,
-    OUT_APAR,
-    OUT_GPP,
-    OUT_RAUT,
-    OUT_NPP,
-    OUT_LITTERFALL,
-    OUT_RHET,
-    OUT_NEE,
-    OUT_CLITTER,
-    OUT_CINTER,
-    OUT_CSLOW,
-    N_OUTVAR_TYPES
-};
-enum
-{
-    OUT_TYPE_DEFAULT,
-    OUT_TYPE_CHAR,
-    OUT_TYPE_SINT,
-    OUT_TYPE_USINT,
-    OUT_TYPE_INT,
-    OUT_TYPE_FLOAT,
-    OUT_TYPE_DOUBLE
-};
-enum
-{
-    AGG_TYPE_AVG,
-    AGG_TYPE_BEG,
-    AGG_TYPE_END,
-    AGG_TYPE_MAX,
-    AGG_TYPE_MIN,
-    AGG_TYPE_SUM
-};
-enum
-{
-    DISP_VERSION,
-    DISP_COMPILE_TIME,
-    DISP_ALL
-};
-enum calendars
-{
-    CALENDAR_STANDARD,
-    CALENDAR_GREGORIAN,
-    CALENDAR_PROLEPTIC_GREGORIAN,
-    CALENDAR_NOLEAP,
-    CALENDAR_365_DAY,
-    CALENDAR_360_DAY,
-    CALENDAR_JULIAN,
-    CALENDAR_ALL_LEAP,
-    CALENDAR_366_DAY
-};
-enum time_units
-{
-    TIME_UNITS_SECONDS,
-    TIME_UNITS_MINUTES,
-    TIME_UNITS_HOURS,
-    TIME_UNITS_DAYS
 };
 typedef struct {
     FILE *forcing[2];
@@ -350,6 +111,7 @@ typedef struct {
     size_t Nnode;
     _Bool NOFLUX;
     size_t NVEGTYPES;
+    size_t NLAKENODES;
     unsigned short int RC_MODE;
     size_t ROOT_ZONES;
     _Bool QUICK_FLUX;
@@ -631,63 +393,69 @@ typedef struct {
     double cell_area;
     double time_zone_lng;
     unsigned int gridcel;
-    double zwtvmoist_zwt[5][11];
-    double zwtvmoist_moist[5][11];
     double slope;
     double aspect;
     double ehoriz;
     double whoriz;
 } soil_con_struct;
 typedef struct {
+    double albedo[12];
+    double *CanopLayerBnd;
     double Cv;
-    double Cv_sum;
+    double displacement[12];
+    double fcanopy[12];
+    double fetch;
+    double LAI[12];
+    int LAKE;
+    double lag_one;
     double root[3];
-    double *zone_depth;
-    double *zone_fract;
+    double roughness[12];
+    double sigma_slope;
     int veg_class;
     size_t vegetat_type_num;
-    double sigma_slope;
-    double lag_one;
-    double fetch;
-    int LAKE;
-    double *CanopLayerBnd;
+    double Wdmax[12];
+    double *zone_depth;
+    double *zone_fract;
 } veg_con_struct;
 typedef struct {
-    _Bool overstory;
-    double LAI[12];
-    double fcanopy[12];
-    double Wdmax[12];
     double albedo[12];
     double displacement[12];
     double emissivity[12];
+    double fcanopy[12];
+    double LAI[12];
     size_t NVegLibTypes;
+    _Bool overstory;
     double rad_atten;
     double rarc;
     double rmin;
     double roughness[12];
     double trunk_ratio;
+    double Wdmax[12];
     double wind_atten;
     double wind_h;
     double RGL;
     unsigned short int veg_class;
     char Ctype;
-    double MaxCarboxRate;
-    double MaxETransport;
     double CO2Specificity;
     double LightUseEff;
+    double MaxCarboxRate;
+    double MaxETransport;
+    double NPPfactor_sat;
     _Bool NscaleFlag;
     double Wnpp_inhib;
-    double NPPfactor_sat;
 } veg_lib_struct;
 typedef struct {
     double *albedo;
-    double *LAI;
+    double *displacement;
     double *fcanopy;
+    double *LAI;
+    double *roughness;
 } veg_hist_struct;
 typedef struct {
     double *air_temp;
     double *Catm;
     double *channel_in;
+    double *coszen;
     double *density;
     double *fdir;
     double *longwave;
@@ -713,34 +481,34 @@ typedef struct {
 typedef struct {
     double Cs;
     double T;
-    double bare_evap_frac;
-    double evap;
     double ice[10];
     double kappa;
     double moist;
     double phi;
     double zwt;
+    double bare_evap_frac;
+    double evap;
 } layer_data_struct;
 typedef struct {
     double aero_resist[2];
     double asat;
-    double baseflow;
     double CLitter;
     double CInter;
     double CSlow;
-    double inflow;
-    double pot_evap;
-    double runoff;
     layer_data_struct layer[3];
+    double rootmoist;
+    double wetness;
+    double zwt;
+    double zwt_lumped;
+    double pot_evap;
+    double baseflow;
+    double runoff;
+    double inflow;
     double RhLitter;
     double RhLitter2Atm;
     double RhInter;
     double RhSlow;
     double RhTot;
-    double rootmoist;
-    double wetness;
-    double zwt;
-    double zwt_lumped;
 } cell_data_struct;
 typedef struct {
     double AlbedoLake;
@@ -812,30 +580,32 @@ typedef struct {
 } energy_bal_struct;
 typedef struct {
     double albedo;
-    double canopyevap;
-    double LAI;
-    double throughfall;
+    double displacement;
     double fcanopy;
+    double LAI;
+    double roughness;
     double Wdew;
     double Wdmax;
-    double *NscaleFactor;
-    double *aPARLayer;
-    double *CiLayer;
-    double *rsLayer;
-    double aPAR;
-    double Ci;
-    double rc;
-    double NPPfactor;
-    double GPP;
-    double Rphoto;
-    double Rdark;
-    double Rmaint;
-    double Rgrowth;
-    double Raut;
-    double NPP;
-    double Litterfall;
+    double canopyevap;
+    double throughfall;
     double AnnualNPP;
     double AnnualNPPPrev;
+    double Ci;
+    double *CiLayer;
+    double NPPfactor;
+    double *NscaleFactor;
+    double rc;
+    double *rsLayer;
+    double aPAR;
+    double *aPARLayer;
+    double GPP;
+    double Litterfall;
+    double NPP;
+    double Raut;
+    double Rdark;
+    double Rgrowth;
+    double Rmaint;
+    double Rphoto;
 } veg_var_struct;
 typedef struct {
     double albedo;
@@ -936,44 +706,6 @@ typedef struct {
     snow_data_struct **snow;
     veg_var_struct **veg_var;
 } all_vars_struct;
-typedef struct {
-    double total_moist_storage;
-    double total_soil_moist;
-    double surfstor;
-    double swe;
-    double wdew;
-} save_data_struct;
-typedef struct {
-    char varname[20];
-    _Bool write;
-    char format[10];
-    unsigned short int type;
-    double mult;
-    unsigned short int aggtype;
-    unsigned int nelem;
-    double *data;
-    double *aggdata;
-} out_data_struct;
-typedef struct {
-    char prefix[20];
-    char filename[2048];
-    FILE *fh;
-    size_t nvars;
-    unsigned int *varid;
-} out_data_file_struct;
-typedef struct {
-    atmos_data_struct *atmos;
-    double dt;
-    energy_bal_struct *energy;
-    filep_struct filep;
-    size_t rec;
-    out_data_struct *out_data;
-    out_data_file_struct *out_data_files;
-    snow_data_struct *snow;
-    soil_con_struct soil_con;
-    veg_con_struct *veg_con;
-    veg_var_struct *veg_var;
-} Error_struct;
 void advect_carbon_storage(double, double, lake_var_struct *,
                            cell_data_struct *);
 void advect_snow_storage(double, double, double, snow_data_struct *);
@@ -987,14 +719,13 @@ void alblake(double, double, double *, double *, double *, double *, double,
              double);
 double arno_evap(layer_data_struct *, double, double, double, double, double,
                  double, double, double, double, double, double *);
-bool assert_close_double(double x, double y, double rtol, double abs_tol);
-bool assert_close_float(float x, float y, float rtol, float abs_tol);
+_Bool assert_close_double(double x, double y, double rtol, double abs_tol);
+_Bool assert_close_float(float x, float y, float rtol, float abs_tol);
 double calc_atmos_energy_bal(double, double, double, double, double, double,
                              double, double, double, double, double, double,
                              double, double *, double *, double *, double *,
                              double *, double *, _Bool *, unsigned int*);
 double calc_density(double);
-double calc_energy_balance_error(double, double, double, double, double);
 double calc_latent_heat_of_sublimation(double temp);
 double calc_latent_heat_of_vaporization(double temp);
 int calc_layer_average_thermal_props(energy_bal_struct *, layer_data_struct *,
@@ -1003,7 +734,7 @@ double calc_outgoing_longwave(double temp, double emis);
 double calc_scale_height(double tair, double elevation);
 double calc_sensible_heat(double atmos_density, double t1, double t0,
                           double Ra);
-void calc_Nscale_factors(char, double *, double, double, double *);
+void calc_Nscale_factors(_Bool, double *, double, double, double *);
 double calc_rainonly(double, double, double, double);
 double calc_rc(double, double, double, double, double, double, double, char);
 void calc_rc_ps(char, double, double, double, double *, double, double,
@@ -1020,10 +751,10 @@ double calc_surf_energy_bal(double, double, double, double, double, double,
                             double, double, double, double, double, double,
                             double, double, double, double, double, double,
                             double, double, double, double, double, double *,
-                            double *, double *, double *, double *, double *, double,
-                            double *, double *, double, double *, double *, int,
-                            int, size_t, size_t, double, size_t,
-                            unsigned short int, int, int, unsigned short int,
+                            double *, double *, double *, double *, double *,
+                            double, double *, double *, double, double *,
+                            double *, int, int, size_t, size_t, double, size_t,
+                            unsigned short int, int, unsigned short int,
                             double *, double *, atmos_data_struct *,
                             dmy_struct *, energy_bal_struct *,
                             layer_data_struct *, snow_data_struct *,
@@ -1031,15 +762,12 @@ double calc_surf_energy_bal(double, double, double, double, double, double,
 double calc_veg_displacement(double);
 double calc_veg_height(double);
 double calc_veg_roughness(double);
-double calc_water_balance_error(double, double, double, double);
-unsigned short int calendar_from_chars(char *cal_chars);
 int CalcAerodynamic(_Bool, double, double, double, double, double, double *,
                     double *, double *, double *, double *);
 double CalcBlowingSnow(double, double, unsigned int, double, double, double,
                        double, double, double, double, double, double, double,
                        double, int, int, double, double, double, double *);
 double CalcIcePackEnergyBalance(double Tsurf, ...);
-double CalcSnowPackEnergyBalance(double Tsurf, ...);
 double CalcSubFlux(double EactAir, double es, double Zrh, double AirDens,
                    double utshear, double ushear, double fe, double Tsnow,
                    double Tair, double U10, double Zo_salt, double F,
@@ -1052,17 +780,11 @@ double canopy_evap(layer_data_struct *, veg_var_struct *, _Bool,
                    unsigned short int, double *, double, double, double, double,
                    double, double, double, double, double *, double *, double *,
                    double *, double *, double *, double, double, double *);
-bool check_write_flag(int rec);
 void colavg(double *, double *, double *, double, double *, int, double,
             double);
-void collect_eb_terms(energy_bal_struct, snow_data_struct, cell_data_struct,
-                      double, double, double, int, int, double, int, int,
-                      double *, double, out_data_struct *);
-void collect_wb_terms(cell_data_struct, veg_var_struct, snow_data_struct,
-                      double, double, double, int, double, int, double *,
-                      double *, out_data_struct *);
 double compute_coszen(double, double, double, unsigned short int, unsigned int);
-void compute_pot_evap(double, double, double, double, double, double, double,
+void compute_derived_lake_dimensions(lake_var_struct *, lake_con_struct);
+void compute_pot_evap(size_t, double, double, double, double, double, double,
                       double, double, double, double *, char, double, double,
                       double, double *);
 void compute_runoff_and_asat(soil_con_struct *, double *, double, double *,
@@ -1084,6 +806,12 @@ int distribute_node_moisture_properties(double *, double *, double *, double *,
 void eddy(int, double, double *, double *, double, int, double, double);
 void energycalc(double *, double *, int, double, double, double *, double *,
                 double *);
+double error_calc_atmos_energy_bal(double Tcanopy, ...);
+double error_calc_atmos_moist_bal(double, ...);
+double error_calc_canopy_energy_bal(double Tsurf, ...);
+double error_calc_surf_energy_bal(double Tsurf, ...);
+double error_solve_T_profile(double Tsurf, ...);
+double ErrorIcePackEnergyBalance(double Tsurf, ...);
 int estimate_layer_ice_content(layer_data_struct *, double *, double *,
                                double *, double *, double *, double *, double *,
                                double, size_t, size_t, char);
@@ -1109,8 +837,6 @@ void get_shear(double x, double *f, double *df, double Ur, double Zr);
 double get_thresh(double Tair, double SurfaceLiquidWater, double Zo_salt);
 int get_volume(lake_con_struct, double, double *);
 double hiTinhib(double);
-int initialize_lake(lake_var_struct *, lake_con_struct, soil_con_struct *,
-                    cell_data_struct *, double, int);
 int ice_melt(double, double, double *, double, snow_data_struct *,
              lake_var_struct *, double, double, double, double, double, double,
              double, double, double, double, double, double, double, double,
@@ -1119,6 +845,8 @@ int ice_melt(double, double, double *, double, snow_data_struct *,
 void iceform(double *, double *, double, double, double *, int, double, double,
              double, double *, double *, double *, double *, double);
 void icerad(double, double, double, double *, double *, double *);
+void initialize_lake(lake_var_struct *, lake_con_struct, soil_con_struct *,
+                     cell_data_struct *, _Bool);
 int lakeice(double, double, double, double, double, double *, double, double *,
             double *, double, double);
 void latent_heat_from_snow(double, double, double, double, double, double,
@@ -1140,9 +868,6 @@ void photosynth(char, double, double, double, double, double, double, double,
 void polint(double xa[], double ya[], int n, double x, double *y, double *dy);
 void prepare_full_energy(int, all_vars_struct *, soil_con_struct *, double *,
                          double *);
-void put_data(all_vars_struct *, atmos_data_struct *, soil_con_struct *,
-              veg_con_struct *, veg_lib_struct *veg_lib, lake_con_struct *,
-              out_data_struct *, save_data_struct *, int);
 double qromb(
     double (*sub_with_height)(), double es, double Wind, double AirDens, double ZO, double EactAir, double F, double hsalt, double phi_r, double ushear, double Zrh, double a,
     double b);
@@ -1160,7 +885,7 @@ void set_node_parameters(double *, double *, double *, double *, double *,
                          double *, int, int);
 void shear_stress(double U10, double ZO, double *ushear, double *Zo_salt,
                   double utshear);
-double snow_albedo(double, double, double, double, double, int, char);
+double snow_albedo(double, double, double, double, double, int, _Bool);
 double snow_density(snow_data_struct *, double, double, double, double);
 int snow_intercept(double, double, double, double, double, double, double,
                    double, double, double, double *, double *, double *,
@@ -1168,19 +893,22 @@ int snow_intercept(double, double, double, double, double, double, double,
                    double *, double *, double *, double *, double *, double *,
                    double *, _Bool *, unsigned int *, double *, double *,
                    double *, double *, double *, double *, double *, int, int,
-                   int, int, int, int, unsigned short int, double *, double *,
+                   int, int, int, unsigned short int, double *, double *,
                    atmos_data_struct *, layer_data_struct *, soil_con_struct *,
                    veg_var_struct *);
 int snow_melt(double, double, double, double, double *, double, double *,
               double, double, double, double, double, double, double, double,
               double, double, double, double, double, double *, double *,
               double *, double *, double *, double *, double *, double *,
-              double *, double *, double *, double *, int, int, int, int,
+              double *, double *, double *, double *, int, int, int,
               snow_data_struct *);
 void soil_carbon_balance(soil_con_struct *, energy_bal_struct *,
                          cell_data_struct *, veg_var_struct *);
 double soil_conductivity(double, double, double, double, double, double, double,
                          double);
+double solve_atmos_energy_bal(double Tcanopy, ...);
+double solve_atmos_moist_bal(double, ...);
+double solve_canopy_energy_bal(double Tfoliage, ...);
 int solve_lake(double, double, double, double, double, double, double, double,
                double, double, lake_var_struct *, soil_con_struct, double,
                double, dmy_struct, double);
@@ -1191,7 +919,7 @@ double solve_snow(char, double, double, double, double, double, double, double,
                   double *, double *, double *, double *, double *, double *,
                   double *, double *, double *, double *, double *, double *,
                   int, size_t, unsigned short int, unsigned short int, double,
-                  size_t, size_t, int, int *, double *, double *, dmy_struct *,
+                  size_t, int, int *, double *, double *, dmy_struct *,
                   atmos_data_struct *, energy_bal_struct *, layer_data_struct *,
                   snow_data_struct *, soil_con_struct *, veg_var_struct *);
 double solve_surf_energy_bal(double Tsurf, ...);
@@ -1214,8 +942,8 @@ int surface_fluxes(_Bool, double, double, double, double, double *, double *,
                    double *, double *, double *, double *, double *, double *,
                    double *, double *, double *, double *, double *, size_t,
                    size_t, unsigned short int, double, unsigned short int,
-                   size_t, unsigned short int, atmos_data_struct *,
-                   dmy_struct *, energy_bal_struct *, global_param_struct *,
+                   unsigned short int, atmos_data_struct *, dmy_struct *,
+                   energy_bal_struct *, global_param_struct *,
                    cell_data_struct *, snow_data_struct *, soil_con_struct *,
                    veg_var_struct *, double, double, double, double *);
 double svp(double);
@@ -1236,12 +964,12 @@ double trapzd(
     int n);
 void tridia(int, double *, double *, double *, double *, double *);
 void tridiag(double *, double *, double *, double *, unsigned int);
-int vic_run(int, atmos_data_struct *, all_vars_struct *, dmy_struct *,
+int vic_run(atmos_data_struct *, all_vars_struct *, dmy_struct *,
             global_param_struct *, lake_con_struct *, soil_con_struct *,
-            veg_con_struct *, veg_lib_struct *, veg_hist_struct *veg_hist);
+            veg_con_struct *, veg_lib_struct *);
 double volumetric_heat_capacity(double, double, double, double);
 int water_balance(lake_var_struct *, lake_con_struct, double, all_vars_struct *,
-                  int, int, int, double, soil_con_struct, veg_con_struct);
+                  int, int, double, soil_con_struct, veg_con_struct);
 int water_energy_balance(int, double *, double *, double, double, double,
                          double, double, double, double, double, double, double,
                          double, double, double, double *, double *, double *,
@@ -1254,7 +982,255 @@ int water_under_ice(int, double, double, double *, double *, double, int,
 void wrap_compute_zwt(soil_con_struct *, cell_data_struct *);
 void write_layer(layer_data_struct *, int, double *);
 void write_vegvar(veg_var_struct *, int);
-void zero_output_list(out_data_struct *);
+enum
+{
+    UNSET_FILE_FORMAT,
+    ASCII,
+    BINARY,
+    NETCDF3_CLASSIC,
+    NETCDF3_64BIT_OFFSET,
+    NETCDF4_CLASSIC,
+    NETCDF4
+};
+enum
+{
+    LITTLE,
+    BIG
+};
+enum
+{
+    FROM_DEFAULT,
+    FROM_VEGLIB,
+    FROM_VEGPARAM,
+    FROM_VEGHIST
+};
+enum
+{
+    AIR_TEMP,
+    ALBEDO,
+    CATM,
+    CHANNEL_IN,
+    FCANOPY,
+    FDIR,
+    LAI_IN,
+    LWDOWN,
+    PAR,
+    PREC,
+    PRESSURE,
+    VP,
+    SWDOWN,
+    WIND,
+    SKIP,
+    N_FORCING_TYPES
+};
+enum
+{
+    OUT_ASAT,
+    OUT_LAKE_AREA_FRAC,
+    OUT_LAKE_DEPTH,
+    OUT_LAKE_ICE,
+    OUT_LAKE_ICE_FRACT,
+    OUT_LAKE_ICE_HEIGHT,
+    OUT_LAKE_MOIST,
+    OUT_LAKE_SURF_AREA,
+    OUT_LAKE_SWE,
+    OUT_LAKE_SWE_V,
+    OUT_LAKE_VOLUME,
+    OUT_ROOTMOIST,
+    OUT_SMFROZFRAC,
+    OUT_SMLIQFRAC,
+    OUT_SNOW_CANOPY,
+    OUT_SNOW_COVER,
+    OUT_SNOW_DEPTH,
+    OUT_SOIL_ICE,
+    OUT_SOIL_LIQ,
+    OUT_SOIL_MOIST,
+    OUT_SOIL_WET,
+    OUT_SURFSTOR,
+    OUT_SURF_FROST_FRAC,
+    OUT_SWE,
+    OUT_WDEW,
+    OUT_ZWT,
+    OUT_ZWT_LUMPED,
+    OUT_BASEFLOW,
+    OUT_DELINTERCEPT,
+    OUT_DELSOILMOIST,
+    OUT_DELSURFSTOR,
+    OUT_DELSWE,
+    OUT_EVAP,
+    OUT_EVAP_BARE,
+    OUT_EVAP_CANOP,
+    OUT_INFLOW,
+    OUT_LAKE_BF_IN,
+    OUT_LAKE_BF_IN_V,
+    OUT_LAKE_BF_OUT,
+    OUT_LAKE_BF_OUT_V,
+    OUT_LAKE_CHAN_IN,
+    OUT_LAKE_CHAN_IN_V,
+    OUT_LAKE_CHAN_OUT,
+    OUT_LAKE_CHAN_OUT_V,
+    OUT_LAKE_DSTOR,
+    OUT_LAKE_DSTOR_V,
+    OUT_LAKE_DSWE,
+    OUT_LAKE_DSWE_V,
+    OUT_LAKE_EVAP,
+    OUT_LAKE_EVAP_V,
+    OUT_LAKE_PREC_V,
+    OUT_LAKE_RCHRG,
+    OUT_LAKE_RCHRG_V,
+    OUT_LAKE_RO_IN,
+    OUT_LAKE_RO_IN_V,
+    OUT_LAKE_VAPFLX,
+    OUT_LAKE_VAPFLX_V,
+    OUT_PET,
+    OUT_PREC,
+    OUT_RAINF,
+    OUT_REFREEZE,
+    OUT_RUNOFF,
+    OUT_SNOW_MELT,
+    OUT_SNOWF,
+    OUT_SUB_BLOWING,
+    OUT_SUB_CANOP,
+    OUT_SUB_SNOW,
+    OUT_SUB_SURFACE,
+    OUT_TRANSP_VEG,
+    OUT_WATER_ERROR,
+    OUT_ALBEDO,
+    OUT_BARESOILT,
+    OUT_FDEPTH,
+    OUT_LAKE_ICE_TEMP,
+    OUT_LAKE_SURF_TEMP,
+    OUT_RAD_TEMP,
+    OUT_SALBEDO,
+    OUT_SNOW_PACK_TEMP,
+    OUT_SNOW_SURF_TEMP,
+    OUT_SNOWT_FBFLAG,
+    OUT_SOIL_TEMP,
+    OUT_SOIL_TNODE,
+    OUT_SOIL_TNODE_WL,
+    OUT_SOILT_FBFLAG,
+    OUT_SURF_TEMP,
+    OUT_SURFT_FBFLAG,
+    OUT_TCAN_FBFLAG,
+    OUT_TDEPTH,
+    OUT_TFOL_FBFLAG,
+    OUT_VEGT,
+    OUT_ADV_SENS,
+    OUT_ADVECTION,
+    OUT_DELTACC,
+    OUT_DELTAH,
+    OUT_ENERGY_ERROR,
+    OUT_FUSION,
+    OUT_GRND_FLUX,
+    OUT_IN_LONG,
+    OUT_LATENT,
+    OUT_LATENT_SUB,
+    OUT_MELT_ENERGY,
+    OUT_LWNET,
+    OUT_SWNET,
+    OUT_R_NET,
+    OUT_RFRZ_ENERGY,
+    OUT_SENSIBLE,
+    OUT_SNOW_FLUX,
+    OUT_AERO_COND,
+    OUT_AERO_COND1,
+    OUT_AERO_COND2,
+    OUT_AERO_RESIST,
+    OUT_AERO_RESIST1,
+    OUT_AERO_RESIST2,
+    OUT_AIR_TEMP,
+    OUT_CATM,
+    OUT_DENSITY,
+    OUT_FCANOPY,
+    OUT_FDIR,
+    OUT_LAI,
+    OUT_LWDOWN,
+    OUT_PAR,
+    OUT_PRESSURE,
+    OUT_QAIR,
+    OUT_REL_HUMID,
+    OUT_SWDOWN,
+    OUT_SURF_COND,
+    OUT_VP,
+    OUT_VPD,
+    OUT_WIND,
+    OUT_ADV_SENS_BAND,
+    OUT_ADVECTION_BAND,
+    OUT_ALBEDO_BAND,
+    OUT_DELTACC_BAND,
+    OUT_GRND_FLUX_BAND,
+    OUT_IN_LONG_BAND,
+    OUT_LATENT_BAND,
+    OUT_LATENT_SUB_BAND,
+    OUT_MELT_ENERGY_BAND,
+    OUT_LWNET_BAND,
+    OUT_SWNET_BAND,
+    OUT_RFRZ_ENERGY_BAND,
+    OUT_SENSIBLE_BAND,
+    OUT_SNOW_CANOPY_BAND,
+    OUT_SNOW_COVER_BAND,
+    OUT_SNOW_DEPTH_BAND,
+    OUT_SNOW_FLUX_BAND,
+    OUT_SNOW_MELT_BAND,
+    OUT_SNOW_PACKT_BAND,
+    OUT_SNOW_SURFT_BAND,
+    OUT_SWE_BAND,
+    OUT_APAR,
+    OUT_GPP,
+    OUT_RAUT,
+    OUT_NPP,
+    OUT_LITTERFALL,
+    OUT_RHET,
+    OUT_NEE,
+    OUT_CLITTER,
+    OUT_CINTER,
+    OUT_CSLOW,
+    N_OUTVAR_TYPES
+};
+enum
+{
+    OUT_TYPE_DEFAULT,
+    OUT_TYPE_CHAR,
+    OUT_TYPE_SINT,
+    OUT_TYPE_USINT,
+    OUT_TYPE_INT,
+    OUT_TYPE_FLOAT,
+    OUT_TYPE_DOUBLE
+};
+enum
+{
+    AGG_TYPE_AVG,
+    AGG_TYPE_BEG,
+    AGG_TYPE_END,
+    AGG_TYPE_MAX,
+    AGG_TYPE_MIN,
+    AGG_TYPE_SUM
+};
+enum
+{
+    DISP_VERSION,
+    DISP_COMPILE_TIME,
+    DISP_ALL
+};
+enum calendars
+{
+    CALENDAR_STANDARD,
+    CALENDAR_GREGORIAN,
+    CALENDAR_PROLEPTIC_GREGORIAN,
+    CALENDAR_NOLEAP,
+    CALENDAR_365_DAY,
+    CALENDAR_360_DAY,
+    CALENDAR_JULIAN,
+    CALENDAR_ALL_LEAP,
+    CALENDAR_366_DAY
+};
+enum time_units
+{
+    TIME_UNITS_SECONDS,
+    TIME_UNITS_MINUTES,
+    TIME_UNITS_HOURS,
+    TIME_UNITS_DAYS
+};
 typedef struct {
     size_t N_ELEM;
     _Bool SIGNED;
@@ -1271,14 +1247,69 @@ typedef struct {
     int FORCE_INDEX[2][N_FORCING_TYPES];
     size_t N_TYPES[2];
 } param_set_struct;
+typedef struct {
+    char prefix[2048];
+    char filename[2048];
+    FILE *fh;
+    size_t nvars;
+    unsigned int *varid;
+} out_data_file_struct;
+typedef struct {
+    double total_moist_storage;
+    double total_soil_moist;
+    double surfstor;
+    double swe;
+    double wdew;
+} save_data_struct;
+typedef struct {
+    char varname[2048];
+    _Bool write;
+    char format[2048];
+    unsigned short int type;
+    double mult;
+    unsigned short int aggtype;
+    unsigned int nelem;
+    double *data;
+    double *aggdata;
+} out_data_struct;
+typedef struct {
+    atmos_data_struct *atmos;
+    double dt;
+    energy_bal_struct *energy;
+    filep_struct filep;
+    size_t rec;
+    out_data_struct *out_data;
+    out_data_file_struct *out_data_files;
+    snow_data_struct *snow;
+    soil_con_struct soil_con;
+    veg_con_struct *veg_con;
+    veg_var_struct *veg_var;
+} Error_struct;
+double air_density(double t, double p);
 double all_30_day_from_dmy(dmy_struct *dmy);
 double all_leap_from_dmy(dmy_struct *dmy);
+double average(double *ar, size_t n);
+double calc_energy_balance_error(double, double, double, double, double);
 void calc_root_fractions(veg_con_struct *veg_con, soil_con_struct *soil_con);
+double calc_water_balance_error(double, double, double, double);
+unsigned short int calendar_from_chars(char *cal_chars);
+_Bool check_write_flag(int rec);
+void collect_eb_terms(energy_bal_struct, snow_data_struct, cell_data_struct,
+                      double, double, double, int, int, double, int, int,
+                      double *, double, out_data_struct *);
+void collect_wb_terms(cell_data_struct, veg_var_struct, snow_data_struct,
+                      double, double, double, int, double, int, double *,
+                      double *, out_data_struct *);
+void compute_derived_state_vars(all_vars_struct *, soil_con_struct *,
+                                veg_con_struct *);
+void compute_lake_params(lake_con_struct *, soil_con_struct);
 void compute_treeline(atmos_data_struct *, dmy_struct *, double, double *,
                       _Bool *);
+size_t count_force_vars(FILE *gp);
 void cmd_proc(int argc, char **argv, char *globalfilename);
 void compress_files(char string[]);
 out_data_struct *create_output_list(void);
+void get_current_datetime(char *cdt);
 double date2num(double origin, dmy_struct *date, double tzoffset,
                 unsigned short int calendar, unsigned short int time_units);
 void dmy_all_30_day(double julian, dmy_struct *dmy);
@@ -1292,21 +1323,23 @@ void display_current_settings(int);
 double fractional_day_from_dmy(dmy_struct *dmy);
 void free_all_vars(all_vars_struct *all_vars, int Nveg);
 void free_dmy(dmy_struct **dmy);
-void free_out_data_files(out_data_file_struct **);
 void free_out_data(out_data_struct **);
 void free_vegcon(veg_con_struct **veg_con);
-double get_dist(double lat1, double long1, double lat2, double long2);
+void generate_default_state(all_vars_struct *, soil_con_struct *,
+                            veg_con_struct *);
+void generate_default_lake_state(all_vars_struct *, soil_con_struct *,
+                                 lake_con_struct);
 void get_parameters(FILE *paramfile);
 void init_output_list(out_data_struct *out_data, int write, char *format,
                       int type, double mult);
+void initialize_energy(energy_bal_struct **energy, size_t nveg);
 void initialize_filenames(void);
 void initialize_fileps(void);
 void initialize_global(void);
 void initialize_options(void);
 void initialize_parameters(void);
 void initialize_snow(snow_data_struct **snow, size_t veg_num);
-void initialize_soil(cell_data_struct **cell, soil_con_struct *soil_con,
-                     size_t veg_num);
+void initialize_soil(cell_data_struct **cell, size_t veg_num);
 void initialize_time(void);
 void initialize_veg(veg_var_struct **veg_var, size_t nveg);
 double julian_day_from_dmy(dmy_struct *dmy, unsigned short int calendar);
@@ -1326,6 +1359,9 @@ void num2date(double origin, double time_value, double tzoffset,
 FILE *open_file(char string[], char type[]);
 void parse_nc_time_units(char *nc_unit_chars, unsigned short int *units,
                          dmy_struct *dmy);
+void put_data(all_vars_struct *, atmos_data_struct *, soil_con_struct *,
+              veg_con_struct *, veg_lib_struct *veg_lib, lake_con_struct *,
+              out_data_struct *, save_data_struct *, int);
 void print_cell_data(cell_data_struct *cell, size_t nlayers, size_t nfrost);
 void print_dmy(dmy_struct *dmy);
 void print_energy_bal(energy_bal_struct *eb, size_t nnodes, size_t nfronts);
@@ -1336,7 +1372,8 @@ void print_global_param(global_param_struct *gp);
 void print_lake_con(lake_con_struct *lcon, size_t nlnodes);
 void print_lake_var(lake_var_struct *lvar, size_t nlnodes, size_t nfronts,
                     size_t nlayers, size_t nnodes, size_t nfrost);
-void print_layer_data(layer_data_struct *ldata, size_t nfrost);
+void print_layer_data_states(layer_data_struct *ldata, size_t nfrost);
+void print_layer_data_fluxes(layer_data_struct *ldata);
 void print_license(void);
 void print_option(option_struct *option);
 void print_out_data(out_data_struct *out, size_t nelem);
@@ -1353,13 +1390,18 @@ void print_veg_lib(veg_lib_struct *vlib, char carbon);
 void print_veg_var(veg_var_struct *vvar, size_t ncanopy);
 void print_version(char *);
 void print_usage(char *);
+double q_to_vp(double q, double p);
 int set_output_var(out_data_file_struct *, int, int, out_data_struct *, char *,
                    int, char *, int, double);
 void soil_moisture_from_water_table(soil_con_struct *soil_con, size_t nlayers);
+void sprint_dmy(char *str, dmy_struct *dmy);
 unsigned short int timeunits_from_chars(char *units_chars);
 int update_step_vars(all_vars_struct *, veg_con_struct *, veg_hist_struct *);
 int invalid_date(unsigned short int calendar, dmy_struct *dmy);
 void validate_parameters(void);
+char will_it_snow(double *t, double t_offset, double max_snow_temp,
+                  double *prcp, size_t n);
+void zero_output_list(out_data_struct *);
 int flag;
 size_t NR;
 size_t NF;
@@ -1369,4 +1411,5 @@ parameters_struct param;
 filenames_struct filenames;
 filep_struct filep;
 param_set_struct param_set;
+
 '''

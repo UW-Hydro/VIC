@@ -173,7 +173,7 @@ def make_cffi_headers():
                 line = maybe_eval_string(line)
                 f.write(line)
                 f.write('\n')
-        f.write("'''")
+        f.write("'''\n")
 
 # -------------------------------------------------------------------- #
 # Get version string

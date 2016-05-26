@@ -484,7 +484,7 @@ typedef struct {
 } save_data_struct;
 
 /******************************************************************************
- * @brief   This structure stores output information for individual history streams
+ * @brief   This structure stores metadata for individual variables
  *****************************************************************************/
 typedef struct {
     char varname[MAXSTRING];  /**< name of variable */
@@ -659,7 +659,7 @@ double time_delta(dmy_struct *dmy_current, unsigned short int freq, int n);
 int update_step_vars(all_vars_struct *, veg_con_struct *, veg_hist_struct *);
 int invalid_date(unsigned short int calendar, dmy_struct *dmy);
 void validate_parameters(void);
-void validate_stream_settings(stream_struct *stream);
+void validate_streams(stream_struct **stream);
 char will_it_snow(double *t, double t_offset, double max_snow_temp,
                   double *prcp, size_t n);
 void zero_output_list(double **);

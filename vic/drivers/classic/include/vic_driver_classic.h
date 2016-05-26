@@ -50,7 +50,6 @@ void free_veglib(veg_lib_struct **);
 double get_dist(double lat1, double long1, double lat2, double long2);
 void get_force_type(char *, int, int *);
 void get_global_param(FILE *);
-void init_output_list(double **, int, char *, int, double);
 void initialize_forcing_files(void);
 void make_in_and_outfiles(filep_struct *filep, filenames_struct *filenames,
                           soil_con_struct *soil, stream_struct **streams,

@@ -532,10 +532,7 @@ get_global_param(FILE *gp)
             else if (strcasecmp("OUTVAR", optstr) == 0) {
                 ; // do nothing
             }
-            else if (strcasecmp("OUTPUT_STEPS_PER_DAY", optstr) == 0) {
-                ; // do nothing
-            }
-            else if (strcasecmp("SKIPYEAR", optstr) == 0) {
+            else if (strcasecmp("AGGFREQ", optstr) == 0) {
                 ; // do nothing
             }
             else if (strcasecmp("COMPRESS", optstr) == 0) {
@@ -552,92 +549,6 @@ get_global_param(FILE *gp)
                      strcasecmp("FCANOPY", optstr) == 0) {
                 log_err("Time-varying vegetation parameters not implemented "
                         "in image mode");
-            }
-
-            /*************************************
-               Fail when deprecated options are used.
-            *************************************/
-            else if (strcasecmp("TIME_STEP", optstr) == 0) {
-                log_err("TIME_STEP has been replaced with MODEL_STEPS_PER_DAY, "
-                        "update your global parameter file accordingly");
-            }
-            else if (strcasecmp("SNOW_STEP", optstr) == 0) {
-                log_err("SNOW_STEP has been replaced with SNOW_STEPS_PER_DAY, "
-                        "update your global parameter file accordingly");
-            }
-            else if (strcasecmp("OUT_STEP", optstr) == 0) {
-                log_err("OUT_STEP has been replaced with OUTPUT_STEPS_PER_DAY, "
-                        "update your global parameter file accordingly");
-            }
-            else if (strcasecmp("FORCE_DT", optstr) == 0) {
-                log_err("FORCE_DT has been replaced with FORCE_STEPS_PER_DAY, "
-                        "update your global parameter file accordingly");
-            }
-            else if (strcasecmp("NLAYER", optstr) == 0) {
-                log_err("NLAYER has been deprecated in the image driver");
-            }
-            else if (strcasecmp("FORCE_FORMAT", optstr) == 0) {
-                log_err("FORCE_FORMAT has been deprecated in the image driver");
-            }
-            else if (strcasecmp("FORCE_ENDIAN", optstr) == 0) {
-                log_err("FORCE_ENDIAN has been deprecated in the image driver");
-            }
-            else if (strcasecmp("GRID_DECIMAL", optstr) == 0) {
-                log_err("GRID_DECIMAL has been deprecated in the image driver");
-            }
-            else if (strcasecmp("BINARY_STATE_FILE", optstr) == 0) {
-                log_err(
-                    "BINARY_STATE_FILE has been deprecated in the image driver");
-            }
-            else if (strcasecmp("RESOLUTION", optstr) == 0) {
-                log_err("RESOLUTION has been deprecated in the image driver");
-            }
-            else if (strcasecmp("EQUAL_AREA", optstr) == 0) {
-                log_err("EQUAL_AREA has been deprecated in the image driver");
-            }
-            else if (strcasecmp("CONTINUEONERROR", optstr) == 0) {
-                log_err(
-                    "CONTINUEONERROR has been deprecated in the image driver");
-            }
-            else if (strcasecmp("BINARY_OUTPUT", optstr) == 0) {
-                log_err("BINARY_OUTPUT has been deprecated in the image driver");
-            }
-            else if (strcasecmp("COMPRESS", optstr) == 0) {
-                log_err("COMPRESS has been deprecated in the image driver");
-            }
-            else if (strcasecmp("PRT_HEADER", optstr) == 0) {
-                log_err("PRT_HEADER has been deprecated in the image driver");
-            }
-            else if (strcasecmp("FORCE_STEPS_PER_DAY", optstr) == 0) {
-                log_err(
-                    "FORCE_STEPS_PER_DAY has been deprecated in the image driver");
-            }
-            else if (strcasecmp("FORCEYEAR", optstr) == 0) {
-                log_err("FORCEYEAR has been deprecated in the image driver");
-            }
-            else if (strcasecmp("FORCEMONTH", optstr) == 0) {
-                log_err("FORCEMONTH has been deprecated in the image driver");
-            }
-            else if (strcasecmp("FORCEDAY", optstr) == 0) {
-                log_err("FORCEDAY has been deprecated in the image driver");
-            }
-            else if (strcasecmp("FORCESEC", optstr) == 0) {
-                log_err("FORCESEC has been deprecated in the image driver");
-            }
-            else if (strcasecmp("ALMA_OUTPUT", optstr) == 0) {
-                log_err("ALMA_OUTPUT has been deprecated, update your global "
-                        "parameter file accordingly");
-            }
-            else if (strcasecmp("MOISTFRACT", optstr) == 0) {
-                log_err("MOISTFRACT has been deprecated and has been replaced "
-                        "with two new output variables OUT_SOIL_ICE_FRAC and "
-                        "OUT_SOIL_LIQ_FRAC, update your global parameter file "
-                        "accordingly");
-            }
-            else if (strcasecmp("PRT_SNOW_BAND", optstr) == 0) {
-                log_err("PRT_SNOW_BAND has been deprecated. To output band "
-                        "specific variables, directly specify them in the "
-                        "global parameter file");
             }
 
             /*************************************

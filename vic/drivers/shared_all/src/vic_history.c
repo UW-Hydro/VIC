@@ -113,6 +113,44 @@ setup_stream(stream_struct *stream,
 }
 
 /******************************************************************************
+ * @brief    This routine frees the memory in the streams array.
+ *****************************************************************************/
+void
+validate_streams(stream_struct **streams)
+{
+    extern option_struct       options;
+
+    size_t                     streamnum;
+
+    // validate stream settings
+    for (streamnum = 0; streamnum < options.Noutstreams; streamnum++) {
+        if ((*streams)[streamnum].ngridcells < 1) {
+            log_err("Number of gridcells in stream is less than 1");
+        }
+        if ((*streams)[streamnum].nvars < 1) {
+            log_err("Number of variables in stream is less than 1");
+        }
+        if (strcasecmp("", ((*streams)[streamnum].prefix)) == 0) {
+            log_err("Stream prefix not set");
+        }
+        if ((*streams)[streamnum].type == NULL) {
+            log_err("Stream type array not allocated");
+        }
+        if ((*streams)[streamnum].mult == NULL) {
+            log_err("Stream mult array not allocated");
+        }
+        if ((*streams)[streamnum].varid == NULL) {
+            log_err("Stream varid array not allocated");
+        }
+        if ((*streams)[streamnum].aggtype == NULL) {
+            log_err("Stream aggtype array not allocated");
+        }
+        if ((*streams)[streamnum].aggdata == NULL) {
+            log_err("Stream agg_data array not allocated");
+        }
+    }
+}
+/******************************************************************************
  * @brief   This routine allocates memory for the stream aggdata array.  The
             shape of this array is [ngridcells, nvars, nelems, nbins].
  *****************************************************************************/

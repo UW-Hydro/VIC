@@ -115,11 +115,12 @@ main(int   argc,
 
     /** Set up output data structures **/
     set_output_met_data_info();
+    // out_data is shape [ngridcells (1), N_OUTVAR_TYPES]
     out_data = create_outdata(1);
     fclose(filep.globalparam);
     filep.globalparam = open_file(filenames.global, "r");
     parse_output_info(filep.globalparam, &streams, &(dmy[0]));
-    // validate_streams(&streams);
+    validate_streams(&streams);
 
     /** Check and Open Files **/
     check_files(&filep, &filenames);
@@ -204,8 +205,7 @@ main(int   argc,
 
             /** Initialize the storage terms in the water and energy balances **/
             initialize_put_data(&all_vars, &atmos[0], &soil_con, veg_con,
-                                veg_lib,
-                                &lake_con, out_data, &save_data);
+                                veg_lib, &lake_con, out_data, &save_data);
 
             /******************************************
                Run Model in Grid Cell for all Time Steps
@@ -297,7 +297,7 @@ main(int   argc,
     free_atmos(global_param.nrecs, &atmos);
     free_dmy(&dmy);
     free_streams(&streams);
-    free_out_data(1, out_data);
+    free_out_data(1, out_data);  // 1 is for the number of gridcells, 1 in classic driver
     fclose(filep.soilparam);
     free_veglib(&veg_lib);
     fclose(filep.vegparam);

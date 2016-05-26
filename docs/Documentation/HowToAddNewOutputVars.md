@@ -39,7 +39,7 @@ enum
 {
     AIR_TEMP,       /**< air temperature per time step [C] (ALMA_INPUT: [K]) */
     ...
-    WIND_N,         /**< meridional component of wind speed [m/s] */
+    WIND,           /**< meridional component of wind speed [m/s] */
     NEW_FORCE_VAR,  /**< Description of new forcing variable [units] */
     SKIP,           /**< place holder for unused data columns */
     // Last value of enum - DO NOT ADD ANYTHING BELOW THIS LINE!!
@@ -48,7 +48,7 @@ enum
 };
 ```
 
-## 3. For output variables, populate the variable's metadata in output_list_utils.c.
+## 3. For output variables, populate the variable's metadata in `vic_metadata.c`.
 
 In the function `set_output_met_data_info()`, there is a series of calls to `strcpy` setting metadata for each output variable:
 

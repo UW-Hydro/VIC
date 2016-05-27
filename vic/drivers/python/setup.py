@@ -8,6 +8,7 @@ import warnings
 import glob
 import subprocess
 import shutil
+from datetime import datetime
 
 from setuptools import setup, find_packages, Command
 from setuptools.extension import Extension
@@ -31,6 +32,7 @@ QUALIFIER = ''
 
 FULLVERSION = VERSION
 write_version = False
+write_headers = True
 
 vic_root_rel_path = os.path.join(os.pardir, os.pardir, os.pardir)
 setup_py_path = os.path.abspath(os.path.dirname(__file__))
@@ -54,20 +56,20 @@ class CleanCommand(Command):
     def run(self):
         for path in ['./build', './dist', './__pycache__', './vic.egg-info']:
             try:
-                print('removing %s' % path)
                 shutil.rmtree(path)
-            except:
+                print('removed %s' % path)
+            except FileNotFoundError:
                 pass
 
-        files = ['vic/_vic.py']
+        files = ['vic/_vic.py', 'vic_headers.py']
         files.extend(glob.glob('vic/*pyc'))
         files.extend(glob.glob('vic_core*'))
 
         for filename in files:
             try:
-                print('removing %s' % filename)
                 os.remove(filename)
-            except:
+                print('removed %s' % filename)
+            except FileNotFoundError:
                 pass
 
 
@@ -84,6 +86,98 @@ short_version = '{1}'
         f.write(version_text.format(FULLVERSION, VERSION))
 # -------------------------------------------------------------------- #
 
+
+# -------------------------------------------------------------------- #
+def maybe_eval_between_brackets(s):
+    '''run eval on strings between brackets e.g. [20 + 3] becomes [23]'''
+    matches = re.findall("\[(.*?)\]", s)
+    for match in matches:
+        if match:
+            try:
+                s = s.replace(match, str(eval(match)))
+            except (NameError, SyntaxError):
+                pass
+    return s
+# -------------------------------------------------------------------- #
+
+
+# -------------------------------------------------------------------- #
+def make_cffi_headers():
+    '''Process the C headers such that CFFI can interpret them'''
+
+    omissions = ['va_list',
+                 'error_print_atmos_energy_bal',
+                 'error_print_atmos_moist_bal',
+                 'error_print_canopy_energy_bal',
+                 'error_print_solve_T_profile',
+                 'error_print_surf_energy_bal',
+                 'ErrorPrintIcePackEnergyBalance',
+                 'ErrorPrintSnowPackEnergyBalance',
+                 'func_atmos_energy_bal',
+                 'func_atmos_moist_bal',
+                 'func_canopy_energy_bal',
+                 'func_surf_energy_bal',
+                 'IceEnergyBalance',
+                 'root_brent',
+                 'SnowPackEnergyBalance',
+                 'soil_thermal_eqn',
+                 'zwtvmoist_zwt',
+                 'zwtvmoist_moist']
+
+    args = ['gcc', '-std=c99', '-E',
+            '-P', os.path.join(vic_root_abs_path, 'vic', 'drivers',
+                               'python', 'src', 'globals.c'),
+            '-I%s' % os.path.join(vic_root_abs_path, 'vic', 'drivers',
+                                  'python', 'include', ''),
+            '-I%s' % os.path.join(vic_root_abs_path, 'vic', 'drivers',
+                                  'shared_all', 'include', ''),
+            '-I%s' % os.path.join(vic_root_abs_path, 'vic',
+                                  'vic_run', 'include', '')]
+
+    proc = subprocess.Popen(' '.join(args),
+                            shell=True,
+                            stderr=subprocess.PIPE,
+                            stdout=subprocess.PIPE)
+    retvals = proc.communicate()
+
+    stdout = retvals[0].decode()
+    stderr = retvals[1].decode()
+
+    if proc.returncode:
+        print(' '.join(args))
+        raise RuntimeError('preprocessor experienced an error: %s' % stderr)
+
+    with open(os.path.join(setup_dir, './vic_headers.py'), 'w') as f:
+        # write python script header information
+        f.write('#!/usr/bin/env python\n')
+        f.write("'''\n    Preprocessed Headers for VIC Python Driver\n"
+                "    Last updated %s\n'''\n\n\n" % datetime.now())
+        # now we write the preprocessed headers, skipping the system headers
+        f.write("headers = '''\n")
+        skip_headers = True
+        for line in stdout.split('\n'):
+            # Note: This check for LOG_DEST is here because the subprocess call
+            # above includes system headers which we don't want in headers.py.
+            # This could be improved by adding a more sophisticated determination
+            # of when we've passed the system headers (always at the begining of
+            # the standard out stream.
+            if 'LOG_DEST' in line:
+                skip_headers = False
+
+            # Skip some lines if they contain functions cffi cannot use
+            for omit in omissions:
+                if omit in line:
+                    skip_omit = True
+                    break
+                else:
+                    skip_omit = False
+            if not skip_headers and not skip_omit:
+                # Evaluate strings that are not completely evaluated by the
+                # preprocessor.
+                line = maybe_eval_between_brackets(line)
+                f.write(line)
+                f.write('\n')
+        f.write("'''\n")
 
 # -------------------------------------------------------------------- #
 # Get version string
@@ -134,6 +228,9 @@ else:
 # -------------------------------------------------------------------- #
 if write_version:
     write_version_py()
+
+if write_headers:
+    make_cffi_headers()
 # -------------------------------------------------------------------- #
 
 sources = []

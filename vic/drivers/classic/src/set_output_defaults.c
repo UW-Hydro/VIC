@@ -51,6 +51,9 @@ set_output_defaults(stream_struct **streams,
     if (options.FROZEN_SOIL) {
         options.Noutstreams++;
     }
+    if (options.SNOW_BAND) {
+        options.Noutstreams++;
+    }
     if (options.LAKES) {
         options.Noutstreams++;
     }
@@ -94,6 +97,19 @@ set_output_defaults(stream_struct **streams,
         setup_stream(&((*streams)[streamnum]), nvars, 1);
         (*streams)[streamnum].agg_alarm = default_alarm;
         strcpy((*streams)[streamnum].prefix, "fdepth");
+        (*streams)[streamnum].file_format = ASCII;
+    }
+    if (options.SNOW_BAND) {
+        streamnum++;
+        if (options.FULL_ENERGY) {
+            nvars = 13;
+        }
+        else {
+            nvars = 9;
+        }
+        setup_stream(&((*streams)[streamnum]), nvars, 1);
+        (*streams)[streamnum].agg_alarm = default_alarm;
+        strcpy((*streams)[streamnum].prefix, "snowband");
         (*streams)[streamnum].file_format = ASCII;
     }
     if (options.LAKES) {
@@ -222,7 +238,25 @@ set_output_defaults(stream_struct **streams,
         set_output_var(&((*streams)[streamnum]), "OUT_SURF_FROST_FRAC",
                        varnum++, "%.4f", OUT_TYPE_FLOAT, 1, AGG_TYPE_DEFAULT);
     }
-
+    if (options.SNOW_BAND) {
+        streamnum++;
+        varnum = 0;
+        set_output_var(&((*streams)[streamnum]), "OUT_SWE_BAND", varnum++, "%.4f", OUT_TYPE_FLOAT, 1, AGG_TYPE_DEFAULT);
+        set_output_var(&((*streams)[streamnum]), "OUT_SNOW_DEPTH_BAND", varnum++, "%.4f", OUT_TYPE_FLOAT, 1, AGG_TYPE_DEFAULT);
+        set_output_var(&((*streams)[streamnum]), "OUT_SNOW_CANOPY_BAND", varnum++, "%.4f", OUT_TYPE_FLOAT, 1, AGG_TYPE_DEFAULT);
+        if (options.FULL_ENERGY) {
+            set_output_var(&((*streams)[streamnum]), "OUT_ADVECTION_BAND", varnum++, "%.4f", OUT_TYPE_FLOAT, 1, AGG_TYPE_DEFAULT);
+            set_output_var(&((*streams)[streamnum]), "OUT_DELTACC_BAND", varnum++, "%.4f", OUT_TYPE_FLOAT, 1, AGG_TYPE_DEFAULT);
+            set_output_var(&((*streams)[streamnum]), "OUT_SNOW_FLUX_BAND", varnum++, "%.4f", OUT_TYPE_FLOAT, 1, AGG_TYPE_DEFAULT);
+            set_output_var(&((*streams)[streamnum]), "OUT_RFRZ_ENERGY_BAND", varnum++, "%.4f", OUT_TYPE_FLOAT, 1, AGG_TYPE_DEFAULT);
+        }
+        set_output_var(&((*streams)[streamnum]), "OUT_SWNET_BAND", varnum++, "%.4f", OUT_TYPE_FLOAT, 1, AGG_TYPE_DEFAULT);
+        set_output_var(&((*streams)[streamnum]), "OUT_LWNET_BAND", varnum++, "%.4f", OUT_TYPE_FLOAT, 1, AGG_TYPE_DEFAULT);
+        set_output_var(&((*streams)[streamnum]), "OUT_ALBEDO_BAND", varnum++, "%.4f", OUT_TYPE_FLOAT, 1, AGG_TYPE_DEFAULT);
+        set_output_var(&((*streams)[streamnum]), "OUT_LATENT_BAND", varnum++, "%.4f", OUT_TYPE_FLOAT, 1, AGG_TYPE_DEFAULT);
+        set_output_var(&((*streams)[streamnum]), "OUT_SENSIBLE_BAND", varnum++, "%.4f", OUT_TYPE_FLOAT, 1, AGG_TYPE_DEFAULT);
+        set_output_var(&((*streams)[streamnum]), "OUT_GRND_FLUX_BAND", varnum++, "%.4f", OUT_TYPE_FLOAT, 1, AGG_TYPE_DEFAULT);
+    }
     if (options.LAKES) {
         streamnum++;
         varnum = 0;

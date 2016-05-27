@@ -1,6 +1,6 @@
 # Snow Band Output Files
 
-When the model is run with snow elevation bands, and PRT_SNOW_BAND is turned on in the [global parameter file](GlobalParam.md), snow pack information for each elevation band will be output to files in the results directory with the prefix `snow_band_`. Energy fluxes are output only for the full energy balance model, so there are file descriptions for both full energy and water balance model output files.
+When the model is run with snow elevation bands, and default outputs are specified in the [global parameter file](GlobalParam.md), snow pack information for each elevation band will be output to files in the results directory with the prefix `snow_band_`. Energy fluxes are output only for the full energy balance model, so there are file descriptions for both full energy and water balance model output files.
 
 Each output file contains model output from one grid cell. The files use the naming convention `snow_band_xx.xx_yy.yy`, where `xx.xx` is the latitude, and `yy.yy` is the longitude. The number of decimal places in the output filename is determined by GRID_DECIMAL in the [global parameter file](GlobalParam.md), while the latitude and longitude values come from the [soil parameter file](SoilParam.md).
 

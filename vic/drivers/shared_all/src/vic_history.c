@@ -133,6 +133,9 @@ validate_streams(stream_struct **streams)
         if (strcasecmp("", ((*streams)[streamnum].prefix)) == 0) {
             log_err("Stream prefix not set");
         }
+        if ((*streams)[streamnum].file_format == UNSET_FILE_FORMAT) {
+            log_err("Stream file_format not set");
+        }
         if ((*streams)[streamnum].type == NULL) {
             log_err("Stream type array not allocated");
         }

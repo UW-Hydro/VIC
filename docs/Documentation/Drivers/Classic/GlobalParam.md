@@ -448,11 +448,8 @@ RESULT_DIR      (put the result directory path here)    # Results directory path
 # file, VIC will produce the same set of output files that it has
 # produced in earlier versions, namely "fluxes" and "snow" files, plus
 # "fdepth" files if FROZEN_SOIL is TRUE and "snowband" files if
-# PRT_SNOW_BAND is TRUE.  These files will have the same contents and
+# snowbands are specified.  These files will have the same contents and
 # format as in earlier versions.
-#
-# If you do specify the file names and contents in the global param file,
-# PRT_SNOW_BAND will have no effect.
 #
 # Format:
 #

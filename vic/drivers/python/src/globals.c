@@ -40,3 +40,4 @@ parameters_struct   param;
 filenames_struct    filenames;
 filep_struct        filep;
 param_set_struct    param_set;
+out_metadata_struct out_metadata[N_OUTVAR_TYPES];

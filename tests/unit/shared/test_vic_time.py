@@ -298,11 +298,9 @@ def test_dt_seconds_to_time_units():
 
 def test_calendar_from_chars():
     for cal, expected in calendars.items():
-        actual = vic_lib.calendar_from_chars(ffi.new('char[]', cal.lower().encode()))
-        assert actual == expected
-
-        actual = vic_lib.calendar_from_chars(ffi.new('char[]', cal.upper().encode()))
-        assert actual == expected
+        assert vic_lib.str_to_calendar(cal.encode()) == expected
+        assert vic_lib.str_to_calendar(cal.upper().encode()) == expected
+        assert vic_lib.str_to_calendar(cal.lower().encode()) == expected
 
 
 def timeunits_from_chars():
@@ -326,20 +324,23 @@ def test_parse_nc_time_units():
 
 
 def test_timedelta():
-    dmy = ffi.new("dmy_struct *")
 
-    # First check the easy (sub)daily time deltas
-    for n in range(1, 61, 5):
-        for freq in ['seconds', 'minutes', 'hours', 'days']:
-            expected = pd.timedelta(**{freq: n}).total_seconds() / 86400
-            actual = vic_lib.time_delta(dmy, freqs[freq], n)  # returns time delta in days
-            assert actual == expected
-
-    # Now, spot check a few of the harder ones
+    dmy = ffi.new('dmy_struct *')
     dmy[0].year = 2015
     dmy[0].month = 1
     dmy[0].day = 1
     dmy[0].dayseconds = 0
+    dmy[0].day_in_year = 1
+
+    # First check the easy (sub)daily time deltas
+    for n in range(1, 61, 5):
+        for freq in ['seconds', 'minutes', 'hours', 'days']:
+            print(freq, freqs[freq], n)
+            expected = pd.Timedelta(**{freq: n}).total_seconds() / 86400.
+            actual = vic_lib.time_delta(dmy, freqs[freq], n)  # [days]
+            np.testing.assert_allclose(actual, expected)
+
+    # Now, spot check a few of the harder ones
     vic_lib.global_param.calendar = calendars['standard']
     actual = vic_lib.time_delta(dmy, freqs['months'], 1)
     assert actual == 31
@@ -365,9 +366,11 @@ def test_dmy_equal():
 def test_strpdmy():
     dmy = ffi.new("dmy_struct *")
 
-    dates = pd.date_range('2015-12-18', '2016-12-22', freq='12H')
-    for date_format in ['%Y-%m-%d-%H', '%Y-%m-%d-%H']:
-        for date in dates:
-            date_str = date.strftime(date_format)
-            vic_lib.strpdmy(date_str, date_format, dmy)
-            assert dmy_to_datetime(dmy) == date.to_datetime()
+    dates = pd.date_range('2015-12-18', '2016-12-22', freq='1D')
+    date_format = '%Y-%m-%d'
+    for date in dates:
+        date_str = date.strftime(date_format)
+        vic_lib.strpdmy(date_str.encode(), date_format.encode(), dmy)
+        expected = date.to_datetime()
+        actual = dmy_to_datetime(dmy)
+        assert abs(expected - actual) < datetime.timedelta(seconds=1)

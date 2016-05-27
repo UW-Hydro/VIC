@@ -823,13 +823,16 @@ time_delta(dmy_struct        *dmy_current,
 
     // uniform timedeltas
     if (freq == FREQ_NSECONDS) {
-        td = n / SEC_PER_DAY;
+        td = (double) n / (double) SEC_PER_DAY;
     }
     else if (freq == FREQ_NMINUTES) {
-        td = n / MIN_PER_DAY;
+        td = (double) n / (double) MIN_PER_DAY;
+    }
+    else if (freq == FREQ_NHOURS) {
+        td = (double) n / (double) HOURS_PER_DAY;
     }
     else if (freq == FREQ_NDAYS) {
-        td = n;
+        td = (double) n;
     }
     // non-uniform timedeltas
     else {
@@ -896,13 +899,17 @@ strpdmy(const char *s,
 {
     struct tm t;
 
-    if (strptime(s, format, &t) != NULL) {
-        log_err("Error while parsing date/time string");
-    }
+    // Initialize some of the time struct
+    t.tm_mon = 1;
+    t.tm_mday = 1;
+    t.tm_hour = 0;
+    t.tm_min = 0;
+    t.tm_sec = 0;
 
-    dmy->year = t.tm_year + 1900;
-    dmy->month = t.tm_mon;
+    strptime(s, format, &t);
+
+    dmy->year = t.tm_year + 1900;  // tm_year is Year - 1900
+    dmy->month = t.tm_mon + 1;  // tm_month is [0-11]
     dmy->day = t.tm_mday;
-    dmy->dayseconds = t.tm_hour * SEC_PER_HOUR + t.tm_min * SEC_PER_MIN +
-                      t.tm_sec;
+    dmy->dayseconds = (double) (t.tm_hour * SEC_PER_HOUR + t.tm_min * SEC_PER_MIN + t.tm_sec);
 }

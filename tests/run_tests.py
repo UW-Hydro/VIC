@@ -244,7 +244,7 @@ def run_unit_tests(test_dir):
     print('Running Unit Tests')
     print('-'.ljust(OUTPUT_WIDTH, '-'))
 
-    retcode = pytest.main(['-x',  os.path.join(test_dir, 'unit')])
+    retcode = pytest.main(['-x',  os.path.join(test_dir, 'unit'), '--boxed'])
     return {'unittests': TestResults('unittests',
                                      test_complete=True,
                                      passed=retcode == 0,

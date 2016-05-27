@@ -415,6 +415,9 @@ free_streams(stream_struct **streams)
             }
             free((char*) (*streams)[streamnum].aggdata[i]);
         }
+        for (j = 0; j < (*streams)[streamnum].nvars; j++) {
+            free((char*) (*streams)[streamnum].format[j]);
+        }
         free((char*) (*streams)[streamnum].aggdata);
         // free remaining arrays
         free((char*) (*streams)[streamnum].type);

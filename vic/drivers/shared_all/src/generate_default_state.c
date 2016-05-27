@@ -44,13 +44,12 @@ generate_default_state(all_vars_struct *all_vars,
     size_t                   band;
     size_t                   lidx;
     size_t                   k;
-    // sizes of tmpTshape and tmpZshape are hardcoded for convenience
-    size_t                   tmpTshape[] = {
-        MAX_LAYERS, MAX_NODES,
-        MAX_FROST_AREAS + 1
+    size_t                     tmpTshape[] = {
+        options.Nlayer, options.Nnode,
+        options.Nfrost + 1
     };
-    size_t                   tmpZshape[] = {
-        MAX_LAYERS, MAX_NODES
+    size_t                     tmpZshape[] = {
+        options.Nlayer, options.Nnode
     };
     double                   Cv;
     double                   tmp;

@@ -42,13 +42,12 @@ calc_layer_average_thermal_props(energy_bal_struct *energy,
 
     size_t               i;
     int                  ErrorFlag;
-    // sizes of tmpTshape and tmpZshape are hardcoded for convenience
     size_t               tmpTshape[] = {
-        MAX_LAYERS, MAX_NODES,
-        MAX_FROST_AREAS + 1
+        options.Nlayer, Nnodes,
+        options.Nfrost + 1
     };
     size_t               tmpZshape[] = {
-        MAX_LAYERS, MAX_NODES
+        options.Nlayer, Nnodes
     };
     double            ***tmpT;
     double             **tmpZ;

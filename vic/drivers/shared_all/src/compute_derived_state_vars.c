@@ -46,13 +46,12 @@ compute_derived_state_vars(all_vars_struct *all_vars,
     size_t                     veg;
     size_t                     lidx;
     size_t                     band;
-    // sizes of tmpTshape and tmpZshape are hardcoded for convenience
     size_t                     tmpTshape[] = {
-        MAX_LAYERS, MAX_NODES,
-        MAX_FROST_AREAS + 1
+        options.Nlayer, options.Nnode,
+        options.Nfrost + 1
     };
     size_t                     tmpZshape[] = {
-        MAX_LAYERS, MAX_NODES
+        options.Nlayer, options.Nnode
     };
     int                        ErrorFlag;
     double                     Cv;

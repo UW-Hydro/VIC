@@ -56,20 +56,20 @@ class CleanCommand(Command):
     def run(self):
         for path in ['./build', './dist', './__pycache__', './vic.egg-info']:
             try:
-                print('removing %s' % path)
                 shutil.rmtree(path)
-            except:
+                print('removed %s' % path)
+            except FileNotFoundError:
                 pass
 
-        files = ['vic/_vic.py']
+        files = ['vic/_vic.py', 'vic_headers.py']
         files.extend(glob.glob('vic/*pyc'))
         files.extend(glob.glob('vic_core*'))
 
         for filename in files:
             try:
-                print('removing %s' % filename)
                 os.remove(filename)
-            except:
+                print('removed %s' % filename)
+            except FileNotFoundError:
                 pass
 
 
@@ -88,7 +88,7 @@ short_version = '{1}'
 
 
 # -------------------------------------------------------------------- #
-def maybe_eval_string(s):
+def maybe_eval_between_brackets(s):
     '''run eval on strings between brackets e.g. [20 + 3] becomes [23]'''
     matches = re.findall("\[(.*?)\]", s)
     for match in matches:
@@ -147,7 +147,7 @@ def make_cffi_headers():
         print(' '.join(args))
         raise RuntimeError('preprocessor experienced an error: %s' % stderr)
 
-    with open('./vic_headers.py', 'w') as f:
+    with open(os.path.join(setup_dir, './vic_headers.py'), 'w') as f:
         # write python script header information
         f.write('#!/usr/bin/env python\n')
         f.write("'''\n    Preprocessed Headers for VIC Python Driver\n"
@@ -156,8 +156,11 @@ def make_cffi_headers():
         f.write("headers = '''\n")
         skip_headers = True
         for line in stdout.split('\n'):
-            # TODO: improve how we determine if we're done looping through
-            #       the system headers
+            # Note: This check for LOG_DEST is here because the subprocess call
+            # above includes system headers which we don't want in headers.py.
+            # This could be improved by adding a more sophisticated determination
+            # of when we've passed the system headers (always at the begining of
+            # the standard out stream.
             if 'LOG_DEST' in line:
                 skip_headers = False
 
@@ -169,8 +172,9 @@ def make_cffi_headers():
                 else:
                     skip_omit = False
             if not skip_headers and not skip_omit:
-                # Evaluate strings that are not processed by the preprocessed
-                line = maybe_eval_string(line)
+                # Evaluate strings that are not completely evaluated by the
+                # preprocessor.
+                line = maybe_eval_between_brackets(line)
                 f.write(line)
                 f.write('\n')
         f.write("'''\n")

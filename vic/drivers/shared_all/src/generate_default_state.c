@@ -44,10 +44,18 @@ generate_default_state(all_vars_struct *all_vars,
     size_t                   band;
     size_t                   lidx;
     size_t                   k;
+    // sizes of tmpTshape and tmpZshape are hardcoded for convenience
+    size_t                   tmpTshape[] = {
+        MAX_LAYERS, MAX_NODES,
+        MAX_FROST_AREAS + 1
+    };
+    size_t                   tmpZshape[] = {
+        MAX_LAYERS, MAX_NODES
+    };
     double                   Cv;
     double                   tmp;
-    double                   tmpT[MAX_LAYERS][MAX_NODES][MAX_FROST_AREAS + 1];
-    double                   tmpZ[MAX_LAYERS][MAX_NODES];
+    double                ***tmpT;
+    double                 **tmpZ;
     int                      ErrorFlag;
 
     cell_data_struct       **cell;
@@ -56,6 +64,10 @@ generate_default_state(all_vars_struct *all_vars,
     cell = all_vars->cell;
     energy = all_vars->energy;
     Nveg = veg_con[0].vegetat_type_num;
+
+    // allocate memory for tmpT and tmpZ
+    malloc_3d_double(tmpTshape, &tmpT);
+    malloc_2d_double(tmpZshape, &tmpZ);
 
     /************************************************************************
        Initialize soil moistures
@@ -174,4 +186,7 @@ generate_default_state(all_vars_struct *all_vars,
             }
         }
     }
+    // free memory for tmpT and tmpZ
+    free_3d_double(tmpTshape, tmpT);
+    free_2d_double(tmpZshape, tmpZ);
 }

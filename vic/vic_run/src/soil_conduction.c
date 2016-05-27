@@ -321,15 +321,15 @@ distribute_node_moisture_properties(double *moist_node,
 *           soil thermal node temperatures.
 ******************************************************************************/
 void
-estimate_frost_temperature_and_depth(double             tmpT[MAX_LAYERS][MAX_NODES][MAX_FROST_AREAS + 1],
-                                     double             tmpZ[MAX_LAYERS][MAX_NODES],
-                                     double            *Zsum_node,
-                                     double            *T,
-                                     double            *depth,
-                                     double            *frost_fract,
-                                     double             frost_slope,
-                                     size_t             Nnodes,
-                                     size_t             Nlayers)
+estimate_frost_temperature_and_depth(double ***tmpT,
+                                     double  **tmpZ,
+                                     double   *Zsum_node,
+                                     double   *T,
+                                     double   *depth,
+                                     double   *frost_fract,
+                                     double    frost_slope,
+                                     size_t    Nnodes,
+                                     size_t    Nlayers)
 {
     extern option_struct options;
 
@@ -430,8 +430,8 @@ estimate_frost_temperature_and_depth(double             tmpT[MAX_LAYERS][MAX_NOD
 ******************************************************************************/
 int
 estimate_layer_temperature(layer_data_struct *layer,
-                           double             tmpT[MAX_LAYERS][MAX_NODES][MAX_FROST_AREAS + 1],
-                           double             tmpZ[MAX_LAYERS][MAX_NODES],
+                           double          ***tmpT,
+                           double           **tmpZ,
                            double            *Zsum_node,
                            double            *depth,
                            size_t             Nnodes,
@@ -492,8 +492,8 @@ estimate_layer_temperature(layer_data_struct *layer,
 ******************************************************************************/
 int
 estimate_layer_ice_content(layer_data_struct *layer,
-                           double             tmpT[MAX_LAYERS][MAX_NODES][MAX_FROST_AREAS + 1],
-                           double             tmpZ[MAX_LAYERS][MAX_NODES],
+                           double          ***tmpT,
+                           double           **tmpZ,
                            double            *Zsum_node,
                            double            *depth,
                            double            *max_moist,

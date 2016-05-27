@@ -476,7 +476,7 @@ set_global_nc_attributes(int                ncid,
 
     // username
     if (getlogin_r(userstr, MAXSTRING) != 0) {
-        log_err("Error getting username");
+        // log_err("Error getting username");
     }
     // hostname
     if (gethostname(hoststr, MAXSTRING) != 0) {

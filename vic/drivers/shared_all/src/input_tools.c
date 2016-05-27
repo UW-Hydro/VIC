@@ -422,24 +422,3 @@ cell_method_from_agg_type(unsigned short int aggtype,
         return false;
     }
 }
-
-/******************************************************************************
- * @brief  convert a string representation of a date/time to a dmy_struct
- *****************************************************************************/
-void
-strpdmy(const char *s,
-        const char *format,
-        dmy_struct *dmy)
-{
-    struct tm t;
-
-    if (strptime(s, format, &t) != NULL) {
-        log_err("Error while parsing date/time string");
-    }
-
-    dmy->year = t.tm_year + 1900;
-    dmy->month = t.tm_mon;
-    dmy->day = t.tm_mday;
-    dmy->dayseconds = t.tm_hour * SEC_PER_HOUR + t.tm_min * SEC_PER_MIN +
-                      t.tm_sec;
-}

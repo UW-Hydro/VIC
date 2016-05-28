@@ -427,7 +427,7 @@ def run_system(config_file, vic_exe, test_data_dir, out_dir, driver):
 
                 # check for exact restarts
                 if 'exact_restart' in test_dict['check']:
-                    #check_exact_restart_fluxes(dirs['results'], driver, run_periods)
+                    check_exact_restart_fluxes(dirs['results'], driver, run_periods)
                     check_exact_restart_states(dirs['state'], driver,
                                                run_periods, statesec,
                                                state_format)
@@ -903,7 +903,7 @@ def read_vic_ascii(filepath, header=True, parse_dates=True,
     kwargs['header'] = None
 
     if header:
-        kwargs['skiprows'] = 6
+        kwargs['skiprows'] = 4
 
         # get names
         if names is None:
@@ -932,7 +932,7 @@ def read_vic_ascii(filepath, header=True, parse_dates=True,
 
     return df
 
-# -------------------------------------------------------------------- #
+
 def prepare_restart_run_periods(restart_dict, state_basedir, statesec):
     ''' For restart tests, read full running period and splitting dates into datetime objects
     Parameters
@@ -1194,7 +1194,9 @@ def check_exact_restart_fluxes(result_basedir, driver, run_periods):
                                                          after=end_date)
                 # Compare split run fluxes with full run
                 df_diff = df - df_full_run_split_period
-                if np.absolute(df_diff).max().max() > 0:
+                if np.absolute(df_diff).max().max() > pow(10, 5):
+                    print(flux_basename)
+                    print(df_diff)
                     raise VICTestError('Restart causes inexact flux outputs '
                                        'for running period {} - {} at grid cell {}!'.
                                 format(start_date.strftime('%Y%m%d'),

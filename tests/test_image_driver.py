@@ -5,6 +5,16 @@ import xarray as xr
 import numpy as np 
 import numpy.testing as npt 
 
+def test_image_driver_no_output_file_nans(fnames, domain_file):
+    '''
+    Test that all VIC image driver output files have the same nan structure as
+    the domain file
+    '''
+    for fname in fnames:
+        ds_domain = xr.open_dataset(domain_file)
+        ds_output = xr.open_dataset(fname)
+        assert_nan_equal(ds_domain, ds_output)
+
 def assert_nan_equal(ds_domain, ds_output): 
     """ 
     test to see if nans in two data arrays are the same in order to check domain 

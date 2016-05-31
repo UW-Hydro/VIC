@@ -251,7 +251,6 @@ put_data(all_vars_struct   *all_vars,
                                      out_data);
 
                     // Store Wetland-Specific Variables
-
                     if (IsWet) {
                         // Wetland soil temperatures
                         for (i = 0; i < options.Nnode; i++) {
@@ -1045,12 +1044,25 @@ collect_eb_terms(energy_bal_struct energy,
 }
 
 /******************************************************************************
- * @brief    Initialize the structures used in put_data
+ * @brief    Initialize the save data structure.
  *****************************************************************************/
 void
-initialize_put_data()
+initialize_save_data(all_vars_struct   *all_vars,
+                     atmos_data_struct *atmos,
+                     soil_con_struct   *soil_con,
+                     veg_con_struct    *veg_con,
+                     veg_lib_struct    *veg_lib,
+                     lake_con_struct   *lake_con,
+                     double           **out_data,
+                     save_data_struct  *save_data)
 {
-    // TODO: do required initialization here.
+
+    // Calling put data will populate the save data storage terms
+    put_data(all_vars, atmos, soil_con, veg_con, veg_lib, lake_con,
+             out_data, save_data);
+
+    zero_output_list(out_data);
+
 }
 
 /******************************************************************************

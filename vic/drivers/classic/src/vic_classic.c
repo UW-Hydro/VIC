@@ -204,8 +204,8 @@ main(int   argc,
             Error.filep = filep;
 
             /** Initialize the storage terms in the water and energy balances **/
-            initialize_put_data(&all_vars, &atmos[0], &soil_con, veg_con,
-                                veg_lib, &lake_con, out_data, &save_data);
+            initialize_save_data(&all_vars, &atmos[0], &soil_con, veg_con,
+                                 veg_lib, &lake_con, out_data[0], &save_data);
 
             /******************************************
                Run Model in Grid Cell for all Time Steps

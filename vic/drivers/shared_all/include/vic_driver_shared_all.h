@@ -646,7 +646,10 @@ void initialize_fileps(void);
 void initialize_global(void);
 void initialize_options(void);
 void initialize_parameters(void);
-void initialize_put_data();
+void initialize_save_data(all_vars_struct *all_vars, atmos_data_struct *atmos,
+                          soil_con_struct *soil_con, veg_con_struct *veg_con,
+                          veg_lib_struct *veg_lib, lake_con_struct *lake_con,
+                          double **out_data, save_data_struct *save_data);
 void initialize_snow(snow_data_struct **snow, size_t veg_num);
 void initialize_soil(cell_data_struct **cell, size_t veg_num);
 void initialize_time(void);

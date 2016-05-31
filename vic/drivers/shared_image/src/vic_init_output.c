@@ -38,6 +38,14 @@ vic_init_output(dmy_struct *dmy_current)
     extern filep_struct    filep;
     extern MPI_Comm        MPI_COMM_VIC;
     extern int             mpi_rank;
+    extern all_vars_struct    *all_vars;
+    extern atmos_data_struct  *atmos;
+    extern lake_con_struct     lake_con;
+    extern save_data_struct   *save_data;
+    extern soil_con_struct    *soil_con;
+    extern veg_con_struct    **veg_con;
+    extern veg_hist_struct   **veg_hist;
+    extern veg_lib_struct    **veg_lib;
     extern double       ***out_data;
     extern stream_struct  *output_streams;
     extern nc_file_struct *nc_hist_files;
@@ -45,11 +53,18 @@ vic_init_output(dmy_struct *dmy_current)
 
     size_t                 streamnum;
     int                    status;
+    size_t                     i;
 
     // initialize the output data structures
     set_output_met_data_info();
 
     out_data = create_outdata(local_domain.ncells_active);
+
+    for (i = 0; i < local_domain.ncells_active; i++) {
+        initialize_save_data(&(all_vars[i]), &(atmos[i]), &(soil_con[i]),
+                             veg_con[i], veg_lib[i], &lake_con, out_data[i],
+                             &(save_data[i]));
+    }
 
     if (mpi_rank == 0) {
         // determine which variables will be written to the history file
@@ -179,7 +194,7 @@ initialize_history_file(nc_file_struct *nc,
                 dmy_current->day, dmy_current->dayseconds);
     }
 
-    initialize_nc_file(nc, stream->nvars, stream->varid);
+    initialize_nc_file(nc, stream->nvars, stream->varid, stream->type);
 
     // print_stream(stream, out_metadata);
     stream->file_format = NETCDF4;
@@ -417,8 +432,16 @@ initialize_history_file(nc_file_struct *nc,
                                     "_FillValue", NC_INT, 1,
                                     &(nc->i_fillvalue));
         }
+        else if (nc->nc_vars[j].nc_type == NC_SHORT) {
+            log_err("NC_SHORT not supported yet");
+        }
+        else if (nc->nc_vars[j].nc_type == NC_CHAR) {
+            log_err("NC_CHAR not supported yet");
+        }
+        else if (nc->nc_vars[j].nc_type == NC_BYTE) {
+            log_err("NC_BYTE not supported yet");
+        }
         else {
-            // TODO: Add NC_SHORT, NC_CHAR, and NC_BYTE
             log_err("NC_TYPE %d not supported at this time",
                     nc->nc_vars[j].nc_type);
         }
@@ -516,29 +539,6 @@ initialize_history_file(nc_file_struct *nc,
 }
 
 /******************************************************************************
- * @brief    Determine the netCDF file format
- *****************************************************************************/
-int
-get_nc_mode(unsigned short int format)
-{
-    if (format == NETCDF3_CLASSIC) {
-        return NC_CLASSIC_MODEL;
-    }
-    else if (format == NETCDF3_64BIT_OFFSET) {
-        return NC_64BIT_OFFSET;
-    }
-    else if (format == NETCDF4_CLASSIC) {
-        return (NC_NETCDF4 | NC_CLASSIC_MODEL);
-    }
-    else if (format == NETCDF4) {
-        return NC_NETCDF4;
-    }
-    else {
-        log_err("Unrecognized netCDF file format");
-    }
-}
-
-/******************************************************************************
  * @brief    Set global netcdf attributes (either history or state file)
  *****************************************************************************/
 void
@@ -612,9 +612,10 @@ set_global_nc_attributes(int ncid,
  * @brief    Set global netcdf attributes (either history or state file)
  *****************************************************************************/
 void
-initialize_nc_file(nc_file_struct *nc_file,
-                   size_t          nvars,
-                   unsigned int   *varids)
+initialize_nc_file(nc_file_struct     *nc_file,
+                   size_t              nvars,
+                   unsigned int       *varids,
+                   unsigned short int *dtypes)
 {
     extern option_struct options;
     extern domain_struct global_domain;
@@ -660,6 +661,6 @@ initialize_nc_file(nc_file_struct *nc_file,
     }
 
     for (i = 0; i < nvars; i++) {
-        set_nc_var_info(varids[i], nc_file, &(nc_file->nc_vars[i]));
+        set_nc_var_info(varids[i], dtypes[i], nc_file, &(nc_file->nc_vars[i]));
     }
 }

@@ -171,6 +171,7 @@ int get_nc_field_float(char *nc_name, char *var_name, size_t *start,
                        size_t *count, float *var);
 int get_nc_field_int(char *nc_name, char *var_name, size_t *start,
                      size_t *count, int *var);
+int get_nc_dtype(unsigned short int dtype);
 int get_nc_mode(unsigned short int format);
 void initialize_domain(domain_struct *domain);
 void initialize_domain_info(domain_info_struct *info);
@@ -182,7 +183,7 @@ int initialize_model_state(all_vars_struct *all_vars, size_t Nveg,
                            size_t Nnodes, double surf_temp,
                            soil_con_struct *soil_con, veg_con_struct *veg_con);
 void initialize_nc_file(nc_file_struct *nc_file, size_t nvars,
-                        unsigned int *varids);
+                        unsigned int *varids, unsigned short int *dtypes);
 void initialize_soil_con(soil_con_struct *soil_con);
 void initialize_veg_con(veg_con_struct *veg_con);
 void parse_output_info(FILE *gp, stream_struct **output_streams, size_t ngridcells,
@@ -203,8 +204,8 @@ int put_nc_field_int(char *nc_name, bool *open, int *nc_id, int fillval,
 void set_force_type(char *cmdstr, int file_num, int *field);
 void set_global_nc_attributes(int ncid, unsigned short int file_type);
 void set_nc_var_dimids(unsigned int varid, nc_file_struct *nc_hist_file, nc_var_struct *nc_var);
-void set_nc_var_info(unsigned int varid, nc_file_struct *nc_hist_file,
-                     nc_var_struct *nc_var);
+void set_nc_var_info(unsigned int varid, unsigned short int dtype,
+                     nc_file_struct *nc_hist_file, nc_var_struct *nc_var);
 void sprint_location(char *str, location_struct *loc);
 void vic_alloc(void);
 void vic_finalize(void);

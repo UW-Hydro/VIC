@@ -4,9 +4,9 @@ VIC allows users to select which output variables to write to their output files
 
 You can enable VIC to output new variables by making a few changes to the code, as follows:
 
-## 1. Make sure VIC sends the variable to put_data()
+## 1. Make sure VIC sends the variable to `put_data()`
 
-If VIC doesn't already compute the variable you need, or computes it but doesn't store it in one of the structures that is accessible to put_data(), you'll have to modify VIC to do this. The structures that put_data() has access to are: atmos_data, soil_con, cell_data, veg_con, veg_var, energy, snow_data, and all_vars.
+If VIC doesn't already compute the variable you need, or computes it but doesn't store it in one of the structures that is accessible to `put_data()`, you'll have to modify VIC to do this. The structures that `put_data()` has access to are: `atmos_data`, `soil_con`, `cell_data`, `veg_con`, `veg_var`, `energy`, `snow_data`, and `lake_var`.  
 
 ## 2. Define the variable's name in `vic_driver_shared_all.h`.
 

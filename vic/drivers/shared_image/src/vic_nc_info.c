@@ -30,15 +30,16 @@
  * @brief    Setup netCDF output variables.
  *****************************************************************************/
 void
-set_nc_var_info(unsigned int    varid,
-                nc_file_struct *nc_hist_file,
-                nc_var_struct  *nc_var)
+set_nc_var_info(unsigned int        varid,
+                unsigned short int  dtype,
+                nc_file_struct     *nc_hist_file,
+                nc_var_struct      *nc_var)
 {
     size_t               i;
 
-    // default is a variable of type NC_DOUBLE with only a single field per
-    // timestep
-    nc_var->nc_type = NC_DOUBLE;  // TODO: set this from the stream struct
+
+    // set datatype
+    nc_var->nc_type = get_nc_dtype(dtype);
 
     for (i = 0; i < MAXDIMS; i++) {
         nc_var->nc_dimids[i] = -1;
@@ -170,5 +171,60 @@ set_nc_var_dimids(unsigned int    varid,
         nc_var->nc_dimids[0] = nc_hist_file->time_dimid;
         nc_var->nc_dimids[1] = nc_hist_file->nj_dimid;
         nc_var->nc_dimids[2] = nc_hist_file->ni_dimid;
+    }
+}
+
+/******************************************************************************
+ * @brief    Determine the netCDF file format
+ *****************************************************************************/
+int
+get_nc_mode(unsigned short int format)
+{
+    if (format == NETCDF3_CLASSIC) {
+        return NC_CLASSIC_MODEL;
+    }
+    else if (format == NETCDF3_64BIT_OFFSET) {
+        return NC_64BIT_OFFSET;
+    }
+    else if (format == NETCDF4_CLASSIC) {
+        return (NC_NETCDF4 | NC_CLASSIC_MODEL);
+    }
+    else if (format == NETCDF4) {
+        return NC_NETCDF4;
+    }
+    else {
+        log_err("Unrecognized netCDF file format");
+    }
+}
+
+/******************************************************************************
+ * @brief    Determine the netCDF data type
+ *****************************************************************************/
+int
+get_nc_dtype(unsigned short int dtype)
+{
+    if (dtype == OUT_TYPE_DEFAULT) {
+        return OUT_TYPE_DOUBLE;
+    }
+    else if (dtype == OUT_TYPE_CHAR) {
+        return NC_CHAR;
+    }
+    else if (dtype == OUT_TYPE_SINT) {
+        return NC_SHORT;
+    }
+    else if (dtype == OUT_TYPE_USINT) {
+        return NC_UINT;
+    }
+    else if (dtype == OUT_TYPE_INT) {
+        return NC_INT;
+    }
+    else if (dtype == OUT_TYPE_FLOAT) {
+        return NC_FLOAT;
+    }
+    else if (dtype == OUT_TYPE_DOUBLE) {
+        return NC_DOUBLE;
+    }
+    else {
+        log_err("Unrecognized netCDF datatype");
     }
 }

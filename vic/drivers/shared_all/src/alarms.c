@@ -39,16 +39,8 @@ reset_alarm(alarm_struct *alarm,
     alarm->count = 0;
     alarm->next = MISSING;
 
-    if (alarm->freq == FREQ_NEVER) {
-        ;  // Do nothing, already set
-    }
-    else if (alarm->freq == FREQ_NSTEPS) {
-        alarm->next = alarm->n;
-    }
-    else if (alarm->freq == FREQ_DATE) {
-        ;  // Do nothing, already set
-    }
-    else if (alarm->freq == FREQ_END) {
+    if ((alarm->freq == FREQ_NEVER) || (alarm->freq == FREQ_NSTEPS) ||
+        (alarm->freq == FREQ_DATE) || (alarm->freq == FREQ_END)) {
         ;  // Do nothing, already set
     }
     else {

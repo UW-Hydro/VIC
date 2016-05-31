@@ -37,6 +37,7 @@ vic_store(dmy_struct *dmy_current)
     extern all_vars_struct    *all_vars;
     extern domain_struct       global_domain;
     extern domain_struct       local_domain;
+    extern global_param_struct global_param;
     extern option_struct       options;
     extern soil_con_struct    *soil_con;
     extern veg_con_map_struct *veg_con_map;
@@ -59,8 +60,11 @@ vic_store(dmy_struct *dmy_current)
     int                       *ivar = NULL;
     double                    *dvar = NULL;
     float                     *fvar = NULL;
+    int                        time_var_id;
     int                        lon_var_id;
     int                        lat_var_id;
+    char                       unit_str[MAXSTRING];
+    char                       str[MAXSTRING];
     size_t                     d1count[1];
     size_t                     d1start[1];
     size_t                     d2count[2];
@@ -73,7 +77,6 @@ vic_store(dmy_struct *dmy_current)
     size_t                     d5start[5];
     size_t                     d6count[6];
     size_t                     d6start[6];
-
     nc_file_struct             nc_state_file;
 
     // create netcdf file for storing model state
@@ -86,6 +89,7 @@ vic_store(dmy_struct *dmy_current)
     nc_state_file.d_fillvalue = NC_FILL_DOUBLE;
     nc_state_file.f_fillvalue = NC_FILL_FLOAT;
 
+    nc_state_file.time_size = 1;
     nc_state_file.ni_size = global_domain.n_nx;
     nc_state_file.nj_size = global_domain.n_ny;
     nc_state_file.veg_size = options.NVEGTYPES;
@@ -114,6 +118,45 @@ vic_store(dmy_struct *dmy_current)
         status = nc_set_fill(nc_state_file.nc_id, NC_FILL, &old_fill_mode);
         if (status != NC_NOERR) {
             log_err("Error setting fill value in %s", filename);
+        }
+
+        // define the time dimension
+        status = nc_def_dim(nc_state_file.nc_id, "time", nc_state_file.time_size,
+                            &(nc_state_file.time_dimid));
+        if (status != NC_NOERR) {
+            log_err("Error defining time dimenension in %s", filename);
+        }
+
+        // define the variable time
+        status = nc_def_var(nc_state_file.nc_id, "time", NC_DOUBLE, 1,
+                            &(nc_state_file.time_dimid), &(time_var_id));
+        if (status != NC_NOERR) {
+            log_err("Error defining time variable in %s", filename);
+        }
+        status = nc_put_att_text(nc_state_file.nc_id, time_var_id, "standard_name",
+                                 strlen("time"), "time");
+        if (status != NC_NOERR) {
+            log_err("Error adding attribute in %s", filename);
+        }
+
+        // adding units attribute to time variable
+        str_from_time_units(global_param.time_units, unit_str);
+
+        sprintf(str, "%s since %s", unit_str, global_param.time_origin_str);
+
+        status = nc_put_att_text(nc_state_file.nc_id, time_var_id, "units",
+                                 strlen(str), str);
+        if (status != NC_NOERR) {
+            log_err("Error adding attribute in %s", filename);
+        }
+
+        // adding calendar attribute to time variable
+        str_from_calendar(global_param.calendar, str);
+
+        status = nc_put_att_text(nc_state_file.nc_id, time_var_id, "calendar",
+                                 strlen(str), str);
+        if (status != NC_NOERR) {
+            log_err("Error adding calendar attribute in %s", filename);
         }
 
         // define netcdf dimensions

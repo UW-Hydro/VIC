@@ -59,7 +59,6 @@ parse_output_info(FILE           *gp,
     dmy_struct                 freq_dmy;
     unsigned short int         agg_type;
     int                        found;
-    strcpy(format, "*");
 
     /** Read through global control file to find output info **/
 
@@ -174,7 +173,7 @@ parse_output_info(FILE           *gp,
                         (*streams)[streamnum].file_format = BINARY;
                     }
                     else {
-                        log_err("Classic friver file format must be ASCII or "
+                        log_err("Classic driver file format must be ASCII or "
                                 "BINARY [stream=%hu]", streamnum);
                     }
                 }
@@ -209,7 +208,7 @@ parse_output_info(FILE           *gp,
     }
     // Otherwise, set output files and their contents to default configuration
     else {
-        set_output_defaults(streams, dmy_current);
+        set_output_defaults(streams, 1, dmy_current);
     }
     fclose(gp);
 

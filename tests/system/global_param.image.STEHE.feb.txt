@@ -41,7 +41,7 @@ ROOT_ZONES      3
 VEGLIB	        $test_data_dir/image/Stehekin/parameters/Stehekin_test_params_20160327.nc
 SNOW_BAND	    1 $test_data_dir/image/Stehekin/parameters/Stehekin_test_params_20160327.nc
 
-RESULT_DIR  $result_dir/Stehekin.history.nc
+RESULT_DIR  $result_dir/
 OUTPUT_STEPS_PER_DAY 24
 
 OUTFILE     fluxes

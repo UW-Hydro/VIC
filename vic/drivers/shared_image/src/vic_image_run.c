@@ -36,9 +36,11 @@ vic_image_run(dmy_struct *dmy_current)
     extern all_vars_struct    *all_vars;
     extern atmos_data_struct  *atmos;
     extern domain_struct       local_domain;
+    extern option_struct       options;
     extern global_param_struct global_param;
     extern lake_con_struct     lake_con;
     extern double           ***out_data;
+    extern stream_struct      *output_streams;
     extern save_data_struct   *save_data;
     extern soil_con_struct    *soil_con;
     extern veg_con_struct    **veg_con;
@@ -62,5 +64,10 @@ vic_image_run(dmy_struct *dmy_current)
                 &lake_con, &(soil_con[i]), veg_con[i], veg_lib[i]);
         put_data(&(all_vars[i]), &(atmos[i]), &(soil_con[i]), veg_con[i],
                  veg_lib[i], &lake_con, out_data[i], &(save_data[i]));
+    }
+    for (i = 0; i < options.Noutstreams; i++) {
+        debug("Agging data for stream %zu", i);
+        agg_stream_data(&(output_streams[i]), dmy_current, out_data);
+        debug("Done Agging data for stream %zu", i);
     }
 }

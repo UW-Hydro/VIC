@@ -163,7 +163,6 @@ print_nc_var(nc_var_struct *nc_var,
     size_t i;
 
     fprintf(LOG_DEST, "nc_var:\n");
-    fprintf(LOG_DEST, "\tnc_var_name: %s\n", nc_var->nc_var_name);
     fprintf(LOG_DEST, "\tnc_dimids:");
     for (i = 0; i < ndims; i++) {
         fprintf(LOG_DEST, "\t%d", nc_var->nc_dimids[i]);

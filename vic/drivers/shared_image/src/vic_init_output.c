@@ -39,10 +39,12 @@ vic_init_output(dmy_struct *dmy_current)
     extern MPI_Comm        MPI_COMM_VIC;
     extern int             mpi_rank;
     extern double       ***out_data;
-    extern stream_struct **output_streams;
+    extern stream_struct  *output_streams;
     extern nc_file_struct *nc_hist_files;
+    extern MPI_Datatype    mpi_stream_struct_type;
 
-    size_t                 i;
+    size_t                 streamnum;
+    int                    status;
 
     // initialize the output data structures
     set_output_met_data_info();
@@ -51,34 +53,65 @@ vic_init_output(dmy_struct *dmy_current)
 
     if (mpi_rank == 0) {
         // determine which variables will be written to the history file
-        parse_output_info(filep.globalparam, output_streams);
-    }
-
-    // for (i = 0; i < options.Noutstreams; i++) {
-    // status = MPI_Bcast(&(output_streams[i]), 1, mpi_stream_struct_type, 0, MPI_COMM_VIC);
-    // if (status != MPI_SUCCESS) {
-    // log_err("MPI error in vic_init_output(): %d\n", status);
-    // }
-    // }
-
-    // allocation of output structures
-    output_streams =
-        calloc(local_domain.ncells_active, sizeof(*output_streams));
-    if (output_streams == NULL) {
-        log_err("Memory allocation error in vic_init_output().");
-    }
-
-    if (mpi_rank == 0) {
-        for (i = 0; i < options.Noutstreams; i++) {
-            nc_hist_files = calloc(options.Noutstreams, sizeof(*nc_hist_files));
-            if (nc_hist_files == NULL) {
-                log_err("Memory allocation error in vic_init_output().");
-            }
+        parse_output_info(filep.globalparam, &output_streams,
+                          local_domain.ncells_active, dmy_current);
+        nc_hist_files = calloc(options.Noutstreams, sizeof(*nc_hist_files));
+        if (nc_hist_files == NULL) {
+          log_err("Memory allocation error in vic_init_output().");
         }
 
-        for (i = 0; i < options.Noutstreams; i++) {
+    }
+
+    status = MPI_Bcast(&(options.Noutstreams), 1, MPI_AINT, 0, MPI_COMM_VIC);
+    if (status != MPI_SUCCESS) {
+        log_err("MPI error in vic_start(): %d\n", status);
+    }
+
+    // Allocate memory for array of streams
+    if (mpi_rank != 0) {
+        output_streams = calloc(options.Noutstreams, sizeof(*output_streams));
+        if (output_streams == NULL) {
+            log_err("Memory allocation error in vic_init_output().");
+        }
+    }
+
+    // Brodcast the scalar values in each stream
+    status = MPI_Bcast(output_streams, options.Noutstreams,
+                       mpi_stream_struct_type, 0, MPI_COMM_VIC);
+    if (status != MPI_SUCCESS) {
+        log_err("MPI error in vic_start(): %d\n", status);
+    }
+
+    // Now that all the scalars are out there, we can allocate memory for each
+    // stream.  This has already been done on the master processor.
+    if (mpi_rank != 0) {
+        for (streamnum = 0; streamnum < options.Noutstreams; streamnum++) {
+            setup_stream(&(output_streams[streamnum]),
+                         output_streams[streamnum].nvars,
+                         output_streams[streamnum].ngridcells);
+
+            // Now brodcast the arrays of shape nvars
+            status = MPI_Bcast(output_streams[streamnum].varid,
+                              output_streams[streamnum].nvars,
+                              MPI_UNSIGNED, 0, MPI_COMM_VIC);
+            if (status != MPI_SUCCESS) {
+                log_err("MPI error brodcasting to varid: %d\n", status);
+            }
+            // Now brodcast the arrays of shape nvars
+            status = MPI_Bcast(output_streams[streamnum].aggtype,
+                               output_streams[streamnum].nvars, MPI_UNSIGNED, 0, MPI_COMM_VIC);
+            if (status != MPI_SUCCESS) {
+                log_err("MPI error brodcasting to aggtype: %d\n", status);
+            }
+
+            alloc_aggdata(&(output_streams[streamnum]));
+        }
+    }
+    if (mpi_rank == 0) {
+        for (streamnum = 0; streamnum < options.Noutstreams; streamnum++) {
             // open the netcdf history file
-            initialize_history_file(&(nc_hist_files[i]), &(*output_streams[i]),
+            initialize_history_file(&(nc_hist_files[streamnum]),
+                                    &(output_streams[streamnum]),
                                     dmy_current);
         }
     }
@@ -148,10 +181,12 @@ initialize_history_file(nc_file_struct *nc,
 
     initialize_nc_file(nc, stream->nvars, stream->varid);
 
+    // print_stream(stream, out_metadata);
+    stream->file_format = NETCDF4;
+
     // open the netcdf file
-    status =
-        nc_create(stream->filename, get_nc_mode(stream->file_format),
-                  &(nc->nc_id));
+    status = nc_create(stream->filename, get_nc_mode(stream->file_format),
+                       &(nc->nc_id));
     if (status != NC_NOERR) {
         log_err("Error creating %s", stream->filename);
     }
@@ -339,16 +374,20 @@ initialize_history_file(nc_file_struct *nc,
     for (j = 0; j < stream->nvars; j++) {
         varid = stream->varid[j];
 
+        set_nc_var_dimids(varid, nc, &(nc->nc_vars[j]));
+
+        print_nc_var(&(nc->nc_vars[j]), MAXDIMS);
+
         // define the variable
         status = nc_def_var(nc->nc_id,
-                            nc->nc_vars[j].nc_var_name,
+                            out_metadata[varid].varname,
                             nc->nc_vars[j].nc_type,
                             nc->nc_vars[j].nc_dims,
                             nc->nc_vars[j].nc_dimids,
                             &(nc->nc_vars[j].nc_varid));
         if (status != NC_NOERR) {
-            log_err("Error defining variable %s in %s",
-                    nc->nc_vars[j].nc_var_name, stream->filename);
+            log_err("Error defining variable %s in %s.  Status: %d",
+                    out_metadata[varid].varname, stream->filename, status);
         }
 
         // Add compression (only works for netCDF4 filetype)
@@ -358,7 +397,7 @@ initialize_history_file(nc_file_struct *nc,
             if (status != NC_NOERR) {
                 log_err(
                     "Error setting compression level in %s for variable: %s",
-                    stream->filename, nc->nc_vars[j].nc_var_name);
+                    stream->filename, out_metadata[varid].varname);
             }
         }
 
@@ -385,7 +424,7 @@ initialize_history_file(nc_file_struct *nc,
         }
         if (status != NC_NOERR) {
             log_err("Error putting _FillValue attribute to %s in %s",
-                    nc->nc_vars[j].nc_var_name, stream->filename);
+                    out_metadata[varid].varname, stream->filename);
         }
 
         put_nc_attr(nc->nc_id, nc->nc_vars[j].nc_varid, "long_name",
@@ -554,7 +593,7 @@ set_global_nc_attributes(int ncid,
                 "hydrologically Based Model of Land Surface Water and Energy "
                 "Fluxes for GSMs, J. Geophys. Res., 99(D7), 14,415-14,428.");
     put_nc_attr(ncid, NC_GLOBAL, "comment",
-                "Output from the Variable Infiltration Capacity (VIC)"
+                "Output from the Variable Infiltration Capacity (VIC) "
                 "Macroscale Hydrologic Model");
     put_nc_attr(ncid, NC_GLOBAL, "Conventions", "CF-1.6");
     put_nc_attr(ncid, NC_GLOBAL, "netcdf_lib_version", nc_inq_libvers());
@@ -591,14 +630,14 @@ initialize_nc_file(nc_file_struct *nc_file,
     // set ids to MISSING
     nc_file->nc_id = MISSING;
     nc_file->band_dimid = MISSING;
-    nc_file->front_dimid     MISSING;
-    nc_file->frost_dimid     MISSING;
-    nc_file->lake_node_dimid MISSING;
-    nc_file->layer_dimid     MISSING;
+    nc_file->front_dimid = MISSING;
+    nc_file->frost_dimid = MISSING;
+    nc_file->lake_node_dimid = MISSING;
+    nc_file->layer_dimid = MISSING;
     nc_file->ni_dimid = MISSING;
     nc_file->nj_dimid = MISSING;
     nc_file->node_dimid = MISSING;
-    nc_file->root_zone_dimid MISSING;
+    nc_file->root_zone_dimid = MISSING;
     nc_file->time_dimid = MISSING;
     nc_file->veg_dimid = MISSING;
 

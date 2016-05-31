@@ -283,6 +283,77 @@ enum
     N_OUTVAR_TYPES        /**< used as a loop counter*/
 };
 
+/******************************************************************************
+ * @brief   Output state variable
+ *****************************************************************************/
+enum
+{
+    STATE_SOIL_MOISTURE,               /**<  */
+    STATE_SOIL_ICE,                    /**<  */
+    STATE_CANOPY_WATER,                /**<  */
+    STATE_ANNUALNPP,                   /**<  */
+    STATE_ANNUALNPPPREV,               /**<  */
+    STATE_CLITTER,                     /**<  */
+    STATE_CINTER,                      /**<  */
+    STATE_CSLOW,                       /**<  */
+    STATE_SNOW_AGE,                    /**<  */
+    STATE_SNOW_MELT_STATE,             /**<  */
+    STATE_SNOW_COVERAGE,               /**<  */
+    STATE_SNOW_WATER_EQUIVALENT,       /**<  */
+    STATE_SNOW_SURF_TEMP,              /**<  */
+    STATE_SNOW_SURF_WATER,             /**<  */
+    STATE_SNOW_PACK_TEMP,              /**<  */
+    STATE_SNOW_PACK_WATER,             /**<  */
+    STATE_SNOW_DENSITY,                /**<  */
+    STATE_SNOW_COLD_CONTENT,           /**<  */
+    STATE_SNOW_CANOPY,                 /**<  */
+    STATE_SOIL_NODE_TEMP,              /**<  */
+    STATE_FOLIAGE_TEMPERATURE,         /**<  */
+    STATE_ENERGY_LONGUNDEROUT,         /**<  */
+    STATE_ENERGY_SNOW_FLUX,            /**<  */
+    STATE_LAKE_SOIL_MOISTURE,          /**<  */
+    STATE_LAKE_SOIL_ICE,               /**<  */
+    STATE_LAKE_CLITTER,                /**<  */
+    STATE_LAKE_CINTER,                 /**<  */
+    STATE_LAKE_CSLOW,                  /**<  */
+    STATE_LAKE_SNOW_AGE,               /**<  */
+    STATE_LAKE_SNOW_MELT_STATE,        /**<  */
+    STATE_LAKE_SNOW_COVERAGE,          /**<  */
+    STATE_LAKE_SNOW_WATER_EQUIVALENT,  /**<  */
+    STATE_LAKE_SNOW_SURF_TEMP,         /**<  */
+    STATE_LAKE_SNOW_SURF_WATER,        /**<  */
+    STATE_LAKE_SNOW_PACK_TEMP,         /**<  */
+    STATE_LAKE_SNOW_PACK_WATER,        /**<  */
+    STATE_LAKE_SNOW_DENSITY,           /**<  */
+    STATE_LAKE_SNOW_COLD_CONTENT,      /**<  */
+    STATE_LAKE_SNOW_CANOPY,            /**<  */
+    STATE_LAKE_SOIL_NODE_TEMP,         /**<  */
+    STATE_LAKE_ACTIVE_LAYERS,          /**<  */
+    STATE_LAKE_LAYER_DZ,               /**<  */
+    STATE_LAKE_SURF_LAYER_DZ,          /**<  */
+    STATE_LAKE_DEPTH,                  /**<  */
+    STATE_LAKE_LAYER_SURF_AREA,        /**<  */
+    STATE_LAKE_SURF_AREA,              /**<  */
+    STATE_LAKE_VOLUME,                 /**<  */
+    STATE_LAKE_LAYER_TEMP,             /**<  */
+    STATE_LAKE_AVERAGE_TEMP,           /**<  */
+    STATE_LAKE_ICE_AREA_FRAC,          /**<  */
+    STATE_LAKE_ICE_AREA_FRAC_NEW,      /**<  */
+    STATE_LAKE_ICE_WATER_EQUIVALENT,   /**<  */
+    STATE_LAKE_ICE_HEIGHT,             /**<  */
+    STATE_LAKE_ICE_TEMP,               /**<  */
+    STATE_LAKE_ICE_SNOW_SURF_TEMP,     /**<  */
+    STATE_LAKE_ICE_SNOW_PACK_TEMP,     /**<  */
+    STATE_LAKE_ICE_SNOW_COLD_CONTENT,  /**<  */
+    STATE_LAKE_ICE_SNOW_SURF_WATER,    /**<  */
+    STATE_LAKE_ICE_SNOW_PACK_WATER,    /**<  */
+    STATE_LAKE_ICE_SNOW_ALBEDO,        /**<  */
+    STATE_LAKE_ICE_SNOW_DEPTH,         /**<  */
+    // Last value of enum - DO NOT ADD ANYTHING BELOW THIS LINE!!
+    // used as a loop counter and must be >= the largest value in this enum
+    N_STATE_VARS                       /**< used as a loop counter*/
+};
+
 
 /******************************************************************************
  * @brief   Output BINARY format types
@@ -468,6 +539,7 @@ typedef struct {
                                           is the order in which the variables will be written. */
     unsigned short int *aggtype;     /**< type of aggregation to use [shape=(nvars, )] */
     alarm_struct agg_alarm;          /**< alaram for stream aggregation */
+    alarm_struct write_alarm;        /**< alaram for controlling stream write */
     double ****aggdata;              /**< array of aggregated data values [shape=(ngridcells, nvars, nelem, nbins)] */
 } stream_struct;
 
@@ -640,6 +712,7 @@ void set_output_var(stream_struct *stream, char *varname, size_t varnum,
 unsigned int get_default_outvar_aggtype(unsigned int varid);
 void set_alarm(dmy_struct *dmy_current, unsigned int freq, void*value,
                alarm_struct *alarm);
+void set_output_defaults(stream_struct **output_streams, size_t ngridcells, dmy_struct *dmy_current);
 void set_output_met_data_info();
 void setup_stream(stream_struct *stream, size_t nvars, size_t ngridcells);
 void soil_moisture_from_water_table(soil_con_struct *soil_con, size_t nlayers);

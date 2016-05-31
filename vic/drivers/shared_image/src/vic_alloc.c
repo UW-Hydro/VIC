@@ -38,7 +38,6 @@ vic_alloc(void)
     extern option_struct       options;
     extern double            **out_data;
     extern save_data_struct   *save_data;
-    extern stream_struct     **output_streams;
     extern soil_con_struct    *soil_con;
     extern veg_con_map_struct *veg_con_map;
     extern veg_con_struct    **veg_con;
@@ -109,14 +108,6 @@ vic_alloc(void)
     if (save_data == NULL) {
         log_err("Memory allocation error in vic_alloc().");
     }
-
-    // allocate memory for output streams structure
-    output_streams =
-        malloc(local_domain.ncells_active * sizeof(*output_streams));
-    if (output_streams == NULL) {
-        log_err("Memory allocation error in vic_alloc().");
-    }
-
 
     // allocate memory for individual grid cells
     for (i = 0; i < local_domain.ncells_active; i++) {

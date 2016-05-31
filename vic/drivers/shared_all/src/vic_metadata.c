@@ -42,6 +42,7 @@ set_output_met_data_info()
     // Set missing and/or default values
     for (v = 0; v < N_OUTVAR_TYPES; v++) {
         // Set default string values
+        strcpy(out_metadata[v].varname, MISSING_S);
         strcpy(out_metadata[v].long_name, MISSING_S);
         strcpy(out_metadata[v].standard_name, MISSING_S);
         strcpy(out_metadata[v].units, MISSING_S);
@@ -292,7 +293,7 @@ set_output_met_data_info()
            "lumped water table position (zwt of total moisture across all layers, lumped together)");
 
     // Water Balance Terms - fluxes
-    /* baseflow out of the bottom layer [mm] (ALMA_OUTPUT: [mm/s]) */
+    /* baseflow out of the bottom layer [mm] */
     strcpy(out_metadata[OUT_BASEFLOW].varname, "OUT_BASEFLOW");
     strcpy(out_metadata[OUT_BASEFLOW].long_name, "baseflow");
     strcpy(out_metadata[OUT_BASEFLOW].standard_name, "baseflow_amount");
@@ -336,14 +337,14 @@ set_output_met_data_info()
     strcpy(out_metadata[OUT_DELSURFSTOR].description,
            "change in surface liquid water storage");
 
-    /* total net evaporation [mm] (ALMA_OUTPUT: [mm/s]) */
+    /* total net evaporation [mm] */
     strcpy(out_metadata[OUT_EVAP].varname, "OUT_EVAP");
     strcpy(out_metadata[OUT_EVAP].long_name, "evap");
     strcpy(out_metadata[OUT_EVAP].standard_name, "water_evaporation_flux_net");
     strcpy(out_metadata[OUT_EVAP].units, "mm");
     strcpy(out_metadata[OUT_EVAP].description, "total net evaporation");
 
-    /* net evaporation from bare soil [mm] (ALMA_OUTPUT: [mm/s]) */
+    /* net evaporation from bare soil [mm] */
     strcpy(out_metadata[OUT_EVAP_BARE].varname, "OUT_EVAP_BARE");
     strcpy(out_metadata[OUT_EVAP_BARE].long_name, "evap_bare");
     strcpy(out_metadata[OUT_EVAP_BARE].standard_name,
@@ -352,7 +353,7 @@ set_output_met_data_info()
     strcpy(out_metadata[OUT_EVAP_BARE].description,
            "net evaporation from bare soil");
 
-    /* net evaporation from canopy interception [mm] (ALMA_OUTPUT: [mm/s]) */
+    /* net evaporation from canopy interception [mm] */
     strcpy(out_metadata[OUT_EVAP_CANOP].varname, "OUT_EVAP_CANOP");
     strcpy(out_metadata[OUT_EVAP_CANOP].long_name, "evap_canop");
     strcpy(out_metadata[OUT_EVAP_CANOP].standard_name,
@@ -361,14 +362,14 @@ set_output_met_data_info()
     strcpy(out_metadata[OUT_EVAP_CANOP].description,
            "net evaporation from canopy interception");
 
-    /* moisture that reaches top of soil column [mm] (ALMA_OUTPUT: [mm/s]) */
+    /* moisture that reaches top of soil column [mm] */
     strcpy(out_metadata[OUT_INFLOW].varname, "OUT_INFLOW");
     strcpy(out_metadata[OUT_INFLOW].long_name, "inflow");
     strcpy(out_metadata[OUT_INFLOW].standard_name, "unset");
     strcpy(out_metadata[OUT_INFLOW].units, "unset");
     strcpy(out_metadata[OUT_INFLOW].description, "something");
 
-    /* incoming baseflow from lake catchment [mm] (ALMA_OUTPUT: [mm/s]) */
+    /* incoming baseflow from lake catchment [mm] */
     strcpy(out_metadata[OUT_LAKE_BF_IN].varname, "OUT_LAKE_BF_IN");
     strcpy(out_metadata[OUT_LAKE_BF_IN].long_name, "lake_bf_in");
     strcpy(out_metadata[OUT_LAKE_BF_IN].standard_name, "infiltration_amount");
@@ -376,7 +377,7 @@ set_output_met_data_info()
     strcpy(out_metadata[OUT_LAKE_BF_IN].description,
            "oisture that reaches top of soil column");
 
-    /* incoming volumetric baseflow from lake catchment [m3] (ALMA_OUTPUT: [m3/s]) */
+    /* incoming volumetric baseflow from lake catchment [m3] */
     strcpy(out_metadata[OUT_LAKE_BF_IN_V].varname, "OUT_LAKE_BF_IN_V");
     strcpy(out_metadata[OUT_LAKE_BF_IN_V].long_name, "lake_bf_in_v");
     strcpy(out_metadata[OUT_LAKE_BF_IN_V].standard_name,
@@ -385,7 +386,7 @@ set_output_met_data_info()
     strcpy(out_metadata[OUT_LAKE_BF_IN_V].description,
            "incoming volumetric baseflow from lake catchment");
 
-    /* outgoing baseflow lake [mm] (ALMA_OUTPUT: [mm/s]) */
+    /* outgoing baseflow lake [mm] */
     strcpy(out_metadata[OUT_LAKE_BF_OUT].varname, "OUT_LAKE_BF_OUT");
     strcpy(out_metadata[OUT_LAKE_BF_OUT].long_name, "lake_bf_out");
     strcpy(out_metadata[OUT_LAKE_BF_OUT].standard_name,
@@ -394,7 +395,7 @@ set_output_met_data_info()
     strcpy(out_metadata[OUT_LAKE_BF_OUT].description,
            "somethoutgoing baseflow lakeing");
 
-    /* outgoing volumetric baseflow from lake [m3] (ALMA_OUTPUT: [m3/s]) */
+    /* outgoing volumetric baseflow from lake [m3] */
     strcpy(out_metadata[OUT_LAKE_BF_OUT_V].varname, "OUT_LAKE_BF_OUT_V");
     strcpy(out_metadata[OUT_LAKE_BF_OUT_V].long_name, "lake_bf_out_v");
     strcpy(out_metadata[OUT_LAKE_BF_OUT_V].standard_name,
@@ -403,7 +404,7 @@ set_output_met_data_info()
     strcpy(out_metadata[OUT_LAKE_BF_OUT_V].description,
            "outgoing volumetric baseflow from lake");
 
-    /* channel inflow into lake [mm] (ALMA_OUTPUT: [mm/s]) */
+    /* channel inflow into lake [mm] */
     strcpy(out_metadata[OUT_LAKE_CHAN_IN].varname, "OUT_LAKE_CHAN_IN");
     strcpy(out_metadata[OUT_LAKE_CHAN_IN].long_name, "lake_chan_in");
     strcpy(out_metadata[OUT_LAKE_CHAN_IN].standard_name,
@@ -412,7 +413,7 @@ set_output_met_data_info()
     strcpy(out_metadata[OUT_LAKE_CHAN_IN].description,
            "channel inflow into lake");
 
-    /* volumetric channel inflow into lake [m3] (ALMA_OUTPUT: [m3/s]) */
+    /* volumetric channel inflow into lake [m3] */
     strcpy(out_metadata[OUT_LAKE_CHAN_IN_V].varname, "OUT_LAKE_CHAN_IN_V");
     strcpy(out_metadata[OUT_LAKE_CHAN_IN_V].long_name, "lake_chan_in_v");
     strcpy(out_metadata[OUT_LAKE_CHAN_IN_V].standard_name,
@@ -421,7 +422,7 @@ set_output_met_data_info()
     strcpy(out_metadata[OUT_LAKE_CHAN_IN_V].description,
            "volumetric channel inflow into lake");
 
-    /* channel outflow from lake [mm] (ALMA_OUTPUT: [mm/s]) */
+    /* channel outflow from lake [mm] */
     strcpy(out_metadata[OUT_LAKE_CHAN_OUT].varname, "OUT_LAKE_CHAN_OUT");
     strcpy(out_metadata[OUT_LAKE_CHAN_OUT].long_name, "lake_chan_out");
     strcpy(out_metadata[OUT_LAKE_CHAN_OUT].standard_name,
@@ -430,7 +431,7 @@ set_output_met_data_info()
     strcpy(out_metadata[OUT_LAKE_CHAN_OUT].description,
            "channel outflow from lake");
 
-    /* volumetric channel outflow from lake [m3] (ALMA_OUTPUT: [m3/s]) */
+    /* volumetric channel outflow from lake [m3] */
     strcpy(out_metadata[OUT_LAKE_CHAN_OUT_V].varname, "OUT_LAKE_CHAN_OUT_V");
     strcpy(out_metadata[OUT_LAKE_CHAN_OUT_V].long_name, "lake_chan_out_v");
     strcpy(out_metadata[OUT_LAKE_CHAN_OUT_V].standard_name,
@@ -439,7 +440,7 @@ set_output_met_data_info()
     strcpy(out_metadata[OUT_LAKE_CHAN_OUT_V].description,
            "volumetric channel outflow from lake");
 
-    /* change in lake moisture storage (liquid plus ice cover) [mm] (ALMA_OUTPUT: [mm/s]) */
+    /* change in lake moisture storage (liquid plus ice cover) [mm] */
     strcpy(out_metadata[OUT_LAKE_DSTOR].varname, "OUT_LAKE_DSTOR");
     strcpy(out_metadata[OUT_LAKE_DSTOR].long_name, "lake_dstor");
     strcpy(out_metadata[OUT_LAKE_DSTOR].standard_name,
@@ -448,7 +449,7 @@ set_output_met_data_info()
     strcpy(out_metadata[OUT_LAKE_DSTOR].description,
            "change in lake moisture storage (liquid plus ice cover)");
 
-    /* volumetric change in lake moisture storage (liquid plus ice cover) [m3] (ALMA_OUTPUT: [m3/s]) */
+    /* volumetric change in lake moisture storage (liquid plus ice cover) [m3] */
     strcpy(out_metadata[OUT_LAKE_DSTOR_V].varname, "OUT_LAKE_DSTOR_V");
     strcpy(out_metadata[OUT_LAKE_DSTOR_V].long_name, "lake_dstor_v");
     strcpy(out_metadata[OUT_LAKE_DSTOR_V].standard_name,
@@ -457,7 +458,7 @@ set_output_met_data_info()
     strcpy(out_metadata[OUT_LAKE_DSTOR_V].description,
            "volumetric change in lake moisture storage (liquid plus ice cover)");
 
-    /* change in snowpack on top of lake ice [mm] (ALMA_OUTPUT: [mm/s]) */
+    /* change in snowpack on top of lake ice [mm] */
     strcpy(out_metadata[OUT_LAKE_DSWE].varname, "OUT_LAKE_DSWE");
     strcpy(out_metadata[OUT_LAKE_DSWE].long_name, "lake_dswe");
     strcpy(out_metadata[OUT_LAKE_DSWE].standard_name,
@@ -466,7 +467,7 @@ set_output_met_data_info()
     strcpy(out_metadata[OUT_LAKE_DSWE].description,
            "change in snowpack on top of lake ice");
 
-    /* volumetric change in snowpack on top of lake ice [m3] (ALMA_OUTPUT: [m3/s]) */
+    /* volumetric change in snowpack on top of lake ice [m3] */
     strcpy(out_metadata[OUT_LAKE_DSWE_V].varname, "OUT_LAKE_DSWE_V");
     strcpy(out_metadata[OUT_LAKE_DSWE_V].long_name, "lake_dswe_v");
     strcpy(out_metadata[OUT_LAKE_DSWE_V].standard_name,
@@ -475,7 +476,7 @@ set_output_met_data_info()
     strcpy(out_metadata[OUT_LAKE_DSWE_V].description,
            "volumetric change in snowpack on top of lake ice");
 
-    /* net evaporation from lake surface [mm] (ALMA_OUTPUT: [mm/s]) */
+    /* net evaporation from lake surface [mm] */
     strcpy(out_metadata[OUT_LAKE_EVAP].varname, "OUT_LAKE_EVAP");
     strcpy(out_metadata[OUT_LAKE_EVAP].long_name, "lake_evap");
     strcpy(out_metadata[OUT_LAKE_EVAP].standard_name,
@@ -484,7 +485,7 @@ set_output_met_data_info()
     strcpy(out_metadata[OUT_LAKE_EVAP].description,
            "net evaporation from lake surface");
 
-    /* net volumetric evaporation from lake surface [m3] (ALMA_OUTPUT: [m3/s]) */
+    /* net volumetric evaporation from lake surface [m3] */
     strcpy(out_metadata[OUT_LAKE_EVAP_V].varname, "OUT_LAKE_EVAP_V");
     strcpy(out_metadata[OUT_LAKE_EVAP_V].long_name, "lake_evap_v");
     strcpy(out_metadata[OUT_LAKE_EVAP_V].standard_name,
@@ -493,7 +494,7 @@ set_output_met_data_info()
     strcpy(out_metadata[OUT_LAKE_EVAP_V].description,
            "net volumetric evaporation from lake surface");
 
-    /* volumetric precipitation over lake surface [m3] (ALMA_OUTPUT: [m3/s]) */
+    /* volumetric precipitation over lake surface [m3] */
     strcpy(out_metadata[OUT_LAKE_PREC_V].varname, "OUT_LAKE_PREC_V");
     strcpy(out_metadata[OUT_LAKE_PREC_V].long_name, "lake_prec_v");
     strcpy(out_metadata[OUT_LAKE_PREC_V].standard_name,
@@ -502,7 +503,7 @@ set_output_met_data_info()
     strcpy(out_metadata[OUT_LAKE_PREC_V].description,
            "volumetric precipitation over lake surface");
 
-    /* recharge from lake to surrounding wetland [mm] (ALMA_OUTPUT: [mm/s]) */
+    /* recharge from lake to surrounding wetland [mm] */
     strcpy(out_metadata[OUT_LAKE_RCHRG].varname, "OUT_LAKE_RCHRG");
     strcpy(out_metadata[OUT_LAKE_RCHRG].long_name, "lake_rchrg");
     strcpy(out_metadata[OUT_LAKE_RCHRG].standard_name,
@@ -511,7 +512,7 @@ set_output_met_data_info()
     strcpy(out_metadata[OUT_LAKE_RCHRG].description,
            "recharge from lake to surrounding wetland");
 
-    /* volumetric recharge from lake to surrounding wetland [m3] (ALMA_OUTPUT: [m3/s]) */
+    /* volumetric recharge from lake to surrounding wetland [m3] */
     strcpy(out_metadata[OUT_LAKE_RCHRG_V].varname, "OUT_LAKE_RCHRG_V");
     strcpy(out_metadata[OUT_LAKE_RCHRG_V].long_name, "lake_rchrg_v");
     strcpy(out_metadata[OUT_LAKE_RCHRG_V].standard_name, "");
@@ -519,7 +520,7 @@ set_output_met_data_info()
     strcpy(out_metadata[OUT_LAKE_RCHRG_V].description,
            "volumetric recharge from lake to surrounding wetland");
 
-    /* incoming runoff from lake catchment [mm] (ALMA_OUTPUT: [mm/s]) */
+    /* incoming runoff from lake catchment [mm] */
     strcpy(out_metadata[OUT_LAKE_RO_IN].varname, "OUT_LAKE_RO_IN");
     strcpy(out_metadata[OUT_LAKE_RO_IN].long_name, "lake_ro_in");
     strcpy(out_metadata[OUT_LAKE_RO_IN].standard_name,
@@ -527,7 +528,7 @@ set_output_met_data_info()
     strcpy(out_metadata[OUT_LAKE_RO_IN].units, "mm");
     strcpy(out_metadata[OUT_LAKE_RO_IN].description, "something");
 
-    /* incoming volumetric runoff from lake catchment [m3] (ALMA_OUTPUT: [m3/s]) */
+    /* incoming volumetric runoff from lake catchment [m3] */
     strcpy(out_metadata[OUT_LAKE_RO_IN_V].varname, "OUT_LAKE_RO_IN_V");
     strcpy(out_metadata[OUT_LAKE_RO_IN_V].long_name, "lake_ro_in_v");
     strcpy(out_metadata[OUT_LAKE_RO_IN_V].standard_name,
@@ -536,7 +537,7 @@ set_output_met_data_info()
     strcpy(out_metadata[OUT_LAKE_RO_IN_V].description,
            "incoming volumetric runoff from lake catchment");
 
-    /* sublimation from lake snow pack [mm] (ALMA_OUTPUT: [mm/s]) */
+    /* sublimation from lake snow pack [mm] */
     strcpy(out_metadata[OUT_LAKE_VAPFLX].varname, "OUT_LAKE_VAPFLX");
     strcpy(out_metadata[OUT_LAKE_VAPFLX].long_name, "lake_vapflx");
     strcpy(out_metadata[OUT_LAKE_VAPFLX].standard_name,
@@ -545,7 +546,7 @@ set_output_met_data_info()
     strcpy(out_metadata[OUT_LAKE_VAPFLX].description,
            "sublimation from lake snow pack");
 
-    /* volumetric sublimation from lake snow pack [m3] (ALMA_OUTPUT: [m3/s]) */
+    /* volumetric sublimation from lake snow pack [m3] */
     strcpy(out_metadata[OUT_LAKE_VAPFLX_V].varname, "OUT_LAKE_VAPFLX_V");
     strcpy(out_metadata[OUT_LAKE_VAPFLX_V].long_name, "lake_vapflx_v");
     strcpy(out_metadata[OUT_LAKE_VAPFLX_V].standard_name,
@@ -554,7 +555,7 @@ set_output_met_data_info()
     strcpy(out_metadata[OUT_LAKE_VAPFLX_V].description,
            "volumetric sublimation from lake snow pack");
 
-    /* Potential evapotranspiration (= area-weighted sum of potential transpiration and potential soil evaporation). [mm] (ALMA_OUTPUT: [mm/s]) */
+    /* Potential evapotranspiration (= area-weighted sum of potential transpiration and potential soil evaporation). [mm] */
     strcpy(out_metadata[OUT_PET].varname, "OUT_PET");
     strcpy(out_metadata[OUT_PET].long_name, "pet");
     strcpy(out_metadata[OUT_PET].standard_name,
@@ -563,21 +564,21 @@ set_output_met_data_info()
     strcpy(out_metadata[OUT_PET].description,
            "Potential evapotranspiration (= area-weighted sum of potential transpiration and potential soil evaporation)");
 
-    /* incoming precipitation [mm] (ALMA_OUTPUT: [mm/s]) */
+    /* incoming precipitation [mm] */
     strcpy(out_metadata[OUT_PREC].varname, "OUT_PREC");
     strcpy(out_metadata[OUT_PREC].long_name, "prec");
     strcpy(out_metadata[OUT_PREC].standard_name, "precipitation_amount");
     strcpy(out_metadata[OUT_PREC].units, "mm");
     strcpy(out_metadata[OUT_PREC].description, "incoming precipitation");
 
-    /* rainfall [mm] (ALMA_OUTPUT: [mm/s]) */
+    /* rainfall [mm] */
     strcpy(out_metadata[OUT_RAINF].varname, "OUT_RAINF");
     strcpy(out_metadata[OUT_RAINF].long_name, "rainf");
     strcpy(out_metadata[OUT_RAINF].standard_name, "rainfall_amount");
     strcpy(out_metadata[OUT_RAINF].units, "mm");
     strcpy(out_metadata[OUT_RAINF].description, "liquid rainfall amount");
 
-    /* refreezing of water in the snow [mm] (ALMA_OUTPUT: [mm/s]) */
+    /* refreezing of water in the snow [mm] */
     strcpy(out_metadata[OUT_REFREEZE].varname, "OUT_REFREEZE");
     strcpy(out_metadata[OUT_REFREEZE].long_name, "refreeze");
     strcpy(out_metadata[OUT_REFREEZE].standard_name,
@@ -586,28 +587,28 @@ set_output_met_data_info()
     strcpy(out_metadata[OUT_REFREEZE].description,
            "refreezing of water in the snow");
 
-    /* surface runoff [mm] (ALMA_OUTPUT: [mm/s]) */
+    /* surface runoff [mm] */
     strcpy(out_metadata[OUT_RUNOFF].varname, "OUT_RUNOFF");
     strcpy(out_metadata[OUT_RUNOFF].long_name, "runoff");
     strcpy(out_metadata[OUT_RUNOFF].standard_name, "runoff_amount");
     strcpy(out_metadata[OUT_RUNOFF].units, "mm");
     strcpy(out_metadata[OUT_RUNOFF].description, "surface runoff");
 
-    /* snow melt [mm] (ALMA_OUTPUT: [mm/s]) */
+    /* snow melt [mm] */
     strcpy(out_metadata[OUT_SNOW_MELT].varname, "OUT_SNOW_MELT");
     strcpy(out_metadata[OUT_SNOW_MELT].long_name, "snow_melt");
     strcpy(out_metadata[OUT_SNOW_MELT].standard_name, "snow_melt_amount");
     strcpy(out_metadata[OUT_SNOW_MELT].units, "mm");
     strcpy(out_metadata[OUT_SNOW_MELT].description, "snow melt");
 
-    /* snowfall [mm] (ALMA_OUTPUT: [mm/s]) */
+    /* snowfall [mm] */
     strcpy(out_metadata[OUT_SNOWF].varname, "OUT_SNOWF");
     strcpy(out_metadata[OUT_SNOWF].long_name, "snowf");
     strcpy(out_metadata[OUT_SNOWF].standard_name, "snowfall_lwe_amount");
     strcpy(out_metadata[OUT_SNOWF].units, "mm");
     strcpy(out_metadata[OUT_SNOWF].description, "snowfall");
 
-    /* net sublimation of blowing snow [mm] (ALMA_OUTPUT: [mm/s]) */
+    /* net sublimation of blowing snow [mm] */
     strcpy(out_metadata[OUT_SUB_BLOWING].varname, "OUT_SUB_BLOWING");
     strcpy(out_metadata[OUT_SUB_BLOWING].long_name, "sub_blowing");
     strcpy(out_metadata[OUT_SUB_BLOWING].standard_name,
@@ -616,7 +617,7 @@ set_output_met_data_info()
     strcpy(out_metadata[OUT_SUB_BLOWING].description,
            "net sublimation of blowing snow");
 
-    /* net sublimation from snow stored in canopy [mm] (ALMA_OUTPUT: [mm/s]) */
+    /* net sublimation from snow stored in canopy [mm] */
     strcpy(out_metadata[OUT_SUB_CANOP].varname, "OUT_SUB_CANOP");
     strcpy(out_metadata[OUT_SUB_CANOP].long_name, "sub_canop");
     strcpy(out_metadata[OUT_SUB_CANOP].standard_name,
@@ -625,7 +626,7 @@ set_output_met_data_info()
     strcpy(out_metadata[OUT_SUB_CANOP].description,
            "net sublimation from snow stored in canopy");
 
-    /* net sublimation from snow pack (surface and blowing) [mm] (ALMA_OUTPUT: [mm/s]) */
+    /* net sublimation from snow pack (surface and blowing) [mm] */
     strcpy(out_metadata[OUT_SUB_SNOW].varname, "OUT_SUB_SNOW");
     strcpy(out_metadata[OUT_SUB_SNOW].long_name, "sub_snow");
     strcpy(out_metadata[OUT_SUB_SNOW].standard_name,
@@ -634,7 +635,7 @@ set_output_met_data_info()
     strcpy(out_metadata[OUT_SUB_SNOW].description,
            "net sublimation from snow pack (surface and blowing)");
 
-    /* net sublimation from snow pack surface [mm] (ALMA_OUTPUT: [mm/s]) */
+    /* net sublimation from snow pack surface [mm] */
     strcpy(out_metadata[OUT_SUB_SURFACE].varname, "OUT_SUB_SURFACE");
     strcpy(out_metadata[OUT_SUB_SURFACE].long_name, "sub_surface");
     strcpy(out_metadata[OUT_SUB_SURFACE].standard_name,
@@ -643,7 +644,7 @@ set_output_met_data_info()
     strcpy(out_metadata[OUT_SUB_SURFACE].description,
            "net sublimation from snow pack surface");
 
-    /* net transpiration from vegetation [mm] (ALMA_OUTPUT: [mm/s]) */
+    /* net transpiration from vegetation [mm] */
     strcpy(out_metadata[OUT_TRANSP_VEG].varname, "OUT_TRANSP_VEG");
     strcpy(out_metadata[OUT_TRANSP_VEG].long_name, "transp_veg");
     strcpy(out_metadata[OUT_TRANSP_VEG].standard_name, "transpiration_amount");
@@ -659,7 +660,7 @@ set_output_met_data_info()
     strcpy(out_metadata[OUT_ALBEDO].units, "1");
     strcpy(out_metadata[OUT_ALBEDO].description, "albedo");
 
-    /* bare soil surface temperature [C] (ALMA_OUTPUT: [K]) */
+    /* bare soil surface temperature [C] */
     strcpy(out_metadata[OUT_BARESOILT].varname, "OUT_BARESOILT");
     strcpy(out_metadata[OUT_BARESOILT].long_name, "baresoilt");
     strcpy(out_metadata[OUT_BARESOILT].standard_name,
@@ -668,7 +669,7 @@ set_output_met_data_info()
     strcpy(out_metadata[OUT_BARESOILT].description,
            "bare soil surface temperature");
 
-    /* depth of freezing fronts [cm] (ALMA_OUTPUT: [m]) for each freezing front */
+    /* depth of freezing fronts [cm] for each freezing front */
     strcpy(out_metadata[OUT_FDEPTH].varname, "OUT_FDEPTH");
     strcpy(out_metadata[OUT_FDEPTH].long_name, "fdepth");
     strcpy(out_metadata[OUT_FDEPTH].standard_name, "freezing_fronts_depth");
@@ -709,7 +710,7 @@ set_output_met_data_info()
     strcpy(out_metadata[OUT_SALBEDO].units, "1");
     strcpy(out_metadata[OUT_SALBEDO].description, "snow albedo");
 
-    /* snow pack temperature [C] (ALMA_OUTPUT: [K]) */
+    /* snow pack temperature [C] */
     strcpy(out_metadata[OUT_SNOW_PACK_TEMP].varname, "OUT_SNOW_PACK_TEMP");
     strcpy(out_metadata[OUT_SNOW_PACK_TEMP].long_name, "snow_pack_temp");
     strcpy(out_metadata[OUT_SNOW_PACK_TEMP].standard_name,
@@ -718,7 +719,7 @@ set_output_met_data_info()
     strcpy(out_metadata[OUT_SNOW_PACK_TEMP].description,
            "snow pack temperature");
 
-    /* snow surface temperature [C] (ALMA_OUTPUT: [K]) */
+    /* snow surface temperature [C] */
     strcpy(out_metadata[OUT_SNOW_SURF_TEMP].varname, "OUT_SNOW_SURF_TEMP");
     strcpy(out_metadata[OUT_SNOW_SURF_TEMP].long_name, "snow_surf_temp");
     strcpy(out_metadata[OUT_SNOW_SURF_TEMP].standard_name,
@@ -736,7 +737,7 @@ set_output_met_data_info()
     strcpy(out_metadata[OUT_SNOWT_FBFLAG].description,
            "snow surface temperature flag");
 
-    /* soil temperature [C] (ALMA_OUTPUT: [K]) for each soil layer */
+    /* soil temperature [C] for each soil layer */
     strcpy(out_metadata[OUT_SOIL_TEMP].varname, "OUT_SOIL_TEMP");
     strcpy(out_metadata[OUT_SOIL_TEMP].long_name, "soil_temp");
     strcpy(out_metadata[OUT_SOIL_TEMP].standard_name, "soil_temperature");
@@ -744,7 +745,7 @@ set_output_met_data_info()
     strcpy(out_metadata[OUT_SOIL_TEMP].description,
            "soil temperature for each soil layer");
 
-    /* soil temperature [C] (ALMA_OUTPUT: [K]) for each soil thermal node */
+    /* soil temperature [C] for each soil thermal node */
     strcpy(out_metadata[OUT_SOIL_TNODE].varname, "OUT_SOIL_TNODE");
     strcpy(out_metadata[OUT_SOIL_TNODE].long_name, "soil_tnode");
     strcpy(out_metadata[OUT_SOIL_TNODE].standard_name, "soil_temperature");
@@ -752,7 +753,7 @@ set_output_met_data_info()
     strcpy(out_metadata[OUT_SOIL_TNODE].description,
            "soil temperature for each soil thermal node");
 
-    /* soil temperature [C] (ALMA_OUTPUT: [K]) for each soil thermal node in the wetland */
+    /* soil temperature [C] for each soil thermal node in the wetland */
     strcpy(out_metadata[OUT_SOIL_TNODE_WL].varname, "OUT_SOIL_TNODE_WL");
     strcpy(out_metadata[OUT_SOIL_TNODE_WL].long_name, "soil_tnode_wl");
     strcpy(out_metadata[OUT_SOIL_TNODE_WL].standard_name, "soil_temperature");
@@ -769,7 +770,7 @@ set_output_met_data_info()
     strcpy(out_metadata[OUT_SOILT_FBFLAG].description,
            "soil temperature flag for each soil thermal node");
 
-    /* average surface temperature [C] (ALMA_OUTPUT: [K]) */
+    /* average surface temperature [C] */
     strcpy(out_metadata[OUT_SURF_TEMP].varname, "OUT_SURF_TEMP");
     strcpy(out_metadata[OUT_SURF_TEMP].long_name, "surf_temp");
     strcpy(out_metadata[OUT_SURF_TEMP].standard_name, "surface_temperature");
@@ -794,7 +795,7 @@ set_output_met_data_info()
     strcpy(out_metadata[OUT_TCAN_FBFLAG].units, "1");
     strcpy(out_metadata[OUT_TCAN_FBFLAG].description, "Tcanopy flag");
 
-    /* depth of thawing fronts [cm] (ALMA_OUTPUT: [m]) for each thawing front */
+    /* depth of thawing fronts [cm] for each thawing front */
     strcpy(out_metadata[OUT_TDEPTH].varname, "OUT_TDEPTH");
     strcpy(out_metadata[OUT_TDEPTH].long_name, "tdepth");
     strcpy(out_metadata[OUT_TDEPTH].standard_name, "depth_of_thawing_fronts");
@@ -811,7 +812,7 @@ set_output_met_data_info()
     strcpy(out_metadata[OUT_TFOL_FBFLAG].description,
            "depth of thawing fronts for each thawing front");
 
-    /* average vegetation canopy temperature [C] (ALMA_OUTPUT: [K]) */
+    /* average vegetation canopy temperature [C] */
     strcpy(out_metadata[OUT_VEGT].varname, "OUT_VEGT");
     strcpy(out_metadata[OUT_VEGT].long_name, "vegt");
     strcpy(out_metadata[OUT_VEGT].standard_name, "canopy_temperature");
@@ -1404,7 +1405,7 @@ set_output_met_data_info()
     strcpy(out_metadata[OUT_SNOW_FLUX_BAND].description,
            out_metadata[OUT_SNOW_FLUX].description);
 
-    /* snow melt [mm] (ALMA_OUTPUT: [mm/s]) */
+    /* snow melt [mm] */
     strcpy(out_metadata[OUT_SNOW_MELT_BAND].varname, "OUT_SNOW_MELT_BAND");
     strcpy(out_metadata[OUT_SNOW_MELT_BAND].long_name, "snow_melt_band");
     strcpy(out_metadata[OUT_SNOW_MELT_BAND].standard_name,
@@ -1414,7 +1415,7 @@ set_output_met_data_info()
     strcpy(out_metadata[OUT_SNOW_MELT_BAND].description,
            out_metadata[OUT_SNOW_MELT].description);
 
-    /* snow pack temperature [C] (ALMA_OUTPUT: [K]) */
+    /* snow pack temperature [C] */
     strcpy(out_metadata[OUT_SNOW_PACKT_BAND].varname, "OUT_SNOW_PACKT_BAND");
     strcpy(out_metadata[OUT_SNOW_PACKT_BAND].long_name, "snow_packt_band");
     strcpy(out_metadata[OUT_SNOW_PACKT_BAND].standard_name,
@@ -1424,7 +1425,7 @@ set_output_met_data_info()
     strcpy(out_metadata[OUT_SNOW_PACKT_BAND].description,
            out_metadata[OUT_SNOW_PACK_TEMP].description);
 
-    /* snow surface temperature [C] (ALMA_OUTPUT: [K]) */
+    /* snow surface temperature [C] */
     strcpy(out_metadata[OUT_SNOW_SURFT_BAND].varname, "OUT_SNOW_SURFT_BAND");
     strcpy(out_metadata[OUT_SNOW_SURFT_BAND].long_name, "snow_surft_band");
     strcpy(out_metadata[OUT_SNOW_SURFT_BAND].standard_name,
@@ -1478,4 +1479,458 @@ set_output_met_data_info()
     out_metadata[OUT_SNOW_PACKT_BAND].nelem = options.SNOW_BAND;
     out_metadata[OUT_SNOW_SURFT_BAND].nelem = options.SNOW_BAND;
     out_metadata[OUT_SWE_BAND].nelem = options.SNOW_BAND;
+}
+
+/******************************************************************************
+ * @brief    Set output met data information
+ *****************************************************************************/
+void
+set_state_meta_data_info()
+{
+    size_t                       v;
+
+    extern out_metadata_struct state_metadata[N_STATE_VARS];
+
+    // Build the list of state variables
+
+    // Set missing and/or default values
+    for (v = 0; v < N_STATE_VARS; v++) {
+        // Set default string values
+        strcpy(state_metadata[v].varname, MISSING_S);
+        strcpy(state_metadata[v].long_name, MISSING_S);
+        strcpy(state_metadata[v].standard_name, MISSING_S);
+        strcpy(state_metadata[v].units, MISSING_S);
+        strcpy(state_metadata[v].description, MISSING_S);
+        // Set default number of elements
+        state_metadata[v].nelem = 1;
+    }
+
+    // STATE_SOIL_MOISTURE
+    strcpy(state_metadata[STATE_SOIL_MOISTURE].varname, "STATE_SOIL_MOISTURE");
+    strcpy(state_metadata[STATE_SOIL_MOISTURE].long_name, "soil_moisture");
+    strcpy(state_metadata[STATE_SOIL_MOISTURE].standard_name, "unknown");
+    strcpy(state_metadata[STATE_SOIL_MOISTURE].units, "unknown");
+    strcpy(state_metadata[STATE_SOIL_MOISTURE].description, "unknown");
+
+    // STATE_SOIL_ICE
+    strcpy(state_metadata[STATE_SOIL_ICE].varname, "STATE_SOIL_ICE");
+    strcpy(state_metadata[STATE_SOIL_ICE].long_name, "soil_ice");
+    strcpy(state_metadata[STATE_SOIL_ICE].standard_name, "unknown");
+    strcpy(state_metadata[STATE_SOIL_ICE].units, "unknown");
+    strcpy(state_metadata[STATE_SOIL_ICE].description, "unknown");
+
+    // STATE_CANOPY_WATER
+    strcpy(state_metadata[STATE_CANOPY_WATER].varname, "STATE_CANOPY_WATER");
+    strcpy(state_metadata[STATE_CANOPY_WATER].long_name, "canopy_water");
+    strcpy(state_metadata[STATE_CANOPY_WATER].standard_name, "unknown");
+    strcpy(state_metadata[STATE_CANOPY_WATER].units, "unknown");
+    strcpy(state_metadata[STATE_CANOPY_WATER].description, "unknown");
+
+    // STATE_ANNUALNPP
+    strcpy(state_metadata[STATE_ANNUALNPP].varname, "STATE_ANNUALNPP");
+    strcpy(state_metadata[STATE_ANNUALNPP].long_name, "annualnpp");
+    strcpy(state_metadata[STATE_ANNUALNPP].standard_name, "unknown");
+    strcpy(state_metadata[STATE_ANNUALNPP].units, "unknown");
+    strcpy(state_metadata[STATE_ANNUALNPP].description, "unknown");
+
+    // STATE_ANNUALNPPPREV
+    strcpy(state_metadata[STATE_ANNUALNPPPREV].varname, "STATE_ANNUALNPPPREV");
+    strcpy(state_metadata[STATE_ANNUALNPPPREV].long_name, "annualnppprev");
+    strcpy(state_metadata[STATE_ANNUALNPPPREV].standard_name, "unknown");
+    strcpy(state_metadata[STATE_ANNUALNPPPREV].units, "unknown");
+    strcpy(state_metadata[STATE_ANNUALNPPPREV].description, "unknown");
+
+    // STATE_CLITTER
+    strcpy(state_metadata[STATE_CLITTER].varname, "STATE_CLITTER");
+    strcpy(state_metadata[STATE_CLITTER].long_name, "clitter");
+    strcpy(state_metadata[STATE_CLITTER].standard_name, "unknown");
+    strcpy(state_metadata[STATE_CLITTER].units, "unknown");
+    strcpy(state_metadata[STATE_CLITTER].description, "unknown");
+
+    // STATE_CINTER
+    strcpy(state_metadata[STATE_CINTER].varname, "STATE_CINTER");
+    strcpy(state_metadata[STATE_CINTER].long_name, "cinter");
+    strcpy(state_metadata[STATE_CINTER].standard_name, "unknown");
+    strcpy(state_metadata[STATE_CINTER].units, "unknown");
+    strcpy(state_metadata[STATE_CINTER].description, "unknown");
+
+    // STATE_CSLOW
+    strcpy(state_metadata[STATE_CSLOW].varname, "STATE_CSLOW");
+    strcpy(state_metadata[STATE_CSLOW].long_name, "cslow");
+    strcpy(state_metadata[STATE_CSLOW].standard_name, "unknown");
+    strcpy(state_metadata[STATE_CSLOW].units, "unknown");
+    strcpy(state_metadata[STATE_CSLOW].description, "unknown");
+
+    // STATE_SNOW_AGE
+    strcpy(state_metadata[STATE_SNOW_AGE].varname, "STATE_SNOW_AGE");
+    strcpy(state_metadata[STATE_SNOW_AGE].long_name, "snow_age");
+    strcpy(state_metadata[STATE_SNOW_AGE].standard_name, "unknown");
+    strcpy(state_metadata[STATE_SNOW_AGE].units, "unknown");
+    strcpy(state_metadata[STATE_SNOW_AGE].description, "unknown");
+
+    // STATE_SNOW_MELT_STATE
+    strcpy(state_metadata[STATE_SNOW_MELT_STATE].varname, "STATE_SNOW_MELT_STATE");
+    strcpy(state_metadata[STATE_SNOW_MELT_STATE].long_name, "snow_melt_state");
+    strcpy(state_metadata[STATE_SNOW_MELT_STATE].standard_name, "unknown");
+    strcpy(state_metadata[STATE_SNOW_MELT_STATE].units, "unknown");
+    strcpy(state_metadata[STATE_SNOW_MELT_STATE].description, "unknown");
+
+    // STATE_SNOW_COVERAGE
+    strcpy(state_metadata[STATE_SNOW_COVERAGE].varname, "STATE_SNOW_COVERAGE");
+    strcpy(state_metadata[STATE_SNOW_COVERAGE].long_name, "snow_coverage");
+    strcpy(state_metadata[STATE_SNOW_COVERAGE].standard_name, "unknown");
+    strcpy(state_metadata[STATE_SNOW_COVERAGE].units, "unknown");
+    strcpy(state_metadata[STATE_SNOW_COVERAGE].description, "unknown");
+
+    // STATE_SNOW_WATER_EQUIVALENT
+    strcpy(state_metadata[STATE_SNOW_WATER_EQUIVALENT].varname, "STATE_SNOW_WATER_EQUIVALENT");
+    strcpy(state_metadata[STATE_SNOW_WATER_EQUIVALENT].long_name, "snow_water_equivalent");
+    strcpy(state_metadata[STATE_SNOW_WATER_EQUIVALENT].standard_name, "unknown");
+    strcpy(state_metadata[STATE_SNOW_WATER_EQUIVALENT].units, "unknown");
+    strcpy(state_metadata[STATE_SNOW_WATER_EQUIVALENT].description, "unknown");
+
+    // STATE_SNOW_SURF_TEMP
+    strcpy(state_metadata[STATE_SNOW_SURF_TEMP].varname, "STATE_SNOW_SURF_TEMP");
+    strcpy(state_metadata[STATE_SNOW_SURF_TEMP].long_name, "snow_surf_temp");
+    strcpy(state_metadata[STATE_SNOW_SURF_TEMP].standard_name, "unknown");
+    strcpy(state_metadata[STATE_SNOW_SURF_TEMP].units, "unknown");
+    strcpy(state_metadata[STATE_SNOW_SURF_TEMP].description, "unknown");
+
+    // STATE_SNOW_SURF_WATER
+    strcpy(state_metadata[STATE_SNOW_SURF_WATER].varname, "STATE_SNOW_SURF_WATER");
+    strcpy(state_metadata[STATE_SNOW_SURF_WATER].long_name, "snow_surf_water");
+    strcpy(state_metadata[STATE_SNOW_SURF_WATER].standard_name, "unknown");
+    strcpy(state_metadata[STATE_SNOW_SURF_WATER].units, "unknown");
+    strcpy(state_metadata[STATE_SNOW_SURF_WATER].description, "unknown");
+
+    // STATE_SNOW_PACK_TEMP
+    strcpy(state_metadata[STATE_SNOW_PACK_TEMP].varname, "STATE_SNOW_PACK_TEMP");
+    strcpy(state_metadata[STATE_SNOW_PACK_TEMP].long_name, "snow_pack_temp");
+    strcpy(state_metadata[STATE_SNOW_PACK_TEMP].standard_name, "unknown");
+    strcpy(state_metadata[STATE_SNOW_PACK_TEMP].units, "unknown");
+    strcpy(state_metadata[STATE_SNOW_PACK_TEMP].description, "unknown");
+
+    // STATE_SNOW_PACK_WATER
+    strcpy(state_metadata[STATE_SNOW_PACK_WATER].varname, "STATE_SNOW_PACK_WATER");
+    strcpy(state_metadata[STATE_SNOW_PACK_WATER].long_name, "snow_pack_water");
+    strcpy(state_metadata[STATE_SNOW_PACK_WATER].standard_name, "unknown");
+    strcpy(state_metadata[STATE_SNOW_PACK_WATER].units, "unknown");
+    strcpy(state_metadata[STATE_SNOW_PACK_WATER].description, "unknown");
+
+    // STATE_SNOW_DENSITY
+    strcpy(state_metadata[STATE_SNOW_DENSITY].varname, "STATE_SNOW_DENSITY");
+    strcpy(state_metadata[STATE_SNOW_DENSITY].long_name, "snow_density");
+    strcpy(state_metadata[STATE_SNOW_DENSITY].standard_name, "unknown");
+    strcpy(state_metadata[STATE_SNOW_DENSITY].units, "unknown");
+    strcpy(state_metadata[STATE_SNOW_DENSITY].description, "unknown");
+
+    // STATE_SNOW_COLD_CONTENT
+    strcpy(state_metadata[STATE_SNOW_COLD_CONTENT].varname, "STATE_SNOW_COLD_CONTENT");
+    strcpy(state_metadata[STATE_SNOW_COLD_CONTENT].long_name, "snow_cold_content");
+    strcpy(state_metadata[STATE_SNOW_COLD_CONTENT].standard_name, "unknown");
+    strcpy(state_metadata[STATE_SNOW_COLD_CONTENT].units, "unknown");
+    strcpy(state_metadata[STATE_SNOW_COLD_CONTENT].description, "unknown");
+
+    // STATE_SNOW_CANOPY
+    strcpy(state_metadata[STATE_SNOW_CANOPY].varname, "STATE_SNOW_CANOPY");
+    strcpy(state_metadata[STATE_SNOW_CANOPY].long_name, "snow_canopy");
+    strcpy(state_metadata[STATE_SNOW_CANOPY].standard_name, "unknown");
+    strcpy(state_metadata[STATE_SNOW_CANOPY].units, "unknown");
+    strcpy(state_metadata[STATE_SNOW_CANOPY].description, "unknown");
+
+    // STATE_SOIL_NODE_TEMP
+    strcpy(state_metadata[STATE_SOIL_NODE_TEMP].varname, "STATE_SOIL_NODE_TEMP");
+    strcpy(state_metadata[STATE_SOIL_NODE_TEMP].long_name, "soil_node_temp");
+    strcpy(state_metadata[STATE_SOIL_NODE_TEMP].standard_name, "unknown");
+    strcpy(state_metadata[STATE_SOIL_NODE_TEMP].units, "unknown");
+    strcpy(state_metadata[STATE_SOIL_NODE_TEMP].description, "unknown");
+
+    // STATE_FOLIAGE_TEMPERATURE
+    strcpy(state_metadata[STATE_FOLIAGE_TEMPERATURE].varname, "STATE_FOLIAGE_TEMPERATURE");
+    strcpy(state_metadata[STATE_FOLIAGE_TEMPERATURE].long_name, "foliage_temperature");
+    strcpy(state_metadata[STATE_FOLIAGE_TEMPERATURE].standard_name, "unknown");
+    strcpy(state_metadata[STATE_FOLIAGE_TEMPERATURE].units, "unknown");
+    strcpy(state_metadata[STATE_FOLIAGE_TEMPERATURE].description, "unknown");
+
+    // STATE_ENERGY_LONGUNDEROUT
+    strcpy(state_metadata[STATE_ENERGY_LONGUNDEROUT].varname, "STATE_ENERGY_LONGUNDEROUT");
+    strcpy(state_metadata[STATE_ENERGY_LONGUNDEROUT].long_name, "energy_longunderout");
+    strcpy(state_metadata[STATE_ENERGY_LONGUNDEROUT].standard_name, "unknown");
+    strcpy(state_metadata[STATE_ENERGY_LONGUNDEROUT].units, "unknown");
+    strcpy(state_metadata[STATE_ENERGY_LONGUNDEROUT].description, "unknown");
+
+    // STATE_ENERGY_SNOW_FLUX
+    strcpy(state_metadata[STATE_ENERGY_SNOW_FLUX].varname, "STATE_ENERGY_SNOW_FLUX");
+    strcpy(state_metadata[STATE_ENERGY_SNOW_FLUX].long_name, "energy_snow_flux");
+    strcpy(state_metadata[STATE_ENERGY_SNOW_FLUX].standard_name, "unknown");
+    strcpy(state_metadata[STATE_ENERGY_SNOW_FLUX].units, "unknown");
+    strcpy(state_metadata[STATE_ENERGY_SNOW_FLUX].description, "unknown");
+
+    // STATE_LAKE_SOIL_MOISTURE
+    strcpy(state_metadata[STATE_LAKE_SOIL_MOISTURE].varname, "STATE_LAKE_SOIL_MOISTURE");
+    strcpy(state_metadata[STATE_LAKE_SOIL_MOISTURE].long_name, "lake_soil_moisture");
+    strcpy(state_metadata[STATE_LAKE_SOIL_MOISTURE].standard_name, "unknown");
+    strcpy(state_metadata[STATE_LAKE_SOIL_MOISTURE].units, "unknown");
+    strcpy(state_metadata[STATE_LAKE_SOIL_MOISTURE].description, "unknown");
+
+    // STATE_LAKE_SOIL_ICE
+    strcpy(state_metadata[STATE_LAKE_SOIL_ICE].varname, "STATE_LAKE_SOIL_ICE");
+    strcpy(state_metadata[STATE_LAKE_SOIL_ICE].long_name, "lake_soil_ice");
+    strcpy(state_metadata[STATE_LAKE_SOIL_ICE].standard_name, "unknown");
+    strcpy(state_metadata[STATE_LAKE_SOIL_ICE].units, "unknown");
+    strcpy(state_metadata[STATE_LAKE_SOIL_ICE].description, "unknown");
+
+    // STATE_LAKE_CLITTER
+    strcpy(state_metadata[STATE_LAKE_CLITTER].varname, "STATE_LAKE_CLITTER");
+    strcpy(state_metadata[STATE_LAKE_CLITTER].long_name, "lake_clitter");
+    strcpy(state_metadata[STATE_LAKE_CLITTER].standard_name, "unknown");
+    strcpy(state_metadata[STATE_LAKE_CLITTER].units, "unknown");
+    strcpy(state_metadata[STATE_LAKE_CLITTER].description, "unknown");
+
+    // STATE_LAKE_CINTER
+    strcpy(state_metadata[STATE_LAKE_CINTER].varname, "STATE_LAKE_CINTER");
+    strcpy(state_metadata[STATE_LAKE_CINTER].long_name, "lake_cinter");
+    strcpy(state_metadata[STATE_LAKE_CINTER].standard_name, "unknown");
+    strcpy(state_metadata[STATE_LAKE_CINTER].units, "unknown");
+    strcpy(state_metadata[STATE_LAKE_CINTER].description, "unknown");
+
+    // STATE_LAKE_CSLOW
+    strcpy(state_metadata[STATE_LAKE_CSLOW].varname, "STATE_LAKE_CSLOW");
+    strcpy(state_metadata[STATE_LAKE_CSLOW].long_name, "lake_cslow");
+    strcpy(state_metadata[STATE_LAKE_CSLOW].standard_name, "unknown");
+    strcpy(state_metadata[STATE_LAKE_CSLOW].units, "unknown");
+    strcpy(state_metadata[STATE_LAKE_CSLOW].description, "unknown");
+
+    // STATE_LAKE_SNOW_AGE
+    strcpy(state_metadata[STATE_LAKE_SNOW_AGE].varname, "STATE_LAKE_SNOW_AGE");
+    strcpy(state_metadata[STATE_LAKE_SNOW_AGE].long_name, "lake_snow_age");
+    strcpy(state_metadata[STATE_LAKE_SNOW_AGE].standard_name, "unknown");
+    strcpy(state_metadata[STATE_LAKE_SNOW_AGE].units, "unknown");
+    strcpy(state_metadata[STATE_LAKE_SNOW_AGE].description, "unknown");
+
+    // STATE_LAKE_SNOW_MELT_STATE
+    strcpy(state_metadata[STATE_LAKE_SNOW_MELT_STATE].varname, "STATE_LAKE_SNOW_MELT_STATE");
+    strcpy(state_metadata[STATE_LAKE_SNOW_MELT_STATE].long_name, "lake_snow_melt_state");
+    strcpy(state_metadata[STATE_LAKE_SNOW_MELT_STATE].standard_name, "unknown");
+    strcpy(state_metadata[STATE_LAKE_SNOW_MELT_STATE].units, "unknown");
+    strcpy(state_metadata[STATE_LAKE_SNOW_MELT_STATE].description, "unknown");
+
+    // STATE_LAKE_SNOW_COVERAGE
+    strcpy(state_metadata[STATE_LAKE_SNOW_COVERAGE].varname, "STATE_LAKE_SNOW_COVERAGE");
+    strcpy(state_metadata[STATE_LAKE_SNOW_COVERAGE].long_name, "lake_snow_coverage");
+    strcpy(state_metadata[STATE_LAKE_SNOW_COVERAGE].standard_name, "unknown");
+    strcpy(state_metadata[STATE_LAKE_SNOW_COVERAGE].units, "unknown");
+    strcpy(state_metadata[STATE_LAKE_SNOW_COVERAGE].description, "unknown");
+
+    // STATE_LAKE_SNOW_WATER_EQUIVALENT
+    strcpy(state_metadata[STATE_LAKE_SNOW_WATER_EQUIVALENT].varname, "STATE_LAKE_SNOW_WATER_EQUIVALENT");
+    strcpy(state_metadata[STATE_LAKE_SNOW_WATER_EQUIVALENT].long_name, "lake_snow_water_equivalent");
+    strcpy(state_metadata[STATE_LAKE_SNOW_WATER_EQUIVALENT].standard_name, "unknown");
+    strcpy(state_metadata[STATE_LAKE_SNOW_WATER_EQUIVALENT].units, "unknown");
+    strcpy(state_metadata[STATE_LAKE_SNOW_WATER_EQUIVALENT].description, "unknown");
+
+    // STATE_LAKE_SNOW_SURF_TEMP
+    strcpy(state_metadata[STATE_LAKE_SNOW_SURF_TEMP].varname, "STATE_LAKE_SNOW_SURF_TEMP");
+    strcpy(state_metadata[STATE_LAKE_SNOW_SURF_TEMP].long_name, "lake_snow_surf_temp");
+    strcpy(state_metadata[STATE_LAKE_SNOW_SURF_TEMP].standard_name, "unknown");
+    strcpy(state_metadata[STATE_LAKE_SNOW_SURF_TEMP].units, "unknown");
+    strcpy(state_metadata[STATE_LAKE_SNOW_SURF_TEMP].description, "unknown");
+
+    // STATE_LAKE_SNOW_SURF_WATER
+    strcpy(state_metadata[STATE_LAKE_SNOW_SURF_WATER].varname, "STATE_LAKE_SNOW_SURF_WATER");
+    strcpy(state_metadata[STATE_LAKE_SNOW_SURF_WATER].long_name, "lake_snow_surf_water");
+    strcpy(state_metadata[STATE_LAKE_SNOW_SURF_WATER].standard_name, "unknown");
+    strcpy(state_metadata[STATE_LAKE_SNOW_SURF_WATER].units, "unknown");
+    strcpy(state_metadata[STATE_LAKE_SNOW_SURF_WATER].description, "unknown");
+
+    // STATE_LAKE_SNOW_PACK_TEMP
+    strcpy(state_metadata[STATE_LAKE_SNOW_PACK_TEMP].varname, "STATE_LAKE_SNOW_PACK_TEMP");
+    strcpy(state_metadata[STATE_LAKE_SNOW_PACK_TEMP].long_name, "lake_snow_pack_temp");
+    strcpy(state_metadata[STATE_LAKE_SNOW_PACK_TEMP].standard_name, "unknown");
+    strcpy(state_metadata[STATE_LAKE_SNOW_PACK_TEMP].units, "unknown");
+    strcpy(state_metadata[STATE_LAKE_SNOW_PACK_TEMP].description, "unknown");
+
+    // STATE_LAKE_SNOW_PACK_WATER
+    strcpy(state_metadata[STATE_LAKE_SNOW_PACK_WATER].varname, "STATE_LAKE_SNOW_PACK_WATER");
+    strcpy(state_metadata[STATE_LAKE_SNOW_PACK_WATER].long_name, "lake_snow_pack_water");
+    strcpy(state_metadata[STATE_LAKE_SNOW_PACK_WATER].standard_name, "unknown");
+    strcpy(state_metadata[STATE_LAKE_SNOW_PACK_WATER].units, "unknown");
+    strcpy(state_metadata[STATE_LAKE_SNOW_PACK_WATER].description, "unknown");
+
+    // STATE_LAKE_SNOW_DENSITY
+    strcpy(state_metadata[STATE_LAKE_SNOW_DENSITY].varname, "STATE_LAKE_SNOW_DENSITY");
+    strcpy(state_metadata[STATE_LAKE_SNOW_DENSITY].long_name, "lake_snow_density");
+    strcpy(state_metadata[STATE_LAKE_SNOW_DENSITY].standard_name, "unknown");
+    strcpy(state_metadata[STATE_LAKE_SNOW_DENSITY].units, "unknown");
+    strcpy(state_metadata[STATE_LAKE_SNOW_DENSITY].description, "unknown");
+
+    // STATE_LAKE_SNOW_COLD_CONTENT
+    strcpy(state_metadata[STATE_LAKE_SNOW_COLD_CONTENT].varname, "STATE_LAKE_SNOW_COLD_CONTENT");
+    strcpy(state_metadata[STATE_LAKE_SNOW_COLD_CONTENT].long_name, "lake_snow_cold_content");
+    strcpy(state_metadata[STATE_LAKE_SNOW_COLD_CONTENT].standard_name, "unknown");
+    strcpy(state_metadata[STATE_LAKE_SNOW_COLD_CONTENT].units, "unknown");
+    strcpy(state_metadata[STATE_LAKE_SNOW_COLD_CONTENT].description, "unknown");
+
+    // STATE_LAKE_SNOW_CANOPY
+    strcpy(state_metadata[STATE_LAKE_SNOW_CANOPY].varname, "STATE_LAKE_SNOW_CANOPY");
+    strcpy(state_metadata[STATE_LAKE_SNOW_CANOPY].long_name, "lake_snow_canopy");
+    strcpy(state_metadata[STATE_LAKE_SNOW_CANOPY].standard_name, "unknown");
+    strcpy(state_metadata[STATE_LAKE_SNOW_CANOPY].units, "unknown");
+    strcpy(state_metadata[STATE_LAKE_SNOW_CANOPY].description, "unknown");
+
+    // STATE_LAKE_SOIL_NODE_TEMP
+    strcpy(state_metadata[STATE_LAKE_SOIL_NODE_TEMP].varname, "STATE_LAKE_SOIL_NODE_TEMP");
+    strcpy(state_metadata[STATE_LAKE_SOIL_NODE_TEMP].long_name, "lake_soil_node_temp");
+    strcpy(state_metadata[STATE_LAKE_SOIL_NODE_TEMP].standard_name, "unknown");
+    strcpy(state_metadata[STATE_LAKE_SOIL_NODE_TEMP].units, "unknown");
+    strcpy(state_metadata[STATE_LAKE_SOIL_NODE_TEMP].description, "unknown");
+
+    // STATE_LAKE_ACTIVE_LAYERS
+    strcpy(state_metadata[STATE_LAKE_ACTIVE_LAYERS].varname, "STATE_LAKE_ACTIVE_LAYERS");
+    strcpy(state_metadata[STATE_LAKE_ACTIVE_LAYERS].long_name, "lake_active_layers");
+    strcpy(state_metadata[STATE_LAKE_ACTIVE_LAYERS].standard_name, "unknown");
+    strcpy(state_metadata[STATE_LAKE_ACTIVE_LAYERS].units, "unknown");
+    strcpy(state_metadata[STATE_LAKE_ACTIVE_LAYERS].description, "unknown");
+
+    // STATE_LAKE_LAYER_DZ
+    strcpy(state_metadata[STATE_LAKE_LAYER_DZ].varname, "STATE_LAKE_LAYER_DZ");
+    strcpy(state_metadata[STATE_LAKE_LAYER_DZ].long_name, "lake_layer_dz");
+    strcpy(state_metadata[STATE_LAKE_LAYER_DZ].standard_name, "unknown");
+    strcpy(state_metadata[STATE_LAKE_LAYER_DZ].units, "unknown");
+    strcpy(state_metadata[STATE_LAKE_LAYER_DZ].description, "unknown");
+
+    // STATE_LAKE_SURF_LAYER_DZ
+    strcpy(state_metadata[STATE_LAKE_SURF_LAYER_DZ].varname, "STATE_LAKE_SURF_LAYER_DZ");
+    strcpy(state_metadata[STATE_LAKE_SURF_LAYER_DZ].long_name, "lake_surf_layer_dz");
+    strcpy(state_metadata[STATE_LAKE_SURF_LAYER_DZ].standard_name, "unknown");
+    strcpy(state_metadata[STATE_LAKE_SURF_LAYER_DZ].units, "unknown");
+    strcpy(state_metadata[STATE_LAKE_SURF_LAYER_DZ].description, "unknown");
+
+    // STATE_LAKE_DEPTH
+    strcpy(state_metadata[STATE_LAKE_DEPTH].varname, "STATE_LAKE_DEPTH");
+    strcpy(state_metadata[STATE_LAKE_DEPTH].long_name, "lake_depth");
+    strcpy(state_metadata[STATE_LAKE_DEPTH].standard_name, "unknown");
+    strcpy(state_metadata[STATE_LAKE_DEPTH].units, "unknown");
+    strcpy(state_metadata[STATE_LAKE_DEPTH].description, "unknown");
+
+    // STATE_LAKE_LAYER_SURF_AREA
+    strcpy(state_metadata[STATE_LAKE_LAYER_SURF_AREA].varname, "STATE_LAKE_LAYER_SURF_AREA");
+    strcpy(state_metadata[STATE_LAKE_LAYER_SURF_AREA].long_name, "lake_layer_surf_area");
+    strcpy(state_metadata[STATE_LAKE_LAYER_SURF_AREA].standard_name, "unknown");
+    strcpy(state_metadata[STATE_LAKE_LAYER_SURF_AREA].units, "unknown");
+    strcpy(state_metadata[STATE_LAKE_LAYER_SURF_AREA].description, "unknown");
+
+    // STATE_LAKE_SURF_AREA
+    strcpy(state_metadata[STATE_LAKE_SURF_AREA].varname, "STATE_LAKE_SURF_AREA");
+    strcpy(state_metadata[STATE_LAKE_SURF_AREA].long_name, "lake_surf_area");
+    strcpy(state_metadata[STATE_LAKE_SURF_AREA].standard_name, "unknown");
+    strcpy(state_metadata[STATE_LAKE_SURF_AREA].units, "unknown");
+    strcpy(state_metadata[STATE_LAKE_SURF_AREA].description, "unknown");
+
+    // STATE_LAKE_VOLUME
+    strcpy(state_metadata[STATE_LAKE_VOLUME].varname, "STATE_LAKE_VOLUME");
+    strcpy(state_metadata[STATE_LAKE_VOLUME].long_name, "lake_volume");
+    strcpy(state_metadata[STATE_LAKE_VOLUME].standard_name, "unknown");
+    strcpy(state_metadata[STATE_LAKE_VOLUME].units, "unknown");
+    strcpy(state_metadata[STATE_LAKE_VOLUME].description, "unknown");
+
+    // STATE_LAKE_LAYER_TEMP
+    strcpy(state_metadata[STATE_LAKE_LAYER_TEMP].varname, "STATE_LAKE_LAYER_TEMP");
+    strcpy(state_metadata[STATE_LAKE_LAYER_TEMP].long_name, "lake_layer_temp");
+    strcpy(state_metadata[STATE_LAKE_LAYER_TEMP].standard_name, "unknown");
+    strcpy(state_metadata[STATE_LAKE_LAYER_TEMP].units, "unknown");
+    strcpy(state_metadata[STATE_LAKE_LAYER_TEMP].description, "unknown");
+
+    // STATE_LAKE_AVERAGE_TEMP
+    strcpy(state_metadata[STATE_LAKE_AVERAGE_TEMP].varname, "STATE_LAKE_AVERAGE_TEMP");
+    strcpy(state_metadata[STATE_LAKE_AVERAGE_TEMP].long_name, "lake_average_temp");
+    strcpy(state_metadata[STATE_LAKE_AVERAGE_TEMP].standard_name, "unknown");
+    strcpy(state_metadata[STATE_LAKE_AVERAGE_TEMP].units, "unknown");
+    strcpy(state_metadata[STATE_LAKE_AVERAGE_TEMP].description, "unknown");
+
+    // STATE_LAKE_ICE_AREA_FRAC
+    strcpy(state_metadata[STATE_LAKE_ICE_AREA_FRAC].varname, "STATE_LAKE_ICE_AREA_FRAC");
+    strcpy(state_metadata[STATE_LAKE_ICE_AREA_FRAC].long_name, "lake_ice_area_frac");
+    strcpy(state_metadata[STATE_LAKE_ICE_AREA_FRAC].standard_name, "unknown");
+    strcpy(state_metadata[STATE_LAKE_ICE_AREA_FRAC].units, "unknown");
+    strcpy(state_metadata[STATE_LAKE_ICE_AREA_FRAC].description, "unknown");
+
+    // STATE_LAKE_ICE_AREA_FRAC_NEW
+    strcpy(state_metadata[STATE_LAKE_ICE_AREA_FRAC_NEW].varname, "STATE_LAKE_ICE_AREA_FRAC_NEW");
+    strcpy(state_metadata[STATE_LAKE_ICE_AREA_FRAC_NEW].long_name, "lake_ice_area_frac_new");
+    strcpy(state_metadata[STATE_LAKE_ICE_AREA_FRAC_NEW].standard_name, "unknown");
+    strcpy(state_metadata[STATE_LAKE_ICE_AREA_FRAC_NEW].units, "unknown");
+    strcpy(state_metadata[STATE_LAKE_ICE_AREA_FRAC_NEW].description, "unknown");
+
+    // STATE_LAKE_ICE_WATER_EQUIVALENT
+    strcpy(state_metadata[STATE_LAKE_ICE_WATER_EQUIVALENT].varname, "STATE_LAKE_ICE_WATER_EQUIVALENT");
+    strcpy(state_metadata[STATE_LAKE_ICE_WATER_EQUIVALENT].long_name, "lake_ice_water_equivalent");
+    strcpy(state_metadata[STATE_LAKE_ICE_WATER_EQUIVALENT].standard_name, "unknown");
+    strcpy(state_metadata[STATE_LAKE_ICE_WATER_EQUIVALENT].units, "unknown");
+    strcpy(state_metadata[STATE_LAKE_ICE_WATER_EQUIVALENT].description, "unknown");
+
+    // STATE_LAKE_ICE_HEIGHT
+    strcpy(state_metadata[STATE_LAKE_ICE_HEIGHT].varname, "STATE_LAKE_ICE_HEIGHT");
+    strcpy(state_metadata[STATE_LAKE_ICE_HEIGHT].long_name, "lake_ice_height");
+    strcpy(state_metadata[STATE_LAKE_ICE_HEIGHT].standard_name, "unknown");
+    strcpy(state_metadata[STATE_LAKE_ICE_HEIGHT].units, "unknown");
+    strcpy(state_metadata[STATE_LAKE_ICE_HEIGHT].description, "unknown");
+
+    // STATE_LAKE_ICE_TEMP
+    strcpy(state_metadata[STATE_LAKE_ICE_TEMP].varname, "STATE_LAKE_ICE_TEMP");
+    strcpy(state_metadata[STATE_LAKE_ICE_TEMP].long_name, "lake_ice_temp");
+    strcpy(state_metadata[STATE_LAKE_ICE_TEMP].standard_name, "unknown");
+    strcpy(state_metadata[STATE_LAKE_ICE_TEMP].units, "unknown");
+    strcpy(state_metadata[STATE_LAKE_ICE_TEMP].description, "unknown");
+
+    // STATE_LAKE_ICE_SNOW_SURF_TEMP
+    strcpy(state_metadata[STATE_LAKE_ICE_SNOW_SURF_TEMP].varname, "STATE_LAKE_ICE_SNOW_SURF_TEMP");
+    strcpy(state_metadata[STATE_LAKE_ICE_SNOW_SURF_TEMP].long_name, "lake_ice_snow_surf_temp");
+    strcpy(state_metadata[STATE_LAKE_ICE_SNOW_SURF_TEMP].standard_name, "unknown");
+    strcpy(state_metadata[STATE_LAKE_ICE_SNOW_SURF_TEMP].units, "unknown");
+    strcpy(state_metadata[STATE_LAKE_ICE_SNOW_SURF_TEMP].description, "unknown");
+
+    // STATE_LAKE_ICE_SNOW_PACK_TEMP
+    strcpy(state_metadata[STATE_LAKE_ICE_SNOW_PACK_TEMP].varname, "STATE_LAKE_ICE_SNOW_PACK_TEMP");
+    strcpy(state_metadata[STATE_LAKE_ICE_SNOW_PACK_TEMP].long_name, "lake_ice_snow_pack_temp");
+    strcpy(state_metadata[STATE_LAKE_ICE_SNOW_PACK_TEMP].standard_name, "unknown");
+    strcpy(state_metadata[STATE_LAKE_ICE_SNOW_PACK_TEMP].units, "unknown");
+    strcpy(state_metadata[STATE_LAKE_ICE_SNOW_PACK_TEMP].description, "unknown");
+
+    // STATE_LAKE_ICE_SNOW_COLD_CONTENT
+    strcpy(state_metadata[STATE_LAKE_ICE_SNOW_COLD_CONTENT].varname, "STATE_LAKE_ICE_SNOW_COLD_CONTENT");
+    strcpy(state_metadata[STATE_LAKE_ICE_SNOW_COLD_CONTENT].long_name, "lake_ice_snow_cold_content");
+    strcpy(state_metadata[STATE_LAKE_ICE_SNOW_COLD_CONTENT].standard_name, "unknown");
+    strcpy(state_metadata[STATE_LAKE_ICE_SNOW_COLD_CONTENT].units, "unknown");
+    strcpy(state_metadata[STATE_LAKE_ICE_SNOW_COLD_CONTENT].description, "unknown");
+
+    // STATE_LAKE_ICE_SNOW_SURF_WATER
+    strcpy(state_metadata[STATE_LAKE_ICE_SNOW_SURF_WATER].varname, "STATE_LAKE_ICE_SNOW_SURF_WATER");
+    strcpy(state_metadata[STATE_LAKE_ICE_SNOW_SURF_WATER].long_name, "lake_ice_snow_surf_water");
+    strcpy(state_metadata[STATE_LAKE_ICE_SNOW_SURF_WATER].standard_name, "unknown");
+    strcpy(state_metadata[STATE_LAKE_ICE_SNOW_SURF_WATER].units, "unknown");
+    strcpy(state_metadata[STATE_LAKE_ICE_SNOW_SURF_WATER].description, "unknown");
+
+    // STATE_LAKE_ICE_SNOW_PACK_WATER
+    strcpy(state_metadata[STATE_LAKE_ICE_SNOW_PACK_WATER].varname, "STATE_LAKE_ICE_SNOW_PACK_WATER");
+    strcpy(state_metadata[STATE_LAKE_ICE_SNOW_PACK_WATER].long_name, "lake_ice_snow_pack_water");
+    strcpy(state_metadata[STATE_LAKE_ICE_SNOW_PACK_WATER].standard_name, "unknown");
+    strcpy(state_metadata[STATE_LAKE_ICE_SNOW_PACK_WATER].units, "unknown");
+    strcpy(state_metadata[STATE_LAKE_ICE_SNOW_PACK_WATER].description, "unknown");
+
+    // STATE_LAKE_ICE_SNOW_ALBEDO
+    strcpy(state_metadata[STATE_LAKE_ICE_SNOW_ALBEDO].varname, "STATE_LAKE_ICE_SNOW_ALBEDO");
+    strcpy(state_metadata[STATE_LAKE_ICE_SNOW_ALBEDO].long_name, "lake_ice_snow_albedo");
+    strcpy(state_metadata[STATE_LAKE_ICE_SNOW_ALBEDO].standard_name, "unknown");
+    strcpy(state_metadata[STATE_LAKE_ICE_SNOW_ALBEDO].units, "unknown");
+    strcpy(state_metadata[STATE_LAKE_ICE_SNOW_ALBEDO].description, "unknown");
+
+    // STATE_LAKE_ICE_SNOW_DEPTH
+    strcpy(state_metadata[STATE_LAKE_ICE_SNOW_DEPTH].varname, "STATE_LAKE_ICE_SNOW_DEPTH");
+    strcpy(state_metadata[STATE_LAKE_ICE_SNOW_DEPTH].long_name, "lake_ice_snow_depth");
+    strcpy(state_metadata[STATE_LAKE_ICE_SNOW_DEPTH].standard_name, "unknown");
+    strcpy(state_metadata[STATE_LAKE_ICE_SNOW_DEPTH].units, "unknown");
+    strcpy(state_metadata[STATE_LAKE_ICE_SNOW_DEPTH].description, "unknown");
+
+
 }

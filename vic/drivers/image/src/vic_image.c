@@ -43,6 +43,7 @@ MPI_Comm            MPI_COMM_VIC = MPI_COMM_WORLD;
 MPI_Datatype        mpi_global_struct_type;
 MPI_Datatype        mpi_filenames_struct_type;
 MPI_Datatype        mpi_location_struct_type;
+MPI_Datatype        mpi_stream_struct_type;
 MPI_Datatype        mpi_nc_file_struct_type;
 MPI_Datatype        mpi_option_struct_type;
 MPI_Datatype        mpi_param_struct_type;
@@ -59,9 +60,10 @@ veg_con_map_struct *veg_con_map = NULL;
 veg_con_struct    **veg_con = NULL;
 veg_hist_struct   **veg_hist = NULL;
 veg_lib_struct    **veg_lib = NULL;
+out_metadata_struct state_metadata[N_STATE_VARS];
 out_metadata_struct out_metadata[N_OUTVAR_TYPES];
 double           ***out_data = NULL;   // [ncells, nvars, nelem]
-stream_struct     **output_streams = NULL;   // [ncells, nstreams]
+stream_struct      *output_streams = NULL;   // [nstreams]
 nc_file_struct     *nc_hist_files = NULL;  // [nstreams]
 
 /******************************************************************************
@@ -116,8 +118,10 @@ main(int    argc,
         // read forcing data
         vic_force();
 
+        debug("running vic_image_run");
         // run vic over the domain
         vic_image_run(&(dmy[current]));
+        debug("done with vic_image_run");
 
         // Write history files
         vic_write_output(&(dmy[current]));

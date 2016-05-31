@@ -25,7 +25,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  *****************************************************************************/
 
-#include <vic_driver_classic.h>
+#include <vic_driver_shared_all.h>
 
 /******************************************************************************
  * @brief    Set the output_stream and out_data structures to default values.
@@ -33,10 +33,10 @@
  *****************************************************************************/
 void
 set_output_defaults(stream_struct **streams,
+                    size_t          ngridcells,
                     dmy_struct     *dmy_current)
 {
     extern option_struct       options;
-    extern global_param_struct global_param;
 
     size_t                     streamnum;
     size_t                     varnum;
@@ -70,7 +70,7 @@ set_output_defaults(stream_struct **streams,
     else {
         nvars = 20;
     }
-    setup_stream(&((*streams)[streamnum]), nvars, 1);
+    setup_stream(&((*streams)[streamnum]), nvars, ngridcells);
     (*streams)[streamnum].agg_alarm = default_alarm;
     strcpy((*streams)[streamnum].prefix, "fluxes");
     (*streams)[streamnum].file_format = ASCII;
@@ -85,7 +85,7 @@ set_output_defaults(stream_struct **streams,
     if (options.BLOWING) {
         nvars += 3;
     }
-    setup_stream(&((*streams)[streamnum]), nvars, 1);
+    setup_stream(&((*streams)[streamnum]), nvars, ngridcells);
     (*streams)[streamnum].agg_alarm = default_alarm;
     strcpy((*streams)[streamnum].prefix, "snow");
     (*streams)[streamnum].file_format = ASCII;
@@ -94,7 +94,7 @@ set_output_defaults(stream_struct **streams,
         streamnum++;
         nvars = 4;
 
-        setup_stream(&((*streams)[streamnum]), nvars, 1);
+        setup_stream(&((*streams)[streamnum]), nvars, ngridcells);
         (*streams)[streamnum].agg_alarm = default_alarm;
         strcpy((*streams)[streamnum].prefix, "fdepth");
         (*streams)[streamnum].file_format = ASCII;
@@ -107,7 +107,7 @@ set_output_defaults(stream_struct **streams,
         else {
             nvars = 9;
         }
-        setup_stream(&((*streams)[streamnum]), nvars, 1);
+        setup_stream(&((*streams)[streamnum]), nvars, ngridcells);
         (*streams)[streamnum].agg_alarm = default_alarm;
         strcpy((*streams)[streamnum].prefix, "snowband");
         (*streams)[streamnum].file_format = ASCII;
@@ -115,7 +115,7 @@ set_output_defaults(stream_struct **streams,
     if (options.LAKES) {
         streamnum++;
         nvars = 8;
-        setup_stream(&((*streams)[streamnum]), nvars, 1);
+        setup_stream(&((*streams)[streamnum]), nvars, ngridcells);
         (*streams)[streamnum].agg_alarm = default_alarm;
         strcpy((*streams)[streamnum].prefix, "lake");
         (*streams)[streamnum].file_format = ASCII;

@@ -74,13 +74,21 @@ setup_stream(stream_struct *stream,
              size_t         nvars,
              size_t         ngridcells)
 {
-    size_t i;
+    size_t     i;
+    int        default_n = 1;
+    dmy_struct dmy_junk;
 
     // Set stream scalars
     stream->nvars = nvars;
     stream->ngridcells = ngridcells;
     stream->file_format = UNSET_FILE_FORMAT;
     stream->compress = false;
+
+    // Set default agg alarm
+    set_alarm(&dmy_junk, FREQ_NDAYS, &default_n, &(stream->agg_alarm));
+
+    // Set default write alarm
+    set_alarm(&dmy_junk, FREQ_END, &default_n, &(stream->write_alarm));
 
     // Allocate stream members of shape [nvars]
     stream->varid = calloc(nvars, sizeof(*(stream->varid)));
@@ -113,7 +121,7 @@ setup_stream(stream_struct *stream,
 }
 
 /******************************************************************************
- * @brief    This routine frees the memory in the streams array.
+ * @brief    This routine validates the streams.
  *****************************************************************************/
 void
 validate_streams(stream_struct **streams)

@@ -41,6 +41,7 @@ vic_write_output(dmy_struct *dmy)
     // Write data
     for (stream_idx = 0; stream_idx < options.Noutstreams; stream_idx++) {
         if (raise_alarm(&(output_streams[stream_idx].agg_alarm), dmy)) {
+            debug("raised alarm for stream %zu", stream_idx);
             vic_write(&(output_streams[stream_idx]),
                       &(nc_hist_files[stream_idx]), dmy);
             reset_stream(&(output_streams[stream_idx]), dmy);
@@ -60,7 +61,6 @@ vic_write(stream_struct  *stream,
 {
     extern global_param_struct global_param;
     extern domain_struct       local_domain;
-    extern size_t              current;
     extern int                 mpi_rank;
     extern out_metadata_struct out_metadata[N_OUTVAR_TYPES];
 
@@ -73,6 +73,9 @@ vic_write(stream_struct  *stream,
     size_t                     dcount[MAXDIMS];
     size_t                     dstart[MAXDIMS];
     unsigned int               varid;
+
+    // Advance the position in the history file
+    stream->write_alarm.count++;
 
     // allocate memory for variables to be stored
     dvar = malloc(local_domain.ncells_active * sizeof(*dvar));
@@ -107,18 +110,18 @@ vic_write(stream_struct  *stream,
         for (j = ndims - 2; j < ndims; j++) {
             dcount[j] = nc_hist_file->nc_vars[k].nc_counts[j];
         }
-        dstart[0] = current;
+        dstart[0] = stream->write_alarm.count;  // Position in the time dimensions
         for (j = 0; j < out_metadata[varid].nelem; j++) {
             // if there is more than one layer, then dstart needs to advance
             dstart[1] = j;
             for (i = 0; i < local_domain.ncells_active; i++) {
-                dvar[i] = (double) stream->aggdata[i][j][k][0];
+                dvar[i] = (double) stream->aggdata[i][k][j][0];
             }
             gather_put_nc_field_double(stream->filename, &(nc_hist_file->open),
                                        &(nc_hist_file->nc_id),
                                        nc_hist_file->d_fillvalue,
                                        dimids, ndims,
-                                       nc_hist_file->nc_vars[k].nc_var_name,
+                                       out_metadata[varid].varname,
                                        dstart, dcount, dvar);
             for (i = 0; i < local_domain.ncells_active; i++) {
                 dvar[i] = nc_hist_file->d_fillvalue;
@@ -133,16 +136,17 @@ vic_write(stream_struct  *stream,
         }
     }
 
-    // ADD Time variable
-    dimids[0] = nc_hist_file->time_dimid;
-    dstart[0] = current;
-    dcount[0] = 1;
-
-    dvar[0] = date2num(global_param.time_origin_num, dmy_current, 0.,
-                       global_param.calendar, global_param.time_units);
-
     // write to file
     if (mpi_rank == 0) {
+        // ADD Time variable
+        dimids[0] = nc_hist_file->time_dimid;
+        dstart[0] = stream->write_alarm.count;
+        dcount[0] = 1;
+
+        dvar[0] = date2num(global_param.time_origin_num, dmy_current, 0.,
+                           global_param.calendar, global_param.time_units);
+
+
         put_nc_field_double(stream->filename, &(nc_hist_file->open),
                             &(nc_hist_file->nc_id),
                             nc_hist_file->d_fillvalue,

@@ -352,11 +352,14 @@ def run_system(config_file, vic_exe, test_data_dir, out_dir, driver):
         #--- if STATE_FORMAT is specified, te the specified value (instead of 
         # the one in the global template file) ---#
         if 'STATE_FORMAT' in replacements:
-            state_format = replacements.pop('STATE_FORMAT')
+            state_format = replacements['STATE_FORMAT']
         #--- replace global options ---#
         if 'restart' in test_dict:
             for j, gp in enumerate(list_global_param):
+                replacements_cp = replacements.copy() # save a copy of replacements
+                                                      # for the next global file
                 list_global_param[j] = replace_global_values(gp, replacements)
+                replacements = replacements_cp
         else:
             global_param = replace_global_values(global_param, replacements)
 
@@ -1194,9 +1197,7 @@ def check_exact_restart_fluxes(result_basedir, driver, run_periods):
                                                          after=end_date)
                 # Compare split run fluxes with full run
                 df_diff = df - df_full_run_split_period
-                if np.absolute(df_diff).max().max() > pow(10, 5):
-                    print(flux_basename)
-                    print(df_diff)
+                if np.absolute(df_diff).max().max() > pow(10, -6):
                     raise VICTestError('Restart causes inexact flux outputs '
                                        'for running period {} - {} at grid cell {}!'.
                                 format(start_date.strftime('%Y%m%d'),
@@ -1278,7 +1279,6 @@ def check_exact_restart_states(state_basedir, driver, run_periods, statesec, sta
                 raise VICTestError('Restart causes inexact state outputs!')
             else:
                 return
-
 # -------------------------------------------------------------------- #
 
 # -------------------------------------------------------------------- #

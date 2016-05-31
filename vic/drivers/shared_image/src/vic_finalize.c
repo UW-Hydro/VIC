@@ -63,6 +63,8 @@ vic_finalize(void)
     size_t                     j;
     int                        status;
 
+    debug("checkpoint 0");
+
     if (mpi_rank == 0) {
         // close the global parameter file
         fclose(filep.globalparam);
@@ -78,6 +80,7 @@ vic_finalize(void)
         }
         free(nc_hist_files);
     }
+    debug("checkpoint 1");
 
     for (i = 0; i < local_domain.ncells_active; i++) {
         free_atmos(&(atmos[i]));
@@ -101,8 +104,11 @@ vic_finalize(void)
         free(veg_hist[i]);
         free(veg_lib[i]);
     }
+    debug("checkpoint 2");
+
     free_streams(&output_streams);
     free_out_data(local_domain.ncells_active, out_data);
+    debug("checkpoint 2a");
     free(atmos);
     free(soil_con);
     free(veg_con_map);
@@ -110,7 +116,6 @@ vic_finalize(void)
     free(veg_hist);
     free(veg_lib);
     free(all_vars);
-    free(out_data);
     free(save_data);
     free(local_domain.locations);
     if (mpi_rank == 0) {
@@ -120,6 +125,8 @@ vic_finalize(void)
         free(mpi_map_global_array_offsets);
         free(mpi_map_mapping_array);
     }
+    debug("checkpoint 3");
+
     MPI_Type_free(&mpi_global_struct_type);
     MPI_Type_free(&mpi_filenames_struct_type);
     MPI_Type_free(&mpi_location_struct_type);
@@ -127,4 +134,6 @@ vic_finalize(void)
     MPI_Type_free(&mpi_option_struct_type);
     MPI_Type_free(&mpi_param_struct_type);
     finalize_logging();
+    debug("checkpoint 4");
+
 }

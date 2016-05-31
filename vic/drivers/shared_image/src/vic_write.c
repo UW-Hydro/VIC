@@ -74,9 +74,6 @@ vic_write(stream_struct  *stream,
     size_t                     dstart[MAXDIMS];
     unsigned int               varid;
 
-    // Advance the position in the history file
-    stream->write_alarm.count++;
-
     // allocate memory for variables to be stored
     dvar = malloc(local_domain.ncells_active * sizeof(*dvar));
     if (dvar == NULL) {
@@ -153,6 +150,11 @@ vic_write(stream_struct  *stream,
                             dimids, 1, "time",
                             dstart, dcount, dvar);
     }
+
+    // Advance the position in the history file
+    stream->write_alarm.count++;
+
+    // TODO: Decide if it is time to close this file and open a new one.
 
     // free memory
     free(dvar);

@@ -413,6 +413,8 @@ free_streams(stream_struct **streams)
     size_t                     k;
     size_t                     varid;
 
+    debug("checkpoint free_streams 0");
+
     // free output streams
     for (streamnum = 0; streamnum < options.Noutstreams; streamnum++) {
         // Free aggdata first
@@ -438,6 +440,8 @@ free_streams(stream_struct **streams)
         free((char*) (*streams)[streamnum].aggtype);
     }
     free((char*) *streams);
+    debug("checkpoint free_streams 1");
+
 }
 
 /******************************************************************************
@@ -450,9 +454,12 @@ free_out_data(size_t    ngridcells,
     size_t                     i;
     size_t                     j;
 
+    debug("checkpoint free_out_data 0");
+
     if (out_data == NULL) {
         return;
     }
+    debug("checkpoint free_out_data 1");
 
     for (i = 0; i < ngridcells; i++) {
         for (j = 0; j < N_OUTVAR_TYPES; j++) {
@@ -460,6 +467,8 @@ free_out_data(size_t    ngridcells,
         }
         free(out_data[i]);
     }
+    debug("checkpoint free_out_data 2");
 
     free((char*) out_data);
+    debug("checkpoint free_out_data 3");
 }

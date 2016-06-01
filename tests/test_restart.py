@@ -5,6 +5,7 @@ import numpy as np
 import datetime
 import os
 import glob
+import xarray as xr
 from test_utils import *
 
 # -------------------------------------------------------------------- #
@@ -209,16 +210,22 @@ def check_exact_restart_fluxes(result_basedir, driver, run_periods):
     run_full_start_date = run_periods[0]['start_date']
     run_full_end_date = run_periods[0]['end_date']
     #--- Read full run fluxes ---#
+    result_dir = os.path.join(
+        result_basedir,
+        '{}_{}'.format(run_full_start_date.strftime('%Y%m%d'),
+                       run_full_end_date.strftime('%Y%m%d')))
     if driver=='classic':
-        result_dir = os.path.join(
-            result_basedir,
-            '{}_{}'.format(run_full_start_date.strftime('%Y%m%d'),
-                           run_full_end_date.strftime('%Y%m%d')))
         # Read in each of the output flux files
         dict_df_full_run = {}  # a dict of flux at each grid cell, keyed by flux basename
         for fname in glob.glob(os.path.join(result_dir, '*')):
             df = read_vic_ascii(fname, header=True)
             dict_df_full_run[os.path.basename(fname)] = df
+    elif driver=='image':
+        if len(glob.glob(os.path.join(result_dir, '*.nc')))>1:
+            print('Warning: more than one netCDF file found under directory {}'.
+                  format(result_dir))
+        fname = glob.glob(os.path.join(result_dir, '*.nc'))[0]
+        ds_full_run = xr.open_dataset(fname)
 
     #--- Loop over the result of each split run period ---#
     for i, run_period in enumerate(run_periods):
@@ -250,6 +257,28 @@ def check_exact_restart_fluxes(result_basedir, driver, run_periods):
                                 format(start_date.strftime('%Y%m%d'),
                                        end_date.strftime('%Y%m%d'),
                                        flux_basename))
+                else:
+                    continue
+        elif driver=='image':
+            # Read in flux data
+            if len(glob.glob(os.path.join(result_dir, '*.nc')))>1:
+                print('Warning: more than one netCDF file found under directory {}'.
+                      format(result_dir))
+            fname = glob.glob(os.path.join(result_dir, '*.nc'))[0]
+            ds = xr.open_dataset(fname)
+            # Extract the same period from the full run
+            ds_full_run_split_period = ds_full_run.sel(time=slice(
+                        start_date.strftime('%Y%m%d'),
+                        end_date.strftime('%Y%m%d')))
+            # Compare split run fluxes with full run
+            for var in ds_full_run.data_vars:
+                if np.absolute(ds[var] - ds_full_run_split_period[var]).\
+                   max().values > 0.0:
+                    raise VICTestError('Restart causes inexact flux outputs '
+                                       '(variable {})'
+                                       'for running period {} - {} at grid cell {}!'.
+                                format(var, start_date.strftime('%Y%m%d'),
+                                       end_date.strftime('%Y%m%d')))
                 else:
                     continue
     return

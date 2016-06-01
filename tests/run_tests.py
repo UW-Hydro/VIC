@@ -307,7 +307,8 @@ def run_system(config_file, vic_exe, test_data_dir, out_dir, driver):
         # If restart test, prepare running periods
         # (1) Find STATESEC option (and STATE_FORMAT option for later use)
         statesec = find_global_param_value(global_param, 'STATESEC')
-        state_format = find_global_param_value(global_param, 'STATE_FORMAT')
+        if driver=='classic':
+            state_format = find_global_param_value(global_param, 'STATE_FORMAT')
         # (2) Prepare running periods and initial state file info for restart test
         if 'restart' in test_dict:
             run_periods = prepare_restart_run_periods(
@@ -393,6 +394,7 @@ def run_system(config_file, vic_exe, test_data_dir, out_dir, driver):
                 check_returncode(returncode, test_dict.pop('expected_retval', 0))
 
             test_complete = True
+            returncode = 0
 
             # check output files (different tests depending on driver)
             if test_dict['check']:
@@ -418,9 +420,13 @@ def run_system(config_file, vic_exe, test_data_dir, out_dir, driver):
                 # check for exact restarts
                 if 'exact_restart' in test_dict['check']:
                     check_exact_restart_fluxes(dirs['results'], driver, run_periods)
-                    check_exact_restart_states(dirs['state'], driver,
-                                               run_periods, statesec,
-                                               state_format)
+                    if driver == 'classic':
+                        check_exact_restart_states(dirs['state'], driver,
+                                                   run_periods, statesec,
+                                                   state_format)
+                    elif driver == 'image':
+                        check_exact_restart_states(dirs['state'], driver,
+                                                   run_periods, statesec)
 
             # if we got this far, the test passed.
             test_passed = True

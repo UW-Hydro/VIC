@@ -317,11 +317,20 @@ def check_exact_restart_states(state_basedir, driver, run_periods, statesec, sta
             state_basedir,
             '{}_{}'.format(run_full_start_date.strftime('%Y%m%d'),
                            run_full_end_date.strftime('%Y%m%d')),
-            'states_{}_{}'.format(run_full_end_date.strftime('%Y%m%d'), statesec))
+            'states_{}_{}'.format(run_full_end_date.strftime('%Y%m%d'),
+                                  statesec))
         if state_format=='ASCII':
             states_full_run = read_ascii_state(state_fname)
         elif state_format=='BINARY':
             states_full_run = read_binary_state(state_fname)
+    elif driver=='image':
+        state_fname = os.path.join(
+            state_basedir,
+            '{}_{}'.format(run_full_start_date.strftime('%Y%m%d'),
+                           run_full_end_date.strftime('%Y%m%d')),
+            'states.{}_{}.nc'.format(run_full_end_date.strftime('%Y%m%d'),
+                                     statesec))
+        ds_states_full_run = xr.open_dataset(state_fname)
 
     #--- Read the state at the end of the last period of run ---#
     # Extract the last split run period
@@ -333,11 +342,20 @@ def check_exact_restart_states(state_basedir, driver, run_periods, statesec, sta
             state_basedir,
             '{}_{}'.format(run_last_period_start_date.strftime('%Y%m%d'),
                            run_last_period_end_date.strftime('%Y%m%d')),
-            'states_{}_{}'.format(run_last_period_end_date.strftime('%Y%m%d'), statesec))
+            'states_{}_{}'.format(run_last_period_end_date.strftime('%Y%m%d'),
+                                  statesec))
         if state_format=='ASCII':
             states = read_ascii_state(state_fname)
         elif state_format=='BINARY':
             states = read_binary_state(state_fname)
+    elif driver=='image':
+        state_fname = os.path.join(
+            state_basedir,
+            '{}_{}'.format(run_last_period_start_date.strftime('%Y%m%d'),
+                           run_last_period_end_date.strftime('%Y%m%d')),
+            'states.{}_{}.nc'.format(run_last_period_end_date.strftime('%Y%m%d'),
+                                     statesec))
+        ds_states = xr.open_dataset(state_fname)
 
     #--- Compare split run states with full run ---#
     if driver=='classic':
@@ -354,6 +372,15 @@ def check_exact_restart_states(state_basedir, driver, run_periods, statesec, sta
                 raise VICTestError('Restart causes inexact state outputs!')
             else:
                 return
+    elif driver=='image':
+        for var in ds_states.data_vars:
+            if np.absolute(ds_states[var] - ds_states_full_run[var]).\
+               max().values > 0.0:
+                raise VICTestError('Restart causes inexact state outputs'
+                                   '(var {}) !'.format(var))
+            else:
+                continue
+        return
 # -------------------------------------------------------------------- #
 
 # -------------------------------------------------------------------- #

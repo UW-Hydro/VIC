@@ -694,7 +694,7 @@ calc_surf_energy_bal(double             Le,
 
             // recompute snow depth
             old_depth = snow->depth;
-            snow->depth = CM_PER_M * snow->swq / snow->density;
+            snow->depth = MM_PER_M * snow->swq / snow->density;
 
             /** Check for Thin Snowpack which only Partially Covers Grid Cell
                 exists only if not snowing and snowpack has started to melt **/

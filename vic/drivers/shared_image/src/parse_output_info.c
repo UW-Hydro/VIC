@@ -257,7 +257,6 @@ parse_output_info(FILE           *gp,
     else {
         set_output_defaults(streams, ngridcells, dmy_current);
     }
-    fclose(gp);
 
     for (streamnum = 0;
          streamnum < (short int) options.Noutstreams;

@@ -413,8 +413,6 @@ free_streams(stream_struct **streams)
     size_t                     k;
     size_t                     varid;
 
-    debug("checkpoint free_streams 0");
-
     // free output streams
     for (streamnum = 0; streamnum < options.Noutstreams; streamnum++) {
         // Free aggdata first
@@ -422,25 +420,24 @@ free_streams(stream_struct **streams)
             for (j = 0; j < (*streams)[streamnum].nvars; j++) {
                 varid = (*streams)[streamnum].varid[j];
                 for (k = 0; k < out_metadata[varid].nelem; k++) {
-                    free((char*) (*streams)[streamnum].aggdata[i][j][k]);
+                    free((*streams)[streamnum].aggdata[i][j][k]);
                 }
-                free((char*) (*streams)[streamnum].aggdata[i][j]);
+                free((*streams)[streamnum].aggdata[i][j]);
             }
-            free((char*) (*streams)[streamnum].aggdata[i]);
+            free((*streams)[streamnum].aggdata[i]);
         }
         for (j = 0; j < (*streams)[streamnum].nvars; j++) {
-            free((char*) (*streams)[streamnum].format[j]);
+            free((*streams)[streamnum].format[j]);
         }
-        free((char*) (*streams)[streamnum].aggdata);
+        free((*streams)[streamnum].aggdata);
         // free remaining arrays
-        free((char*) (*streams)[streamnum].type);
-        free((char*) (*streams)[streamnum].mult);
-        free((char*) (*streams)[streamnum].format);
-        free((char*) (*streams)[streamnum].varid);
-        free((char*) (*streams)[streamnum].aggtype);
+        free((*streams)[streamnum].type);
+        free((*streams)[streamnum].mult);
+        free((*streams)[streamnum].format);
+        free((*streams)[streamnum].varid);
+        free((*streams)[streamnum].aggtype);
     }
-    free((char*) *streams);
-    debug("checkpoint free_streams 1");
+    free(*streams);
 
 }
 
@@ -454,12 +451,10 @@ free_out_data(size_t    ngridcells,
     size_t                     i;
     size_t                     j;
 
-    debug("checkpoint free_out_data 0");
 
     if (out_data == NULL) {
         return;
     }
-    debug("checkpoint free_out_data 1");
 
     for (i = 0; i < ngridcells; i++) {
         for (j = 0; j < N_OUTVAR_TYPES; j++) {
@@ -467,8 +462,6 @@ free_out_data(size_t    ngridcells,
         }
         free(out_data[i]);
     }
-    debug("checkpoint free_out_data 2");
 
-    free((char*) out_data);
-    debug("checkpoint free_out_data 3");
+    free(out_data);
 }

@@ -36,7 +36,7 @@ vic_alloc(void)
     extern atmos_data_struct  *atmos;
     extern domain_struct       local_domain;
     extern option_struct       options;
-    extern double            **out_data;
+    extern double           ***out_data;
     extern save_data_struct   *save_data;
     extern soil_con_struct    *soil_con;
     extern veg_con_map_struct *veg_con_map;

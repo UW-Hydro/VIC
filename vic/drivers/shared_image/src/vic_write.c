@@ -45,7 +45,6 @@ vic_write_output(dmy_struct *dmy)
             vic_write(&(output_streams[stream_idx]),
                       &(nc_hist_files[stream_idx]), dmy);
             reset_stream(&(output_streams[stream_idx]), dmy);
-            // reset_nc_file(&(nc_hist_files[stream_idx]));
         }
     }
 }
@@ -74,6 +73,8 @@ vic_write(stream_struct  *stream,
     size_t                     dstart[MAXDIMS];
     unsigned int               varid;
 
+    debug("writing to file: %s", stream->filename);
+
     // allocate memory for variables to be stored
     dvar = malloc(local_domain.ncells_active * sizeof(*dvar));
     if (dvar == NULL) {
@@ -92,8 +93,12 @@ vic_write(stream_struct  *stream,
         dcount[i] = -1;
     }
 
+    debug("checkpoint 0");
+
     for (k = 0; k < stream->nvars; k++) {
         varid = stream->varid[k];
+
+        debug("checkpoint 0-%zu", k);
 
         ndims = nc_hist_file->nc_vars[k].nc_dims;
         for (j = 0; j < ndims; j++) {
@@ -114,6 +119,7 @@ vic_write(stream_struct  *stream,
             for (i = 0; i < local_domain.ncells_active; i++) {
                 dvar[i] = (double) stream->aggdata[i][k][j][0];
             }
+            debug("checkpoint 0-%zu-%zu", k, j);
             gather_put_nc_field_double(stream->filename, &(nc_hist_file->open),
                                        &(nc_hist_file->nc_id),
                                        nc_hist_file->d_fillvalue,
@@ -132,7 +138,7 @@ vic_write(stream_struct  *stream,
             dcount[j] = -1;
         }
     }
-
+    debug("checkpoint 1");
     // write to file
     if (mpi_rank == 0) {
         // ADD Time variable

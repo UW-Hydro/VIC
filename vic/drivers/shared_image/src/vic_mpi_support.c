@@ -1866,7 +1866,11 @@ gather_put_nc_field_double(char   *nc_name,
     size_t               grid_size;
     size_t               i;
 
+
+    debug("gather_put_nc_field_double, proc=%d", mpi_rank);
+
     if (mpi_rank == 0) {
+        debug("mpi_rank=0, checkpoint 0");
         grid_size = global_domain.n_nx * global_domain.n_ny;
         dvar = malloc(grid_size * sizeof(*dvar));
         if (dvar == NULL) {
@@ -1875,21 +1879,23 @@ gather_put_nc_field_double(char   *nc_name,
         for (i = 0; i < grid_size; i++) {
             dvar[i] = fillval;
         }
-
+        debug("mpi_rank=0, checkpoint 1");
         dvar_gathered =
             malloc(global_domain.ncells_active * sizeof(*dvar_gathered));
         if (dvar_gathered == NULL) {
             log_err("Memory allocation error in gather_put_nc_field_double().");
         }
-
+        debug("mpi_rank=0, checkpoint 2");
         dvar_remapped =
             malloc(global_domain.ncells_active * sizeof(*dvar_remapped));
         if (dvar_remapped == NULL) {
             log_err("Memory allocation error in gather_put_nc_field_double().");
         }
+        debug("mpi_rank=0, checkpoint 3");
     }
     // Gather the results from the nodes, result for the local node is in the
     // array *var (which is a function argument)
+    debug("mpi_rank=%d, checkpoint 4", mpi_rank);
     status = MPI_Gatherv(var, local_domain.ncells_active, MPI_DOUBLE,
                          dvar_gathered, mpi_map_local_array_sizes,
                          mpi_map_global_array_offsets, MPI_DOUBLE,
@@ -1898,16 +1904,20 @@ gather_put_nc_field_double(char   *nc_name,
         fprintf(stderr, "MPI error in main(): %d\n", status);
         exit(EXIT_FAILURE);
     }
+    debug("mpi_rank=%d, checkpoint 5", mpi_rank);
     if (mpi_rank == 0) {
         // remap the array
+        debug("mpi_rank=%d, checkpoint 6", mpi_rank);
         map(sizeof(double), global_domain.ncells_active, NULL,
             mpi_map_mapping_array,
             dvar_gathered, dvar_remapped);
         // expand to full grid size
+        debug("mpi_rank=%d, checkpoint 7", mpi_rank);
         map(sizeof(double), global_domain.ncells_active, NULL,
             filter_active_cells,
             dvar_remapped, dvar);
         // write to file
+        debug("mpi_rank=%d, checkpoint 8", mpi_rank);
         put_nc_field_double(nc_name, open, nc_id, fillval, dimids, ndims,
                             var_name, start, count, dvar);
         // cleanup
@@ -1915,6 +1925,7 @@ gather_put_nc_field_double(char   *nc_name,
         free(dvar_gathered);
         free(dvar_remapped);
     }
+    debug("mpi_rank=%d, checkpoint 9", mpi_rank);
 }
 
 /******************************************************************************

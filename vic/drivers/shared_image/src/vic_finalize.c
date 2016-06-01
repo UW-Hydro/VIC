@@ -77,6 +77,7 @@ vic_finalize(void)
                     log_err("Error closing history file");
                 }
             }
+            free(nc_hist_files[i].nc_vars);
         }
         free(nc_hist_files);
     }

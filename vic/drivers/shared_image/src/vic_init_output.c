@@ -24,6 +24,8 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  *****************************************************************************/
 
+#include <pwd.h>
+#include <sys/types.h>
 #include <vic_driver_shared_image.h>
 
 /******************************************************************************
@@ -44,7 +46,6 @@ vic_init_output(dmy_struct *dmy_current)
     extern save_data_struct   *save_data;
     extern soil_con_struct    *soil_con;
     extern veg_con_struct    **veg_con;
-    extern veg_hist_struct   **veg_hist;
     extern veg_lib_struct    **veg_lib;
     extern double       ***out_data;
     extern stream_struct  *output_streams;
@@ -563,9 +564,16 @@ set_global_nc_attributes(int ncid,
     timeinfo = localtime(&curr_date_time);
 
     // username
-    if (getlogin_r(userstr, MAXSTRING) != 0) {
-        log_err("Error getting username");
+    uid_t uid = geteuid();
+    struct passwd *pw = getpwuid(uid);
+    
+    if (pw) {
+        strcpy(userstr, pw->pw_name);
     }
+    else {
+        strcpy(userstr, "unknown");
+    }
+
     // hostname
     if (gethostname(hoststr, MAXSTRING) != 0) {
         log_err("Error getting hostname");

@@ -56,14 +56,12 @@ vic_cesm_start(vic_clock     *vclock,
         global_param.snow_dt = (double) vclock->timestep;
         global_param.runoff_dt = (double) vclock->timestep;
         global_param.atmos_dt = (double) vclock->timestep;
-        global_param.out_dt = (double) vclock->timestep;
 
         global_param.model_steps_per_day =
             (int) ((double) SEC_PER_DAY / global_param.dt);
         global_param.snow_steps_per_day = global_param.model_steps_per_day;
         global_param.runoff_steps_per_day = global_param.model_steps_per_day;
         global_param.atmos_steps_per_day = global_param.model_steps_per_day;
-        global_param.output_steps_per_day = global_param.model_steps_per_day;
 
         // Start date/time
         global_param.startyear = vclock->current_year;
@@ -73,7 +71,7 @@ vic_cesm_start(vic_clock     *vclock,
         global_param.nrecs = 1;
 
         // Calendar
-        global_param.calendar = calendar_from_chars(trim(vclock->calendar));
+        global_param.calendar = str_to_calendar(trim(vclock->calendar));
         // set NR and NF
         NF = global_param.snow_steps_per_day / global_param.model_steps_per_day;
         if (NF == 1) {

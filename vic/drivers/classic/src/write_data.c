@@ -33,8 +33,8 @@ void
 write_data(stream_struct *stream,
            dmy_struct    *dmy)
 {
-    extern option_struct       options;
-    extern out_metadata_struct out_metadata[N_OUTVAR_TYPES];
+    extern option_struct   options;
+    extern metadata_struct out_metadata[N_OUTVAR_TYPES];
 
     size_t                     n;
     size_t                     var_idx;

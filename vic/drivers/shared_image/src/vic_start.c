@@ -72,6 +72,7 @@ vic_start(void)
         if (strcasecmp(filenames.constants, "MISSING")) {
             filep.constants = open_file(filenames.constants, "r");
             get_parameters(filep.constants);
+            fclose(filep.constants);
         }
 
         // read domain info

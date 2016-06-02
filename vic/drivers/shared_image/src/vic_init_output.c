@@ -145,7 +145,7 @@ initialize_history_file(nc_file_struct *nc,
     extern domain_struct       global_domain;
     extern option_struct       options;
     extern global_param_struct global_param;
-    extern out_metadata_struct out_metadata[N_OUTVAR_TYPES];
+    extern metadata_struct     out_metadata[N_OUTVAR_TYPES];
 
     int                        status;
     int                        old_fill_mode;
@@ -161,7 +161,6 @@ initialize_history_file(nc_file_struct *nc,
     size_t                     dcount[MAXDIMS];
     size_t                     dstart[MAXDIMS];
     int                        dimids[MAXDIMS];
-    int                        time_var_id;
     int                        lon_var_id;
     int                        lat_var_id;
     unsigned int               varid;
@@ -286,11 +285,11 @@ initialize_history_file(nc_file_struct *nc,
 
     // define the netcdf variable time
     status = nc_def_var(nc->nc_id, "time", NC_DOUBLE, 1,
-                        &(nc->time_dimid), &(time_var_id));
+                        &(nc->time_dimid), &(nc->time_varid));
     if (status != NC_NOERR) {
         log_err("Error defining time variable in %s", stream->filename);
     }
-    status = nc_put_att_text(nc->nc_id, time_var_id, "standard_name",
+    status = nc_put_att_text(nc->nc_id, nc->time_varid, "standard_name",
                              strlen("time"), "time");
     if (status != NC_NOERR) {
         log_err("Error adding attribute in %s", stream->filename);
@@ -301,7 +300,7 @@ initialize_history_file(nc_file_struct *nc,
 
     sprintf(str, "%s since %s", unit_str, global_param.time_origin_str);
 
-    status = nc_put_att_text(nc->nc_id, time_var_id, "units",
+    status = nc_put_att_text(nc->nc_id, nc->time_varid, "units",
                              strlen(str), str);
     if (status != NC_NOERR) {
         log_err("Error adding attribute in %s", stream->filename);
@@ -310,7 +309,7 @@ initialize_history_file(nc_file_struct *nc,
     // adding calendar attribute to time variable
     str_from_calendar(global_param.calendar, calendar_str);
 
-    status = nc_put_att_text(nc->nc_id, time_var_id, "calendar",
+    status = nc_put_att_text(nc->nc_id, nc->time_varid, "calendar",
                              strlen(calendar_str), calendar_str);
     if (status != NC_NOERR) {
         log_err("Error adding attribute in %s", stream->filename);
@@ -566,7 +565,7 @@ set_global_nc_attributes(int ncid,
     // username
     uid_t uid = geteuid();
     struct passwd *pw = getpwuid(uid);
-    
+
     if (pw) {
         strcpy(userstr, pw->pw_name);
     }
@@ -632,6 +631,7 @@ initialize_nc_file(nc_file_struct     *nc_file,
 
     // Set fill values
     nc_file->c_fillvalue = NC_FILL_CHAR;
+    nc_file->s_fillvalue = NC_FILL_SHORT;
     nc_file->i_fillvalue = NC_FILL_INT;
     nc_file->d_fillvalue = NC_FILL_DOUBLE;
     nc_file->f_fillvalue = NC_FILL_FLOAT;

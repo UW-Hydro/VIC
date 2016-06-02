@@ -41,7 +41,7 @@ param_set_struct    param_set;
 parameters_struct   param;
 filenames_struct    filenames;
 filep_struct        filep;
-out_metadata_struct out_metadata[N_OUTVAR_TYPES];
+metadata_struct     out_metadata[N_OUTVAR_TYPES];
 
 /******************************************************************************
  * @brief   Classic driver of the VIC model

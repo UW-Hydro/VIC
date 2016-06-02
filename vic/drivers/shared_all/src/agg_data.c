@@ -34,7 +34,7 @@ agg_stream_data(stream_struct *stream,
                 dmy_struct    *dmy_current,
                 double      ***out_data)
 {
-    extern out_metadata_struct out_metadata[N_OUTVAR_TYPES];
+    extern metadata_struct out_metadata[N_OUTVAR_TYPES];
 
     alarm_struct              *alarm;
     size_t                     i;

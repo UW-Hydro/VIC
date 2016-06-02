@@ -61,48 +61,83 @@ vic_write(stream_struct  *stream,
     extern global_param_struct global_param;
     extern domain_struct       local_domain;
     extern int                 mpi_rank;
-    extern out_metadata_struct out_metadata[N_OUTVAR_TYPES];
+    extern metadata_struct     out_metadata[N_OUTVAR_TYPES];
 
-    int                        dimids[MAXDIMS];
     size_t                     i;
     size_t                     j;
     size_t                     k;
     size_t                     ndims;
     double                    *dvar = NULL;
+    float                     *fvar = NULL;
+    int                       *ivar = NULL;
+    short int                 *svar = NULL;
+    char                      *cvar = NULL;
     size_t                     dcount[MAXDIMS];
     size_t                     dstart[MAXDIMS];
     unsigned int               varid;
-
-    debug("writing to file: %s", stream->filename);
-
-    // allocate memory for variables to be stored
-    dvar = malloc(local_domain.ncells_active * sizeof(*dvar));
-    if (dvar == NULL) {
-        log_err("Memory allocation error in vic_write().");
-    }
-
-    // set missing values
-    for (i = 0; i < local_domain.ncells_active; i++) {
-        dvar[i] = nc_hist_file->d_fillvalue;
-    }
+    int                        status;
 
     // initialize dimids to invalid values - helps debugging
     for (i = 0; i < MAXDIMS; i++) {
-        dimids[i] = -1;
         dstart[i] = -1;
         dcount[i] = -1;
     }
 
-    debug("checkpoint 0");
 
     for (k = 0; k < stream->nvars; k++) {
         varid = stream->varid[k];
 
-        debug("checkpoint 0-%zu", k);
+        if (nc_hist_file->nc_vars[k].nc_type == NC_DOUBLE) {
+            if (dvar != NULL) {
+                // allocate memory for variables to be stored
+                dvar = malloc(local_domain.ncells_active * sizeof(*dvar));
+                if (dvar == NULL) {
+                    log_err("Memory allocation error in vic_write().");
+                }
+            }
+        }
+        else if (nc_hist_file->nc_vars[k].nc_type == NC_FLOAT) {
+            if (fvar != NULL) {
+                // allocate memory for variables to be stored
+                fvar = malloc(local_domain.ncells_active * sizeof(*fvar));
+                if (fvar == NULL) {
+                    log_err("Memory allocation error in vic_write().");
+                }
+            }
+        }
+        else if (nc_hist_file->nc_vars[k].nc_type == NC_INT) {
+            if (ivar != NULL) {
+                // allocate memory for variables to be stored
+                ivar = malloc(local_domain.ncells_active * sizeof(*ivar));
+                if (ivar == NULL) {
+                    log_err("Memory allocation error in vic_write().");
+                }
+            }
+        }
+        else if (nc_hist_file->nc_vars[k].nc_type == NC_SHORT) {
+            if (svar != NULL) {
+                // allocate memory for variables to be stored
+                svar = malloc(local_domain.ncells_active * sizeof(*svar));
+                if (svar == NULL) {
+                    log_err("Memory allocation error in vic_write().");
+                }
+            }
+        }
+        else if (nc_hist_file->nc_vars[k].nc_type == NC_CHAR) {
+            if (cvar != NULL) {
+                // allocate memory for variables to be stored
+                cvar = malloc(local_domain.ncells_active * sizeof(*cvar));
+                if (cvar == NULL) {
+                    log_err("Memory allocation error in vic_write().");
+                }
+            }
+        }
+        else {
+            log_err("Unsupported nc_type encountered");
+        }
 
         ndims = nc_hist_file->nc_vars[k].nc_dims;
         for (j = 0; j < ndims; j++) {
-            dimids[j] = nc_hist_file->nc_vars[k].nc_dimids[j];
             dstart[j] = 0;
             dcount[j] = 1;
         }
@@ -116,52 +151,99 @@ vic_write(stream_struct  *stream,
         for (j = 0; j < out_metadata[varid].nelem; j++) {
             // if there is more than one layer, then dstart needs to advance
             dstart[1] = j;
-            for (i = 0; i < local_domain.ncells_active; i++) {
-                dvar[i] = (double) stream->aggdata[i][k][j][0];
+            if (nc_hist_file->nc_vars[k].nc_type == NC_DOUBLE) {
+                for (i = 0; i < local_domain.ncells_active; i++) {
+                    dvar[i] = (double) stream->aggdata[i][k][j][0];
+                }
+                gather_put_nc_field_double(nc_hist_file->nc_id,
+                                           nc_hist_file->nc_vars[k].nc_varid,
+                                           nc_hist_file->d_fillvalue,
+                                           dstart, dcount, dvar);
             }
-            debug("checkpoint 0-%zu-%zu", k, j);
-            gather_put_nc_field_double(stream->filename, &(nc_hist_file->open),
-                                       &(nc_hist_file->nc_id),
-                                       nc_hist_file->d_fillvalue,
-                                       dimids, ndims,
-                                       out_metadata[varid].varname,
-                                       dstart, dcount, dvar);
-            for (i = 0; i < local_domain.ncells_active; i++) {
-                dvar[i] = nc_hist_file->d_fillvalue;
+
+            else if (nc_hist_file->nc_vars[k].nc_type == NC_FLOAT) {
+                for (i = 0; i < local_domain.ncells_active; i++) {
+                    fvar[i] = (float) stream->aggdata[i][k][j][0];
+                }
+                gather_put_nc_field_float(nc_hist_file->nc_id,
+                                           nc_hist_file->nc_vars[k].nc_varid,
+                                           nc_hist_file->f_fillvalue,
+                                           dstart, dcount, fvar);
+            }
+            else if (nc_hist_file->nc_vars[k].nc_type == NC_INT) {
+                for (i = 0; i < local_domain.ncells_active; i++) {
+                    ivar[i] = (int) stream->aggdata[i][k][j][0];
+                }
+                gather_put_nc_field_int(nc_hist_file->nc_id,
+                                           nc_hist_file->nc_vars[k].nc_varid,
+                                           nc_hist_file->i_fillvalue,
+                                           dstart, dcount, ivar);
+            }
+
+            else if (nc_hist_file->nc_vars[k].nc_type == NC_SHORT) {
+                for (i = 0; i < local_domain.ncells_active; i++) {
+                    svar[i] = (short int) stream->aggdata[i][k][j][0];
+                }
+                gather_put_nc_field_short(nc_hist_file->nc_id,
+                                           nc_hist_file->nc_vars[k].nc_varid,
+                                           nc_hist_file->s_fillvalue,
+                                           dstart, dcount, svar);
+            }
+
+            else if (nc_hist_file->nc_vars[k].nc_type == NC_CHAR) {
+                for (i = 0; i < local_domain.ncells_active; i++) {
+                    cvar[i] = (char) stream->aggdata[i][k][j][0];
+                }
+                gather_put_nc_field_schar(nc_hist_file->nc_id,
+                                          nc_hist_file->nc_vars[k].nc_varid,
+                                          nc_hist_file->d_fillvalue,
+                                          dstart, dcount, cvar);
+            }
+            else {
+                log_err("Unsupported nc_type encountered");
             }
         }
 
         // reset dimids to invalid values - helps debugging
         for (j = 0; j < MAXDIMS; j++) {
-            dimids[j] = -1;
             dstart[j] = -1;
             dcount[j] = -1;
         }
     }
-    debug("checkpoint 1");
     // write to file
     if (mpi_rank == 0) {
         // ADD Time variable
-        dimids[0] = nc_hist_file->time_dimid;
         dstart[0] = stream->write_alarm.count;
-        dcount[0] = 1;
 
         dvar[0] = date2num(global_param.time_origin_num, dmy_current, 0.,
                            global_param.calendar, global_param.time_units);
 
-
-        put_nc_field_double(stream->filename, &(nc_hist_file->open),
-                            &(nc_hist_file->nc_id),
-                            nc_hist_file->d_fillvalue,
-                            dimids, 1, "time",
-                            dstart, dcount, dvar);
+        status =  nc_put_var1_double(nc_hist_file->nc_id,
+                                     nc_hist_file->time_varid,
+                                     dstart, dvar);
+        if (status != NC_NOERR) {
+            log_err("Error setting fill value in %s", stream->filename);
+        }
     }
 
     // Advance the position in the history file
     stream->write_alarm.count++;
-
     // TODO: Decide if it is time to close this file and open a new one.
 
     // free memory
-    free(dvar);
+    if (dvar != NULL) {
+        free(dvar);
+    }
+    if (fvar != NULL) {
+        free(fvar);
+    }
+    if (ivar != NULL) {
+        free(ivar);
+    }
+    if (svar != NULL) {
+        free(svar);
+    }
+    if (cvar != NULL) {
+        free(cvar);
+    }
 }

@@ -37,13 +37,16 @@ void create_MPI_location_struct_type(MPI_Datatype *mpi_type);
 void create_MPI_stream_struct_type(MPI_Datatype *mpi_type);
 void create_MPI_option_struct_type(MPI_Datatype *mpi_type);
 void create_MPI_param_struct_type(MPI_Datatype *mpi_type);
-void gather_put_nc_field_double(char *nc_name, bool *open, int *nc_id,
-                                double fillval, int *dimids, int ndims,
-                                char *var_name, size_t *start, size_t *count,
-                                double *var);
-void gather_put_nc_field_int(char *nc_name, bool *open, int *nc_id, int fillval,
-                             int *dimids, int ndims, char *var_name,
+void gather_put_nc_field_double(int nc_id, int var_id, double fillval,
+                                size_t *start, size_t *count, double *var);
+void gather_put_nc_field_float(int nc_id, int var_id, float fillval,
+                               size_t *start, size_t *count, float *var);
+void gather_put_nc_field_int(int nc_id, int var_id, int fillval,
                              size_t *start, size_t *count, int *var);
+void gather_put_nc_field_short(int nc_id, int var_id, short int fillval,
+                               size_t *start, size_t *count, short int *var);
+void gather_put_nc_field_schar(int nc_id, int var_id, char fillval,
+                              size_t *start, size_t *count, char *var);
 void get_scatter_nc_field_double(char *nc_name, char *var_name, size_t *start,
                                  size_t *count, double *var);
 void get_scatter_nc_field_float(char *nc_name, char *var_name, size_t *start,

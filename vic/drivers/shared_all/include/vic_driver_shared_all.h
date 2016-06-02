@@ -29,7 +29,7 @@
 
 #include <vic_run.h>
 
-#define VERSION "5.0 beta 2016 April 25"
+#define VERSION "5.0 beta 2016 Jun 2"
 #define SHORT_VERSION "5.0.beta"
 
 // Define maximum array sizes for driver level objects
@@ -284,71 +284,72 @@ enum
 };
 
 /******************************************************************************
- * @brief   Output state variable
+ * @brief   Output state variable.
  *****************************************************************************/
 enum
 {
-    STATE_SOIL_MOISTURE,               /**<  */
-    STATE_SOIL_ICE,                    /**<  */
-    STATE_CANOPY_WATER,                /**<  */
-    STATE_ANNUALNPP,                   /**<  */
-    STATE_ANNUALNPPPREV,               /**<  */
-    STATE_CLITTER,                     /**<  */
-    STATE_CINTER,                      /**<  */
-    STATE_CSLOW,                       /**<  */
-    STATE_SNOW_AGE,                    /**<  */
-    STATE_SNOW_MELT_STATE,             /**<  */
-    STATE_SNOW_COVERAGE,               /**<  */
-    STATE_SNOW_WATER_EQUIVALENT,       /**<  */
-    STATE_SNOW_SURF_TEMP,              /**<  */
-    STATE_SNOW_SURF_WATER,             /**<  */
-    STATE_SNOW_PACK_TEMP,              /**<  */
-    STATE_SNOW_PACK_WATER,             /**<  */
-    STATE_SNOW_DENSITY,                /**<  */
-    STATE_SNOW_COLD_CONTENT,           /**<  */
-    STATE_SNOW_CANOPY,                 /**<  */
-    STATE_SOIL_NODE_TEMP,              /**<  */
-    STATE_FOLIAGE_TEMPERATURE,         /**<  */
-    STATE_ENERGY_LONGUNDEROUT,         /**<  */
-    STATE_ENERGY_SNOW_FLUX,            /**<  */
-    STATE_LAKE_SOIL_MOISTURE,          /**<  */
-    STATE_LAKE_SOIL_ICE,               /**<  */
-    STATE_LAKE_CLITTER,                /**<  */
-    STATE_LAKE_CINTER,                 /**<  */
-    STATE_LAKE_CSLOW,                  /**<  */
-    STATE_LAKE_SNOW_AGE,               /**<  */
-    STATE_LAKE_SNOW_MELT_STATE,        /**<  */
-    STATE_LAKE_SNOW_COVERAGE,          /**<  */
-    STATE_LAKE_SNOW_WATER_EQUIVALENT,  /**<  */
-    STATE_LAKE_SNOW_SURF_TEMP,         /**<  */
-    STATE_LAKE_SNOW_SURF_WATER,        /**<  */
-    STATE_LAKE_SNOW_PACK_TEMP,         /**<  */
-    STATE_LAKE_SNOW_PACK_WATER,        /**<  */
-    STATE_LAKE_SNOW_DENSITY,           /**<  */
-    STATE_LAKE_SNOW_COLD_CONTENT,      /**<  */
-    STATE_LAKE_SNOW_CANOPY,            /**<  */
-    STATE_LAKE_SOIL_NODE_TEMP,         /**<  */
-    STATE_LAKE_ACTIVE_LAYERS,          /**<  */
-    STATE_LAKE_LAYER_DZ,               /**<  */
-    STATE_LAKE_SURF_LAYER_DZ,          /**<  */
-    STATE_LAKE_DEPTH,                  /**<  */
-    STATE_LAKE_LAYER_SURF_AREA,        /**<  */
-    STATE_LAKE_SURF_AREA,              /**<  */
-    STATE_LAKE_VOLUME,                 /**<  */
-    STATE_LAKE_LAYER_TEMP,             /**<  */
-    STATE_LAKE_AVERAGE_TEMP,           /**<  */
-    STATE_LAKE_ICE_AREA_FRAC,          /**<  */
-    STATE_LAKE_ICE_AREA_FRAC_NEW,      /**<  */
-    STATE_LAKE_ICE_WATER_EQUIVALENT,   /**<  */
-    STATE_LAKE_ICE_HEIGHT,             /**<  */
-    STATE_LAKE_ICE_TEMP,               /**<  */
-    STATE_LAKE_ICE_SNOW_SURF_TEMP,     /**<  */
-    STATE_LAKE_ICE_SNOW_PACK_TEMP,     /**<  */
-    STATE_LAKE_ICE_SNOW_COLD_CONTENT,  /**<  */
-    STATE_LAKE_ICE_SNOW_SURF_WATER,    /**<  */
-    STATE_LAKE_ICE_SNOW_PACK_WATER,    /**<  */
-    STATE_LAKE_ICE_SNOW_ALBEDO,        /**<  */
-    STATE_LAKE_ICE_SNOW_DEPTH,         /**<  */
+    STATE_SOIL_MOISTURE,               /**<  total soil moisture */
+    STATE_SOIL_ICE,                    /**<  ice content */
+    STATE_CANOPY_WATER,                /**<  dew storage: tmpval = veg_var[veg][band].Wdew; */
+    STATE_ANNUALNPP,                   /**<  cumulative NPP: tmpval = veg_var[veg][band].AnnualNPP; */
+    STATE_ANNUALNPPPREV,               /**<  previous NPP: tmpval = veg_var[veg][band].AnnualNPPPrev; */
+    STATE_CLITTER,                     /**<  litter carbon: tmpval = cell[veg][band].CLitter; */
+    STATE_CINTER,                      /**<  intermediate carbon: tmpval = cell[veg][band].CInter; */
+    STATE_CSLOW,                       /**<  slow carbon: tmpval = cell[veg][band].CSlow; */
+    STATE_SNOW_AGE,                    /**<  snow age: snow[veg][band].last_snow */
+    STATE_SNOW_MELT_STATE,             /**<  melting state: (int)snow[veg][band].MELTING */
+    STATE_SNOW_COVERAGE,               /**<  snow covered fraction: snow[veg][band].coverage */
+    STATE_SNOW_WATER_EQUIVALENT,       /**<  snow water equivalent: snow[veg][band].swq */
+    STATE_SNOW_SURF_TEMP,              /**<  snow surface temperature: snow[veg][band].surf_temp */
+    STATE_SNOW_SURF_WATER,             /**<  snow surface water: snow[veg][band].surf_water */
+    STATE_SNOW_PACK_TEMP,              /**<  snow pack temperature: snow[veg][band].pack_temp */
+    STATE_SNOW_PACK_WATER,             /**<  snow pack water: snow[veg][band].pack_water */
+    STATE_SNOW_DENSITY,                /**<  snow density: snow[veg][band].density */
+    STATE_SNOW_COLD_CONTENT,           /**<  snow cold content: snow[veg][band].coldcontent */
+    STATE_SNOW_CANOPY,                 /**<  snow canopy storage: snow[veg][band].snow_canopy */
+    STATE_SOIL_NODE_TEMP,              /**<  soil node temperatures: energy[veg][band].T[nidx] */
+    STATE_FOLIAGE_TEMPERATURE,         /**<  Foliage temperature: energy[veg][band].Tfoliage */
+    STATE_ENERGY_LONGUNDEROUT,         /**<  Outgoing longwave from understory: energy[veg][band].LongUnderOut */
+    STATE_ENERGY_SNOW_FLUX,            /**<  Thermal flux through the snow pack: energy[veg][band].snow_flux */
+    STATE_LAKE_SOIL_MOISTURE,          /**<  total soil moisture */
+    STATE_LAKE_SOIL_ICE,               /**<  ice content */
+    STATE_LAKE_CLITTER,                /**<  litter carbon: tmpval = lake_var.soil.CLitter; */
+    STATE_LAKE_CINTER,                 /**<  intermediate carbon: tmpval = lake_var.soil.CInter; */
+    STATE_LAKE_CSLOW,                  /**<  slow carbon: tmpval = lake_var.soil.CSlow; */
+    STATE_LAKE_SNOW_AGE,               /**<  snow age: lake_var.snow.last_snow */
+    STATE_LAKE_SNOW_MELT_STATE,        /**<  melting state: (int)lake_var.snow.MELTING */
+    STATE_LAKE_SNOW_COVERAGE,          /**<  snow covered fraction: lake_var.snow.coverage */
+    STATE_LAKE_SNOW_WATER_EQUIVALENT,  /**<  snow water equivalent: lake_var.snow.swq */
+    STATE_LAKE_SNOW_SURF_TEMP,         /**<  snow surface temperature: lake_var.snow.surf_temp */
+    STATE_LAKE_SNOW_SURF_WATER,        /**<  snow surface water: lake_var.snow.surf_water */
+    STATE_LAKE_SNOW_PACK_TEMP,         /**<  snow pack temperature: lake_var.snow.pack_temp */
+    STATE_LAKE_SNOW_PACK_WATER,        /**<  snow pack water: lake_var.snow.pack_water */
+    STATE_LAKE_SNOW_DENSITY,           /**<  snow density: lake_var.snow.density */
+    STATE_LAKE_SNOW_COLD_CONTENT,      /**<  snow cold content: lake_var.snow.coldcontent */
+    STATE_LAKE_SNOW_CANOPY,            /**<  snow canopy storage: lake_var.snow.snow_canopy */
+    STATE_LAKE_SOIL_NODE_TEMP,         /**<  soil node temperatures: lake_var.energy.T[nidx] */
+    STATE_LAKE_ACTIVE_LAYERS,          /**<  lake active layers: lake_var.activenod */
+    STATE_LAKE_LAYER_DZ,               /**<  lake layer thickness: lake_var.dz */
+    STATE_LAKE_SURF_LAYER_DZ,          /**<  lake surface layer thickness: lake_var.surfdz */
+    STATE_LAKE_DEPTH,                  /**<  lake depth: lake_var.ldepth */
+    STATE_LAKE_LAYER_SURF_AREA,        /**<  lake layer surface areas: lake_var.surface[ndix] */
+    STATE_LAKE_SURF_AREA,              /**<  lake surface area: lake_var.sarea */
+    STATE_LAKE_VOLUME,                 /**<  lake volume: lake_var.volume */
+    STATE_LAKE_LAYER_TEMP,             /**<  lake layer temperatures: lake_var.temp[nidx] */
+    STATE_LAKE_AVERAGE_TEMP,           /**<  vertical average lake temperature: lake_var.tempavg */
+    STATE_LAKE_ICE_AREA_FRAC,          /**<  lake ice area fraction: lake_var.areai */
+    STATE_LAKE_ICE_AREA_FRAC_NEW,      /**<  new lake ice area fraction: lake_var.new_ice_area */
+    STATE_LAKE_ICE_WATER_EQUIVALENT,   /**<  lake ice water equivalent: lake_var.ice_water_eq */
+    STATE_LAKE_ICE_HEIGHT,             /**<  lake ice height: lake_var.hice */
+    STATE_LAKE_ICE_TEMP,               /**<  lake ice temperature: lake_var.tempi */
+    STATE_LAKE_ICE_SWE,                /**<  lake ice snow water equivalent: lake_var.swe */
+    STATE_LAKE_ICE_SNOW_SURF_TEMP,     /**<  lake ice snow surface temperature: lake_var.surf_temp */
+    STATE_LAKE_ICE_SNOW_PACK_TEMP,     /**<  lake ice snow pack temperature: lake_var.pack_temp */
+    STATE_LAKE_ICE_SNOW_COLD_CONTENT,  /**<  lake ice snow coldcontent: lake_var.coldcontent */
+    STATE_LAKE_ICE_SNOW_SURF_WATER,    /**<  lake ice snow surface water: lake_var.surf_water */
+    STATE_LAKE_ICE_SNOW_PACK_WATER,    /**<  lake ice snow pack water: lake_var.pack_water */
+    STATE_LAKE_ICE_SNOW_ALBEDO,        /**<  lake ice snow albedo: lake_var.SAlbedo */
+    STATE_LAKE_ICE_SNOW_DEPTH,         /**<  lake ice snow depth: lake_var.sdepth */
     // Last value of enum - DO NOT ADD ANYTHING BELOW THIS LINE!!
     // used as a loop counter and must be >= the largest value in this enum
     N_STATE_VARS                       /**< used as a loop counter*/
@@ -565,7 +566,7 @@ typedef struct {
     char units[MAXSTRING];  /**< units of variable */
     char description[MAXSTRING];  /**< descripition of variable */
     size_t nelem;          /**< number of data values */
-} out_metadata_struct;
+} metadata_struct;
 
 /******************************************************************************
  * @brief   This structure holds all variables needed for the error handling
@@ -689,8 +690,8 @@ void print_layer_data_states(layer_data_struct *ldata, size_t nfrost);
 void print_layer_data_fluxes(layer_data_struct *ldata);
 void print_license(void);
 void print_option(option_struct *option);
-void print_out_data(double **out_data, out_metadata_struct *metadata);
-void print_out_metadata(out_metadata_struct *metadata);
+void print_out_data(double **out_data, metadata_struct *metadata);
+void print_out_metadata(metadata_struct *metadata, size_t nvars);
 void print_output_streams(stream_struct *outf);
 void print_param_set(param_set_struct *param_set);
 void print_parameters(parameters_struct *param);
@@ -698,7 +699,7 @@ void print_save_data(save_data_struct *save);
 void print_snow_data(snow_data_struct *snow);
 void print_soil_con(soil_con_struct *scon, size_t nlayers, size_t nnodes,
                     size_t nfrost, size_t nbands, size_t nzwt);
-void print_stream(stream_struct *stream, out_metadata_struct *metadata);
+void print_stream(stream_struct *stream, metadata_struct *metadata);
 void print_veg_con(veg_con_struct *vcon, size_t nroots, char blowing, char lake,
                    char carbon, size_t ncanopy);
 void print_veg_lib(veg_lib_struct *vlib, char carbon);

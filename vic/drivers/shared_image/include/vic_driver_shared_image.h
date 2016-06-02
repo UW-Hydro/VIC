@@ -93,11 +93,11 @@ typedef struct {
  * @brief    Structure for netcdf variable information
  *****************************************************************************/
 typedef struct {
-    int nc_varid;                /**< variable netcdf id */
-    int nc_type;                 /**< variable netcdf type */
-    int nc_dimids[MAXDIMS];      /**< ids of dimensions */
-    int nc_counts[MAXDIMS];      /**< size of dimid */
-    int nc_dims;                 /**< number of dimensions */
+    int    nc_varid;                /**< variable netcdf id */
+    int    nc_type;                 /**< variable netcdf type */
+    int    nc_dimids[MAXDIMS];      /**< ids of dimensions */
+    size_t nc_counts[MAXDIMS];      /**< size of dimid */
+    size_t nc_dims;                 /**< number of dimensions */
 } nc_var_struct;
 
 /******************************************************************************
@@ -109,6 +109,7 @@ typedef struct {
     int i_fillvalue;
     double d_fillvalue;
     float f_fillvalue;
+    short int s_fillvalue;
     int nc_id;
     int band_dimid;
     int front_dimid;
@@ -121,6 +122,7 @@ typedef struct {
     int root_zone_dimid;
     int time_dimid;
     int veg_dimid;
+    int time_varid;
     size_t band_size;
     size_t front_size;
     size_t frost_size;
@@ -178,6 +180,7 @@ void initialize_domain_info(domain_info_struct *info);
 void initialize_global_structures(void);
 void initialize_history_file(nc_file_struct *nc, stream_struct *stream,
                              dmy_struct *dmy_current);
+void initialize_state_file(char *filename, nc_file_struct *nc_state_file);
 void initialize_location(location_struct *location);
 int initialize_model_state(all_vars_struct *all_vars, size_t Nveg,
                            size_t Nnodes, double surf_temp,
@@ -195,17 +198,14 @@ void print_nc_file(nc_file_struct *nc);
 void print_nc_var(nc_var_struct *nc_var, size_t ndims);
 void print_veg_con_map(veg_con_map_struct *veg_con_map);
 void put_nc_attr(int nc_id, int var_id, const char *name, const char *value);
-int put_nc_field_double(char *nc_name, bool *open, int *nc_id, double fillval,
-                        int *dimids, int ndims, char *var_name, size_t *start,
-                        size_t *count, double *var);
-int put_nc_field_int(char *nc_name, bool *open, int *nc_id, int fillval,
-                     int *dimids, int ndims, char *var_name, size_t *start,
-                     size_t *count, int *var);
 void set_force_type(char *cmdstr, int file_num, int *field);
 void set_global_nc_attributes(int ncid, unsigned short int file_type);
+void set_state_meta_data_info();
 void set_nc_var_dimids(unsigned int varid, nc_file_struct *nc_hist_file, nc_var_struct *nc_var);
 void set_nc_var_info(unsigned int varid, unsigned short int dtype,
                      nc_file_struct *nc_hist_file, nc_var_struct *nc_var);
+void set_nc_state_file_info(nc_file_struct *nc_state_file);
+void set_nc_state_var_info(nc_file_struct *nc_state_file);
 void sprint_location(char *str, location_struct *loc);
 void vic_alloc(void);
 void vic_finalize(void);

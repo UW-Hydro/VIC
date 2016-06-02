@@ -32,7 +32,7 @@
 void
 zero_output_list(double **out_data)
 {
-    extern out_metadata_struct out_metadata[N_OUTVAR_TYPES];
+    extern metadata_struct out_metadata[N_OUTVAR_TYPES];
 
     size_t                     varid, i;
 

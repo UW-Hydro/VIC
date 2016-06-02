@@ -35,7 +35,7 @@ write_header(stream_struct **streams,
 {
     extern option_struct       options;
     extern global_param_struct global_param;
-    extern out_metadata_struct out_metadata[N_OUTVAR_TYPES];
+    extern metadata_struct     out_metadata[N_OUTVAR_TYPES];
 
     size_t                     stream_idx;
     size_t                     var_idx;

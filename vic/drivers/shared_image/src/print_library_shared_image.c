@@ -170,11 +170,11 @@ print_nc_var(nc_var_struct *nc_var,
     fprintf(LOG_DEST, "\n");
     fprintf(LOG_DEST, "\tnc_counts:");
     for (i = 0; i < ndims; i++) {
-        fprintf(LOG_DEST, "\t%d", nc_var->nc_counts[i]);
+        fprintf(LOG_DEST, "\t%zu", nc_var->nc_counts[i]);
     }
     fprintf(LOG_DEST, "\n");
     fprintf(LOG_DEST, "\tnc_type: %d\n", nc_var->nc_type);
-    fprintf(LOG_DEST, "\tnc_dims: %d\n", nc_var->nc_dims);
+    fprintf(LOG_DEST, "\tnc_dims: %zu\n", nc_var->nc_dims);
 }
 
 /******************************************************************************

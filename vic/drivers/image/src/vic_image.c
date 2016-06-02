@@ -60,8 +60,8 @@ veg_con_map_struct *veg_con_map = NULL;
 veg_con_struct    **veg_con = NULL;
 veg_hist_struct   **veg_hist = NULL;
 veg_lib_struct    **veg_lib = NULL;
-out_metadata_struct state_metadata[N_STATE_VARS];
-out_metadata_struct out_metadata[N_OUTVAR_TYPES];
+metadata_struct     state_metadata[N_STATE_VARS];
+metadata_struct     out_metadata[N_OUTVAR_TYPES];
 double           ***out_data = NULL;   // [ncells, nvars, nelem]
 stream_struct      *output_streams = NULL;   // [nstreams]
 nc_file_struct     *nc_hist_files = NULL;  // [nstreams]

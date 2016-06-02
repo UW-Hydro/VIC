@@ -32,7 +32,7 @@
 double ***
 create_outdata(size_t ngridcells)
 {
-    extern out_metadata_struct out_metadata[N_OUTVAR_TYPES];
+    extern metadata_struct out_metadata[N_OUTVAR_TYPES];
 
     size_t                     i;
     size_t                     j;
@@ -168,7 +168,7 @@ validate_streams(stream_struct **streams)
 void
 alloc_aggdata(stream_struct *stream)
 {
-    extern out_metadata_struct out_metadata[N_OUTVAR_TYPES];
+    extern metadata_struct out_metadata[N_OUTVAR_TYPES];
 
     size_t                     i;
     size_t                     j;
@@ -211,7 +211,7 @@ void
 reset_stream(stream_struct *stream,
              dmy_struct    *dmy_current)
 {
-    extern out_metadata_struct out_metadata[N_OUTVAR_TYPES];
+    extern metadata_struct out_metadata[N_OUTVAR_TYPES];
 
     size_t                     i;
     size_t                     j;
@@ -347,7 +347,7 @@ set_output_var(stream_struct     *stream,
                double             mult,
                unsigned short int aggtype)
 {
-    extern out_metadata_struct out_metadata[N_OUTVAR_TYPES];
+    extern metadata_struct out_metadata[N_OUTVAR_TYPES];
 
     int                        varid;
     int                        found = false;
@@ -404,8 +404,8 @@ set_output_var(stream_struct     *stream,
 void
 free_streams(stream_struct **streams)
 {
-    extern option_struct       options;
-    extern out_metadata_struct out_metadata[N_OUTVAR_TYPES];
+    extern option_struct   options;
+    extern metadata_struct out_metadata[N_OUTVAR_TYPES];
 
     size_t                     streamnum;
     size_t                     i;

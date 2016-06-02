@@ -1840,13 +1840,9 @@ mpi_map_decomp_domain(size_t   ncells,
  *          master node
  *****************************************************************************/
 void
-gather_put_nc_field_double(char   *nc_name,
-                           bool   *open,
-                           int    *nc_id,
+gather_put_nc_field_double(int nc_id,
+                           int var_id,
                            double  fillval,
-                           int    *dimids,
-                           int     ndims,
-                           char   *var_name,
                            size_t *start,
                            size_t *count,
                            double *var)
@@ -1866,66 +1862,130 @@ gather_put_nc_field_double(char   *nc_name,
     size_t               grid_size;
     size_t               i;
 
-
-    debug("gather_put_nc_field_double, proc=%d", mpi_rank);
-
     if (mpi_rank == 0) {
-        debug("mpi_rank=0, checkpoint 0");
         grid_size = global_domain.n_nx * global_domain.n_ny;
         dvar = malloc(grid_size * sizeof(*dvar));
         if (dvar == NULL) {
-            log_err("Memory allocation error in gather_put_nc_field_double().");
+            log_err("Memory allocation error.");
         }
         for (i = 0; i < grid_size; i++) {
             dvar[i] = fillval;
         }
-        debug("mpi_rank=0, checkpoint 1");
         dvar_gathered =
             malloc(global_domain.ncells_active * sizeof(*dvar_gathered));
         if (dvar_gathered == NULL) {
-            log_err("Memory allocation error in gather_put_nc_field_double().");
+            log_err("Memory allocation error.");
         }
-        debug("mpi_rank=0, checkpoint 2");
         dvar_remapped =
             malloc(global_domain.ncells_active * sizeof(*dvar_remapped));
         if (dvar_remapped == NULL) {
-            log_err("Memory allocation error in gather_put_nc_field_double().");
+            log_err("Memory allocation error.");
         }
-        debug("mpi_rank=0, checkpoint 3");
     }
     // Gather the results from the nodes, result for the local node is in the
     // array *var (which is a function argument)
-    debug("mpi_rank=%d, checkpoint 4", mpi_rank);
     status = MPI_Gatherv(var, local_domain.ncells_active, MPI_DOUBLE,
                          dvar_gathered, mpi_map_local_array_sizes,
                          mpi_map_global_array_offsets, MPI_DOUBLE,
                          0, MPI_COMM_VIC);
     if (status != MPI_SUCCESS) {
-        fprintf(stderr, "MPI error in main(): %d\n", status);
-        exit(EXIT_FAILURE);
+        log_err("MPI error");
     }
-    debug("mpi_rank=%d, checkpoint 5", mpi_rank);
     if (mpi_rank == 0) {
         // remap the array
-        debug("mpi_rank=%d, checkpoint 6", mpi_rank);
         map(sizeof(double), global_domain.ncells_active, NULL,
-            mpi_map_mapping_array,
-            dvar_gathered, dvar_remapped);
+            mpi_map_mapping_array, dvar_gathered, dvar_remapped);
         // expand to full grid size
-        debug("mpi_rank=%d, checkpoint 7", mpi_rank);
         map(sizeof(double), global_domain.ncells_active, NULL,
-            filter_active_cells,
-            dvar_remapped, dvar);
+            filter_active_cells, dvar_remapped, dvar);
+
         // write to file
-        debug("mpi_rank=%d, checkpoint 8", mpi_rank);
-        put_nc_field_double(nc_name, open, nc_id, fillval, dimids, ndims,
-                            var_name, start, count, dvar);
+        status = nc_put_vara_double(nc_id, var_id, start, count, dvar);
+        if (status != NC_NOERR) {
+            log_err("Error writing values");
+        }
         // cleanup
         free(dvar);
         free(dvar_gathered);
         free(dvar_remapped);
     }
-    debug("mpi_rank=%d, checkpoint 9", mpi_rank);
+}
+
+/******************************************************************************
+ * @brief   Gather and write double precision NetCDF field
+ * @details Values are gathered to the master node and then written from the
+ *          master node
+ *****************************************************************************/
+void
+gather_put_nc_field_float(int nc_id,
+                          int var_id,
+                          float  fillval,
+                          size_t *start,
+                          size_t *count,
+                          float *var)
+{
+    extern MPI_Comm      MPI_COMM_VIC;
+    extern domain_struct global_domain;
+    extern domain_struct local_domain;
+    extern int           mpi_rank;
+    extern int          *mpi_map_global_array_offsets;
+    extern int          *mpi_map_local_array_sizes;
+    extern size_t       *filter_active_cells;
+    extern size_t       *mpi_map_mapping_array;
+    int                  status;
+    float              *fvar = NULL;
+    float              *fvar_gathered = NULL;
+    float              *fvar_remapped = NULL;
+    size_t               grid_size;
+    size_t               i;
+
+    if (mpi_rank == 0) {
+        grid_size = global_domain.n_nx * global_domain.n_ny;
+        fvar = malloc(grid_size * sizeof(*fvar));
+        if (fvar == NULL) {
+            log_err("Memory allocation error.");
+        }
+        for (i = 0; i < grid_size; i++) {
+            fvar[i] = fillval;
+        }
+        fvar_gathered =
+            malloc(global_domain.ncells_active * sizeof(*fvar_gathered));
+        if (fvar_gathered == NULL) {
+            log_err("Memory allocation error.");
+        }
+        fvar_remapped =
+            malloc(global_domain.ncells_active * sizeof(*fvar_remapped));
+        if (fvar_remapped == NULL) {
+            log_err("Memory allocation error.");
+        }
+    }
+    // Gather the results from the nodes, result for the local node is in the
+    // array *var (which is a function argument)
+    status = MPI_Gatherv(var, local_domain.ncells_active, MPI_FLOAT,
+                         fvar_gathered, mpi_map_local_array_sizes,
+                         mpi_map_global_array_offsets, MPI_FLOAT,
+                         0, MPI_COMM_VIC);
+    if (status != MPI_SUCCESS) {
+        log_err("MPI error");
+    }
+    if (mpi_rank == 0) {
+        // remap the array
+        map(sizeof(float), global_domain.ncells_active, NULL,
+            mpi_map_mapping_array, fvar_gathered, fvar_remapped);
+        // expand to full grid size
+        map(sizeof(float), global_domain.ncells_active, NULL,
+            filter_active_cells, fvar_remapped, fvar);
+
+        // write to file
+        status = nc_put_vara_float(nc_id, var_id, start, count, fvar);
+        if (status != NC_NOERR) {
+            log_err("Error writing values");
+        }
+        // cleanup
+        free(fvar);
+        free(fvar_gathered);
+        free(fvar_remapped);
+    }
 }
 
 /******************************************************************************
@@ -1934,16 +1994,12 @@ gather_put_nc_field_double(char   *nc_name,
  *          master node
  *****************************************************************************/
 void
-gather_put_nc_field_int(char   *nc_name,
-                        bool   *open,
-                        int    *nc_id,
-                        int     fillval,
-                        int    *dimids,
-                        int     ndims,
-                        char   *var_name,
+gather_put_nc_field_int(int nc_id,
+                        int var_id,
+                        int fillval,
                         size_t *start,
                         size_t *count,
-                        int    *var)
+                        int *var)
 {
     extern MPI_Comm      MPI_COMM_VIC;
     extern domain_struct global_domain;
@@ -1964,7 +2020,7 @@ gather_put_nc_field_int(char   *nc_name,
         grid_size = global_domain.n_nx * global_domain.n_ny;
         ivar = malloc(grid_size * sizeof(*ivar));
         if (ivar == NULL) {
-            log_err("Memory allocation error in gather_put_nc_field_int().");
+            log_err("Memory allocation error");
         }
         for (i = 0; i < grid_size; i++) {
             ivar[i] = fillval;
@@ -1973,13 +2029,13 @@ gather_put_nc_field_int(char   *nc_name,
         ivar_gathered =
             malloc(global_domain.ncells_active * sizeof(*ivar_gathered));
         if (ivar_gathered == NULL) {
-            log_err("Memory allocation error in gather_put_nc_field_int().");
+            log_err("Memory allocation error");
         }
 
         ivar_remapped =
             malloc(global_domain.ncells_active * sizeof(*ivar_remapped));
         if (ivar_remapped == NULL) {
-            log_err("Memory allocation error in gather_put_nc_field_int().");
+            log_err("Memory allocation error");
         }
     }
     // Gather the results from the nodes, result for the local node is in the
@@ -1989,8 +2045,7 @@ gather_put_nc_field_int(char   *nc_name,
                          mpi_map_global_array_offsets, MPI_INT,
                          0, MPI_COMM_VIC);
     if (status != MPI_SUCCESS) {
-        fprintf(stderr, "MPI error in main(): %d\n", status);
-        exit(EXIT_FAILURE);
+        log_err("MPI error");
     }
 
     if (mpi_rank == 0) {
@@ -2002,12 +2057,174 @@ gather_put_nc_field_int(char   *nc_name,
         map(sizeof(int), global_domain.ncells_active, NULL, filter_active_cells,
             ivar_remapped, ivar);
         // write to file
-        put_nc_field_int(nc_name, open, nc_id, fillval, dimids, ndims,
-                         var_name, start, count, ivar);
+        status = nc_put_vara_int(nc_id, var_id, start, count, ivar);
+        if (status != NC_NOERR) {
+            log_err("Error writing values");
+        }
         // cleanup
         free(ivar);
         free(ivar_gathered);
         free(ivar_remapped);
+    }
+}
+
+/******************************************************************************
+ * @brief   Gather and write short integer NetCDF field
+ * @details Values are gathered to the master node and then written from the
+ *          master node
+ *****************************************************************************/
+void
+gather_put_nc_field_short(int        nc_id,
+                         int        var_id,
+                         short int  fillval,
+                         size_t    *start,
+                         size_t    *count,
+                         short int *var)
+{
+    extern MPI_Comm      MPI_COMM_VIC;
+    extern domain_struct global_domain;
+    extern domain_struct local_domain;
+    extern int           mpi_rank;
+    extern int          *mpi_map_global_array_offsets;
+    extern int          *mpi_map_local_array_sizes;
+    extern size_t       *filter_active_cells;
+    extern size_t       *mpi_map_mapping_array;
+    int                  status;
+    short int           *svar = NULL;
+    short int           *svar_gathered = NULL;
+    short int           *svar_remapped = NULL;
+    size_t               grid_size;
+    size_t               i;
+
+    if (mpi_rank == 0) {
+        grid_size = global_domain.n_nx * global_domain.n_ny;
+        svar = malloc(grid_size * sizeof(*svar));
+        if (svar == NULL) {
+            log_err("Memory allocation error");
+        }
+        for (i = 0; i < grid_size; i++) {
+            svar[i] = fillval;
+        }
+
+        svar_gathered =
+            malloc(global_domain.ncells_active * sizeof(*svar_gathered));
+        if (svar_gathered == NULL) {
+            log_err("Memory allocation error");
+        }
+
+        svar_remapped =
+            malloc(global_domain.ncells_active * sizeof(*svar_remapped));
+        if (svar_remapped == NULL) {
+            log_err("Memory allocation error");
+        }
+    }
+    // Gather the results from the nodes, result for the local node is in the
+    // array *var (which is a function argument)
+    status = MPI_Gatherv(var, local_domain.ncells_active, MPI_SHORT,
+                         svar_gathered, mpi_map_local_array_sizes,
+                         mpi_map_global_array_offsets, MPI_SHORT,
+                         0, MPI_COMM_VIC);
+    if (status != MPI_SUCCESS) {
+        log_err("MPI error");
+    }
+
+    if (mpi_rank == 0) {
+        // remap the array
+        map(sizeof(short int), global_domain.ncells_active, NULL,
+            mpi_map_mapping_array,
+            svar_gathered, svar_remapped);
+        // expand to full grid size
+        map(sizeof(short int), global_domain.ncells_active, NULL,
+            filter_active_cells, svar_remapped, svar);
+        // write to file
+        status = nc_put_vara_short(nc_id, var_id, start, count, svar);
+        if (status != NC_NOERR) {
+            log_err("Error writing values");
+        }
+        // cleanup
+        free(svar);
+        free(svar_gathered);
+        free(svar_remapped);
+    }
+}
+
+/******************************************************************************
+ * @brief   Gather and write signed character NetCDF field
+ * @details Values are gathered to the master node and then written from the
+ *          master node
+ *****************************************************************************/
+void
+gather_put_nc_field_schar(int     nc_id,
+                          int     var_id,
+                          char    fillval,
+                          size_t *start,
+                          size_t *count,
+                          char   *var)
+{
+    extern MPI_Comm      MPI_COMM_VIC;
+    extern domain_struct global_domain;
+    extern domain_struct local_domain;
+    extern int           mpi_rank;
+    extern int          *mpi_map_global_array_offsets;
+    extern int          *mpi_map_local_array_sizes;
+    extern size_t       *filter_active_cells;
+    extern size_t       *mpi_map_mapping_array;
+    int                  status;
+    signed char           *cvar = NULL;
+    signed char           *cvar_gathered = NULL;
+    signed char           *cvar_remapped = NULL;
+    size_t               grid_size;
+    size_t               i;
+
+    if (mpi_rank == 0) {
+        grid_size = global_domain.n_nx * global_domain.n_ny;
+        cvar = malloc(grid_size * sizeof(*cvar));
+        if (cvar == NULL) {
+            log_err("Memory allocation error");
+        }
+        for (i = 0; i < grid_size; i++) {
+            cvar[i] = fillval;
+        }
+
+        cvar_gathered =
+            malloc(global_domain.ncells_active * sizeof(*cvar_gathered));
+        if (cvar_gathered == NULL) {
+            log_err("Memory allocation error");
+        }
+
+        cvar_remapped =
+            malloc(global_domain.ncells_active * sizeof(*cvar_remapped));
+        if (cvar_remapped == NULL) {
+            log_err("Memory allocation error");
+        }
+    }
+    // Gather the results from the nodes, result for the local node is in the
+    // array *var (which is a function argument)
+    status = MPI_Gatherv(var, local_domain.ncells_active, MPI_CHAR,
+                         cvar_gathered, mpi_map_local_array_sizes,
+                         mpi_map_global_array_offsets, MPI_CHAR,
+                         0, MPI_COMM_VIC);
+    if (status != MPI_SUCCESS) {
+        log_err("MPI error");
+    }
+
+    if (mpi_rank == 0) {
+        // remap the array
+        map(sizeof(char), global_domain.ncells_active, NULL,
+            mpi_map_mapping_array,
+            cvar_gathered, cvar_remapped);
+        // expand to full grid size
+        map(sizeof(char), global_domain.ncells_active, NULL,
+            filter_active_cells, cvar_remapped, cvar);
+        // write to file
+        status = nc_put_vara_schar(nc_id, var_id, start, count, cvar);
+        if (status != NC_NOERR) {
+            log_err("Error writing values");
+        }
+        // cleanup
+        free(cvar);
+        free(cvar_gathered);
+        free(cvar_remapped);
     }
 }
 
@@ -2039,27 +2256,25 @@ get_scatter_nc_field_double(char   *nc_name,
     if (mpi_rank == 0) {
         dvar = malloc(global_domain.ncells_total * sizeof(*dvar));
         if (dvar == NULL) {
-            log_err("Memory allocation error in get_scatter_nc_field_double().");
+            log_err("Memory allocation error");
         }
         dvar_filtered =
             malloc(global_domain.ncells_active * sizeof(*dvar_filtered));
         if (dvar_filtered == NULL) {
-            log_err("Memory allocation error in get_scatter_nc_field_double().");
+            log_err("Memory allocation error");
         }
         dvar_mapped =
             malloc(global_domain.ncells_active * sizeof(*dvar_mapped));
         if (dvar_mapped == NULL) {
-            log_err("Memory allocation error in get_scatter_nc_field_double().");
+            log_err("Memory allocation error");
         }
         get_nc_field_double(nc_name, var_name, start, count, dvar);
         // filter the active cells only
         map(sizeof(double), global_domain.ncells_active, filter_active_cells,
-            NULL,
-            dvar, dvar_filtered);
+            NULL, dvar, dvar_filtered);
         // map to prepare for MPI_Scatterv
         map(sizeof(double), global_domain.ncells_active, mpi_map_mapping_array,
-            NULL,
-            dvar_filtered, dvar_mapped);
+            NULL, dvar_filtered, dvar_mapped);
         free(dvar);
         free(dvar_filtered);
     }
@@ -2071,8 +2286,7 @@ get_scatter_nc_field_double(char   *nc_name,
                           var, local_domain.ncells_active, MPI_DOUBLE,
                           0, MPI_COMM_VIC);
     if (status != MPI_SUCCESS) {
-        fprintf(stderr, "MPI error in main(): %d\n", status);
-        exit(EXIT_FAILURE);
+        log_err("MPI error");
     }
 
     if (mpi_rank == 0) {
@@ -2140,8 +2354,7 @@ get_scatter_nc_field_float(char   *nc_name,
                           var, local_domain.ncells_active, MPI_FLOAT,
                           0, MPI_COMM_VIC);
     if (status != MPI_SUCCESS) {
-        fprintf(stderr, "MPI error in main(): %d\n", status);
-        exit(EXIT_FAILURE);
+        log_err("MPI error");
     }
 
     if (mpi_rank == 0) {
@@ -2208,8 +2421,7 @@ get_scatter_nc_field_int(char   *nc_name,
                           var, local_domain.ncells_active, MPI_INT,
                           0, MPI_COMM_VIC);
     if (status != MPI_SUCCESS) {
-        fprintf(stderr, "MPI error in main(): %d\n", status);
-        exit(EXIT_FAILURE);
+        log_err("MPI error");
     }
 
     if (mpi_rank == 0) {

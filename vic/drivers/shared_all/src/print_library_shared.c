@@ -546,7 +546,7 @@ print_option(option_struct *option)
  *****************************************************************************/
 void
 print_out_data(double             **out_data,
-               out_metadata_struct *metadata)
+               metadata_struct *metadata)
 {
     size_t i;
     size_t j;
@@ -570,7 +570,7 @@ print_out_data(double             **out_data,
  *****************************************************************************/
 void
 print_stream(stream_struct       *stream,
-             out_metadata_struct *metadata)
+             metadata_struct *metadata)
 {
     size_t       i;
     unsigned int varid;
@@ -621,14 +621,13 @@ print_alarm(alarm_struct *alarm)
  * @brief    Print stream_file_struct.
  *****************************************************************************/
 void
-print_out_metadata(out_metadata_struct *metadata)
+print_out_metadata(metadata_struct *metadata, size_t nvars)
 {
     size_t i;
 
-    fprintf(LOG_DEST, "out_metadata_struct: \n");
-    fprintf(LOG_DEST, "\tN_OUTVAR_TYPES: %d\n", N_OUTVAR_TYPES);
+    fprintf(LOG_DEST, "metadata_struct: \n");
 
-    for (i = 0; i < N_OUTVAR_TYPES; i++) {
+    for (i = 0; i < nvars; i++) {
         fprintf(LOG_DEST, "\t%s (%zu)\n", metadata[i].varname, i);
         fprintf(LOG_DEST, "\t\tlong_name: %s\n", metadata[i].long_name);
         fprintf(LOG_DEST, "\t\tunits: %s\n", metadata[i].units);

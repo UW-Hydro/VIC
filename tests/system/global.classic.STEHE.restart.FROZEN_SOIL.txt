@@ -1,0 +1,101 @@
+#######################################################################
+# VIC Model Parameters for Stehekin Basin Sample Classic Driver Setup
+#######################################################################
+
+#######################################################################
+# Simulation Parameters
+#######################################################################
+NLAYER                3      # number of soil layers
+NODES                 3      # number of soil thermal nodes
+MODEL_STEPS_PER_DAY   24     # number of model time steps per day (set to 1 if FULL_ENERGY = FALSE, set to > 1 if FULL_ENERGY = TRUE)
+SNOW_STEPS_PER_DAY    24     # number of time steps per day for which to solve the snow model (should = MODEL_STEPS_PER_DAY if MODEL_STEPS_PER_DAY > 1)
+RUNOFF_STEPS_PER_DAY  24     # time step in hours for which to solve the runoff model (should be >= MODEL_STEPS_PER_DAY)
+STARTYEAR             $startyear   # year model simulation starts
+STARTMONTH            $startmonth     # month model simulation starts
+STARTDAY              $startday     # day model simulation starts
+#STARTHOUR             00     # hour model simulation starts
+ENDYEAR               $endyear   # year model simulation ends
+ENDMONTH              $endmonth     # month model simulation ends
+ENDDAY                $endday     # day model simulation ends
+FULL_ENERGY           FALSE  # TRUE = calculate full energy balance; FALSE = compute water balance only
+FROZEN_SOIL           FALSE  # TRUE = calculate frozen soils
+
+######################################################################
+# State Files and Parameters
+#######################################################################
+$init_state # -(put the initial state path/filename here)--# Initial state path/file
+STATENAME   $state_dir/states # Output state file path/prefix.  The date (STATEYEAR,STATEMONTH,STATEDAY) will be appended to the prefix automatically in the format yyyymmdd.
+STATEYEAR   $stateyear    # year to save model state
+STATEMONTH  $statemonth   # month to save model state
+STATEDAY    $stateday  # day to save model state
+STATESEC    82800  # second to save model state
+STATE_FORMAT           ASCII    # BINARY OR ASCII
+
+#######################################################################
+# Forcing Files
+#######################################################################
+FORCING1             $test_data_dir/classic/Stehekin/forcings/full_data_    # Forcing file path and prefix, ending in "_"
+FORCE_FORMAT         ASCII  # BINARY or ASCII
+FORCE_TYPE           PREC
+FORCE_TYPE           AIR_TEMP
+FORCE_TYPE           SWDOWN
+FORCE_TYPE           LWDOWN
+FORCE_TYPE           SKIP  # This column is air density, which is not needed by VIC
+FORCE_TYPE           PRESSURE
+FORCE_TYPE           VP
+FORCE_TYPE           WIND
+FORCE_STEPS_PER_DAY  24    # Forcing time step length (hours)
+FORCEYEAR            1949  # Year of first forcing record
+FORCEMONTH           01    # Month of first forcing record
+FORCEDAY             01    # Day of first forcing record
+GRID_DECIMAL         4     # Number of digits after decimal point in forcing file names
+WIND_H               10.0  # height of wind speed measurement (m)
+
+#######################################################################
+# Land Surface Parameters
+#######################################################################
+SOIL                $test_dir/system/Stehekin_soil.FROZEN_SOIL.txt     # Soil parameter path/file
+BASEFLOW            ARNO   # ARNO = columns 5-8 are the standard VIC baseflow parameters; NIJSSEN2001 = columns 5-8 of soil file are baseflow parameters from Nijssen et al (2001)
+JULY_TAVG_SUPPLIED  FALSE  # TRUE = final column of the soil parameter file will contain average July air temperature, for computing treeline; this will be ignored if COMPUTE_TREELINE is FALSE; FALSE = compute the treeline based on the average July air temperature of the forcings over the simulation period
+ORGANIC_FRACT       FALSE  # TRUE = simulate organic soils; soil param file contains 3*Nlayer extra columns, listing for each layer the organic fraction, and the bulk density and soil particle density of the organic matter in the soil layer; FALSE = soil param file does not contain any information about organic soil, and organic fraction should be assumed to be 0
+VEGLIB              $test_data_dir/classic/Stehekin/parameters/Stehekin_veglib.txt    # Veg library path/file
+VEGPARAM            $test_data_dir/classic/Stehekin/parameters/Stehekin_vegparam.txt  # Veg parameter path/file
+ROOT_ZONES          3      # Number of root zones (must match format of veg param file)
+VEGPARAM_LAI        TRUE   # TRUE = veg param file contains LAI information; FALSE = veg param file does NOT contain LAI information
+LAI_SRC             FROM_VEGPARAM  # FROM_VEGPARAM = read LAI from veg param file; FROM_VEGLIB = read LAI from veg library file
+SNOW_BAND           5  $test_data_dir/classic/Stehekin/parameters/Stehekin_snowbands.txt  # Number of snow bands; if number of snow bands > 1, you must insert the snow band path/file after the number of bands (e.g. SNOW_BAND 5 my_path/my_snow_band_file)
+
+#######################################################################
+# Output Files and Parameters
+#######################################################################
+RESULT_DIR     $result_dir  # Results directory path
+OUTPUT_STEPS_PER_DAY        0       # Output steps per day; if 0, OUTPUT_STEPS_PER_DAY = MODEL_STEPS_PER_DAY
+SKIPYEAR       0      # Number of years of output to omit from the output files
+COMPRESS       FALSE  # TRUE = compress input and output files when done
+OUT_FORMAT     ASCII  # BINARY or ASCII
+ALMA_OUTPUT    FALSE  # TRUE = ALMA-format output files; FALSE = standard VIC units
+MOISTFRACT     FALSE  # TRUE = output soil moisture as volumetric fraction; FALSE = standard VIC units
+PRT_HEADER     TRUE  # TRUE = insert a header at the beginning of each output file; FALSE = no header
+PRT_SNOW_BAND  FALSE  # TRUE = write a "snowband" output file, containing band-specific values of snow variables; NOTE: this is ignored if N_OUTFILES is specified below.
+
+OUTFILE     fluxes
+OUTVAR      OUT_PREC
+OUTVAR      OUT_RAINF
+OUTVAR      OUT_SNOWF
+OUTVAR      OUT_AIR_TEMP
+OUTVAR      OUT_SWDOWN
+OUTVAR      OUT_LWDOWN
+OUTVAR      OUT_PRESSURE
+OUTVAR      OUT_WIND
+OUTVAR      OUT_DENSITY
+OUTVAR      OUT_REL_HUMID
+OUTVAR      OUT_QAIR
+OUTVAR      OUT_VP
+OUTVAR      OUT_VPD
+OUTVAR      OUT_RUNOFF
+OUTVAR      OUT_BASEFLOW
+OUTVAR      OUT_EVAP
+OUTVAR      OUT_SWE
+OUTVAR      OUT_SOIL_MOIST
+OUTVAR      OUT_ALBEDO
+OUTVAR      OUT_SOIL_TEMP

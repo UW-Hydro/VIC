@@ -6,7 +6,7 @@ import datetime
 import os
 import glob
 import xarray as xr
-from test_utils import *
+from test_utils import read_vic_ascii
 
 
 # -------------------------------------------------------------------- #
@@ -137,8 +137,7 @@ def setup_subdirs_restart_test(result_basedir, state_basedir, run_periods):
 
 # -------------------------------------------------------------------- #
 def setup_subdirs_and_fill_in_global_param_restart_test(
-        s, run_periods, driver, result_basedir, state_basedir, test_data_dir,
-        test_dir):
+        s, run_periods, driver, result_basedir, state_basedir, test_data_dir):
     ''' Fill in global parameter options for multiple runs for restart testing
 
     Parameters
@@ -157,8 +156,6 @@ def setup_subdirs_and_fill_in_global_param_restart_test(
         subdirectories under the base directory
     test_data_dir: <str>
         Base directory of test data
-    test_dir: <str>
-        Directory of the testing scripts
 
     Returns
     ----------
@@ -191,7 +188,6 @@ def setup_subdirs_and_fill_in_global_param_restart_test(
 
         # Fill in global parameter options
         list_global_param.append(s.safe_substitute(
-                test_dir=test_dir,
                 test_data_dir=test_data_dir,
                 result_dir=result_dir,
                 state_dir=state_dir,

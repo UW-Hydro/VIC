@@ -14,9 +14,17 @@ import pytest
 from tonic.models.vic.vic import VIC, default_vic_valgrind_error_code
 from tonic.io import read_config, read_configobj
 from tonic.testing import VICTestError
-from test_utils import *
-from test_image_driver import *
-from test_restart import *
+from test_utils import (setup_test_dirs, print_test_dict,
+                        replace_global_values, drop_tests, pop_run_kwargs,
+                        check_returncode, process_error,
+                        test_classic_driver_all_complete,
+                        test_classic_driver_no_output_file_nans,
+                        find_global_param_value)
+from test_image_driver import test_image_driver_no_output_file_nans
+from test_restart import (prepare_restart_run_periods,
+                          setup_subdirs_and_fill_in_global_param_restart_test,
+                          check_exact_restart_fluxes,
+                          check_exact_restart_states)
 
 test_dir = os.path.dirname(os.path.abspath(__file__))
 
@@ -331,11 +339,10 @@ def run_system(config_file, vic_exe, test_data_dir, out_dir, driver):
             list_global_param =\
                 setup_subdirs_and_fill_in_global_param_restart_test(
                     s, run_periods, driver, dirs['results'], dirs['state'],
-                    test_data_dir, test_dir)
+                    test_data_dir)
         # --- Else, single run --- #
         else:
-            global_param = s.safe_substitute(test_dir=test_dir,
-                                             test_data_dir=test_data_dir,
+            global_param = s.safe_substitute(test_data_dir=test_data_dir,
                                              result_dir=dirs['results'],
                                              state_dir=dirs['state'])
 

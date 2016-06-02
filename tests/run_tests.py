@@ -81,6 +81,7 @@ class TestResults(object):
                                                                   self.passed,
                                                                   self.comment)
 
+
 def main():
     '''
     Run VIC tests
@@ -166,8 +167,10 @@ def main():
                                               args.driver)
     # examples
     if any(i in ['all', 'examples'] for i in args.tests):
-        test_results['examples'] = run_examples(args.examples, vic_exe, data_dir,
-                                                os.path.join(out_dir, 'examples'),
+        test_results['examples'] = run_examples(args.examples, vic_exe,
+                                                data_dir,
+                                                os.path.join(
+                                                    out_dir, 'examples'),
                                                 args.driver)
     # release
     if any(i in ['all', 'release'] for i in args.tests):
@@ -307,9 +310,11 @@ def run_system(config_file, vic_exe, test_data_dir, out_dir, driver):
         # If restart test, prepare running periods
         # (1) Find STATESEC option (and STATE_FORMAT option for later use)
         statesec = find_global_param_value(global_param, 'STATESEC')
-        if driver=='classic':
-            state_format = find_global_param_value(global_param, 'STATE_FORMAT')
-        # (2) Prepare running periods and initial state file info for restart test
+        if driver == 'classic':
+            state_format = find_global_param_value(global_param,
+                                                   'STATE_FORMAT')
+        # (2) Prepare running periods and initial state file info for restart
+        # test
         if 'restart' in test_dict:
             run_periods = prepare_restart_run_periods(
                                 test_dict['restart'],
@@ -319,14 +324,15 @@ def run_system(config_file, vic_exe, test_data_dir, out_dir, driver):
         s = string.Template(global_param)
 
         # fill in global parameter options
-        #--- if restart test, multiple runs ---#
+        # --- if restart test, multiple runs --- #
         if 'restart' in test_dict:
-            # Set up subdirectories and fill in global parameter options 
+            # Set up subdirectories and fill in global parameter options
             # for restart testing
-            list_global_param = setup_subdirs_and_fill_in_global_param_restart_test(
+            list_global_param =\
+                setup_subdirs_and_fill_in_global_param_restart_test(
                     s, run_periods, driver, dirs['results'], dirs['state'],
                     test_data_dir, test_dir)
-        #--- Else, single run ---#
+        # --- Else, single run --- #
         else:
             global_param = s.safe_substitute(test_dir=test_dir,
                                              test_data_dir=test_data_dir,
@@ -334,20 +340,21 @@ def run_system(config_file, vic_exe, test_data_dir, out_dir, driver):
                                              state_dir=dirs['state'])
 
         # replace global options from config file
-        #--- extract global options to be substitute ---#
+        # --- extract global options to be substitute --- #
         if 'options' in test_dict:
             replacements = test_dict['options']
         else:
             replacements = OrderedDict()
-        #--- if STATE_FORMAT is specified, then the specified value (instead of 
-        # the one in the global template file) ---#
+        # --- if STATE_FORMAT is specified, then the specified value (instead
+        # of the one in the global template file) --- #
         if 'STATE_FORMAT' in replacements:
             state_format = replacements['STATE_FORMAT']
-        #--- replace global options ---#
+        # --- replace global options --- #
         if 'restart' in test_dict:
             for j, gp in enumerate(list_global_param):
-                replacements_cp = replacements.copy() # save a copy of replacements
-                                                      # for the next global file
+                # save a copy of replacements for the next flobal file
+                replacements_cp = replacements.copy()
+                #
                 list_global_param[j] = replace_global_values(gp, replacements)
                 replacements = replacements_cp
         else:
@@ -358,18 +365,19 @@ def run_system(config_file, vic_exe, test_data_dir, out_dir, driver):
             list_test_global_file = []
             for j, gp in enumerate(list_global_param):
                 test_global_file = os.path.join(
-                            dirs['test'],
-                            '{}_globalparam_{}_{}.txt'.format(
-                                    testname,
-                                    run_periods[j]['start_date'].strftime("%Y%m%d"),
-                                    run_periods[j]['end_date'].strftime("%Y%m%d")))
+                        dirs['test'],
+                        '{}_globalparam_{}_{}.txt'.format(
+                            testname,
+                            run_periods[j]['start_date'].strftime("%Y%m%d"),
+                            run_periods[j]['end_date'].strftime("%Y%m%d")))
                 list_test_global_file.append(test_global_file)
                 with open(test_global_file, mode='w') as f:
                     for line in gp:
                         f.write(line)
         else:
-            test_global_file = os.path.join(dirs['test'],
-                                            '{0}_globalparam.txt'.format(testname))
+            test_global_file = os.path.join(
+                                dirs['test'],
+                                '{0}_globalparam.txt'.format(testname))
             with open(test_global_file, mode='w') as f:
                 for line in global_param:
                     f.write(line)
@@ -386,14 +394,17 @@ def run_system(config_file, vic_exe, test_data_dir, out_dir, driver):
         try:
             if 'restart' in test_dict:
                 for j, test_global_file in enumerate(list_test_global_file):
-                    returncode = vic_exe.run(test_global_file, logdir=dirs['logs'])
+                    returncode = vic_exe.run(test_global_file,
+                                             logdir=dirs['logs'])
                     # Check return code
-                    check_returncode(returncode, test_dict.pop('expected_retval', 0))
+                    check_returncode(returncode,
+                                     test_dict.pop('expected_retval', 0))
             else:
                 returncode = vic_exe.run(test_global_file, logdir=dirs['logs'],
                                          **run_kwargs)
                 # Check return code
-                check_returncode(returncode, test_dict.pop('expected_retval', 0))
+                check_returncode(returncode,
+                                 test_dict.pop('expected_retval', 0))
 
             test_complete = True
 
@@ -414,13 +425,15 @@ def run_system(config_file, vic_exe, test_data_dir, out_dir, driver):
                     elif driver == 'image':
                         domain_file = os.path.join(test_data_dir,
                                                    test_dict['domain_file'])
-                        test_image_driver_no_output_file_nans(fnames, domain_file)
+                        test_image_driver_no_output_file_nans(fnames,
+                                                              domain_file)
                     else:
                         raise ValueError('unknown driver')
 
                 # check for exact restarts
                 if 'exact_restart' in test_dict['check']:
-                    check_exact_restart_fluxes(dirs['results'], driver, run_periods)
+                    check_exact_restart_fluxes(dirs['results'], driver,
+                                               run_periods)
                     if driver == 'classic':
                         check_exact_restart_states(dirs['state'], driver,
                                                    run_periods, statesec,
@@ -560,7 +573,8 @@ def run_science(config_file, vic_exe, test_data_dir, out_dir, driver):
                     elif driver == 'image':
                         domain_file = os.path.join(test_data_dir,
                                                    test_dict['domain_file'])
-                        test_image_driver_no_output_file_nans(fnames, domain_file)
+                        test_image_driver_no_output_file_nans(fnames,
+                                                              domain_file)
                     else:
                         raise ValueError('unknown driver')
 
@@ -640,7 +654,8 @@ def run_examples(config_file, vic_exe, test_data_dir, out_dir, driver):
                                mkdirs=['results', 'state', 'logs', 'plots'])
 
         # read template global parameter file
-        infile = os.path.join(test_dir, 'examples', test_dict['global_parameter_file'])
+        infile = os.path.join(test_dir, 'examples',
+                              test_dict['global_parameter_file'])
 
         with open(infile, 'r') as global_file:
             global_param = global_file.read()
@@ -695,7 +710,8 @@ def run_examples(config_file, vic_exe, test_data_dir, out_dir, driver):
                     elif driver == 'image':
                         domain_file = os.path.join(test_data_dir,
                                                    test_dict['domain_file'])
-                        test_image_driver_no_output_file_nans(fnames, domain_file)
+                        test_image_driver_no_output_file_nans(fnames,
+                                                              domain_file)
                     else:
                         raise ValueError('unknown driver')
 

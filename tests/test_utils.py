@@ -13,8 +13,10 @@ from tonic.testing import check_completed, check_for_nans, VICTestError
 OUTPUT_WIDTH = 100
 ERROR_TAIL = 20  # lines
 
+
 class VICReturnCodeError(Exception):
     pass
+
 
 class VICValgrindError(Exception):
     pass
@@ -142,7 +144,8 @@ def process_error(error, vic_exe):
 
 def test_classic_driver_all_complete(fnames):
     '''
-    Test that all VIC files in fnames have the same first and last index position
+    Test that all VIC files in fnames have the same first and last index
+    position
     '''
     start = None
     end = None
@@ -163,7 +166,9 @@ def test_classic_driver_no_output_file_nans(fnames):
         df = read_vic_ascii(fname, header=True)
         check_for_nans(df)
 
-# TODO: Update tonic version of this function, need to check that subdaily works
+
+# TODO: Update tonic version of this function, need to check that subdaily
+# works
 def read_vic_ascii(filepath, header=True, parse_dates=True,
                    datetime_index=None, names=None, **kwargs):
     '''Generic reader function for VIC ASCII output with a standard header
@@ -207,6 +212,7 @@ def read_vic_ascii(filepath, header=True, parse_dates=True,
 
     return df
 
+
 def find_global_param_value(gp, param_name):
     ''' Return the value of a global parameter
 
@@ -224,10 +230,10 @@ def find_global_param_value(gp, param_name):
     '''
     for line in iter(gp.splitlines()):
         line_list = line.split()
-        if line_list==[]:
+        if line_list == []:
             continue
         key = line_list[0]
-        if key==param_name:
+        if key == param_name:
             return line_list[1]
 
 if __name__ == '__main__':

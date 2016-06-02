@@ -124,7 +124,7 @@ def setup_subdirs_restart_test(result_basedir, state_basedir, run_periods):
 # -------------------------------------------------------------------- #
 
 # -------------------------------------------------------------------- #
-def setup_subdirs_and_fill_in_global_param_restart_test(s, run_periods, driver, result_basedir, state_basedir, test_data_dir):
+def setup_subdirs_and_fill_in_global_param_restart_test(s, run_periods, driver, result_basedir, state_basedir, test_data_dir, test_dir):
     ''' Fill in global parameter options for multiple runs for restart testing
 
     Parameters
@@ -141,6 +141,8 @@ def setup_subdirs_and_fill_in_global_param_restart_test(s, run_periods, driver, 
         Base directory of output state results; running periods are subdirectories under the base directory
     test_data_dir: <str>
         Base directory of test data
+    test_dir: <str>
+        Directory of the testing scripts
 
     Returns
     ----------
@@ -172,6 +174,7 @@ def setup_subdirs_and_fill_in_global_param_restart_test(s, run_periods, driver, 
 
         # Fill in global parameter options
         list_global_param.append(s.safe_substitute(
+                test_dir=test_dir,
                 test_data_dir=test_data_dir,
                 result_dir=result_dir,
                 state_dir=state_dir,
@@ -362,7 +365,7 @@ def check_exact_restart_states(state_basedir, driver, run_periods, statesec, sta
         # If ASCII state file, check if almost the same
         if state_format=='ASCII':
             states_diff = states - states_full_run
-            if np.absolute(states_diff).max() > pow(10, -6):
+            if np.absolute(states_diff).max() > pow(10, -3):
                 raise VICTestError('Restart causes inexact state outputs!')
             else:
                 return

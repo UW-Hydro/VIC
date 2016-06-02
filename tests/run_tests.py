@@ -324,10 +324,12 @@ def run_system(config_file, vic_exe, test_data_dir, out_dir, driver):
             # Set up subdirectories and fill in global parameter options 
             # for restart testing
             list_global_param = setup_subdirs_and_fill_in_global_param_restart_test(
-                s, run_periods, driver, dirs['results'], dirs['state'], test_data_dir)
+                    s, run_periods, driver, dirs['results'], dirs['state'],
+                    test_data_dir, test_dir)
         #--- Else, single run ---#
         else:
-            global_param = s.safe_substitute(test_data_dir=test_data_dir,
+            global_param = s.safe_substitute(test_dir=test_dir,
+                                             test_data_dir=test_data_dir,
                                              result_dir=dirs['results'],
                                              state_dir=dirs['state'])
 
@@ -337,7 +339,7 @@ def run_system(config_file, vic_exe, test_data_dir, out_dir, driver):
             replacements = test_dict['options']
         else:
             replacements = OrderedDict()
-        #--- if STATE_FORMAT is specified, te the specified value (instead of 
+        #--- if STATE_FORMAT is specified, then the specified value (instead of 
         # the one in the global template file) ---#
         if 'STATE_FORMAT' in replacements:
             state_format = replacements['STATE_FORMAT']
@@ -394,7 +396,6 @@ def run_system(config_file, vic_exe, test_data_dir, out_dir, driver):
                 check_returncode(returncode, test_dict.pop('expected_retval', 0))
 
             test_complete = True
-            returncode = 0
 
             # check output files (different tests depending on driver)
             if test_dict['check']:

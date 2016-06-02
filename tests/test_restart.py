@@ -253,15 +253,9 @@ def check_exact_restart_fluxes(result_basedir, driver, run_periods):
                                                          before=start_date,
                                                          after=end_date)
                 # Compare split run fluxes with full run
-                df_diff = df - df_full_run_split_period
-                if np.absolute(df_diff).max().max() > pow(10, -6):
-                    raise VICTestError('Restart causes inexact flux outputs '
-                                       'for running period {} - {} at grid cell {}!'.
-                                format(start_date.strftime('%Y%m%d'),
-                                       end_date.strftime('%Y%m%d'),
-                                       flux_basename))
-                else:
-                    continue
+                np.testing.assert_almost_equal(df.values,
+                                               df_full_run_split_period.values,
+                                               decimal=6)
         elif driver=='image':
             # Read in flux data
             if len(glob.glob(os.path.join(result_dir, '*.nc')))>1:
@@ -364,11 +358,7 @@ def check_exact_restart_states(state_basedir, driver, run_periods, statesec, sta
     if driver=='classic':
         # If ASCII state file, check if almost the same
         if state_format=='ASCII':
-            states_diff = states - states_full_run
-            if np.absolute(states_diff).max() > pow(10, -3):
-                raise VICTestError('Restart causes inexact state outputs!')
-            else:
-                return
+            np.testing.assert_almost_equal(states, states_full_run, decimal=3)
         # If BINARY state file, check if exactly the same
         elif state_format=='BINARY':
             if states!=states_full_run:

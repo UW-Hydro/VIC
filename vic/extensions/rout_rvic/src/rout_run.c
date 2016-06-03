@@ -48,7 +48,8 @@ rout_run(void)
     }
 
     // Equivalent to Fortran 90 cshift function, in python: (from variables.py) self.ring[tracer] = np.roll(self.ring[tracer], -1, axis=0)
-    cshift(rout.ring, rout.rout_param.nTimesteps, rout.rout_param.nOutlets, 0,
+    cshift(rout.ring, rout.rout_param.full_time_length,
+           rout.rout_param.nOutlets, 0,
            1);
 
     /*Loop through all sources*/
@@ -61,7 +62,7 @@ rout_run(void)
         // jTimestep is the position in the ring
         for (iTimestep = 0; iTimestep < rout.rout_param.nTimesteps;
              iTimestep++) {
-            jTimestep = iTimestep + offset; // need to be corrected (buffer overflow)
+            jTimestep = iTimestep + offset;
 
             // index locations
             iRing = (jTimestep * rout.rout_param.nOutlets) + iOutlet;

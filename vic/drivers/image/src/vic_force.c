@@ -349,7 +349,6 @@ vic_force(void)
             // precipitation in mm/period
             atmos[i].prec[j] *= global_param.snow_dt;
             // pressure in Pa
-            // atmos[i].pressure[j] = atmos[i].pressure[j] *1000;
             // vapor pressure in Pa (we read specific humidity in kg/kg)
             atmos[i].vp[j] = q_to_vp(atmos[i].vp[j], atmos[i].pressure[j]);
             // vapor pressure deficit in Pa

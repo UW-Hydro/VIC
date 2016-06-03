@@ -72,6 +72,7 @@ get_global_param_rout(FILE *gp)
             *************************************/
             if (strcasecmp("ROUT_PARAM", optstr) == 0) {
                 sscanf(cmdstr, "%*s %s", rout.param_filename);
+                break;
             }
         }
         fgets(cmdstr, MAXSTRING, gp);

@@ -155,12 +155,14 @@ This is a major update from VIC 4. The VIC 5.0.0 release aims to have nearly ide
 
 	Previously, if the soil thermal damping depth was shallower than the bottom of the deepest soil layer, and `FROZEN_SOIL==TRUE`, VIC would abort when estimating layer ice contents because it could not estimate a layer temperature if the thermal nodes did not completely span the layer.  Now, a layer temperature is estimated even when thermal nodes do not completely span the layer, and the error no longer occurs.
 
-3. Fix related to exact restart ([GH#481](https://github.com/UW-Hydro/VIC/pull/481), [GH#507](https://github.com/UW-Hydro/VIC/pull/507))
+3. Fix related to exact restart ([GH#481](https://github.com/UW-Hydro/VIC/pull/481), [GH#507](https://github.com/UW-Hydro/VIC/pull/507), [GH#509](https://github.com/UW-Hydro/VIC/pull/509))
 
 	Previously, VIC did not produce the same results (fluxes and states) if a simulation is separated into multiple shorter-period runs by saving the state variables and restarting. This was due to: 1) the MTCLIM algorithm resulted in slightly different sub-daily meteorological variable values for different length of forcing (MTCLIM is deprecated in the current version); 2) a few bugs resulting in inexact restart. The following bugs have been fixed:
 
 	- The prognostic state variable `energy.Tfoliage` (foliage temperature) is now saved to the state file
 	- Two flux variables `energy.LongUnderOut` and `energy.snow_flux` are now saved to the state file. **TODO:** this is a temporary solution to ensure exact restart. A better way of handling the two flux variables needs to be done in the future (see [GH#479](https://github.com/UW-Hydro/VIC/issues/479))
+	- The calculation of layer ice content and layer temperatures are now done in two separate functions (before, these two variables are computed together in a single function `estimate_layer_ice_content` or `estimate_layer_ice_content_quick_flux`). When initial state file is given, layer ice content (as a diagnostic state variable) is directly read from the state file, while layer temperature is derived (as a prognostic state variable). This modification ensures exact restart when `FROZEN_SOIL=TRUE` (see [GH#509](https://github.com/UW-Hydro/VIC/pull/509))
+
 
 4. Fix for binary state file I/O ([GH#487](https://github.com/UW-Hydro/VIC/pull/487))
 

@@ -1056,13 +1056,11 @@ initialize_save_data(all_vars_struct   *all_vars,
                      double           **out_data,
                      save_data_struct  *save_data)
 {
-
     // Calling put data will populate the save data storage terms
     put_data(all_vars, atmos, soil_con, veg_con, veg_lib, lake_con,
              out_data, save_data);
 
     zero_output_list(out_data);
-
 }
 
 /******************************************************************************

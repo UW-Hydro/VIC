@@ -30,20 +30,19 @@
  * @brief    Setup netCDF output variables.
  *****************************************************************************/
 void
-set_nc_var_info(unsigned int        varid,
-                unsigned short int  dtype,
-                nc_file_struct     *nc_hist_file,
-                nc_var_struct      *nc_var)
+set_nc_var_info(unsigned int       varid,
+                unsigned short int dtype,
+                nc_file_struct    *nc_hist_file,
+                nc_var_struct     *nc_var)
 {
-    size_t               i;
-
+    size_t i;
 
     // set datatype
     nc_var->nc_type = get_nc_dtype(dtype);
 
     for (i = 0; i < MAXDIMS; i++) {
         nc_var->nc_dimids[i] = -1;
-        nc_var->nc_counts[i] = -1;
+        nc_var->nc_counts[i] = 0;
     }
 
     // Set the number of dimensions and the count sizes
@@ -114,6 +113,12 @@ set_nc_var_dimids(unsigned int    varid,
                   nc_file_struct *nc_hist_file,
                   nc_var_struct  *nc_var)
 {
+    size_t i;
+
+    for (i = 0; i < MAXDIMS; i++) {
+        nc_var->nc_dimids[i] = -1;
+    }
+
     // Set the non-default ones
     switch (varid) {
     case OUT_FDEPTH:

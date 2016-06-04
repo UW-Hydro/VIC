@@ -61,7 +61,6 @@ initialize_mpi(void)
     create_MPI_stream_struct_type(&mpi_stream_struct_type);
     create_MPI_option_struct_type(&mpi_option_struct_type);
     create_MPI_param_struct_type(&mpi_param_struct_type);
-
 }
 
 /******************************************************************************
@@ -1621,9 +1620,7 @@ create_MPI_alarm_struct_type(MPI_Datatype *mpi_type)
     free(offsets);
     free(mpi_types);
     MPI_Type_free(&mpi_dmy_type);
-
 }
-
 
 /******************************************************************************
  * @brief   Create an MPI_Datatype that represents the stream_struct
@@ -1645,7 +1642,7 @@ create_MPI_stream_struct_type(MPI_Datatype *mpi_type)
     size_t        i;
     MPI_Aint     *offsets;
     MPI_Datatype *mpi_types;
-    MPI_Datatype mpi_alarm_type;
+    MPI_Datatype  mpi_alarm_type;
 
     // nitems has to equal the number of elements in global_param_struct
     nitems = 5;
@@ -1715,7 +1712,6 @@ create_MPI_stream_struct_type(MPI_Datatype *mpi_type)
     free(offsets);
     free(mpi_types);
     MPI_Type_free(&mpi_alarm_type);
-
 }
 
 /******************************************************************************
@@ -1840,8 +1836,8 @@ mpi_map_decomp_domain(size_t   ncells,
  *          master node
  *****************************************************************************/
 void
-gather_put_nc_field_double(int nc_id,
-                           int var_id,
+gather_put_nc_field_double(int     nc_id,
+                           int     var_id,
                            double  fillval,
                            size_t *start,
                            size_t *count,
@@ -1901,9 +1897,7 @@ gather_put_nc_field_double(int nc_id,
 
         // write to file
         status = nc_put_vara_double(nc_id, var_id, start, count, dvar);
-        if (status != NC_NOERR) {
-            log_err("Error writing values");
-        }
+        check_nc_status(status, "Error writing values");
         // cleanup
         free(dvar);
         free(dvar_gathered);
@@ -1917,12 +1911,12 @@ gather_put_nc_field_double(int nc_id,
  *          master node
  *****************************************************************************/
 void
-gather_put_nc_field_float(int nc_id,
-                          int var_id,
-                          float  fillval,
+gather_put_nc_field_float(int     nc_id,
+                          int     var_id,
+                          float   fillval,
                           size_t *start,
                           size_t *count,
-                          float *var)
+                          float  *var)
 {
     extern MPI_Comm      MPI_COMM_VIC;
     extern domain_struct global_domain;
@@ -1933,9 +1927,9 @@ gather_put_nc_field_float(int nc_id,
     extern size_t       *filter_active_cells;
     extern size_t       *mpi_map_mapping_array;
     int                  status;
-    float              *fvar = NULL;
-    float              *fvar_gathered = NULL;
-    float              *fvar_remapped = NULL;
+    float               *fvar = NULL;
+    float               *fvar_gathered = NULL;
+    float               *fvar_remapped = NULL;
     size_t               grid_size;
     size_t               i;
 
@@ -1978,9 +1972,8 @@ gather_put_nc_field_float(int nc_id,
 
         // write to file
         status = nc_put_vara_float(nc_id, var_id, start, count, fvar);
-        if (status != NC_NOERR) {
-            log_err("Error writing values");
-        }
+        check_nc_status(status, "Error writing values");
+
         // cleanup
         free(fvar);
         free(fvar_gathered);
@@ -1994,12 +1987,12 @@ gather_put_nc_field_float(int nc_id,
  *          master node
  *****************************************************************************/
 void
-gather_put_nc_field_int(int nc_id,
-                        int var_id,
-                        int fillval,
+gather_put_nc_field_int(int     nc_id,
+                        int     var_id,
+                        int     fillval,
                         size_t *start,
                         size_t *count,
-                        int *var)
+                        int    *var)
 {
     extern MPI_Comm      MPI_COMM_VIC;
     extern domain_struct global_domain;
@@ -2058,9 +2051,8 @@ gather_put_nc_field_int(int nc_id,
             ivar_remapped, ivar);
         // write to file
         status = nc_put_vara_int(nc_id, var_id, start, count, ivar);
-        if (status != NC_NOERR) {
-            log_err("Error writing values");
-        }
+        check_nc_status(status, "Error writing values");
+
         // cleanup
         free(ivar);
         free(ivar_gathered);
@@ -2075,11 +2067,11 @@ gather_put_nc_field_int(int nc_id,
  *****************************************************************************/
 void
 gather_put_nc_field_short(int        nc_id,
-                         int        var_id,
-                         short int  fillval,
-                         size_t    *start,
-                         size_t    *count,
-                         short int *var)
+                          int        var_id,
+                          short int  fillval,
+                          size_t    *start,
+                          size_t    *count,
+                          short int *var)
 {
     extern MPI_Comm      MPI_COMM_VIC;
     extern domain_struct global_domain;
@@ -2138,9 +2130,8 @@ gather_put_nc_field_short(int        nc_id,
             filter_active_cells, svar_remapped, svar);
         // write to file
         status = nc_put_vara_short(nc_id, var_id, start, count, svar);
-        if (status != NC_NOERR) {
-            log_err("Error writing values");
-        }
+        check_nc_status(status, "Error writing values");
+
         // cleanup
         free(svar);
         free(svar_gathered);
@@ -2170,9 +2161,9 @@ gather_put_nc_field_schar(int     nc_id,
     extern size_t       *filter_active_cells;
     extern size_t       *mpi_map_mapping_array;
     int                  status;
-    signed char           *cvar = NULL;
-    signed char           *cvar_gathered = NULL;
-    signed char           *cvar_remapped = NULL;
+    signed char         *cvar = NULL;
+    signed char         *cvar_gathered = NULL;
+    signed char         *cvar_remapped = NULL;
     size_t               grid_size;
     size_t               i;
 
@@ -2218,9 +2209,8 @@ gather_put_nc_field_schar(int     nc_id,
             filter_active_cells, cvar_remapped, cvar);
         // write to file
         status = nc_put_vara_schar(nc_id, var_id, start, count, cvar);
-        if (status != NC_NOERR) {
-            log_err("Error writing values");
-        }
+        check_nc_status(status, "Error writing values");
+
         // cleanup
         free(cvar);
         free(cvar_gathered);

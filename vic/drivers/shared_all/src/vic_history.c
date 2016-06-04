@@ -34,10 +34,10 @@ create_outdata(size_t ngridcells)
 {
     extern metadata_struct out_metadata[N_OUTVAR_TYPES];
 
-    size_t                     i;
-    size_t                     j;
-    size_t                     k;
-    double                  ***out_data;
+    size_t                 i;
+    size_t                 j;
+    size_t                 k;
+    double              ***out_data;
 
     out_data = calloc(ngridcells, sizeof(*out_data));
     if (out_data == NULL) {
@@ -126,9 +126,9 @@ setup_stream(stream_struct *stream,
 void
 validate_streams(stream_struct **streams)
 {
-    extern option_struct       options;
+    extern option_struct options;
 
-    size_t                     streamnum;
+    size_t               streamnum;
 
     // validate stream settings
     for (streamnum = 0; streamnum < options.Noutstreams; streamnum++) {
@@ -161,6 +161,7 @@ validate_streams(stream_struct **streams)
         }
     }
 }
+
 /******************************************************************************
  * @brief   This routine allocates memory for the stream aggdata array.  The
             shape of this array is [ngridcells, nvars, nelems, nbins].
@@ -170,10 +171,10 @@ alloc_aggdata(stream_struct *stream)
 {
     extern metadata_struct out_metadata[N_OUTVAR_TYPES];
 
-    size_t                     i;
-    size_t                     j;
-    size_t                     k;
-    size_t                     nelem;
+    size_t                 i;
+    size_t                 j;
+    size_t                 k;
+    size_t                 nelem;
 
     stream->aggdata = calloc(stream->ngridcells, sizeof(*(stream->aggdata)));
     if (stream->aggdata == NULL) {
@@ -213,10 +214,10 @@ reset_stream(stream_struct *stream,
 {
     extern metadata_struct out_metadata[N_OUTVAR_TYPES];
 
-    size_t                     i;
-    size_t                     j;
-    size_t                     k;
-    size_t                     varid;
+    size_t                 i;
+    size_t                 j;
+    size_t                 k;
+    size_t                 varid;
 
     // Reset alarm to next agg period
     reset_alarm(&(stream->agg_alarm),
@@ -349,8 +350,8 @@ set_output_var(stream_struct     *stream,
 {
     extern metadata_struct out_metadata[N_OUTVAR_TYPES];
 
-    int                        varid;
-    int                        found = false;
+    int                    varid;
+    int                    found = false;
 
     // Find the output varid by looping through out_metadata, comparing to varname
     for (varid = 0; varid < N_OUTVAR_TYPES; varid++) {
@@ -407,11 +408,11 @@ free_streams(stream_struct **streams)
     extern option_struct   options;
     extern metadata_struct out_metadata[N_OUTVAR_TYPES];
 
-    size_t                     streamnum;
-    size_t                     i;
-    size_t                     j;
-    size_t                     k;
-    size_t                     varid;
+    size_t                 streamnum;
+    size_t                 i;
+    size_t                 j;
+    size_t                 k;
+    size_t                 varid;
 
     // free output streams
     for (streamnum = 0; streamnum < options.Noutstreams; streamnum++) {
@@ -438,7 +439,6 @@ free_streams(stream_struct **streams)
         free((*streams)[streamnum].aggtype);
     }
     free(*streams);
-
 }
 
 /******************************************************************************
@@ -448,8 +448,8 @@ void
 free_out_data(size_t    ngridcells,
               double ***out_data)
 {
-    size_t                     i;
-    size_t                     j;
+    size_t i;
+    size_t j;
 
 
     if (out_data == NULL) {

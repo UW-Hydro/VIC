@@ -66,8 +66,6 @@ vic_image_run(dmy_struct *dmy_current)
                  veg_lib[i], &lake_con, out_data[i], &(save_data[i]));
     }
     for (i = 0; i < options.Noutstreams; i++) {
-        debug("Agging data for stream %zu", i);
         agg_stream_data(&(output_streams[i]), dmy_current, out_data);
-        debug("Done Agging data for stream %zu", i);
     }
 }

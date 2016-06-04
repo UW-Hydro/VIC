@@ -32,9 +32,9 @@
 void
 set_output_met_data_info()
 {
-    size_t                     v;
+    size_t                 v;
 
-    extern option_struct       options;
+    extern option_struct   options;
     extern metadata_struct out_metadata[N_OUTVAR_TYPES];
 
     // Build the list of supported output variables

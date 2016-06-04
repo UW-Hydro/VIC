@@ -545,7 +545,7 @@ print_option(option_struct *option)
  * @brief    Print out data structure.
  *****************************************************************************/
 void
-print_out_data(double             **out_data,
+print_out_data(double         **out_data,
                metadata_struct *metadata)
 {
     size_t i;
@@ -569,7 +569,7 @@ print_out_data(double             **out_data,
  * @brief    Print stream_file_struct.
  *****************************************************************************/
 void
-print_stream(stream_struct       *stream,
+print_stream(stream_struct   *stream,
              metadata_struct *metadata)
 {
     size_t       i;
@@ -585,7 +585,8 @@ print_stream(stream_struct       *stream,
     fprintf(LOG_DEST, "\tngridcells: %zu\n", stream->ngridcells);
     fprintf(LOG_DEST, "\tagg_alarm:\n    ");
     print_alarm(&(stream->agg_alarm));
-    fprintf(LOG_DEST, "\t# \tVARID        \tVARNAME \tTYPE \tMULT \tFORMAT        \tAGGTYPE\n");
+    fprintf(LOG_DEST,
+            "\t# \tVARID        \tVARNAME \tTYPE \tMULT \tFORMAT        \tAGGTYPE\n");
     for (i = 0; i < stream->nvars; i++) {
         varid = stream->varid[i];
         fprintf(LOG_DEST, "\t%zu \t%u \t%20s \t%hu \t%f \t%10s \t%hu\n",
@@ -610,7 +611,8 @@ print_alarm(alarm_struct *alarm)
     fprintf(LOG_DEST, "\tnext: %d\n", alarm->next);
     fprintf(LOG_DEST, "\tfreq: %u\n", alarm->freq);
     fprintf(LOG_DEST, "\tn: %d\n", alarm->n);
-    fprintf(LOG_DEST, "\tis_subdaily: %s\n", alarm->is_subdaily ? "true" : "false");
+    fprintf(LOG_DEST, "\tis_subdaily: %s\n",
+            alarm->is_subdaily ? "true" : "false");
     fprintf(LOG_DEST, "\tdate: \n    ");
     print_dmy(&(alarm->date));
 
@@ -621,7 +623,8 @@ print_alarm(alarm_struct *alarm)
  * @brief    Print stream_file_struct.
  *****************************************************************************/
 void
-print_out_metadata(metadata_struct *metadata, size_t nvars)
+print_out_metadata(metadata_struct *metadata,
+                   size_t           nvars)
 {
     size_t i;
 

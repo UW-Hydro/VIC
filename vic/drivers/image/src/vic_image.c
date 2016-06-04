@@ -118,7 +118,6 @@ main(int    argc,
         // read forcing data
         vic_force();
 
-        debug("running vic_image_run");
         // run vic over the domain
         vic_image_run(&(dmy[current]));
         debug("done with vic_image_run");

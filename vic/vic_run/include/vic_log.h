@@ -129,9 +129,10 @@ void setup_logging(int id);
                                           exit(EXIT_FAILURE); }
 
 #define check(A, M, ...) if (!(A)) {log_err(M, ## __VA_ARGS__); errno = 0; exit( \
-                                        1); }
+                                        EXIT_FAILURE); }
 
-#define sentinel(M, ...)  {log_err(M, ## __VA_ARGS__); errno = 0; exit(EXIT_FAILURE); }
+#define sentinel(M, ...)  {log_err(M, ## __VA_ARGS__); errno = 0; exit( \
+                               EXIT_FAILURE); }
 
 #define check_mem(A) check((A), "Out of memory.")
 

@@ -36,29 +36,29 @@ parse_output_info(FILE           *gp,
                   size_t          ngridcells,
                   dmy_struct     *dmy_current)
 {
-    extern option_struct       options;
+    extern option_struct options;
 
-    char                       cmdstr[MAXSTRING];
-    char                       optstr[MAXSTRING];
-    char                       flgstr[MAXSTRING];
-    short int                  streamnum;
-    char                       varname[MAXSTRING];
-    int                        outvarnum;
-    char                       freq_type_str[MAXSTRING];
-    char                       freq_value_str[MAXSTRING];
-    char                       format[MAXSTRING];
-    char                       typestr[MAXSTRING];
-    int                        type;
-    char                       multstr[MAXSTRING];
-    char                       aggstr[MAXSTRING];
-    double                     mult;
-    size_t                     nstreams;
-    size_t                     nvars;
-    unsigned short int         freq;
-    int                        freq_n;
-    dmy_struct                 freq_dmy;
-    unsigned short int         agg_type;
-    int                        found;
+    char                 cmdstr[MAXSTRING];
+    char                 optstr[MAXSTRING];
+    char                 flgstr[MAXSTRING];
+    short int            streamnum;
+    char                 varname[MAXSTRING];
+    int                  outvarnum;
+    char                 freq_type_str[MAXSTRING];
+    char                 freq_value_str[MAXSTRING];
+    char                 format[MAXSTRING];
+    char                 typestr[MAXSTRING];
+    int                  type;
+    char                 multstr[MAXSTRING];
+    char                 aggstr[MAXSTRING];
+    double               mult;
+    size_t               nstreams;
+    size_t               nvars;
+    unsigned short int   freq;
+    int                  freq_n;
+    dmy_struct           freq_dmy;
+    unsigned short int   agg_type;
+    int                  found;
 
     /** Read through global control file to find output info **/
 
@@ -211,7 +211,8 @@ parse_output_info(FILE           *gp,
                         (*streams)[streamnum].file_format = NETCDF3_CLASSIC;
                     }
                     else if (strcasecmp("NETCDF3_64BIT_OFFSET", flgstr) == 0) {
-                        (*streams)[streamnum].file_format = NETCDF3_64BIT_OFFSET;
+                        (*streams)[streamnum].file_format =
+                            NETCDF3_64BIT_OFFSET;
                     }
                     else if (strcasecmp("NETCDF4_CLASSIC", flgstr) == 0) {
                         (*streams)[streamnum].file_format = NETCDF4_CLASSIC;
@@ -221,7 +222,8 @@ parse_output_info(FILE           *gp,
                         (*streams)[streamnum].file_format = NETCDF4;
                     }
                     else {
-                        log_err("Image driver file format must be a valid NETCDF format");
+                        log_err(
+                            "Image driver file format must be a valid NETCDF format");
                     }
                 }
                 else if (strcasecmp("OUTVAR", optstr) == 0) {

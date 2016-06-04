@@ -716,7 +716,8 @@ void set_output_var(stream_struct *stream, char *varname, size_t varnum,
 unsigned int get_default_outvar_aggtype(unsigned int varid);
 void set_alarm(dmy_struct *dmy_current, unsigned int freq, void*value,
                alarm_struct *alarm);
-void set_output_defaults(stream_struct **output_streams, size_t ngridcells, dmy_struct *dmy_current);
+void set_output_defaults(stream_struct **output_streams, size_t ngridcells,
+                         dmy_struct *dmy_current);
 void set_output_met_data_info();
 void setup_stream(stream_struct *stream, size_t nvars, size_t ngridcells);
 void soil_moisture_from_water_table(soil_con_struct *soil_con, size_t nlayers);

@@ -36,17 +36,17 @@ write_data(stream_struct *stream,
     extern option_struct   options;
     extern metadata_struct out_metadata[N_OUTVAR_TYPES];
 
-    size_t                     n;
-    size_t                     var_idx;
-    size_t                     elem_idx;
-    size_t                     ptr_idx;
-    unsigned int               varid;
-    char                      *tmp_cptr;
-    short int                 *tmp_siptr;
-    unsigned short int        *tmp_usiptr;
-    int                       *tmp_iptr;
-    float                     *tmp_fptr;
-    double                    *tmp_dptr;
+    size_t                 n;
+    size_t                 var_idx;
+    size_t                 elem_idx;
+    size_t                 ptr_idx;
+    unsigned int           varid;
+    char                  *tmp_cptr;
+    short int             *tmp_siptr;
+    unsigned short int    *tmp_usiptr;
+    int                   *tmp_iptr;
+    float                 *tmp_fptr;
+    double                *tmp_dptr;
 
     if (stream->file_format == BINARY) {
         n = N_OUTVAR_TYPES * options.Nlayer * options.SNOW_BAND;

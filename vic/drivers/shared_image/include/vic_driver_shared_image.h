@@ -28,6 +28,7 @@
 #define VIC_DRIVER_SHARED_IMAGE_H
 
 #include <vic_driver_shared_all.h>
+#include <vic_nc_log.h>
 #include <vic_mpi.h>
 
 #include <netcdf.h>
@@ -93,9 +94,9 @@ typedef struct {
  * @brief    Structure for netcdf variable information
  *****************************************************************************/
 typedef struct {
-    int    nc_varid;                /**< variable netcdf id */
-    int    nc_type;                 /**< variable netcdf type */
-    int    nc_dimids[MAXDIMS];      /**< ids of dimensions */
+    int nc_varid;                   /**< variable netcdf id */
+    int nc_type;                    /**< variable netcdf type */
+    int nc_dimids[MAXDIMS];         /**< ids of dimensions */
     size_t nc_counts[MAXDIMS];      /**< size of dimid */
     size_t nc_dims;                 /**< number of dimensions */
 } nc_var_struct;
@@ -189,8 +190,8 @@ void initialize_nc_file(nc_file_struct *nc_file, size_t nvars,
                         unsigned int *varids, unsigned short int *dtypes);
 void initialize_soil_con(soil_con_struct *soil_con);
 void initialize_veg_con(veg_con_struct *veg_con);
-void parse_output_info(FILE *gp, stream_struct **output_streams, size_t ngridcells,
-                       dmy_struct *dmy_current);
+void parse_output_info(FILE *gp, stream_struct **output_streams,
+                       size_t ngridcells, dmy_struct *dmy_current);
 void print_atmos_data(atmos_data_struct *atmos);
 void print_domain(domain_struct *domain, bool print_loc);
 void print_location(location_struct *location);
@@ -201,7 +202,8 @@ void put_nc_attr(int nc_id, int var_id, const char *name, const char *value);
 void set_force_type(char *cmdstr, int file_num, int *field);
 void set_global_nc_attributes(int ncid, unsigned short int file_type);
 void set_state_meta_data_info();
-void set_nc_var_dimids(unsigned int varid, nc_file_struct *nc_hist_file, nc_var_struct *nc_var);
+void set_nc_var_dimids(unsigned int varid, nc_file_struct *nc_hist_file,
+                       nc_var_struct *nc_var);
 void set_nc_var_info(unsigned int varid, unsigned short int dtype,
                      nc_file_struct *nc_hist_file, nc_var_struct *nc_var);
 void set_nc_state_file_info(nc_file_struct *nc_state_file);

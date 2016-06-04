@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 '''VIC testing command line interface'''
 
+from __future__ import print_function
 import os
 import sys
 import glob
@@ -323,7 +324,7 @@ def run_system(config_file, vic_exe, test_data_dir, out_dir, driver):
                                                    'STATE_FORMAT')
         # (2) Prepare running periods and initial state file info for restart
         # test
-        if 'restart' in test_dict:
+        if 'exact_restart' in test_dict['check']:
             run_periods = prepare_restart_run_periods(
                                 test_dict['restart'],
                                 dirs['state'], statesec)
@@ -333,14 +334,14 @@ def run_system(config_file, vic_exe, test_data_dir, out_dir, driver):
 
         # fill in global parameter options
         # --- if restart test, multiple runs --- #
-        if 'restart' in test_dict:
+        if 'exact_restart' in test_dict['check']:
             # Set up subdirectories and fill in global parameter options
             # for restart testing
             list_global_param =\
                 setup_subdirs_and_fill_in_global_param_restart_test(
                     s, run_periods, driver, dirs['results'], dirs['state'],
                     test_data_dir)
-        # --- Else, single run --- #
+        # else, single run
         else:
             global_param = s.safe_substitute(test_data_dir=test_data_dir,
                                              result_dir=dirs['results'],
@@ -357,18 +358,18 @@ def run_system(config_file, vic_exe, test_data_dir, out_dir, driver):
         if 'STATE_FORMAT' in replacements:
             state_format = replacements['STATE_FORMAT']
         # --- replace global options --- #
-        if 'restart' in test_dict:
+        if 'exact_restart' in test_dict['check']:
             for j, gp in enumerate(list_global_param):
-                # save a copy of replacements for the next flobal file
+                # save a copy of replacements for the next global file
                 replacements_cp = replacements.copy()
-                #
+                # replace global options for this global file
                 list_global_param[j] = replace_global_values(gp, replacements)
                 replacements = replacements_cp
         else:
             global_param = replace_global_values(global_param, replacements)
 
         # write global parameter file
-        if 'restart' in test_dict:
+        if 'exact_restart' in test_dict['check']:
             list_test_global_file = []
             for j, gp in enumerate(list_global_param):
                 test_global_file = os.path.join(
@@ -399,7 +400,7 @@ def run_system(config_file, vic_exe, test_data_dir, out_dir, driver):
         error_message = ''
 
         try:
-            if 'restart' in test_dict:
+            if 'exact_restart' in test_dict['check']:
                 for j, test_global_file in enumerate(list_test_global_file):
                     returncode = vic_exe.run(test_global_file,
                                              logdir=dirs['logs'])
@@ -416,7 +417,7 @@ def run_system(config_file, vic_exe, test_data_dir, out_dir, driver):
             test_complete = True
 
             # check output files (different tests depending on driver)
-            if test_dict['check']:
+            if 'check' in test_dict:
 
                 # Check that the simulation completed for all grid cells
                 if 'complete' in test_dict['check']:

@@ -9,7 +9,6 @@ import xarray as xr
 from test_utils import read_vic_ascii
 
 
-# -------------------------------------------------------------------- #
 def prepare_restart_run_periods(restart_dict, state_basedir, statesec):
     ''' For restart tests, read full running period and splitting dates into
     datetime objects
@@ -39,19 +38,20 @@ def prepare_restart_run_periods(restart_dict, state_basedir, statesec):
     '''
 
     # --- Read in full running period --- #
-    start_date = datetime.datetime(restart_dict['start_date'][0],
-                                   restart_dict['start_date'][1],
-                                   restart_dict['start_date'][2])
-    end_date = datetime.datetime(restart_dict['end_date'][0],
-                                 restart_dict['end_date'][1],
-                                 restart_dict['end_date'][2])
+    start_date = datetime.datetime.strptime(restart_dict['start_date'],
+                                            '%Y-%m-%d')
+    end_date = datetime.datetime.strptime(restart_dict['end_date'],
+                                          '%Y-%m-%d')
     # --- Identify each of the splitted running period --- #
-    list_split_dates = []
-    for i, split in enumerate(restart_dict['split_dates']):
-        list_split_dates.append(
-            datetime.datetime(restart_dict['split_dates'][split][0],
-                              restart_dict['split_dates'][split][1],
-                              restart_dict['split_dates'][split][2]))
+    if not isinstance(restart_dict['split_dates'], list):
+        list_split_dates = [datetime.datetime.strptime(
+                                        restart_dict['split_dates'],
+                                        '%Y-%m-%d')]
+    else:
+        list_split_dates = datetime.datetime.strptime(
+                                        restart_dict['split_dates'],
+                                        '%Y-%m-%d')
+
     # --- Prepare running periods --- #
     # run_periods is a list of running periods, including the full-period run,
     # and all splitted runs in order. Each element of run_period is a
@@ -71,7 +71,7 @@ def prepare_restart_run_periods(restart_dict, state_basedir, statesec):
     run_periods.append(d)
     # Loop over each of the rest splitted periods
     for i in range(len(list_split_dates)-1):
-        d = dict(start_date=list_split_dates[i] + dt.timedelta(days=1),
+        d = dict(start_date=list_split_dates[i] + datetime.timedelta(days=1),
                  end_date=list_split_dates[i+1])
         d['init_state'] = os.path.join(
                 state_basedir,
@@ -96,10 +96,8 @@ def prepare_restart_run_periods(restart_dict, state_basedir, statesec):
     run_periods.append(d)
 
     return run_periods
-# -------------------------------------------------------------------- #
 
 
-# -------------------------------------------------------------------- #
 def setup_subdirs_restart_test(result_basedir, state_basedir, run_periods):
     ''' Set up subdirectories for multiple runs for restart testing
     Parameters
@@ -112,10 +110,6 @@ def setup_subdirs_restart_test(result_basedir, state_basedir, run_periods):
         subdirectories under the base directory
     run_periods: <list>
         A list of running periods. Return from prepare_restart_run_periods()
-
-    Returns
-    ----------
-    None
     '''
 
     for j, run_period in enumerate(run_periods):
@@ -132,10 +126,8 @@ def setup_subdirs_restart_test(result_basedir, state_basedir, run_periods):
                                run_end_date.strftime("%Y%m%d")))
         os.makedirs(result_dir, exist_ok=True)
         os.makedirs(state_dir, exist_ok=True)
-# -------------------------------------------------------------------- #
 
 
-# -------------------------------------------------------------------- #
 def setup_subdirs_and_fill_in_global_param_restart_test(
         s, run_periods, driver, result_basedir, state_basedir, test_data_dir):
     ''' Fill in global parameter options for multiple runs for restart testing
@@ -159,6 +151,8 @@ def setup_subdirs_and_fill_in_global_param_restart_test(
 
     Returns
     ----------
+    list_global_param: <list>
+        A list of global parameter strings to be run with parameters filled in
     '''
 
     list_global_param = []
@@ -202,10 +196,8 @@ def setup_subdirs_and_fill_in_global_param_restart_test(
                 statemonth=run_end_date.month,
                 stateday=run_end_date.day))
     return(list_global_param)
-# -------------------------------------------------------------------- #
 
 
-# -------------------------------------------------------------------- #
 def check_exact_restart_fluxes(result_basedir, driver, run_periods):
     ''' Checks whether all the fluxes are the same w/ or w/o restart
 
@@ -219,9 +211,6 @@ def check_exact_restart_fluxes(result_basedir, driver, run_periods):
     run_periods: <list>
         A list of running periods. Return from prepare_restart_run_periods()
 
-    Returns
-    ----------
-    None
     '''
 
     # --- Extract full run period --- #
@@ -287,21 +276,10 @@ def check_exact_restart_fluxes(result_basedir, driver, run_periods):
                         end_date.strftime('%Y%m%d')))
             # Compare split run fluxes with full run
             for var in ds_full_run.data_vars:
-                if np.absolute(ds[var] - ds_full_run_split_period[var]).\
-                   max().values > 0.0:
-                    raise VICTestError('Restart causes inexact flux outputs '
-                                       '(variable {}) for running period '
-                                       '{} - {} at grid cell {}!'.
-                                       format(var,
-                                              start_date.strftime('%Y%m%d'),
-                                              end_date.strftime('%Y%m%d')))
-                else:
-                    continue
-    return
-# -------------------------------------------------------------------- #
+                np.testing.assert_array_equal(
+                        ds[var].values, ds_full_run_split_period[var].values)
 
 
-# -------------------------------------------------------------------- #
 def check_exact_restart_states(state_basedir, driver, run_periods, statesec,
                                state_format='ASCII'):
     ''' Checks whether all the states are the same w/ or w/o restart.
@@ -321,10 +299,6 @@ def check_exact_restart_states(state_basedir, driver, run_periods, statesec,
     state_format: <str>
         state file format, 'ASCII' or 'BINARY'; only need to specify when
         driver=='classic'
-
-    Returns
-    ----------
-    None
     '''
 
     # --- Read the state at the end of the full run --- #
@@ -352,12 +326,13 @@ def check_exact_restart_states(state_basedir, driver, run_periods, statesec,
                                      statesec))
         ds_states_full_run = xr.open_dataset(state_fname)
 
-    # --- Read the state at the end of the last period of run --- #
+    # --- Compare split run states with full run --- #
     # Extract the last split run period
     run_last_period_start_date = run_periods[-1]['start_date']
     run_last_period_end_date = run_periods[-1]['end_date']
-    # Read the state file
+
     if driver == 'classic':
+        # Read the state file at the end of the last period of run
         state_fname = os.path.join(
             state_basedir,
             '{}_{}'.format(run_last_period_start_date.strftime('%Y%m%d'),
@@ -368,7 +343,17 @@ def check_exact_restart_states(state_basedir, driver, run_periods, statesec,
             states = read_ascii_state(state_fname)
         elif state_format == 'BINARY':
             states = read_binary_state(state_fname)
+        # Compare split run states with full run
+        # --- If ASCII state file, check if almost the same ---#
+        if state_format == 'ASCII':
+            np.testing.assert_almost_equal(states, states_full_run, decimal=3)
+        # --- If BINARY state file, check if exactly the same ---#
+        elif state_format == 'BINARY':
+            if states != states_full_run:
+                raise VICTestError('Restart causes inexact state outputs!')
+
     elif driver == 'image':
+        # Read the state file at the end of the last period of run
         state_fname = os.path.join(
             state_basedir,
             '{}_{}'.format(run_last_period_start_date.strftime('%Y%m%d'),
@@ -377,31 +362,12 @@ def check_exact_restart_states(state_basedir, driver, run_periods, statesec,
                     run_last_period_end_date.strftime('%Y%m%d'),
                     statesec))
         ds_states = xr.open_dataset(state_fname)
-
-    # --- Compare split run states with full run --- #
-    if driver == 'classic':
-        # If ASCII state file, check if almost the same
-        if state_format == 'ASCII':
-            np.testing.assert_almost_equal(states, states_full_run, decimal=3)
-        # If BINARY state file, check if exactly the same
-        elif state_format == 'BINARY':
-            if states != states_full_run:
-                raise VICTestError('Restart causes inexact state outputs!')
-            else:
-                return
-    elif driver == 'image':
+        # Compare split run states with full run
         for var in ds_states.data_vars:
-            if np.absolute(ds_states[var] - ds_states_full_run[var]).\
-               max().values > 0.0:
-                raise VICTestError('Restart causes inexact state outputs'
-                                   '(var {}) !'.format(var))
-            else:
-                continue
-        return
-# -------------------------------------------------------------------- #
+            np.testing.assert_array_equal(ds_states[var].values,
+                                          ds_states_full_run[var].values)
 
 
-# -------------------------------------------------------------------- #
 def read_ascii_state(state_fname):
     ''' Read in ascii format state file and convert to a list of numbers
 
@@ -421,10 +387,8 @@ def read_ascii_state(state_fname):
         for i, item in enumerate(list_states):
             list_states[i] = float(item)
     return np.asarray(list_states)
-# -------------------------------------------------------------------- #
 
 
-# -------------------------------------------------------------------- #
 def read_binary_state(state_fname):
     ''' Read in ascii format state file and convert to a list of numbers
 
@@ -442,4 +406,3 @@ def read_binary_state(state_fname):
     with open(state_fname, 'rb') as f:
         states = f.read()
     return states
-# -------------------------------------------------------------------- #

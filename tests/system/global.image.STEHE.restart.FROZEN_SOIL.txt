@@ -1,80 +1,56 @@
-#######################################################################
-# VIC Model Parameters for Stehekin Basin Sample Classic Driver Setup
-#######################################################################
-
-#######################################################################
-# Simulation Parameters
-#######################################################################
-NODES                 3      # number of soil thermal nodes
-MODEL_STEPS_PER_DAY   24     # number of model time steps per day (set to 1 if FULL_ENERGY = FALSE, set to > 1 if FULL_ENERGY = TRUE)
-SNOW_STEPS_PER_DAY    24     # number of time steps per day for which to solve the snow model (should = MODEL_STEPS_PER_DAY if MODEL_STEPS_PER_DAY > 1)
-RUNOFF_STEPS_PER_DAY  24     # time step in hours for which to solve the runoff model (should be >= MODEL_STEPS_PER_DAY)
-STARTYEAR             $startyear   # year model simulation starts
-STARTMONTH            $startmonth     # month model simulation starts
-STARTDAY              $startday     # day model simulation starts
-#STARTHOUR             00     # hour model simulation starts
-ENDYEAR               $endyear   # year model simulation ends
-ENDMONTH              $endmonth     # month model simulation ends
-ENDDAY                $endday     # day model simulation ends
+NODES                 3
+MODEL_STEPS_PER_DAY   24
+SNOW_STEPS_PER_DAY    24
+RUNOFF_STEPS_PER_DAY  24
+STARTYEAR             $startyear
+STARTMONTH            $startmonth
+STARTDAY              $startday
+ENDYEAR               $endyear
+ENDMONTH              $endmonth
+ENDDAY                $endday
 CALENDAR              PROLEPTIC_GREGORIAN
+FULL_ENERGY           FALSE
+FROZEN_SOIL           FALSE
 
-FULL_ENERGY           FALSE  # TRUE = calculate full energy balance; FALSE = compute water balance only
-FROZEN_SOIL           FALSE  # TRUE = calculate frozen soils
+DOMAIN          $test_data_dir/image/Stehekin/parameters/domain.stehekin.20151028.nc
+DOMAIN_TYPE     LAT     lat
+DOMAIN_TYPE     LON     lon
+DOMAIN_TYPE     MASK    mask
+DOMAIN_TYPE     AREA    area
+DOMAIN_TYPE     FRAC    frac
+DOMAIN_TYPE     YDIM    lat
+DOMAIN_TYPE     XDIM    lon
 
-#######################################################################
-# DOMAIN INFO
-#######################################################################
-DOMAIN $test_data_dir/image/Stehekin/parameters/domain.stehekin.20151028.nc
-DOMAIN_TYPE    LAT     lat
-DOMAIN_TYPE    LON     lon
-DOMAIN_TYPE    MASK    mask
-DOMAIN_TYPE    AREA    area
-DOMAIN_TYPE    FRAC    frac
-DOMAIN_TYPE    YDIM    lat
-DOMAIN_TYPE    XDIM    lon
+$init_state
+STATENAME   $state_dir/states
+STATEYEAR   $stateyear
+STATEMONTH  $statemonth
+STATEDAY    $stateday
+STATESEC    82800
 
-######################################################################
-# State Files and Parameters
-#######################################################################
-$init_state # -(put the initial state path/filename here)--# Initial state path/file
-STATENAME   $state_dir/states # Output state file path/prefix.  The date (STATEYEAR,STATEMONTH,STATEDAY) will be appended to the prefix automatically in the format yyyymmdd.
-STATEYEAR   $stateyear    # year to save model state
-STATEMONTH  $statemonth   # month to save model state
-STATEDAY    $stateday  # day to save model state
-STATESEC    82800  # second to save model state
+FORCING1      $test_data_dir/image/Stehekin/forcings/Stehekin_image_test.forcings_10days.
+FORCE_TYPE    AIR_TEMP      tas
+FORCE_TYPE    PREC          prcp
+FORCE_TYPE    PRESSURE      pres
+FORCE_TYPE    SWDOWN        dswrf
+FORCE_TYPE    LWDOWN        dlwrf
+FORCE_TYPE    VP            shum
+FORCE_TYPE    WIND          wind
+WIND_H        10.0
 
-#######################################################################
-# Forcing Files
-#######################################################################
-FORCING1             $test_data_dir/image/Stehekin/forcings/Stehekin_image_test.forcings_10days.
-FORCE_TYPE    AIR_TEMP      tas    # Average air temperature, C
-FORCE_TYPE    PREC          prcp   # Total precipitation (rain and snow), mm
-FORCE_TYPE    PRESSURE      pres   # Atmospheric pressure, kPa
-FORCE_TYPE    SWDOWN        dswrf  # Incoming shortwave, W/m2
-FORCE_TYPE    LWDOWN        dlwrf  # Incoming longwave radiation, W/m2
-FORCE_TYPE    VP            shum   # Vapor pressure, kPa
-FORCE_TYPE    WIND          wind   # Wind speed, m/s
-WIND_H        10.0                 # height of wind speed measurement
+SOIL                $test_data_dir/image/Stehekin/parameters/Stehekin_test_params_20160327.FROZEN_SOIL.nc
+BASEFLOW            ARNO
+JULY_TAVG_SUPPLIED  FALSE
+ORGANIC_FRACT       FALSE
+VEGLIB              $test_data_dir/image/Stehekin/parameters/Stehekin_test_params_20160327.nc
+VEGPARAM            $test_data_dir/image/Stehekin/parameters/Stehekin_test_params_20160327.nc
+ROOT_ZONES          3
+VEGPARAM_LAI        TRUE
+LAI_SRC             FROM_VEGPARAM
+SNOW_BAND           1 $test_data_dir/image/Stehekin/parameters/Stehekin_test_params_20160327.nc
 
-#######################################################################
-# Land Surface Parameters
-#######################################################################
-SOIL                $test_data_dir/image/Stehekin/parameters/Stehekin_test_params_20160327.FROZEN_SOIL.nc     # Soil parameter path/file
-BASEFLOW            ARNO   # ARNO = columns 5-8 are the standard VIC baseflow parameters; NIJSSEN2001 = columns 5-8 of soil file are baseflow parameters from Nijssen et al (2001)
-JULY_TAVG_SUPPLIED  FALSE  # TRUE = final column of the soil parameter file will contain average July air temperature, for computing treeline; this will be ignored if COMPUTE_TREELINE is FALSE; FALSE = compute the treeline based on the average July air temperature of the forcings over the simulation period
-ORGANIC_FRACT       FALSE  # TRUE = simulate organic soils; soil param file contains 3*Nlayer extra columns, listing for each layer the organic fraction, and the bulk density and soil particle density of the organic matter in the soil layer; FALSE = soil param file does not contain any information about organic soil, and organic fraction should be assumed to be 0
-VEGLIB              $test_data_dir/image/Stehekin/parameters/Stehekin_test_params_20160327.nc    # Veg library path/file
-VEGPARAM            $test_data_dir/image/Stehekin/parameters/Stehekin_test_params_20160327.nc  # Veg parameter path/file
-ROOT_ZONES          3      # Number of root zones (must match format of veg param file)
-VEGPARAM_LAI        TRUE   # TRUE = veg param file contains LAI information; FALSE = veg param file does NOT contain LAI information
-LAI_SRC             FROM_VEGPARAM  # FROM_VEGPARAM = read LAI from veg param file; FROM_VEGLIB = read LAI from veg library file
-SNOW_BAND           1 $test_data_dir/image/Stehekin/parameters/Stehekin_test_params_20160327.nc  # Number of snow bands; if number of snow bands > 1, you must insert the snow band path/file after the number of bands (e.g. SNOW_BAND 5 my_path/my_snow_band_file)
-
-#######################################################################
-# Output Files and Parameters
-#######################################################################
-RESULT_DIR     $result_dir/Stehekin.history.nc  # Results path
-OUTPUT_STEPS_PER_DAY        24       # Output steps per day; if 0, OUTPUT_STEPS_PER_DAY = MODEL_STEPS_PER_DAY
+RESULT_DIR              $result_dir/Stehekin.history.nc
+OUTPUT_STEPS_PER_DAY    24
 
 OUTFILE     fluxes
 OUTVAR      OUT_PREC

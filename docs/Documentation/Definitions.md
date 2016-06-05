@@ -10,9 +10,9 @@ This parameter is the temperature of the soil at the [damping depth](#dp). This 
 The b_infilt parameter is the parameter used to describe the Variable Infiltration Curve. This is typically a value that is adjusted during the calibration of the VIC model. Parameter values range from 10-5 to 0.4. Higher values will produce more runoff. 0.2 is often used as a starting value.
 
 ### bubble
-The bubble parameter is the bubbling pressure, h, for the soil texture type (see, e.g., Table 5.3.2 in Rawls, et al (Handbook of Hydrology)). This parameter is necessary for running the VIC model with FULL_ENERGY==TRUE or FROZEN_SOIL==TRUE. Values must be > 0.0.
+The bubble parameter is the bubbling pressure, h, for the soil texture type (see, e.g., Table 5.3.2 in Rawls, et al (Handbook of Hydrology)). This parameter is necessary for running the VIC model with `FULL_ENERGY==TRUE` or `FROZEN_SOIL==TRUE`. Values must be > 0.0.
 
-If you have a VIC soil parameter file created for water-balance mode runs, in which bubbling pressure has been set to a "nodata" value such as -99, you will not be able to use this soil parameter file for FULL_ENERGY==TRUE or FROZEN_SOIL==TRUE. However, a quick way to estimate bubbling pressure from the existing soil parameters (namely the _expt_ parameter) is:
+If you have a VIC soil parameter file created for water-balance mode runs, in which bubbling pressure has been set to a "nodata" value such as -99, you will not be able to use this soil parameter file for `FULL_ENERGY==TRUE` or `FROZEN_SOIL==TRUE`. However, a quick way to estimate bubbling pressure from the existing soil parameters (namely the _expt_ parameter) is:
 
 `bubble = 0.32*expt + 4.3`
 
@@ -52,7 +52,7 @@ The Exponent (expt) parameter is the exponent, n, from the Brooks-Corey relation
 Reference: Rawls et al., Infiltration and Soil Water Movement, In: _Handbook of Hydrology_, D. Maidment (ed.), 1993
 
 ### init_moist
-Initial moisture content of each layer can be set at any reasonable value. One approach is to use fractional soil moisture content (expressed as a fraction of the maximum soil moisture; max. `soil moisture = porosity * layer depth`) at the critical point, Wcr, which can be computed for each layer as a depth in millimeters by multiplying Wcr by the thickness of the layer in meters, and then multiplying by 1000.
+Initial moisture content of each layer can be set at any reasonable value. One approach is to use fractional soil moisture content (expressed as a fraction of the maximum soil moisture; max. `soil moisture = porosity * layer depth`) at the critical point, Wcr, which can be computed for each layer as a depth in millimeters by multiplying `Wcr` by the thickness of the layer in meters, and then multiplying by 1000.
 
 ### Ksat
 The parameter Ksat is the saturated hydraulic conductivity for each layer used in a VIC model. Ksat is approximated using data onsoil textures available for the basin.
@@ -137,7 +137,7 @@ Soil textures are from the STATSGO database (USDA NRCS), which has been compiled
 
 This reports 16 different soil texture classes for 11 layers, which cover a depth of 2.5 meters. The majority of data does not extend beyond 1.5 meters, which includes the first 9 of their 11 layers. The Penn State data is available in gridded form at a resolution of 30 arc-seconds.
 
-The soil texture data is then imported into Arc/Info, where it is indexed to values of Wcr according to the table [SOILTEXT.](soiltext.md) The data in this table are placed into an INFO file in Arc/Info, and the individual relates are then created to be used in an Arc/Info macro to create the Wcr grid. An example Arc/Info macro can be downloaded [here](text_wcrit.aml).
+The soil texture data is then imported into Arc/Info, where it is indexed to values of `Wcr` according to the table [SOILTEXT.](soiltext.md) The data in this table are placed into an INFO file in Arc/Info, and the individual relates are then created to be used in an Arc/Info macro to create the `Wcr` grid. An example Arc/Info macro can be downloaded [here](text_wcrit.aml).
 
 ### wind_h
 
@@ -147,7 +147,7 @@ The measurement wind height is the height above the ground at which wind observa
 
 ### Wpwp_FRACT
 
-The parameter Wpwp_FRACT (wp) is the fractional soil moisture (expressed as a fraction of the maximum soil moisture; max. soil moisture = porosity * layer depth) at the wilting point. Wilting Point is set at the water content at a tension of ?1500 kPa, and is approximated for the different soil textures.
+The parameter `Wpwp_FRACT` (`wp`) is the fractional soil moisture (expressed as a fraction of the maximum soil moisture; max. soil moisture = porosity * layer depth) at the wilting point. Wilting Point is set at the water content at a tension of ?1500 kPa, and is approximated for the different soil textures.
 
 Soil textures are from the STATSGO database (USDA NRCS), which has been compiled from a state-by-state format into a U.S. database, available through Penn State University at [http://dbwww.essc.psu.edu/geotree/dbtop/amer_n/us_48/data/soilprop/statsgo_geo/soiltext/doc.html](http://dbwww.essc.psu.edu/geotree/dbtop/amer_n/us_48/data/soilprop/statsgo_geo/soiltext/doc.html)
 
@@ -156,4 +156,4 @@ This reports 16 different soil texture classes for 11 layers, which cover a dept
 The soil texture data is then imported into Arc/Info, where it is indexed to values of Wp according to the table [SOILTEXT](soiltext.md). The data in this table are placed into an INFO file in Arc/Info, and the individual relates are then created to be used in an Arc/Info macro to create the Wp grid. An example Arc/Info macro can be downloaded [here.](text_wiltp.aml)
 
 ### Ws
-The parameter Ws is the fraction of maximum soil moisture where non-linear baseflow occurs. As with the [Ds](#Ds) parameter, this is generally adjusted during the calibration phase of applying the VIC model. Values for Ws are typically greater than 0.5. An initial value of 0.9 can be used.
+The parameter Ws is the fraction of maximum soil moisture where non-linear baseflow occurs. As with the [`Ds`](#Ds) parameter, this is generally adjusted during the calibration phase of applying the VIC model. Values for Ws are typically greater than 0.5. An initial value of 0.9 can be used.

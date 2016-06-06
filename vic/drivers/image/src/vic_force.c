@@ -49,16 +49,18 @@ vic_force(void)
     extern parameters_struct   param;
     extern param_set_struct    param_set;
 
-    double                     t_offset;
+    double                    *t_offset;
     double                    *dvar = NULL;
     size_t                     i;
     size_t                     j;
     size_t                     v;
+    size_t                     band;
     int                        vidx;
     size_t                     d3count[3];
     size_t                     d3start[3];
     size_t                     d4count[4];
     size_t                     d4start[4];
+    double                    *Tfactor;
 
     // allocate memory for variables to be read
     dvar = malloc(local_domain.ncells_active * sizeof(*dvar));
@@ -335,11 +337,26 @@ vic_force(void)
         global_param.forceoffset[1] += NF;
     }
 
-    if (options.SNOW_BAND > 1) {
-        log_err("SNOW_BAND not implemented in vic_force()");
+    
+    // allocate memory for t_offset
+    t_offset = malloc(local_domain.ncells_active * sizeof(*t_offset));
+    if (dvar == NULL) {
+        log_err("Memory allocation error in vic_force().");
     }
-    else {
-        t_offset = 0;
+
+    for (i = 0; i < local_domain.ncells_active; i++) {
+        if (options.SNOW_BAND > 1) {
+            Tfactor = soil_con[i].Tfactor;
+            t_offset[i] = Tfactor[0];
+            for (band = 1; band < options.SNOW_BAND; band++) {
+                if (Tfactor[band] < t_offset[i]) {
+                    t_offset[i] = Tfactor[band];
+                }
+            }
+        }
+        else {
+            t_offset[i] = 0;
+        }
     }
     // Convert forcings into what we need and calculate missing ones
     for (i = 0; i < local_domain.ncells_active; i++) {
@@ -358,7 +375,7 @@ vic_force(void)
                                               atmos[i].pressure[j]);
             // snow flag
             atmos[i].snowflag[j] = will_it_snow(&(atmos[i].air_temp[j]),
-                                                t_offset,
+                                                t_offset[i],
                                                 param.SNOW_MAX_SNOW_TEMP,
                                                 &(atmos[i].prec[j]), 1);
         }
@@ -396,7 +413,7 @@ vic_force(void)
         atmos[i].vpd[NR] = (svp(atmos[i].air_temp[NR]) - atmos[i].vp[NR]);
         atmos[i].density[NR] = air_density(atmos[i].air_temp[NR],
                                            atmos[i].pressure[NR]);
-        atmos[i].snowflag[NR] = will_it_snow(atmos[i].air_temp, t_offset,
+        atmos[i].snowflag[NR] = will_it_snow(atmos[i].air_temp, t_offset[i],
                                              param.SNOW_MAX_SNOW_TEMP,
                                              atmos[i].prec, NF);
 

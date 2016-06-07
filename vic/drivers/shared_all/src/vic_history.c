@@ -118,6 +118,13 @@ setup_stream(stream_struct *stream,
             log_err("Memory allocation error.");
         }
     }
+    // Initialize some of the stream members
+    // these will be overwritten in set_output_var
+    for (i = 0; i < nvars; i++) {
+        stream->type[i] = OUT_TYPE_DEFAULT;
+        stream->mult[i] = OUT_MULT_DEFAULT;
+        stream->aggtype[i] = AGG_TYPE_DEFAULT;
+    }
 }
 
 /******************************************************************************

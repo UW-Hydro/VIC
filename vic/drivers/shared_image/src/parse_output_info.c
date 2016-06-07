@@ -103,11 +103,13 @@ parse_output_info(FILE           *gp,
                           "and %zu gridcells", streamnum, nvars, ngridcells);
                     setup_stream(&((*streams)[streamnum]), nvars, ngridcells);
 
-
                     if (sscanf(cmdstr, "%*s %s",
                                (*streams)[streamnum].prefix) != 1) {
                         log_err("Invalid specification for OUTFILE");
                     }
+
+                    // set default file format
+                    (*streams)[streamnum].file_format = NETCDF4_CLASSIC;
 
                     outvarnum = 0;
                 }

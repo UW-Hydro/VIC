@@ -104,6 +104,9 @@ parse_output_info(FILE           *gp,
                         log_err("Invalid specification for OUTFILE");
                     }
 
+                    // set default file format
+                    (*streams)[streamnum].file_format = ASCII;
+
                     outvarnum = 0;
                 }
                 else if (strcasecmp("AGGFREQ", optstr) == 0) {

@@ -37,7 +37,7 @@ initialize_mpi(void)
     extern MPI_Datatype mpi_location_struct_type;
     extern MPI_Datatype mpi_option_struct_type;
     extern MPI_Datatype mpi_param_struct_type;
-    extern MPI_Datatype mpi_stream_struct_type;
+    extern MPI_Datatype mpi_alarm_struct_type;
     extern MPI_Comm     MPI_COMM_VIC;
     extern int          mpi_rank;
     extern int          mpi_size;
@@ -58,7 +58,8 @@ initialize_mpi(void)
     create_MPI_global_struct_type(&mpi_global_struct_type);
     create_MPI_filenames_struct_type(&mpi_filenames_struct_type);
     create_MPI_location_struct_type(&mpi_location_struct_type);
-    create_MPI_stream_struct_type(&mpi_stream_struct_type);
+    // create_MPI_stream_struct_type(&mpi_stream_struct_type);
+    create_MPI_alarm_struct_type(&mpi_alarm_struct_type);
     create_MPI_option_struct_type(&mpi_option_struct_type);
     create_MPI_param_struct_type(&mpi_param_struct_type);
 }
@@ -83,7 +84,7 @@ create_MPI_global_struct_type(MPI_Datatype *mpi_type)
     MPI_Datatype   *mpi_types;
 
     // nitems has to equal the number of elements in global_param_struct
-    nitems = 30;
+    nitems = 31;
     blocklengths = malloc(nitems * sizeof(*blocklengths));
     if (blocklengths == NULL) {
         log_err("Memory allocation error in create_MPI_global_struct_type().")
@@ -233,6 +234,11 @@ create_MPI_global_struct_type(MPI_Datatype *mpi_type)
     // double time_origin_num;
     offsets[i] = offsetof(global_param_struct, time_origin_num);
     mpi_types[i++] = MPI_DOUBLE;
+
+    // char time_origin_str[MAXSTRING];
+    offsets[i] = offsetof(global_param_struct, time_origin_str);
+    blocklengths[i] = MAXSTRING;
+    mpi_types[i++] = MPI_CHAR;
 
     // make sure that the we have the right number of elements
     if (i != (size_t) nitems) {
@@ -1552,17 +1558,17 @@ create_MPI_alarm_struct_type(MPI_Datatype *mpi_type)
     nitems = 6;
     blocklengths = malloc(nitems * sizeof(*blocklengths));
     if (blocklengths == NULL) {
-        log_err("Memory allocation error in create_MPI_alarm_struct_type().")
+        log_err("Memory allocation error.")
     }
 
     offsets = malloc(nitems * sizeof(*offsets));
     if (offsets == NULL) {
-        log_err("Memory allocation error in create_MPI_alarm_struct_type().")
+        log_err("Memory allocation error.")
     }
 
     mpi_types = malloc(nitems * sizeof(*mpi_types));
     if (mpi_types == NULL) {
-        log_err("Memory allocation error in create_MPI_alarm_struct_type().")
+        log_err("Memory allocation error.")
     }
 
     // none of the elements in location_struct are arrays.
@@ -1620,98 +1626,6 @@ create_MPI_alarm_struct_type(MPI_Datatype *mpi_type)
     free(offsets);
     free(mpi_types);
     MPI_Type_free(&mpi_dmy_type);
-}
-
-/******************************************************************************
- * @brief   Create an MPI_Datatype that represents the stream_struct
- * @details This allows MPI operations in which the entire stream_struct
- *          can be treated as an MPI_Datatype.
- *          NOTE: This function needs to be kept in-sync with the stream_struct
- *                data type in vic_image_driver.h.
- *          NOTE: Only scalar quantities that are needed on every processor are
- *          included here. Arrays (pointers) are not passed via mpi.
- *
- * @param mpi_type MPI_Datatype that can be used in MPI operations
- *****************************************************************************/
-void
-create_MPI_stream_struct_type(MPI_Datatype *mpi_type)
-{
-    int           nitems; // number of elements in struct
-    int           status;
-    int          *blocklengths;
-    size_t        i;
-    MPI_Aint     *offsets;
-    MPI_Datatype *mpi_types;
-    MPI_Datatype  mpi_alarm_type;
-
-    // nitems has to equal the number of elements in global_param_struct
-    nitems = 5;
-    blocklengths = malloc(nitems * sizeof(*blocklengths));
-    if (blocklengths == NULL) {
-        log_err("Memory allocation error in create_MPI_stream_struct_type().")
-    }
-
-    offsets = malloc(nitems * sizeof(*offsets));
-    if (offsets == NULL) {
-        log_err("Memory allocation error in create_MPI_stream_struct_type().")
-    }
-
-    mpi_types = malloc(nitems * sizeof(*mpi_types));
-    if (mpi_types == NULL) {
-        log_err("Memory allocation error in create_MPI_stream_struct_type().")
-    }
-
-    // none of the elements in location_struct are arrays.
-    for (i = 0; i < (size_t) nitems; i++) {
-        blocklengths[i] = 1;
-    }
-
-    // reset i
-    i = 0;
-
-    // unsigned short int file_format;
-    offsets[i] = offsetof(stream_struct, file_format);
-    mpi_types[i++] = MPI_UNSIGNED_SHORT;
-
-    // short int compress;
-    offsets[i] = offsetof(stream_struct, compress);
-    mpi_types[i++] = MPI_SHORT;
-
-    // size_t nvars;
-    offsets[i] = offsetof(stream_struct, nvars);
-    mpi_types[i++] = MPI_AINT; // note there is no MPI_SIZE_T equivalent
-
-    // size_t ngridcells;
-    offsets[i] = offsetof(stream_struct, ngridcells);
-    mpi_types[i++] = MPI_AINT; // note there is no MPI_SIZE_T equivalent
-
-    // alarm_struct agg_alarm;
-    offsets[i] = offsetof(stream_struct, agg_alarm);
-    create_MPI_alarm_struct_type(&mpi_alarm_type);
-    mpi_types[i++] = mpi_alarm_type;
-
-    // make sure that the we have the right number of elements
-    if (i != (size_t) nitems) {
-        log_err("Miscount in create_MPI_stream_struct_type(): "
-                "%zd not equal to %d\n", i, nitems);
-    }
-
-    status = MPI_Type_create_struct(nitems, blocklengths, offsets, mpi_types,
-                                    mpi_type);
-    if (status != MPI_SUCCESS) {
-        log_err("MPI error in create_MPI_stream_struct_type(): %d\n", status);
-    }
-
-    status = MPI_Type_commit(mpi_type);
-    if (status != MPI_SUCCESS) {
-        log_err("MPI error in create_MPI_stream_struct_type(): %d\n", status);
-    }
-
-    // cleanup
-    free(blocklengths);
-    free(offsets);
-    free(mpi_types);
-    MPI_Type_free(&mpi_alarm_type);
 }
 
 /******************************************************************************

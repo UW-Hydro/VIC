@@ -74,15 +74,8 @@ count_outfile_nvars(FILE *gp)
             if (strcasecmp("OUTVAR", optstr) == 0) {
                 nvars++;
             }
-            else if ((strcasecmp("AGGFREQ",
-                                 optstr) == 0) ||
-                     (strcasecmp("COMPRESS",
-                                 optstr) == 0) ||
-                     (strcasecmp("OUT_FORMAT", optstr) == 0)) {
-                ;  // Do nothing for these options
-            }
-            // else we're done with this file so break out of loop
-            else {
+            else if ((strcasecmp("OUTFILE", optstr) == 0)) {
+                // we're done with this file so break out of loop
                 break;
             }
         }
@@ -102,19 +95,20 @@ count_outfile_nvars(FILE *gp)
 size_t
 count_n_outfiles(FILE *gp)
 {
-    size_t        n_outfiles;
+    size_t        n_outfiles = 0;
     unsigned long start_position;
     char          cmdstr[MAXSTRING];
     char          optstr[MAXSTRING];
+
     // Figure out where we are in the input file
     fflush(gp);
     start_position = ftell(gp);
 
+    // seek to the beginning of the file
+    rewind(gp);
+
     // read the first line
     fgets(cmdstr, MAXSTRING, gp);
-
-    // initalize n_outfiles
-    n_outfiles = 0;
 
     // Loop through the lines
     while (!feof(gp)) {
@@ -165,7 +159,7 @@ str_to_agg_type(char aggstr[])
             return AGG_TYPE_SUM;
         }
         else {
-            log_err("Unknown aggregation type found!");
+            log_err("Unknown aggregation type found: %s", aggstr);
         }
     }
 }
@@ -193,7 +187,7 @@ str_to_out_type(char typestr[])
             return OUT_TYPE_DOUBLE;
         }
         else {
-            log_err("Unknown out type found!");
+            log_err("Unknown out type found: %s", typestr);
         }
     }
 }

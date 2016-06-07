@@ -29,12 +29,11 @@
 
 #include <vic_def.h>
 #include <mpi.h>
-#include <stdbool.h>
 
 void create_MPI_filenames_struct_type(MPI_Datatype *mpi_type);
 void create_MPI_global_struct_type(MPI_Datatype *mpi_type);
 void create_MPI_location_struct_type(MPI_Datatype *mpi_type);
-void create_MPI_stream_struct_type(MPI_Datatype *mpi_type);
+void create_MPI_alarm_struct_type(MPI_Datatype *mpi_type);
 void create_MPI_option_struct_type(MPI_Datatype *mpi_type);
 void create_MPI_param_struct_type(MPI_Datatype *mpi_type);
 void gather_put_nc_field_double(int nc_id, int var_id, double fillval,

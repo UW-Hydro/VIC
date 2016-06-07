@@ -101,11 +101,11 @@ setup_stream(stream_struct *stream,
     }
     stream->type = calloc(nvars, sizeof(*(stream->type)));
     if (stream->type == NULL) {
-        log_err("Memory allocation error in setup_stream().");
+        log_err("Memory allocation error.");
     }
     stream->mult = calloc(nvars, sizeof(*(stream->mult)));
     if (stream->mult == NULL) {
-        log_err("Memory allocation error in setup_stream().");
+        log_err("Memory allocation error.");
     }
     // Question: do we have to dynamically allocate the length of each string
     stream->format = calloc(nvars, sizeof(*(stream->format)));

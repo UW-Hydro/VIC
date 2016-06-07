@@ -37,7 +37,6 @@ reset_alarm(alarm_struct *alarm,
     extern global_param_struct global_param;
 
     alarm->count = 0;
-    alarm->next = MISSING;
 
     if ((alarm->freq == FREQ_NEVER) || (alarm->freq == FREQ_NSTEPS) ||
         (alarm->freq == FREQ_DATE) || (alarm->freq == FREQ_END)) {
@@ -85,10 +84,13 @@ set_alarm(dmy_struct   *dmy_current,
     alarm->freq = freq;
     alarm->n = MISSING;
 
-    if ((freq == FREQ_NSTEPS) || (freq == FREQ_NSECONDS) ||
-        (freq == FREQ_NMINUTES) || (freq == FREQ_NHOURS) ||
-        (freq == FREQ_NDAYS) || (freq == FREQ_NMONTHS) ||
-        (freq == FREQ_NYEARS)) {
+    if (freq == FREQ_NSTEPS) {
+        alarm->n = *((int*) value);
+        alarm->next = alarm->n;
+    }
+    else if ((freq == FREQ_NSECONDS) || (freq == FREQ_NMINUTES) ||
+             (freq == FREQ_NHOURS) || (freq == FREQ_NDAYS) ||
+             (freq == FREQ_NMONTHS) || (freq == FREQ_NYEARS)) {
         alarm->n = *((int*) value);
     }
     else if (freq == FREQ_DATE) {

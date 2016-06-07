@@ -62,8 +62,6 @@ parse_output_info(FILE           *gp,
 
     /** Read through global control file to find output info **/
 
-    fgets(cmdstr, MAXSTRING, gp);
-
     streamnum = -1;
     outvarnum = 0;
 
@@ -79,6 +77,10 @@ parse_output_info(FILE           *gp,
             log_err("Memory allocation error in parse_output_info().");
         }
 
+        // rewind the global parameter file to the begining and parse only the
+        // output file info.
+        rewind(gp);
+        fgets(cmdstr, MAXSTRING, gp);
         while (!feof(gp)) {
             if (cmdstr[0] != '#' && cmdstr[0] != '\n' && cmdstr[0] != '\0') {
                 sscanf(cmdstr, "%s", optstr);

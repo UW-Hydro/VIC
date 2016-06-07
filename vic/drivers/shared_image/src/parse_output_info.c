@@ -60,16 +60,15 @@ parse_output_info(FILE           *gp,
     unsigned short int   agg_type;
     int                  found;
 
-    /** Read through global control file to find output info **/
-
-    fgets(cmdstr, MAXSTRING, gp);
-
     streamnum = -1;
     outvarnum = 0;
 
     // Count the number of output files listed in the global param file
     nstreams = count_n_outfiles(gp);
 
+    debug("found %zu streams", nstreams);
+
+    /** Read through global control file to find output info **/
     // only parse the output info if there are output files to parse
     if (nstreams > 0) {
         options.Noutstreams = nstreams;
@@ -78,6 +77,11 @@ parse_output_info(FILE           *gp,
         if (*streams == NULL) {
             log_err("Memory allocation error in parse_output_info().");
         }
+
+        // rewind the global parameter file to the begining and parse only the
+        // output file info.
+        rewind(gp);
+        fgets(cmdstr, MAXSTRING, gp);
 
         while (!feof(gp)) {
             if (cmdstr[0] != '#' && cmdstr[0] != '\n' && cmdstr[0] != '\0') {
@@ -95,7 +99,10 @@ parse_output_info(FILE           *gp,
                     nvars = count_outfile_nvars(gp);
 
                     // Setup stream
-                    setup_stream(streams[streamnum], nvars, ngridcells);
+                    debug("setting up stream %hu with %zu variables "
+                          "and %zu gridcells", streamnum, nvars, ngridcells);
+                    setup_stream(&((*streams)[streamnum]), nvars, ngridcells);
+
 
                     if (sscanf(cmdstr, "%*s %s",
                                (*streams)[streamnum].prefix) != 1) {
@@ -113,7 +120,7 @@ parse_output_info(FILE           *gp,
                                    freq_value_str);
 
                     if (!found) {
-                        log_err("No arguments found after OUTFREQ");
+                        log_err("No arguments found after AGGFREQ");
                     }
                     // parse the frequency string to an enum value
                     freq = str_to_freq_flag(freq_type_str);
@@ -191,7 +198,8 @@ parse_output_info(FILE           *gp,
                     }
                     sscanf(cmdstr, "%*s %s", flgstr);
                     if (strcasecmp("TRUE", flgstr) == 0) {
-                        (*streams)[streamnum].compress = COMPRESSION_LVL_UNSET;
+                        (*streams)[streamnum].compress =
+                            COMPRESSION_LVL_DEFAULT;
                     }
                     else if (strcasecmp("FALSE", flgstr) == 0) {
                         (*streams)[streamnum].compress = 0;
@@ -201,7 +209,6 @@ parse_output_info(FILE           *gp,
                     }
                 }
                 else if (strcasecmp("OUT_FORMAT", optstr) == 0) {
-                    debug("parsing file format now");
                     if (streamnum < 0) {
                         log_err("Error in global param file: \"OUTFILE\" must be "
                                 "specified before you can specify \"OUT_FORMAT\".");
@@ -218,7 +225,6 @@ parse_output_info(FILE           *gp,
                         (*streams)[streamnum].file_format = NETCDF4_CLASSIC;
                     }
                     else if (strcasecmp("NETCDF4", flgstr) == 0) {
-                        debug("file format: NETCDF4");
                         (*streams)[streamnum].file_format = NETCDF4;
                     }
                     else {
@@ -232,9 +238,11 @@ parse_output_info(FILE           *gp,
                                 "specified before you can specify \"OUTVAR\".");
                     }
                     // parse outvar options
+                    strcpy(varname, "");
                     strcpy(format, "");
                     strcpy(typestr, "");
                     strcpy(multstr, "");
+                    strcpy(aggstr, "");
                     found = sscanf(cmdstr, "%*s %s %s %s %s %s", varname,
                                    format, typestr, multstr, aggstr);
                     if (!found) {
@@ -247,7 +255,7 @@ parse_output_info(FILE           *gp,
                     mult = str_to_out_mult(multstr);
 
                     // Add OUTVAR to stream
-                    set_output_var(streams[streamnum], varname, outvarnum,
+                    set_output_var(&((*streams)[streamnum]), varname, outvarnum,
                                    format, type, mult, agg_type);
                     outvarnum++;
                 }

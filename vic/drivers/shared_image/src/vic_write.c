@@ -44,9 +44,7 @@ vic_write_output(dmy_struct *dmy)
             debug("raised alarm for stream %zu", stream_idx);
             vic_write(&(output_streams[stream_idx]),
                       &(nc_hist_files[stream_idx]), dmy);
-            debug("finished writing");
             reset_stream(&(output_streams[stream_idx]), dmy);
-            debug("finished resetting stream");
         }
     }
 }
@@ -69,6 +67,7 @@ vic_write(stream_struct  *stream,
     size_t                     j;
     size_t                     k;
     size_t                     ndims;
+    double                     dtime;
     double                    *dvar = NULL;
     float                     *fvar = NULL;
     int                       *ivar = NULL;
@@ -79,24 +78,18 @@ vic_write(stream_struct  *stream,
     unsigned int               varid;
     int                        status;
 
-    int                        checkpoint = 0;
-
-    debug("checkpoint %d", checkpoint);
-    checkpoint++;
 
     // initialize dimids to invalid values - helps debugging
     for (i = 0; i < MAXDIMS; i++) {
         dstart[i] = -1;
         dcount[i] = 0;
     }
-    debug("checkpoint %d", checkpoint);
-    checkpoint++;
 
     for (k = 0; k < stream->nvars; k++) {
         varid = stream->varid[k];
 
         if (nc_hist_file->nc_vars[k].nc_type == NC_DOUBLE) {
-            if (dvar != NULL) {
+            if (dvar == NULL) {
                 // allocate memory for variables to be stored
                 dvar = malloc(local_domain.ncells_active * sizeof(*dvar));
                 if (dvar == NULL) {
@@ -105,8 +98,7 @@ vic_write(stream_struct  *stream,
             }
         }
         else if (nc_hist_file->nc_vars[k].nc_type == NC_FLOAT) {
-            if (fvar != NULL) {
-                debug("malloc'ing fvar");
+            if (fvar == NULL) {
                 // allocate memory for variables to be stored
                 fvar = malloc(local_domain.ncells_active * sizeof(*fvar));
                 if (fvar == NULL) {
@@ -115,7 +107,7 @@ vic_write(stream_struct  *stream,
             }
         }
         else if (nc_hist_file->nc_vars[k].nc_type == NC_INT) {
-            if (ivar != NULL) {
+            if (ivar == NULL) {
                 // allocate memory for variables to be stored
                 ivar = malloc(local_domain.ncells_active * sizeof(*ivar));
                 if (ivar == NULL) {
@@ -124,7 +116,7 @@ vic_write(stream_struct  *stream,
             }
         }
         else if (nc_hist_file->nc_vars[k].nc_type == NC_SHORT) {
-            if (svar != NULL) {
+            if (svar == NULL) {
                 // allocate memory for variables to be stored
                 svar = malloc(local_domain.ncells_active * sizeof(*svar));
                 if (svar == NULL) {
@@ -133,7 +125,7 @@ vic_write(stream_struct  *stream,
             }
         }
         else if (nc_hist_file->nc_vars[k].nc_type == NC_CHAR) {
-            if (cvar != NULL) {
+            if (cvar == NULL) {
                 // allocate memory for variables to be stored
                 cvar = malloc(local_domain.ncells_active * sizeof(*cvar));
                 if (cvar == NULL) {
@@ -144,8 +136,6 @@ vic_write(stream_struct  *stream,
         else {
             log_err("Unsupported nc_type encountered");
         }
-        debug("checkpoint %d", checkpoint);
-        checkpoint++;
 
         ndims = nc_hist_file->nc_vars[k].nc_dims;
         for (j = 0; j < ndims; j++) {
@@ -159,52 +149,36 @@ vic_write(stream_struct  *stream,
             dcount[j] = nc_hist_file->nc_vars[k].nc_counts[j];
         }
         dstart[0] = stream->write_alarm.count;  // Position in the time dimensions
-        debug("checkpoint %d", checkpoint);
-        checkpoint++;
 
         for (j = 0; j < out_metadata[varid].nelem; j++) {
-            debug("checkpoint %d", checkpoint);
-            checkpoint++;
             // if there is more than one layer, then dstart needs to advance
             dstart[1] = j;
             if (nc_hist_file->nc_vars[k].nc_type == NC_DOUBLE) {
                 for (i = 0; i < local_domain.ncells_active; i++) {
                     dvar[i] = (double) stream->aggdata[i][k][j][0];
                 }
-                debug("checkpoint %d", checkpoint);
-                checkpoint++;
                 gather_put_nc_field_double(nc_hist_file->nc_id,
                                            nc_hist_file->nc_vars[k].nc_varid,
                                            nc_hist_file->d_fillvalue,
                                            dstart, dcount, dvar);
-                debug("checkpoint %d", checkpoint);
-                checkpoint++;
             }
             else if (nc_hist_file->nc_vars[k].nc_type == NC_FLOAT) {
                 for (i = 0; i < local_domain.ncells_active; i++) {
                     fvar[i] = (float) stream->aggdata[i][k][j][0];
                 }
-                debug("checkpoint %d", checkpoint);
-                checkpoint++;
                 gather_put_nc_field_float(nc_hist_file->nc_id,
                                           nc_hist_file->nc_vars[k].nc_varid,
                                           nc_hist_file->f_fillvalue,
                                           dstart, dcount, fvar);
-                debug("checkpoint %d", checkpoint);
-                checkpoint++;
             }
             else if (nc_hist_file->nc_vars[k].nc_type == NC_INT) {
                 for (i = 0; i < local_domain.ncells_active; i++) {
                     ivar[i] = (int) stream->aggdata[i][k][j][0];
                 }
-                debug("checkpoint %d", checkpoint);
-                checkpoint++;
                 gather_put_nc_field_int(nc_hist_file->nc_id,
                                         nc_hist_file->nc_vars[k].nc_varid,
                                         nc_hist_file->i_fillvalue,
                                         dstart, dcount, ivar);
-                debug("checkpoint %d", checkpoint);
-                checkpoint++;
             }
             else if (nc_hist_file->nc_vars[k].nc_type == NC_SHORT) {
                 for (i = 0; i < local_domain.ncells_active; i++) {
@@ -235,31 +209,24 @@ vic_write(stream_struct  *stream,
             dcount[j] = -1;
         }
     }
-    debug("checkpoint %d", checkpoint);
-    checkpoint++;
+
     // write to file
     if (mpi_rank == 0) {
         // ADD Time variable
         dstart[0] = stream->write_alarm.count;
-        debug("checkpoint %d", checkpoint);
-        checkpoint++;
 
-        dvar[0] = date2num(global_param.time_origin_num, dmy_current, 0.,
-                           global_param.calendar, global_param.time_units);
+        dtime = date2num(global_param.time_origin_num, dmy_current, 0.,
+                         global_param.calendar, global_param.time_units);
 
         status = nc_put_var1_double(nc_hist_file->nc_id,
                                     nc_hist_file->time_varid,
-                                    dstart, dvar);
+                                    dstart, &dtime);
         check_nc_status(status, "Error writing time variable");
     }
-    debug("checkpoint %d", checkpoint);
-    checkpoint++;
 
     // Advance the position in the history file
     stream->write_alarm.count++;
     // TODO: Decide if it is time to close this file and open a new one.
-    debug("checkpoint %d", checkpoint);
-    checkpoint++;
 
     // free memory
     if (dvar != NULL) {
@@ -277,6 +244,4 @@ vic_write(stream_struct  *stream,
     if (cvar != NULL) {
         free(cvar);
     }
-    debug("checkpoint %d", checkpoint);
-    checkpoint++;
 }

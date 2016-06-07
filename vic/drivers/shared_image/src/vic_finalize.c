@@ -55,7 +55,7 @@ vic_finalize(void)
     extern MPI_Datatype        mpi_global_struct_type;
     extern MPI_Datatype        mpi_filenames_struct_type;
     extern MPI_Datatype        mpi_location_struct_type;
-    extern MPI_Datatype        mpi_stream_struct_type;
+    extern MPI_Datatype        mpi_alarm_struct_type;
     extern MPI_Datatype        mpi_option_struct_type;
     extern MPI_Datatype        mpi_param_struct_type;
 
@@ -72,7 +72,7 @@ vic_finalize(void)
         for (i = 0; i < options.Noutstreams; i++) {
             if (nc_hist_files[i].open == true) {
                 status = nc_close(nc_hist_files[i].nc_id);
-                log_ncerr(status, "Error closing history file");
+                check_nc_status(status, "Error closing history file");
             }
             free(nc_hist_files[i].nc_vars);
         }
@@ -124,7 +124,7 @@ vic_finalize(void)
     MPI_Type_free(&mpi_global_struct_type);
     MPI_Type_free(&mpi_filenames_struct_type);
     MPI_Type_free(&mpi_location_struct_type);
-    MPI_Type_free(&mpi_stream_struct_type);
+    MPI_Type_free(&mpi_alarm_struct_type);
     MPI_Type_free(&mpi_option_struct_type);
     MPI_Type_free(&mpi_param_struct_type);
     finalize_logging();

@@ -43,8 +43,7 @@ MPI_Comm            MPI_COMM_VIC = MPI_COMM_WORLD;
 MPI_Datatype        mpi_global_struct_type;
 MPI_Datatype        mpi_filenames_struct_type;
 MPI_Datatype        mpi_location_struct_type;
-MPI_Datatype        mpi_stream_struct_type;
-MPI_Datatype        mpi_nc_file_struct_type;
+MPI_Datatype        mpi_alarm_struct_type;
 MPI_Datatype        mpi_option_struct_type;
 MPI_Datatype        mpi_param_struct_type;
 int                *mpi_map_local_array_sizes = NULL;
@@ -120,7 +119,6 @@ main(int    argc,
 
         // run vic over the domain
         vic_image_run(&(dmy[current]));
-        debug("done with vic_image_run");
 
         // Write history files
         vic_write_output(&(dmy[current]));

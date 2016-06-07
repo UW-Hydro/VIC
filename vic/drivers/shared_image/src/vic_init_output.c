@@ -50,7 +50,7 @@ vic_init_output(dmy_struct *dmy_current)
     extern double          ***out_data;
     extern stream_struct     *output_streams;
     extern nc_file_struct    *nc_hist_files;
-    extern MPI_Datatype       mpi_stream_struct_type;
+    extern MPI_Datatype       mpi_alarm_struct_type;
 
     size_t                    streamnum;
     int                       status;
@@ -66,20 +66,21 @@ vic_init_output(dmy_struct *dmy_current)
                              veg_con[i], veg_lib[i], &lake_con, out_data[i],
                              &(save_data[i]));
     }
-
     if (mpi_rank == 0) {
         // determine which variables will be written to the history file
         parse_output_info(filep.globalparam, &output_streams,
                           local_domain.ncells_active, dmy_current);
-        nc_hist_files = calloc(options.Noutstreams, sizeof(*nc_hist_files));
-        if (nc_hist_files == NULL) {
-            log_err("Memory allocation error");
-        }
     }
 
     status = MPI_Bcast(&(options.Noutstreams), 1, MPI_AINT, 0, MPI_COMM_VIC);
     if (status != MPI_SUCCESS) {
-        log_err("MPI error in vic_start(): %d\n", status);
+        log_err("MPI error %d\n", status);
+    }
+
+    // allocate netcdf history files array
+    nc_hist_files = calloc(options.Noutstreams, sizeof(*nc_hist_files));
+    if (nc_hist_files == NULL) {
+        log_err("Memory allocation error");
     }
 
     // Allocate memory for array of streams
@@ -90,41 +91,79 @@ vic_init_output(dmy_struct *dmy_current)
         }
     }
 
-    // Brodcast the scalar values in each stream
-    status = MPI_Bcast(output_streams, options.Noutstreams,
-                       mpi_stream_struct_type, 0, MPI_COMM_VIC);
-    if (status != MPI_SUCCESS) {
-        log_err("MPI error in vic_start(): %d\n", status);
-    }
-
     // Now that all the scalars are out there, we can allocate memory for each
     // stream.  This has already been done on the master processor.
-    if (mpi_rank != 0) {
-        for (streamnum = 0; streamnum < options.Noutstreams; streamnum++) {
+    for (streamnum = 0; streamnum < options.Noutstreams; streamnum++) {
+        status = MPI_Bcast(&(output_streams[streamnum].nvars),
+                           1, MPI_AINT, 0, MPI_COMM_VIC);
+        if (status != MPI_SUCCESS) {
+            log_err("MPI error %d\n", status);
+        }
+
+        if (mpi_rank != 0) {
             setup_stream(&(output_streams[streamnum]),
                          output_streams[streamnum].nvars,
-                         output_streams[streamnum].ngridcells);
-
-            // Now brodcast the arrays of shape nvars
-            status = MPI_Bcast(output_streams[streamnum].varid,
-                               output_streams[streamnum].nvars,
-                               MPI_UNSIGNED, 0, MPI_COMM_VIC);
-            if (status != MPI_SUCCESS) {
-                log_err("MPI error brodcasting to varid: %d\n", status);
-            }
-            // Now brodcast the arrays of shape nvars
-            status = MPI_Bcast(output_streams[streamnum].aggtype,
-                               output_streams[streamnum].nvars, MPI_UNSIGNED, 0,
-                               MPI_COMM_VIC);
-            if (status != MPI_SUCCESS) {
-                log_err("MPI error brodcasting to aggtype: %d\n", status);
-            }
-
-            alloc_aggdata(&(output_streams[streamnum]));
+                         local_domain.ncells_active);
         }
-    }
-    if (mpi_rank == 0) {
-        for (streamnum = 0; streamnum < options.Noutstreams; streamnum++) {
+
+        // Now brodcast the arrays of shape nvars
+        // type
+        status = MPI_Bcast(output_streams[streamnum].type,
+                           output_streams[streamnum].nvars,
+                           MPI_UNSIGNED_SHORT, 0, MPI_COMM_VIC);
+        if (status != MPI_SUCCESS) {
+            log_err("MPI error brodcasting to type: %d\n", status);
+        }
+
+        // mult
+        status = MPI_Bcast(output_streams[streamnum].mult,
+                           output_streams[streamnum].nvars,
+                           MPI_DOUBLE, 0, MPI_COMM_VIC);
+        if (status != MPI_SUCCESS) {
+            log_err("MPI error brodcasting to mult: %d\n", status);
+        }
+
+        // varid
+        status = MPI_Bcast(output_streams[streamnum].varid,
+                           output_streams[streamnum].nvars,
+                           MPI_UNSIGNED, 0, MPI_COMM_VIC);
+        if (status != MPI_SUCCESS) {
+            log_err("MPI error brodcasting to varid: %d\n", status);
+        }
+
+        // aggtype
+        status = MPI_Bcast(output_streams[streamnum].aggtype,
+                           output_streams[streamnum].nvars, MPI_UNSIGNED, 0,
+                           MPI_COMM_VIC);
+        if (status != MPI_SUCCESS) {
+            log_err("MPI error brodcasting to aggtype: %d\n", status);
+        }
+
+        // Now brodcast the alarms
+        status = MPI_Bcast(&(output_streams[streamnum].agg_alarm), 1,
+                           mpi_alarm_struct_type, 0, MPI_COMM_VIC);
+        if (status != MPI_SUCCESS) {
+            log_err("MPI error %d\n", status);
+        }
+        status = MPI_Bcast(&(output_streams[streamnum].write_alarm), 1,
+                           mpi_alarm_struct_type, 0, MPI_COMM_VIC);
+        if (status != MPI_SUCCESS) {
+            log_err("MPI error %d\n", status);
+        }
+
+        debug("streamnum %zu of %zu", streamnum, options.Noutstreams);
+
+        extern metadata_struct out_metadata[N_OUTVAR_TYPES];
+        print_stream(&(output_streams[streamnum]), out_metadata);
+
+        alloc_aggdata(&(output_streams[streamnum]));
+
+        initialize_nc_file(&(nc_hist_files[streamnum]),
+                           output_streams[streamnum].nvars,
+                           output_streams[streamnum].varid,
+                           output_streams[streamnum].type);
+
+        if (mpi_rank == 0) {
             // open the netcdf history file
             initialize_history_file(&(nc_hist_files[streamnum]),
                                     &(output_streams[streamnum]),
@@ -193,11 +232,6 @@ initialize_history_file(nc_file_struct *nc,
                 stream->prefix, dmy_current->year, dmy_current->month,
                 dmy_current->day, dmy_current->dayseconds);
     }
-
-    initialize_nc_file(nc, stream->nvars, stream->varid, stream->type);
-
-    // print_stream(stream, out_metadata);
-    stream->file_format = NETCDF4;
 
     // open the netcdf file
     status = nc_create(stream->filename, get_nc_mode(stream->file_format),

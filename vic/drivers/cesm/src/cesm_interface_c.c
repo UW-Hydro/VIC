@@ -46,7 +46,7 @@ MPI_Datatype        mpi_domain_struct_type;
 MPI_Datatype        mpi_global_struct_type;
 MPI_Datatype        mpi_filenames_struct_type;
 MPI_Datatype        mpi_location_struct_type;
-MPI_Datatype        mpi_stream_struct_type;
+MPI_Datatype        mpi_alarm_struct_type;
 MPI_Datatype        mpi_option_struct_type;
 MPI_Datatype        mpi_param_struct_type;
 int                *mpi_map_local_array_sizes = NULL;
@@ -95,7 +95,7 @@ vic_cesm_init(vic_clock     *vclock,
     // initialize output structures
     vic_init_output(&dmy_current);
 
-    return 0;
+    return EXIT_SUCCESS;
 }
 
 /******************************************************************************
@@ -131,7 +131,7 @@ vic_cesm_run(vic_clock *vclock)
     advance_time();
     assert_time_insync(vclock, &dmy_current);
 
-    return 0;
+    return EXIT_SUCCESS;
 }
 
 /******************************************************************************
@@ -143,5 +143,5 @@ vic_cesm_final()
     // clean up
     vic_cesm_finalize();
 
-    return 0;
+    return EXIT_SUCCESS;
 }

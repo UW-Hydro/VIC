@@ -53,7 +53,6 @@ int                 mpi_size;
 option_struct       options;
 parameters_struct   param;
 param_set_struct    param_set;
-save_data_struct   *save_data;
 soil_con_struct    *soil_con = NULL;
 veg_con_map_struct *veg_con_map = NULL;
 veg_con_struct    **veg_con = NULL;
@@ -61,8 +60,9 @@ veg_hist_struct   **veg_hist = NULL;
 veg_lib_struct    **veg_lib = NULL;
 metadata_struct     state_metadata[N_STATE_VARS];
 metadata_struct     out_metadata[N_OUTVAR_TYPES];
-double           ***out_data = NULL;   // [ncells, nvars, nelem]
-stream_struct      *output_streams = NULL;   // [nstreams]
+save_data_struct   *save_data;  // [ncells]
+double           ***out_data = NULL;  // [ncells, nvars, nelem]
+stream_struct      *output_streams = NULL;  // [nstreams]
 nc_file_struct     *nc_hist_files = NULL;  // [nstreams]
 
 /******************************************************************************

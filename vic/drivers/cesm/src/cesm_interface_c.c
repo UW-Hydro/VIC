@@ -53,22 +53,20 @@ int                *mpi_map_local_array_sizes = NULL;
 int                *mpi_map_global_array_offsets = NULL;
 int                 mpi_rank;
 int                 mpi_size;
-nc_file_struct      nc_hist_file;
-nc_var_struct       nc_vars[N_OUTVAR_TYPES];
 option_struct       options;
 parameters_struct   param;
-metadata_struct     state_metadata[N_STATE_VARS];
-metadata_struct     out_metadata[N_OUTVAR_TYPES];
-double           ***out_data = NULL;   // [ncells, nvars, nelem]
-stream_struct      *output_streams = NULL;   // [nstreams]
-nc_file_struct     *nc_hist_files = NULL;  // [nstreams]
-save_data_struct   *save_data;
 param_set_struct    param_set;
 soil_con_struct    *soil_con = NULL;
 veg_con_map_struct *veg_con_map = NULL;
 veg_con_struct    **veg_con = NULL;
 veg_hist_struct   **veg_hist = NULL;
 veg_lib_struct    **veg_lib = NULL;
+metadata_struct     state_metadata[N_STATE_VARS];
+metadata_struct     out_metadata[N_OUTVAR_TYPES];
+save_data_struct   *save_data;  // [ncells]
+double           ***out_data = NULL;  // [ncells, nvars, nelem]
+stream_struct      *output_streams = NULL;  // [nstreams]
+nc_file_struct     *nc_hist_files = NULL;  // [nstreams]
 
 /******************************************************************************
  * @brief    Initialization function for CESM driver

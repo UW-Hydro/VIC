@@ -548,6 +548,18 @@ typedef struct {
     veg_var_struct *veg_var;
 } Error_struct;
 
+/******************************************************************************
+ * @brief   This structure holds timer information for profiling
+ *****************************************************************************/
+typedef struct {
+    double start_wall;
+    double start_cpu;
+    double stop_wall;
+    double stop_cpu;
+    double delta_wall;
+    double delta_cpu;
+} timer_struct;
+
 double air_density(double t, double p);
 void agg_stream_data(stream_struct *stream, dmy_struct *dmy_current,
                      double ***out_data);
@@ -577,7 +589,9 @@ void count_nstreams_nvars(FILE *gp, size_t *nstreams, size_t nvars[]);
 void cmd_proc(int argc, char **argv, char *globalfilename);
 void compress_files(char string[], short int level);
 stream_struct create_outstream(stream_struct *output_streams);
+double get_cpu_time();
 void get_current_datetime(char *cdt);
+double get_wall_time();
 double date2num(double origin, dmy_struct *date, double tzoffset,
                 unsigned short int calendar, unsigned short int time_units);
 void dmy_all_30_day(double julian, dmy_struct *dmy);
@@ -693,6 +707,8 @@ unsigned short int str_to_out_type(char typestr[]);
 unsigned short int str_to_timeunits(char units_chars[]);
 void strpdmy(const char *s, const char *format, dmy_struct *dmy);
 double time_delta(dmy_struct *dmy_current, unsigned short int freq, int n);
+void timer_start(timer_struct *t);
+void timer_stop(timer_struct *t);
 int update_step_vars(all_vars_struct *, veg_con_struct *, veg_hist_struct *);
 int invalid_date(unsigned short int calendar, dmy_struct *dmy);
 void validate_parameters(void);

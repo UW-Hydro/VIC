@@ -821,7 +821,7 @@ set_output_met_data_info()
            "average vegetation canopy temperature");
 
     // Energy Balance Terms - fluxes
-    /* net sensible heat advected to snow pack [W/m2] */
+    /* net sensible heat advected to snow pack [W m-2] */
     strcpy(out_metadata[OUT_ADV_SENS].varname, "OUT_ADV_SENS");
     strcpy(out_metadata[OUT_ADV_SENS].long_name, "adv_sens");
     strcpy(out_metadata[OUT_ADV_SENS].standard_name,
@@ -830,14 +830,14 @@ set_output_met_data_info()
     strcpy(out_metadata[OUT_ADV_SENS].description,
            "net sensible heat advected to snow pack");
 
-    /* advected energy [W/m2] */
+    /* advected energy [W m-2] */
     strcpy(out_metadata[OUT_ADVECTION].varname, "OUT_ADVECTION");
     strcpy(out_metadata[OUT_ADVECTION].long_name, "advection");
     strcpy(out_metadata[OUT_ADVECTION].standard_name, "advected_energy");
     strcpy(out_metadata[OUT_ADVECTION].units, "W m-2");
     strcpy(out_metadata[OUT_ADVECTION].description, "advected energy ");
 
-    /* rate of change in cold content in snow pack [W/m2] */
+    /* rate of change in cold content in snow pack [W m-2] */
     strcpy(out_metadata[OUT_DELTACC].varname, "OUT_DELTACC");
     strcpy(out_metadata[OUT_DELTACC].long_name, "deltacc");
     strcpy(out_metadata[OUT_DELTACC].standard_name,
@@ -846,7 +846,7 @@ set_output_met_data_info()
     strcpy(out_metadata[OUT_DELTACC].description,
            "rate of change in cold content in snow pack");
 
-    /* rate of change in heat storage [W/m2] */
+    /* rate of change in heat storage [W m-2] */
     strcpy(out_metadata[OUT_DELTAH].varname, "OUT_DELTAH");
     strcpy(out_metadata[OUT_DELTAH].long_name, "deltah");
     strcpy(out_metadata[OUT_DELTAH].standard_name,
@@ -855,7 +855,7 @@ set_output_met_data_info()
     strcpy(out_metadata[OUT_DELTAH].description,
            "rate of change in heat storage");
 
-    /* energy budget error [W/m2] */
+    /* energy budget error [W m-2] */
     strcpy(out_metadata[OUT_ENERGY_ERROR].varname, "OUT_ENERGY_ERROR");
     strcpy(out_metadata[OUT_ENERGY_ERROR].long_name, "energy_error");
     strcpy(out_metadata[OUT_ENERGY_ERROR].standard_name, "energy_budget_error");
@@ -869,7 +869,7 @@ set_output_met_data_info()
     strcpy(out_metadata[OUT_WATER_ERROR].units, "mm");
     strcpy(out_metadata[OUT_WATER_ERROR].description, "water budget error");
 
-    /* net energy used to melt/freeze soil moisture [W/m2] */
+    /* net energy used to melt/freeze soil moisture [W m-2] */
     strcpy(out_metadata[OUT_FUSION].varname, "OUT_FUSION");
     strcpy(out_metadata[OUT_FUSION].long_name, "fusion");
     strcpy(out_metadata[OUT_FUSION].standard_name,
@@ -878,7 +878,7 @@ set_output_met_data_info()
     strcpy(out_metadata[OUT_FUSION].description,
            "net energy used to melt/freeze soil moisture");
 
-    /* net heat flux into ground [W/m2] */
+    /* net heat flux into ground [W m-2] */
     strcpy(out_metadata[OUT_GRND_FLUX].varname, "OUT_GRND_FLUX");
     strcpy(out_metadata[OUT_GRND_FLUX].long_name, "grnd_flux");
     strcpy(out_metadata[OUT_GRND_FLUX].standard_name,
@@ -887,7 +887,7 @@ set_output_met_data_info()
     strcpy(out_metadata[OUT_GRND_FLUX].description,
            "net heat flux into ground");
 
-    /* incoming longwave flux at surface (under veg) [W/m2] */
+    /* incoming longwave flux at surface (under veg) [W m-2] */
     strcpy(out_metadata[OUT_IN_LONG].varname, "OUT_IN_LONG");
     strcpy(out_metadata[OUT_IN_LONG].long_name, "in_long");
     strcpy(out_metadata[OUT_IN_LONG].standard_name,
@@ -896,7 +896,7 @@ set_output_met_data_info()
     strcpy(out_metadata[OUT_IN_LONG].description,
            "incoming longwave flux at surface (under veg)");
 
-    /* net upward latent heat flux [W/m2] */
+    /* net upward latent heat flux [W m-2] */
     strcpy(out_metadata[OUT_LATENT].varname, "OUT_LATENT");
     strcpy(out_metadata[OUT_LATENT].long_name, "latent");
     strcpy(out_metadata[OUT_LATENT].standard_name,
@@ -904,7 +904,7 @@ set_output_met_data_info()
     strcpy(out_metadata[OUT_LATENT].units, "W m-2");
     strcpy(out_metadata[OUT_LATENT].description, "net upward latent heat flux");
 
-    /* net upward latent heat flux from sublimation [W/m2] */
+    /* net upward latent heat flux from sublimation [W m-2] */
     strcpy(out_metadata[OUT_LATENT_SUB].varname, "OUT_LATENT_SUB");
     strcpy(out_metadata[OUT_LATENT_SUB].long_name, "latent_sub");
     strcpy(out_metadata[OUT_LATENT_SUB].standard_name,
@@ -913,7 +913,7 @@ set_output_met_data_info()
     strcpy(out_metadata[OUT_LATENT_SUB].description,
            "net upward latent heat flux from sublimation");
 
-    /* energy of fusion (melting) [W/m2] */
+    /* energy of fusion (melting) [W m-2] */
     strcpy(out_metadata[OUT_MELT_ENERGY].varname, "OUT_MELT_ENERGY");
     strcpy(out_metadata[OUT_MELT_ENERGY].long_name, "melt_energy");
     strcpy(out_metadata[OUT_MELT_ENERGY].standard_name, "energy_of_fusion");
@@ -921,7 +921,7 @@ set_output_met_data_info()
     strcpy(out_metadata[OUT_MELT_ENERGY].description,
            "energy of fusion (melting)");
 
-    /* net downward longwave flux [W/m2] */
+    /* net downward longwave flux [W m-2] */
     strcpy(out_metadata[OUT_LWNET].varname, "OUT_LWNET");
     strcpy(out_metadata[OUT_LWNET].long_name, "lwnet");
     strcpy(out_metadata[OUT_LWNET].standard_name,
@@ -929,7 +929,7 @@ set_output_met_data_info()
     strcpy(out_metadata[OUT_LWNET].units, "W m-2");
     strcpy(out_metadata[OUT_LWNET].description, "net downward longwave flux");
 
-    /* net downward shortwave flux [W/m2] */
+    /* net downward shortwave flux [W m-2] */
     strcpy(out_metadata[OUT_SWNET].varname, "OUT_SWNET");
     strcpy(out_metadata[OUT_SWNET].long_name, "swnet");
     strcpy(out_metadata[OUT_SWNET].standard_name,
@@ -937,7 +937,7 @@ set_output_met_data_info()
     strcpy(out_metadata[OUT_SWNET].units, "W m-2");
     strcpy(out_metadata[OUT_SWNET].description, "net downward shortwave flux");
 
-    /* net downward radiation flux [W/m2] */
+    /* net downward radiation flux [W m-2] */
     strcpy(out_metadata[OUT_R_NET].varname, "OUT_R_NET");
     strcpy(out_metadata[OUT_R_NET].long_name, "r_net");
     strcpy(out_metadata[OUT_R_NET].standard_name,
@@ -945,7 +945,7 @@ set_output_met_data_info()
     strcpy(out_metadata[OUT_R_NET].units, "W m-2");
     strcpy(out_metadata[OUT_R_NET].description, "net downward radiation flux");
 
-    /* net energy used to refreeze liquid water in snowpack [W/m2] */
+    /* net energy used to refreeze liquid water in snowpack [W m-2] */
     strcpy(out_metadata[OUT_RFRZ_ENERGY].varname, "OUT_RFRZ_ENERGY");
     strcpy(out_metadata[OUT_RFRZ_ENERGY].long_name, "rfrz_energy");
     strcpy(out_metadata[OUT_RFRZ_ENERGY].standard_name,
@@ -954,7 +954,7 @@ set_output_met_data_info()
     strcpy(out_metadata[OUT_RFRZ_ENERGY].description,
            "net energy used to refreeze liquid water in snowpack");
 
-    /* net upward sensible heat flux [W/m2] */
+    /* net upward sensible heat flux [W m-2] */
     strcpy(out_metadata[OUT_SENSIBLE].varname, "OUT_SENSIBLE");
     strcpy(out_metadata[OUT_SENSIBLE].long_name, "sensible");
     strcpy(out_metadata[OUT_SENSIBLE].standard_name,
@@ -963,7 +963,7 @@ set_output_met_data_info()
     strcpy(out_metadata[OUT_SENSIBLE].description,
            "net upward sensible heat flux");
 
-    /* energy flux through snow pack [W/m2] */
+    /* energy flux through snow pack [W m-2] */
     strcpy(out_metadata[OUT_SNOW_FLUX].varname, "OUT_SNOW_FLUX");
     strcpy(out_metadata[OUT_SNOW_FLUX].long_name, "snow_flux");
     strcpy(out_metadata[OUT_SNOW_FLUX].standard_name,
@@ -998,12 +998,12 @@ set_output_met_data_info()
     strcpy(out_metadata[OUT_AERO_COND2].description,
            "overstory aerodynamic conductance");
 
-    /* "scene" aerodynamic resistance [s/m] (tiles with overstory contribute overstory resistance; others contribue surface resistance)*/
+    /* "scene" aerodynamic resistance [s m-1] (tiles with overstory contribute overstory resistance; others contribue surface resistance)*/
     strcpy(out_metadata[OUT_AERO_RESIST].varname, "OUT_AERO_RESIST");
     strcpy(out_metadata[OUT_AERO_RESIST].long_name, "aero_resist");
     strcpy(out_metadata[OUT_AERO_RESIST].standard_name,
            "aerodynamic_resistance");
-    strcpy(out_metadata[OUT_AERO_RESIST].units, "s/m");
+    strcpy(out_metadata[OUT_AERO_RESIST].units, "s m-1");
     strcpy(out_metadata[OUT_AERO_RESIST].description,
            "scene aerodynamic resistance (tiles with overstory contribute overstory resistance; others contribue surface resistance)");
 
@@ -1012,7 +1012,7 @@ set_output_met_data_info()
     strcpy(out_metadata[OUT_AERO_RESIST1].long_name, "aero_resist1");
     strcpy(out_metadata[OUT_AERO_RESIST1].standard_name,
            "aerodynamic_resistance_surface");
-    strcpy(out_metadata[OUT_AERO_RESIST1].units, "s/m");
+    strcpy(out_metadata[OUT_AERO_RESIST1].units, "s m-1");
     strcpy(out_metadata[OUT_AERO_RESIST1].description,
            "surface aerodynamic resistance");
 
@@ -1021,7 +1021,7 @@ set_output_met_data_info()
     strcpy(out_metadata[OUT_AERO_RESIST2].long_name, "aero_resist2");
     strcpy(out_metadata[OUT_AERO_RESIST2].standard_name,
            "aerodynamic_resistance_overstory");
-    strcpy(out_metadata[OUT_AERO_RESIST2].units, "s/m");
+    strcpy(out_metadata[OUT_AERO_RESIST2].units, "s m-1");
     strcpy(out_metadata[OUT_AERO_RESIST2].description,
            "overstory aerodynamic resistance");
 
@@ -1040,11 +1040,11 @@ set_output_met_data_info()
     strcpy(out_metadata[OUT_CATM].units, "ppm");
     strcpy(out_metadata[OUT_CATM].description, "atmospheric CO2 concentration");
 
-    /* near-surface atmospheric density [kg/m3] */
+    /* near-surface atmospheric density [kg m-3] */
     strcpy(out_metadata[OUT_DENSITY].varname, "OUT_DENSITY");
     strcpy(out_metadata[OUT_DENSITY].long_name, "density");
     strcpy(out_metadata[OUT_DENSITY].standard_name, "air_density");
-    strcpy(out_metadata[OUT_DENSITY].units, "kg/m3");
+    strcpy(out_metadata[OUT_DENSITY].units, "kg m-3");
     strcpy(out_metadata[OUT_DENSITY].description,
            "near-surface atmospheric density");
 
@@ -1066,14 +1066,14 @@ set_output_met_data_info()
     strcpy(out_metadata[OUT_FDIR].description,
            "fraction of incoming shortwave that is direct");
 
-    /* leaf area index [m2/m2] */
+    /* leaf area index [1] */
     strcpy(out_metadata[OUT_LAI].varname, "OUT_LAI");
     strcpy(out_metadata[OUT_LAI].long_name, "lai");
     strcpy(out_metadata[OUT_LAI].standard_name, "leaf_area_index");
     strcpy(out_metadata[OUT_LAI].units, "1");
     strcpy(out_metadata[OUT_LAI].description, "leaf area index");
 
-    /* incoming longwave [W/m2] */
+    /* incoming longwave [W m-2] */
     strcpy(out_metadata[OUT_LWDOWN].varname, "OUT_LWDOWN");
     strcpy(out_metadata[OUT_LWDOWN].long_name, "lwdown");
     strcpy(out_metadata[OUT_LWDOWN].standard_name,
@@ -1081,7 +1081,7 @@ set_output_met_data_info()
     strcpy(out_metadata[OUT_LWDOWN].units, "W m-2");
     strcpy(out_metadata[OUT_LWDOWN].description, "incoming longwave");
 
-    /* incoming photosynthetically active radiation [W/m2] */
+    /* incoming photosynthetically active radiation [W m-2] */
     strcpy(out_metadata[OUT_PAR].varname, "OUT_PAR");
     strcpy(out_metadata[OUT_PAR].long_name, "par");
     strcpy(out_metadata[OUT_PAR].standard_name,
@@ -1112,7 +1112,7 @@ set_output_met_data_info()
     strcpy(out_metadata[OUT_REL_HUMID].units, "1");
     strcpy(out_metadata[OUT_REL_HUMID].description, "relative humidity");
 
-    /* incoming shortwave [W/m2] */
+    /* incoming shortwave [W m-2] */
     strcpy(out_metadata[OUT_SWDOWN].varname, "OUT_SWDOWN");
     strcpy(out_metadata[OUT_SWDOWN].long_name, "swdown");
     strcpy(out_metadata[OUT_SWDOWN].standard_name, "incoming shortwave");
@@ -1151,7 +1151,7 @@ set_output_met_data_info()
     strcpy(out_metadata[OUT_WIND].description, "near surface wind speed");
 
     // Carbon-cycling Terms
-    /* absorbed PAR [W/m2] */
+    /* absorbed PAR [W m-2] */
     strcpy(out_metadata[OUT_APAR].varname, "OUT_APAR");
     strcpy(out_metadata[OUT_APAR].long_name, "apar");
     strcpy(out_metadata[OUT_APAR].standard_name,
@@ -1231,7 +1231,7 @@ set_output_met_data_info()
     strcpy(out_metadata[OUT_CSLOW].description, "slow pool carbon density");
 
     // Band-specific quantities
-    /* net sensible heat flux advected to snow pack [W/m2] */
+    /* net sensible heat flux advected to snow pack [W m-2] */
     strcpy(out_metadata[OUT_ADV_SENS_BAND].varname, "OUT_ADV_SENS_BAND");
     strcpy(out_metadata[OUT_ADV_SENS_BAND].long_name, "adv_sens_band");
     strcpy(out_metadata[OUT_ADV_SENS_BAND].standard_name,
@@ -1249,7 +1249,7 @@ set_output_met_data_info()
     strcpy(out_metadata[OUT_ADV_SENS].description,
            "net sensible heat advected to snow pack");
 
-    /* advected energy [W/m2] */
+    /* advected energy [W m-2] */
     strcpy(out_metadata[OUT_ADVECTION_BAND].varname, "OUT_ADVECTION_BAND");
     strcpy(out_metadata[OUT_ADVECTION_BAND].long_name, "advection_band");
     strcpy(out_metadata[OUT_ADVECTION_BAND].standard_name,
@@ -1268,7 +1268,7 @@ set_output_met_data_info()
     strcpy(out_metadata[OUT_ALBEDO_BAND].description,
            out_metadata[OUT_ALBEDO].description);
 
-    /* change in cold content in snow pack [W/m2] */
+    /* change in cold content in snow pack [W m-2] */
     strcpy(out_metadata[OUT_DELTACC_BAND].varname, "OUT_DELTACC_BAND");
     strcpy(out_metadata[OUT_DELTACC_BAND].long_name, "deltacc_band");
     strcpy(out_metadata[OUT_DELTACC_BAND].standard_name,
@@ -1278,7 +1278,7 @@ set_output_met_data_info()
     strcpy(out_metadata[OUT_DELTACC_BAND].description,
            out_metadata[OUT_DELTACC].description);
 
-    /* net heat flux into ground [W/m2] */
+    /* net heat flux into ground [W m-2] */
     strcpy(out_metadata[OUT_GRND_FLUX_BAND].varname, "OUT_GRND_FLUX_BAND");
     strcpy(out_metadata[OUT_GRND_FLUX_BAND].long_name, "grnd_flux_band");
     strcpy(out_metadata[OUT_GRND_FLUX_BAND].standard_name,
@@ -1288,7 +1288,7 @@ set_output_met_data_info()
     strcpy(out_metadata[OUT_GRND_FLUX_BAND].description,
            out_metadata[OUT_GRND_FLUX].description);
 
-    /* incoming longwave flux at surface (under veg) [W/m2] */
+    /* incoming longwave flux at surface (under veg) [W m-2] */
     strcpy(out_metadata[OUT_IN_LONG_BAND].varname, "OUT_IN_LONG_BAND");
     strcpy(out_metadata[OUT_IN_LONG_BAND].long_name, "in_long_band");
     strcpy(out_metadata[OUT_IN_LONG_BAND].standard_name,
@@ -1298,7 +1298,7 @@ set_output_met_data_info()
     strcpy(out_metadata[OUT_IN_LONG_BAND].description,
            out_metadata[OUT_IN_LONG].description);
 
-    /* net upward latent heat flux [W/m2] */
+    /* net upward latent heat flux [W m-2] */
     strcpy(out_metadata[OUT_LATENT_BAND].varname, "OUT_LATENT_BAND");
     strcpy(out_metadata[OUT_LATENT_BAND].long_name, "latent_band");
     strcpy(out_metadata[OUT_LATENT_BAND].standard_name,
@@ -1307,7 +1307,7 @@ set_output_met_data_info()
     strcpy(out_metadata[OUT_LATENT_BAND].description,
            out_metadata[OUT_LATENT].description);
 
-    /* net upward latent heat flux from sublimation [W/m2] */
+    /* net upward latent heat flux from sublimation [W m-2] */
     strcpy(out_metadata[OUT_LATENT_SUB_BAND].varname, "OUT_LATENT_SUB_BAND");
     strcpy(out_metadata[OUT_LATENT_SUB_BAND].long_name, "latent_sub_band");
     strcpy(out_metadata[OUT_LATENT_SUB_BAND].standard_name,
@@ -1317,7 +1317,7 @@ set_output_met_data_info()
     strcpy(out_metadata[OUT_LATENT_SUB_BAND].description,
            out_metadata[OUT_LATENT_SUB].description);
 
-    /* energy of fusion (melting) [W/m2] */
+    /* energy of fusion (melting) [W m-2] */
     strcpy(out_metadata[OUT_MELT_ENERGY_BAND].varname, "OUT_MELT_ENERGY_BAND");
     strcpy(out_metadata[OUT_MELT_ENERGY_BAND].long_name, "melt_energy_band");
     strcpy(out_metadata[OUT_MELT_ENERGY_BAND].standard_name,
@@ -1327,7 +1327,7 @@ set_output_met_data_info()
     strcpy(out_metadata[OUT_MELT_ENERGY_BAND].description,
            out_metadata[OUT_MELT_ENERGY].description);
 
-    /* net downward longwave flux [W/m2] */
+    /* net downward longwave flux [W m-2] */
     strcpy(out_metadata[OUT_LWNET_BAND].varname, "OUT_LWNET_BAND");
     strcpy(out_metadata[OUT_LWNET_BAND].long_name, "lwnet_band");
     strcpy(out_metadata[OUT_LWNET_BAND].standard_name,
@@ -1336,7 +1336,7 @@ set_output_met_data_info()
     strcpy(out_metadata[OUT_LWNET_BAND].description,
            out_metadata[OUT_LWNET].description);
 
-    /* net downward shortwave flux [W/m2] */
+    /* net downward shortwave flux [W m-2] */
     strcpy(out_metadata[OUT_SWNET_BAND].varname, "OUT_SWNET_BAND");
     strcpy(out_metadata[OUT_SWNET_BAND].long_name, "swnet_band");
     strcpy(out_metadata[OUT_SWNET_BAND].standard_name,
@@ -1345,7 +1345,7 @@ set_output_met_data_info()
     strcpy(out_metadata[OUT_SWNET_BAND].description,
            out_metadata[OUT_SWNET].description);
 
-    /* net energy used to refreeze liquid water in snowpack [W/m2] */
+    /* net energy used to refreeze liquid water in snowpack [W m-2] */
     strcpy(out_metadata[OUT_RFRZ_ENERGY_BAND].varname, "OUT_RFRZ_ENERGY_BAND");
     strcpy(out_metadata[OUT_RFRZ_ENERGY_BAND].long_name, "rfrz_energy_band");
     strcpy(out_metadata[OUT_RFRZ_ENERGY_BAND].standard_name,
@@ -1355,7 +1355,7 @@ set_output_met_data_info()
     strcpy(out_metadata[OUT_RFRZ_ENERGY_BAND].description,
            out_metadata[OUT_RFRZ_ENERGY].description);
 
-    /* net upward sensible heat flux [W/m2] */
+    /* net upward sensible heat flux [W m-2] */
     strcpy(out_metadata[OUT_SENSIBLE_BAND].varname, "OUT_SENSIBLE_BAND");
     strcpy(out_metadata[OUT_SENSIBLE_BAND].long_name, "sensible_band");
     strcpy(out_metadata[OUT_SENSIBLE_BAND].standard_name,
@@ -1395,7 +1395,7 @@ set_output_met_data_info()
     strcpy(out_metadata[OUT_SNOW_DEPTH_BAND].description,
            out_metadata[OUT_SNOW_DEPTH].description);
 
-    /* energy flux through snow pack [W/m2] */
+    /* energy flux through snow pack [W m-2] */
     strcpy(out_metadata[OUT_SNOW_FLUX_BAND].varname, "OUT_SNOW_FLUX_BAND");
     strcpy(out_metadata[OUT_SNOW_FLUX_BAND].long_name, "snow_flux_band");
     strcpy(out_metadata[OUT_SNOW_FLUX_BAND].standard_name,

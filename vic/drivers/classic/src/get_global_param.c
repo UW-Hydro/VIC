@@ -668,7 +668,7 @@ get_global_param(FILE *gp)
                         "global parameter file");
             }
             else if (strcasecmp("SKIPYEAR", optstr) == 0) {
-                log_err("SKIPYEAR has been deprecated. To avoid writting output"
+                log_err("SKIPYEAR has been deprecated. To avoid writing output"
                         "to history files, set AGGFREQ == FREQ_NEVER");
             }
 

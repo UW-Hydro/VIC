@@ -135,7 +135,8 @@ set_state_meta_data_info()
     strcpy(state_metadata[STATE_SNOW_MELT_STATE].long_name, "snow_melt_state");
     strcpy(state_metadata[STATE_SNOW_MELT_STATE].standard_name,
            "snow_melting_phase");
-    strcpy(state_metadata[STATE_SNOW_MELT_STATE].units, "none");
+    strcpy(state_metadata[STATE_SNOW_MELT_STATE].units,
+           "1 melting, 0 not melting");
     strcpy(state_metadata[STATE_SNOW_MELT_STATE].description,
            "flag to indicate whether snowpack is in accumulation or melting phase");
 
@@ -144,7 +145,7 @@ set_state_meta_data_info()
     strcpy(state_metadata[STATE_SNOW_COVERAGE].long_name, "snow_coverage");
     strcpy(state_metadata[STATE_SNOW_COVERAGE].standard_name,
            "snow_coverage_fraction");
-    strcpy(state_metadata[STATE_SNOW_COVERAGE].units, "none");
+    strcpy(state_metadata[STATE_SNOW_COVERAGE].units, "1");
     strcpy(state_metadata[STATE_SNOW_COVERAGE].description,
            "fraction of grid cell area covered by snow");
 
@@ -204,7 +205,7 @@ set_state_meta_data_info()
     strcpy(state_metadata[STATE_SNOW_DENSITY].long_name, "snow_density");
     strcpy(state_metadata[STATE_SNOW_DENSITY].standard_name,
            "snowpack_density");
-    strcpy(state_metadata[STATE_SNOW_DENSITY].units, "kg/m3");
+    strcpy(state_metadata[STATE_SNOW_DENSITY].units, "kg m-3");
     strcpy(state_metadata[STATE_SNOW_DENSITY].description, "snowpack density");
 
     // STATE_SNOW_COLD_CONTENT
@@ -214,7 +215,7 @@ set_state_meta_data_info()
            "snow_cold_content");
     strcpy(state_metadata[STATE_SNOW_COLD_CONTENT].standard_name,
            "snowpack_cold_content");
-    strcpy(state_metadata[STATE_SNOW_COLD_CONTENT].units, "J/m2");
+    strcpy(state_metadata[STATE_SNOW_COLD_CONTENT].units, "J m-2");
     strcpy(state_metadata[STATE_SNOW_COLD_CONTENT].description,
            "snowpack cold content");
 
@@ -255,7 +256,7 @@ set_state_meta_data_info()
            "energy_longunderout");
     strcpy(state_metadata[STATE_ENERGY_LONGUNDEROUT].standard_name,
            "longwave_out_from_understory");
-    strcpy(state_metadata[STATE_ENERGY_LONGUNDEROUT].units, "W/m2");
+    strcpy(state_metadata[STATE_ENERGY_LONGUNDEROUT].units, "W m-2");
     strcpy(state_metadata[STATE_ENERGY_LONGUNDEROUT].description,
            "outgoing longwave flux from understory vegetation");
 
@@ -266,7 +267,7 @@ set_state_meta_data_info()
            "energy_snow_flux");
     strcpy(state_metadata[STATE_ENERGY_SNOW_FLUX].standard_name,
            "snowpack_thermal_flux");
-    strcpy(state_metadata[STATE_ENERGY_SNOW_FLUX].units, "W/m2");
+    strcpy(state_metadata[STATE_ENERGY_SNOW_FLUX].units, "W m-2");
     strcpy(state_metadata[STATE_ENERGY_SNOW_FLUX].description,
            "thermal flux through snowpack");
 
@@ -333,7 +334,8 @@ set_state_meta_data_info()
            "lake_snow_melt_state");
     strcpy(state_metadata[STATE_LAKE_SNOW_MELT_STATE].standard_name,
            "lake_snow_melting_phase");
-    strcpy(state_metadata[STATE_LAKE_SNOW_MELT_STATE].units, "none");
+    strcpy(state_metadata[STATE_LAKE_SNOW_MELT_STATE].units,
+           "1 melting, 0 not melting");
     strcpy(state_metadata[STATE_LAKE_SNOW_MELT_STATE].description,
            "flag to indicate whether snowpack is in accumulation or melting phase on lake ice");
 
@@ -344,7 +346,7 @@ set_state_meta_data_info()
            "lake_snow_coverage");
     strcpy(state_metadata[STATE_LAKE_SNOW_COVERAGE].standard_name,
            "lake_snow_coverage_fraction");
-    strcpy(state_metadata[STATE_LAKE_SNOW_COVERAGE].units, "none");
+    strcpy(state_metadata[STATE_LAKE_SNOW_COVERAGE].units, "1");
     strcpy(state_metadata[STATE_LAKE_SNOW_COVERAGE].description,
            "fraction of grid cell area covered by snow on lake ice");
 
@@ -357,7 +359,7 @@ set_state_meta_data_info()
            "snow_water_equivalent");
     strcpy(state_metadata[STATE_LAKE_SNOW_WATER_EQUIVALENT].units, "m");
     strcpy(state_metadata[STATE_LAKE_SNOW_WATER_EQUIVALENT].description,
-           "snow water equivalent on lake ice");
+           "lake snow water equivalent on lake ice");
 
     // STATE_LAKE_SNOW_SURF_TEMP
     strcpy(state_metadata[STATE_LAKE_SNOW_SURF_TEMP].varname,
@@ -410,7 +412,7 @@ set_state_meta_data_info()
            "lake_snow_density");
     strcpy(state_metadata[STATE_LAKE_SNOW_DENSITY].standard_name,
            "lake_snowpack_density");
-    strcpy(state_metadata[STATE_LAKE_SNOW_DENSITY].units, "kg/m3");
+    strcpy(state_metadata[STATE_LAKE_SNOW_DENSITY].units, "kg m-3");
     strcpy(state_metadata[STATE_LAKE_SNOW_DENSITY].description,
            "snowpack density on lake ice");
 
@@ -421,9 +423,9 @@ set_state_meta_data_info()
            "lake_snow_cold_content");
     strcpy(state_metadata[STATE_LAKE_SNOW_COLD_CONTENT].standard_name,
            "lake_snowpack_cold_content");
-    strcpy(state_metadata[STATE_LAKE_SNOW_COLD_CONTENT].units, "J/m2");
+    strcpy(state_metadata[STATE_LAKE_SNOW_COLD_CONTENT].units, "J m-2");
     strcpy(state_metadata[STATE_LAKE_SNOW_COLD_CONTENT].description,
-           "snowpack cold content_on_lake_ice");
+           "snowpack cold content on lake ice");
 
     // STATE_LAKE_SNOW_CANOPY
     strcpy(state_metadata[STATE_LAKE_SNOW_CANOPY].varname,
@@ -431,7 +433,7 @@ set_state_meta_data_info()
     strcpy(state_metadata[STATE_LAKE_SNOW_CANOPY].long_name,
            "lake_snow_canopy");
     strcpy(state_metadata[STATE_LAKE_SNOW_CANOPY].standard_name,
-           "snow_water_equivalent_intercepted_in_canopy");
+           "lake_snow_water_equivalent_intercepted_in_canopy");
     strcpy(state_metadata[STATE_LAKE_SNOW_CANOPY].units, "m");
     strcpy(state_metadata[STATE_LAKE_SNOW_CANOPY].description,
            "snow interception storage in canopy on lake ice");
@@ -454,7 +456,7 @@ set_state_meta_data_info()
            "lake_active_layers");
     strcpy(state_metadata[STATE_LAKE_ACTIVE_LAYERS].standard_name,
            "lake_active_layers");
-    strcpy(state_metadata[STATE_LAKE_ACTIVE_LAYERS].units, "none");
+    strcpy(state_metadata[STATE_LAKE_ACTIVE_LAYERS].units, "-");
     strcpy(state_metadata[STATE_LAKE_ACTIVE_LAYERS].description,
            "number of nodes whose corresponding layers currently contain water");
 
@@ -626,7 +628,7 @@ set_state_meta_data_info()
            "lake_ice_snow_cold_content");
     strcpy(state_metadata[STATE_LAKE_ICE_SNOW_COLD_CONTENT].standard_name,
            "lake_ice_snow_cold_content");
-    strcpy(state_metadata[STATE_LAKE_ICE_SNOW_COLD_CONTENT].units, "J/m2");
+    strcpy(state_metadata[STATE_LAKE_ICE_SNOW_COLD_CONTENT].units, "J m-2");
     strcpy(state_metadata[STATE_LAKE_ICE_SNOW_COLD_CONTENT].description,
            "snowpack cold content of snow lake");
 
@@ -659,7 +661,7 @@ set_state_meta_data_info()
            "lake_ice_snow_albedo");
     strcpy(state_metadata[STATE_LAKE_ICE_SNOW_ALBEDO].standard_name,
            "lake_ice_snow_albedo");
-    strcpy(state_metadata[STATE_LAKE_ICE_SNOW_ALBEDO].units, "none");
+    strcpy(state_metadata[STATE_LAKE_ICE_SNOW_ALBEDO].units, "1");
     strcpy(state_metadata[STATE_LAKE_ICE_SNOW_ALBEDO].description,
            "albedo of lake snow");
 

@@ -7,10 +7,11 @@ VIC allows the user to specify exactly which output files to create and which va
 **Main points:**
 
 1.  Output file names and contents can be specified in the [global parameter file](GlobalParam.md) (see below).
-2.  If you do not specify file names and contents in the [global parameter file](GlobalParam.md), VIC will produce the same set of output files that it has produced in earlier versions, namely "fluxes" and "snow" files, plus "fdepth" files if FROZEN_SOIL is TRUE and "snowband" files if PRT_SNOW_BAND is TRUE. These files will have the same contents and format as in earlier versions.
+2.  If you do not specify file names and contents in the [global parameter file](GlobalParam.md), VIC will produce the same set of output files that it has produced in earlier versions, namely "fluxes" and "snow" files, plus "fdepth" files if FROZEN_SOIL is TRUE and "snowband" files if PRT_SNOW_BAND is TRUE. These files will all be in netCDF format. (NOTE: these default outputs seem to not be implemented in the image driver yet!!!)
 3.  The OPTIMIZE and LDAS_OUTPUT options have been removed. These output configurations can be selected with the proper set of instructions in the [global parameter file](GlobalParam.md). (see the `output.*.template` files included in this distribution for more information.)
 4.  If you do specify the file names and contents in the [global parameter file](GlobalParam.md), PRT_SNOW_BAND will have no effect.
 
+# NOTE: things below need to be changed according to new netCDF output
 **To specify file names and contents in the [global parameter file](GlobalParam.md):**
 
 1.  Find the names of the desired variables in the [output variable list](../../OutputVarList.md)

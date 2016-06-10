@@ -109,13 +109,13 @@ from tonic.models.vic.grid_params import soil, snow, veg, veg_class, Cols, Desc
 
 n_veg_classes = 4
 root_zones = 3
-months_per_year = 12
 
 # Read the soil parameters
 soil_dict = soil('~/workdir/Stehekin_VIC.4.1.2_soil.txt', c=Cols(nlayers=3))
 
 # Read the snow parameters
-soil_dict = soil('~/workdir/Stehekin_VIC.4.1.2_snow.txt', c=Cols(snow_bands=5))
+soil_dict = snow('~/workdir/Stehekin_VIC.4.1.2_snow.txt',
+                 soil_dict, c=Cols(snow_bands=5))
 
 # Read the veg parameter file
 veg_dict = veg('~/workdir/Stehekin_VIC.4.1.2_vegparam.txt',

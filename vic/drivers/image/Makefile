@@ -92,7 +92,7 @@ INCLUDES = -I ${DRIVERPATH}/include \
 		   -I ${NETCDFPATH}/include \
 
 # Uncomment to include debugging information
-CFLAGS  =  ${INCLUDES} -ggdb -O0 -Wall -Wextra -std=c99 -DLOG_LVL=$(LOG_LVL)
+CFLAGS  =  ${INCLUDES} -ggdb -O0 -Wall -Wextra -std=c99 -fopenmp -DLOG_LVL=$(LOG_LVL)
 LIBRARY = -lm -L${NETCDFPATH}/lib -lnetcdf
 
 COMPEXE = vic_image

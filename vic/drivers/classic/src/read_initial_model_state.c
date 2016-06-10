@@ -502,7 +502,7 @@ read_initial_model_state(FILE            *init_state,
                 log_err("End of model state file found unexpectedly");
             }
             if (lake_var->snow.density > 0.) {
-                lake_var->snow.depth = MM_PER_M * lake_var->snow.swq /
+                lake_var->snow.depth = CONST_RHOFW * lake_var->snow.swq /
                                        lake_var->snow.density;
             }
 
@@ -643,7 +643,7 @@ read_initial_model_state(FILE            *init_state,
             }
             lake_var->snow.MELTING = (char)tmp_char;
             if (lake_var->snow.density > 0.) {
-                lake_var->snow.depth = MM_PER_M * lake_var->snow.swq /
+                lake_var->snow.depth = CONST_RHOFW * lake_var->snow.swq /
                                        lake_var->snow.density;
             }
 

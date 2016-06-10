@@ -73,7 +73,7 @@ Each grid cell information line must be followed with lines for all defined vege
 | (8+2\*Nlayer)                                                                 | surf_temp         | double    | Temperature of the surface layer in the snow algorithm [C]                            |
 | (9+2\*Nlayer)                                                                 | surf_water        | double    | Liquid water content of the surface layer [m]                                         |
 | (10+2\*Nlayer)                                                                | pack_temp         | double    | Temperature of the pack layer in the snow algorithm [C]                               |
-| (11+2\*Nlayer)                                                                | pack_water        | double    | Liquid water content of the surface layer [m]                                         |
+| (11+2\*Nlayer)                                                                | pack_water        | double    | Liquid water content of the pack layer [m]                                         |
 | (12+2\*Nlayer)                                                                | density           | double    | Density of the snowpack [kg/m<sup>3</sup>]                                            |
 | (13+2\*Nlayer)                                                                | coldcontent       | double    | Cold content of snow pack [J/m<sup>2</sup>]                                           |
 | (14+2\*Nlayer)                                                                | snow_canopy       | double    | Snow water equivalence stored in the canopy [m]                                       |

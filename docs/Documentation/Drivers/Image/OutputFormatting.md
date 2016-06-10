@@ -11,7 +11,9 @@ VIC allows the user to specify exactly which output files to create and which va
 3.  The OPTIMIZE and LDAS_OUTPUT options have been removed. These output configurations can be selected with the proper set of instructions in the [global parameter file](GlobalParam.md). (see the `output.*.template` files included in this distribution for more information.)
 4.  If you do specify the file names and contents in the [global parameter file](GlobalParam.md), PRT_SNOW_BAND will have no effect.
 
-# NOTE: things below need to be changed according to new netCDF output
+!!! Warning:
+    Things below need to be changed according to new netCDF output!!!
+
 **To specify file names and contents in the [global parameter file](GlobalParam.md):**
 
 1.  Find the names of the desired variables in the [output variable list](../../OutputVarList.md)
@@ -160,4 +162,3 @@ In addition, several more variables have been added to the list of available out
 ## Specifying Output Time Step
 
 VIC can now aggregate the output variables to a user-defined output interval, via the OUT_STEP setting in the [global parameter file](GlobalParam.md). Currently, the largest output interval allowed is 24 hours, so this option is only useful for simulations running at sub-daily time steps.
-

@@ -29,6 +29,7 @@
 
 #include <vic_def.h>
 #include <mpi.h>
+#include <omp.h>
 
 #define VIC_MPI_ROOT 0
 

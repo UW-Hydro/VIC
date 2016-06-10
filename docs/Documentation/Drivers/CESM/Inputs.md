@@ -1,6 +1,9 @@
 # CESM Driver Inputs
 
-To run VIC, several sets of input data are necessary:
+!!! Warning
+    The VIC CESM Driver is experimental and is still under development. No documentation or support is provided for running CESM in any way.
+
+To run CESM or RASM with VIC, several sets of input data are necessary:
 
 *   Input Configuration File: This file lists the individual input files used by the CESM driver. The heading (e.g. `wr50a`) describes the domain grid used and is used by `build_vic_namelist` via the `LND_GRID` environment variable set by the CESM build system. The individual input files described are described below. Currently, the `vic_global_param` and `vic_constants` are included in the `VIC/vic/drivers/cesm/bld/` directory. Additional default configuration files may be added in the future.
 

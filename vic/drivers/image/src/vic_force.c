@@ -337,7 +337,7 @@ vic_force(void)
         global_param.forceoffset[1] += NF;
     }
 
-    
+
     // allocate memory for t_offset
     t_offset = malloc(local_domain.ncells_active * sizeof(*t_offset));
     if (dvar == NULL) {

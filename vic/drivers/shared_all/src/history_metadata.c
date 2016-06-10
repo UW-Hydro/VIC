@@ -97,14 +97,16 @@ set_output_met_data_info()
     strcpy(out_metadata[OUT_LAKE_ICE_HEIGHT].long_name, "lake_ice_height");
     strcpy(out_metadata[OUT_LAKE_ICE_HEIGHT].standard_name, "lake_ice_height");
     strcpy(out_metadata[OUT_LAKE_ICE_HEIGHT].units, "cm");
-    strcpy(out_metadata[OUT_LAKE_ICE_HEIGHT].description, "thickness of lake ice");
+    strcpy(out_metadata[OUT_LAKE_ICE_HEIGHT].description,
+           "thickness of lake ice");
 
     /* liquid water stored in lake [mm over lake area?] */
     strcpy(out_metadata[OUT_LAKE_MOIST].varname, "OUT_LAKE_MOIST");
     strcpy(out_metadata[OUT_LAKE_MOIST].long_name, "lake_moist");
     strcpy(out_metadata[OUT_LAKE_MOIST].standard_name, "lake_moisture");
     strcpy(out_metadata[OUT_LAKE_MOIST].units, "mm");
-    strcpy(out_metadata[OUT_LAKE_MOIST].description, "liquid water stored in lake");
+    strcpy(out_metadata[OUT_LAKE_MOIST].description,
+           "liquid water stored in lake");
 
     /* lake surface area [m2] */
     strcpy(out_metadata[OUT_LAKE_SURF_AREA].varname, "OUT_LAKE_SURF_AREA");
@@ -119,7 +121,8 @@ set_output_met_data_info()
     strcpy(out_metadata[OUT_LAKE_SWE].standard_name,
            "lwe_thickness_of_snow_on_lake");
     strcpy(out_metadata[OUT_LAKE_SWE].units, "m");
-    strcpy(out_metadata[OUT_LAKE_SWE].description, "liquid water equivalent of snow on top of lake ice");
+    strcpy(out_metadata[OUT_LAKE_SWE].description,
+           "liquid water equivalent of snow on top of lake ice");
 
     /* volumetric liquid water equivalent of snow on top of lake ice [m3] */
     strcpy(out_metadata[OUT_LAKE_SWE_V].varname, "OUT_LAKE_SWE_V");
@@ -228,7 +231,8 @@ set_output_met_data_info()
     strcpy(out_metadata[OUT_SOIL_MOIST].long_name, "soil_moist");
     strcpy(out_metadata[OUT_SOIL_MOIST].standard_name, "soil_moisture");
     strcpy(out_metadata[OUT_SOIL_MOIST].units, "mm");
-    strcpy(out_metadata[OUT_SOIL_MOIST].description, "soil total moisture content");
+    strcpy(out_metadata[OUT_SOIL_MOIST].description,
+           "soil total moisture content");
 
     /* vertical average of (soil moisture - wilting point)/(maximum soil moisture - wilting point) [mm/mm] */
     strcpy(out_metadata[OUT_SOIL_WET].varname, "OUT_SOIL_WET");
@@ -368,7 +372,8 @@ set_output_met_data_info()
     strcpy(out_metadata[OUT_INFLOW].long_name, "inflow");
     strcpy(out_metadata[OUT_INFLOW].standard_name, "soil_column_inflow");
     strcpy(out_metadata[OUT_INFLOW].units, "mm");
-    strcpy(out_metadata[OUT_INFLOW].description, "moisture that reaches top of soil column");
+    strcpy(out_metadata[OUT_INFLOW].description,
+           "moisture that reaches top of soil column");
 
     /* incoming baseflow from lake catchment [mm] */
     strcpy(out_metadata[OUT_LAKE_BF_IN].varname, "OUT_LAKE_BF_IN");
@@ -394,7 +399,7 @@ set_output_met_data_info()
            "baseflow_outgoing_lake");
     strcpy(out_metadata[OUT_LAKE_BF_OUT].units, "mm");
     strcpy(out_metadata[OUT_LAKE_BF_OUT].description,
-           "somethoutgoing baseflow lakeing");
+           "outgoing baseflow lake");
 
     /* outgoing volumetric baseflow from lake [m3] */
     strcpy(out_metadata[OUT_LAKE_BF_OUT_V].varname, "OUT_LAKE_BF_OUT_V");
@@ -797,7 +802,8 @@ set_output_met_data_info()
     strcpy(out_metadata[OUT_TCAN_FBFLAG].standard_name,
            "canopy_temperature_flag");
     strcpy(out_metadata[OUT_TCAN_FBFLAG].units, "1");
-    strcpy(out_metadata[OUT_TCAN_FBFLAG].description, "Canopy temperature fallback flag");
+    strcpy(out_metadata[OUT_TCAN_FBFLAG].description,
+           "Canopy temperature fallback flag");
 
     /* depth of thawing fronts [cm] for each thawing front */
     strcpy(out_metadata[OUT_TDEPTH].varname, "OUT_TDEPTH");
@@ -814,7 +820,7 @@ set_output_met_data_info()
            "foliage_temperature_flag");
     strcpy(out_metadata[OUT_TFOL_FBFLAG].units, "1");
     strcpy(out_metadata[OUT_TFOL_FBFLAG].description,
-           "depth of thawing fronts for each thawing front");
+           "foilage temperature fallback flag");
 
     /* average vegetation canopy temperature [C] */
     strcpy(out_metadata[OUT_VEGT].varname, "OUT_VEGT");
@@ -973,8 +979,11 @@ set_output_met_data_info()
     strcpy(out_metadata[OUT_SNOW_FLUX].standard_name,
            "energy_flux_through_snow_pack");
     strcpy(out_metadata[OUT_SNOW_FLUX].units, "W m-2");
+    strcpy(out_metadata[OUT_SNOW_FLUX].description,
+           "energy flux through snow pack");
 
     // Miscellaneous Terms
+
     /* "scene" aerodynamic conductance [m/s] (tiles with overstory contribute
         overstory conductance; others contribue surface conductance) */
     strcpy(out_metadata[OUT_AERO_COND].varname, "OUT_AERO_COND");

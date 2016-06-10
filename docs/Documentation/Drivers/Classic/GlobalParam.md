@@ -482,8 +482,8 @@ RESULT_DIR      (put the result directory path here)    # Results directory path
 #                    NYEARS    = write to history every <value> years
 #                    DATE      = write to history on the date: <value>
 #                    END       = write to history at the end of the simulation
-#   <value>      = integer describing the number of <freq> intervals to pass
-#                  before writing to the history file.
+#   <value>      = integer or date string (YYYY-MM-DD) describing the number
+#                  of <freq> intervals to pass before writing to the history file.
 #   <compress>   = gzip compression option.  TRUE, FALSE, or integer between 1-9.
 #   <varname>    = name of the variable (this must be one of the
 #                  output variable names listed in vic_driver_shared_all.h.)

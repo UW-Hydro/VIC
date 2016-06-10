@@ -30,7 +30,8 @@
  * @brief    This routine creates the list of output data.
  *****************************************************************************/
 void
-alloc_out_data(size_t ngridcells, double ****out_data)
+alloc_out_data(size_t     ngridcells,
+               double ****out_data)
 {
     extern metadata_struct out_metadata[N_OUTVAR_TYPES];
 

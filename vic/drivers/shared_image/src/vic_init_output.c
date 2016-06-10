@@ -536,14 +536,14 @@ set_global_nc_attributes(int ncid,
                          unsigned short int
                          file_type)
 {
-    char       tmpstr[MAXSTRING];
-    char       userstr[MAXSTRING];
-    char       hoststr[MAXSTRING];
-    char       mpistr[MPI_MAX_LIBRARY_VERSION_STRING];
-    int        len;
-    int        status;
-    time_t     curr_date_time;
-    struct tm *timeinfo;
+    char           tmpstr[MAXSTRING];
+    char           userstr[MAXSTRING];
+    char           hoststr[MAXSTRING];
+    char           mpistr[MPI_MAX_LIBRARY_VERSION_STRING];
+    int            len;
+    int            status;
+    time_t         curr_date_time;
+    struct tm     *timeinfo;
     uid_t          uid;
     struct passwd *pw;
 

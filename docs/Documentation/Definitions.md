@@ -61,7 +61,7 @@ Soil textures are from the STATSGO database (USDA NRCS), which has been compiled
 
 This reports 16 different soil texture classes for 11 layers, which cover a depth of 2.5 meters. The majority of data does not extend beyond 1.5 meters, which includes the first 9 of their 11 layers. The Penn State data is available in gridded form at a resolution of 30 arc-seconds.
 
-The soil texture data is then imported into Arc/Info, where it is indexed to values of Ksat according to an index table soil hydraulic properties [(see sample table here)](soiltext.md). The data in this table are placed into an INFO file in Arc/Info, and the individual relates are then created to be used in an Arc/Info macro to create the Ksat grid for each layer. An example Arc/Info macro can be downloaded [here](text_ks.aml).
+The soil texture data is then imported into Arc/Info, where it is indexed to values of Ksat according to an index table soil hydraulic properties [(see sample table here)](soiltext.md). The data in this table are placed into an INFO file in Arc/Info, and the individual relates are then created to be used in an Arc/Info macro to create the Ksat grid for each layer.
 
 ### MIN_WIND_SPEED
 MIN_WIND_SPEED defines the minimum observable wind speed, which is then used to correct the model forcing data. Anemometers typically have a minimum observable wind speed on the order of 0.5 m/s. When forcing the VIC model with hourly wind speeds, the model's surface flux estimates have been observed to "hiccup" (especially in dry climates), while this does not impact the long term energy balance, it will be very noticable when looking at daily fluxes. Therefore, VIC will use MIN_WIND_SPEED to restrict the minimum value of wind speed used to force the model.
@@ -147,7 +147,7 @@ The measurement wind height is the height above the ground at which wind observa
 
 ### Wpwp_FRACT
 
-The parameter `Wpwp_FRACT` (`wp`) is the fractional soil moisture (expressed as a fraction of the maximum soil moisture; max. soil moisture = porosity * layer depth) at the wilting point. Wilting Point is set at the water content at a tension of ?1500 kPa, and is approximated for the different soil textures.
+The parameter `Wpwp_FRACT` (`wp`) is the fractional soil moisture (expressed as a fraction of the maximum soil moisture; max. soil moisture = porosity * layer depth) at the wilting point. Wilting Point is set at the water content at a tension of 1500 kPa, and is approximated for the different soil textures.
 
 Soil textures are from the STATSGO database (USDA NRCS), which has been compiled from a state-by-state format into a U.S. database, available through Penn State University at [http://dbwww.essc.psu.edu/geotree/dbtop/amer_n/us_48/data/soilprop/statsgo_geo/soiltext/doc.html](http://dbwww.essc.psu.edu/geotree/dbtop/amer_n/us_48/data/soilprop/statsgo_geo/soiltext/doc.html)
 
@@ -156,4 +156,4 @@ This reports 16 different soil texture classes for 11 layers, which cover a dept
 The soil texture data is then imported into Arc/Info, where it is indexed to values of Wp according to the table [SOILTEXT](soiltext.md). The data in this table are placed into an INFO file in Arc/Info, and the individual relates are then created to be used in an Arc/Info macro to create the Wp grid. An example Arc/Info macro can be downloaded [here.](text_wiltp.aml)
 
 ### Ws
-The parameter Ws is the fraction of maximum soil moisture where non-linear baseflow occurs. As with the [`Ds`](#Ds) parameter, this is generally adjusted during the calibration phase of applying the VIC model. Values for Ws are typically greater than 0.5. An initial value of 0.9 can be used.
+The parameter Ws is the fraction of maximum soil moisture where non-linear baseflow occurs. As with the [`Ds`](#ds) parameter, this is generally adjusted during the calibration phase of applying the VIC model. Values for Ws are typically greater than 0.5. An initial value of 0.9 can be used.

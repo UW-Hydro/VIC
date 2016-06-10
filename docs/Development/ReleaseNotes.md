@@ -10,7 +10,8 @@ For a list of known issues and their fixes (in bug-fix updates), visit the VIC G
 
 To check which release of VIC you are running:
 
-Type `vicNl -v` or for VIC 5 and later, `vic_{classic,image}.exe -v`.
+For VIC 4, type `vicNl -v`
+For VIC 5 and later, type `vic _{classic,image}.exe -v`
 
 ------------------------------
 
@@ -39,7 +40,7 @@ This is a major update from VIC 4. The VIC 5.0.0 release aims to have nearly ide
 
 4. Constants File ([GH#192](https://github.com/UW-Hydro/VIC/pull/173))
 
-	Earlier versions of VIC included many hard-coded parameters and constants.  We have consolidated these constants into a single structure and developed a input file that allows users to modify parameters at run-time.  See [here](../Documentation/Constants/) for more information.
+	Earlier versions of VIC included many hard-coded parameters and constants.  We have consolidated these constants into a single structure and developed an input file that allows users to modify parameters at run-time.  See [here](../Documentation/Constants/) for more information.
 
 5. Logging ([GH#173](https://github.com/UW-Hydro/VIC/pull/173))
 
@@ -63,7 +64,7 @@ This is a major update from VIC 4. The VIC 5.0.0 release aims to have nearly ide
 
 10. Testing and Continuous Integration ([GH#190](https://github.com/UW-Hydro/VIC/pull/190))
 
-	A comprehensive testing platform has been implemented and is available for public use along with the VIC model. A small subset of the test platform is run on [Travis-CI](https://travis-ci.org/UW-Hydro/VIC), which facilitates for continuous integration of the VIC test platform. More information on the test platform is [here](Testing.md)
+	A comprehensive testing platform has been implemented and is available for public use along with the VIC model. A small subset of the test platform is run on [Travis-CI](https://travis-ci.org/UW-Hydro/VIC), which facilitates continuous integration of the VIC test platform. More information on the test platform is [here](Testing.md)
 
 #### Backwards Incompatible Changes:
 
@@ -159,7 +160,7 @@ This is a major update from VIC 4. The VIC 5.0.0 release aims to have nearly ide
 	- The prognostic state variable `energy.Tfoliage` (foliage temperature) is now saved to the state file
 	- Two flux variables `energy.LongUnderOut` and `energy.snow_flux` are now saved to the state file.
 
-		!!!note
+		!!!Note
 				This is a temporary solution to ensure exact restart. A better way of handling the two flux variables needs to be done in the future (see [GH#479](https://github.com/UW-Hydro/VIC/issues/479))
 
 4. Fix for binary state file I/O ([GH#487](https://github.com/UW-Hydro/VIC/pull/487))

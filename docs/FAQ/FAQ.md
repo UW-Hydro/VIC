@@ -61,7 +61,7 @@ Here are some commonly-asked questions and their answers. Another source of info
     *   We have not yet performed rigorous testing of any VIC versions on 64-bit platforms. At this point, users must assume some risk when running VIC in a 64-bit environment. We hope to look into this further in the future.
     *   VIC's numerical schemes may be partially responsible for differences. VIC uses simple first-order forward difference schemes for most of its computations, although VIC 4.1.1 and later have the option to use an implicit scheme to model soil temperatures.
 
-    In summary, probably the best thing you can do at this point is to upgrade to the latest version of VIC and see if turning off the "-g" option is sufficient to speed up your code without invoking any compiler optimization options. If running with `FROZEN_SOIL` or `FULL_ENERGY` set to `TRUE`, setting `IMPLICIT` to `TRUE` may make VIC's results more stable as well.s
+    In summary, probably the best thing you can do at this point is to upgrade to the latest version of VIC and see if turning off the "-g" option is sufficient to speed up your code without invoking any compiler optimization options. If running with `FROZEN_SOIL` or `FULL_ENERGY` set to `TRUE`, setting `IMPLICIT` to `TRUE` may make VIC's results more stable as well.
 
     It is worth noting that users have reported similar problems with other hydrologic models. See Martyn Clark's "numerical daemons" paper.
 

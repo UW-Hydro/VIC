@@ -29,6 +29,7 @@
 
 #include <vic_def.h>
 #include <mpi.h>
+#include <omp.h>
 #include <stdbool.h>
 
 void create_MPI_filenames_struct_type(MPI_Datatype *mpi_type);

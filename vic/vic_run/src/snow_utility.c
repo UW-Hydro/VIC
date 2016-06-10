@@ -169,17 +169,17 @@ snow_density(snow_data_struct *snow,
                 depth_new = new_snow / density_new;
                 depth = depth - delta_depth + depth_new;
                 swq += new_snow / MM_PER_M;
-                density = MM_PER_M * swq / depth;
+                density = CONST_RHOFW * swq / depth;
             }
             else {
                 /* no snowpack present, so snow density equals that of new snow */
                 density = density_new;
                 swq += new_snow / MM_PER_M;
-                depth = MM_PER_M * swq / density;
+                depth = CONST_RHOFW * swq / density;
             }
         }
         else {
-            density = MM_PER_M * swq / snow->depth;
+            density = CONST_RHOFW * swq / snow->depth;
         }
 
         /** Densification of the snow pack due to aging **/
@@ -194,7 +194,7 @@ snow_density(snow_data_struct *snow,
                 delta_depth = param.SNOW_DENS_MAX_CHANGE * depth;
             }
             depth -= delta_depth;
-            density = MM_PER_M * swq / depth;
+            density = CONST_RHOFW * swq / depth;
         }
     }
 

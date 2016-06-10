@@ -107,7 +107,7 @@ compute_derived_state_vars(all_vars_struct *all_vars,
     for (veg = 0; veg <= Nveg; veg++) {
         for (band = 0; band < options.SNOW_BAND; band++) {
             if (snow[veg][band].density > 0.) {
-                snow[veg][band].depth = MM_PER_M * snow[veg][band].swq /
+                snow[veg][band].depth = CONST_RHOFW * snow[veg][band].swq /
                                         snow[veg][band].density;
             }
         }

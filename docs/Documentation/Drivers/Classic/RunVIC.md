@@ -3,14 +3,15 @@
 ## Compiling
 
 - Dependencies:
-    The Classic Driver's only dependency is a C compiler.  We routinely test VIC using the following compilers:
+    The Classic Driver's only dependency is a C compiler that supports the C-99 standard.  We routinely test VIC using the following compilers:
 
-    - GNU (`gcc`)
-    - Clang (`clang`)
+    - GNU (`gcc` version 4+)
+    - Clang (`clang` version 3+)
 
     VIC has also been compiled using these compilers:
     - Intel (`icc`)
     - PGI (`pgcc`)
+
 - If you want to use a compiler other than `gcc`, either edit the Makefile or set the `CC` environment variable, e.g.
 
         export CC=icc

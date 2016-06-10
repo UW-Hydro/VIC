@@ -26,6 +26,7 @@ pages:
         - 'Classic': 'Documentation/Drivers/Classic/ClassicDriver.md'
         - 'Image': 'Documentation/Drivers/Image/ImageDriver.md'
         - 'CESM': 'Documentation/Drivers/CESM/CESMDriver.md'
+        - 'Python': 'Documentation/Drivers/Python/PythonDriver.md'
 - Development:
     - 'Development': 'Development/ModelDevelopment.md'
     - 'Release Notes': 'Development/ReleaseNotes.md'
@@ -41,6 +42,7 @@ pages:
     # Classic Driver
     - 'DefaultOutputs': 'Documentation/Drivers/Classic/DefaultOutputs.md'
     - 'FluxOutputFiles': 'Documentation/Drivers/Classic/FluxOutputFiles.md'
+    - 'SnowOutputFile': 'Documentation/Drivers/Classic/SnowOutputFile.md'
     - 'Forcing Data': 'Documentation/Drivers/Classic/ForcingData.md'
     - 'FrozenSoilOutputFile': 'Documentation/Drivers/Classic/FrozenSoilOutputFile.md'
     - 'GlobalParam': 'Documentation/Drivers/Classic/GlobalParam.md'
@@ -78,6 +80,7 @@ pages:
     - 'SnowModelText': 'Overview/SnowModelText.md'
     - 'Git Workflow': 'Development/git-workflow.md'
     - 'Open Source': 'Development/open-source-philosophy.md'
+    - 'Best Practices': 'Documentation/best_practices.md'
 
 markdown_extensions:
     - toc:

@@ -5,8 +5,14 @@ Running the VIC model may seem to be a formidable task, but approaching the task
 ## VIC Drivers
 
 1.  [Classic Driver](./Drivers/Classic/ClassicDriver.md)
-2.  [Image Driver](./Drivers/Image/ImageDriver.md)
-2.  [CESM Driver](./Drivers/CESM/CESMDriver.md)
+1.  [Image Driver](./Drivers/Image/ImageDriver.md)
+1.  [CESM Driver](./Drivers/CESM/CESMDriver.md)
+1.  [Python Driver](./Drivers/Python/PythonDriver.md)
+
+## Best Practices
+
+1.  [Model History and Metadata](best_practices.md)
+1.  [Using git for version control](../Development/working-with-git.md)
 
 ## References
 

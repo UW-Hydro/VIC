@@ -18,6 +18,9 @@ VIC allows the user to specify exactly which output files to create and which va
 ```
 # Output File Contents
 OUTFILE	_prefix_
+AGGFREQ         _freq_            _value_
+COMPRESS        _compress_
+OUT_FORMAT      _file_format_
 OUTVAR	_varname_	[_format_	[_type_	[_multiplier_ [_aggtype_]]]]
 OUTVAR	_varname_	[_format_	[_type_	[_multiplier_ [_aggtype_]]]]
 OUTVAR	_varname_	[_format_	[_type_	[_multiplier_ [_aggtype_]]]]
@@ -29,55 +32,77 @@ OUTVAR	_varname_	[_format_	[_type_	[_multiplier_ [_aggtype_]]]]
 ```
 where
 
-_prefix_ = name of the output file, NOT including latitude and longitude
+```
+ _prefix_     = name of the output file, NOT including latitude
+                and longitude
+ _freq_       = Describes aggregation frequency for output stream. Valid
+                options for frequency are:
+                  NEVER     = never write to history file
+                  NSTEPS    = write to history every _value_ steps
+                  NSECONDS  = write to history every _value_ seconds
+                  NMINUTES  = write to history every _value_ minutes
+                  NHOURS    = write to history every _value_ hours
+                  NDAYS     = write to history every _value_ days
+                  NMONTHS   = write to history every _value_ months
+                  NYEARS    = write to history every _value_ years
+                  DATE      = write to history on the date: _value_
+                  END       = write to history at the end of the simulation
+ _value_      = integer describing the number of _freq_ intervals to pass
+                before writing to the history file.
+ _compress_   = gzip compression option.  TRUE, FALSE, or integer between 1-9.
+ _varname_    = name of the variable (this must be one of the
+                output variable names listed in vic_driver_shared_all.h.)
+ _format_     = (for ascii output files) fprintf format string,
+                e.g.
+                  %.4f = floating point with 4 decimal places
+                  %.7e = scientific notation w/ 7 decimal places
+                  *    = use the default format for this variable
 
-_varname_ = name of the variable (this must be one of the output variable names listed in `vic_driver_shared_all.h`.)
+ _format_, _type_, and _multiplier_ are optional.  For a given
+ variable, you can specify either NONE of these, or ALL of
+ these.  If these are omitted, the default values will be used.
 
-_format_, _type_,  _multiplier_, and _aggtype_ are optional.  For a given variable,
-you can specify either NONE of these, or ALL of these.  If these
-are omitted, the default values will be used.
-
-_format_ = (for ascii output files) `fprintf` format string, e.g.
-
-  - `%.4f` = floating point with 4 decimal places
-  - `%.7e` = scientific notation w/ 7 decimal places
-  - `*` = use the default format for this variable
-
-_type_ = (for `BINARY` output files) data type code. Must be one of:
-
-  - `OUT_TYPE_DOUBLE` = double-precision floating point
-  - `OUT_TYPE_FLOAT` = single-precision floating point
-  - `OUT_TYPE_INT` = integer
-  - `OUT_TYPE_USINT` = unsigned short integer
-  - `OUT_TYPE_SINT` = short integer
-  - `OUT_TYPE_CHAR` = char
-  - `*` = use the default type
-
-_multiplier_ = (for `BINARY` output files) factor to multiply the data by before writing, to increase precision compared to not using the multiplier.
-  - `*` = use the default multiplier for this variable
-
-_aggtype_ = Aggregation method to use for temporal aggregation. Valid options for aggtype are:
-
-  - `AGG_TYPE_DEFAULT` = default aggregation type for variable
-  - `AGG_TYPE_AVG` = average over aggregation window
-  - `AGG_TYPE_BEG` = beginning of aggregation window
-  - `AGG_TYPE_END` = end of aggregation window
-  - `AGG_TYPE_MAX` = maximum in aggregation window
-  - `AGG_TYPE_MIN` = minimum in aggregation window
-  - `AGG_TYPE_SUM` = sum over aggregation window
+ _type_       = (for binary output files) data type code.
+                Must be one of:
+                  OUT_TYPE_DOUBLE = double-precision floating point
+                  OUT_TYPE_FLOAT  = single-precision floating point
+                  OUT_TYPE_INT    = integer
+                  OUT_TYPE_USINT  = unsigned short integer
+                  OUT_TYPE_SINT   = short integer
+                  OUT_TYPE_CHAR   = char
+                  *               = use the default type
+ _multiplier_ = (for binary output files) factor to multiply
+                the data by before writing, to increase precision.
+                  *    = use the default multiplier for this variable
+ _aggtype_    = Aggregation method to use for temporal aggregation. Valid
+                options for aggtype are:
+                  AGG_TYPE_DEFAULT = default aggregation type for variable
+                  AGG_TYPE_AVG     = average over aggregation window
+                  AGG_TYPE_BEG     = beginning of aggregation window
+                  AGG_TYPE_END     = end of aggregation window
+                  AGG_TYPE_MAX     = maximum in aggregation window
+                  AGG_TYPE_MIN     = minimum in aggregation window
+                  AGG_TYPE_SUM     = sum over aggregation window
+```
 
 Here's an example. To specify 2 output files, named `wbal` and `ebal`, and containing water balance and energy balance terms, respectively, you could do something like this:
 
 ```
 OUTFILE	wbal
-OUTVAR	OUT_PREC
-OUTVAR	OUT_EVAP
-OUTVAR	OUT_RUNOFF
-OUTVAR	OUT_BASEFLOW
-OUTVAR	OUT_SWE
-OUTVAR	OUT_SOIL_MOIST
+AGGFREQ         NDAYS           1
+COMPRESS        FALSE
+OUT_FORMAT      ASCII
+OUTVAR	OUT_PREC        %.7g * * AGG_TYPE_AVG
+OUTVAR	OUT_EVAP        %.7g * * AGG_TYPE_AVG
+OUTVAR	OUT_RUNOFF      %.7g * * AGG_TYPE_AVG
+OUTVAR	OUT_BASEFLOW    %.7g * * AGG_TYPE_AVG
+OUTVAR	OUT_SWE         %.7g * * AGG_TYPE_END
+OUTVAR	OUT_SOIL_MOIST  %.7g * * AGG_TYPE_AVG
 
 OUTFILE	ebal
+AGGFREQ         NHOURS           3
+COMPRESS        TRUE
+OUT_FORMAT      BINARY
 OUTVAR	OUT_NET_SHORT
 OUTVAR	OUT_NET_LONG
 OUTVAR	OUT_LATENT
@@ -87,9 +112,9 @@ OUTVAR	OUT_SNOW_FLUX
 OUTVAR	OUT_ALBEDO
 ```
 
-Since no _format_, _type, _multiplier_, or _aggtype_ were specified for any variables, VIC will use the default _format_, _type, _multiplier_, or _aggtype_ for the variables.
+In the second file, none of the _format_, _type, _multiplier_, or _aggtype_ parameters were specified for any variables, VIC will use the default _format_, _type, _multiplier_, or _aggtype_ for the variables.
 
-If you wanted scientific notation with 10 significant digits for `ALBEDO`, you could do the following:
+For example, to specify scientific notation with 10 significant digits, you could do the following:
 
 ```OUTVAR	OUT_ALBEDO	%.9e```
 
@@ -126,7 +151,7 @@ will result in an output file containing:
 
 ## Specifying Output Time Step
 
-VIC can now aggregate the output variables to a user-defined output interval, via the `OUTFREQ` setting in the [global parameter file](GlobalParam.md). When  `OUTFREQ` is set, it describes aggregation frequency for an output stream. Valid options for frequency are: NEVER, NSTEPS, NSECONDS, NMINUTES, NHOURS, NDAYS, NMONTHS, NYEARS, DATE, END. Count may be an positive integer or a string with date format YYYY-MM-DD[-SSSSS] in the case of DATE. Default `frequency` is `NDAYS`. Default `count` is 1.
+VIC can now aggregate the output variables to a user-defined output interval, via the `OUTFREQ` setting in the [global parameter file](GlobalParam.md). When  `OUTFREQ` is set, it describes aggregation frequency for an output stream. Valid options for frequency are: NEVER, NSTEPS, NSECONDS, NMINUTES, NHOURS, NDAYS, NMONTHS, NYEARS, DATE, END. Count may be a positive integer or a string with date format YYYY-MM-DD[-SSSSS] in the case of DATE. Default `frequency` is `NDAYS`. Default `count` is 1.
 
 ## Optional Output File Headers
 

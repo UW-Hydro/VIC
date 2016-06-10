@@ -4,7 +4,7 @@ If the user does not give explicit output file instructions in the global parame
 
 ## Flux Files
 
-The primary output file type for the VIC model is the flux file, which contains information about moisture and energy fluxes for each time step. These output files are based on the model output files used for the PILPS-2C project. The number of variables in this file depends on the values of `FULL_ENERGY` and `FROZEN_SOIL` in the [global parameter file](GlobalParam.md); when either `FULL_ENERGY` or `FROZEN_SOIL` are true. Flux files are always written, regardless of the mode of operation. Flux files begin with the prefix `fluxes_`.
+The primary output file type for the VIC model is the flux file, which contains information about moisture and energy fluxes for each time step. These output files are based on the model output files used for the PILPS-2C project. The number of variables in this file depends on the values of `FULL_ENERGY` and `FROZEN_SOIL` in the [global parameter file](GlobalParam.md). When either `FULL_ENERGY` or `FROZEN_SOIL` are true, flux files are always written, regardless of the mode of operation. Flux files begin with the prefix `fluxes_`.
 
 For more information on the Flux Output Files, [click here](FluxOutputFiles.md).
 
@@ -28,6 +28,6 @@ For more information on the Snow Band Output Files, [click here](SnowBandOutputF
 
 ## Lake Files
 
-The lake file contains information about the lake fraction of the grid cell. Lake files are only written when LAKES is set equal to a valid lake parameter file, in the [global parameter file](GlobalParam.md). Lake files begin with the prefix `lake_`.
+The lake file contains information about the lake fraction of each grid cell. Lake files are only written when LAKES is set equal to a valid lake parameter file, in the [global parameter file](GlobalParam.md). Lake files begin with the prefix `lake_`.
 
 For more information on the Lake Output File, [click here](LakeOutputFile.md).

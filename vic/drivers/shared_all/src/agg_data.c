@@ -77,14 +77,14 @@ agg_stream_data(stream_struct *stream,
             else if (stream->aggtype[j] == AGG_TYPE_MAX) {
                 for (k = 0; k < nelem; k++) {
                     stream->aggdata[i][j][k][0] +=
-                        min(stream->aggdata[i][j][k][0], out_data[i][varid][k]);
+                        max(stream->aggdata[i][j][k][0], out_data[i][varid][k]);
                 }
             }
             // Minimum over the period
-            else if (stream->aggtype[j] == AGG_TYPE_MAX) {
+            else if (stream->aggtype[j] == AGG_TYPE_MIN) {
                 for (k = 0; k < nelem; k++) {
                     stream->aggdata[i][j][k][0] +=
-                        max(stream->aggdata[i][j][k][0], out_data[i][varid][k]);
+                        min(stream->aggdata[i][j][k][0], out_data[i][varid][k]);
                 }
             }
             // Average over the period if counter is full

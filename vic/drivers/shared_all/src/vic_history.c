@@ -29,41 +29,38 @@
 /******************************************************************************
  * @brief    This routine creates the list of output data.
  *****************************************************************************/
-double ***
-create_outdata(size_t ngridcells)
+void
+alloc_out_data(size_t ngridcells, double ****out_data)
 {
     extern metadata_struct out_metadata[N_OUTVAR_TYPES];
 
     size_t                 i;
     size_t                 j;
     size_t                 k;
-    double              ***out_data;
 
-    out_data = calloc(ngridcells, sizeof(*out_data));
-    if (out_data == NULL) {
+    *out_data = calloc(ngridcells, sizeof(*(*out_data)));
+    if ((*out_data) == NULL) {
         log_err("Memory allocation error.");
     }
 
     for (i = 0; i < ngridcells; i++) {
-        out_data[i] = calloc(N_OUTVAR_TYPES, sizeof(*(out_data[i])));
-        if (out_data[i] == NULL) {
+        (*out_data)[i] = calloc(N_OUTVAR_TYPES, sizeof(*((*out_data)[i])));
+        if ((*out_data)[i] == NULL) {
             log_err("Memory allocation error.");
         }
         // Allocate space for data
         for (j = 0; j < N_OUTVAR_TYPES; j++) {
-            out_data[i][j] =
-                calloc(out_metadata[j].nelem, sizeof(*(out_data[i][j])));
-            if (out_data[i][j] == NULL) {
+            (*out_data)[i][j] =
+                calloc(out_metadata[j].nelem, sizeof(*((*out_data)[i][j])));
+            if ((*out_data)[i][j] == NULL) {
                 log_err("Memory allocation error.");
             }
             // initialize data member
             for (k = 0; k < out_metadata[i].nelem; k++) {
-                out_data[i][j][k] = 0;
+                (*out_data)[i][j][k] = 0;
             }
         }
     }
-
-    return out_data;
 }
 
 /******************************************************************************

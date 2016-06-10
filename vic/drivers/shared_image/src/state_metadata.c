@@ -356,7 +356,7 @@ set_state_meta_data_info()
     strcpy(state_metadata[STATE_LAKE_SNOW_WATER_EQUIVALENT].long_name,
            "lake_snow_water_equivalent");
     strcpy(state_metadata[STATE_LAKE_SNOW_WATER_EQUIVALENT].standard_name,
-           "snow_water_equivalent");
+           "lake_snow_water_equivalent");
     strcpy(state_metadata[STATE_LAKE_SNOW_WATER_EQUIVALENT].units, "m");
     strcpy(state_metadata[STATE_LAKE_SNOW_WATER_EQUIVALENT].description,
            "lake snow water equivalent on lake ice");

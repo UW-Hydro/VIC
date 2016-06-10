@@ -116,7 +116,7 @@ main(int   argc,
     /** Set up output data structures **/
     set_output_met_data_info();
     // out_data is shape [ngridcells (1), N_OUTVAR_TYPES]
-    out_data = create_outdata(1);
+    alloc_out_data(1, &out_data);
     fclose(filep.globalparam);
     filep.globalparam = open_file(filenames.global, "r");
     parse_output_info(filep.globalparam, &streams, &(dmy[0]));

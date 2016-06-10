@@ -6,15 +6,15 @@ Using options within the *global parameter file*, any combination of the variabl
 | Variable            	| Description                                                                                 | Units                 |
 |---------------------	|-------------------------------------------------------------------------------------------- |---------------------- |
 | OUT_ASAT            	| Saturated Area Fraction (of exposed land, i.e. non-lake; the total fraction of the grid cell that is completely full of water would be OUT_ASAT plus OUT_LAKE_AREA_FRAC) 	| fraction |
-| OUT_LAKE_AREA_FRACT 	| ke surface area as fraction of grid cell area                                               | fraction              |
+| OUT_LAKE_AREA_FRACT 	| Lake surface area as fraction of grid cell area                                               | fraction              |
 | OUT_LAKE_DEPTH      	| Lake depth (distance between surface and deepest point)                                     | m                     |
 | OUT_LAKE_ICE        	| Moisture stored as lake ice                                                                 | mm over lake ice area |
 | OUT_LAKE_ICE_FRACT  	| Fractional coverage of lake ice                                                             | fraction              |
 | OUT_LAKE_ICE_HEIGHT 	| Thickness of lake ice                                                                       | cm  |
 | OUT_LAKE_MOIST      	| Liquid water and ice stored in lake                                                         | mm over grid cell     |
 | OUT_LAKE_SURF_AREA  	| Lake surface area                                                                           | m<sup>2</sup>         |
-| OUT_LAKE_SWE        	| iquid water equivalent of snow on top of lake ice                                           | m over lake ice area  |
-| OUT_LAKE_SWE_V      	| olumetric liquid water equivalent of snow on top of lake ice                                | m<sup>3</sup>         |
+| OUT_LAKE_SWE        	| Liquid water equivalent of snow on top of lake ice                                           | m over lake ice area  |
+| OUT_LAKE_SWE_V      	| Volumetric liquid water equivalent of snow on top of lake ice                                | m<sup>3</sup>         |
 | OUT_LAKE_VOLUME     	| Lake volume                                                                                 | m<sup>3</sup>         |
 | OUT_ROOTMOIST       	| Total soil moisture in layers that contain roots.                                           | mm                    |
 | OUT_SMFROZFRAC      	| Fraction of soil moisture (by mass) that is ice, for each soil layer                        | fraction              |
@@ -47,27 +47,27 @@ Using options within the *global parameter file*, any combination of the variabl
 | OUT_EVAP_BARE          	| Net evaporation from bare soil                                                            	| mm  	        |
 | OUT_EVAP_CANOP         	| Net evaporation from canopy interception                                                  	| mm  	        |
 | OUT_INFLOW             	| Moisture that reaches top of soil column                                                  	| mm  	        |
-| OUT_LAKE_BF_IN         	| ncoming baseflow from lake catchment                            	                            | mm  	        |
-| OUT_LAKE_BF_IN_V       	| ncoming volumetric baseflow from lake catchment                 	                            | m<sup>3</sup> |
-| OUT_LAKE_BF_OUT        	| utgoing baseflow from lake to channel network                  	                            | mm  	        |
-| OUT_LAKE_BF_OUT_V      	| utgoing volumetric baseflow from lake to channel network        	                            | m<sup>3</sup> |
-| OUT_LAKE_CHANNEL_IN    	| hannel inflow from upstream                                    	                            | mm  	        |
-| OUT_LAKE_CHANNEL_IN_V  	| olumetric channel inflow from upstream                          	                            | m<sup>3</sup> |
-| OUT_LAKE_CHANNEL_OUT   	| hannel outflow from lake to channel network                     	                            | mm  	        |
-| OUT_LAKE_CHANNEL_OUT_V 	| olumetric channel outflow from lake to channel network          	                            | m<sup>3</sup> |
-| OUT_LAKE_DSTOR         	| hange in lake moisture storage (liquid plus ice cover)         	                            | mm  	        |
-| OUT_LAKE_DSTOR_V       	| olumetric change in lake moisture storage (liquid plus ice cover)                             | m<sup>3</sup> |
-| OUT_LAKE_DSWE          	| hange in swe on top of lake ice                                	                            | mm  	        |
-| OUT_LAKE_DSWE_V        	| olumetric change in swe on top of lake ice                      	                            | m<sup>3</sup> |
-| OUT_LAKE_EVAP          	| et evaporation from lake surface                                	                            | mm  	        |
-| OUT_LAKE_EVAP_V        	| et volumetric evaporation from lake surface                     	                            | m<sup>3</sup> |
-| OUT_LAKE_PREC_V        	| olumetric precipitation over lake surface                       	                            | m<sup>3</sup> |
-| OUT_LAKE_RCHRG         	| echarge from lake to surrounding wetland                        	                            | mm  	        |
-| OUT_LAKE_RCHRG_V       	| olumetric recharge from lake to surrounding wetland             	                            | m<sup>3</sup> |
-| OUT_LAKE_RO_IN         	| ncoming runoff from lake catchment                             	                            | mm  	        |
-| OUT_LAKE_RO_IN_V       	| ncoming volumetric runoff from lake catchment                   	                            | m<sup>3</sup> |
-| OUT_LAKE_VAPFLX        	| utgoing sublimation from snow on top of lake ice                	                            | mm  	        |
-| OUT_LAKE_VAPFLX_V      	| utgoing volumetric sublimation from snow on top of lake ice     	                            | m<sup>3</sup> |
+| OUT_LAKE_BF_IN         	| Incoming baseflow from lake catchment                            	                            | mm  	        |
+| OUT_LAKE_BF_IN_V       	| Incoming volumetric baseflow from lake catchment                 	                            | m<sup>3</sup> |
+| OUT_LAKE_BF_OUT        	| Outgoing baseflow from lake to channel network                  	                            | mm  	        |
+| OUT_LAKE_BF_OUT_V      	| Outgoing volumetric baseflow from lake to channel network        	                            | m<sup>3</sup> |
+| OUT_LAKE_CHANNEL_IN    	| Channel inflow from upstream                                    	                            | mm  	        |
+| OUT_LAKE_CHANNEL_IN_V  	| Volumetric channel inflow from upstream                          	                            | m<sup>3</sup> |
+| OUT_LAKE_CHANNEL_OUT   	| Channel outflow from lake to channel network                     	                            | mm  	        |
+| OUT_LAKE_CHANNEL_OUT_V 	| Volumetric channel outflow from lake to channel network          	                            | m<sup>3</sup> |
+| OUT_LAKE_DSTOR         	| Change in lake moisture storage (liquid plus ice cover)         	                            | mm  	        |
+| OUT_LAKE_DSTOR_V       	| Volumetric change in lake moisture storage (liquid plus ice cover)                             | m<sup>3</sup> |
+| OUT_LAKE_DSWE          	| Change in swe on top of lake ice                                	                            | mm  	        |
+| OUT_LAKE_DSWE_V        	| Volumetric change in swe on top of lake ice                      	                            | m<sup>3</sup> |
+| OUT_LAKE_EVAP          	| Net evaporation from lake surface                                	                            | mm  	        |
+| OUT_LAKE_EVAP_V        	| Net volumetric evaporation from lake surface                     	                            | m<sup>3</sup> |
+| OUT_LAKE_PREC_V        	| Volumetric precipitation over lake surface                       	                            | m<sup>3</sup> |
+| OUT_LAKE_RCHRG         	| Recharge from lake to surrounding wetland                        	                            | mm  	        |
+| OUT_LAKE_RCHRG_V       	| Volumetric recharge from lake to surrounding wetland             	                            | m<sup>3</sup> |
+| OUT_LAKE_RO_IN         	| Incoming runoff from lake catchment                             	                            | mm  	        |
+| OUT_LAKE_RO_IN_V       	| Incoming volumetric runoff from lake catchment                   	                            | m<sup>3</sup> |
+| OUT_LAKE_VAPFLX        	| Outgoing sublimation from snow on top of lake ice                	                            | mm  	        |
+| OUT_LAKE_VAPFLX_V      	| Outgoing volumetric sublimation from snow on top of lake ice     	                            | m<sup>3</sup> |
 | OUT_PET                	| Potential evapotranspiration (= area-weighted sum of potential transpiration and potential soil evaporation).  Potential transpiration is computed using the Penman-Monteith eqn with architectural resistance and LAI of the current veg cover. | mm  	        |
 | OUT_PREC               	| Incoming precipitation                                                                    	| mm  	        |
 | OUT_RAINF              	| Rainfall                                                                                  	| mm  	        |
@@ -120,8 +120,8 @@ Using options within the *global parameter file*, any combination of the variabl
 | OUT_LATENT       	| Net upward latent heat flux                          	| W/m<sup>2</sup> |
 | OUT_LATENT_SUB   	| Net upward latent heat flux from sublimation         	| W/m<sup>2</sup> |
 | OUT_MELT_ENERGY  	| Energy of fusion (melting) in snowpack               	| W/m<sup>2</sup> |
-| OUT_LWNET     	| Net downward longwave flux                           	| W/m<sup>2</sup> |
-| OUT_SWNET      	| Net downward shortwave flux                          	| W/m<sup>2</sup> |
+| OUT_LWNET        	| Net downward longwave flux                           	| W/m<sup>2</sup> |
+| OUT_SWNET        	| Net downward shortwave flux                          	| W/m<sup>2</sup> |
 | OUT_R_NET        	| Net downward radiation flux                          	| W/m<sup>2</sup> |
 | OUT_RFRZ_ENERGY  	| Net energy used to refreeze liquid water in snowpack 	| W/m<sup>2</sup> |
 | OUT_SENSIBLE     	| Net upward sensible heat flux                        	| W/m<sup>2</sup> |
@@ -165,8 +165,8 @@ Using options within the *global parameter file*, any combination of the variabl
 | OUT_LATENT_BAND      	| Net upward latent heat flux                          	| W/m<sup>2</sup> |
 | OUT_LATENT_SUB_BAND  	| Net upward latent heat flux due to sublimation       	| W/m<sup>2</sup> |
 | OUT_MELT_ENERGY_BAND 	| Energy of fusion (melting) in snowpack               	| W/m<sup>2</sup> |
-| OUT_LWNET_BAND    	| Net downward longwave flux                           	| W/m<sup>2</sup> |
-| OUT_SWNET_BAND     	| Net downward shortwave flux                      	    | W/m<sup>2</sup> |
+| OUT_LWNET_BAND      	| Net downward longwave flux                           	| W/m<sup>2</sup> |
+| OUT_SWNET_BAND       	| Net downward shortwave flux                      	    | W/m<sup>2</sup> |
 | OUT_RFRZ_ENERGY_BAND 	| Net energy used to refreeze liquid water in snowpack 	| W/m<sup>2</sup> |
 | OUT_SENSIBLE_BAND    	| Net upward sensible heat flux                        	| W/m<sup>2</sup> |
 | OUT_SNOW_CANOPY_BAND 	| Snow interception storage in canopy                  	| mm              |

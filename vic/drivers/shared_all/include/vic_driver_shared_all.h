@@ -592,6 +592,7 @@ void agg_stream_data(stream_struct *stream, dmy_struct *dmy_current,
 double all_30_day_from_dmy(dmy_struct *dmy);
 double all_leap_from_dmy(dmy_struct *dmy);
 void alloc_aggdata(stream_struct *stream);
+void alloc_out_data(size_t ngridcells, double ****out_data);
 double average(double *ar, size_t n);
 double calc_energy_balance_error(double, double, double, double, double);
 void calc_root_fractions(veg_con_struct *veg_con, soil_con_struct *soil_con);
@@ -614,7 +615,6 @@ size_t count_n_outfiles(FILE *gp);
 size_t count_outfile_nvars(FILE *gp);
 void cmd_proc(int argc, char **argv, char *globalfilename);
 void compress_files(char string[], short int level);
-double ***create_outdata(size_t ngridcells);
 stream_struct create_outstream(stream_struct *output_streams);
 void get_current_datetime(char *cdt);
 double date2num(double origin, dmy_struct *date, double tzoffset,

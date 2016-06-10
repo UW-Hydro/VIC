@@ -59,7 +59,7 @@ vic_init_output(dmy_struct *dmy_current)
     // initialize the output data structures
     set_output_met_data_info();
 
-    out_data = create_outdata(local_domain.ncells_active);
+    alloc_out_data(local_domain.ncells_active, &out_data);
 
     for (i = 0; i < local_domain.ncells_active; i++) {
         initialize_save_data(&(all_vars[i]), &(atmos[i]), &(soil_con[i]),
@@ -544,6 +544,8 @@ set_global_nc_attributes(int ncid,
     int        status;
     time_t     curr_date_time;
     struct tm *timeinfo;
+    uid_t          uid;
+    struct passwd *pw;
 
     // datestr
     curr_date_time = time(NULL);
@@ -553,8 +555,8 @@ set_global_nc_attributes(int ncid,
     timeinfo = localtime(&curr_date_time);
 
     // username
-    uid_t          uid = geteuid();
-    struct passwd *pw = getpwuid(uid);
+    uid = geteuid();
+    pw = getpwuid(uid);
 
     if (pw) {
         strcpy(userstr, pw->pw_name);

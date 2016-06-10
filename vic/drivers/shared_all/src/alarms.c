@@ -87,11 +87,17 @@ set_alarm(dmy_struct   *dmy_current,
     if (freq == FREQ_NSTEPS) {
         alarm->n = *((int*) value);
         alarm->next = alarm->n;
+        if (alarm->n <= 0) {
+            log_err("invalid n (%d) provided to set_alarm", alarm->n);
+        }
     }
     else if ((freq == FREQ_NSECONDS) || (freq == FREQ_NMINUTES) ||
              (freq == FREQ_NHOURS) || (freq == FREQ_NDAYS) ||
              (freq == FREQ_NMONTHS) || (freq == FREQ_NYEARS)) {
         alarm->n = *((int*) value);
+        if (alarm->n <= 0) {
+            log_err("invalid n (%d) provided to set_alarm", alarm->n);
+        }
     }
     else if (freq == FREQ_DATE) {
         alarm->date = *((dmy_struct*) value);

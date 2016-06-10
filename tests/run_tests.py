@@ -850,7 +850,7 @@ def read_vic_ascii(filepath, parse_dates=True, datetime_index=None, sep='\t',
     df = pd.read_table(filepath, sep=sep, comment=comment, **kwargs)
 
     if parse_dates and datetime_index:
-        raise ValueError('can not specify both parse_dates and datetime_index')
+        raise ValueError('cannot specify both parse_dates and datetime_index')
 
     if parse_dates:
         time_cols = ['YEAR', 'MONTH', 'DAY']

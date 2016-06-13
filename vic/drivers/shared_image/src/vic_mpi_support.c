@@ -58,7 +58,6 @@ initialize_mpi(void)
     create_MPI_global_struct_type(&mpi_global_struct_type);
     create_MPI_filenames_struct_type(&mpi_filenames_struct_type);
     create_MPI_location_struct_type(&mpi_location_struct_type);
-    // create_MPI_stream_struct_type(&mpi_stream_struct_type);
     create_MPI_alarm_struct_type(&mpi_alarm_struct_type);
     create_MPI_option_struct_type(&mpi_option_struct_type);
     create_MPI_param_struct_type(&mpi_param_struct_type);
@@ -1454,8 +1453,8 @@ create_MPI_param_struct_type(MPI_Datatype *mpi_type)
 }
 
 /******************************************************************************
- * @brief   Create an MPI_Datatype that represents the alarm_struct
- * @details This allows MPI operations in which the entire alarm_struct
+ * @brief   Create an MPI_Datatype that represents the dmy_struct
+ * @details This allows MPI operations in which the entire dmy_struct
  *          can be treated as an MPI_Datatype.
  * @param mpi_type MPI_Datatype that can be used in MPI operations
  *****************************************************************************/
@@ -1469,21 +1468,21 @@ create_MPI_dmy_struct_type(MPI_Datatype *mpi_type)
     MPI_Aint     *offsets;
     MPI_Datatype *mpi_types;
 
-    // nitems has to equal the number of elements in global_param_struct
+    // nitems has to equal the number of elements in dmy_struct
     nitems = 5;
     blocklengths = malloc(nitems * sizeof(*blocklengths));
     if (blocklengths == NULL) {
-        log_err("Memory allocation error in create_MPI_dmy_struct_type().")
+        log_err("Memory allocation error")
     }
 
     offsets = malloc(nitems * sizeof(*offsets));
     if (offsets == NULL) {
-        log_err("Memory allocation error in create_MPI_dmy_struct_type().")
+        log_err("Memory allocation error")
     }
 
     mpi_types = malloc(nitems * sizeof(*mpi_types));
     if (mpi_types == NULL) {
-        log_err("Memory allocation error in create_MPI_dmy_struct_type().")
+        log_err("Memory allocation error")
     }
 
     // none of the elements in location_struct are arrays.
@@ -1516,19 +1515,18 @@ create_MPI_dmy_struct_type(MPI_Datatype *mpi_type)
 
     // make sure that the we have the right number of elements
     if (i != (size_t) nitems) {
-        log_err("Miscount in create_MPI_dmy_struct_type(): "
-                "%zd not equal to %d\n", i, nitems);
+        log_err("Miscount: %zd not equal to %d\n", i, nitems);
     }
 
     status = MPI_Type_create_struct(nitems, blocklengths, offsets, mpi_types,
                                     mpi_type);
     if (status != MPI_SUCCESS) {
-        log_err("MPI error in create_MPI_dmy_struct_type(): %d\n", status);
+        log_err("MPI error: %d\n", status);
     }
 
     status = MPI_Type_commit(mpi_type);
     if (status != MPI_SUCCESS) {
-        log_err("MPI error in create_MPI_dmy_struct_type(): %d\n", status);
+        log_err("MPI error: %d\n", status);
     }
 
     // cleanup
@@ -1554,21 +1552,21 @@ create_MPI_alarm_struct_type(MPI_Datatype *mpi_type)
     MPI_Datatype *mpi_types;
     MPI_Datatype  mpi_dmy_type;
 
-    // nitems has to equal the number of elements in global_param_struct
+    // nitems has to equal the number of elements in alarm_struct
     nitems = 6;
     blocklengths = malloc(nitems * sizeof(*blocklengths));
     if (blocklengths == NULL) {
-        log_err("Memory allocation error.")
+        log_err("Memory allocation error")
     }
 
     offsets = malloc(nitems * sizeof(*offsets));
     if (offsets == NULL) {
-        log_err("Memory allocation error.")
+        log_err("Memory allocation error")
     }
 
     mpi_types = malloc(nitems * sizeof(*mpi_types));
     if (mpi_types == NULL) {
-        log_err("Memory allocation error.")
+        log_err("Memory allocation error")
     }
 
     // none of the elements in location_struct are arrays.
@@ -1606,19 +1604,18 @@ create_MPI_alarm_struct_type(MPI_Datatype *mpi_type)
 
     // make sure that the we have the right number of elements
     if (i != (size_t) nitems) {
-        log_err("Miscount in create_MPI_alarm_struct_type(): "
-                "%zd not equal to %d\n", i, nitems);
+        log_err("Miscount: %zd not equal to %d\n", i, nitems);
     }
 
     status = MPI_Type_create_struct(nitems, blocklengths, offsets, mpi_types,
                                     mpi_type);
     if (status != MPI_SUCCESS) {
-        log_err("MPI error in create_MPI_alarm_struct_type(): %d\n", status);
+        log_err("MPI error: %d\n", status);
     }
 
     status = MPI_Type_commit(mpi_type);
     if (status != MPI_SUCCESS) {
-        log_err("MPI error in create_MPI_alarm_struct_type(): %d\n", status);
+        log_err("MPI error: %d\n", status);
     }
 
     // cleanup
@@ -2353,7 +2350,6 @@ domain_struct    local_domain;
 // lake_con_struct     lake_con;
 MPI_Datatype     mpi_global_struct_type;
 MPI_Datatype     mpi_location_struct_type;
-MPI_Datatype     mpi_stream_struct_type;
 MPI_Datatype     mpi_option_struct_type;
 MPI_Datatype     mpi_param_struct_type;
 int             *mpi_map_local_array_sizes = NULL;
@@ -2414,7 +2410,6 @@ main(int    argc,
 
     create_MPI_global_struct_type(&mpi_global_struct_type);
     create_MPI_location_struct_type(&mpi_location_struct_type);
-    create_MPI_stream_struct_type(&mpi_stream_struct_type);
     create_MPI_option_struct_type(&mpi_option_struct_type);
     create_MPI_param_struct_type(&mpi_param_struct_type);
 
@@ -2461,12 +2456,6 @@ main(int    argc,
     }
 
     status = MPI_Bcast(&location, 1, mpi_location_struct_type,
-                       0, MPI_COMM_VIC);
-    if (status != MPI_SUCCESS) {
-        log_err("MPI error in main(): %d\n", status);
-    }
-
-    status = MPI_Bcast(&ncfile, 1, mpi_stream_struct_type,
                        0, MPI_COMM_VIC);
     if (status != MPI_SUCCESS) {
         log_err("MPI error in main(): %d\n", status);

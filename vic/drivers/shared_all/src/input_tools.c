@@ -47,13 +47,16 @@ str_to_bool(char str[])
  * @brief    This routine determines the counts the number of output variables
              in each output file specified in the global parameter file.
  *****************************************************************************/
-size_t
-count_outfile_nvars(FILE *gp)
+void
+count_nstreams_nvars(FILE   *gp,
+                     size_t *nstreams,
+                     size_t  nvars[])
 {
-    size_t        nvars;
     unsigned long start_position;
     char          cmdstr[MAXSTRING];
     char          optstr[MAXSTRING];
+    size_t        i;
+
     // Figure out where we are in the input file
     fflush(gp);
     start_position = ftell(gp);
@@ -61,64 +64,29 @@ count_outfile_nvars(FILE *gp)
     // read the first line
     fgets(cmdstr, MAXSTRING, gp);
 
-    // initalize nvars
-    nvars = 0;
-
-    // Loop through the lines
-    while (!feof(gp)) {
-        if (cmdstr[0] != '#' && cmdstr[0] != '\n' && cmdstr[0] != '\0') {
-            // line is not blank or a comment
-            sscanf(cmdstr, "%s", optstr);
-
-            // if the line starts with OUTFILE
-            if (strcasecmp("OUTVAR", optstr) == 0) {
-                nvars++;
-            }
-            else if ((strcasecmp("OUTFILE", optstr) == 0)) {
-                // we're done with this file so break out of loop
-                break;
-            }
-        }
-        fgets(cmdstr, MAXSTRING, gp);
+    // initialize nstreams and nvars
+    *nstreams = 0;
+    for (i = 0; i < MAX_OUTPUT_STREAMS; i++) {
+        nvars[i] = 0;
     }
 
-    // put the position in the file back to where we started
-    fseek(gp, start_position, SEEK_SET);
-
-    return nvars;
-}
-
-/******************************************************************************
- * @brief    This routine determines the counts the number of output files
-             specified in the global parameter file.
- *****************************************************************************/
-size_t
-count_n_outfiles(FILE *gp)
-{
-    size_t        n_outfiles = 0;
-    unsigned long start_position;
-    char          cmdstr[MAXSTRING];
-    char          optstr[MAXSTRING];
-
-    // Figure out where we are in the input file
-    fflush(gp);
-    start_position = ftell(gp);
-
-    // seek to the beginning of the file
-    rewind(gp);
-
-    // read the first line
-    fgets(cmdstr, MAXSTRING, gp);
-
     // Loop through the lines
     while (!feof(gp)) {
         if (cmdstr[0] != '#' && cmdstr[0] != '\n' && cmdstr[0] != '\0') {
             // line is not blank or a comment
             sscanf(cmdstr, "%s", optstr);
 
-            // if the line starts with OUTFILE
+            // if the line starts with OUTFILE, increment nstreams
             if (strcasecmp("OUTFILE", optstr) == 0) {
-                n_outfiles++;
+                (*nstreams)++;
+                if (*nstreams > MAX_OUTPUT_STREAMS) {
+                    log_err("Too many output streams specified.");
+                }
+            }
+
+            // if the line starts with OUTVAR, add another variable to nvars
+            if (strcasecmp("OUTVAR", optstr) == 0) {
+                nvars[*nstreams - 1]++;
             }
         }
         fgets(cmdstr, MAXSTRING, gp);
@@ -126,8 +94,6 @@ count_n_outfiles(FILE *gp)
 
     // put the position in the file back to where we started
     fseek(gp, start_position, SEEK_SET);
-
-    return n_outfiles;
 }
 
 /******************************************************************************

@@ -191,7 +191,7 @@ void initialize_nc_file(nc_file_struct *nc_file, size_t nvars,
 void initialize_soil_con(soil_con_struct *soil_con);
 void initialize_veg_con(veg_con_struct *veg_con);
 void parse_output_info(FILE *gp, stream_struct **output_streams,
-                       size_t ngridcells, dmy_struct *dmy_current);
+                       dmy_struct *dmy_current);
 void print_atmos_data(atmos_data_struct *atmos);
 void print_domain(domain_struct *domain, bool print_loc);
 void print_location(location_struct *location);

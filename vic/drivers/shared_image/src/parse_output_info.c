@@ -33,7 +33,6 @@
 void
 parse_output_info(FILE           *gp,
                   stream_struct **streams,
-                  size_t          ngridcells,
                   dmy_struct     *dmy_current)
 {
     extern option_struct options;
@@ -52,8 +51,6 @@ parse_output_info(FILE           *gp,
     char                 multstr[MAXSTRING];
     char                 aggstr[MAXSTRING];
     double               mult;
-    size_t               nstreams;
-    size_t               nvars;
     unsigned short int   freq;
     int                  freq_n;
     dmy_struct           freq_dmy;
@@ -61,219 +58,184 @@ parse_output_info(FILE           *gp,
     int                  found;
 
     streamnum = -1;
-    outvarnum = 0;
 
-    // Count the number of output files listed in the global param file
-    nstreams = count_n_outfiles(gp);
-
-    debug("found %zu streams", nstreams);
+    // rewind the global parameter file to the begining and parse only the
+    // output file info.
+    rewind(gp);
+    fgets(cmdstr, MAXSTRING, gp);
 
     /** Read through global control file to find output info **/
-    // only parse the output info if there are output files to parse
-    if (nstreams > 0) {
-        options.Noutstreams = nstreams;
+    while (!feof(gp)) {
+        if (cmdstr[0] != '#' && cmdstr[0] != '\n' && cmdstr[0] != '\0') {
+            sscanf(cmdstr, "%s", optstr);
 
-        *streams = calloc(options.Noutstreams, sizeof(*(*streams)));
-        if (*streams == NULL) {
-            log_err("Memory allocation error in parse_output_info().");
-        }
-
-        // rewind the global parameter file to the begining and parse only the
-        // output file info.
-        rewind(gp);
-        fgets(cmdstr, MAXSTRING, gp);
-
-        while (!feof(gp)) {
-            if (cmdstr[0] != '#' && cmdstr[0] != '\n' && cmdstr[0] != '\0') {
-                sscanf(cmdstr, "%s", optstr);
-
-                if (strcasecmp("OUTFILE", optstr) == 0) {
-                    streamnum++;
-                    if (streamnum >= (short int) options.Noutstreams) {
-                        log_err("Found too many output files, was expecting "
-                                "%zu but found %hu", options.Noutstreams,
-                                streamnum);
-                    }
-                    // determine how many variable will be in this file before
-                    // allocating (GH: 209)
-                    nvars = count_outfile_nvars(gp);
-
-                    // Setup stream
-                    debug("setting up stream %hu with %zu variables "
-                          "and %zu gridcells", streamnum, nvars, ngridcells);
-                    setup_stream(&((*streams)[streamnum]), nvars, ngridcells);
-
-                    if (sscanf(cmdstr, "%*s %s",
-                               (*streams)[streamnum].prefix) != 1) {
-                        log_err("Invalid specification for OUTFILE");
-                    }
-
-                    // set default file format
-                    (*streams)[streamnum].file_format = NETCDF4_CLASSIC;
-
-                    outvarnum = 0;
+            if (strcasecmp("OUTFILE", optstr) == 0) {
+                streamnum++;
+                if (streamnum >= (short int) options.Noutstreams) {
+                    log_err("Found too many output files, was expecting "
+                            "%zu but found %hu", options.Noutstreams,
+                            streamnum);
                 }
-                else if (strcasecmp("AGGFREQ", optstr) == 0) {
-                    if (streamnum < 0) {
-                        log_err("Error in global param file: \"OUTFILE\" must be "
-                                "specified before you can specify \"AGGFREQ\".");
-                    }
-                    found = sscanf(cmdstr, "%*s %s %s", freq_type_str,
-                                   freq_value_str);
 
-                    if (!found) {
-                        log_err("No arguments found after AGGFREQ");
-                    }
-                    // parse the frequency string to an enum value
-                    freq = str_to_freq_flag(freq_type_str);
-
-                    if (freq == FREQ_DATE) {
-                        // Make sure we have a datestring
-                        if (found != 2) {
-                            log_err(
-                                "AGGFREQ was set to DATE but no date string was found");
-                        }
-                        // parse date from freq_value_str
-                        strpdmy(freq_value_str, "%Y-%m-%d", &freq_dmy);
-                        // set the alarm
-                        set_alarm(dmy_current, freq, &freq_dmy,
-                                  (&(*streams)[streamnum].agg_alarm));
-                    }
-                    else {
-                        if (found != 2) {
-                            // Default frequency is 1
-                            freq_n = 1;
-                        }
-                        else {
-                            // get the frequency value as an integer
-                            freq_n = atoi(freq_value_str);
-                        }
-                        // set the alarm
-                        set_alarm(dmy_current, freq, &freq_n,
-                                  (&(*streams)[streamnum].agg_alarm));
-                    }
+                if (sscanf(cmdstr, "%*s %s",
+                           (*streams)[streamnum].prefix) != 1) {
+                    log_err("Invalid specification for OUTFILE");
                 }
-                else if (strcasecmp("HISTFREQ", optstr) == 0) {
-                    if (streamnum < 0) {
-                        log_err("Error in global param file: \"OUTFILE\" must be "
-                                "specified before you can specify \"HISTFREQ\".");
-                    }
-                    found = sscanf(cmdstr, "%*s %s %s", freq_type_str,
-                                   freq_value_str);
 
-                    if (!found) {
-                        log_err("No arguments found after HISTFREQ");
-                    }
-                    // parse the frequency string to an enum value
-                    freq = str_to_freq_flag(freq_type_str);
+                // set default file format
+                (*streams)[streamnum].file_format = NETCDF4_CLASSIC;
 
-                    if (freq == FREQ_DATE) {
-                        // Make sure we have a datestring
-                        if (found != 2) {
-                            log_err(
-                                "AGGFREQ was set to DATE but no date string was found");
-                        }
-                        // parse date from freq_value_str
-                        strpdmy(freq_value_str, "%Y-%m-%d", &freq_dmy);
-                        // set the alarm
-                        set_alarm(dmy_current, freq, &freq_dmy,
-                                  (&(*streams)[streamnum].write_alarm));
-                    }
-                    else {
-                        if (found != 2) {
-                            // Default frequency is 1
-                            freq_n = 1;
-                        }
-                        else {
-                            // get the frequency value as an integer
-                            freq_n = atoi(freq_value_str);
-                        }
-                        // set the alarm
-                        set_alarm(dmy_current, freq, &freq_n,
-                                  (&(*streams)[streamnum].write_alarm));
-                    }
+                outvarnum = 0;
+            }
+            else if (strcasecmp("AGGFREQ", optstr) == 0) {
+                if (streamnum < 0) {
+                    log_err("Error in global param file: \"OUTFILE\" must be "
+                            "specified before you can specify \"AGGFREQ\".");
                 }
-                else if (strcasecmp("COMPRESS", optstr) == 0) {
-                    if (streamnum < 0) {
-                        log_err("Error in global param file: \"OUTFILE\" must be "
-                                "specified before you can specify \"COMPRESS\".");
-                    }
-                    sscanf(cmdstr, "%*s %s", flgstr);
-                    if (strcasecmp("TRUE", flgstr) == 0) {
-                        (*streams)[streamnum].compress =
-                            COMPRESSION_LVL_DEFAULT;
-                    }
-                    else if (strcasecmp("FALSE", flgstr) == 0) {
-                        (*streams)[streamnum].compress = 0;
-                    }
-                    else {
-                        (*streams)[streamnum].compress = atoi(flgstr);
-                    }
+                found = sscanf(cmdstr, "%*s %s %s", freq_type_str,
+                               freq_value_str);
+
+                if (!found) {
+                    log_err("No arguments found after AGGFREQ");
                 }
-                else if (strcasecmp("OUT_FORMAT", optstr) == 0) {
-                    if (streamnum < 0) {
-                        log_err("Error in global param file: \"OUTFILE\" must be "
-                                "specified before you can specify \"OUT_FORMAT\".");
-                    }
-                    sscanf(cmdstr, "%*s %s", flgstr);
-                    if (strcasecmp("NETCDF3_CLASSIC", flgstr) == 0) {
-                        (*streams)[streamnum].file_format = NETCDF3_CLASSIC;
-                    }
-                    else if (strcasecmp("NETCDF3_64BIT_OFFSET", flgstr) == 0) {
-                        (*streams)[streamnum].file_format =
-                            NETCDF3_64BIT_OFFSET;
-                    }
-                    else if (strcasecmp("NETCDF4_CLASSIC", flgstr) == 0) {
-                        (*streams)[streamnum].file_format = NETCDF4_CLASSIC;
-                    }
-                    else if (strcasecmp("NETCDF4", flgstr) == 0) {
-                        (*streams)[streamnum].file_format = NETCDF4;
-                    }
-                    else {
+                // parse the frequency string to an enum value
+                freq = str_to_freq_flag(freq_type_str);
+
+                if (freq == FREQ_DATE) {
+                    // Make sure we have a datestring
+                    if (found != 2) {
                         log_err(
-                            "Image driver file format must be a valid NETCDF format");
+                            "AGGFREQ was set to DATE but no date string was found");
                     }
+                    // parse date from freq_value_str
+                    strpdmy(freq_value_str, "%Y-%m-%d", &freq_dmy);
+                    // set the alarm
+                    set_alarm(dmy_current, freq, &freq_dmy,
+                              (&(*streams)[streamnum].agg_alarm));
                 }
-                else if (strcasecmp("OUTVAR", optstr) == 0) {
-                    if (streamnum < 0) {
-                        log_err("Error in global param file: \"OUTFILE\" must be "
-                                "specified before you can specify \"OUTVAR\".");
+                else {
+                    if (found != 2) {
+                        // Default frequency is 1
+                        freq_n = 1;
                     }
-                    // parse outvar options
-                    strcpy(varname, "");
-                    strcpy(format, "");
-                    strcpy(typestr, "");
-                    strcpy(multstr, "");
-                    strcpy(aggstr, "");
-                    found = sscanf(cmdstr, "%*s %s %s %s %s %s", varname,
-                                   format, typestr, multstr, aggstr);
-                    if (!found) {
-                        log_err("OUTVAR specified but no variable was listed");
+                    else {
+                        // get the frequency value as an integer
+                        freq_n = atoi(freq_value_str);
                     }
-                    // interpret string options, set defaults if necessary
-                    str_to_ascii_format(format);
-                    agg_type = str_to_agg_type(aggstr);
-                    type = str_to_out_type(typestr);
-                    mult = str_to_out_mult(multstr);
-
-                    // Add OUTVAR to stream
-                    set_output_var(&((*streams)[streamnum]), varname, outvarnum,
-                                   format, type, mult, agg_type);
-                    outvarnum++;
+                    // set the alarm
+                    set_alarm(dmy_current, freq, &freq_n,
+                              (&(*streams)[streamnum].agg_alarm));
                 }
             }
-            fgets(cmdstr, MAXSTRING, gp);
-        }
-    }
-    // Otherwise, set output files and their contents to default configuration
-    else {
-        set_output_defaults(streams, ngridcells, dmy_current);
-    }
+            else if (strcasecmp("HISTFREQ", optstr) == 0) {
+                if (streamnum < 0) {
+                    log_err("Error in global param file: \"OUTFILE\" must be "
+                            "specified before you can specify \"HISTFREQ\".");
+                }
+                found = sscanf(cmdstr, "%*s %s %s", freq_type_str,
+                               freq_value_str);
 
-    for (streamnum = 0;
-         streamnum < (short int) options.Noutstreams;
-         streamnum++) {
-        // Allocate memory for the stream aggdata arrays
-        alloc_aggdata(&(*streams)[streamnum]);
+                if (!found) {
+                    log_err("No arguments found after HISTFREQ");
+                }
+                // parse the frequency string to an enum value
+                freq = str_to_freq_flag(freq_type_str);
+
+                if (freq == FREQ_DATE) {
+                    // Make sure we have a datestring
+                    if (found != 2) {
+                        log_err(
+                            "AGGFREQ was set to DATE but no date string was found");
+                    }
+                    // parse date from freq_value_str
+                    strpdmy(freq_value_str, "%Y-%m-%d", &freq_dmy);
+                    // set the alarm
+                    set_alarm(dmy_current, freq, &freq_dmy,
+                              (&(*streams)[streamnum].write_alarm));
+                }
+                else {
+                    if (found != 2) {
+                        // Default frequency is 1
+                        freq_n = 1;
+                    }
+                    else {
+                        // get the frequency value as an integer
+                        freq_n = atoi(freq_value_str);
+                    }
+                    // set the alarm
+                    set_alarm(dmy_current, freq, &freq_n,
+                              (&(*streams)[streamnum].write_alarm));
+                }
+            }
+            else if (strcasecmp("COMPRESS", optstr) == 0) {
+                if (streamnum < 0) {
+                    log_err("Error in global param file: \"OUTFILE\" must be "
+                            "specified before you can specify \"COMPRESS\".");
+                }
+                sscanf(cmdstr, "%*s %s", flgstr);
+                if (strcasecmp("TRUE", flgstr) == 0) {
+                    (*streams)[streamnum].compress =
+                        COMPRESSION_LVL_DEFAULT;
+                }
+                else if (strcasecmp("FALSE", flgstr) == 0) {
+                    (*streams)[streamnum].compress = 0;
+                }
+                else {
+                    (*streams)[streamnum].compress = atoi(flgstr);
+                }
+            }
+            else if (strcasecmp("OUT_FORMAT", optstr) == 0) {
+                if (streamnum < 0) {
+                    log_err("Error in global param file: \"OUTFILE\" must be "
+                            "specified before you can specify \"OUT_FORMAT\".");
+                }
+                sscanf(cmdstr, "%*s %s", flgstr);
+                if (strcasecmp("NETCDF3_CLASSIC", flgstr) == 0) {
+                    (*streams)[streamnum].file_format = NETCDF3_CLASSIC;
+                }
+                else if (strcasecmp("NETCDF3_64BIT_OFFSET", flgstr) == 0) {
+                    (*streams)[streamnum].file_format =
+                        NETCDF3_64BIT_OFFSET;
+                }
+                else if (strcasecmp("NETCDF4_CLASSIC", flgstr) == 0) {
+                    (*streams)[streamnum].file_format = NETCDF4_CLASSIC;
+                }
+                else if (strcasecmp("NETCDF4", flgstr) == 0) {
+                    (*streams)[streamnum].file_format = NETCDF4;
+                }
+                else {
+                    log_err(
+                        "Image driver file format must be a valid NETCDF format");
+                }
+            }
+            else if (strcasecmp("OUTVAR", optstr) == 0) {
+                if (streamnum < 0) {
+                    log_err("Error in global param file: \"OUTFILE\" must be "
+                            "specified before you can specify \"OUTVAR\".");
+                }
+                // parse outvar options
+                strcpy(varname, "");
+                strcpy(format, "");
+                strcpy(typestr, "");
+                strcpy(multstr, "");
+                strcpy(aggstr, "");
+                found = sscanf(cmdstr, "%*s %s %s %s %s %s", varname,
+                               format, typestr, multstr, aggstr);
+                if (!found) {
+                    log_err("OUTVAR specified but no variable was listed");
+                }
+                // interpret string options, set defaults if necessary
+                str_to_ascii_format(format);
+                agg_type = str_to_agg_type(aggstr);
+                type = str_to_out_type(typestr);
+                mult = str_to_out_mult(multstr);
+
+                // Add OUTVAR to stream
+                set_output_var(&((*streams)[streamnum]), varname, outvarnum,
+                               format, type, mult, agg_type);
+                outvarnum++;
+            }
+        }
+        fgets(cmdstr, MAXSTRING, gp);
     }
 }

@@ -52,30 +52,43 @@ parse_output_info(FILE           *gp,
     char                       multstr[MAXSTRING];
     char                       aggstr[MAXSTRING];
     double                     mult;
-    size_t                     nstreams;
-    size_t                     nvars;
     unsigned short int         freq;
     int                        freq_n;
     dmy_struct                 freq_dmy;
     unsigned short int         agg_type;
     int                        found;
+    size_t                     nstream_vars[MAX_OUTPUT_STREAMS];
+    bool                       default_outputs = false;
 
     /** Read through global control file to find output info **/
 
-    streamnum = -1;
-    outvarnum = 0;
-
     // Count the number of output files listed in the global param file
-    nstreams = count_n_outfiles(gp);
+    count_nstreams_nvars(gp, &(options.Noutstreams), nstream_vars);
+
+    // If there weren't any output streams specified, get the defaults
+    if (options.Noutstreams == 0) {
+        default_outputs = true;
+        get_default_nstreams_nvars(&(options.Noutstreams), nstream_vars);
+    }
+
+    // Allocate streams
+    *streams = calloc(options.Noutstreams, sizeof(*(*streams)));
+    if (*streams == NULL) {
+        log_err("Memory allocation error in parse_output_info().");
+    }
+
+    // Setup streams
+    for (streamnum = 0;
+         streamnum < (short int) options.Noutstreams;
+         streamnum++) {
+        setup_stream(streams[streamnum], nstream_vars[streamnum], 1);
+    }
 
     // only parse the output info if there are output files to parse
-    if (nstreams > 0) {
-        options.Noutstreams = nstreams;
-
-        *streams = calloc(options.Noutstreams, sizeof(*(*streams)));
-        if (*streams == NULL) {
-            log_err("Memory allocation error in parse_output_info().");
-        }
+    if (!default_outputs) {
+        // initialize counters
+        streamnum = -1;
+        outvarnum = 0;
 
         // rewind the global parameter file to the begining and parse only the
         // output file info.
@@ -92,13 +105,6 @@ parse_output_info(FILE           *gp,
                                 "%zu but found %hu", options.Noutstreams,
                                 streamnum);
                     }
-                    // determine how many variable will be in this file before
-                    // allocating (GH: 209)
-                    nvars = count_outfile_nvars(gp);
-
-                    // Setup stream
-                    setup_stream(streams[streamnum], nvars, 1);
-
                     if (sscanf(cmdstr, "%*s %s",
                                (*streams)[streamnum].prefix) != 1) {
                         log_err("Invalid specification for OUTFILE");
@@ -213,7 +219,7 @@ parse_output_info(FILE           *gp,
     }
     // Otherwise, set output files and their contents to default configuration
     else {
-        set_output_defaults(streams, 1, dmy_current);
+        set_output_defaults(streams, dmy_current);
     }
     fclose(gp);
 

@@ -55,58 +55,75 @@ vic_init_output(dmy_struct *dmy_current)
     int                       status;
     size_t                    i;
     size_t                    streamnum;
+    size_t                    nstream_vars[MAX_OUTPUT_STREAMS];
+    bool                      default_outputs = false;
 
     // initialize the output data structures
     set_output_met_data_info();
 
+    // allocate out_data
     alloc_out_data(local_domain.ncells_active, &out_data);
 
+    // initialize the save data structures
     for (i = 0; i < local_domain.ncells_active; i++) {
         initialize_save_data(&(all_vars[i]), &(atmos[i]), &(soil_con[i]),
                              veg_con[i], veg_lib[i], &lake_con, out_data[i],
                              &(save_data[i]));
     }
+
     if (mpi_rank == 0) {
-        // determine which variables will be written to the history file
-        parse_output_info(filep.globalparam, &output_streams,
-                          local_domain.ncells_active, dmy_current);
+        // count the number of streams and variables in the global parameter file
+        count_nstreams_nvars(filep.globalparam, &(options.Noutstreams),
+                             nstream_vars);
+
+        // If there weren't any output streams specified, get the defaults
+        if (options.Noutstreams == 0) {
+            default_outputs = true;
+            get_default_nstreams_nvars(&(options.Noutstreams), nstream_vars);
+        }
     }
 
+    // broadcast Noutstreams and nstream_vars
     status = MPI_Bcast(&(options.Noutstreams), 1, MPI_AINT, 0, MPI_COMM_VIC);
     if (status != MPI_SUCCESS) {
         log_err("MPI error %d\n", status);
     }
+    status = MPI_Bcast(&(nstream_vars), MAX_OUTPUT_STREAMS, MPI_AINT, 0,
+                       MPI_COMM_VIC);
+    if (status != MPI_SUCCESS) {
+        log_err("MPI error %d\n", status);
+    }
 
+    // allocate output streams
+    output_streams = calloc(options.Noutstreams, sizeof(*output_streams));
+    if (output_streams == NULL) {
+        log_err("Memory allocation error");
+    }
     // allocate netcdf history files array
     nc_hist_files = calloc(options.Noutstreams, sizeof(*nc_hist_files));
     if (nc_hist_files == NULL) {
         log_err("Memory allocation error");
     }
 
-    // Allocate memory for array of streams
-    if (mpi_rank != 0) {
-        output_streams = calloc(options.Noutstreams, sizeof(*output_streams));
-        if (output_streams == NULL) {
-            log_err("Memory allocation error");
+    // allocate memory for streams, initialize to default/missing values
+    for (streamnum = 0; streamnum < options.Noutstreams; streamnum++) {
+        setup_stream(&(output_streams[streamnum]), nstream_vars[streamnum],
+                     local_domain.ncells_active);
+    }
+
+    if (mpi_rank == 0) {
+        if (!default_outputs) {
+            // determine which variables will be written to the history file
+            parse_output_info(filep.globalparam, &output_streams, dmy_current);
+        }
+        else {
+            // set output defaults
+            set_output_defaults(&output_streams, dmy_current);
         }
     }
 
-    // Now that all the scalars are out there, we can allocate memory for each
-    // stream.  This has already been done on the master processor.
+    // Now brodcast the arrays of shape nvars
     for (streamnum = 0; streamnum < options.Noutstreams; streamnum++) {
-        status = MPI_Bcast(&(output_streams[streamnum].nvars),
-                           1, MPI_AINT, 0, MPI_COMM_VIC);
-        if (status != MPI_SUCCESS) {
-            log_err("MPI error %d\n", status);
-        }
-
-        if (mpi_rank != 0) {
-            setup_stream(&(output_streams[streamnum]),
-                         output_streams[streamnum].nvars,
-                         local_domain.ncells_active);
-        }
-
-        // Now brodcast the arrays of shape nvars
         // type
         status = MPI_Bcast(output_streams[streamnum].type,
                            output_streams[streamnum].nvars,
@@ -151,13 +168,10 @@ vic_init_output(dmy_struct *dmy_current)
             log_err("MPI error %d\n", status);
         }
 
-        debug("streamnum %zu of %zu", streamnum, options.Noutstreams);
-
-        extern metadata_struct out_metadata[N_OUTVAR_TYPES];
-        print_stream(&(output_streams[streamnum]), out_metadata);
-
+        // allocate agg data
         alloc_aggdata(&(output_streams[streamnum]));
 
+        // setup netcdf files
         initialize_nc_file(&(nc_hist_files[streamnum]),
                            output_streams[streamnum].nvars,
                            output_streams[streamnum].varid,
@@ -170,6 +184,8 @@ vic_init_output(dmy_struct *dmy_current)
                                     dmy_current);
         }
     }
+    // validate streams
+    validate_streams(&output_streams);
 }
 
 /******************************************************************************

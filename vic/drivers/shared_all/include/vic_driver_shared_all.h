@@ -34,6 +34,7 @@
 
 // Define maximum array sizes for driver level objects
 #define MAX_FORCE_FILES 2
+#define MAX_OUTPUT_STREAMS 20
 
 // Output compression setting
 #define COMPRESSION_LVL_UNSET -1
@@ -611,8 +612,7 @@ void compute_lake_params(lake_con_struct *, soil_con_struct);
 void compute_treeline(atmos_data_struct *, dmy_struct *, double, double *,
                       bool *);
 size_t count_force_vars(FILE *gp);
-size_t count_n_outfiles(FILE *gp);
-size_t count_outfile_nvars(FILE *gp);
+void count_nstreams_nvars(FILE *gp, size_t *nstreams, size_t nvars[]);
 void cmd_proc(int argc, char **argv, char *globalfilename);
 void compress_files(char string[], short int level);
 stream_struct create_outstream(stream_struct *output_streams);
@@ -638,6 +638,7 @@ void generate_default_state(all_vars_struct *, soil_con_struct *,
                             veg_con_struct *);
 void generate_default_lake_state(all_vars_struct *, soil_con_struct *,
                                  lake_con_struct);
+void get_default_nstreams_nvars(size_t *nstreams, size_t nvars[]);
 void get_parameters(FILE *paramfile);
 void init_output_list(double **out_data, int write, char *format, int type,
                       double mult);
@@ -716,8 +717,8 @@ void set_output_var(stream_struct *stream, char *varname, size_t varnum,
 unsigned int get_default_outvar_aggtype(unsigned int varid);
 void set_alarm(dmy_struct *dmy_current, unsigned int freq, void*value,
                alarm_struct *alarm);
-void set_output_defaults(stream_struct **output_streams, size_t ngridcells,
-                         dmy_struct *dmy_current);
+void set_output_defaults(stream_struct **output_streams,
+                         dmy_struct     *dmy_current);
 void set_output_met_data_info();
 void setup_stream(stream_struct *stream, size_t nvars, size_t ngridcells);
 void soil_moisture_from_water_table(soil_con_struct *soil_con, size_t nlayers);

@@ -32,19 +32,10 @@
              These can be overridden by the user in the global control file.
  *****************************************************************************/
 void
-set_output_defaults(stream_struct **streams,
-                    size_t          ngridcells,
-                    dmy_struct     *dmy_current)
+get_default_nstreams_nvars(size_t *nstreams,
+                           size_t  nvars[])
 {
     extern option_struct options;
-
-    size_t               streamnum;
-    size_t               varnum;
-    size_t               nvars;
-    alarm_struct         default_alarm;
-    int                  default_freq_n = 1;
-
-    set_alarm(dmy_current, FREQ_NDAYS, &default_freq_n, &default_alarm);
 
     // Output files
     options.Noutstreams = 2;
@@ -58,72 +49,69 @@ set_output_defaults(stream_struct **streams,
         options.Noutstreams++;
     }
 
-    *streams = calloc(options.Noutstreams, sizeof(*(*streams)));
-    if (*streams == NULL) {
-        log_err("Memory allocation error in set_output_defaults().");
-    }
-
-    streamnum = 0;
+    (*nstreams) = 0;
     if (options.FULL_ENERGY || options.FROZEN_SOIL) {
-        nvars = 26;
+        nvars[(*nstreams) - 1] = 26;
     }
     else {
-        nvars = 20;
+        nvars[(*nstreams) - 1] = 20;
     }
-    setup_stream(&((*streams)[streamnum]), nvars, ngridcells);
-    (*streams)[streamnum].agg_alarm = default_alarm;
-    strcpy((*streams)[streamnum].prefix, "fluxes");
-    (*streams)[streamnum].file_format = ASCII;
 
-    streamnum++;
+    (*nstreams)++;
     if (options.FULL_ENERGY || options.FROZEN_SOIL) {
-        nvars = 14;
+        nvars[(*nstreams) - 1] = 14;
     }
     else {
-        nvars = 4;
+        nvars[(*nstreams) - 1] = 4;
     }
     if (options.BLOWING) {
         nvars += 3;
     }
-    setup_stream(&((*streams)[streamnum]), nvars, ngridcells);
-    (*streams)[streamnum].agg_alarm = default_alarm;
-    strcpy((*streams)[streamnum].prefix, "snow");
-    (*streams)[streamnum].file_format = ASCII;
 
     if (options.FROZEN_SOIL) {
-        streamnum++;
-        nvars = 4;
-
-        setup_stream(&((*streams)[streamnum]), nvars, ngridcells);
-        (*streams)[streamnum].agg_alarm = default_alarm;
-        strcpy((*streams)[streamnum].prefix, "fdepth");
-        (*streams)[streamnum].file_format = ASCII;
+        (*nstreams)++;
+        nvars[(*nstreams) - 1] = 4;
     }
     if (options.SNOW_BAND) {
-        streamnum++;
+        (*nstreams)++;
         if (options.FULL_ENERGY) {
-            nvars = 13;
+            nvars[(*nstreams) - 1] = 13;
         }
         else {
-            nvars = 9;
+            nvars[(*nstreams) - 1] = 9;
         }
-        setup_stream(&((*streams)[streamnum]), nvars, ngridcells);
-        (*streams)[streamnum].agg_alarm = default_alarm;
-        strcpy((*streams)[streamnum].prefix, "snowband");
-        (*streams)[streamnum].file_format = ASCII;
     }
     if (options.LAKES) {
-        streamnum++;
-        nvars = 8;
-        setup_stream(&((*streams)[streamnum]), nvars, ngridcells);
-        (*streams)[streamnum].agg_alarm = default_alarm;
-        strcpy((*streams)[streamnum].prefix, "lake");
-        (*streams)[streamnum].file_format = ASCII;
+        (*nstreams)++;
+        nvars[(*nstreams) - 1] = 8;
     }
+}
+
+/******************************************************************************
+ * @brief    Set the output_stream and out_data structures to default values.
+             These can be overridden by the user in the global control file.
+ *****************************************************************************/
+void
+set_output_defaults(stream_struct **streams,
+                    dmy_struct     *dmy_current)
+{
+    extern option_struct options;
+
+    size_t               streamnum;
+    size_t               varnum;
+    alarm_struct         default_alarm;
+    int                  default_freq_n = 1;
+
+    set_alarm(dmy_current, FREQ_NDAYS, &default_freq_n, &default_alarm);
 
     // Variables in first file
     streamnum = 0;
     varnum = 0;
+
+    (*streams)[streamnum].agg_alarm = default_alarm;
+    strcpy((*streams)[streamnum].prefix, "fluxes");
+    (*streams)[streamnum].file_format = ASCII;
+
     set_output_var(&((*streams)[streamnum]), "OUT_PREC", varnum++, "%.4f",
                    OUT_TYPE_FLOAT, 1, AGG_TYPE_DEFAULT);
     set_output_var(&((*streams)[streamnum]), "OUT_EVAP", varnum++, "%.4f",
@@ -186,6 +174,11 @@ set_output_defaults(stream_struct **streams,
     // Variables in second file
     streamnum++;
     varnum = 0;
+
+    (*streams)[streamnum].agg_alarm = default_alarm;
+    strcpy((*streams)[streamnum].prefix, "snow");
+    (*streams)[streamnum].file_format = ASCII;
+
     set_output_var(&((*streams)[streamnum]), "OUT_SWE", varnum++, "%.4f",
                    OUT_TYPE_FLOAT, 1, AGG_TYPE_DEFAULT);
     set_output_var(&((*streams)[streamnum]), "OUT_SNOW_DEPTH", varnum++, "%.4f",
@@ -229,6 +222,11 @@ set_output_defaults(stream_struct **streams,
     if (options.FROZEN_SOIL) {
         streamnum++;
         varnum = 0;
+
+        (*streams)[streamnum].agg_alarm = default_alarm;
+        strcpy((*streams)[streamnum].prefix, "fdepth");
+        (*streams)[streamnum].file_format = ASCII;
+
         set_output_var(&((*streams)[streamnum]), "OUT_FDEPTH", varnum++, "%.4f",
                        OUT_TYPE_FLOAT, 1, AGG_TYPE_DEFAULT);
         set_output_var(&((*streams)[streamnum]), "OUT_TDEPTH", varnum++, "%.4f",
@@ -241,6 +239,11 @@ set_output_defaults(stream_struct **streams,
     if (options.SNOW_BAND) {
         streamnum++;
         varnum = 0;
+
+        (*streams)[streamnum].agg_alarm = default_alarm;
+        strcpy((*streams)[streamnum].prefix, "snowband");
+        (*streams)[streamnum].file_format = ASCII;
+
         set_output_var(&((*streams)[streamnum]), "OUT_SWE_BAND", varnum++,
                        "%.4f", OUT_TYPE_FLOAT, 1, AGG_TYPE_DEFAULT);
         set_output_var(&((*streams)[streamnum]), "OUT_SNOW_DEPTH_BAND",
@@ -277,6 +280,11 @@ set_output_defaults(stream_struct **streams,
     if (options.LAKES) {
         streamnum++;
         varnum = 0;
+
+        (*streams)[streamnum].agg_alarm = default_alarm;
+        strcpy((*streams)[streamnum].prefix, "lake");
+        (*streams)[streamnum].file_format = ASCII;
+
         set_output_var(&((*streams)[streamnum]), "OUT_LAKE_ICE_TEMP", varnum++,
                        "%.4f", OUT_TYPE_FLOAT, 1, AGG_TYPE_DEFAULT);
         set_output_var(&((*streams)[streamnum]), "OUT_LAKE_ICE_HEIGHT",

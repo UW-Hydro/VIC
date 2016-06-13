@@ -35,25 +35,25 @@
 void
 vic_init_output(dmy_struct *dmy_current)
 {
-    extern all_vars_struct    *all_vars;
-    extern atmos_data_struct  *atmos;
-    extern domain_struct       local_domain;
-    extern filep_struct        filep;
-    extern MPI_Comm            MPI_COMM_VIC;
-    extern int                 mpi_rank;
-    extern nc_file_struct     *nc_hist_files;
-    extern lake_con_struct     lake_con;
+    extern all_vars_struct   *all_vars;
+    extern atmos_data_struct *atmos;
+    extern domain_struct      local_domain;
+    extern filep_struct       filep;
+    extern MPI_Comm           MPI_COMM_VIC;
+    extern int                mpi_rank;
+    extern nc_file_struct    *nc_hist_files;
+    extern lake_con_struct    lake_con;
     extern double          ***out_data;
-    extern save_data_struct   *save_data;
-    extern soil_con_struct    *soil_con;
-    extern veg_con_struct    **veg_con;
-    extern veg_lib_struct    **veg_lib;
+    extern save_data_struct  *save_data;
+    extern soil_con_struct   *soil_con;
+    extern veg_con_struct   **veg_con;
+    extern veg_lib_struct   **veg_lib;
     extern option_struct      options;
     extern MPI_Datatype       mpi_alarm_struct_type;
     extern stream_struct     *output_streams;
 
-    int                        status;
-    size_t                     i;
+    int                       status;
+    size_t                    i;
     size_t                    streamnum;
 
     // initialize the output data structures

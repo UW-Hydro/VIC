@@ -29,8 +29,8 @@
 
 #include <vic_run.h>
 
-#define VERSION "5.0 beta 2016 April 25"
-#define SHORT_VERSION "5.0.beta"
+#define VERSION "5.0.0 candidate 1: June 10, 2016"
+#define SHORT_VERSION "5.0.0 candidate 1"
 
 /******************************************************************************
  * @brief   Met file formats

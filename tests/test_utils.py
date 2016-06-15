@@ -3,7 +3,6 @@
 
 import os
 from collections import OrderedDict
-import string
 import pandas as pd
 
 from tonic.models.vic.vic import (VICRuntimeError,
@@ -42,9 +41,16 @@ def print_test_dict(d):
     print('{0: <48} | {1: <6} | {2}'.format('Test Name', 'Passed', 'Comment'))
     print('-'.ljust(OUTPUT_WIDTH, '-'))
     for k, v in d.items():
-        print('{0: <48} | {1: <6} | {2}'.format(v.name, str(bool(v.passed)),
+        print('{0: <48} | {1: <6} | {2}'.format(clip_string(v.name, 48),
+                                                str(bool(v.passed)),
                                                 v.comment))
         print('-'.ljust(OUTPUT_WIDTH, '-'))
+
+
+def clip_string(string, length=50):
+    if len(string) > length:
+        string = string[:length - 3] + '...'
+    return string
 
 
 def print_tail(string, n=20, indent='\t--->'):
@@ -150,7 +156,7 @@ def test_classic_driver_all_complete(fnames):
     start = None
     end = None
     for fname in fnames:
-        df = read_vic_ascii(fname, header=True)
+        df = read_vic_ascii(fname)
 
         # check that each dataframe includes all timestamps
         if (start is not None) and (end is not None):
@@ -163,7 +169,7 @@ def test_classic_driver_all_complete(fnames):
 def test_classic_driver_no_output_file_nans(fnames):
     '''Test that all VIC classic driver output files in fnames have no nans'''
     for fname in fnames:
-        df = read_vic_ascii(fname, header=True)
+        df = read_vic_ascii(fname)
         check_for_nans(df)
 
 
@@ -220,6 +226,3 @@ def find_global_param_value(gp, param_name):
         key = line_list[0]
         if key == param_name:
             return line_list[1]
-
-if __name__ == '__main__':
-    main()

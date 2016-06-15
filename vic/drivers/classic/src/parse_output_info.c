@@ -81,7 +81,7 @@ parse_output_info(FILE           *gp,
     for (streamnum = 0;
          streamnum < (short int) options.Noutstreams;
          streamnum++) {
-        setup_stream(streams[streamnum], nstream_vars[streamnum], 1);
+        setup_stream(&(*streams)[streamnum], nstream_vars[streamnum], 1);
     }
 
     // only parse the output info if there are output files to parse

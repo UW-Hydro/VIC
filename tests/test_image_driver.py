@@ -11,8 +11,8 @@ def test_image_driver_no_output_file_nans(fnames, domain_file):
     Test that all VIC image driver output files have the same nan structure as
     the domain file
     '''
+    ds_domain = xr.open_dataset(domain_file)
     for fname in fnames:
-        ds_domain = xr.open_dataset(domain_file)
         ds_output = xr.open_dataset(fname)
         assert_nan_equal(ds_domain, ds_output)
 

@@ -12,7 +12,7 @@ import string
 
 import pytest
 
-from tonic.models.vic.vic import VIC, default_vic_valgrind_error_code
+from tonic.models.vic.vic import VIC
 from tonic.io import read_config, read_configobj
 from tonic.testing import VICTestError
 from test_utils import (setup_test_dirs, print_test_dict,

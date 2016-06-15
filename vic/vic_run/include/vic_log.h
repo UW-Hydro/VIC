@@ -144,5 +144,4 @@ void setup_logging(int id);
 
 #define error_unless(T, F, C, M, ...) if (!(T)) \
         error_response(F, C, M, ## __VA_ARGS__)
-
 #endif

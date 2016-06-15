@@ -219,7 +219,7 @@ parse_output_info(FILE           *gp,
     }
     // Otherwise, set output files and their contents to default configuration
     else {
-        set_output_defaults(streams, dmy_current);
+        set_output_defaults(streams, dmy_current, ASCII);
     }
     fclose(gp);
 

@@ -118,7 +118,7 @@ vic_init_output(dmy_struct *dmy_current)
         }
         else {
             // set output defaults
-            set_output_defaults(&output_streams, dmy_current);
+            set_output_defaults(&output_streams, dmy_current, NETCDF4_CLASSIC);
         }
     }
 

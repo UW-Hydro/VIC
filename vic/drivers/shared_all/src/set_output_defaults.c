@@ -37,53 +37,55 @@ get_default_nstreams_nvars(size_t *nstreams,
 {
     extern option_struct options;
 
+    size_t streamnum;
+
     // Output files
-    options.Noutstreams = 2;
+    (*nstreams) = 2;
     if (options.FROZEN_SOIL) {
-        options.Noutstreams++;
+        (*nstreams)++;
     }
     if (options.SNOW_BAND) {
-        options.Noutstreams++;
+        (*nstreams)++;
     }
     if (options.LAKES) {
-        options.Noutstreams++;
+        (*nstreams)++;
     }
 
-    (*nstreams) = 0;
+    streamnum = 0;
     if (options.FULL_ENERGY || options.FROZEN_SOIL) {
-        nvars[(*nstreams) - 1] = 26;
+        nvars[streamnum] = 26;
     }
     else {
-        nvars[(*nstreams) - 1] = 20;
+        nvars[streamnum] = 20;
     }
 
-    (*nstreams)++;
+    streamnum++;
     if (options.FULL_ENERGY || options.FROZEN_SOIL) {
-        nvars[(*nstreams) - 1] = 14;
+        nvars[streamnum] = 14;
     }
     else {
-        nvars[(*nstreams) - 1] = 4;
+        nvars[streamnum] = 4;
     }
     if (options.BLOWING) {
         nvars += 3;
     }
 
     if (options.FROZEN_SOIL) {
-        (*nstreams)++;
-        nvars[(*nstreams) - 1] = 4;
+        streamnum++;
+        nvars[streamnum] = 4;
     }
     if (options.SNOW_BAND) {
-        (*nstreams)++;
+        streamnum++;
         if (options.FULL_ENERGY) {
-            nvars[(*nstreams) - 1] = 13;
+            nvars[streamnum] = 13;
         }
         else {
-            nvars[(*nstreams) - 1] = 9;
+            nvars[streamnum] = 9;
         }
     }
     if (options.LAKES) {
-        (*nstreams)++;
-        nvars[(*nstreams) - 1] = 8;
+        streamnum++;
+        nvars[streamnum] = 8;
     }
 }
 
@@ -93,7 +95,8 @@ get_default_nstreams_nvars(size_t *nstreams,
  *****************************************************************************/
 void
 set_output_defaults(stream_struct **streams,
-                    dmy_struct     *dmy_current)
+                    dmy_struct     *dmy_current,
+                    unsigned short  default_file_format)
 {
     extern option_struct options;
 
@@ -102,16 +105,18 @@ set_output_defaults(stream_struct **streams,
     alarm_struct         default_alarm;
     int                  default_freq_n = 1;
 
+
     set_alarm(dmy_current, FREQ_NDAYS, &default_freq_n, &default_alarm);
+
+    for (streamnum = 0; streamnum < options.Noutstreams; streamnum++) {
+        (*streams)[streamnum].agg_alarm = default_alarm;
+        (*streams)[streamnum].file_format = default_file_format;
+    }
 
     // Variables in first file
     streamnum = 0;
     varnum = 0;
-
-    (*streams)[streamnum].agg_alarm = default_alarm;
     strcpy((*streams)[streamnum].prefix, "fluxes");
-    (*streams)[streamnum].file_format = ASCII;
-
     set_output_var(&((*streams)[streamnum]), "OUT_PREC", varnum++, "%.4f",
                    OUT_TYPE_FLOAT, 1, AGG_TYPE_DEFAULT);
     set_output_var(&((*streams)[streamnum]), "OUT_EVAP", varnum++, "%.4f",
@@ -174,11 +179,7 @@ set_output_defaults(stream_struct **streams,
     // Variables in second file
     streamnum++;
     varnum = 0;
-
-    (*streams)[streamnum].agg_alarm = default_alarm;
     strcpy((*streams)[streamnum].prefix, "snow");
-    (*streams)[streamnum].file_format = ASCII;
-
     set_output_var(&((*streams)[streamnum]), "OUT_SWE", varnum++, "%.4f",
                    OUT_TYPE_FLOAT, 1, AGG_TYPE_DEFAULT);
     set_output_var(&((*streams)[streamnum]), "OUT_SNOW_DEPTH", varnum++, "%.4f",
@@ -222,11 +223,7 @@ set_output_defaults(stream_struct **streams,
     if (options.FROZEN_SOIL) {
         streamnum++;
         varnum = 0;
-
-        (*streams)[streamnum].agg_alarm = default_alarm;
         strcpy((*streams)[streamnum].prefix, "fdepth");
-        (*streams)[streamnum].file_format = ASCII;
-
         set_output_var(&((*streams)[streamnum]), "OUT_FDEPTH", varnum++, "%.4f",
                        OUT_TYPE_FLOAT, 1, AGG_TYPE_DEFAULT);
         set_output_var(&((*streams)[streamnum]), "OUT_TDEPTH", varnum++, "%.4f",
@@ -239,11 +236,7 @@ set_output_defaults(stream_struct **streams,
     if (options.SNOW_BAND) {
         streamnum++;
         varnum = 0;
-
-        (*streams)[streamnum].agg_alarm = default_alarm;
         strcpy((*streams)[streamnum].prefix, "snowband");
-        (*streams)[streamnum].file_format = ASCII;
-
         set_output_var(&((*streams)[streamnum]), "OUT_SWE_BAND", varnum++,
                        "%.4f", OUT_TYPE_FLOAT, 1, AGG_TYPE_DEFAULT);
         set_output_var(&((*streams)[streamnum]), "OUT_SNOW_DEPTH_BAND",
@@ -280,11 +273,7 @@ set_output_defaults(stream_struct **streams,
     if (options.LAKES) {
         streamnum++;
         varnum = 0;
-
-        (*streams)[streamnum].agg_alarm = default_alarm;
         strcpy((*streams)[streamnum].prefix, "lake");
-        (*streams)[streamnum].file_format = ASCII;
-
         set_output_var(&((*streams)[streamnum]), "OUT_LAKE_ICE_TEMP", varnum++,
                        "%.4f", OUT_TYPE_FLOAT, 1, AGG_TYPE_DEFAULT);
         set_output_var(&((*streams)[streamnum]), "OUT_LAKE_ICE_HEIGHT",

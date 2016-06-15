@@ -50,9 +50,9 @@ LAI_SRC             FROM_VEGPARAM
 SNOW_BAND           1 $test_data_dir/image/Stehekin/parameters/Stehekin_test_params_20160327.nc
 
 RESULT_DIR              $result_dir/Stehekin.history.nc
-OUTPUT_STEPS_PER_DAY    24
 
 OUTFILE     fluxes
+AGGFREQ     NHOURS   1
 OUTVAR      OUT_PREC
 OUTVAR      OUT_RAINF
 OUTVAR      OUT_SNOWF

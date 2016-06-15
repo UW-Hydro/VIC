@@ -50,16 +50,9 @@ LAI_SRC             FROM_VEGPARAM
 SNOW_BAND           5  $test_data_dir/classic/Stehekin/parameters/Stehekin_snowbands.txt
 
 RESULT_DIR              $result_dir
-OUTPUT_STEPS_PER_DAY    0
-SKIPYEAR                0
-COMPRESS                FALSE
-OUT_FORMAT              ASCII
-ALMA_OUTPUT             FALSE
-MOISTFRACT              FALSE
-PRT_HEADER              TRUE
-PRT_SNOW_BAND           FALSE
 
 OUTFILE     fluxes
+AGGFREQ     NHOURS   1
 OUTVAR      OUT_PREC
 OUTVAR      OUT_RAINF
 OUTVAR      OUT_SNOWF

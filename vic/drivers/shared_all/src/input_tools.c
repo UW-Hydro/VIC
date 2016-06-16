@@ -209,7 +209,7 @@ str_to_freq_flag(char freq[])
         return FREQ_END;
     }
     else {
-        log_err("Unknown frequency flag found");
+        log_err("Unknown frequency flag found: %s", freq);
     }
 }
 

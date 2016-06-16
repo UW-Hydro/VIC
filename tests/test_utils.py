@@ -3,6 +3,10 @@
 
 import os
 from collections import OrderedDict
+
+import traceback
+
+import numpy as np
 import pandas as pd
 
 from tonic.models.vic.vic import (VICRuntimeError,
@@ -120,25 +124,24 @@ def check_returncode(returncode, expected=0):
 
 def process_error(error, vic_exe):
     '''Helper function to process possible error raised during testing'''
+    tail = None
     if isinstance(error, VICRuntimeError):
         test_comment = 'Test failed during simulation'
-        error_message = error
         tail = vic_exe.stderr
     elif isinstance(error, VICTestError):
         test_comment = 'Test failed during testing of output files'
-        error_message = error
-        tail = None
     elif isinstance(error, VICValgrindError):
         test_comment = 'Test failed due to memory error detected by valgrind'
-        error_message = error
         tail = vic_exe.stderr
     elif isinstance(error, VICReturnCodeError):
         test_comment = 'Test failed due to incorrect return code'
-        error_message = error
         tail = vic_exe.stderr
+    elif isinstance(error, AssertionError):
+        test_comment = 'AssertionError raised during testing'
     else:
         raise error
-
+    error_message = error
+    traceback.print_stack()
     print('\t{0}'.format(test_comment))
     print('\t{0}'.format(error_message))
     if tail is not None:
@@ -187,15 +190,19 @@ def read_vic_ascii(filepath, parse_dates=True, datetime_index=None, sep='\t',
     '''
 
     df = pd.read_table(filepath, sep=sep, comment=comment, **kwargs)
+    # Strip extra whitespace around variable names
+    df.rename(columns=lambda x: x.strip(), inplace=True)
 
     if parse_dates and datetime_index:
         raise ValueError('cannot specify both parse_dates and datetime_index')
 
     if parse_dates:
         time_cols = ['YEAR', 'MONTH', 'DAY']
-        if 'SECONDS' in df:
-            time_cols.append('SECONDS')
         df.index = pd.to_datetime(df[time_cols])
+        if 'SEC' in df:
+            df.index += pd.Series([pd.Timedelta(s, unit='s') for s in df['SEC']],
+                                  index=df.index)
+            time_cols.append('SEC')
         df.drop(time_cols, axis=1)
 
     if datetime_index is not None:
@@ -226,3 +233,74 @@ def find_global_param_value(gp, param_name):
         key = line_list[0]
         if key == param_name:
             return line_list[1]
+
+
+def check_multistream(fnames, driver):
+    '''
+
+    '''
+
+    if driver.lower() != 'classic':
+        raise ValueError('only classic driver is supported in this test')
+
+    how_dict = {'OUT_ALBEDO': 'max',
+                'OUT_SOIL_TEMP_1': 'min',
+                'OUT_PRESSURE': 'sum',
+                'OUT_AIR_TEMP': 'first',
+                'OUT_SWDOWN': 'mean',
+                'OUT_LWDOWN': 'last'}
+
+    streams = {}  # Dictionary to store parsed stream names
+    gridcells = []  # list of gridcells (lat_lon)
+
+    for path in fnames:
+        # split up the path name to get info about the stream
+        resultdir, fname = os.path.split(path)
+        pieces = os.path.splitext(fname)[0].split('_')
+        gridcells.append('_'.join(pieces[-2:]))
+        stream = '_'.join(pieces[:-2])  # stream name
+        freq_n = pieces[-3]  # stream frequency n
+
+        # set the stream frequency for pandas resample
+        if 'NSTEPS' in stream:
+            inst_stream = stream
+        else:
+            if 'NDAYS' in stream:
+                streams[stream] = '{}D'.format(freq_n)
+            elif 'NHOURS' in stream:
+                streams[stream] = '{}H'.format(freq_n)
+            elif 'NMINUTES' in stream:
+                streams[stream] = '{}min'.format(freq_n)
+            elif 'NSECONDS' in stream:
+                streams[stream] = '{}S'.format(freq_n)
+            else:
+                ValueError('stream %s not supported in this test' % stream)
+
+    # unique gridcells
+    gridcells = list(set(gridcells))
+
+    # Loop over all grid cells in result dir
+    for gridcell in gridcells:
+        fname = os.path.join(resultdir, '{}_{}.txt'.format(inst_stream, gridcell))
+        instant_df = read_vic_ascii(fname)
+
+        # Loop over all streams
+        for stream, freq in streams.items():
+            fname = os.path.join(resultdir, '{}_{}.txt'.format(stream, gridcell))
+            agg_df = read_vic_ascii(fname)
+
+            # Setup the resample of the instantaneous data
+            rs = instant_df.resample(freq)
+
+            # Loop over the variables in the stream
+            for key, how in how_dict.items():
+                # Get the aggregated values (from VIC)
+                actual = agg_df[key].values
+                # Calculated the expected values based on the resampling from pandas
+                expected = rs[key].aggregate(how).values
+
+                # Compare the actual and expected (with tolerance)
+                np.testing.assert_almost_equal(
+                    actual, expected, decimal=4,
+                    err_msg='Variable=%s, freq=%s, how=%s: '
+                            'failed comparison' % (key, freq, how))

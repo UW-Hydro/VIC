@@ -257,13 +257,12 @@ def check_exact_restart_fluxes(result_basedir, driver, run_periods):
                 df = read_vic_ascii(fname)
                 # Extract the same period from the full run
                 df_full_run_split_period =\
-                    dict_df_full_run[flux_basename].truncate(
-                                                        before=start_date,
-                                                        after=end_date)
+                    dict_df_full_run[flux_basename].truncate(df.index[0], df.index[-1])
                 # Compare split run fluxes with full run
                 np.testing.assert_almost_equal(df.values,
                                                df_full_run_split_period.values,
-                                               decimal=6)
+                                               decimal=6,
+                                               err_msg='fluxes are not a close match')
         elif driver == 'image':
             # Read in flux data
             if len(glob.glob(os.path.join(result_dir, '*.nc'))) > 1:
@@ -278,7 +277,8 @@ def check_exact_restart_fluxes(result_basedir, driver, run_periods):
             # Compare split run fluxes with full run
             for var in ds_full_run.data_vars:
                 np.testing.assert_array_equal(
-                        ds[var].values, ds_full_run_split_period[var].values)
+                        ds[var].values, ds_full_run_split_period[var].values,
+                        err_msg='Fluxes are not an exact match')
 
 
 def check_exact_restart_states(state_basedir, driver, run_periods, statesec,
@@ -347,7 +347,8 @@ def check_exact_restart_states(state_basedir, driver, run_periods, statesec,
         # Compare split run states with full run
         # --- If ASCII state file, check if almost the same ---#
         if state_format == 'ASCII':
-            np.testing.assert_almost_equal(states, states_full_run, decimal=3)
+            np.testing.assert_almost_equal(states, states_full_run, decimal=3,
+                                           err_msg='States are not a close match')
         # --- If BINARY state file, check if exactly the same ---#
         elif state_format == 'BINARY':
             if states != states_full_run:
@@ -366,7 +367,8 @@ def check_exact_restart_states(state_basedir, driver, run_periods, statesec,
         # Compare split run states with full run
         for var in ds_states.data_vars:
             np.testing.assert_array_equal(ds_states[var].values,
-                                          ds_states_full_run[var].values)
+                                          ds_states_full_run[var].values,
+                                          err_msg='states are not an exact match')
 
 
 def read_ascii_state(state_fname):

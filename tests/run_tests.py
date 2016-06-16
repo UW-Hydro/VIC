@@ -20,7 +20,8 @@ from test_utils import (setup_test_dirs, print_test_dict,
                         check_returncode, process_error,
                         test_classic_driver_all_complete,
                         test_classic_driver_no_output_file_nans,
-                        find_global_param_value)
+                        find_global_param_value,
+                        check_multistream)
 from test_image_driver import test_image_driver_no_output_file_nans
 from test_restart import (prepare_restart_run_periods,
                           setup_subdirs_and_fill_in_global_param_restart_test,
@@ -449,6 +450,10 @@ def run_system(config_file, vic_exe, test_data_dir, out_dir, driver):
                     elif driver == 'image':
                         check_exact_restart_states(dirs['state'], driver,
                                                    run_periods, statesec)
+
+                if 'multistream' in test_dict['check']:
+                    fnames = glob.glob(os.path.join(dirs['results'], '*'))
+                    check_multistream(fnames, driver)
 
             # if we got this far, the test passed.
             test_passed = True

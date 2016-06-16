@@ -1,0 +1,123 @@
+NLAYER      3   # number of soil layers
+NODES       10  # number of soil thermal nodes
+TIME_STEP   1   # model time step in hours (set to 24 if FULL_ENERGY = FALSE, set to < 24 if FULL_ENERGY = TRUE)
+SNOW_STEP   1   # time step in hours for which to solve the snow model (should = TIME_STEP if TIME_STEP < 24)
+STARTYEAR   2007
+STARTMONTH  11
+STARTDAY    01
+STARTHOUR   00
+ENDYEAR     2008
+ENDMONTH    07
+ENDDAY      31
+
+FULL_ENERGY     TRUE
+FROZEN_SOIL FALSE
+
+#SNOW_ALBEDO USACE   # USACE = use traditional VIC algorithm based on US Army Corps of Engineers empirical snow albedo decay curves, using hard-coded dates for transitions from snow accumulation to melting; SUN1999 = use algorithm of Sun et al 1999, in which albedo decay depends on snow cold content (more appropriate for simulations outside the US).
+#SNOW_DENSITY    DENS_BRAS   # DENS_BRAS = use traditional VIC algorithm taken from Bras, 1990; DENS_SNTHRM = use algorithm taken from SNTHRM model.
+BLOWING     FALSE   # TRUE = compute evaporative fluxes due to blowing snow
+#COMPUTE_TREELINE   FALSE   # Can be either FALSE or the id number of an understory veg class; FALSE = turn treeline computation off; VEG_CLASS_ID = replace any overstory veg types with the this understory veg type in all snow bands for which the average July Temperature <= 10 C (e.g. "COMPUTE_TREELINE 10" replaces any overstory veg cover with class 10)
+#DIST_PRCP   FALSE   # TRUE = use distributed precipitation
+#PREC_EXPT   0.6 # exponent for use in distributed precipitation eqn (only used if DIST_PRCP is TRUE)
+
+CORRPREC    FALSE   # TRUE = correct precipitation for gauge undercatch
+MIN_WIND_SPEED  0.1 # minimum allowable wind speed (m/s)
+MAX_SNOW_TEMP   0.5 # maximum temperature (C) at which snow can fall
+MIN_RAIN_TEMP   -0.5    # minimum temperature (C) at which rain can fall
+
+CONTINUEONERROR TRUE    # TRUE = if simulation aborts on one grid cell, continue to next grid cell
+
+#TFALLBACK   TRUE    # TRUE = when temperature iteration fails to converge, use previous time step's T value
+#AERO_RESIST_CANSNOW AR_406_FULL # Options for aerodynamic resistance in snow-filled canopy:
+
+GRND_FLUX_TYPE  GF_FULL # Options for ground flux:
+            # GF_406 = use (flawed) formulas for ground flux, deltaH, and fusion from VIC 4.0.6 and earlier;
+            # GF_410 = use formulas from VIC 4.1.0 (ground flux is correct, but deltaH and fusion ignore surf_atten);
+            # GF_FULL = use correct ground flux formula from VIC 4.1.0 and also take surf_atten into account in deltaH and fusion
+            # Default   = GF_FULL
+
+#MIN_LIQ        FALSE   # TRUE = use temperature-dependent minimum for liquid soil moisture instead of residual moisture
+# PLAPSE      FALSE   # This controls how VIC computes air pressure when air pressure is not supplied as an input forcing: TRUE = set air pressure to sea level pressure, lapsed to grid cell average elevation; FALSE = set air pressure to constant 95.5 kPa (as in all versions of VIC pre-4.1.1)
+
+
+FORCING1    /Users/diana/Dropbox/UW/VIC_test_data/datasets/snotel/forcings_vp/snotel_VIC.4.1.2_forcings_
+FORCE_FORMAT    ASCII
+FORCE_ENDIAN    LITTLE
+N_TYPES     7   # Number of variables (columns)
+FORCE_TYPE  SHORTWAVE  UNSIGNED 40
+FORCE_TYPE  LONGWAVE   UNSIGNED 40
+FORCE_TYPE  AIR_TEMP   SIGNED       100
+FORCE_TYPE  PRESSURE   UNSIGNED 40
+FORCE_TYPE  PREC       UNSIGNED 40
+FORCE_TYPE  VP         UNSIGNED 40
+FORCE_TYPE  WIND       SIGNED   100
+FORCE_DT    1   # Forcing time step length (hours)
+FORCEYEAR   2007    # Year of first forcing record
+FORCEMONTH  11  # Month of first forcing record
+FORCEDAY    01  # Day of first forcing record
+FORCEHOUR   00  # Hour of first forcing record
+GRID_DECIMAL    4   # Number of digits after decimal point in forcing file names
+WIND_H          17.5    # height of wind speed measurement (m)
+MEASURE_H       17.5    # height of humidity measurement (m)
+ALMA_INPUT  FALSE   # TRUE = ALMA-compliant input variable units; FALSE = standard VIC units
+
+SOIL            /Users/diana/Dropbox/UW/VIC_test_data/datasets/snotel/parameters/Snotel_VIC.4.1.2_soil.txt
+ARC_SOIL        FALSE
+
+BASEFLOW    ARNO    # ARNO = columns 5-8 are the standard VIC baseflow parameters; NIJSSEN2001 = columns 5-8 of soil file are baseflow parameters from Nijssen et al (2001)
+JULY_TAVG_SUPPLIED  FALSE   # TRUE = final column of the soil parameter file will contain average July air temperature, for computing treeline; this will be ignored if COMPUTE_TREELINE is FALSE; FALSE = compute the treeline based on the average July air temperature of the forcings over the simulation period
+
+VEGPARAM        /Users/diana/Dropbox/UW/VIC_test_data/datasets/snotel/parameters/Snotel_VIC.4.1.2_vegparam.txt
+
+VEGPARAM_LAI    TRUE    # TRUE = read LAI from veg param file; FALSE = read LAI from veg library file
+LAI_SRC     LAI_FROM_VEGPARAM
+
+ROOT_ZONES      3   # Number of root zones (must match format of veg param file)
+
+VEGLIB          /Users/diana/Dropbox/UW/VIC_test_data/datasets/snotel/parameters/Snotel_VIC.4.1.2_veglib.txt
+
+SNOW_BAND   1   # Number of snow bands; if number of snow bands > 1, you must insert the snow band path/file after the number of bands (e.g. SNOW_BAND 5 my_path/my_snow_band_file)
+
+
+RESULT_DIR      /Users/diana/Dropbox/UW/VIC_test_data/test_runs/vic_4_2/snotel/results2
+OUT_STEP        24       # Output interval (hours); if 0, OUT_STEP = TIME_STEP
+SKIPYEAR    0   # Number of years of output to omit from the output files
+COMPRESS    FALSE   # TRUE = compress input and output files when done
+BINARY_OUTPUT   FALSE
+ALMA_OUTPUT FALSE   # TRUE = ALMA-format output files; FALSE = standard VIC units
+MOISTFRACT  FALSE   # TRUE = output soil moisture as volumetric fraction; FALSE = standard VIC units
+PRT_HEADER  TRUE   # TRUE = insert a header at the beginning of each output file; FALSE = no header
+PRT_SNOW_BAND   FALSE   # TRUE = write a "snowband" output file, containing band-specific values of snow variables; NOTE: this is ignored if N_OUTFILES is specified below.
+
+
+N_OUTFILES  2
+
+OUTFILE         snow 16
+OUTVAR          OUT_SWE                 %.4f    *       *
+OUTVAR          OUT_SNOW_DEPTH          %.4f    *       *
+OUTVAR          OUT_SNOW_CANOPY         %.4f    *       *
+OUTVAR          OUT_SNOW_COVER          %.4f    *       *
+OUTVAR          OUT_ADVECTION           %.4f    *       *
+OUTVAR          OUT_DELTACC             %.4f    *       *
+OUTVAR          OUT_SNOW_FLUX           %.4f    *       *
+OUTVAR          OUT_RFRZ_ENERGY         %.4f    *       *
+OUTVAR          OUT_MELT_ENERGY         %.4f    *       *
+OUTVAR          OUT_ADV_SENS            %.4f    *       *
+OUTVAR          OUT_LATENT_SUB          %.4f    *       *
+OUTVAR          OUT_SNOW_SURF_TEMP      %.4f    *       *
+OUTVAR          OUT_SNOW_PACK_TEMP      %.4f    *       *
+OUTVAR          OUT_SNOW_MELT           %.4f    *       *
+OUTVAR          OUT_ALBEDO              %.4f    *       *
+OUTVAR          OUT_SALBEDO             %.4f    *       *
+
+OUTFILE         en_bal 10
+OUTVAR          OUT_ADV_SENS            %.4f    *       *
+OUTVAR          OUT_ADVECTION           %.4f    *       *
+OUTVAR          OUT_DELTAH              %.4f    *       *
+OUTVAR          OUT_GRND_FLUX           %.4f    *       *
+OUTVAR          OUT_IN_LONG             %.4f    *       *
+OUTVAR          OUT_LATENT              %.4f    *       *
+OUTVAR          OUT_LATENT_SUB          %.4f    *       *
+OUTVAR          OUT_R_NET               %.4f    *       *
+OUTVAR          OUT_SENSIBLE            %.4f    *       *
+OUTVAR          OUT_RAD_TEMP            %.4f    *       *

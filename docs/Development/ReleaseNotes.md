@@ -17,7 +17,7 @@ For VIC 5 and later, type `vic _{classic,image}.exe -v`
 
 ## VIC 5.0.0 (Release Candidate 1)
 
-**Release date: June 10, 2016**
+**Release date: June 17, 2016**
 
 This is a major update from VIC 4. The VIC 5.0.0 release aims to have nearly identical physics as VIC 4.2 while providing a clean, refactored code base supporting multiple drivers. There are a number of new features, bug fixes, and backward incompatible changes. See the VIC Github page for more details on the changes included in this release.
 

@@ -369,7 +369,7 @@ solve_snow(char               overstory,
 
                 /** Calculate Snow Depth (H.B.H. 7.2.1) **/
                 old_depth = snow->depth;
-                snow->depth = MM_PER_M * snow->swq / snow->density;
+                snow->depth = CONST_RHOFW * snow->swq / snow->density;
 
                 /** Record if snowpack is melting this time step **/
                 if (snow->coldcontent >= 0 && (

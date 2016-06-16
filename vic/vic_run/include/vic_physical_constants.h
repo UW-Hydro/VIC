@@ -6,7 +6,7 @@
  * @section LICENSE
  *
  * The Variable Infiltration Capacity (VIC) macroscale hydrological model
- * Copyright (C) 2014 The Land Surface Hydrology Group, Department of Civil
+ * Copyright (C) 2016 The Computational Hydrology Group, Department of Civil
  * and Environmental Engineering, University of Washington.
  *
  * The VIC model is free software; you can redistribute it and/or
@@ -50,9 +50,12 @@
 #define MM_PER_M 1000  /**< milimeters per meter */
 #define CM_PER_M 100  /**< centimeters per meter */
 #define MM_PER_CM 10  /**< milimeters per centimeter */
+#define MM_PER_IN 25.4  /**< milimeters per inch */
+#define IN_PER_M (MM_PER_M / MM_PER_IN)  /**< inches per meter */
 #define MOLE_PER_KMOLE 1000 /**< moles per kilomole */
 #define FRACT_TO_PERCENT 100
 #define PPM_to_MIXRATIO 1.0e-6
+#define C_TO_F(t) (t * 9. / 5.) + 32.
 
 /***** Mathematical Constants *****/
 #define CONST_PI 3.14159265358979323846

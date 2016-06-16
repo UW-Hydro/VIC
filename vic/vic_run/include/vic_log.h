@@ -61,7 +61,6 @@
 FILE *LOG_DEST;
 
 void finalize_logging(void);
-void get_current_datetime(char *cdt);
 void get_logname(const char *path, int id, char *filename);
 void initialize_log(void);
 void print_trace(void);

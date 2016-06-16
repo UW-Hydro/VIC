@@ -3,7 +3,7 @@ VIC Testing
 
 The VIC Test Suite includes six main test types:
 
-1.  **unit**:  function level tests. These tests mostly focus on testing the routines in `vic_run` and `drivers/shared_all`.
+1.  **unit**:  function level tests. These tests use the Python Drivers api and mostly focus on testing the routines in `vic_run` and `drivers/shared_all`.
 2.  **system**: tests that aim to address model runtime issues.  These tests are generally very quick. These tests mostly focus on testing the `classic` and `image` driver functions:
     * configuration errors - tests that address model startup and error checking.
     * restart:  tests that address model state and restart capability.
@@ -16,9 +16,9 @@ The VIC Test Suite includes six main test types:
 
 ## Test data
 
-The **system** and **examples** tests use the [VIC sample data repository](https://github.com/UW-Hydro/VIC_sample_data). This repository includes short (e.g. 10 day) test setups for the VIC image and classic drivers.
+The **system** and **examples** tests use the [VIC sample data repository](https://github.com/UW-Hydro/VIC_sample_data). This repository includes short (e.g. 10 days) test setups for the VIC image and classic drivers.
 
-The **science** and **release** tests are under development (as of April 2016).
+The **science** and **release** tests are under development (as of June 2016).
 
 ## Running the VIC Test Suite
 

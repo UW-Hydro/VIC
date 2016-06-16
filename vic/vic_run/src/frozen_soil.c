@@ -7,7 +7,7 @@
  * @section LICENSE
  *
  * The Variable Infiltration Capacity (VIC) macroscale hydrological model
- * Copyright (C) 2014 The Land Surface Hydrology Group, Department of Civil
+ * Copyright (C) 2016 The Computational Hydrology Group, Department of Civil
  * and Environmental Engineering, University of Washington.
  *
  * The VIC model is free software; you can redistribute it and/or
@@ -42,6 +42,19 @@ calc_layer_average_thermal_props(energy_bal_struct *energy,
 
     size_t               i;
     int                  ErrorFlag;
+    size_t               tmpTshape[] = {
+        options.Nlayer, Nnodes,
+        options.Nfrost + 1
+    };
+    size_t               tmpZshape[] = {
+        options.Nlayer, Nnodes
+    };
+    double            ***tmpT;
+    double             **tmpZ;
+
+    // allocate memory for tmpT and tmpZ
+    malloc_3d_double(tmpTshape, &tmpT);
+    malloc_2d_double(tmpZshape, &tmpZ);
 
     if (options.FROZEN_SOIL && soil_con->FS_ACTIVE) {
         find_0_degree_fronts(energy, soil_con->Zsum_node, T, Nnodes);
@@ -64,12 +77,17 @@ calc_layer_average_thermal_props(energy_bal_struct *energy,
 
     /** Compute Soil Layer average  properties **/
     if (options.QUICK_FLUX) {
-        ErrorFlag = estimate_layer_ice_content_quick_flux(layer,
+        ErrorFlag = estimate_layer_temperature_quick_flux(layer,
                                                           soil_con->depth,
                                                           soil_con->dp,
                                                           energy->T[0],
                                                           energy->T[1],
-                                                          soil_con->avg_temp,
+                                                          soil_con->avg_temp);
+        if (ErrorFlag == ERROR) {
+            return (ERROR);
+        }
+        ErrorFlag = estimate_layer_ice_content_quick_flux(layer,
+                                                          soil_con->depth,
                                                           soil_con->max_moist,
                                                           soil_con->expt,
                                                           soil_con->bubble,
@@ -81,15 +99,33 @@ calc_layer_average_thermal_props(energy_bal_struct *energy,
         }
     }
     else {
-        ErrorFlag = estimate_layer_ice_content(layer,
+        estimate_frost_temperature_and_depth(tmpT,
+                                             tmpZ,
+                                             soil_con->Zsum_node,
+                                             energy->T,
+                                             soil_con->depth,
+                                             soil_con->frost_fract,
+                                             soil_con->frost_slope,
+                                             Nnodes,
+                                             options.Nlayer);
+        ErrorFlag = estimate_layer_temperature(layer,
+                                               tmpT,
+                                               tmpZ,
                                                soil_con->Zsum_node,
-                                               energy->T,
+                                               soil_con->depth,
+                                               Nnodes,
+                                               options.Nlayer);
+        if (ErrorFlag == ERROR) {
+            return (ERROR);
+        }
+        ErrorFlag = estimate_layer_ice_content(layer,
+                                               tmpT,
+                                               tmpZ,
+                                               soil_con->Zsum_node,
                                                soil_con->depth,
                                                soil_con->max_moist,
                                                soil_con->expt,
                                                soil_con->bubble,
-                                               soil_con->frost_fract,
-                                               soil_con->frost_slope,
                                                Nnodes,
                                                options.Nlayer,
                                                soil_con->FS_ACTIVE);
@@ -97,6 +133,10 @@ calc_layer_average_thermal_props(energy_bal_struct *energy,
             return (ERROR);
         }
     }
+
+    // free memory for tmpT and tmpZ
+    free_3d_double(tmpTshape, tmpT);
+    free_2d_double(tmpZshape, tmpZ);
 
     return (0);
 }

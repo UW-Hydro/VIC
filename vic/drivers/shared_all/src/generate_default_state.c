@@ -7,7 +7,7 @@
  * @section LICENSE
  *
  * The Variable Infiltration Capacity (VIC) macroscale hydrological model
- * Copyright (C) 2014 The Land Surface Hydrology Group, Department of Civil
+ * Copyright (C) 2016 The Computational Hydrology Group, Department of Civil
  * and Environmental Engineering, University of Washington.
  *
  * The VIC model is free software; you can redistribute it and/or
@@ -44,8 +44,18 @@ generate_default_state(all_vars_struct *all_vars,
     size_t                   band;
     size_t                   lidx;
     size_t                   k;
+    size_t                     tmpTshape[] = {
+        options.Nlayer, options.Nnode,
+        options.Nfrost + 1
+    };
+    size_t                     tmpZshape[] = {
+        options.Nlayer, options.Nnode
+    };
     double                   Cv;
     double                   tmp;
+    double                ***tmpT;
+    double                 **tmpZ;
+    int                      ErrorFlag;
 
     cell_data_struct       **cell;
     energy_bal_struct      **energy;
@@ -53,6 +63,10 @@ generate_default_state(all_vars_struct *all_vars,
     cell = all_vars->cell;
     energy = all_vars->energy;
     Nveg = veg_con[0].vegetat_type_num;
+
+    // allocate memory for tmpT and tmpZ
+    malloc_3d_double(tmpTshape, &tmpT);
+    malloc_2d_double(tmpZshape, &tmpZ);
 
     /************************************************************************
        Initialize soil moistures
@@ -67,7 +81,7 @@ generate_default_state(all_vars_struct *all_vars,
         if (Cv > 0) {
             for (band = 0; band < options.SNOW_BAND; band++) {
                 if (soil_con->AreaFract[band] > 0.) {
-                    /* Initialize soil node temperatures */
+                    /* Initialize soil moistures */
                     for (lidx = 0; lidx < options.Nlayer; lidx++) {
                         cell[veg][band].layer[lidx].moist =
                             soil_con->init_moist[lidx];
@@ -110,4 +124,68 @@ generate_default_state(all_vars_struct *all_vars,
             }
         }
     }
+
+    /************************************************************************
+       Initialize soil layer ice content
+    ************************************************************************/
+
+    for (veg = 0; veg <= Nveg; veg++) {
+        Cv = veg_con[veg].Cv;
+        if (Cv > 0) {
+            for (band = 0; band < options.SNOW_BAND; band++) {
+                if (soil_con->AreaFract[band] > 0.) {
+                    if (options.QUICK_FLUX) {
+                        // TBD: calculation of layer ice content for quick flux
+                        // depends on layer temperatures; so this initial
+                        // estimation here is not ideal, since the layer
+                        // temperature calculation is later in compute_derived_
+                        // state_vars.
+                        ErrorFlag =
+                            estimate_layer_ice_content_quick_flux(
+                                cell[veg][band].layer,
+                                soil_con->depth,
+                                soil_con->max_moist,
+                                soil_con->expt, soil_con->bubble,
+                                soil_con->frost_fract, soil_con->frost_slope,
+                                soil_con->FS_ACTIVE);
+                        if (ErrorFlag == ERROR) {
+                            log_err("Error in "
+                                    "estimate_layer_ice_content_quick_flux");
+                        }
+                    }
+                    else {
+                        estimate_frost_temperature_and_depth(
+                            tmpT,
+                            tmpZ,
+                            soil_con->Zsum_node,
+                            energy[veg][band].T,
+                            soil_con->depth,
+                            soil_con->frost_fract,
+                            soil_con->frost_slope,
+                            options.Nnode,
+                            options.Nlayer);
+                        ErrorFlag = estimate_layer_ice_content(
+                            cell[veg][band].layer,
+                            tmpT,
+                            tmpZ,
+                            soil_con->Zsum_node,
+                            soil_con->depth,
+                            soil_con->max_moist,
+                            soil_con->expt,
+                            soil_con->bubble,
+                            options.Nnode,
+                            options.Nlayer,
+                            soil_con->FS_ACTIVE);
+                        if (ErrorFlag == ERROR) {
+                            log_err("Error in "
+                                    "estimate_layer_ice_content");
+                        }
+                    }
+                }
+            }
+        }
+    }
+    // free memory for tmpT and tmpZ
+    free_3d_double(tmpTshape, tmpT);
+    free_2d_double(tmpZshape, tmpZ);
 }

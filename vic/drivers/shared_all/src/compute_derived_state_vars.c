@@ -8,7 +8,7 @@
  * @section LICENSE
  *
  * The Variable Infiltration Capacity (VIC) macroscale hydrological model
- * Copyright (C) 2014 The Land Surface Hydrology Group, Department of Civil
+ * Copyright (C) 2016 The Computational Hydrology Group, Department of Civil
  * and Environmental Engineering, University of Washington.
  *
  * The VIC model is free software; you can redistribute it and/or
@@ -46,14 +46,20 @@ compute_derived_state_vars(all_vars_struct *all_vars,
     size_t                     veg;
     size_t                     lidx;
     size_t                     band;
-    size_t                     frost_area;
+    size_t                     tmpTshape[] = {
+        options.Nlayer, options.Nnode,
+        options.Nfrost + 1
+    };
+    size_t                     tmpZshape[] = {
+        options.Nlayer, options.Nnode
+    };
     int                        ErrorFlag;
     double                     Cv;
     double                     moist[MAX_VEG][MAX_BANDS][MAX_LAYERS];
-    double                     ice[MAX_VEG][MAX_BANDS][MAX_LAYERS][
-        MAX_FROST_AREAS];
     double                     dt_thresh;
     double                     tmp_runoff;
+    double                  ***tmpT;
+    double                   **tmpZ;
 
     cell_data_struct         **cell;
     energy_bal_struct        **energy;
@@ -63,6 +69,10 @@ compute_derived_state_vars(all_vars_struct *all_vars,
     energy = all_vars->energy;
     snow = all_vars->snow;
     Nveg = veg_con[0].vegetat_type_num;
+
+    // allocate memory for tmpT and tmpZ
+    malloc_3d_double(tmpTshape, &tmpT);
+    malloc_2d_double(tmpZshape, &tmpZ);
 
     /******************************************
        Compute derived soil layer vars
@@ -75,16 +85,10 @@ compute_derived_state_vars(all_vars_struct *all_vars,
             for (band = 0; band < options.SNOW_BAND; band++) {
                 // Initialize soil for existing snow elevation bands
                 if (soil_con->AreaFract[band] > 0.) {
-                    // set up temporary moist and ice arrays
+                    // set up temporary moist arrays
                     for (lidx = 0; lidx < options.Nlayer; lidx++) {
                         moist[veg][band][lidx] =
                             cell[veg][band].layer[lidx].moist;
-                        for (frost_area = 0;
-                             frost_area < options.Nfrost;
-                             frost_area++) {
-                            ice[veg][band][lidx][frost_area] =
-                                cell[veg][band].layer[lidx].ice[frost_area];
-                        }
                     }
 
                     // compute saturated area and water table
@@ -103,7 +107,7 @@ compute_derived_state_vars(all_vars_struct *all_vars,
     for (veg = 0; veg <= Nveg; veg++) {
         for (band = 0; band < options.SNOW_BAND; band++) {
             if (snow[veg][band].density > 0.) {
-                snow[veg][band].depth = MM_PER_M * snow[veg][band].swq /
+                snow[veg][band].depth = CONST_RHOFW * snow[veg][band].swq /
                                         snow[veg][band].density;
             }
         }
@@ -195,50 +199,42 @@ compute_derived_state_vars(all_vars_struct *all_vars,
                         }
                     }
 
-                    /* initialize layer moistures and ice contents */
-                    for (lidx = 0; lidx < options.Nlayer; lidx++) {
-                        cell[veg][band].layer[lidx].moist =
-                            moist[veg][band][lidx];
-                        for (frost_area = 0;
-                             frost_area < options.Nfrost;
-                             frost_area++) {
-                            cell[veg][band].layer[lidx].ice[frost_area] =
-                                ice[veg][band][lidx][frost_area];
-                        }
-                    }
+                    /* calculate soil layer temperatures  */
                     if (options.QUICK_FLUX) {
                         ErrorFlag =
-                            estimate_layer_ice_content_quick_flux(
+                            estimate_layer_temperature_quick_flux(
                                 cell[veg][band].layer,
                                 soil_con->depth, soil_con->dp,
-                                energy[
-                                    veg][band].T[0], energy[veg][band].T[1],
-                                soil_con->avg_temp, soil_con->max_moist,
-                                soil_con->expt, soil_con->bubble,
-                                soil_con->frost_fract, soil_con->frost_slope,
-                                soil_con->FS_ACTIVE);
+                                energy[veg][band].T[0],
+                                energy[veg][band].T[1],
+                                soil_con->avg_temp);
                         if (ErrorFlag == ERROR) {
                             log_err("Error in "
-                                    "estimate_layer_ice_content_quick_flux");
+                                    "estimate_layer_temperature_quick_flux");
                         }
                     }
                     else {
-                        ErrorFlag = estimate_layer_ice_content(
-                            cell[veg][band].layer,
+                        estimate_frost_temperature_and_depth(
+                            tmpT,
+                            tmpZ,
                             soil_con->Zsum_node,
                             energy[veg][band].T,
                             soil_con->depth,
-                            soil_con->max_moist,
-                            soil_con->expt,
-                            soil_con->bubble,
                             soil_con->frost_fract,
                             soil_con->frost_slope,
                             options.Nnode,
-                            options.Nlayer,
-                            soil_con->FS_ACTIVE);
+                            options.Nlayer);
+                        ErrorFlag = estimate_layer_temperature(
+                            cell[veg][band].layer,
+                            tmpT,
+                            tmpZ,
+                            soil_con->Zsum_node,
+                            soil_con->depth,
+                            options.Nnode,
+                            options.Nlayer);
                         if (ErrorFlag == ERROR) {
                             log_err("Error in "
-                                    "estimate_layer_ice_content");
+                                    "estimate_layer_temperature");
                         }
                     }
 
@@ -253,4 +249,7 @@ compute_derived_state_vars(all_vars_struct *all_vars,
             }
         }
     }
+    // free memory for tmpT and tmpZ
+    free_3d_double(tmpTshape, tmpT);
+    free_2d_double(tmpZshape, tmpZ);
 }

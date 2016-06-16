@@ -93,7 +93,7 @@ vic_write(stream_struct  *stream,
                 // allocate memory for variables to be stored
                 dvar = malloc(local_domain.ncells_active * sizeof(*dvar));
                 if (dvar == NULL) {
-                    log_err("Memory allocation error in vic_write().");
+                    log_err("Memory allocation error");
                 }
             }
         }
@@ -102,7 +102,7 @@ vic_write(stream_struct  *stream,
                 // allocate memory for variables to be stored
                 fvar = malloc(local_domain.ncells_active * sizeof(*fvar));
                 if (fvar == NULL) {
-                    log_err("Memory allocation error in vic_write().");
+                    log_err("Memory allocation error");
                 }
             }
         }
@@ -111,7 +111,7 @@ vic_write(stream_struct  *stream,
                 // allocate memory for variables to be stored
                 ivar = malloc(local_domain.ncells_active * sizeof(*ivar));
                 if (ivar == NULL) {
-                    log_err("Memory allocation error in vic_write().");
+                    log_err("Memory allocation error");
                 }
             }
         }
@@ -120,7 +120,7 @@ vic_write(stream_struct  *stream,
                 // allocate memory for variables to be stored
                 svar = malloc(local_domain.ncells_active * sizeof(*svar));
                 if (svar == NULL) {
-                    log_err("Memory allocation error in vic_write().");
+                    log_err("Memory allocation error");
                 }
             }
         }
@@ -129,7 +129,7 @@ vic_write(stream_struct  *stream,
                 // allocate memory for variables to be stored
                 cvar = malloc(local_domain.ncells_active * sizeof(*cvar));
                 if (cvar == NULL) {
-                    log_err("Memory allocation error in vic_write().");
+                    log_err("Memory allocation error");
                 }
             }
         }

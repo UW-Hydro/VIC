@@ -112,17 +112,17 @@ vic_init_output(dmy_struct *dmy_current)
     }
 
     if (mpi_rank == 0) {
-        if (!default_outputs) {
+        if (default_outputs) {
             // determine which variables will be written to the history file
-            parse_output_info(filep.globalparam, &output_streams, dmy_current);
+            set_output_defaults(&output_streams, dmy_current, NETCDF4_CLASSIC);
         }
         else {
             // set output defaults
-            set_output_defaults(&output_streams, dmy_current, NETCDF4_CLASSIC);
+            parse_output_info(filep.globalparam, &output_streams, dmy_current);
         }
     }
 
-    // Now brodcast the arrays of shape nvars
+    // Now broadcast the arrays of shape nvars
     for (streamnum = 0; streamnum < options.Noutstreams; streamnum++) {
         // type
         status = MPI_Bcast(output_streams[streamnum].type,
@@ -224,29 +224,30 @@ initialize_history_file(nc_file_struct *nc,
 
     // This could be further refined but for now, I've choosen a file naming
     // Convention that goes like this:
-    // If FREQ_NDAYS -- filename = result_dir/prefix.YYYY-MM-DD.nc
-    if (stream->agg_alarm.freq == FREQ_NDAYS) {
-        sprintf(stream->filename, "%s/%s.%04d-%02d-%02d.nc",
-                filenames.result_dir,
-                stream->prefix, dmy_current->year, dmy_current->month,
-                dmy_current->day);
-    }
-    // If FREQ_NMONTHS -- filename = result_dir/prefix.YYYY-MM.nc
-    else if (stream->agg_alarm.freq == FREQ_NMONTHS) {
-        sprintf(stream->filename, "%s/%s.%04d-%02d.nc", filenames.result_dir,
-                stream->prefix, dmy_current->year, dmy_current->month);
-    }
-    // If FREQ_NYEARS -- filename = result_dir/prefix.YYYY.nc
-    else if (stream->agg_alarm.freq == FREQ_NYEARS) {
-        sprintf(stream->filename, "%s/%s.%04d.nc", filenames.result_dir,
-                stream->prefix, dmy_current->year);
-    }
-    // For all other cases -- filename = result_dir/prefix.YYYY-MM-DD-SSSSS.nc
-    else {
-        sprintf(stream->filename, "%s/%s.%04d-%02d-%02d-%05u.nc",
-                filenames.result_dir,
-                stream->prefix, dmy_current->year, dmy_current->month,
-                dmy_current->day, dmy_current->dayseconds);
+    switch (stream->agg_alarm.freq) {
+        // If FREQ_NDAYS -- filename = result_dir/prefix.YYYY-MM-DD.nc
+        case FREQ_NDAYS:
+            sprintf(stream->filename, "%s/%s.%04d-%02d-%02d.nc",
+                    filenames.result_dir,
+                    stream->prefix, dmy_current->year, dmy_current->month,
+                    dmy_current->day);
+            break;
+        case FREQ_NMONTHS:
+            // If FREQ_NMONTHS -- filename = result_dir/prefix.YYYY-MM.nc
+            sprintf(stream->filename, "%s/%s.%04d-%02d.nc", filenames.result_dir,
+                    stream->prefix, dmy_current->year, dmy_current->month);
+            break;
+        case FREQ_NYEARS:
+            // If FREQ_NYEARS -- filename = result_dir/prefix.YYYY.nc
+            sprintf(stream->filename, "%s/%s.%04d.nc", filenames.result_dir,
+                    stream->prefix, dmy_current->year);
+            break;
+        default:
+            // For all other cases -- filename = result_dir/prefix.YYYY-MM-DD-SSSSS.nc
+            sprintf(stream->filename, "%s/%s.%04d-%02d-%02d-%05u.nc",
+                    filenames.result_dir,
+                    stream->prefix, dmy_current->year, dmy_current->month,
+                    dmy_current->day, dmy_current->dayseconds);
     }
 
     // open the netcdf file
@@ -429,34 +430,36 @@ initialize_history_file(nc_file_struct *nc,
         }
 
         // set the fill value attribute
-        if (nc->nc_vars[j].nc_type == NC_DOUBLE) {
-            status = nc_put_att_double(nc->nc_id, nc->nc_vars[j].nc_varid,
-                                       "_FillValue", NC_DOUBLE, 1,
-                                       &(nc->d_fillvalue));
+        switch (nc->nc_vars[j].nc_type) {
+            case NC_DOUBLE:
+                status = nc_put_att_double(nc->nc_id, nc->nc_vars[j].nc_varid,
+                                           "_FillValue", NC_DOUBLE, 1,
+                                           &(nc->d_fillvalue));
+                break;
+            case NC_FLOAT:
+                status = nc_put_att_float(nc->nc_id, nc->nc_vars[j].nc_varid,
+                                          "_FillValue", NC_FLOAT, 1,
+                                          &(nc->f_fillvalue));
+                break;
+            case NC_INT:
+                status = nc_put_att_int(nc->nc_id, nc->nc_vars[j].nc_varid,
+                                        "_FillValue", NC_INT, 1,
+                                        &(nc->i_fillvalue));
+                break;
+            case NC_SHORT:
+                log_err("NC_SHORT not supported yet");
+                break;
+            case NC_CHAR:
+                log_err("NC_CHAR not supported yet");
+                break;
+            case NC_BYTE:
+                log_err("NC_BYTE not supported yet");
+                break;
+            default:
+                log_err("NC_TYPE %d not supported at this time",
+                        nc->nc_vars[j].nc_type);
         }
-        else if (nc->nc_vars[j].nc_type == NC_FLOAT) {
-            status = nc_put_att_float(nc->nc_id, nc->nc_vars[j].nc_varid,
-                                      "_FillValue", NC_FLOAT, 1,
-                                      &(nc->f_fillvalue));
-        }
-        else if (nc->nc_vars[j].nc_type == NC_INT) {
-            status = nc_put_att_int(nc->nc_id, nc->nc_vars[j].nc_varid,
-                                    "_FillValue", NC_INT, 1,
-                                    &(nc->i_fillvalue));
-        }
-        else if (nc->nc_vars[j].nc_type == NC_SHORT) {
-            log_err("NC_SHORT not supported yet");
-        }
-        else if (nc->nc_vars[j].nc_type == NC_CHAR) {
-            log_err("NC_CHAR not supported yet");
-        }
-        else if (nc->nc_vars[j].nc_type == NC_BYTE) {
-            log_err("NC_BYTE not supported yet");
-        }
-        else {
-            log_err("NC_TYPE %d not supported at this time",
-                    nc->nc_vars[j].nc_type);
-        }
+        // check status of fill value setting
         check_nc_status(status,
                         "Error (%d) putting _FillValue attribute to %s in %s",
                         status, out_metadata[varid].varname, stream->filename);

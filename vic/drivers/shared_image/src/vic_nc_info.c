@@ -185,24 +185,23 @@ set_nc_var_dimids(unsigned int    varid,
 int
 get_nc_mode(unsigned short int format)
 {
-
     int nc_format;
 
     switch (format) {
-        case NETCDF3_CLASSIC:
-            nc_format = NC_CLASSIC_MODEL;
-            break;
-        case NETCDF3_64BIT_OFFSET:
-            nc_format = NC_64BIT_OFFSET;
-            break;
-        case NETCDF4_CLASSIC:
-            nc_format = (NC_NETCDF4 | NC_CLASSIC_MODEL);
-            break;
-        case NETCDF4:
-            nc_format = NC_NETCDF4;
-            break;
-        default:
-            log_err("Unrecognized netCDF file format");
+    case NETCDF3_CLASSIC:
+        nc_format = NC_CLASSIC_MODEL;
+        break;
+    case NETCDF3_64BIT_OFFSET:
+        nc_format = NC_64BIT_OFFSET;
+        break;
+    case NETCDF4_CLASSIC:
+        nc_format = (NC_NETCDF4 | NC_CLASSIC_MODEL);
+        break;
+    case NETCDF4:
+        nc_format = NC_NETCDF4;
+        break;
+    default:
+        log_err("Unrecognized netCDF file format");
     }
     return nc_format;
 }
@@ -216,29 +215,29 @@ get_nc_dtype(unsigned short int dtype)
     int type;
 
     switch (dtype) {
-        case OUT_TYPE_DEFAULT:
-            type = OUT_TYPE_DOUBLE;
-            break;
-        case OUT_TYPE_CHAR:
-            type = NC_CHAR;
-            break;
-        case OUT_TYPE_SINT:
-            type = NC_SHORT;
-            break;
-        case OUT_TYPE_USINT:
-            type = NC_UINT;
-            break;
-        case OUT_TYPE_INT:
-            type = NC_INT;
-            break;
-        case OUT_TYPE_FLOAT:
-            type = NC_FLOAT;
-            break;
-        case OUT_TYPE_DOUBLE:
-            type = NC_DOUBLE;
-            break;
-        default:
-            log_err("Unrecognized netCDF datatype");
+    case OUT_TYPE_DEFAULT:
+        type = OUT_TYPE_DOUBLE;
+        break;
+    case OUT_TYPE_CHAR:
+        type = NC_CHAR;
+        break;
+    case OUT_TYPE_SINT:
+        type = NC_SHORT;
+        break;
+    case OUT_TYPE_USINT:
+        type = NC_UINT;
+        break;
+    case OUT_TYPE_INT:
+        type = NC_INT;
+        break;
+    case OUT_TYPE_FLOAT:
+        type = NC_FLOAT;
+        break;
+    case OUT_TYPE_DOUBLE:
+        type = NC_DOUBLE;
+        break;
+    default:
+        log_err("Unrecognized netCDF datatype");
     }
     return type;
 }

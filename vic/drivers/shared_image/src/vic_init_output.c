@@ -225,29 +225,29 @@ initialize_history_file(nc_file_struct *nc,
     // This could be further refined but for now, I've choosen a file naming
     // Convention that goes like this:
     switch (stream->agg_alarm.freq) {
-        // If FREQ_NDAYS -- filename = result_dir/prefix.YYYY-MM-DD.nc
-        case FREQ_NDAYS:
-            sprintf(stream->filename, "%s/%s.%04d-%02d-%02d.nc",
-                    filenames.result_dir,
-                    stream->prefix, dmy_current->year, dmy_current->month,
-                    dmy_current->day);
-            break;
-        case FREQ_NMONTHS:
-            // If FREQ_NMONTHS -- filename = result_dir/prefix.YYYY-MM.nc
-            sprintf(stream->filename, "%s/%s.%04d-%02d.nc", filenames.result_dir,
-                    stream->prefix, dmy_current->year, dmy_current->month);
-            break;
-        case FREQ_NYEARS:
-            // If FREQ_NYEARS -- filename = result_dir/prefix.YYYY.nc
-            sprintf(stream->filename, "%s/%s.%04d.nc", filenames.result_dir,
-                    stream->prefix, dmy_current->year);
-            break;
-        default:
-            // For all other cases -- filename = result_dir/prefix.YYYY-MM-DD-SSSSS.nc
-            sprintf(stream->filename, "%s/%s.%04d-%02d-%02d-%05u.nc",
-                    filenames.result_dir,
-                    stream->prefix, dmy_current->year, dmy_current->month,
-                    dmy_current->day, dmy_current->dayseconds);
+    // If FREQ_NDAYS -- filename = result_dir/prefix.YYYY-MM-DD.nc
+    case FREQ_NDAYS:
+        sprintf(stream->filename, "%s/%s.%04d-%02d-%02d.nc",
+                filenames.result_dir,
+                stream->prefix, dmy_current->year, dmy_current->month,
+                dmy_current->day);
+        break;
+    case FREQ_NMONTHS:
+        // If FREQ_NMONTHS -- filename = result_dir/prefix.YYYY-MM.nc
+        sprintf(stream->filename, "%s/%s.%04d-%02d.nc", filenames.result_dir,
+                stream->prefix, dmy_current->year, dmy_current->month);
+        break;
+    case FREQ_NYEARS:
+        // If FREQ_NYEARS -- filename = result_dir/prefix.YYYY.nc
+        sprintf(stream->filename, "%s/%s.%04d.nc", filenames.result_dir,
+                stream->prefix, dmy_current->year);
+        break;
+    default:
+        // For all other cases -- filename = result_dir/prefix.YYYY-MM-DD-SSSSS.nc
+        sprintf(stream->filename, "%s/%s.%04d-%02d-%02d-%05u.nc",
+                filenames.result_dir,
+                stream->prefix, dmy_current->year, dmy_current->month,
+                dmy_current->day, dmy_current->dayseconds);
     }
 
     // open the netcdf file
@@ -431,33 +431,33 @@ initialize_history_file(nc_file_struct *nc,
 
         // set the fill value attribute
         switch (nc->nc_vars[j].nc_type) {
-            case NC_DOUBLE:
-                status = nc_put_att_double(nc->nc_id, nc->nc_vars[j].nc_varid,
-                                           "_FillValue", NC_DOUBLE, 1,
-                                           &(nc->d_fillvalue));
-                break;
-            case NC_FLOAT:
-                status = nc_put_att_float(nc->nc_id, nc->nc_vars[j].nc_varid,
-                                          "_FillValue", NC_FLOAT, 1,
-                                          &(nc->f_fillvalue));
-                break;
-            case NC_INT:
-                status = nc_put_att_int(nc->nc_id, nc->nc_vars[j].nc_varid,
-                                        "_FillValue", NC_INT, 1,
-                                        &(nc->i_fillvalue));
-                break;
-            case NC_SHORT:
-                log_err("NC_SHORT not supported yet");
-                break;
-            case NC_CHAR:
-                log_err("NC_CHAR not supported yet");
-                break;
-            case NC_BYTE:
-                log_err("NC_BYTE not supported yet");
-                break;
-            default:
-                log_err("NC_TYPE %d not supported at this time",
-                        nc->nc_vars[j].nc_type);
+        case NC_DOUBLE:
+            status = nc_put_att_double(nc->nc_id, nc->nc_vars[j].nc_varid,
+                                       "_FillValue", NC_DOUBLE, 1,
+                                       &(nc->d_fillvalue));
+            break;
+        case NC_FLOAT:
+            status = nc_put_att_float(nc->nc_id, nc->nc_vars[j].nc_varid,
+                                      "_FillValue", NC_FLOAT, 1,
+                                      &(nc->f_fillvalue));
+            break;
+        case NC_INT:
+            status = nc_put_att_int(nc->nc_id, nc->nc_vars[j].nc_varid,
+                                    "_FillValue", NC_INT, 1,
+                                    &(nc->i_fillvalue));
+            break;
+        case NC_SHORT:
+            log_err("NC_SHORT not supported yet");
+            break;
+        case NC_CHAR:
+            log_err("NC_CHAR not supported yet");
+            break;
+        case NC_BYTE:
+            log_err("NC_BYTE not supported yet");
+            break;
+        default:
+            log_err("NC_TYPE %d not supported at this time",
+                    nc->nc_vars[j].nc_type);
         }
         // check status of fill value setting
         check_nc_status(status,

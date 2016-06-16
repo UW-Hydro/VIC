@@ -37,7 +37,7 @@ get_default_nstreams_nvars(size_t *nstreams,
 {
     extern option_struct options;
 
-    size_t streamnum;
+    size_t               streamnum;
 
     // Output files
     (*nstreams) = 2;

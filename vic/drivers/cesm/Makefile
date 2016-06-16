@@ -73,6 +73,9 @@ else
 FC = mpifort
 endif
 
+GIT_VERSION := $(shell git describe --abbrev=4 --dirty --always --tags)
+HOSTNAME := $(shell uname -n)
+
 # set includes
 INCLUDES = -I ${DRIVERPATH}/include \
 		   -I ${VICPATH}/include \
@@ -84,7 +87,11 @@ INCLUDES = -I ${DRIVERPATH}/include \
 LIBRARY = -lm -L${NETCDFPATH}/lib -lnetcdf
 
 # Set compiler flags
-CFLAGS  =  ${INCLUDES} -ggdb -O0 -Wall -Wextra -fPIC
+CFLAGS  =  ${INCLUDES} -ggdb -O0 -Wall -Wextra -fPIC \
+					 -DLOG_LVL=$(LOG_LVL) \
+					 -DGIT_VERSION=\"$(GIT_VERSION)\" \
+					 -DUSERNAME=\"$(USER)\" \
+					 -DHOSTNAME=\"$(HOSTNAME)\"
 FFLAGS  = ${INCLUDES} -fPIC
 
 # Set the log level

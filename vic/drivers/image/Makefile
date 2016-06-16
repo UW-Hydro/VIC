@@ -74,6 +74,9 @@ else
 CC = mpicc
 endif
 
+GIT_VERSION := $(shell git describe --abbrev=4 --dirty --always --tags)
+HOSTNAME := $(shell uname -n)
+
 # Set the log level
 # To turn off warning statements, set LOG_LVL >= 30
 # | Level     | Numeric value    |
@@ -92,7 +95,11 @@ INCLUDES = -I ${DRIVERPATH}/include \
 		   -I ${NETCDFPATH}/include \
 
 # Uncomment to include debugging information
-CFLAGS  =  ${INCLUDES} -ggdb -O0 -Wall -Wextra -std=c99 -DLOG_LVL=$(LOG_LVL)
+CFLAGS  =  ${INCLUDES} -ggdb -O0 -Wall -Wextra -std=c99 \
+					 -DLOG_LVL=$(LOG_LVL) \
+					 -DGIT_VERSION=\"$(GIT_VERSION)\" \
+					 -DUSERNAME=\"$(USER)\" \
+					 -DHOSTNAME=\"$(HOSTNAME)\"
 LIBRARY = -lm -L${NETCDFPATH}/lib -lnetcdf
 
 COMPEXE = vic_image

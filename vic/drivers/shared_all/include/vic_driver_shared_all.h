@@ -28,9 +28,7 @@
 #define VIC_DRIVER_SHARED_H
 
 #include <vic_run.h>
-
-#define VERSION "5.0.0 candidate 1: June 10, 2016"
-#define SHORT_VERSION "5.0.0 candidate 1"
+#include <vic_version.h>
 
 /******************************************************************************
  * @brief   Met file formats

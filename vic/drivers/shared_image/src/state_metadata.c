@@ -34,6 +34,7 @@ set_state_meta_data_info()
 {
     size_t                 v;
 
+    extern option_struct       options;
     extern metadata_struct state_metadata[N_STATE_VARS];
 
     // Build the list of state variables
@@ -271,6 +272,7 @@ set_state_meta_data_info()
     strcpy(state_metadata[STATE_ENERGY_SNOW_FLUX].description,
            "thermal flux through snowpack");
 
+    if (options.LAKES) {
     // STATE_LAKE_SOIL_MOISTURE
     strcpy(state_metadata[STATE_LAKE_SOIL_MOISTURE].varname,
            "STATE_LAKE_SOIL_MOISTURE");
@@ -675,4 +677,5 @@ set_state_meta_data_info()
     strcpy(state_metadata[STATE_LAKE_ICE_SNOW_DEPTH].units, "m");
     strcpy(state_metadata[STATE_LAKE_ICE_SNOW_DEPTH].description,
            "depth of snow on lake ice");
+    }
 }

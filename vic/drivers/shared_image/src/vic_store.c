@@ -1333,7 +1333,6 @@ set_nc_state_var_info(nc_file_struct *nc)
 
     for (i = 0; i < N_STATE_VARS; i++) {
         nc->nc_vars[i].nc_varid = i;
-        nc->nc_vars[i].nc_type = NC_DOUBLE;
         for (j = 0; j < MAXDIMS; j++) {
             nc->nc_vars[i].nc_dimids[j] = -1;
             nc->nc_vars[i].nc_counts[j] = -1;
@@ -1351,6 +1350,7 @@ set_nc_state_var_info(nc_file_struct *nc)
         // Set the number of dimensions and dimids for each state variable
         switch (i) {
         case STATE_SOIL_MOISTURE:
+            debug("setting state soil moisture var");
             // 5d vars [veg, band, layer, j, i]
             nc->nc_vars[i].nc_dims = 5;
             nc->nc_vars[i].nc_dimids[0] = nc->veg_dimid;
@@ -1470,6 +1470,7 @@ set_nc_state_var_info(nc_file_struct *nc)
         case STATE_LAKE_ICE_WATER_EQUIVALENT:
         case STATE_LAKE_ICE_HEIGHT:
         case STATE_LAKE_ICE_TEMP:
+        case STATE_LAKE_ICE_SWE:
         case STATE_LAKE_ICE_SNOW_SURF_TEMP:
         case STATE_LAKE_ICE_SNOW_PACK_TEMP:
         case STATE_LAKE_ICE_SNOW_COLD_CONTENT:
@@ -1637,6 +1638,8 @@ initialize_state_file(char           *filename,
         check_nc_status(status, "Error defining lake_node in %s", filename);
     }
 
+    set_nc_state_var_info(nc_state_file);
+
     // initialize dimids to invalid values
     for (i = 0; i < MAXDIMS; i++) {
         dimids[i] = -1;
@@ -1685,15 +1688,11 @@ initialize_state_file(char           *filename,
         dimids[0] = nc_state_file->nj_dimid;
         dcount[0] = nc_state_file->nj_size;
     }
-    for (i = 0; i < MAXDIMS; i++) {
-        dimids[i] = -1;
-        dcount[i] = 0;
-    }
 
     // define the netcdf variable latitude
     status = nc_def_var(nc_state_file->nc_id, global_domain.info.lat_var,
                         NC_DOUBLE, ndims, dimids, &(lat_var_id));
-    check_nc_status(status, "Error defining lat variable in %s", filename);
+    check_nc_status(status, "Error defining lat variable (%s) in %s", global_domain.info.lat_var, filename);
     status = nc_put_att_text(nc_state_file->nc_id, lat_var_id, "long_name", strlen(
                                  "latitude"), "latitude");
     check_nc_status(status, "Error adding attribute in %s", filename);
@@ -1808,24 +1807,38 @@ initialize_state_file(char           *filename,
     check_nc_status(status, "Error adding attribute in %s", filename);
     dimids[0] = -1;
 
-    // lake_node
-    dimids[0] = nc_state_file->lake_node_dimid;
-    status = nc_def_var(nc_state_file->nc_id, "lake_node", NC_INT, ndims,
-                        dimids, &(lake_node_var_id));
-    check_nc_status(status, "Error defining node variable in %s", filename);
-    status = nc_put_att_text(nc_state_file->nc_id, lake_node_var_id,
-                             "long_name",
-                             strlen("lake_node"), "lake_node");
-    check_nc_status(status, "Error adding attribute in %s", filename);
-    status = nc_put_att_text(nc_state_file->nc_id, dz_node_var_id,
-                             "standard_name", strlen("lake_node_number"),
-                             "lake_node_number");
-    check_nc_status(status, "Error adding attribute in %s", filename);
-    dimids[0] = -1;
+    if (options.LAKES) {
+        // lake_node
+        dimids[0] = nc_state_file->lake_node_dimid;
+        status = nc_def_var(nc_state_file->nc_id, "lake_node", NC_INT, ndims,
+                            dimids, &(lake_node_var_id));
+        check_nc_status(status, "Error defining node variable in %s", filename);
+        status = nc_put_att_text(nc_state_file->nc_id, lake_node_var_id,
+                                 "long_name",
+                                 strlen("lake_node"), "lake_node");
+        check_nc_status(status, "Error adding attribute in %s", filename);
+        status = nc_put_att_text(nc_state_file->nc_id, dz_node_var_id,
+                                 "standard_name", strlen("lake_node_number"),
+                                 "lake_node_number");
+        check_nc_status(status, "Error adding attribute in %s", filename);
+        dimids[0] = -1;
+    }
 
     // Define state variables
     for (i = 0; i < N_STATE_VARS; i++) {
         // create the variable
+        debug("defining state variable %zu: %s", i, state_metadata[i].varname);
+        debug("dtype %d (expecting %d)", nc_state_file->nc_vars[i].nc_type, NC_DOUBLE);
+
+        debug("varname: %s, ndims: %d", state_metadata[i].varname, nc_state_file->nc_vars[i].nc_dims);
+        
+        print_nc_var(&(nc_state_file->nc_vars[i]), nc_state_file->nc_vars[i].nc_dims);
+
+        if (strcasecmp(state_metadata[i].varname, MISSING_S) == 0) {
+            debug("skipping...");
+            continue;
+        }
+
         status = nc_def_var(nc_state_file->nc_id, state_metadata[i].varname,
                             nc_state_file->nc_vars[i].nc_type,
                             nc_state_file->nc_vars[i].nc_dims,
@@ -1835,6 +1848,7 @@ initialize_state_file(char           *filename,
                         state_metadata[i].varname, filename);
 
         // set the fill value attribute
+        debug("setting fill value %f", nc_state_file->d_fillvalue);
         if (nc_state_file->nc_vars[i].nc_type == NC_DOUBLE) {
             status = nc_put_att_double(nc_state_file->nc_id,
                                        nc_state_file->nc_vars[i].nc_varid,

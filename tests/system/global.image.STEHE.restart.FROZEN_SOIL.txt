@@ -49,7 +49,7 @@ VEGPARAM_LAI        TRUE
 LAI_SRC             FROM_VEGPARAM
 SNOW_BAND           1 $test_data_dir/image/Stehekin/parameters/Stehekin_test_params_20160327.nc
 
-RESULT_DIR              $result_dir/Stehekin.history.nc
+RESULT_DIR              $result_dir
 
 OUTFILE     fluxes
 AGGFREQ     NHOURS   1

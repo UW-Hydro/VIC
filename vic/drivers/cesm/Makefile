@@ -7,7 +7,7 @@
  # @section LICENSE
  #
  # The Variable Infiltration Capacity (VIC) macroscale hydrological model
- # Copyright (C) 2014 The Land Surface Hydrology Group, Department of Civil
+ # Copyright (C) 2016 The Computational Hydrology Group, Department of Civil
  # and Environmental Engineering, University of Washington.
  #
  # The VIC model is free software; you can redistribute it and/or
@@ -73,6 +73,9 @@ else
 FC = mpifort
 endif
 
+GIT_VERSION := $(shell git describe --abbrev=4 --dirty --always --tags)
+HOSTNAME := $(shell uname -n)
+
 # set includes
 INCLUDES = -I ${DRIVERPATH}/include \
 		   -I ${VICPATH}/include \
@@ -84,7 +87,11 @@ INCLUDES = -I ${DRIVERPATH}/include \
 LIBRARY = -lm -L${NETCDFPATH}/lib -lnetcdf
 
 # Set compiler flags
-CFLAGS  =  ${INCLUDES} -ggdb -O0 -Wall -Wextra -fPIC
+CFLAGS  =  ${INCLUDES} -ggdb -O0 -Wall -Wextra -fPIC \
+					 -DLOG_LVL=$(LOG_LVL) \
+					 -DGIT_VERSION=\"$(GIT_VERSION)\" \
+					 -DUSERNAME=\"$(USER)\" \
+					 -DHOSTNAME=\"$(HOSTNAME)\"
 FFLAGS  = ${INCLUDES} -fPIC
 
 # Set the log level

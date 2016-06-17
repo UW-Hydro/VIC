@@ -527,8 +527,8 @@ get_forcing_file_info(param_set_struct *param_set,
                 param_set->force_steps_per_day[file_num])
     }
     if (calendar != global_param.calendar) {
-        log_err("Calendar in forcing file does not match the calendar of "
-                "VIC's clock: %s", calendar_char);
+        log_err("Calendar in forcing file (%s) does not match the calendar of "
+                "VIC's clock", calendar_char);
     }
 
     // Free attribute character arrays

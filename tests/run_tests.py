@@ -406,13 +406,13 @@ def run_system(config_file, vic_exe, test_data_dir, out_dir, driver):
                     returncode = vic_exe.run(test_global_file,
                                              logdir=dirs['logs'])
                     # Check return code
-                    check_returncode(returncode,
+                    check_returncode(vic_exe,
                                      test_dict.pop('expected_retval', 0))
             else:
                 returncode = vic_exe.run(test_global_file, logdir=dirs['logs'],
                                          **run_kwargs)
                 # Check return code
-                check_returncode(returncode,
+                check_returncode(vic_exe,
                                  test_dict.pop('expected_retval', 0))
 
             test_complete = True
@@ -569,7 +569,7 @@ def run_science(config_file, vic_exe, test_data_dir, out_dir, driver):
             test_complete = True
 
             # Check return code
-            check_returncode(returncode)
+            check_returncode(vic_exe)
 
             # check output files (different tests depending on driver)
             if test_dict['check']:
@@ -706,7 +706,7 @@ def run_examples(config_file, vic_exe, test_data_dir, out_dir, driver):
             test_complete = True
 
             # Check return code
-            check_returncode(returncode)
+            check_returncode(vic_exe)
 
             # check output files (different tests depending on driver)
             if test_dict['check']:

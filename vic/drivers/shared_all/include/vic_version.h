@@ -27,7 +27,7 @@
 #ifndef VIC_VERSION_H
 #define VIC_VERSION_H
 
-#define STR_HELPER(x) #x
+#define STR_HELPER(x) # x
 #define STR(x) STR_HELPER(x)
 
 #ifndef VERSION
@@ -67,7 +67,8 @@
 #elif defined(__GNUC__) || defined(__GNUG__)
 /* GNU GCC/G++. --------------------------------------------- */
 # define COMPILER "gcc"
-# define COMPILER_VERSION STR(__GNUC__) "." STR(__GNUC_MINOR__) "." STR(__GNUC_PATCHLEVEL__)
+# define COMPILER_VERSION STR(__GNUC__) "." STR(__GNUC_MINOR__) "." STR( \
+        __GNUC_PATCHLEVEL__)
 
 #elif defined(__PGI)
 /* Portland Group PGCC/PGCPP. ------------------------------- */

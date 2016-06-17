@@ -111,15 +111,17 @@ def pop_run_kwargs(config):
     return run_kwargs
 
 
-def check_returncode(returncode, expected=0):
+def check_returncode(exe, expected=0):
     '''check return code given by VIC, raise error if appropriate'''
-    if returncode == expected:
+    if exe.returncode == expected:
         return None
-    elif returncode == default_vic_valgrind_error_code:
-        raise VICValgrindError('Valgrind raised an error')
+    elif exe.returncode == default_vic_valgrind_error_code:
+        raise VICValgrindError(
+            'Valgrind raised an error when running: "{}"'.format(exe.argstring))
     else:
-        raise VICReturnCodeError('VIC return code ({0}) does not match '
-                                 'expected ({1})'.format(returncode, expected))
+        raise VICReturnCodeError(
+            'VIC return code ({0}) did not match expected ({1}) when running '
+            '"{2}"'.format(exe.returncode, expected, exe.argstring))
 
 
 def process_error(error, vic_exe):

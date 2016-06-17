@@ -6,7 +6,7 @@
  * @section LICENSE
  *
  * The Variable Infiltration Capacity (VIC) macroscale hydrological model
- * Copyright (C) 2014 The Land Surface Hydrology Group, Department of Civil
+ * Copyright (C) 2016 The Computational Hydrology Group, Department of Civil
  * and Environmental Engineering, University of Washington.
  *
  * The VIC model is free software; you can redistribute it and/or
@@ -116,8 +116,13 @@ print_usage(char *executable)
 void
 print_version(char *driver)
 {
-    fprintf(stdout, "  VIC Version : %s\n", SHORT_VERSION);
-    fprintf(stdout, "  VIC Driver  : %s\n", driver);
+    fprintf(stdout, "VIC Driver  : %s\n", driver);
+    fprintf(stdout, "VIC Version : %s\n", VERSION);
+    fprintf(stdout, "VIC Git Tag : %s\n", GIT_VERSION);
+    fprintf(stdout, "Compiled    : by %s on %s (%s) %s %s\n",
+            USERNAME, HOSTNAME, PLATFORM, BUILD_DATE, BUILD_TIME);
+    fprintf(stdout, "Compiler    : %s\n", COMPILER);
+    fprintf(stdout, " version    : %s\n", COMPILER_VERSION);
 
     print_license();
 }
@@ -131,10 +136,10 @@ print_license()
     fprintf(stdout,
             "\n  Variable Infiltration Capacity (VIC) macroscale hydrologic\n");
     fprintf(stdout,
-            "  model version %s, Copyright (C) 2014 Land Surface\n",
+            "  model version %s, Copyright (C) 2016 Computational Hydrology\n",
             SHORT_VERSION);
     fprintf(stdout,
-            "  Hydrology Group, Dept. of Civil and Environmental Engineering,\n");
+            "  Group, Dept. of Civil and Environmental Engineering,\n");
     fprintf(stdout,
             "  University of Washington.  VIC comes with ABSOLUTELY NO\n");
     fprintf(stdout,

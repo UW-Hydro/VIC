@@ -211,7 +211,7 @@ vic_write(stream_struct  *stream,
     }
 
     // write to file
-    if (mpi_rank == 0) {
+    if (mpi_rank == VIC_MPI_ROOT) {
         // ADD Time variable
         dstart[0] = stream->write_alarm.count;
 

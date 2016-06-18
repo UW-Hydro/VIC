@@ -519,6 +519,8 @@ typedef struct {
  * @brief   This structure stores output information for one output stream.
  *****************************************************************************/
 typedef struct {
+    size_t nvars;                    /**< number of variables to store in the file */
+    size_t ngridcells;               /**< number of grid cells in aggdata */
     char prefix[MAXSTRING];          /**< prefix of the file name, e.g. "fluxes" */
     char filename[MAXSTRING];        /**< complete file name */
     FILE *fh;                        /**< filehandle */
@@ -531,16 +533,14 @@ typedef struct {
                                           OUT_TYPE_DOUBLE = double precision floating point */
     double *mult;                    /**< multiplier, when written to a binary file [shape=(nvars, )] */
     char **format;                    /**< format, when written to disk [shape=(nvars, )] */
-    size_t nvars;                    /**< number of variables to store in the file */
-    size_t ngridcells;               /**< number of grid cells in aggdata */
     unsigned int *varid;             /**< id numbers of the variables to store in the file
                                           (a variable's id number is its index in the out_data array).
                                           The order of the id numbers in the varid array
                                           is the order in which the variables will be written. */
     unsigned short int *aggtype;     /**< type of aggregation to use [shape=(nvars, )] */
+    double ****aggdata;              /**< array of aggregated data values [shape=(ngridcells, nvars, nelem, nbins)] */
     alarm_struct agg_alarm;          /**< alaram for stream aggregation */
     alarm_struct write_alarm;        /**< alaram for controlling stream write */
-    double ****aggdata;              /**< array of aggregated data values [shape=(ngridcells, nvars, nelem, nbins)] */
 } stream_struct;
 
 /******************************************************************************

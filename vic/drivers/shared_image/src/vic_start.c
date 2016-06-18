@@ -59,7 +59,7 @@ vic_start(void)
     size_t                     j;
 
     status = MPI_Bcast(&filenames, 1, mpi_filenames_struct_type,
-                       0, MPI_COMM_VIC);
+                       VIC_MPI_ROOT, MPI_COMM_VIC);
     if (status != MPI_SUCCESS) {
         log_err("MPI error in vic_start(): %d\n", status);
     }
@@ -67,7 +67,7 @@ vic_start(void)
     // Set Log Destination
     setup_logging(mpi_rank);
 
-    if (mpi_rank == 0) {
+    if (mpi_rank == VIC_MPI_ROOT) {
         // set model constants
         if (strcasecmp(filenames.constants, "MISSING")) {
             filep.constants = open_file(filenames.constants, "r");
@@ -122,30 +122,30 @@ vic_start(void)
 
     // broadcast global, option, param structures as well as global valies
     // such as NF and NR
-    status = MPI_Bcast(&NF, 1, MPI_UNSIGNED_LONG, 0, MPI_COMM_VIC);
+    status = MPI_Bcast(&NF, 1, MPI_UNSIGNED_LONG, VIC_MPI_ROOT, MPI_COMM_VIC);
     if (status != MPI_SUCCESS) {
         log_err("MPI error in vic_start(): %d\n", status);
     }
 
-    status = MPI_Bcast(&NR, 1, MPI_UNSIGNED_LONG, 0, MPI_COMM_VIC);
+    status = MPI_Bcast(&NR, 1, MPI_UNSIGNED_LONG, VIC_MPI_ROOT, MPI_COMM_VIC);
     if (status != MPI_SUCCESS) {
         log_err("MPI error in vic_start(): %d\n", status);
     }
 
     status = MPI_Bcast(&global_param, 1, mpi_global_struct_type,
-                       0, MPI_COMM_VIC);
+                       VIC_MPI_ROOT, MPI_COMM_VIC);
     if (status != MPI_SUCCESS) {
         log_err("MPI error in vic_start(): %d\n", status);
     }
 
     status = MPI_Bcast(&options, 1, mpi_option_struct_type,
-                       0, MPI_COMM_VIC);
+                       VIC_MPI_ROOT, MPI_COMM_VIC);
     if (status != MPI_SUCCESS) {
         log_err("MPI error in vic_start(): %d\n", status);
     }
 
     status = MPI_Bcast(&param, 1, mpi_param_struct_type,
-                       0, MPI_COMM_VIC);
+                       VIC_MPI_ROOT, MPI_COMM_VIC);
     if (status != MPI_SUCCESS) {
         log_err("MPI error in vic_start(): %d\n", status);
     }
@@ -154,7 +154,8 @@ vic_start(void)
 
     // First scatter the array sizes
     status = MPI_Scatter(mpi_map_local_array_sizes, 1, MPI_INT,
-                         &local_ncells_active, 1, MPI_INT, 0, MPI_COMM_VIC);
+                         &local_ncells_active, 1, MPI_INT, VIC_MPI_ROOT,
+                         MPI_COMM_VIC);
     local_domain.ncells_active = (size_t) local_ncells_active;
     if (status != MPI_SUCCESS) {
         log_err("MPI error in vic_start(): %d\n", status);
@@ -171,7 +172,7 @@ vic_start(void)
     }
 
     // map the location vector to a temporary array so they can be scattered
-    if (mpi_rank == 0) {
+    if (mpi_rank == VIC_MPI_ROOT) {
         mapped_locations = malloc(global_domain.ncells_active *
                                   sizeof(*mapped_locations));
         if (mapped_locations == NULL) {
@@ -208,7 +209,7 @@ vic_start(void)
                           mpi_location_struct_type,
                           local_domain.locations, local_domain.ncells_active,
                           mpi_location_struct_type,
-                          0, MPI_COMM_VIC);
+                          VIC_MPI_ROOT, MPI_COMM_VIC);
     if (status != MPI_SUCCESS) {
         log_err("MPI error in vic_start(): %d\n", status);
     }
@@ -218,7 +219,7 @@ vic_start(void)
     }
 
     // cleanup
-    if (mpi_rank == 0) {
+    if (mpi_rank == VIC_MPI_ROOT) {
         free(mapped_locations);
         free(active_locations);
     }

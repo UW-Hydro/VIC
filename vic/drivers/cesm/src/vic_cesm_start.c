@@ -44,7 +44,7 @@ vic_cesm_start(vic_clock     *vclock,
     initialize_global_structures();
 
     // Driver specific settings
-    if (mpi_rank == 0) {
+    if (mpi_rank == VIC_MPI_ROOT) {
         strcpy(filenames.global, GLOBALPARAM);
         // read global settings
         filep.globalparam = open_file(filenames.global, "r");

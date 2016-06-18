@@ -93,7 +93,7 @@ main(int    argc,
     initialize_mpi();
 
     // process command line arguments
-    if (mpi_rank == 0) {
+    if (mpi_rank == VIC_MPI_ROOT) {
         cmd_proc(argc, argv, filenames.global);
     }
 

@@ -71,7 +71,7 @@ vic_init_output(dmy_struct *dmy_current)
                              &(save_data[i]));
     }
 
-    if (mpi_rank == 0) {
+    if (mpi_rank == VIC_MPI_ROOT) {
         // count the number of streams and variables in the global parameter file
         count_nstreams_nvars(filep.globalparam, &(options.Noutstreams),
                              nstream_vars);
@@ -84,11 +84,13 @@ vic_init_output(dmy_struct *dmy_current)
     }
 
     // broadcast Noutstreams and nstream_vars
-    status = MPI_Bcast(&(options.Noutstreams), 1, MPI_AINT, 0, MPI_COMM_VIC);
+    status = MPI_Bcast(&(options.Noutstreams), 1, MPI_AINT, VIC_MPI_ROOT,
+                       MPI_COMM_VIC);
     if (status != MPI_SUCCESS) {
         log_err("MPI error %d\n", status);
     }
-    status = MPI_Bcast(&(nstream_vars), MAX_OUTPUT_STREAMS, MPI_AINT, 0,
+    status = MPI_Bcast(&(nstream_vars), MAX_OUTPUT_STREAMS, MPI_AINT,
+                       VIC_MPI_ROOT,
                        MPI_COMM_VIC);
     if (status != MPI_SUCCESS) {
         log_err("MPI error %d\n", status);
@@ -111,7 +113,7 @@ vic_init_output(dmy_struct *dmy_current)
                      local_domain.ncells_active);
     }
 
-    if (mpi_rank == 0) {
+    if (mpi_rank == VIC_MPI_ROOT) {
         if (default_outputs) {
             // determine which variables will be written to the history file
             set_output_defaults(&output_streams, dmy_current, NETCDF4_CLASSIC);
@@ -124,10 +126,40 @@ vic_init_output(dmy_struct *dmy_current)
 
     // Now broadcast the arrays of shape nvars
     for (streamnum = 0; streamnum < options.Noutstreams; streamnum++) {
+        // prefix
+        status = MPI_Bcast(output_streams[streamnum].prefix,
+                           MAXSTRING, MPI_CHAR, VIC_MPI_ROOT, MPI_COMM_VIC);
+        if (status != MPI_SUCCESS) {
+            log_err("MPI error brodcasting to prefix: %d\n", status);
+        }
+
+        // filename
+        status = MPI_Bcast(output_streams[streamnum].filename,
+                           MAXSTRING, MPI_CHAR, VIC_MPI_ROOT, MPI_COMM_VIC);
+        if (status != MPI_SUCCESS) {
+            log_err("MPI error brodcasting to filename: %d\n", status);
+        }
+
+        // skip fh
+
+        // file_format
+        status = MPI_Bcast(&(output_streams[streamnum].file_format),
+                           1, MPI_UNSIGNED_SHORT, VIC_MPI_ROOT, MPI_COMM_VIC);
+        if (status != MPI_SUCCESS) {
+            log_err("MPI error brodcasting to file_format: %d\n", status);
+        }
+
+        // compress
+        status = MPI_Bcast(&(output_streams[streamnum].compress),
+                           1, MPI_SHORT, VIC_MPI_ROOT, MPI_COMM_VIC);
+        if (status != MPI_SUCCESS) {
+            log_err("MPI error brodcasting to compress: %d\n", status);
+        }
+
         // type
         status = MPI_Bcast(output_streams[streamnum].type,
                            output_streams[streamnum].nvars,
-                           MPI_UNSIGNED_SHORT, 0, MPI_COMM_VIC);
+                           MPI_UNSIGNED_SHORT, VIC_MPI_ROOT, MPI_COMM_VIC);
         if (status != MPI_SUCCESS) {
             log_err("MPI error brodcasting to type: %d\n", status);
         }
@@ -135,35 +167,45 @@ vic_init_output(dmy_struct *dmy_current)
         // mult
         status = MPI_Bcast(output_streams[streamnum].mult,
                            output_streams[streamnum].nvars,
-                           MPI_DOUBLE, 0, MPI_COMM_VIC);
+                           MPI_DOUBLE, VIC_MPI_ROOT, MPI_COMM_VIC);
         if (status != MPI_SUCCESS) {
             log_err("MPI error brodcasting to mult: %d\n", status);
+        }
+
+        // format
+        status = MPI_Bcast(output_streams[streamnum].format,
+                           output_streams[streamnum].nvars * MAXSTRING,
+                           MPI_CHAR, VIC_MPI_ROOT, MPI_COMM_VIC);
+        if (status != MPI_SUCCESS) {
+            log_err("MPI error brodcasting to format: %d\n", status);
         }
 
         // varid
         status = MPI_Bcast(output_streams[streamnum].varid,
                            output_streams[streamnum].nvars,
-                           MPI_UNSIGNED, 0, MPI_COMM_VIC);
+                           MPI_UNSIGNED, VIC_MPI_ROOT, MPI_COMM_VIC);
         if (status != MPI_SUCCESS) {
             log_err("MPI error brodcasting to varid: %d\n", status);
         }
 
         // aggtype
         status = MPI_Bcast(output_streams[streamnum].aggtype,
-                           output_streams[streamnum].nvars, MPI_UNSIGNED, 0,
-                           MPI_COMM_VIC);
+                           output_streams[streamnum].nvars, MPI_UNSIGNED_SHORT,
+                           VIC_MPI_ROOT, MPI_COMM_VIC);
         if (status != MPI_SUCCESS) {
             log_err("MPI error brodcasting to aggtype: %d\n", status);
         }
 
+        // skip agg data
+
         // Now brodcast the alarms
         status = MPI_Bcast(&(output_streams[streamnum].agg_alarm), 1,
-                           mpi_alarm_struct_type, 0, MPI_COMM_VIC);
+                           mpi_alarm_struct_type, VIC_MPI_ROOT, MPI_COMM_VIC);
         if (status != MPI_SUCCESS) {
             log_err("MPI error %d\n", status);
         }
         status = MPI_Bcast(&(output_streams[streamnum].write_alarm), 1,
-                           mpi_alarm_struct_type, 0, MPI_COMM_VIC);
+                           mpi_alarm_struct_type, VIC_MPI_ROOT, MPI_COMM_VIC);
         if (status != MPI_SUCCESS) {
             log_err("MPI error %d\n", status);
         }
@@ -177,7 +219,7 @@ vic_init_output(dmy_struct *dmy_current)
                            output_streams[streamnum].varid,
                            output_streams[streamnum].type);
 
-        if (mpi_rank == 0) {
+        if (mpi_rank == VIC_MPI_ROOT) {
             // open the netcdf history file
             initialize_history_file(&(nc_hist_files[streamnum]),
                                     &(output_streams[streamnum]),
@@ -251,7 +293,8 @@ initialize_history_file(nc_file_struct *nc,
     }
 
     // open the netcdf file
-    status = nc_create(stream->filename, get_nc_mode(stream->file_format),
+    status = nc_create(stream->filename,
+                       NC_WRITE | get_nc_mode(stream->file_format),
                        &(nc->nc_id));
     check_nc_status(status, "Error creating %s", stream->filename);
     nc->open = true;
@@ -622,6 +665,7 @@ set_global_nc_attributes(int ncid,
 
     // Useful attributes from VIC
     put_nc_attr(ncid, NC_GLOBAL, "VIC_Model_Version", VERSION);
+    put_nc_attr(ncid, NC_GLOBAL, "VIC_GIT_VERSION", GIT_VERSION);
     // TODO: pass in driver as an argmument to this function
     put_nc_attr(ncid, NC_GLOBAL, "VIC_Driver", "Image");
 }

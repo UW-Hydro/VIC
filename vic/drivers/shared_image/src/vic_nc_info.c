@@ -83,6 +83,7 @@ set_nc_var_info(unsigned int       varid,
     case OUT_LATENT_SUB_BAND:
     case OUT_MELT_ENERGY_BAND:
     case OUT_LWNET_BAND:
+    case OUT_SWNET_BAND:
     case OUT_RFRZ_ENERGY_BAND:
     case OUT_SENSIBLE_BAND:
     case OUT_SNOW_CANOPY_BAND:
@@ -157,6 +158,7 @@ set_nc_var_dimids(unsigned int    varid,
     case OUT_LATENT_SUB_BAND:
     case OUT_MELT_ENERGY_BAND:
     case OUT_LWNET_BAND:
+    case OUT_SWNET_BAND:
     case OUT_RFRZ_ENERGY_BAND:
     case OUT_SENSIBLE_BAND:
     case OUT_SNOW_CANOPY_BAND:
@@ -237,7 +239,7 @@ get_nc_dtype(unsigned short int dtype)
         type = NC_DOUBLE;
         break;
     default:
-        log_err("Unrecognized netCDF datatype");
+        log_err("Unrecognized netCDF variable datatype %hu", dtype);
     }
     return type;
 }

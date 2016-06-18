@@ -60,7 +60,7 @@ vic_store(dmy_struct *dmy_current)
     set_nc_state_file_info(&nc_state_file);
 
     // only open and initialize the netcdf file on the first thread
-    if (mpi_rank == 0) {
+    if (mpi_rank == (mpi_rank == VIC_MPI_ROOT)) {
         // create netcdf file for storing model state
         sprintf(filename, "%s.%04d%02d%02d_%05u.nc",
                 filenames.statefile, dmy_current->year, dmy_current->month,
@@ -142,7 +142,6 @@ vic_store(dmy_struct *dmy_current)
             }
         }
     }
-
 
     // ice content
     nc_var = &(nc_state_file.nc_vars[STATE_SOIL_ICE]);
@@ -1258,7 +1257,7 @@ vic_store(dmy_struct *dmy_current)
     }
 
     // close the netcdf file if it is still open
-    if (mpi_rank == 0) {
+    if (mpi_rank == (mpi_rank == VIC_MPI_ROOT)) {
         if (nc_state_file.open == true) {
             status = nc_close(nc_state_file.nc_id);
             if (status != NC_NOERR) {
@@ -1335,7 +1334,7 @@ set_nc_state_var_info(nc_file_struct *nc)
         nc->nc_vars[i].nc_varid = i;
         for (j = 0; j < MAXDIMS; j++) {
             nc->nc_vars[i].nc_dimids[j] = -1;
-            nc->nc_vars[i].nc_counts[j] = -1;
+            nc->nc_vars[i].nc_counts[j] = 0;
         }
         nc->nc_vars[i].nc_dims = 0;
 
@@ -1350,7 +1349,6 @@ set_nc_state_var_info(nc_file_struct *nc)
         // Set the number of dimensions and dimids for each state variable
         switch (i) {
         case STATE_SOIL_MOISTURE:
-            debug("setting state soil moisture var");
             // 5d vars [veg, band, layer, j, i]
             nc->nc_vars[i].nc_dims = 5;
             nc->nc_vars[i].nc_dimids[0] = nc->veg_dimid;
@@ -1358,9 +1356,9 @@ set_nc_state_var_info(nc_file_struct *nc)
             nc->nc_vars[i].nc_dimids[2] = nc->layer_dimid;
             nc->nc_vars[i].nc_dimids[3] = nc->nj_dimid;
             nc->nc_vars[i].nc_dimids[4] = nc->ni_dimid;
-            nc->nc_vars[i].nc_counts[0] = nc->veg_size;
-            nc->nc_vars[i].nc_counts[1] = nc->band_size;
-            nc->nc_vars[i].nc_counts[2] = nc->layer_size;
+            nc->nc_vars[i].nc_counts[0] = 1;
+            nc->nc_vars[i].nc_counts[1] = 1;
+            nc->nc_vars[i].nc_counts[2] = 1;
             nc->nc_vars[i].nc_counts[3] = nc->nj_size;
             nc->nc_vars[i].nc_counts[4] = nc->ni_size;
             break;
@@ -1373,10 +1371,10 @@ set_nc_state_var_info(nc_file_struct *nc)
             nc->nc_vars[i].nc_dimids[3] = nc->frost_dimid;
             nc->nc_vars[i].nc_dimids[4] = nc->nj_dimid;
             nc->nc_vars[i].nc_dimids[5] = nc->ni_dimid;
-            nc->nc_vars[i].nc_counts[0] = nc->veg_size;
-            nc->nc_vars[i].nc_counts[1] = nc->band_size;
-            nc->nc_vars[i].nc_counts[2] = nc->layer_size;
-            nc->nc_vars[i].nc_counts[3] = nc->frost_size;
+            nc->nc_vars[i].nc_counts[0] = 1;
+            nc->nc_vars[i].nc_counts[1] = 1;
+            nc->nc_vars[i].nc_counts[2] = 1;
+            nc->nc_vars[i].nc_counts[3] = 1;
             nc->nc_vars[i].nc_counts[4] = nc->nj_size;
             nc->nc_vars[i].nc_counts[5] = nc->ni_size;
             break;
@@ -1406,8 +1404,8 @@ set_nc_state_var_info(nc_file_struct *nc)
             nc->nc_vars[i].nc_dimids[1] = nc->band_dimid;
             nc->nc_vars[i].nc_dimids[2] = nc->nj_dimid;
             nc->nc_vars[i].nc_dimids[3] = nc->ni_dimid;
-            nc->nc_vars[i].nc_counts[0] = nc->veg_size;
-            nc->nc_vars[i].nc_counts[1] = nc->band_size;
+            nc->nc_vars[i].nc_counts[0] = 1;
+            nc->nc_vars[i].nc_counts[1] = 1;
             nc->nc_vars[i].nc_counts[2] = nc->nj_size;
             nc->nc_vars[i].nc_counts[3] = nc->ni_size;
             break;
@@ -1419,9 +1417,9 @@ set_nc_state_var_info(nc_file_struct *nc)
             nc->nc_vars[i].nc_dimids[2] = nc->node_dimid;
             nc->nc_vars[i].nc_dimids[3] = nc->nj_dimid;
             nc->nc_vars[i].nc_dimids[4] = nc->ni_dimid;
-            nc->nc_vars[i].nc_counts[0] = nc->veg_size;
-            nc->nc_vars[i].nc_counts[1] = nc->band_size;
-            nc->nc_vars[i].nc_counts[2] = nc->node_size;
+            nc->nc_vars[i].nc_counts[0] = 1;
+            nc->nc_vars[i].nc_counts[1] = 1;
+            nc->nc_vars[i].nc_counts[2] = 1;
             nc->nc_vars[i].nc_counts[3] = nc->nj_size;
             nc->nc_vars[i].nc_counts[4] = nc->ni_size;
             break;
@@ -1439,8 +1437,8 @@ set_nc_state_var_info(nc_file_struct *nc)
             nc->nc_vars[i].nc_dimids[1] = nc->frost_dimid;
             nc->nc_vars[i].nc_dimids[2] = nc->nj_dimid;
             nc->nc_vars[i].nc_dimids[3] = nc->ni_dimid;
-            nc->nc_vars[i].nc_counts[0] = nc->layer_size;
-            nc->nc_vars[i].nc_counts[1] = nc->frost_size;
+            nc->nc_vars[i].nc_counts[0] = 1;
+            nc->nc_vars[i].nc_counts[1] = 1;
             nc->nc_vars[i].nc_counts[2] = nc->nj_size;
             nc->nc_vars[i].nc_counts[3] = nc->ni_size;
             break;
@@ -1491,7 +1489,7 @@ set_nc_state_var_info(nc_file_struct *nc)
             nc->nc_vars[i].nc_dimids[0] = nc->node_dimid;
             nc->nc_vars[i].nc_dimids[1] = nc->nj_dimid;
             nc->nc_vars[i].nc_dimids[2] = nc->ni_dimid;
-            nc->nc_vars[i].nc_counts[0] = nc->node_size;
+            nc->nc_vars[i].nc_counts[0] = 1;
             nc->nc_vars[i].nc_counts[1] = nc->nj_size;
             nc->nc_vars[i].nc_counts[2] = nc->ni_size;
             break;
@@ -1502,7 +1500,7 @@ set_nc_state_var_info(nc_file_struct *nc)
             nc->nc_vars[i].nc_dimids[0] = nc->lake_node_dimid;
             nc->nc_vars[i].nc_dimids[1] = nc->nj_dimid;
             nc->nc_vars[i].nc_dimids[2] = nc->ni_dimid;
-            nc->nc_vars[i].nc_counts[0] = nc->lake_node_size;
+            nc->nc_vars[i].nc_counts[0] = 1;
             nc->nc_vars[i].nc_counts[1] = nc->nj_size;
             nc->nc_vars[i].nc_counts[2] = nc->ni_size;
             break;
@@ -1553,7 +1551,7 @@ initialize_state_file(char           *filename,
     int                       *ivar = NULL;
 
     // open the netcdf file
-    status = nc_create(filename, get_nc_mode(options.STATE_FORMAT),
+    status = nc_create(filename, NC_WRITE | get_nc_mode(options.STATE_FORMAT),
                        &(nc_state_file->nc_id));
     check_nc_status(status, "Error creating %s", filename);
     nc_state_file->open = true;
@@ -1692,7 +1690,8 @@ initialize_state_file(char           *filename,
     // define the netcdf variable latitude
     status = nc_def_var(nc_state_file->nc_id, global_domain.info.lat_var,
                         NC_DOUBLE, ndims, dimids, &(lat_var_id));
-    check_nc_status(status, "Error defining lat variable (%s) in %s", global_domain.info.lat_var, filename);
+    check_nc_status(status, "Error defining lat variable (%s) in %s",
+                    global_domain.info.lat_var, filename);
     status = nc_put_att_text(nc_state_file->nc_id, lat_var_id, "long_name", strlen(
                                  "latitude"), "latitude");
     check_nc_status(status, "Error adding attribute in %s", filename);
@@ -1826,19 +1825,12 @@ initialize_state_file(char           *filename,
 
     // Define state variables
     for (i = 0; i < N_STATE_VARS; i++) {
-        // create the variable
-        debug("defining state variable %zu: %s", i, state_metadata[i].varname);
-        debug("dtype %d (expecting %d)", nc_state_file->nc_vars[i].nc_type, NC_DOUBLE);
-
-        debug("varname: %s, ndims: %d", state_metadata[i].varname, nc_state_file->nc_vars[i].nc_dims);
-        
-        print_nc_var(&(nc_state_file->nc_vars[i]), nc_state_file->nc_vars[i].nc_dims);
-
         if (strcasecmp(state_metadata[i].varname, MISSING_S) == 0) {
-            debug("skipping...");
+            // skip variables not set in set_state_meta_data_info
             continue;
         }
 
+        // create the variable
         status = nc_def_var(nc_state_file->nc_id, state_metadata[i].varname,
                             nc_state_file->nc_vars[i].nc_type,
                             nc_state_file->nc_vars[i].nc_dims,
@@ -1848,7 +1840,6 @@ initialize_state_file(char           *filename,
                         state_metadata[i].varname, filename);
 
         // set the fill value attribute
-        debug("setting fill value %f", nc_state_file->d_fillvalue);
         if (nc_state_file->nc_vars[i].nc_type == NC_DOUBLE) {
             status = nc_put_att_double(nc_state_file->nc_id,
                                        nc_state_file->nc_vars[i].nc_varid,

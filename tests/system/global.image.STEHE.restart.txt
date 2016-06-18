@@ -45,7 +45,6 @@ ORGANIC_FRACT       FALSE
 VEGLIB              $test_data_dir/image/Stehekin/parameters/Stehekin_test_params_20160327.nc
 VEGPARAM            $test_data_dir/image/Stehekin/parameters/Stehekin_test_params_20160327.nc
 ROOT_ZONES          3
-VEGPARAM_LAI        TRUE
 LAI_SRC             FROM_VEGPARAM
 SNOW_BAND           1 $test_data_dir/image/Stehekin/parameters/Stehekin_test_params_20160327.nc
 

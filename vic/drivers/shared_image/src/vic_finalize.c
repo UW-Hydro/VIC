@@ -113,7 +113,7 @@ vic_finalize(void)
     free(all_vars);
     free(save_data);
     free(local_domain.locations);
-    if (mpi_rank == 0) {
+    if (mpi_rank == VIC_MPI_ROOT) {
         free(filter_active_cells);
         free(global_domain.locations);
         free(mpi_map_local_array_sizes);

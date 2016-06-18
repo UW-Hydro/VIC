@@ -378,6 +378,14 @@ cell_method_from_agg_type(unsigned short int aggtype,
         strcpy(cell_method, "time: sum");
         return true;
     }
+    else if (aggtype == AGG_TYPE_END) {
+        strcpy(cell_method, "time: end");
+        return true;
+    }
+    else if (aggtype == AGG_TYPE_BEG) {
+        strcpy(cell_method, "time: beg");
+        return true;
+    }
     else {
         return false;
     }

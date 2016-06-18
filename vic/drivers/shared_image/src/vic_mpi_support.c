@@ -1769,7 +1769,7 @@ gather_put_nc_field_double(int     nc_id,
     size_t               grid_size;
     size_t               i;
 
-    if (mpi_rank == 0) {
+    if (mpi_rank == VIC_MPI_ROOT) {
         grid_size = global_domain.n_nx * global_domain.n_ny;
         dvar = malloc(grid_size * sizeof(*dvar));
         if (dvar == NULL) {
@@ -1794,11 +1794,11 @@ gather_put_nc_field_double(int     nc_id,
     status = MPI_Gatherv(var, local_domain.ncells_active, MPI_DOUBLE,
                          dvar_gathered, mpi_map_local_array_sizes,
                          mpi_map_global_array_offsets, MPI_DOUBLE,
-                         0, MPI_COMM_VIC);
+                         VIC_MPI_ROOT, MPI_COMM_VIC);
     if (status != MPI_SUCCESS) {
         log_err("MPI error");
     }
-    if (mpi_rank == 0) {
+    if (mpi_rank == VIC_MPI_ROOT) {
         // remap the array
         map(sizeof(double), global_domain.ncells_active, NULL,
             mpi_map_mapping_array, dvar_gathered, dvar_remapped);
@@ -1806,7 +1806,6 @@ gather_put_nc_field_double(int     nc_id,
         map(sizeof(double), global_domain.ncells_active, NULL,
             filter_active_cells, dvar_remapped, dvar);
 
-        // write to file
         status = nc_put_vara_double(nc_id, var_id, start, count, dvar);
         check_nc_status(status, "Error writing values");
         // cleanup
@@ -1844,7 +1843,9 @@ gather_put_nc_field_float(int     nc_id,
     size_t               grid_size;
     size_t               i;
 
-    if (mpi_rank == 0) {
+    debug("checkpoint");
+
+    if (mpi_rank == VIC_MPI_ROOT) {
         grid_size = global_domain.n_nx * global_domain.n_ny;
         fvar = malloc(grid_size * sizeof(*fvar));
         if (fvar == NULL) {
@@ -1869,11 +1870,11 @@ gather_put_nc_field_float(int     nc_id,
     status = MPI_Gatherv(var, local_domain.ncells_active, MPI_FLOAT,
                          fvar_gathered, mpi_map_local_array_sizes,
                          mpi_map_global_array_offsets, MPI_FLOAT,
-                         0, MPI_COMM_VIC);
+                         VIC_MPI_ROOT, MPI_COMM_VIC);
     if (status != MPI_SUCCESS) {
         log_err("MPI error");
     }
-    if (mpi_rank == 0) {
+    if (mpi_rank == VIC_MPI_ROOT) {
         // remap the array
         map(sizeof(float), global_domain.ncells_active, NULL,
             mpi_map_mapping_array, fvar_gathered, fvar_remapped);
@@ -1920,7 +1921,7 @@ gather_put_nc_field_int(int     nc_id,
     size_t               grid_size;
     size_t               i;
 
-    if (mpi_rank == 0) {
+    if (mpi_rank == VIC_MPI_ROOT) {
         grid_size = global_domain.n_nx * global_domain.n_ny;
         ivar = malloc(grid_size * sizeof(*ivar));
         if (ivar == NULL) {
@@ -1947,12 +1948,12 @@ gather_put_nc_field_int(int     nc_id,
     status = MPI_Gatherv(var, local_domain.ncells_active, MPI_INT,
                          ivar_gathered, mpi_map_local_array_sizes,
                          mpi_map_global_array_offsets, MPI_INT,
-                         0, MPI_COMM_VIC);
+                         VIC_MPI_ROOT, MPI_COMM_VIC);
     if (status != MPI_SUCCESS) {
         log_err("MPI error");
     }
 
-    if (mpi_rank == 0) {
+    if (mpi_rank == VIC_MPI_ROOT) {
         // remap the array
         map(sizeof(int), global_domain.ncells_active, NULL,
             mpi_map_mapping_array,
@@ -1999,7 +2000,7 @@ gather_put_nc_field_short(int        nc_id,
     size_t               grid_size;
     size_t               i;
 
-    if (mpi_rank == 0) {
+    if (mpi_rank == VIC_MPI_ROOT) {
         grid_size = global_domain.n_nx * global_domain.n_ny;
         svar = malloc(grid_size * sizeof(*svar));
         if (svar == NULL) {
@@ -2026,12 +2027,12 @@ gather_put_nc_field_short(int        nc_id,
     status = MPI_Gatherv(var, local_domain.ncells_active, MPI_SHORT,
                          svar_gathered, mpi_map_local_array_sizes,
                          mpi_map_global_array_offsets, MPI_SHORT,
-                         0, MPI_COMM_VIC);
+                         VIC_MPI_ROOT, MPI_COMM_VIC);
     if (status != MPI_SUCCESS) {
         log_err("MPI error");
     }
 
-    if (mpi_rank == 0) {
+    if (mpi_rank == VIC_MPI_ROOT) {
         // remap the array
         map(sizeof(short int), global_domain.ncells_active, NULL,
             mpi_map_mapping_array,
@@ -2078,7 +2079,7 @@ gather_put_nc_field_schar(int     nc_id,
     size_t               grid_size;
     size_t               i;
 
-    if (mpi_rank == 0) {
+    if (mpi_rank == VIC_MPI_ROOT) {
         grid_size = global_domain.n_nx * global_domain.n_ny;
         cvar = malloc(grid_size * sizeof(*cvar));
         if (cvar == NULL) {
@@ -2105,12 +2106,12 @@ gather_put_nc_field_schar(int     nc_id,
     status = MPI_Gatherv(var, local_domain.ncells_active, MPI_CHAR,
                          cvar_gathered, mpi_map_local_array_sizes,
                          mpi_map_global_array_offsets, MPI_CHAR,
-                         0, MPI_COMM_VIC);
+                         VIC_MPI_ROOT, MPI_COMM_VIC);
     if (status != MPI_SUCCESS) {
         log_err("MPI error");
     }
 
-    if (mpi_rank == 0) {
+    if (mpi_rank == VIC_MPI_ROOT) {
         // remap the array
         map(sizeof(char), global_domain.ncells_active, NULL,
             mpi_map_mapping_array,
@@ -2154,7 +2155,7 @@ get_scatter_nc_field_double(char   *nc_name,
     double              *dvar_filtered = NULL;
     double              *dvar_mapped = NULL;
 
-    if (mpi_rank == 0) {
+    if (mpi_rank == VIC_MPI_ROOT) {
         dvar = malloc(global_domain.ncells_total * sizeof(*dvar));
         if (dvar == NULL) {
             log_err("Memory allocation error");
@@ -2185,12 +2186,12 @@ get_scatter_nc_field_double(char   *nc_name,
     status = MPI_Scatterv(dvar_mapped, mpi_map_local_array_sizes,
                           mpi_map_global_array_offsets, MPI_DOUBLE,
                           var, local_domain.ncells_active, MPI_DOUBLE,
-                          0, MPI_COMM_VIC);
+                          VIC_MPI_ROOT, MPI_COMM_VIC);
     if (status != MPI_SUCCESS) {
         log_err("MPI error");
     }
 
-    if (mpi_rank == 0) {
+    if (mpi_rank == VIC_MPI_ROOT) {
         free(dvar_mapped);
     }
 }
@@ -2220,7 +2221,7 @@ get_scatter_nc_field_float(char   *nc_name,
     float               *fvar_filtered = NULL;
     float               *fvar_mapped = NULL;
 
-    if (mpi_rank == 0) {
+    if (mpi_rank == VIC_MPI_ROOT) {
         fvar = malloc(global_domain.ncells_total * sizeof(*fvar));
         if (fvar == NULL) {
             log_err("Memory allocation error in get_scatter_nc_field_float().");
@@ -2253,12 +2254,12 @@ get_scatter_nc_field_float(char   *nc_name,
     status = MPI_Scatterv(fvar_mapped, mpi_map_local_array_sizes,
                           mpi_map_global_array_offsets, MPI_FLOAT,
                           var, local_domain.ncells_active, MPI_FLOAT,
-                          0, MPI_COMM_VIC);
+                          VIC_MPI_ROOT, MPI_COMM_VIC);
     if (status != MPI_SUCCESS) {
         log_err("MPI error");
     }
 
-    if (mpi_rank == 0) {
+    if (mpi_rank == VIC_MPI_ROOT) {
         free(fvar_mapped);
     }
 }
@@ -2288,7 +2289,7 @@ get_scatter_nc_field_int(char   *nc_name,
     int                 *ivar_filtered = NULL;
     int                 *ivar_mapped = NULL;
 
-    if (mpi_rank == 0) {
+    if (mpi_rank == VIC_MPI_ROOT) {
         ivar = malloc(global_domain.ncells_total * sizeof(*ivar));
         if (ivar == NULL) {
             log_err("Memory allocation error in get_scatter_nc_field_int().");
@@ -2320,12 +2321,12 @@ get_scatter_nc_field_int(char   *nc_name,
     status = MPI_Scatterv(ivar_mapped, mpi_map_local_array_sizes,
                           mpi_map_global_array_offsets, MPI_INT,
                           var, local_domain.ncells_active, MPI_INT,
-                          0, MPI_COMM_VIC);
+                          VIC_MPI_ROOT, MPI_COMM_VIC);
     if (status != MPI_SUCCESS) {
         log_err("MPI error");
     }
 
-    if (mpi_rank == 0) {
+    if (mpi_rank == VIC_MPI_ROOT) {
         free(ivar_mapped);
     }
 }
@@ -2413,7 +2414,7 @@ main(int    argc,
     create_MPI_option_struct_type(&mpi_option_struct_type);
     create_MPI_param_struct_type(&mpi_param_struct_type);
 
-    if (mpi_rank == 0) {
+    if (mpi_rank == VIC_MPI_ROOT) {
         // populate the test structure on the master
         // make sure to test the last element of the structure, because any
         // problem with alignment would show there
@@ -2450,25 +2451,25 @@ main(int    argc,
 
     // broadcast to the slaves
     status = MPI_Bcast(&global, 1, mpi_global_struct_type,
-                       0, MPI_COMM_VIC);
+                       VIC_MPI_ROOT, MPI_COMM_VIC);
     if (status != MPI_SUCCESS) {
         log_err("MPI error in main(): %d\n", status);
     }
 
     status = MPI_Bcast(&location, 1, mpi_location_struct_type,
-                       0, MPI_COMM_VIC);
+                       VIC_MPI_ROOT, MPI_COMM_VIC);
     if (status != MPI_SUCCESS) {
         log_err("MPI error in main(): %d\n", status);
     }
 
     status = MPI_Bcast(&option, 1, mpi_option_struct_type,
-                       0, MPI_COMM_VIC);
+                       VIC_MPI_ROOT, MPI_COMM_VIC);
     if (status != MPI_SUCCESS) {
         log_err("MPI error in main(): %d\n", status);
     }
 
     status = MPI_Bcast(&param, 1, mpi_param_struct_type,
-                       0, MPI_COMM_VIC);
+                       VIC_MPI_ROOT, MPI_COMM_VIC);
     if (status != MPI_SUCCESS) {
         log_err("MPI error in main(): %d\n", status);
     }

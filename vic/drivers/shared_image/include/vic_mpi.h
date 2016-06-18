@@ -30,6 +30,8 @@
 #include <vic_def.h>
 #include <mpi.h>
 
+#define VIC_MPI_ROOT 0
+
 void create_MPI_filenames_struct_type(MPI_Datatype *mpi_type);
 void create_MPI_global_struct_type(MPI_Datatype *mpi_type);
 void create_MPI_location_struct_type(MPI_Datatype *mpi_type);

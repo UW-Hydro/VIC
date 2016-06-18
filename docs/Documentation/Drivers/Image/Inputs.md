@@ -9,5 +9,7 @@ To run VIC, several sets of input data are necessary:
 *   [Parameters File](Params.md): Spatially distributed parameters describing the land surface.
 
 And a few more are optional:
+
 *   [Constants File](../../Constants.md): Model parameters that are constant in time and space.
 *   [Initial State File](StateFile.md): Moisture storages (soil moisture, snow pack, etc), energy storages (soil temperatures, etc) and other information describing the current state of the system. A state file saved from a previous VIC simulation may be used as the initial state for another run.
+*   [Lake/Wetland Parameter File](LakeParam.md): File containing lake model parameters. By default, VIC does not simulate lakes or other impoundment of surface water.

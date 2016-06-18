@@ -66,7 +66,9 @@ pages:
     - 'Outputs': 'Documentation/Drivers/Image/Outputs.md'
     - 'Params': 'Documentation/Drivers/Image/Params.md'
     - 'RunVIC': 'Documentation/Drivers/Image/RunVIC.md'
+    - 'Lake Param': 'Documentation/Drivers/Image/LakeParam.md'
     - 'StateFile': 'Documentation/Drivers/Image/StateFile.md'
+    - 'Ascii_to_NetCDF_params.md': 'Documentation/Drivers/Image/Ascii_to_NetCDF_params.md'
     # CESM Driver
     - 'Inputs': 'Documentation/Drivers/CESM/Inputs.md'
 

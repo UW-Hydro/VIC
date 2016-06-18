@@ -6,7 +6,7 @@
  * @section LICENSE
  *
  * The Variable Infiltration Capacity (VIC) macroscale hydrological model
- * Copyright (C) 2014 The Land Surface Hydrology Group, Department of Civil
+ * Copyright (C) 2016 The Computational Hydrology Group, Department of Civil
  * and Environmental Engineering, University of Washington.
  *
  * The VIC model is free software; you can redistribute it and/or
@@ -1007,9 +1007,8 @@ vic_init(void)
             // grid cell mean elevation. If not reset mean
             mean = 0.;
             for (j = 0; j < options.SNOW_BAND; j++) {
-                mean += soil_con[i].BandElev[j];
+                mean += soil_con[i].BandElev[j] * soil_con[i].AreaFract[j];
             }
-            mean /= options.SNOW_BAND;
             if (fabs(soil_con[i].elevation - soil_con[i].BandElev[j]) > 1.0) {
                 sprint_location(locstr, &(local_domain.locations[i]));
                 log_warn("average band elevation %f not equal to grid_cell "

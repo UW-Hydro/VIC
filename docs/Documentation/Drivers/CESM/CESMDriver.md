@@ -11,6 +11,15 @@ Model (RASM)](http://uw-hydro.github.io/current_project/rasm). Although it has o
 
 The CESM driver for VIC can be built in two ways.
 
+## Dependencies:
+In addition to the dependencies listed in the [image driver documentation](../Image/RunVIC/#dependencies), the CESM driver has the following dependencies:
+
+1. A Fortran compiler with Fortran 2003 or later.  We routinely test VIC using the following compilers:
+
+    - [GNU](https://gcc.gnu.org/fortran/) (`gfortran` version 4.9+)
+    - [PGI](http://clang.llvm.org/) (`pgfortran` version 15.5+)
+    - [Intel](http://clang.llvm.org/) (`ifort` version 16.0+)
+
 1. The `Makefile` is in the root driver directory is configured to build the CESM driver as a shared object. This makefile is provided for testing purposes only.
 
 2. Using the CESM build system. Users should refer to the [CESM documentation](http://www.cesm.ucar.edu/models/cesm1.0/cesm/) for more information on how to build cases.

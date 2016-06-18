@@ -12,7 +12,7 @@
  * @section LICENSE
  *
  * The Variable Infiltration Capacity (VIC) macroscale hydrological model
- * Copyright (C) 2014 The Land Surface Hydrology Group, Department of Civil
+ * Copyright (C) 2016 The Computational Hydrology Group, Department of Civil
  * and Environmental Engineering, University of Washington.
  *
  * The VIC model is free software; you can redistribute it and/or
@@ -502,7 +502,7 @@ read_initial_model_state(FILE            *init_state,
                 log_err("End of model state file found unexpectedly");
             }
             if (lake_var->snow.density > 0.) {
-                lake_var->snow.depth = MM_PER_M * lake_var->snow.swq /
+                lake_var->snow.depth = CONST_RHOFW * lake_var->snow.swq /
                                        lake_var->snow.density;
             }
 
@@ -643,7 +643,7 @@ read_initial_model_state(FILE            *init_state,
             }
             lake_var->snow.MELTING = (char)tmp_char;
             if (lake_var->snow.density > 0.) {
-                lake_var->snow.depth = MM_PER_M * lake_var->snow.swq /
+                lake_var->snow.depth = CONST_RHOFW * lake_var->snow.swq /
                                        lake_var->snow.density;
             }
 

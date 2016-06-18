@@ -9,21 +9,27 @@ import argparse
 import datetime
 from collections import OrderedDict
 import string
-import xarray as xr
 
 import pytest
-import pandas as pd
 
-from tonic.models.vic.vic import (VIC, VICRuntimeError,
-                                  default_vic_valgrind_error_code)
+from tonic.models.vic.vic import VIC, default_vic_valgrind_error_code
 from tonic.io import read_config, read_configobj
-from tonic.testing import check_completed, check_for_nans, VICTestError
-from test_image_driver import assert_nan_equal
+from tonic.testing import VICTestError
+from test_utils import (setup_test_dirs, print_test_dict,
+                        replace_global_values, drop_tests, pop_run_kwargs,
+                        check_returncode, process_error,
+                        test_classic_driver_all_complete,
+                        test_classic_driver_no_output_file_nans,
+                        find_global_param_value)
+from test_image_driver import test_image_driver_no_output_file_nans
+from test_restart import (prepare_restart_run_periods,
+                          setup_subdirs_and_fill_in_global_param_restart_test,
+                          check_exact_restart_fluxes,
+                          check_exact_restart_states)
 
 test_dir = os.path.dirname(os.path.abspath(__file__))
 
 OUTPUT_WIDTH = 100
-ERROR_TAIL = 20  # lines
 
 description = '''
                             VIC Test Suite
@@ -83,14 +89,6 @@ class TestResults(object):
         return '{0} test results:Passed: {1}, Comment:{2}'.format(self.name,
                                                                   self.passed,
                                                                   self.comment)
-
-
-class VICReturnCodeError(Exception):
-    pass
-
-
-class VICValgrindError(Exception):
-    pass
 
 
 def main():
@@ -178,8 +176,10 @@ def main():
                                               args.driver)
     # examples
     if any(i in ['all', 'examples'] for i in args.tests):
-        test_results['examples'] = run_examples(args.examples, vic_exe, data_dir,
-                                                os.path.join(out_dir, 'examples'),
+        test_results['examples'] = run_examples(args.examples, vic_exe,
+                                                data_dir,
+                                                os.path.join(
+                                                    out_dir, 'examples'),
                                                 args.driver)
     # release
     if any(i in ['all', 'release'] for i in args.tests):
@@ -316,30 +316,79 @@ def run_system(config_file, vic_exe, test_data_dir, out_dir, driver):
         with open(infile, 'r') as global_file:
             global_param = global_file.read()
 
+        # If restart test, prepare running periods
+        # (1) Find STATESEC option (and STATE_FORMAT option for later use)
+        statesec = find_global_param_value(global_param, 'STATESEC')
+        if driver == 'classic':
+            state_format = find_global_param_value(global_param,
+                                                   'STATE_FORMAT')
+        # (2) Prepare running periods and initial state file info for restart
+        # test
+        if 'exact_restart' in test_dict['check']:
+            run_periods = prepare_restart_run_periods(
+                                test_dict['restart'],
+                                dirs['state'], statesec)
+
         # create template string
         s = string.Template(global_param)
 
         # fill in global parameter options
-        global_param = s.safe_substitute(test_data_dir=test_data_dir,
-                                         result_dir=dirs['results'],
-                                         state_dir=dirs['state'],
-                                         testname=testname,
-                                         test_root=test_dir)
+        # --- if restart test, multiple runs --- #
+        if 'exact_restart' in test_dict['check']:
+            # Set up subdirectories and fill in global parameter options
+            # for restart testing
+            list_global_param =\
+                setup_subdirs_and_fill_in_global_param_restart_test(
+                    s, run_periods, driver, dirs['results'], dirs['state'],
+                    test_data_dir)
+        # else, single run
+        else:
+            global_param = s.safe_substitute(test_data_dir=test_data_dir,
+                                             result_dir=dirs['results'],
+                                             state_dir=dirs['state'])
 
         # replace global options from config file
+        # --- extract global options to be substitute --- #
         if 'options' in test_dict:
             replacements = test_dict['options']
         else:
             replacements = OrderedDict()
-        global_param = replace_global_values(global_param, replacements)
+        # --- if STATE_FORMAT is specified, then the specified value (instead
+        # of the one in the global template file) --- #
+        if 'STATE_FORMAT' in replacements:
+            state_format = replacements['STATE_FORMAT']
+        # --- replace global options --- #
+        if 'exact_restart' in test_dict['check']:
+            for j, gp in enumerate(list_global_param):
+                # save a copy of replacements for the next global file
+                replacements_cp = replacements.copy()
+                # replace global options for this global file
+                list_global_param[j] = replace_global_values(gp, replacements)
+                replacements = replacements_cp
+        else:
+            global_param = replace_global_values(global_param, replacements)
 
         # write global parameter file
-        test_global_file = os.path.join(dirs['test'],
-                                        '{0}_globalparam.txt'.format(testname))
-
-        with open(test_global_file, mode='w') as f:
-            for line in global_param:
-                f.write(line)
+        if 'exact_restart' in test_dict['check']:
+            list_test_global_file = []
+            for j, gp in enumerate(list_global_param):
+                test_global_file = os.path.join(
+                        dirs['test'],
+                        '{}_globalparam_{}_{}.txt'.format(
+                            testname,
+                            run_periods[j]['start_date'].strftime("%Y%m%d"),
+                            run_periods[j]['end_date'].strftime("%Y%m%d")))
+                list_test_global_file.append(test_global_file)
+                with open(test_global_file, mode='w') as f:
+                    for line in gp:
+                        f.write(line)
+        else:
+            test_global_file = os.path.join(
+                                dirs['test'],
+                                '{0}_globalparam.txt'.format(testname))
+            with open(test_global_file, mode='w') as f:
+                for line in global_param:
+                    f.write(line)
 
         # Get optional kwargs for run executable
         run_kwargs = pop_run_kwargs(test_dict)
@@ -351,32 +400,55 @@ def run_system(config_file, vic_exe, test_data_dir, out_dir, driver):
         error_message = ''
 
         try:
-            # Run the VIC simulation
-            returncode = vic_exe.run(test_global_file, logdir=dirs['logs'],
-                                     **run_kwargs)
+            if 'exact_restart' in test_dict['check']:
+                for j, test_global_file in enumerate(list_test_global_file):
+                    returncode = vic_exe.run(test_global_file,
+                                             logdir=dirs['logs'])
+                    # Check return code
+                    check_returncode(returncode,
+                                     test_dict.pop('expected_retval', 0))
+            else:
+                returncode = vic_exe.run(test_global_file, logdir=dirs['logs'],
+                                         **run_kwargs)
+                # Check return code
+                check_returncode(returncode,
+                                 test_dict.pop('expected_retval', 0))
+
             test_complete = True
 
-            # Check return code
-            check_returncode(returncode, test_dict.pop('expected_retval', 0))
-
             # check output files (different tests depending on driver)
-            if test_dict['check']:
-                fnames = glob.glob(os.path.join(dirs['results'], '*'))
+            if 'check' in test_dict:
 
                 # Check that the simulation completed for all grid cells
-                if 'complete' in test_dict['check'] and driver == 'classic':
-                    test_classic_driver_all_complete(fnames)
+                if 'complete' in test_dict['check']:
+                    fnames = glob.glob(os.path.join(dirs['results'], '*'))
+                    if driver == 'classic':
+                        test_classic_driver_all_complete(fnames)
 
                 # check for nans in all example files
                 if 'output_file_nans' in test_dict['check']:
+                    fnames = glob.glob(os.path.join(dirs['results'], '*'))
                     if driver == 'classic':
                         test_classic_driver_no_output_file_nans(fnames)
                     elif driver == 'image':
                         domain_file = os.path.join(test_data_dir,
                                                    test_dict['domain_file'])
-                        test_image_driver_no_output_file_nans(fnames, domain_file)
+                        test_image_driver_no_output_file_nans(fnames,
+                                                              domain_file)
                     else:
                         raise ValueError('unknown driver')
+
+                # check for exact restarts
+                if 'exact_restart' in test_dict['check']:
+                    check_exact_restart_fluxes(dirs['results'], driver,
+                                               run_periods)
+                    if driver == 'classic':
+                        check_exact_restart_states(dirs['state'], driver,
+                                                   run_periods, statesec,
+                                                   state_format)
+                    elif driver == 'image':
+                        check_exact_restart_states(dirs['state'], driver,
+                                                   run_periods, statesec)
 
             # if we got this far, the test passed.
             test_passed = True
@@ -509,7 +581,8 @@ def run_science(config_file, vic_exe, test_data_dir, out_dir, driver):
                     elif driver == 'image':
                         domain_file = os.path.join(test_data_dir,
                                                    test_dict['domain_file'])
-                        test_image_driver_no_output_file_nans(fnames, domain_file)
+                        test_image_driver_no_output_file_nans(fnames,
+                                                              domain_file)
                     else:
                         raise ValueError('unknown driver')
 
@@ -589,7 +662,8 @@ def run_examples(config_file, vic_exe, test_data_dir, out_dir, driver):
                                mkdirs=['results', 'state', 'logs', 'plots'])
 
         # read template global parameter file
-        infile = os.path.join(test_dir, 'examples', test_dict['global_parameter_file'])
+        infile = os.path.join(test_dir, 'examples',
+                              test_dict['global_parameter_file'])
 
         with open(infile, 'r') as global_file:
             global_param = global_file.read()
@@ -644,7 +718,8 @@ def run_examples(config_file, vic_exe, test_data_dir, out_dir, driver):
                     elif driver == 'image':
                         domain_file = os.path.join(test_data_dir,
                                                    test_dict['domain_file'])
-                        test_image_driver_no_output_file_nans(fnames, domain_file)
+                        test_image_driver_no_output_file_nans(fnames,
+                                                              domain_file)
                     else:
                         raise ValueError('unknown driver')
 
@@ -677,206 +752,6 @@ def run_release(config_file):
     NOT IMPLEMENTED
     '''
     return OrderedDict()
-
-
-def setup_test_dirs(testname, out_dir, mkdirs=['results', 'state',
-                                               'logs', 'plots']):
-    '''create test directories for testname'''
-
-    dirs = OrderedDict()
-    dirs['test'] = os.path.join(out_dir, testname)
-    for d in mkdirs:
-        dirs[d] = os.path.join(dirs['test'], d)
-
-    for dirname in dirs.values():
-        os.makedirs(dirname, exist_ok=True)
-
-    return dirs
-
-
-def print_test_dict(d):
-    '''print a nicely formatted set of test results'''
-    print('{0: <48} | {1: <6} | {2}'.format('Test Name', 'Passed', 'Comment'))
-    print('-'.ljust(OUTPUT_WIDTH, '-'))
-    for k, v in d.items():
-        print('{0: <48} | {1: <6} | {2}'.format(v.name, str(bool(v.passed)),
-                                                v.comment))
-        print('-'.ljust(OUTPUT_WIDTH, '-'))
-
-
-def print_tail(string, n=20, indent='\t--->'):
-    '''print tail of multiline string'''
-    lines = string.decode().splitlines()
-    for l in lines[-n:]:
-        print('{0}{1}'.format(indent, l))
-
-
-def replace_global_values(gp, replace):
-    '''given a multiline string that represents a VIC global parameter file,
-       loop through the string, replacing values with those found in the
-       replace dictionary'''
-    gpl = []
-    for line in iter(gp.splitlines()):
-        line_list = line.split()
-        if line_list:
-            key = line_list[0]
-            if key in replace:
-                value = replace.pop(key)
-                val = list([str(value)])
-            else:
-                val = line_list[1:]
-            gpl.append('{0: <20} {1}\n'.format(key, ' '.join(val)))
-
-    if replace:
-        for key, val in replace.items():
-            try:
-                value = ' '.join(val)
-            except:
-                value = val
-            gpl.append('{0: <20} {1}\n'.format(key, value))
-
-    return gpl
-
-
-def drop_tests(config, driver):
-    '''helper function to remove tests that should not be run for driver'''
-    new = {}
-    for key, test_cfg in config.items():
-        try:
-            if test_cfg['driver'].lower() == driver.lower():
-                new[key] = test_cfg
-        except KeyError:
-            raise KeyError('test configuration must specify driver')
-    return new
-
-
-def pop_run_kwargs(config):
-    '''pop run kwargs for VIC executable'''
-    run_kwargs = {}
-    run_kwargs['valgrind'] = config.pop('valgrind', False)
-    run_kwargs['mpi_proc'] = config.pop('mpi_proc', None)
-    return run_kwargs
-
-
-def check_returncode(returncode, expected=0):
-    '''check return code given by VIC, raise error if appropriate'''
-    if returncode == expected:
-        return None
-    elif returncode == default_vic_valgrind_error_code:
-        raise VICValgrindError('Valgrind raised an error')
-    else:
-        raise VICReturnCodeError('VIC return code ({0}) does not match '
-                                 'expected ({1})'.format(returncode, expected))
-
-
-def process_error(error, vic_exe):
-    '''Helper function to process possible error raised during testing'''
-    if isinstance(error, VICRuntimeError):
-        test_comment = 'Test failed during simulation'
-        error_message = error
-        tail = vic_exe.stderr
-    elif isinstance(error, VICTestError):
-        test_comment = 'Test failed during testing of output files'
-        error_message = error
-        tail = None
-    elif isinstance(error, VICValgrindError):
-        test_comment = 'Test failed due to memory error detected by valgrind'
-        error_message = error
-        tail = vic_exe.stderr
-    elif isinstance(error, VICReturnCodeError):
-        test_comment = 'Test failed due to incorrect return code'
-        error_message = error
-        tail = vic_exe.stderr
-    else:
-        raise error
-
-    print('\t{0}'.format(test_comment))
-    print('\t{0}'.format(error_message))
-    if tail is not None:
-        print('\tLast {0} lines of standard out:'.format(ERROR_TAIL))
-        print_tail(tail, n=ERROR_TAIL)
-
-    return test_comment, error_message
-
-
-def test_classic_driver_all_complete(fnames):
-    '''
-    Test that all VIC files in fnames have the same first and last index position
-    '''
-    start = None
-    end = None
-    for fname in fnames:
-        df = read_vic_ascii(fname, header=True)
-
-        # check that each dataframe includes all timestamps
-        if (start is not None) and (end is not None):
-            check_completed(df, start, end)
-        else:
-            start = df.index[0]
-            end = df.index[-1]
-
-
-def test_classic_driver_no_output_file_nans(fnames):
-    '''Test that all VIC classic driver output files in fnames have no nans'''
-    for fname in fnames:
-        df = read_vic_ascii(fname, header=True)
-        check_for_nans(df)
-
-
-def test_image_driver_no_output_file_nans(fnames, domain_file):
-    '''
-    Test that all VIC image driver output files have the same nan structure as
-    the domain file
-    '''
-    for fname in fnames:
-        ds_domain = xr.open_dataset(domain_file)
-        ds_output = xr.open_dataset(fname)
-        assert_nan_equal(ds_domain, ds_output)
-
-
-# TODO: Update tonic version of this function, need to check that subdaily works
-def read_vic_ascii(filepath, header=True, parse_dates=True,
-                   datetime_index=None, names=None, **kwargs):
-    '''Generic reader function for VIC ASCII output with a standard header
-    filepath: path to VIC output file
-    header (True or False):  Standard VIC header is present
-    parse_dates (True or False): Parse dates from file
-    datetime_index (Pandas.tseries.index.DatetimeIndex):  Index to use as
-    datetime index names (list like): variable names
-    **kwargs: passed to Pandas.read_table
-    returns Pandas.DataFrame
-    '''
-    kwargs['header'] = None
-
-    if header:
-        kwargs['skiprows'] = 6
-
-        # get names
-        if names is None:
-            with open(filepath) as f:
-                # skip lines 0 through 3
-                for _ in range(3):
-                    next(f)
-
-                # process header
-                names = next(f)
-                names = names.strip('#').replace('OUT_', '').split()
-
-    kwargs['names'] = names
-
-    if parse_dates:
-        time_cols = ['YEAR', 'MONTH', 'DAY']
-        if 'SECONDS' in names:
-            time_cols.append('SECONDS')
-        kwargs['parse_dates'] = {'datetime': time_cols}
-        kwargs['index_col'] = 0
-
-    df = pd.read_table(filepath, **kwargs)
-
-    if datetime_index is not None:
-        df.index = datetime_index
-
-    return df
 
 
 if __name__ == '__main__':

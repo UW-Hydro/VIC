@@ -6,7 +6,7 @@
  # @section LICENSE
  #
  # The Variable Infiltration Capacity (VIC) macroscale hydrological model
- # Copyright (C) 2014 The Land Surface Hydrology Group, Department of Civil
+ # Copyright (C) 2016 The Computational Hydrology Group, Department of Civil
  # and Environmental Engineering, University of Washington.
  #
  # The VIC model is free software; you can redistribute it and/or
@@ -45,6 +45,9 @@ ifndef CC
 CC=gcc
 endif
 
+GIT_VERSION := $(shell git describe --abbrev=4 --dirty --always --tags)
+HOSTNAME := $(shell uname -n)
+
 # Set the log level
 # To turn off warning statements, set LOG_LVL >= 30
 # | Level     | Numeric value    |
@@ -63,7 +66,11 @@ INCLUDES = -I ${DRIVERPATH}/include -I $(SHAREDPATH)/include -I ${VICPATH}/inclu
 # LIBRARY = -lm
 
 # Uncomment to include debugging information
-CFLAGS  =  ${INCLUDES} -g -Wall -Wextra -std=c99 -DLOG_LVL=$(LOG_LVL)
+CFLAGS  =  ${INCLUDES} -g -Wall -Wextra -std=c99 \
+					 -DLOG_LVL=$(LOG_LVL) \
+					 -DGIT_VERSION=\"$(GIT_VERSION)\" \
+					 -DUSERNAME=\"$(USER)\" \
+					 -DHOSTNAME=\"$(HOSTNAME)\"
 LIBRARY = -lm
 
 # Uncomment to include execution profiling information

@@ -6,7 +6,7 @@
  * @section LICENSE
  *
  * The Variable Infiltration Capacity (VIC) macroscale hydrological model
- * Copyright (C) 2014 The Land Surface Hydrology Group, Department of Civil
+ * Copyright (C) 2016 The Computational Hydrology Group, Department of Civil
  * and Environmental Engineering, University of Washington.
  *
  * The VIC model is free software; you can redistribute it and/or
@@ -28,9 +28,7 @@
 #define VIC_DRIVER_SHARED_H
 
 #include <vic_run.h>
-
-#define VERSION "5.0 beta 2016 April 25"
-#define SHORT_VERSION "5.0.beta"
+#include <vic_version.h>
 
 /******************************************************************************
  * @brief   Met file formats

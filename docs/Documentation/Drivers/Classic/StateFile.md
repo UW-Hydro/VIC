@@ -122,10 +122,10 @@ Each grid cell information line must be followed with lines for all defined vege
 | (26+2\*Nlayer+Nnodes+2\*numnod)                                               | surf_temp     | double    | Temperature of surface snow layer (C)                                                 |
 | (27+2\*Nlayer+Nnodes+2\*numnod)                                               | pack_temp     | double    | Temperature of pack snow layer (C)                                                    |
 | (28+2\*Nlayer+Nnodes+2\*numnod)                                               | coldcontent   | double    | cold content of snow pack                                                             |
-| (29+2\*Nlayer+Nnodes+2\*numnod)                                               | surf_water    | double    | Water content of surface snow layer (m<sup>3</sup>)                                   |
-| (30+2\*Nlayer+Nnodes+2\*numnod)                                               | pack_water    | double    | Water content of pack snow layer (m<sup>3</sup>)                                      |
+| (29+2\*Nlayer+Nnodes+2\*numnod)                                               | surf_water    | double    | Water content of surface snow layer (m)                                   |
+| (30+2\*Nlayer+Nnodes+2\*numnod)                                               | pack_water    | double    | Water content of pack snow layer (m)                                      |
 | (31+2\*Nlayer+Nnodes+2\*numnod)                                               | SAlbedo       | double    | Albedo of lake snow (fraction)                                                        |
-| (32+2\*Nlayer+Nnodes+2\*numnod)                                               | sdepth        | double    | Depth of snow on top of ice (m<sup>3</sup>)                                           |
+| (32+2\*Nlayer+Nnodes+2\*numnod)                                               | sdepth        | double    | Depth of snow on top of ice (m)                                           |
 
 ## State File Example
 

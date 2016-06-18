@@ -1,8 +1,5 @@
 # VIC Model Outputs - Image Driver
 
-!!! Warning:
-    This page is not complete yet !!!
-
 ## Model Results
 
 The contents of the results files can be controlled by the user, by options/instructions in the global parameter file. If no output file instructions are given in the [global parameter file](GlobalParam.md), [VIC will create default output files with default variables.](DefaultOutputs.md)

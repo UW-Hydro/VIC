@@ -20,41 +20,50 @@ VIC allows the user to specify exactly which output files to create and which va
 ```
 # Output File Contents
 OUTFILE	_prefix_
-OUTVAR	_varname_	[_format_	_type_	_multiplier_]
-OUTVAR	_varname_	[_format_	_type_	_multiplier_]
-OUTVAR	_varname_	[_format_	_type_	_multiplier_]
+OUTVAR	_varname_	[_format_	_type_	_multiplier_ [_aggtype_]]
+OUTVAR	_varname_	[_format_	_type_	_multiplier_ [_aggtype_]]
+OUTVAR	_varname_	[_format_	_type_	_multiplier_ [_aggtype_]]
 
 OUTFILE	_prefix_
-OUTVAR	_varname_	[_format_	_type_	_multiplier_]
-OUTVAR	_varname_	[_format_	_type_	_multiplier_]
-OUTVAR	_varname_	[_format_	_type_	_multiplier_]
+OUTVAR	_varname_	[_format_	_type_	_multiplier_ [_aggtype_]]
+OUTVAR	_varname_	[_format_	_type_	_multiplier_ [_aggtype_]]
+OUTVAR	_varname_	[_format_	_type_	_multiplier_ [_aggtype_]]
 ```
 where
 
-_prefix_ = name of the output file, NOT including latitude and longitude
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; _prefix_ = name of the output file, NOT including latitude and longitude
 
-_varname_ = name of the variable (this must be one of the output variable names listed in `vic_driver_shared.h`.)
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; _varname_ = name of the variable (this must be one of the output variable names listed in `vic_driver_shared.h`.)
 
-_format_, _type_, and _multiplier_ are optional.  For a given variable,
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; _format_, _type_, and _multiplier_ are optional.  For a given variable,
 you can specify either NONE of these, or ALL of these.  If these
 are omitted, the default values will be used.
 
-_format_ = (for ascii output files) `fprintf` format string, e.g.
-  - `%.4f` = floating point with 4 decimal places
-  - `%.7e` = scientific notation w/ 7 decimal places
-  - `*` = use the default format for this variable
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; _format_ = (for ascii output files) `fprintf` format string, e.g. <br />
+  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; `%.4f` = floating point with 4 decimal places <br />
+  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; `%.7e` = scientific notation w/ 7 decimal places <br />
+  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; `*` = use the default format for this variable <br />
 
-_type_ = (for `BINARY` output files) data type code. Must be one of:
-  - `OUT_TYPE_DOUBLE` = double-precision floating point
-  - `OUT_TYPE_FLOAT` = single-precision floating point
-  - `OUT_TYPE_INT` = integer
-  - `OUT_TYPE_USINT` = unsigned short integer
-  - `OUT_TYPE_SINT` = short integer
-  - `OUT_TYPE_CHAR` = char
-  - `*` = use the default type
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; _type_ = (for `BINARY` output files) data type code. Must be one of: <br />
+  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; `OUT_TYPE_DOUBLE` = double-precision floating  point <br />
+  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; `OUT_TYPE_FLOAT` = single-precision floating point <br />
+  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; `OUT_TYPE_INT` = integer <br />
+  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; `OUT_TYPE_USINT` = unsigned short integer <br />
+  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; `OUT_TYPE_SINT` = short integer <br />
+  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; `OUT_TYPE_CHAR` = char <br />
+  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; `*` = use the default type <br />
 
-_multiplier_ = (for `BINARY` output files) factor to multiply the data by before writing, to increase precision compared to not using the multiplier.
-  - `*` = use the default multiplier for this variable
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; _multiplier_ = (for `BINARY` output files) factor to multiply the data by before writing, to increase precision compared to not using the multiplier. <br />
+  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; `*` = use the default multiplier for this variable
+
+  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  _aggtype_ = Aggregation method to use for temporal aggregation. Valid options for aggtype are: <br />
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; `AGG_TYPE_DEFAULT` = default aggregation type for variable <br />
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; `AGG_TYPE_AVG` = average over aggregation window <br />
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; `AGG_TYPE_BEG` = beginning of aggregation window <br />
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; `AGG_TYPE_END` = end of aggregation window <br />
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; `AGG_TYPE_MAX` = maximum in aggregation window <br />
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; `AGG_TYPE_MIN` = minimum in aggregation window <br />
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; `AGG_TYPE_SUM` = sum over aggregation window <br />
 
 Here's an example. To specify 2 output files, named "wbal" and "ebal", and containing water balance and energy balance terms, respectively, you could do something like this:
 

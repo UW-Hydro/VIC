@@ -90,7 +90,7 @@ ds = xr.open_dataset(filename)
 ds.snow_band
 ```
 
-For a list of variable names, see the [Classic Driver Snowbands File](../Classic/SnowBands.md).
+For a list of variable names, see the [Classic Driver Snowbands File](../Classic/SnowBand.md).
 
 To access individual snow band variables, such as elevation for the 1st snowband:
 

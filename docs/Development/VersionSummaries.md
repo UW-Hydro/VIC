@@ -4,7 +4,7 @@ The tables below compare features (and bug fixes) of current and previous versio
 
 * * *
 
-## VIC 4.2 (hotfix 4.2.c)
+## VIC 4.2 (hotfix 4.2.d)
 
 * **Partial Vegetation Cover**
     *   Accounts for gaps in vegetative cover, through which bare soil evaporation can occur In terms of radiation attenuation and turbulence, the bare soil between plants is treated like understory, rather than a large open area of bare soil.
@@ -49,7 +49,13 @@ The tables below compare features (and bug fixes) of current and previous versio
     *   Removed SUN1999 albedo option
     *   Require JULY_TAVG_SUPPLIED=TRUE when COMPUTE_TREELINE=TRUE
 
-## Bug Fixes in VIC 4.2.a-4.2.c
+## Bug Fixes in VIC 4.2.a-4.2.d
+
+* **Fixed uninitialized dmy struct when writing binary output when OUTPUT_FORCE is True**
+    *   Previously, the `dmy_struct` was not allocated or initializaed when `OUTPUT_FORCE == TRUE` and the output format is binary.  This fix corrects this bug.
+
+* **Fixed uninitialized vegetation albedo when VEGPARAM_LAI is False**
+    *   Previously, some vegetation parameters were left uninitialized when `VEGPARAM_LAI == FALSE`.  This bug has been corrected.
 
 * **Fixed uninitialized bare soil albedo**
     *   Previously, bare_albedo was unset for the bare soil case (`iveg!=Nveg`). This fix sets the bare_albedo to the global variable value of `BARE_SOIL_ALBEDO`.
@@ -57,8 +63,8 @@ The tables below compare features (and bug fixes) of current and previous versio
 * **Cleanup of frozen soil option constraints**
     *   Removed hardcoded, behind the scenes checks for the `EXP_TRANS` and `NO_FLUX` global parameter values for case of `QUICK_SOLVE=TRUE` in `calc_surf_energy_bal`.
 
-* **Fixed memory error in `initialize_atmos` when OUTPUT_FORCE = TRUE* **
-    *   Previously, access to unitialized elements of the veg_con and veg_hist structure was attempted when OUTPUT_FORCE = TRUE, causing a memory error and the model to crash.  This fix sets these elements inside a `if (!options.OUTPUT_FORCE)` block allowing the OUTPUT_FORCE option to work as expected.
+* **Fixed memory error in `initialize_atmos` when OUTPUT_FORCE = TRUE ***
+    *   Previously, access to uninitialized elements of the veg_con and veg_hist structure was attempted when OUTPUT_FORCE = TRUE, causing a memory error and the model to crash.  This fix sets these elements inside a `if (!options.OUTPUT_FORCE)` block allowing the OUTPUT_FORCE option to work as expected.
 
 * **Documented how VIC 4.2 needs user to specify veg_lib and veg_param files when OUTPUT_FORCE = TRUE**
     *   Prior to release 4.2, a user could run VIC in OUTPUT_FORCE mode with only a soil parameter file and forcing files.  This functionality is now broken as of release 4.2 and will not be fixed.  Users must either supply veg_lib and veg_parameter files (which the user is likely to have anyway) or use the standalone forcing disaggregator under cevelopment for use with release 5.0.  The documentation was updated to describe this issue as of release 4.2.c.

@@ -1,10 +1,11 @@
 # Current Version of VIC Model
 
-## Current Version: 4.2.c [![DOI](https://zenodo.org/badge/doi/10.5281/zenodo.22307.svg)](http://dx.doi.org/10.5281/zenodo.22307)
+## Current Version: 4.2.d
 
-The current version of VIC is 4.2.c, a minor bug fix update to 4.2.  4.2 is itself a minor release in the VIC 4 development track.  The release prior to 4.2 was VIC 4.1.2.m.
 
-Here we provide a brief description of the features of 4.2 (and hotfixes 4.2.a-4.2.c) and differences between 4.2 and previous versions.
+The current version of VIC is 4.2.d, a minor bug fix update to 4.2.  4.2 is itself a minor release in the VIC 4 development track.  The release prior to 4.2 was VIC 4.1.2.m.
+
+Here we provide a brief description of the features of 4.2 (and hotfixes 4.2.a-4.2.d) and differences between 4.2 and previous versions.
 
 ## Summary of new features
 

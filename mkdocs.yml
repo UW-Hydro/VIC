@@ -53,7 +53,6 @@ pages:
     - 'Outputs': 'Documentation/Drivers/Classic/Outputs.md'
     - 'RunVIC': 'Documentation/Drivers/Classic/RunVIC.md'
     - 'Snow Band': 'Documentation/Drivers/Classic/SnowBand.md'
-    - 'SnowBandOutputFiles': 'Documentation/Drivers/Classic/SnowBandOutputFiles.md'
     - 'SnowOutputFile': 'Documentation/Drivers/Classic/SnowOutputFile.md'
     - 'Soil Param': 'Documentation/Drivers/Classic/SoilParam.md'
     - 'State File': 'Documentation/Drivers/Classic/StateFile.md'
@@ -73,7 +72,6 @@ pages:
     - 'FluxOutputFiles': 'Documentation/Drivers/Image/FluxOutputFiles.md'
     - 'SnowOutputFile': 'Documentation/Drivers/Image/SnowOutputFile.md'
     - 'FrozenSoilOutputFile': 'Documentation/Drivers/Image/FrozenSoilOutputFile.md'
-    - 'SnowBandOutputFiles': 'Documentation/Drivers/Image/SnowBandOutputFiles.md'
     - 'LakeOutputFile': 'Documentation/Drivers/Image/LakeOutputFile.md'
     # CESM Driver
     - 'Inputs': 'Documentation/Drivers/CESM/Inputs.md'

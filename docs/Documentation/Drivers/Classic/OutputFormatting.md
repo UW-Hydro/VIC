@@ -20,41 +20,50 @@ VIC allows the user to specify exactly which output files to create and which va
 ```
 # Output File Contents
 OUTFILE	_prefix_
-OUTVAR	_varname_	[_format_	_type_	_multiplier_]
-OUTVAR	_varname_	[_format_	_type_	_multiplier_]
-OUTVAR	_varname_	[_format_	_type_	_multiplier_]
+OUTVAR	_varname_	[_format_	_type_	_multiplier_ [_aggtype_]]
+OUTVAR	_varname_	[_format_	_type_	_multiplier_ [_aggtype_]]
+OUTVAR	_varname_	[_format_	_type_	_multiplier_ [_aggtype_]]
 
 OUTFILE	_prefix_
-OUTVAR	_varname_	[_format_	_type_	_multiplier_]
-OUTVAR	_varname_	[_format_	_type_	_multiplier_]
-OUTVAR	_varname_	[_format_	_type_	_multiplier_]
+OUTVAR	_varname_	[_format_	_type_	_multiplier_ [_aggtype_]]
+OUTVAR	_varname_	[_format_	_type_	_multiplier_ [_aggtype_]]
+OUTVAR	_varname_	[_format_	_type_	_multiplier_ [_aggtype_]]
 ```
 where
 
-_prefix_ = name of the output file, NOT including latitude and longitude
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; _prefix_ = name of the output file, NOT including latitude and longitude
 
-_varname_ = name of the variable (this must be one of the output variable names listed in `vic_driver_shared.h`.)
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; _varname_ = name of the variable (this must be one of the output variable names listed in `vic_driver_shared.h`.)
 
-_format_, _type_, and _multiplier_ are optional.  For a given variable,
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; _format_, _type_, and _multiplier_ are optional.  For a given variable,
 you can specify either NONE of these, or ALL of these.  If these
 are omitted, the default values will be used.
 
-_format_ = (for ascii output files) `fprintf` format string, e.g.
-  - `%.4f` = floating point with 4 decimal places
-  - `%.7e` = scientific notation w/ 7 decimal places
-  - `*` = use the default format for this variable
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; _format_ = (for ascii output files) `fprintf` format string, e.g. <br />
+  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; `%.4f` = floating point with 4 decimal places <br />
+  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; `%.7e` = scientific notation w/ 7 decimal places <br />
+  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; `*` = use the default format for this variable <br />
 
-_type_ = (for `BINARY` output files) data type code. Must be one of:
-  - `OUT_TYPE_DOUBLE` = double-precision floating point
-  - `OUT_TYPE_FLOAT` = single-precision floating point
-  - `OUT_TYPE_INT` = integer
-  - `OUT_TYPE_USINT` = unsigned short integer
-  - `OUT_TYPE_SINT` = short integer
-  - `OUT_TYPE_CHAR` = char
-  - `*` = use the default type
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; _type_ = (for `BINARY` output files) data type code. Must be one of: <br />
+  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; `OUT_TYPE_DOUBLE` = double-precision floating  point <br />
+  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; `OUT_TYPE_FLOAT` = single-precision floating point <br />
+  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; `OUT_TYPE_INT` = integer <br />
+  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; `OUT_TYPE_USINT` = unsigned short integer <br />
+  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; `OUT_TYPE_SINT` = short integer <br />
+  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; `OUT_TYPE_CHAR` = char <br />
+  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; `*` = use the default type <br />
 
-_multiplier_ = (for `BINARY` output files) factor to multiply the data by before writing, to increase precision compared to not using the multiplier.
-  - `*` = use the default multiplier for this variable
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; _multiplier_ = (for `BINARY` output files) factor to multiply the data by before writing, to increase precision compared to not using the multiplier. <br />
+  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; `*` = use the default multiplier for this variable
+
+  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  _aggtype_ = Aggregation method to use for temporal aggregation. Valid options for aggtype are: <br />
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; `AGG_TYPE_DEFAULT` = default aggregation type for variable <br />
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; `AGG_TYPE_AVG` = average over aggregation window <br />
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; `AGG_TYPE_BEG` = beginning of aggregation window <br />
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; `AGG_TYPE_END` = end of aggregation window <br />
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; `AGG_TYPE_MAX` = maximum in aggregation window <br />
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; `AGG_TYPE_MIN` = minimum in aggregation window <br />
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; `AGG_TYPE_SUM` = sum over aggregation window <br />
 
 Here's an example. To specify 2 output files, named "wbal" and "ebal", and containing water balance and energy balance terms, respectively, you could do something like this:
 
@@ -113,48 +122,6 @@ OUTVAR	OUT_ALBEDO_BAND
 will result in an output file containing:
 
 ```year month day (seconds) swe[0] swe[1] albedo[0] albedo[1]```
-
-## Specifying Units
-
-The user now has some control over the units of the input and output variables. The standard VIC units for moisture fluxes are total mm over the output time interval, and degrees C for temperatures. However, other land surface schemes and circulation or climate models tend to use mm/s for moisture fluxes and degrees K for temperatures.
-
-Now there are options in the [global parameter file](GlobalParam.md) that allow you to specify whether to use traditional VIC units or the mm/s and K convention for input or output variables. The option names are "ALMA_INPUT" and "ALMA_OUTPUT", named after the [ALMA convention](http://www.lmd.jussieu.fr/~polcher/ALMA/) used in the PILPS-2e experiment.
-
-**ALMA INPUT:**
-
-VIC now accepts the following new ALMA-compliant input forcings in addition to the forcings that it already accepts:
-
-```
-SNOWF     snowfall rate (kg/m^2s)
-RAINF     rainfall rate (kg/m^2s)
-CRAINF    convective rainfall rate (kg/m^2s)
-LSRAINF   large scale rainfall rate (kg/m^2s)
-QAIR      specific humidity (kg/kg)
-WIND_E    zonal wind speed (m/s)
-WIND_N    meridional wind speed (m/s)
-TAIR      air temperature per time step (K)
-PSURF     atmospheric pressure (Pa)
-```
-
-When giving VIC ALMA-compliant input files, you must be sure to use the names given above in the forcing section of your [global parameter file](GlobalParam.md).
-
-Instead of the existing PREC (precipitation per timestep in mm), you can now specify SNOWF and RAINF (snowfall and rainfall rates, both in mm/s). VIC will simply add these two quantities together, multiply by the forcing interval, and treat their sum the same way it treats PREC.
-
-An alternative to supplying RAINF is to supply CRAINF (convective rainfall rate, mm/s) and LSRAINF (large-scale rainfall rate, mm/s). VIC will add these two quantities together to get RAINF.
-
-Instead of the existing WIND, alternatively you can specify WIND_E and WIND_N (zonal and meridional wind speed, m/s). VIC will simply compute `WIND = sqrt(WIND_E**2+WIND_N**2)`.
-
-TAIR has units of K, while the existing AIR_TEMP is in C. Similarly, PSURF is in Pa, while PRESSURE is in kPa. VIC will convert these to AIR_TEMP and PRESSURE after reading them in.
-
-More information is available on ALMA forcing variables at: [http://www.lmd.jussieu.fr/~polcher/ALMA/convention_input_3.html](http://www.lmd.jussieu.fr/~polcher/ALMA/convention_input_3.html)
-
-**ALMA OUTPUT:**
-
-If the user sets ALMA_OUTPUT=TRUE in the global parameter file, then VIC will convert its output variables to ALMA-compliant forms. The majority of the changes are changes of units. Moisture fluxes are changed from VIC's standard (mm accumulated over the time step) to the average flux rate (mm/s). Temperatures are converted from C to K.
-
-More information on ALMA output variables is available at: [http://www.lmd.jussieu.fr/~polcher/ALMA/convention_output_3.html](http://www.lmd.jussieu.fr/~polcher/ALMA/convention_output_3.html).
-
-In addition, several more variables have been added to the list of available output variables. See `vic_driver_shared.h` for the complete list of available output variables.
 
 ## Specifying Output Time Step
 

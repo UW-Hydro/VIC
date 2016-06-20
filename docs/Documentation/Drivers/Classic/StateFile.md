@@ -73,7 +73,7 @@ Each grid cell information line must be followed with lines for all defined vege
 | (8+2\*Nlayer)                                                                 | surf_temp         | double    | Temperature of the surface layer in the snow algorithm [C]                            |
 | (9+2\*Nlayer)                                                                 | surf_water        | double    | Liquid water content of the surface layer [m]                                         |
 | (10+2\*Nlayer)                                                                | pack_temp         | double    | Temperature of the pack layer in the snow algorithm [C]                               |
-| (11+2\*Nlayer)                                                                | pack_water        | double    | Liquid water content of the surface layer [m]                                         |
+| (11+2\*Nlayer)                                                                | pack_water        | double    | Liquid water content of the pack layer [m]                                         |
 | (12+2\*Nlayer)                                                                | density           | double    | Density of the snowpack [kg/m<sup>3</sup>]                                            |
 | (13+2\*Nlayer)                                                                | coldcontent       | double    | Cold content of snow pack [J/m<sup>2</sup>]                                           |
 | (14+2\*Nlayer)                                                                | snow_canopy       | double    | Snow water equivalence stored in the canopy [m]                                       |
@@ -122,10 +122,10 @@ Each grid cell information line must be followed with lines for all defined vege
 | (26+2\*Nlayer+Nnodes+2\*numnod)                                               | surf_temp     | double    | Temperature of surface snow layer (C)                                                 |
 | (27+2\*Nlayer+Nnodes+2\*numnod)                                               | pack_temp     | double    | Temperature of pack snow layer (C)                                                    |
 | (28+2\*Nlayer+Nnodes+2\*numnod)                                               | coldcontent   | double    | cold content of snow pack                                                             |
-| (29+2\*Nlayer+Nnodes+2\*numnod)                                               | surf_water    | double    | Water content of surface snow layer (m<sup>3</sup>)                                   |
-| (30+2\*Nlayer+Nnodes+2\*numnod)                                               | pack_water    | double    | Water content of pack snow layer (m<sup>3</sup>)                                      |
+| (29+2\*Nlayer+Nnodes+2\*numnod)                                               | surf_water    | double    | Water content of surface snow layer (m)                                   |
+| (30+2\*Nlayer+Nnodes+2\*numnod)                                               | pack_water    | double    | Water content of pack snow layer (m)                                      |
 | (31+2\*Nlayer+Nnodes+2\*numnod)                                               | SAlbedo       | double    | Albedo of lake snow (fraction)                                                        |
-| (32+2\*Nlayer+Nnodes+2\*numnod)                                               | sdepth        | double    | Depth of snow on top of ice (m<sup>3</sup>)                                           |
+| (32+2\*Nlayer+Nnodes+2\*numnod)                                               | sdepth        | double    | Depth of snow on top of ice (m)                                           |
 
 ## State File Example
 

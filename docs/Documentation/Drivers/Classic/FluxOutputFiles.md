@@ -1,4 +1,4 @@
-# Flux Output Files
+# Default Flux Output Files
 
 The primary output file type for the VIC Classic Driver is the flux file, which contains information about moisture and energy fluxes for each time step. The number of variables in this file depends on the values of `FULL_ENERGY` and `FROZEN_SOIL` in the [global parameter file](GlobalParam.md); when either `FULL_ENERGY` or `FROZEN_SOIL` are true, the file will contain the same number of columns as found in the PILPS-2C files for comparison purposes. Flux files are always written, regardless of the mode of operation. Flux files begin with the prefix `fluxes_`.
 
@@ -19,7 +19,7 @@ Each output file contains model output from one grid cell. The files use the nam
 | 10: Nlayer+9                                                                                                      	| OUT_SOIL_LIQ    	| mm                       	| Moisture content of each soil layer                                 	|
 | OUT_RAD_TEMP is only output when `FULL_ENERGY` or `FROZEN_SOIL` is TRUE in the global parameter file                |                 	|                          	|                                                                     	|
 | Nlayer+10                                                                                                         	| OUT_RAD_TEMP    	| K                        	| Radiative temperature of the surface                                	|
-| Nlayer+11                                                                                                         	| OUT_NET_SHORT   	| W/m2                     	| Net shortwave radiation at the surface                              	|
+| Nlayer+11                                                                                                         	| OUT_SWNET     	| W/m2                     	| Net shortwave radiation at the surface                              	|
 | Nlayer+12                                                                                                         	| OUT_R_NET       	| W/m2                     	| Net radiation at the surface, includes long and shortwave radiation 	|
 | OUT_LATENT is only output when `FULL_ENERGY` or `FROZEN_SOIL` is TRUE in the global parameter file                  |                 	|                          	|                                                                     	|
 | Nlayer+13                                                                                                         	| OUT_LATENT      	| W/m2                     	| Latent heat from the surface                                        	|
@@ -31,7 +31,7 @@ Each output file contains model output from one grid cell. The files use the nam
 | The following four variables are only output when `FULL_ENERGY` or `FROZEN_SOIL` is TRUE in the global parameter file |                	|                          	|                                                                     	|
 | Nlayer+19                                                                                                         	| OUT_SENSIBLE    	| W/m2                     	| Sensible heat flux from the surface                                 	|
 | Nlayer+20                                                                                                         	| OUT_GRND_FLUX   	| W/m2                     	| Ground heat flux plus heat storage in the top soil layer            	|
-| Nlayer+21                                                                                                         	| OUT_DELTAH      	| W/m2  	                  | Rate of change in heat storage                                      	|
+| Nlayer+21                                                                                                         	| OUT_DELTAH      	| W/m2  	                | Rate of change in heat storage                                      	|
 | Nlayer+22                                                                                                         	| OUT_FUSION      	| W/m2                     	| Net energy used to melt/freeze soil moisture                        	|
 | Nlayer+23                                                                                                         	| OUT_AERO_RESIST 	| s/m                      	| Aerodynamic resistance                                              	|
 | Nlayer+24                                                                                                         	| OUT_SURF_TEMP   	| C                        	| Surface temperature                                                 	|

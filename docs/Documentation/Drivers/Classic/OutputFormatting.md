@@ -18,12 +18,9 @@ VIC allows the user to specify exactly which output files to create and which va
 ```
 # Output File Contents
 OUTFILE	_prefix_
-AGGFREQ         _freq_            _value_
-COMPRESS        _compress_
-OUT_FORMAT      _file_format_
-OUTVAR	_varname_	[_format_	[_type_	[_multiplier_ [_aggtype_]]]]
-OUTVAR	_varname_	[_format_	[_type_	[_multiplier_ [_aggtype_]]]]
-OUTVAR	_varname_	[_format_	[_type_	[_multiplier_ [_aggtype_]]]]
+OUTVAR	_varname_	[_format_	_type_	_multiplier_]
+OUTVAR	_varname_	[_format_	_type_	_multiplier_]
+OUTVAR	_varname_	[_format_	_type_	_multiplier_]
 
 OUTFILE	_prefix_
 OUTVAR	_varname_	[_format_	[_type_	[_multiplier_ [_aggtype_]]]]

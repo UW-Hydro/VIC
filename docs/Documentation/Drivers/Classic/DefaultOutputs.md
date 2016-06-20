@@ -20,12 +20,6 @@ When the model is run with FROZEN_SOIL set to TRUE in the [global parameter file
 
 For more information on the Frozen Soil Output File, [click here](FrozenSoilOutputFile.md).
 
-## Snow Band Files
-
-When the model is run with snow elevation bands, and PRT_SNOW_BAND is turned on in the [global parameter file](GlobalParam.md), snow pack information for each elevation band will be output to files in the results directory with the prefix "snow_band_". Energy fluxes are output only for the full energy balance model, so there are file descriptions for both full energy and water balance model output files.
-
-For more information on the Snow Band Output Files, [click here](SnowBandOutputFiles.md).
-
 ## Lake Files
 
 The lake file contains information about the lake fraction of the grid cell. Lake files are only written when LAKES is set equal to a valid lake parameter file, in the [global parameter file](GlobalParam.md). Lake files begin with the prefix "lake_".

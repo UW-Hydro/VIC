@@ -16,7 +16,7 @@ FROZEN_SOIL           FALSE
 
 QUICK_FLUX            FALSE
 
-FORCING1              /Users/diana/Dropbox/UW/VIC_test_data/datasets/snotel/forcings_vp/snotel_VIC.4.1.2_forcings_
+FORCING1              $test_data_dir/datasets/snotel/forcings_vp/snotel_VIC.4.1.2_forcings_
 FORCE_FORMAT          ASCII
 FORCE_TYPE            SWDOWN
 FORCE_TYPE            LWDOWN
@@ -35,22 +35,22 @@ FORCEDAY              01
 GRID_DECIMAL          4
 WIND_H                17.5
 
-SOIL                  /Users/diana/Dropbox/UW/VIC_test_data/datasets/snotel/parameters/Snotel_VIC.4.1.2_soil.txt
+SOIL                  $test_data_dir/datasets/snotel/parameters/Snotel_VIC.4.1.2_soil.txt
 BASEFLOW              ARNO
 
 JULY_TAVG_SUPPLIED    FALSE
 ORGANIC_FRACT         FALSE
 
-VEGLIB                /Users/diana/Dropbox/UW/VIC_test_data/datasets/snotel/parameters/Snotel_VIC.4.1.2_veglib.txt
-VEGPARAM              /Users/diana/Dropbox/UW/VIC_test_data/datasets/snotel/parameters/Snotel_VIC.4.1.2_vegparam.txt
+VEGLIB                $test_data_dir/datasets/snotel/parameters/Snotel_VIC.4.1.2_veglib.txt
+VEGPARAM              $test_data_dir/datasets/snotel/parameters/Snotel_VIC.4.1.2_vegparam.txt
 ROOT_ZONES            3
 
 VEGPARAM_LAI          TRUE
-LAI_SRC               FROM_VEGLIB
+LAI_SRC               LAI_FROM_VEGPARAM
 
 SNOW_BAND             1
 
-RESULT_DIR            /Users/diana/Dropbox/UW/VIC_test_data/test_runs/vic_5_0/snotel/results
+RESULT_DIR            $result_dir
 
 OUTPUT_STEPS_PER_DAY  1
 SKIPYEAR              0

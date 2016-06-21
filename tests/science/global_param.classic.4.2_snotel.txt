@@ -40,7 +40,7 @@ GRND_FLUX_TYPE  GF_FULL # Options for ground flux:
 # PLAPSE      FALSE   # This controls how VIC computes air pressure when air pressure is not supplied as an input forcing: TRUE = set air pressure to sea level pressure, lapsed to grid cell average elevation; FALSE = set air pressure to constant 95.5 kPa (as in all versions of VIC pre-4.1.1)
 
 
-FORCING1    /Users/diana/Dropbox/UW/VIC_test_data/datasets/snotel/forcings_vp/snotel_VIC.4.1.2_forcings_
+FORCING1    $test_data_dir/datasets/snotel/forcings_vp/snotel_VIC.4.1.2_forcings_
 FORCE_FORMAT    ASCII
 FORCE_ENDIAN    LITTLE
 N_TYPES     7   # Number of variables (columns)
@@ -61,25 +61,25 @@ WIND_H          17.5    # height of wind speed measurement (m)
 MEASURE_H       17.5    # height of humidity measurement (m)
 ALMA_INPUT  FALSE   # TRUE = ALMA-compliant input variable units; FALSE = standard VIC units
 
-SOIL            /Users/diana/Dropbox/UW/VIC_test_data/datasets/snotel/parameters/Snotel_VIC.4.1.2_soil.txt
+SOIL            $test_data_dir/datasets/snotel/parameters/Snotel_VIC.4.1.2_soil.txt
 ARC_SOIL        FALSE
 
 BASEFLOW    ARNO    # ARNO = columns 5-8 are the standard VIC baseflow parameters; NIJSSEN2001 = columns 5-8 of soil file are baseflow parameters from Nijssen et al (2001)
 JULY_TAVG_SUPPLIED  FALSE   # TRUE = final column of the soil parameter file will contain average July air temperature, for computing treeline; this will be ignored if COMPUTE_TREELINE is FALSE; FALSE = compute the treeline based on the average July air temperature of the forcings over the simulation period
 
-VEGPARAM        /Users/diana/Dropbox/UW/VIC_test_data/datasets/snotel/parameters/Snotel_VIC.4.1.2_vegparam.txt
+VEGPARAM        $test_data_dir/datasets/snotel/parameters/Snotel_VIC.4.1.2_vegparam.txt
 
 VEGPARAM_LAI    TRUE    # TRUE = read LAI from veg param file; FALSE = read LAI from veg library file
 LAI_SRC     LAI_FROM_VEGPARAM
 
 ROOT_ZONES      3   # Number of root zones (must match format of veg param file)
 
-VEGLIB          /Users/diana/Dropbox/UW/VIC_test_data/datasets/snotel/parameters/Snotel_VIC.4.1.2_veglib.txt
+VEGLIB          $test_data_dir/datasets/snotel/parameters/Snotel_VIC.4.1.2_veglib.txt
 
 SNOW_BAND   1   # Number of snow bands; if number of snow bands > 1, you must insert the snow band path/file after the number of bands (e.g. SNOW_BAND 5 my_path/my_snow_band_file)
 
 
-RESULT_DIR      /Users/diana/Dropbox/UW/VIC_test_data/test_runs/vic_4_2/snotel/results2
+RESULT_DIR      $result_dir
 OUT_STEP        24       # Output interval (hours); if 0, OUT_STEP = TIME_STEP
 SKIPYEAR    0   # Number of years of output to omit from the output files
 COMPRESS    FALSE   # TRUE = compress input and output files when done

@@ -346,10 +346,10 @@ vic_store(dmy_struct *dmy_current)
                     ivar[i] = nc_state_file.i_fillvalue;
                 }
             }
-            gather_put_nc_field_double(nc_state_file.nc_id,
-                                       nc_var->nc_varid,
-                                       nc_state_file.d_fillvalue,
-                                       d4start, nc_var->nc_counts, dvar);
+            gather_put_nc_field_int(nc_state_file.nc_id,
+                                    nc_var->nc_varid,
+                                    nc_state_file.d_fillvalue,
+                                    d4start, nc_var->nc_counts, ivar);
             for (i = 0; i < local_domain.ncells_active; i++) {
                 ivar[i] = nc_state_file.i_fillvalue;
             }
@@ -372,10 +372,10 @@ vic_store(dmy_struct *dmy_current)
                     ivar[i] = nc_state_file.i_fillvalue;
                 }
             }
-            gather_put_nc_field_double(nc_state_file.nc_id,
-                                       nc_var->nc_varid,
-                                       nc_state_file.d_fillvalue,
-                                       d4start, nc_var->nc_counts, dvar);
+            gather_put_nc_field_int(nc_state_file.nc_id,
+                                    nc_var->nc_varid,
+                                    nc_state_file.d_fillvalue,
+                                    d4start, nc_var->nc_counts, ivar);
             for (i = 0; i < local_domain.ncells_active; i++) {
                 ivar[i] = nc_state_file.i_fillvalue;
             }
@@ -809,10 +809,10 @@ vic_store(dmy_struct *dmy_current)
         for (i = 0; i < local_domain.ncells_active; i++) {
             ivar[i] = (int) all_vars[i].lake_var.snow.last_snow;
         }
-        gather_put_nc_field_double(nc_state_file.nc_id,
-                                   nc_var->nc_varid,
-                                   nc_state_file.d_fillvalue,
-                                   d2start, nc_var->nc_counts, dvar);
+        gather_put_nc_field_int(nc_state_file.nc_id,
+                                nc_var->nc_varid,
+                                nc_state_file.d_fillvalue,
+                                d2start, nc_var->nc_counts, ivar);
         for (i = 0; i < local_domain.ncells_active; i++) {
             ivar[i] = nc_state_file.i_fillvalue;
         }
@@ -822,10 +822,10 @@ vic_store(dmy_struct *dmy_current)
         for (i = 0; i < local_domain.ncells_active; i++) {
             ivar[i] = (int) all_vars[i].lake_var.snow.MELTING;
         }
-        gather_put_nc_field_double(nc_state_file.nc_id,
-                                   nc_var->nc_varid,
-                                   nc_state_file.d_fillvalue,
-                                   d2start, nc_var->nc_counts, dvar);
+        gather_put_nc_field_int(nc_state_file.nc_id,
+                                nc_var->nc_varid,
+                                nc_state_file.d_fillvalue,
+                                d2start, nc_var->nc_counts, ivar);
         for (i = 0; i < local_domain.ncells_active; i++) {
             ivar[i] = nc_state_file.i_fillvalue;
         }
@@ -1339,6 +1339,10 @@ set_nc_state_var_info(nc_file_struct *nc)
         nc->nc_vars[i].nc_dims = 0;
 
         switch (i) {
+        case STATE_SNOW_AGE:
+        case STATE_SNOW_MELT_STATE:
+        case STATE_LAKE_SNOW_AGE:
+        case STATE_LAKE_SNOW_MELT_STATE:
         case STATE_LAKE_ACTIVE_LAYERS:
             nc->nc_vars[i].nc_type = NC_INT;
             break;
@@ -1526,6 +1530,7 @@ initialize_state_file(char           *filename,
     extern domain_struct       global_domain;
     extern global_param_struct global_param;
     extern metadata_struct     state_metadata[N_STATE_VARS];
+    extern soil_con_struct    *soil_con;
 
     int                        status;
     int                        dimids[MAXDIMS];
@@ -1551,7 +1556,7 @@ initialize_state_file(char           *filename,
     int                       *ivar = NULL;
 
     // open the netcdf file
-    status = nc_create(filename, NC_WRITE | get_nc_mode(options.STATE_FORMAT),
+    status = nc_create(filename, get_nc_mode(options.STATE_FORMAT),
                        &(nc_state_file->nc_id));
     check_nc_status(status, "Error creating %s", filename);
     nc_state_file->open = true;
@@ -2021,7 +2026,7 @@ initialize_state_file(char           *filename,
     dimids[0] = nc_state_file->node_dimid;
     dcount[0] = nc_state_file->node_size;
     status = nc_put_vara_double(nc_state_file->nc_id, dz_node_var_id, dstart,
-                                dcount, dvar);
+                                dcount, soil_con[0].dz_node);
     check_nc_status(status, "Error writing thermal node deltas");
     for (i = 0; i < ndims; i++) {
         dimids[i] = -1;
@@ -2032,7 +2037,7 @@ initialize_state_file(char           *filename,
     dimids[0] = nc_state_file->node_dimid;
     dcount[0] = nc_state_file->node_size;
     status = nc_put_vara_double(nc_state_file->nc_id, node_depth_var_id, dstart,
-                                dcount, dvar);
+                                dcount, soil_con[0].Zsum_node);
     check_nc_status(status, "Error writing thermal node depths");
     for (i = 0; i < ndims; i++) {
         dimids[i] = -1;

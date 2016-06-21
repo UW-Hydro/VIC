@@ -165,8 +165,6 @@ void initialize_l2x_data(void);
 void initialize_vic_cesm_mpi(MPI_Fint *MPI_COMM_VIC_F);
 void initialize_x2l_data(void);
 void make_dummy_forcings(x2l_data_struct *x2l);
-FILE *open_file(char *string, char *type);
-int parse_output_info(FILE *gp, out_data_struct **out_data);
 void print_case_metadata(case_metadata *cmeta);
 void print_l2x_data(l2x_data_struct *l2x);
 void print_vic_clock(vic_clock *vclock);

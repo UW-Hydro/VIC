@@ -165,57 +165,59 @@ SNOW_BAND	1	# Number of snow bands; if number of snow bands > 1, you must insert
 #######################################################################
 # Output Files and Parameters
 #######################################################################
-RESULT_DIR      (put the result directory path here)	# Results directory path
-OUTPUT_STEPS_PER_DAY        0       # Output interval (hours); if 0, OUTPUT_STEPS_PER_DAY = MODEL_STEPS_PER_DAY
-SKIPYEAR 	0	# Number of years of output to omit from the output files
-COMPRESS	FALSE	# TRUE = compress input and output files when done
-OUT_FORMAT	ASCII	# BINARY OR ASCII
-ALMA_OUTPUT	FALSE	# TRUE = ALMA-format output files; FALSE = standard VIC units
-MOISTFRACT 	FALSE	# TRUE = output soil moisture as volumetric fraction; FALSE = standard VIC units
-PRT_HEADER	FALSE   # TRUE = insert a header at the beginning of each output file; FALSE = no header
-PRT_SNOW_BAND   FALSE   # TRUE = write a "snowband" output file, containing band-specific values of snow variables; NOTE: this is ignored if any OUTFILEs are specified below.
+LOG_DIR         (put the log directory path here)       # Log directory path
+RESULT_DIR      (put the result directory path here)    # Results directory path
 
 #######################################################################
 #
 # Output File Contents
 #
-# As of VIC 4.0.6 and 4.1.0, you can specify your output file names and
-# contents # in the global param file (see the README.txt file for more
-# information).
+# You can specify your output file names and contents in the global param file
+# (see the VIC documentation for more information).
 #
 # If you do not specify file names and contents in the global param
 # file, VIC will produce the same set of output files that it has
 # produced in earlier versions, namely "fluxes" and "snow" files, plus
 # "fdepth" files if FROZEN_SOIL is TRUE and "snowband" files if
-# PRT_SNOW_BAND is TRUE.  These files will have the same contents and
+# snowbands are specified.  These files will have the same contents and
 # format as in earlier versions.
-#
-# The OPTIMIZE and LDAS_OUTPUT options have been removed.  These
-# output configurations can be selected with the proper set of
-# instructions in the global param file.  (see the output.*.template
-# files included in this distribution for more information.)
-#
-# If you do specify the file names and contents in the global param file,
-# PRT_SNOW_BAND will have no effect.
 #
 # Format:
 #
 #   OUTFILE       <prefix>
-#   OUTVAR        <varname>       [<format>        <type>  <multiplier>]
-#   OUTVAR        <varname>       [<format>        <type>  <multiplier>]
-#   OUTVAR        <varname>       [<format>        <type>  <multiplier>]
+#   AGGFREQ       <freq>            <value>
+#   COMPRESS      <compress>
+#   OUT_FORMAT    <file_format>
+#   OUTVAR        <varname>       [ <format>       [ <type>  [ <multiplier>   [ <aggtype>]]]]
+#   OUTVAR        <varname>       [ <format>       [ <type>  [ <multiplier>   [ <aggtype>]]]]
+#   OUTVAR        <varname>       [ <format>       [ <type>  [ <multiplier>   [ <aggtype>]]]]
 #
 #   OUTFILE       <prefix>
-#   OUTVAR        <varname>       [<format>        <type>  <multiplier>]
-#   OUTVAR        <varname>       [<format>        <type>  <multiplier>]
-#   OUTVAR        <varname>       [<format>        <type>  <multiplier>]
+#   OUTVAR        <varname>       [ <format>       [ <type>  [ <multiplier>   [ <aggtype>]]]]
+#   OUTVAR        <varname>       [ <format>       [ <type>  [ <multiplier>   [ <aggtype>]]]]
+#   OUTVAR        <varname>       [ <format>       [ <type>  [ <multiplier>   [ <aggtype>]]]]
 #
 #
 # where
 #   <prefix>     = name of the output file, NOT including latitude
 #                  and longitude
+#   <freq>       = Describes aggregation frequency for output stream. Valid
+#                  options for frequency are:
+#                    NEVER     = never write to history file
+#                    NSTEPS    = write to history every <value> steps
+#                    NSECONDS  = write to history every <value> seconds
+#                    NMINUTES  = write to history every <value> minutes
+#                    NHOURS    = write to history every <value> hours
+#                    NDAYS     = write to history every <value> days
+#                    NMONTHS   = write to history every <value> months
+#                    NYEARS    = write to history every <value> years
+#                    DATE      = write to history on the date: <value>
+#                    END       = write to history at the end of the simulation
+#   <value>      = integer describing the number of <freq> intervals to pass
+#                  before writing to the history file.
+#   <compress>   = gzip compression option.  TRUE, FALSE, or integer between 1-9.
 #   <varname>    = name of the variable (this must be one of the
-#                  output variable names listed in vic_driver_shared.h.)
+#                  output variable names listed in vic_driver_shared_all.h.)
 #   <format>     = (for ascii output files) fprintf format string,
 #                  e.g.
 #                    %.4f = floating point with 4 decimal places
@@ -238,5 +240,14 @@ PRT_SNOW_BAND   FALSE   # TRUE = write a "snowband" output file, containing band
 #   <multiplier> = (for binary output files) factor to multiply
 #                  the data by before writing, to increase precision.
 #                    *    = use the default multiplier for this variable
+#   <aggtype>    = Aggregation method to use for temporal aggregation. Valid
+#                  options for aggtype are:
+#                    AGG_TYPE_DEFAULT = default aggregation type for variable
+#                    AGG_TYPE_AVG     = average over aggregation window
+#                    AGG_TYPE_BEG     = beginning of aggregation window
+#                    AGG_TYPE_END     = end of aggregation window
+#                    AGG_TYPE_MAX     = maximum in aggregation window
+#                    AGG_TYPE_MIN     = minimum in aggregation window
+#                    AGG_TYPE_SUM     = sum over aggregation window
 #
 #######################################################################

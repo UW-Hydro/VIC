@@ -32,6 +32,18 @@ units = {'days': vic_lib.TIME_UNITS_DAYS,
          'minutes': vic_lib.TIME_UNITS_MINUTES,
          'seconds': vic_lib.TIME_UNITS_SECONDS}
 
+
+freqs = {'never': vic_lib.FREQ_NEVER,
+         'steps': vic_lib.FREQ_NSTEPS,
+         'seconds': vic_lib.FREQ_NSECONDS,
+         'minutes': vic_lib.FREQ_NMINUTES,
+         'hours': vic_lib.FREQ_NHOURS,
+         'days': vic_lib.FREQ_NDAYS,
+         'months': vic_lib.FREQ_NMONTHS,
+         'years': vic_lib.FREQ_NYEARS,
+         'date': vic_lib.FREQ_DATE,
+         'end': vic_lib.FREQ_END}
+
 vic_default_units = 'days since 0001-01-01'
 
 
@@ -286,11 +298,9 @@ def test_dt_seconds_to_time_units():
 
 def test_calendar_from_chars():
     for cal, expected in calendars.items():
-        actual = vic_lib.calendar_from_chars(ffi.new('char[]', cal.lower().encode()))
-        assert actual == expected
-
-        actual = vic_lib.calendar_from_chars(ffi.new('char[]', cal.upper().encode()))
-        assert actual == expected
+        assert vic_lib.str_to_calendar(cal.encode()) == expected
+        assert vic_lib.str_to_calendar(cal.upper().encode()) == expected
+        assert vic_lib.str_to_calendar(cal.lower().encode()) == expected
 
 
 def timeunits_from_chars():
@@ -311,3 +321,56 @@ def test_parse_nc_time_units():
     assert actual_dmy[0].month == 1
     assert actual_dmy[0].day == 1
     assert actual_dmy[0].dayseconds == 0
+
+
+def test_timedelta():
+
+    dmy = ffi.new('dmy_struct *')
+    dmy[0].year = 2015
+    dmy[0].month = 1
+    dmy[0].day = 1
+    dmy[0].dayseconds = 0
+    dmy[0].day_in_year = 1
+
+    # First check the easy (sub)daily time deltas
+    for n in range(1, 61, 5):
+        for freq in ['seconds', 'minutes', 'hours', 'days']:
+            print(freq, freqs[freq], n)
+            expected = pd.Timedelta(**{freq: n}).total_seconds() / 86400.
+            actual = vic_lib.time_delta(dmy, freqs[freq], n)  # [days]
+            np.testing.assert_allclose(actual, expected)
+
+    # Now, spot check a few of the harder ones
+    vic_lib.global_param.calendar = calendars['standard']
+    actual = vic_lib.time_delta(dmy, freqs['months'], 1)
+    assert actual == 31
+
+    vic_lib.global_param.calendar = calendars['noleap']
+    actual = vic_lib.time_delta(dmy, freqs['years'], 1)
+    assert actual == 365
+
+    vic_lib.global_param.calendar = calendars['all_leap']
+    actual = vic_lib.time_delta(dmy, freqs['years'], 1)
+    assert actual == 366
+
+
+def test_dmy_equal():
+    dmy1 = datetime_to_dmy(datetime.datetime(2015, 12, 12, 8))
+    dmy2 = datetime_to_dmy(datetime.datetime(2015, 12, 12, 8))
+    assert vic_lib.dmy_equal(dmy1, dmy2)
+
+    dmy2 = datetime_to_dmy(datetime.datetime(2014, 12, 12, 8))
+    assert not vic_lib.dmy_equal(dmy1, dmy2)
+
+
+def test_strpdmy():
+    dmy = ffi.new("dmy_struct *")
+
+    dates = pd.date_range('2015-12-18', '2016-12-22', freq='1D')
+    date_format = '%Y-%m-%d'
+    for date in dates:
+        date_str = date.strftime(date_format)
+        vic_lib.strpdmy(date_str.encode(), date_format.encode(), dmy)
+        expected = date.to_datetime()
+        actual = dmy_to_datetime(dmy)
+        assert abs(expected - actual) < datetime.timedelta(seconds=1)

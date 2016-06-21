@@ -39,7 +39,7 @@ vic_image_start(void)
     // Initialize structures
     initialize_global_structures();
 
-    if (mpi_rank == 0) {
+    if (mpi_rank == VIC_MPI_ROOT) {
         // Read the global parameter file
         filep.globalparam = open_file(filenames.global, "r");
         get_global_param(filep.globalparam);

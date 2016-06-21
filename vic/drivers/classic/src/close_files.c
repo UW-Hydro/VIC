@@ -30,35 +30,31 @@
  * @brief    This routine closes all forcing data files, and output files.
  *****************************************************************************/
 void
-close_files(filep_struct         *filep,
-            out_data_file_struct *out_data_files,
-            filenames_struct     *fnames)
+close_files(filep_struct   *filep,
+            stream_struct **streams)
 {
     extern option_struct options;
-    size_t               filenum;
+
+    size_t               streamnum;
 
     /**********************
        Close All Input Files
     **********************/
 
     fclose(filep->forcing[0]);
-    if (options.COMPRESS) {
-        compress_files(fnames->forcing[0]);
-    }
+
     if (filep->forcing[1] != NULL) {
         fclose(filep->forcing[1]);
-        if (options.COMPRESS) {
-            compress_files(fnames->forcing[1]);
-        }
     }
 
     /*******************
        Close Output Files
     *******************/
-    for (filenum = 0; filenum < options.Noutfiles; filenum++) {
-        fclose(out_data_files[filenum].fh);
-        if (options.COMPRESS) {
-            compress_files(out_data_files[filenum].filename);
+    for (streamnum = 0; streamnum < options.Noutstreams; streamnum++) {
+        fclose((*streams)[streamnum].fh);
+        if ((*streams)[streamnum].compress) {
+            compress_files((*streams)[streamnum].filename,
+                           (*streams)[streamnum].compress);
         }
     }
 }

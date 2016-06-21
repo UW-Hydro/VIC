@@ -125,7 +125,6 @@ void
 print_nc_file(nc_file_struct *nc)
 {
     fprintf(LOG_DEST, "nc_file:");
-    fprintf(LOG_DEST, "\tfname          : %s\n", nc->fname);
     fprintf(LOG_DEST, "\tc_fillvalue    : %d\n", nc->c_fillvalue);
     fprintf(LOG_DEST, "\ti_fillvalue    : %d\n", nc->i_fillvalue);
     fprintf(LOG_DEST, "\td_fillvalue    : %.4f\n", nc->d_fillvalue);
@@ -164,8 +163,8 @@ print_nc_var(nc_var_struct *nc_var,
     size_t i;
 
     fprintf(LOG_DEST, "nc_var:\n");
-    fprintf(LOG_DEST, "\tnc_var_name: %s\n", nc_var->nc_var_name);
-    fprintf(LOG_DEST, "\tnc_units: %s\n", nc_var->nc_units);
+    fprintf(LOG_DEST, "\tnc_varid: %d\n", nc_var->nc_varid);
+    fprintf(LOG_DEST, "\tnc_type: %d\n", nc_var->nc_type);
     fprintf(LOG_DEST, "\tnc_dimids:");
     for (i = 0; i < ndims; i++) {
         fprintf(LOG_DEST, "\t%d", nc_var->nc_dimids[i]);
@@ -173,13 +172,10 @@ print_nc_var(nc_var_struct *nc_var,
     fprintf(LOG_DEST, "\n");
     fprintf(LOG_DEST, "\tnc_counts:");
     for (i = 0; i < ndims; i++) {
-        fprintf(LOG_DEST, "\t%d", nc_var->nc_counts[i]);
+        fprintf(LOG_DEST, "\t%zu", nc_var->nc_counts[i]);
     }
     fprintf(LOG_DEST, "\n");
-    fprintf(LOG_DEST, "\tnc_type: %d\n", nc_var->nc_type);
-    fprintf(LOG_DEST, "\tnc_aggtype: %d\n", nc_var->nc_aggtype);
-    fprintf(LOG_DEST, "\tnc_dims: %d\n", nc_var->nc_dims);
-    fprintf(LOG_DEST, "\tnc_write: %d\n", nc_var->nc_write);
+    fprintf(LOG_DEST, "\tnc_dims: %zu\n", nc_var->nc_dims);
 }
 
 /******************************************************************************

@@ -12,7 +12,7 @@ import string
 
 import pytest
 
-from tonic.models.vic.vic import VIC, default_vic_valgrind_error_code
+from tonic.models.vic.vic import VIC
 from tonic.io import read_config, read_configobj
 from tonic.testing import VICTestError
 from test_utils import (setup_test_dirs, print_test_dict,
@@ -20,7 +20,8 @@ from test_utils import (setup_test_dirs, print_test_dict,
                         check_returncode, process_error,
                         test_classic_driver_all_complete,
                         test_classic_driver_no_output_file_nans,
-                        find_global_param_value)
+                        find_global_param_value,
+                        check_multistream)
 from test_image_driver import test_image_driver_no_output_file_nans
 from test_restart import (prepare_restart_run_periods,
                           setup_subdirs_and_fill_in_global_param_restart_test,
@@ -244,7 +245,7 @@ def run_unit_tests(test_dir):
     print('Running Unit Tests')
     print('-'.ljust(OUTPUT_WIDTH, '-'))
 
-    retcode = pytest.main(['-x',  os.path.join(test_dir, 'unit')])
+    retcode = pytest.main(['-x',  os.path.join(test_dir, 'unit'), '--boxed'])
     return {'unittests': TestResults('unittests',
                                      test_complete=True,
                                      passed=retcode == 0,
@@ -405,13 +406,13 @@ def run_system(config_file, vic_exe, test_data_dir, out_dir, driver):
                     returncode = vic_exe.run(test_global_file,
                                              logdir=dirs['logs'])
                     # Check return code
-                    check_returncode(returncode,
+                    check_returncode(vic_exe,
                                      test_dict.pop('expected_retval', 0))
             else:
                 returncode = vic_exe.run(test_global_file, logdir=dirs['logs'],
                                          **run_kwargs)
                 # Check return code
-                check_returncode(returncode,
+                check_returncode(vic_exe,
                                  test_dict.pop('expected_retval', 0))
 
             test_complete = True
@@ -449,6 +450,10 @@ def run_system(config_file, vic_exe, test_data_dir, out_dir, driver):
                     elif driver == 'image':
                         check_exact_restart_states(dirs['state'], driver,
                                                    run_periods, statesec)
+
+                if 'multistream' in test_dict['check']:
+                    fnames = glob.glob(os.path.join(dirs['results'], '*'))
+                    check_multistream(fnames, driver)
 
             # if we got this far, the test passed.
             test_passed = True
@@ -564,7 +569,7 @@ def run_science(config_file, vic_exe, test_data_dir, out_dir, driver):
             test_complete = True
 
             # Check return code
-            check_returncode(returncode)
+            check_returncode(vic_exe)
 
             # check output files (different tests depending on driver)
             if test_dict['check']:
@@ -701,7 +706,7 @@ def run_examples(config_file, vic_exe, test_data_dir, out_dir, driver):
             test_complete = True
 
             # Check return code
-            check_returncode(returncode)
+            check_returncode(vic_exe)
 
             # check output files (different tests depending on driver)
             if test_dict['check']:

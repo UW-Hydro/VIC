@@ -145,8 +145,8 @@ double ErrorPrintIcePackEnergyBalance(double, va_list);
 int ErrorPrintSnowPackEnergyBalance(double, va_list);
 int ErrorSnowPackEnergyBalance(double Tsurf, ...);
 void estimate_frost_temperature_and_depth(double ***, double **, double *,
-                                          double *, double *, double *,
-                                          double, size_t, size_t);
+                                          double *, double *, double *, double,
+                                          size_t, size_t);
 int estimate_layer_ice_content(layer_data_struct *, double ***, double **,
                                double *, double *, double *, double *, double *,
                                size_t, size_t, char);

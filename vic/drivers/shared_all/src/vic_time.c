@@ -697,6 +697,8 @@ initialize_time()
     // See make_dmy.c for more details on how global_param.time_origin_num is used.
     global_param.time_origin_num = date2num(0., &dmy, 0., global_param.calendar,
                                             TIME_UNITS_DAYS);
+    // Set the string representation of time_origin_num
+    strcpy(global_param.time_origin_str, "0001-01-01 00:00:00");
     return;
 }
 
@@ -774,70 +776,6 @@ dt_seconds_to_time_units(unsigned short int time_units,
 }
 
 /******************************************************************************
- * @brief  Parse chars of calendar and return calendar integer
- * @return enum integer representing calendar
- *****************************************************************************/
-unsigned short int
-calendar_from_chars(char *cal_chars)
-{
-    if (strcasecmp("STANDARD", cal_chars) == 0) {
-        return CALENDAR_STANDARD;
-    }
-    else if (strcasecmp("GREGORIAN", cal_chars) == 0) {
-        return CALENDAR_GREGORIAN;
-    }
-    else if (strcasecmp("PROLEPTIC_GREGORIAN", cal_chars) == 0) {
-        return CALENDAR_PROLEPTIC_GREGORIAN;
-    }
-    else if ((strcasecmp("NOLEAP", cal_chars) == 0) ||
-             (strcasecmp("NO_LEAP", cal_chars) == 0)) {
-        return CALENDAR_NOLEAP;
-    }
-    else if (strcasecmp("365_DAY", cal_chars) == 0) {
-        return CALENDAR_365_DAY;
-    }
-    else if (strcasecmp("360_DAY", cal_chars) == 0) {
-        return CALENDAR_360_DAY;
-    }
-    else if (strcasecmp("JULIAN", cal_chars) == 0) {
-        return CALENDAR_JULIAN;
-    }
-    else if (strcasecmp("ALL_LEAP", cal_chars) == 0) {
-        return CALENDAR_ALL_LEAP;
-    }
-    else if (strcasecmp("366_DAY", cal_chars) == 0) {
-        return CALENDAR_366_DAY;
-    }
-    else {
-        log_err("Unknown calendar specified: %s", cal_chars);
-    }
-}
-
-/******************************************************************************
- * @brief  Parse chars of time units and return time units integer
- * @return enum integer representing time units
- *****************************************************************************/
-unsigned short int
-timeunits_from_chars(char *units_chars)
-{
-    if (strcasecmp("SECONDS", units_chars) == 0) {
-        return TIME_UNITS_SECONDS;
-    }
-    else if (strcasecmp("MINUTES", units_chars) == 0) {
-        return TIME_UNITS_MINUTES;
-    }
-    else if (strcasecmp("HOURS", units_chars) == 0) {
-        return TIME_UNITS_HOURS;
-    }
-    else if (strcasecmp("DAYS", units_chars) == 0) {
-        return TIME_UNITS_DAYS;
-    }
-    else {
-        log_err("Unknown time units specified: %s", units_chars);
-    }
-}
-
-/******************************************************************************
  * @brief  Parse units string in format of "<units> since <origin (YYYY-MM-DD)>"
  *****************************************************************************/
 void
@@ -866,5 +804,113 @@ parse_nc_time_units(char               *nc_unit_chars,
     // string is not present
     dmy->dayseconds = hours * SEC_PER_HOUR + minutes * SEC_PER_MIN + seconds;
 
-    *units = timeunits_from_chars(unit_chars);
+    *units = str_to_timeunits(unit_chars);
+}
+
+/******************************************************************************
+ * @brief   This function calculates the time_delta in days from a frequency
+            and number of steps.
+ *****************************************************************************/
+double
+time_delta(dmy_struct        *dmy_current,
+           unsigned short int freq,
+           int                n)
+{
+    extern global_param_struct global_param;
+
+    double                     td, a, b;
+    dmy_struct                 dmy_next;
+
+    // uniform timedeltas
+    if (freq == FREQ_NSECONDS) {
+        td = (double) n / (double) SEC_PER_DAY;
+    }
+    else if (freq == FREQ_NMINUTES) {
+        td = (double) n / (double) MIN_PER_DAY;
+    }
+    else if (freq == FREQ_NHOURS) {
+        td = (double) n / (double) HOURS_PER_DAY;
+    }
+    else if (freq == FREQ_NDAYS) {
+        td = (double) n;
+    }
+    // non-uniform timedeltas
+    else {
+        if (n < 1) {
+            log_err("Negative time delta's are not implemented yet")
+        }
+
+        // copy dmy structure
+        dmy_next = *dmy_current;
+
+        if (freq == FREQ_NMONTHS) {
+            dmy_next.month += n;
+            if (dmy_next.month > MONTHS_PER_YEAR) {
+                dmy_next.month -= MONTHS_PER_YEAR;
+                dmy_next.year += 1;
+            }
+        }
+        else if (freq == FREQ_NYEARS) {
+            dmy_next.year += n;
+        }
+        else {
+            log_err("Unknown frequency found during time_delta computation");
+        }
+
+        // Check to make sure this is a valid time
+        if (invalid_date(global_param.calendar, &dmy_next)) {
+            log_err("Invalid date found during time_delta computation");
+        }
+
+        // Get ordinal representation of these times
+        a = date2num(global_param.time_origin_num, dmy_current, 0,
+                     global_param.calendar, TIME_UNITS_DAYS);
+        b = date2num(global_param.time_origin_num, &dmy_next, 0,
+                     global_param.calendar, TIME_UNITS_DAYS);
+        td = b - a;
+    }
+
+    return td;
+}
+
+/******************************************************************************
+ * @brief   Compare two dmy_struct objects and return true if they are equal
+ *****************************************************************************/
+bool
+dmy_equal(dmy_struct *a,
+          dmy_struct *b)
+{
+    if ((a->year == b->year) &&
+        (a->month == b->month) &&
+        (a->day == b->day) &&
+        (a->dayseconds == b->dayseconds)) {
+        return true;
+    }
+    return false;
+}
+
+/******************************************************************************
+ * @brief  convert a string representation of a date/time to a dmy_struct
+ *****************************************************************************/
+void
+strpdmy(const char *s,
+        const char *format,
+        dmy_struct *dmy)
+{
+    struct tm t;
+
+    // Initialize some of the time struct
+    t.tm_mon = 1;
+    t.tm_mday = 1;
+    t.tm_hour = 0;
+    t.tm_min = 0;
+    t.tm_sec = 0;
+
+    strptime(s, format, &t);
+
+    dmy->year = t.tm_year + 1900;  // tm_year is Year - 1900
+    dmy->month = t.tm_mon + 1;  // tm_month is [0-11]
+    dmy->day = t.tm_mday;
+    dmy->dayseconds =
+        (double) (t.tm_hour * SEC_PER_HOUR + t.tm_min * SEC_PER_MIN + t.tm_sec);
 }

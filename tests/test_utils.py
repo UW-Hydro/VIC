@@ -3,7 +3,10 @@
 
 import os
 from collections import OrderedDict
-import string
+
+import traceback
+
+import numpy as np
 import pandas as pd
 
 from tonic.models.vic.vic import (VICRuntimeError,
@@ -42,9 +45,16 @@ def print_test_dict(d):
     print('{0: <48} | {1: <6} | {2}'.format('Test Name', 'Passed', 'Comment'))
     print('-'.ljust(OUTPUT_WIDTH, '-'))
     for k, v in d.items():
-        print('{0: <48} | {1: <6} | {2}'.format(v.name, str(bool(v.passed)),
+        print('{0: <48} | {1: <6} | {2}'.format(clip_string(v.name, 48),
+                                                str(bool(v.passed)),
                                                 v.comment))
         print('-'.ljust(OUTPUT_WIDTH, '-'))
+
+
+def clip_string(string, length=50):
+    if len(string) > length:
+        string = string[:length - 3] + '...'
+    return string
 
 
 def print_tail(string, n=20, indent='\t--->'):
@@ -101,38 +111,39 @@ def pop_run_kwargs(config):
     return run_kwargs
 
 
-def check_returncode(returncode, expected=0):
+def check_returncode(exe, expected=0):
     '''check return code given by VIC, raise error if appropriate'''
-    if returncode == expected:
+    if exe.returncode == expected:
         return None
-    elif returncode == default_vic_valgrind_error_code:
-        raise VICValgrindError('Valgrind raised an error')
+    elif exe.returncode == default_vic_valgrind_error_code:
+        raise VICValgrindError(
+            'Valgrind raised an error when running: "{}"'.format(exe.argstring))
     else:
-        raise VICReturnCodeError('VIC return code ({0}) does not match '
-                                 'expected ({1})'.format(returncode, expected))
+        raise VICReturnCodeError(
+            'VIC return code ({0}) did not match expected ({1}) when running '
+            '"{2}"'.format(exe.returncode, expected, exe.argstring))
 
 
 def process_error(error, vic_exe):
     '''Helper function to process possible error raised during testing'''
+    tail = None
     if isinstance(error, VICRuntimeError):
         test_comment = 'Test failed during simulation'
-        error_message = error
         tail = vic_exe.stderr
     elif isinstance(error, VICTestError):
         test_comment = 'Test failed during testing of output files'
-        error_message = error
-        tail = None
     elif isinstance(error, VICValgrindError):
         test_comment = 'Test failed due to memory error detected by valgrind'
-        error_message = error
         tail = vic_exe.stderr
     elif isinstance(error, VICReturnCodeError):
         test_comment = 'Test failed due to incorrect return code'
-        error_message = error
         tail = vic_exe.stderr
+    elif isinstance(error, AssertionError):
+        test_comment = 'AssertionError raised during testing'
     else:
         raise error
-
+    error_message = error
+    traceback.print_stack()
     print('\t{0}'.format(test_comment))
     print('\t{0}'.format(error_message))
     if tail is not None:
@@ -150,7 +161,7 @@ def test_classic_driver_all_complete(fnames):
     start = None
     end = None
     for fname in fnames:
-        df = read_vic_ascii(fname, header=True)
+        df = read_vic_ascii(fname)
 
         # check that each dataframe includes all timestamps
         if (start is not None) and (end is not None):
@@ -163,14 +174,13 @@ def test_classic_driver_all_complete(fnames):
 def test_classic_driver_no_output_file_nans(fnames):
     '''Test that all VIC classic driver output files in fnames have no nans'''
     for fname in fnames:
-        df = read_vic_ascii(fname, header=True)
+        df = read_vic_ascii(fname)
         check_for_nans(df)
 
 
-# TODO: Update tonic version of this function, need to check that subdaily
-# works
-def read_vic_ascii(filepath, header=True, parse_dates=True,
-                   datetime_index=None, names=None, **kwargs):
+# TODO: Update tonic version of this function, need to check that subdaily works
+def read_vic_ascii(filepath, parse_dates=True, datetime_index=None, sep='\t',
+                   comment='#', **kwargs):
     '''Generic reader function for VIC ASCII output with a standard header
     filepath: path to VIC output file
     header (True or False):  Standard VIC header is present
@@ -180,32 +190,22 @@ def read_vic_ascii(filepath, header=True, parse_dates=True,
     **kwargs: passed to Pandas.read_table
     returns Pandas.DataFrame
     '''
-    kwargs['header'] = None
 
-    if header:
-        kwargs['skiprows'] = 4
+    df = pd.read_table(filepath, sep=sep, comment=comment, **kwargs)
+    # Strip extra whitespace around variable names
+    df.rename(columns=lambda x: x.strip(), inplace=True)
 
-        # get names
-        if names is None:
-            with open(filepath) as f:
-                # skip lines 0 through 3
-                for _ in range(3):
-                    next(f)
-
-                # process header
-                names = next(f)
-                names = names.strip('#').replace('OUT_', '').split()
-
-    kwargs['names'] = names
+    if parse_dates and datetime_index:
+        raise ValueError('cannot specify both parse_dates and datetime_index')
 
     if parse_dates:
         time_cols = ['YEAR', 'MONTH', 'DAY']
-        if 'SECONDS' in names:
-            time_cols.append('SECONDS')
-        kwargs['parse_dates'] = {'datetime': time_cols}
-        kwargs['index_col'] = 0
-
-    df = pd.read_table(filepath, **kwargs)
+        df.index = pd.to_datetime(df[time_cols])
+        if 'SEC' in df:
+            df.index += pd.Series([pd.Timedelta(s, unit='s') for s in df['SEC']],
+                                  index=df.index)
+            time_cols.append('SEC')
+        df.drop(time_cols, axis=1)
 
     if datetime_index is not None:
         df.index = datetime_index
@@ -236,5 +236,73 @@ def find_global_param_value(gp, param_name):
         if key == param_name:
             return line_list[1]
 
-if __name__ == '__main__':
-    main()
+
+def check_multistream(fnames, driver):
+    '''
+
+    '''
+
+    if driver.lower() != 'classic':
+        raise ValueError('only classic driver is supported in this test')
+
+    how_dict = {'OUT_ALBEDO': 'max',
+                'OUT_SOIL_TEMP_1': 'min',
+                'OUT_PRESSURE': 'sum',
+                'OUT_AIR_TEMP': 'first',
+                'OUT_SWDOWN': 'mean',
+                'OUT_LWDOWN': 'last'}
+
+    streams = {}  # Dictionary to store parsed stream names
+    gridcells = []  # list of gridcells (lat_lon)
+
+    for path in fnames:
+        # split up the path name to get info about the stream
+        resultdir, fname = os.path.split(path)
+        pieces = os.path.splitext(fname)[0].split('_')
+        gridcells.append('_'.join(pieces[-2:]))
+        stream = '_'.join(pieces[:-2])  # stream name
+        freq_n = pieces[-3]  # stream frequency n
+
+        # set the stream frequency for pandas resample
+        if 'NSTEPS' in stream:
+            inst_stream = stream
+        else:
+            if 'NDAYS' in stream:
+                streams[stream] = '{}D'.format(freq_n)
+            elif 'NHOURS' in stream:
+                streams[stream] = '{}H'.format(freq_n)
+            elif 'NMINUTES' in stream:
+                streams[stream] = '{}min'.format(freq_n)
+            elif 'NSECONDS' in stream:
+                streams[stream] = '{}S'.format(freq_n)
+            else:
+                ValueError('stream %s not supported in this test' % stream)
+
+    # unique gridcells
+    gridcells = list(set(gridcells))
+
+    # Loop over all grid cells in result dir
+    for gridcell in gridcells:
+        fname = os.path.join(resultdir, '{}_{}.txt'.format(inst_stream, gridcell))
+        instant_df = read_vic_ascii(fname)
+
+        # Loop over all streams
+        for stream, freq in streams.items():
+            fname = os.path.join(resultdir, '{}_{}.txt'.format(stream, gridcell))
+            agg_df = read_vic_ascii(fname)
+
+            # Setup the resample of the instantaneous data
+            rs = instant_df.resample(freq)
+
+            # Loop over the variables in the stream
+            for key, how in how_dict.items():
+                # Get the aggregated values (from VIC)
+                actual = agg_df[key].values
+                # Calculated the expected values based on the resampling from pandas
+                expected = rs[key].aggregate(how).values
+
+                # Compare the actual and expected (with tolerance)
+                np.testing.assert_almost_equal(
+                    actual, expected, decimal=4,
+                    err_msg='Variable=%s, freq=%s, how=%s: '
+                            'failed comparison' % (key, freq, how))

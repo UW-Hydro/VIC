@@ -42,9 +42,10 @@ vic_finalize(void)
     extern int                *mpi_map_local_array_sizes;
     extern int                *mpi_map_global_array_offsets;
     extern int                 mpi_rank;
-    extern nc_file_struct      nc_hist_file;
+    extern nc_file_struct     *nc_hist_files;
     extern option_struct       options;
-    extern out_data_struct   **out_data;
+    extern double           ***out_data;
+    extern stream_struct      *output_streams;
     extern save_data_struct   *save_data;
     extern soil_con_struct    *soil_con;
     extern veg_con_map_struct *veg_con_map;
@@ -54,7 +55,7 @@ vic_finalize(void)
     extern MPI_Datatype        mpi_global_struct_type;
     extern MPI_Datatype        mpi_filenames_struct_type;
     extern MPI_Datatype        mpi_location_struct_type;
-    extern MPI_Datatype        mpi_nc_file_struct_type;
+    extern MPI_Datatype        mpi_alarm_struct_type;
     extern MPI_Datatype        mpi_option_struct_type;
     extern MPI_Datatype        mpi_param_struct_type;
 
@@ -62,17 +63,20 @@ vic_finalize(void)
     size_t                     j;
     int                        status;
 
+
     if (mpi_rank == 0) {
         // close the global parameter file
         fclose(filep.globalparam);
 
         // close the netcdf history file if it is still open
-        if (nc_hist_file.open == true) {
-            status = nc_close(nc_hist_file.nc_id);
-            if (status != NC_NOERR) {
-                log_err("Error closing history file %s", nc_hist_file.fname);
+        for (i = 0; i < options.Noutstreams; i++) {
+            if (nc_hist_files[i].open == true) {
+                status = nc_close(nc_hist_files[i].nc_id);
+                check_nc_status(status, "Error closing history file");
             }
+            free(nc_hist_files[i].nc_vars);
         }
+        free(nc_hist_files);
     }
 
     for (i = 0; i < local_domain.ncells_active; i++) {
@@ -91,13 +95,15 @@ vic_finalize(void)
             free_veg_hist(&(veg_hist[i][j]));
         }
         free_all_vars(&(all_vars[i]), veg_con_map[i].nv_active);
-        free_out_data(&(out_data[i]));
         free(veg_con_map[i].vidx);
         free(veg_con_map[i].Cv);
         free(veg_con[i]);
         free(veg_hist[i]);
         free(veg_lib[i]);
     }
+
+    free_streams(&output_streams);
+    free_out_data(local_domain.ncells_active, out_data);
     free(atmos);
     free(soil_con);
     free(veg_con_map);
@@ -105,20 +111,20 @@ vic_finalize(void)
     free(veg_hist);
     free(veg_lib);
     free(all_vars);
-    free(out_data);
     free(save_data);
     free(local_domain.locations);
-    if (mpi_rank == 0) {
+    if (mpi_rank == VIC_MPI_ROOT) {
         free(filter_active_cells);
         free(global_domain.locations);
         free(mpi_map_local_array_sizes);
         free(mpi_map_global_array_offsets);
         free(mpi_map_mapping_array);
     }
+
     MPI_Type_free(&mpi_global_struct_type);
     MPI_Type_free(&mpi_filenames_struct_type);
     MPI_Type_free(&mpi_location_struct_type);
-    MPI_Type_free(&mpi_nc_file_struct_type);
+    MPI_Type_free(&mpi_alarm_struct_type);
     MPI_Type_free(&mpi_option_struct_type);
     MPI_Type_free(&mpi_param_struct_type);
     finalize_logging();

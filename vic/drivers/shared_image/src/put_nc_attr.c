@@ -27,7 +27,7 @@
 #include <vic_driver_shared_image.h>
 
 /******************************************************************************
- * @brief    Put double precision data field to netCDF.
+ * @brief    Put text attribute to netCDF.
  *****************************************************************************/
 void
 put_nc_attr(int         nc_id,

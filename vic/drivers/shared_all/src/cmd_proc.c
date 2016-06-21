@@ -59,12 +59,12 @@ cmd_proc(int    argc,
         case 'v':
             /** Version information **/
             display_current_settings(DISP_VERSION);
-            exit(0);
+            exit(EXIT_SUCCESS);
             break;
         case 'o':
             /** Compile-time options information **/
             display_current_settings(DISP_COMPILE_TIME);
-            exit(0);
+            exit(EXIT_SUCCESS);
             break;
         case 'g':
             /** Global Parameters File **/
@@ -83,7 +83,7 @@ cmd_proc(int    argc,
         fprintf(stderr,
                 "ERROR: Must set global control file using the '-g' flag\n");
         print_usage(argv[0]);
-        exit(1);
+        exit(EXIT_FAILURE);
     }
 }
 

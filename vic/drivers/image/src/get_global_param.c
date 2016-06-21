@@ -107,160 +107,95 @@ get_global_param(FILE *gp)
             }
             else if (strcasecmp("CALENDAR", optstr) == 0) {
                 sscanf(cmdstr, "%*s %s", flgstr);
-                global_param.calendar = calendar_from_chars(flgstr);
+                global_param.calendar = str_to_calendar(flgstr);
             }
             else if (strcasecmp("OUT_TIME_UNITS", optstr) == 0) {
                 sscanf(cmdstr, "%*s %s", flgstr);
-                global_param.time_units = timeunits_from_chars(flgstr);
+                global_param.time_units = str_to_timeunits(flgstr);
             }
             else if (strcasecmp("FULL_ENERGY", optstr) == 0) {
                 sscanf(cmdstr, "%*s %s", flgstr);
-                if (strcasecmp("TRUE", flgstr) == 0) {
-                    options.FULL_ENERGY = true;
-                }
-                else {
-                    options.FULL_ENERGY = false;
-                }
+                options.FULL_ENERGY = str_to_bool(flgstr);
             }
             else if (strcasecmp("FROZEN_SOIL", optstr) == 0) {
                 sscanf(cmdstr, "%*s %s", flgstr);
-                if (strcasecmp("TRUE", flgstr) == 0) {
-                    options.FROZEN_SOIL = true;
+                options.FROZEN_SOIL = str_to_bool(flgstr);
+                // TODO: move these steps to a option validation
+                if (options.FROZEN_SOIL) {
                     options.QUICK_FLUX = false;
                 }
                 else {
-                    options.FROZEN_SOIL = false;
                     options.IMPLICIT = false;
                     options.EXP_TRANS = false;
                 }
             }
             else if (strcasecmp("QUICK_FLUX", optstr) == 0) {
                 sscanf(cmdstr, "%*s %s", flgstr);
-                if (strcasecmp("TRUE", flgstr) == 0) {
-                    options.QUICK_FLUX = true;
-                }
-                else {
-                    options.QUICK_FLUX = false;
-                }
+                options.QUICK_FLUX = str_to_bool(flgstr);
             }
             else if (strcasecmp("QUICK_SOLVE", optstr) == 0) {
                 sscanf(cmdstr, "%*s %s", flgstr);
-                if (strcasecmp("TRUE", flgstr) == 0) {
-                    options.QUICK_SOLVE = true;
-                }
-                else {
-                    options.QUICK_SOLVE = false;
-                }
+                options.QUICK_SOLVE = str_to_bool(flgstr);
             }
             else if ((strcasecmp("NOFLUX",
                                  optstr) == 0) ||
                      (strcasecmp("NO_FLUX", optstr) == 0)) {
                 sscanf(cmdstr, "%*s %s", flgstr);
                 if (strcasecmp("TRUE", flgstr) == 0) {
-                    options.NOFLUX = true;
-                }
-                else {
-                    options.NOFLUX = false;
+                    options.NOFLUX = str_to_bool(flgstr);
                 }
             }
             else if (strcasecmp("IMPLICIT", optstr) == 0) {
                 sscanf(cmdstr, "%*s %s", flgstr);
-                if (strcasecmp("TRUE", flgstr) == 0) {
-                    options.IMPLICIT = true;
-                }
-                else {
-                    options.IMPLICIT = false;
-                }
+                options.IMPLICIT = str_to_bool(flgstr);
             }
             else if (strcasecmp("EXP_TRANS", optstr) == 0) {
                 sscanf(cmdstr, "%*s %s", flgstr);
-                if (strcasecmp("TRUE", flgstr) == 0) {
-                    options.EXP_TRANS = true;
-                }
-                else {
-                    options.EXP_TRANS = false;
-                }
+                options.EXP_TRANS = str_to_bool(flgstr);
             }
             else if (strcasecmp("SNOW_DENSITY", optstr) == 0) {
                 sscanf(cmdstr, "%*s %s", flgstr);
                 if (strcasecmp("DENS_SNTHRM", flgstr) == 0) {
                     options.SNOW_DENSITY = DENS_SNTHRM;
                 }
-                else {
+                else if (strcasecmp("DENS_BRAS", flgstr) == 0) {
                     options.SNOW_DENSITY = DENS_BRAS;
+                }
+                else {
+                    log_err("Unknown SNOW_DENSITY option: %s", flgstr);
                 }
             }
             else if (strcasecmp("BLOWING", optstr) == 0) {
                 sscanf(cmdstr, "%*s %s", flgstr);
-                if (strcasecmp("TRUE", flgstr) == 0) {
-                    options.BLOWING = true;
-                }
-                else {
-                    options.BLOWING = false;
-                }
+                options.BLOWING = str_to_bool(flgstr);
             }
             else if (strcasecmp("BLOWING_VAR_THRESHOLD", optstr) == 0) {
                 sscanf(cmdstr, "%*s %s", flgstr);
-                if (strcasecmp("TRUE", flgstr) == 0) {
-                    options.BLOWING_VAR_THRESHOLD = true;
-                }
-                else {
-                    options.BLOWING_VAR_THRESHOLD = false;
-                }
+                options.BLOWING_VAR_THRESHOLD = str_to_bool(flgstr);
             }
             else if (strcasecmp("BLOWING_CALC_PROB", optstr) == 0) {
                 sscanf(cmdstr, "%*s %s", flgstr);
-                if (strcasecmp("TRUE", flgstr) == 0) {
-                    options.BLOWING_CALC_PROB = true;
-                }
-                else {
-                    options.BLOWING_CALC_PROB = false;
-                }
+                options.BLOWING_CALC_PROB = str_to_bool(flgstr);
             }
             else if (strcasecmp("BLOWING_SIMPLE", optstr) == 0) {
                 sscanf(cmdstr, "%*s %s", flgstr);
-                if (strcasecmp("TRUE", flgstr) == 0) {
-                    options.BLOWING_SIMPLE = true;
-                }
-                else {
-                    options.BLOWING_SIMPLE = false;
-                }
+                options.BLOWING_SIMPLE = str_to_bool(flgstr);
             }
             else if (strcasecmp("BLOWING_FETCH", optstr) == 0) {
                 sscanf(cmdstr, "%*s %s", flgstr);
-                if (strcasecmp("TRUE", flgstr) == 0) {
-                    options.BLOWING_FETCH = true;
-                }
-                else {
-                    options.BLOWING_FETCH = false;
-                }
+                options.BLOWING_FETCH = str_to_bool(flgstr);
             }
             else if (strcasecmp("BLOWING_SPATIAL_WIND", optstr) == 0) {
                 sscanf(cmdstr, "%*s %s", flgstr);
-                if (strcasecmp("TRUE", flgstr) == 0) {
-                    options.BLOWING_SPATIAL_WIND = true;
-                }
-                else {
-                    options.BLOWING_SPATIAL_WIND = false;
-                }
+                options.BLOWING_SPATIAL_WIND = str_to_bool(flgstr);
             }
             else if (strcasecmp("CORRPREC", optstr) == 0) {
                 sscanf(cmdstr, "%*s %s", flgstr);
-                if (strcasecmp("TRUE", flgstr) == 0) {
-                    options.CORRPREC = true;
-                }
-                else {
-                    options.CORRPREC = false;
-                }
+                options.CORRPREC = str_to_bool(flgstr);
             }
             else if (strcasecmp("CLOSE_ENERGY", optstr) == 0) {
                 sscanf(cmdstr, "%*s %s", flgstr);
-                if (strcasecmp("TRUE", flgstr) == 0) {
-                    options.CLOSE_ENERGY = true;
-                }
-                else {
-                    options.CLOSE_ENERGY = false;
-                }
+                options.CLOSE_ENERGY = str_to_bool(flgstr);
             }
             else if (strcasecmp("COMPUTE_TREELINE", optstr) == 0) {
                 sscanf(cmdstr, "%*s %s", flgstr);
@@ -286,6 +221,9 @@ get_global_param(FILE *gp)
                 else if (strcasecmp("AR_410", flgstr) == 0) {
                     options.AERO_RESIST_CANSNOW = AR_410;
                 }
+                else {
+                    log_err("Unknown AERO_RESIST_CANSNOW option: %s", flgstr);
+                }
             }
             else if (strcasecmp("GRND_FLUX_TYPE", optstr) == 0) {
                 sscanf(cmdstr, "%*s %s", flgstr);
@@ -294,6 +232,9 @@ get_global_param(FILE *gp)
                 }
                 else if (strcasecmp("GF_410", flgstr) == 0) {
                     options.GRND_FLUX_TYPE = GF_410;
+                }
+                else {
+                    log_err("Unknown GRND_FLUX_TYPE option: %s", flgstr);
                 }
             }
             else if (strcasecmp("SPATIAL_FROST", optstr) == 0) {
@@ -308,50 +249,33 @@ get_global_param(FILE *gp)
             }
             else if (strcasecmp("SPATIAL_SNOW", optstr) == 0) {
                 sscanf(cmdstr, "%*s %s", flgstr);
-                if (strcasecmp("TRUE", flgstr) == 0) {
-                    options.SPATIAL_SNOW = true;
-                }
-                else {
-                    options.SPATIAL_SNOW = false;
-                }
+                options.SPATIAL_SNOW = str_to_bool(flgstr);
             }
             else if (strcasecmp("TFALLBACK", optstr) == 0) {
                 sscanf(cmdstr, "%*s %s", flgstr);
-                if (strcasecmp("TRUE", flgstr) == 0) {
-                    options.TFALLBACK = true;
-                }
-                else {
-                    options.TFALLBACK = false;
-                }
+                options.TFALLBACK = str_to_bool(flgstr);
             }
             else if (strcasecmp("SHARE_LAYER_MOIST", optstr) == 0) {
                 sscanf(cmdstr, "%*s %s", flgstr);
-                if (strcasecmp("TRUE", flgstr) == 0) {
-                    options.SHARE_LAYER_MOIST = true;
-                }
-                else {
-                    options.SHARE_LAYER_MOIST = false;
-                }
+                options.SHARE_LAYER_MOIST = str_to_bool(flgstr);
             }
             else if (strcasecmp("CANOPY_LAYERS", optstr) == 0) {
                 sscanf(cmdstr, "%*s %zu", &options.Ncanopy);
             }
             else if (strcasecmp("CARBON", optstr) == 0) {
                 sscanf(cmdstr, "%*s %s", flgstr);
-                if (strcasecmp("TRUE", flgstr) == 0) {
-                    options.CARBON = true;
-                }
-                else {
-                    options.CARBON = false;
-                }
+                options.CARBON = str_to_bool(flgstr);
             }
             else if (strcasecmp("RC_MODE", optstr) == 0) {
                 sscanf(cmdstr, "%*s %s", flgstr);
                 if (strcasecmp("RC_PHOTO", flgstr) == 0) {
                     options.RC_MODE = RC_PHOTO;
                 }
-                else {
+                else if (strcasecmp("RC_JARVIS", flgstr) == 0) {
                     options.RC_MODE = RC_JARVIS;
+                }
+                else {
+                    log_err("Unknown RC_MODE option: %s", flgstr);
                 }
             }
 
@@ -494,39 +418,27 @@ get_global_param(FILE *gp)
                 if (strcasecmp("NIJSSEN2001", flgstr) == 0) {
                     options.BASEFLOW = NIJSSEN2001;
                 }
-                else {
+                else if (strcasecmp("ARNO", flgstr) == 0) {
                     options.BASEFLOW = ARNO;
+                }
+                else {
+                    log_err("Unknown BASEFLOW option: %s", flgstr);
                 }
             }
             else if (strcasecmp("JULY_TAVG_SUPPLIED", optstr) == 0) {
                 sscanf(cmdstr, "%*s %s", flgstr);
-                if (strcasecmp("FALSE", flgstr) == 0) {
-                    options.JULY_TAVG_SUPPLIED = false;
-                }
-                else {
-                    options.JULY_TAVG_SUPPLIED = true;
-                }
+                options.JULY_TAVG_SUPPLIED = str_to_bool(flgstr);
             }
             else if (strcasecmp("ORGANIC_FRACT", optstr) == 0) {
                 sscanf(cmdstr, "%*s %s", flgstr);
-                if (strcasecmp("FALSE", flgstr) == 0) {
-                    options.ORGANIC_FRACT = false;
-                }
-                else {
-                    options.ORGANIC_FRACT = true;
-                }
+                options.ORGANIC_FRACT = str_to_bool(flgstr);
             }
             else if (strcasecmp("VEGLIB", optstr) == 0) {
                 sscanf(cmdstr, "%*s %s", filenames.veglib);
             }
             else if (strcasecmp("VEGLIB_PHOTO", optstr) == 0) {
                 sscanf(cmdstr, "%*s %s", flgstr);
-                if (strcasecmp("TRUE", flgstr) == 0) {
-                    options.VEGLIB_PHOTO = true;
-                }
-                else {
-                    options.VEGLIB_PHOTO = false;
-                }
+                options.VEGLIB_PHOTO = str_to_bool(flgstr);
             }
             else if (strcasecmp("VEGPARAM", optstr) == 0) {
                 sscanf(cmdstr, "%*s %s", filenames.veg);
@@ -601,12 +513,7 @@ get_global_param(FILE *gp)
             }
             else if (strcasecmp("LAKE_PROFILE", optstr) == 0) {
                 sscanf(cmdstr, "%*s %s", flgstr);
-                if (strcasecmp("FALSE", flgstr) == 0) {
-                    options.LAKE_PROFILE = false;
-                }
-                else {
-                    options.LAKE_PROFILE = true;
-                }
+                options.LAKE_PROFILE = str_to_bool(flgstr);
             }
 
             /*************************************
@@ -614,39 +521,6 @@ get_global_param(FILE *gp)
             *************************************/
             else if (strcasecmp("RESULT_DIR", optstr) == 0) {
                 sscanf(cmdstr, "%*s %s", filenames.result_dir);
-            }
-            else if (strcasecmp("OUTPUT_STEPS_PER_DAY", optstr) == 0) {
-                sscanf(cmdstr, "%*s %zu", &global_param.output_steps_per_day);
-            }
-            else if (strcasecmp("SKIPYEAR", optstr) == 0) {
-                sscanf(cmdstr, "%*s %hu", &global_param.skipyear);
-            }
-            else if (strcasecmp("ALMA_OUTPUT", optstr) == 0) {
-                sscanf(cmdstr, "%*s %s", flgstr);
-                if (strcasecmp("TRUE", flgstr) == 0) {
-                    options.ALMA_OUTPUT = true;
-                }
-                else {
-                    options.ALMA_OUTPUT = false;
-                }
-            }
-            else if (strcasecmp("MOISTFRACT", optstr) == 0) {
-                sscanf(cmdstr, "%*s %s", flgstr);
-                if (strcasecmp("TRUE", flgstr) == 0) {
-                    options.MOISTFRACT = true;
-                }
-                else {
-                    options.MOISTFRACT = false;
-                }
-            }
-            else if (strcasecmp("PRT_SNOW_BAND", optstr) == 0) {
-                sscanf(cmdstr, "%*s %s", flgstr);
-                if (strcasecmp("TRUE", flgstr) == 0) {
-                    options.PRT_SNOW_BAND = true;
-                }
-                else {
-                    options.PRT_SNOW_BAND = false;
-                }
             }
 
             /*************************************
@@ -658,6 +532,15 @@ get_global_param(FILE *gp)
             else if (strcasecmp("OUTVAR", optstr) == 0) {
                 ; // do nothing
             }
+            else if (strcasecmp("AGGFREQ", optstr) == 0) {
+                ; // do nothing
+            }
+            else if (strcasecmp("COMPRESS", optstr) == 0) {
+                ; // do nothing
+            }
+            else if (strcasecmp("OUT_FORMAT", optstr) == 0) {
+                ; // do nothing
+            }
             // vegetation history not yet implemented in image mode
             // TBD: feature in VIC 4.2 that has been ported to classic
             // mode, but that does not exist in image mode (yet)
@@ -666,77 +549,6 @@ get_global_param(FILE *gp)
                      strcasecmp("FCANOPY", optstr) == 0) {
                 log_err("Time-varying vegetation parameters not implemented "
                         "in image mode");
-            }
-
-            /*************************************
-               Fail when deprecated options are used.
-            *************************************/
-            else if (strcasecmp("TIME_STEP", optstr) == 0) {
-                log_err("TIME_STEP has been replaced with MODEL_STEPS_PER_DAY, "
-                        "update your global parameter file accordingly");
-            }
-            else if (strcasecmp("SNOW_STEP", optstr) == 0) {
-                log_err("SNOW_STEP has been replaced with SNOW_STEPS_PER_DAY, "
-                        "update your global parameter file accordingly");
-            }
-            else if (strcasecmp("OUT_STEP", optstr) == 0) {
-                log_err("OUT_STEP has been replaced with OUTPUT_STEPS_PER_DAY, "
-                        "update your global parameter file accordingly");
-            }
-            else if (strcasecmp("FORCE_DT", optstr) == 0) {
-                log_err("FORCE_DT has been replaced with FORCE_STEPS_PER_DAY, "
-                        "update your global parameter file accordingly");
-            }
-            else if (strcasecmp("NLAYER", optstr) == 0) {
-                log_err("NLAYER has been deprecated in the image driver");
-            }
-            else if (strcasecmp("FORCE_FORMAT", optstr) == 0) {
-                log_err("FORCE_FORMAT has been deprecated in the image driver");
-            }
-            else if (strcasecmp("FORCE_ENDIAN", optstr) == 0) {
-                log_err("FORCE_ENDIAN has been deprecated in the image driver");
-            }
-            else if (strcasecmp("GRID_DECIMAL", optstr) == 0) {
-                log_err("GRID_DECIMAL has been deprecated in the image driver");
-            }
-            else if (strcasecmp("BINARY_STATE_FILE", optstr) == 0) {
-                log_err(
-                    "BINARY_STATE_FILE has been deprecated in the image driver");
-            }
-            else if (strcasecmp("RESOLUTION", optstr) == 0) {
-                log_err("RESOLUTION has been deprecated in the image driver");
-            }
-            else if (strcasecmp("EQUAL_AREA", optstr) == 0) {
-                log_err("EQUAL_AREA has been deprecated in the image driver");
-            }
-            else if (strcasecmp("CONTINUEONERROR", optstr) == 0) {
-                log_err(
-                    "CONTINUEONERROR has been deprecated in the image driver");
-            }
-            else if (strcasecmp("BINARY_OUTPUT", optstr) == 0) {
-                log_err("BINARY_OUTPUT has been deprecated in the image driver");
-            }
-            else if (strcasecmp("COMPRESS", optstr) == 0) {
-                log_err("COMPRESS has been deprecated in the image driver");
-            }
-            else if (strcasecmp("PRT_HEADER", optstr) == 0) {
-                log_err("PRT_HEADER has been deprecated in the image driver");
-            }
-            else if (strcasecmp("FORCE_STEPS_PER_DAY", optstr) == 0) {
-                log_err(
-                    "FORCE_STEPS_PER_DAY has been deprecated in the image driver");
-            }
-            else if (strcasecmp("FORCEYEAR", optstr) == 0) {
-                log_err("FORCEYEAR has been deprecated in the image driver");
-            }
-            else if (strcasecmp("FORCEMONTH", optstr) == 0) {
-                log_err("FORCEMONTH has been deprecated in the image driver");
-            }
-            else if (strcasecmp("FORCEDAY", optstr) == 0) {
-                log_err("FORCEDAY has been deprecated in the image driver");
-            }
-            else if (strcasecmp("FORCESEC", optstr) == 0) {
-                log_err("FORCESEC has been deprecated in the image driver");
             }
 
             /*************************************
@@ -894,47 +706,6 @@ get_global_param(FILE *gp)
     }
     global_param.atmos_dt = SEC_PER_DAY /
                             (double) global_param.atmos_steps_per_day;
-
-    // Validate the output step
-    if (global_param.output_steps_per_day == 0) {
-        global_param.output_steps_per_day = global_param.model_steps_per_day;
-    }
-    if (global_param.output_steps_per_day > global_param.model_steps_per_day) {
-        log_err("Invalid value for OUTPUT_STEPS_PER_DAY (%zu).  "
-                "OUTPUT_STEPS_PER_DAY must be <= MODEL_STEPS_PER_DAY (%zu)",
-                global_param.output_steps_per_day,
-                global_param.model_steps_per_day);
-    }
-    else if (global_param.model_steps_per_day %
-             global_param.output_steps_per_day != 0) {
-        log_err("Invalid value for OUTPUT_STEPS_PER_DAY (%zu).  "
-                "MODEL_STEPS_PER_DAY (%zu) must be a multiple of "
-                "OUTPUT_STEPS_PER_DAY.",
-                global_param.output_steps_per_day,
-                global_param.model_steps_per_day);
-    }
-    else if (global_param.output_steps_per_day != 1 &&
-             global_param.output_steps_per_day < MIN_SUBDAILY_STEPS_PER_DAY) {
-        log_err("The specified number of output steps per day (%zu) > 1 and < "
-                "the minimum number of subdaily steps per day (%d).  Make "
-                "sure that the global file defines OUTPUT_STEPS_PER_DAY of at "
-                "least (%d).", global_param.model_steps_per_day,
-                MIN_SUBDAILY_STEPS_PER_DAY,
-                MIN_SUBDAILY_STEPS_PER_DAY);
-    }
-    else if (global_param.output_steps_per_day >
-             MAX_SUBDAILY_STEPS_PER_DAY) {
-        log_err("The specified number of model steps per day (%zu) > the "
-                "the maximum number of subdaily steps per day (%d).  Make "
-                "sure that the global file defines MODEL_STEPS_PER_DAY of at "
-                "most (%d).", global_param.model_steps_per_day,
-                MAX_SUBDAILY_STEPS_PER_DAY,
-                MAX_SUBDAILY_STEPS_PER_DAY);
-    }
-    else {
-        global_param.out_dt = SEC_PER_DAY /
-                              (double) global_param.output_steps_per_day;
-    }
 
     // set NR and NF
     NF = global_param.snow_steps_per_day / global_param.model_steps_per_day;
@@ -1284,9 +1055,6 @@ get_global_param(FILE *gp)
     // Default file formats (if unset)
     if (options.SAVE_STATE && options.STATE_FORMAT == UNSET_FILE_FORMAT) {
         options.STATE_FORMAT = NETCDF4_CLASSIC;
-    }
-    if (options.OUT_FORMAT == UNSET_FILE_FORMAT) {
-        options.OUT_FORMAT = NETCDF4_CLASSIC;
     }
 
     /*********************************

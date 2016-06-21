@@ -416,43 +416,5 @@ display_current_settings(int mode)
     fprintf(LOG_DEST, "\n");
     fprintf(LOG_DEST, "Output Data:\n");
     fprintf(LOG_DEST, "Result dir:\t\t%s\n", filenames.result_dir);
-    fprintf(LOG_DEST, "OUT_STEP\t\t%f\n", global_param.out_dt);
-    if (options.ALMA_OUTPUT) {
-        fprintf(LOG_DEST, "ALMA_OUTPUT\t\tTRUE\n");
-    }
-    else {
-        fprintf(LOG_DEST, "ALMA_OUTPUT\t\tFALSE\n");
-    }
-    if (options.OUT_FORMAT == ASCII) {
-        fprintf(LOG_DEST, "OUT_FORMAT\t\tASCII\n");
-    }
-    else if (options.OUT_FORMAT == BINARY) {
-        fprintf(LOG_DEST, "OUT_FORMAT\t\tBINARY\n");
-    }
-    if (options.COMPRESS) {
-        fprintf(LOG_DEST, "COMPRESS\t\tTRUE\n");
-    }
-    else {
-        fprintf(LOG_DEST, "COMPRESS\t\tFALSE\n");
-    }
-    if (options.MOISTFRACT) {
-        fprintf(LOG_DEST, "MOISTFRACT\t\tTRUE\n");
-    }
-    else {
-        fprintf(LOG_DEST, "MOISTFRACT\t\tFALSE\n");
-    }
-    if (options.PRT_HEADER) {
-        fprintf(LOG_DEST, "PRT_HEADER\t\tTRUE\n");
-    }
-    else {
-        fprintf(LOG_DEST, "PRT_HEADER\t\tFALSE\n");
-    }
-    if (options.PRT_SNOW_BAND) {
-        fprintf(LOG_DEST, "PRT_SNOW_BAND\t\tTRUE\n");
-    }
-    else {
-        fprintf(LOG_DEST, "PRT_SNOW_BAND\t\tFALSE\n");
-    }
-    fprintf(LOG_DEST, "SKIPYEAR\t\t%d\n", global_param.skipyear);
     fprintf(LOG_DEST, "\n");
 }

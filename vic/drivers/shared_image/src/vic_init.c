@@ -1561,6 +1561,9 @@ vic_init(void)
         initialize_energy(all_vars[i].energy, nveg);
     }
 
+    // set state metadata structure
+    set_state_meta_data_info();
+
     // cleanup
     free(dvar);
     free(ivar);

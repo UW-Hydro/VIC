@@ -46,7 +46,7 @@ VEGPARAM              $test_data_dir/datasets/snotel/parameters/Snotel_VIC.4.1.2
 ROOT_ZONES            3
 
 VEGPARAM_LAI          TRUE
-LAI_SRC               LAI_FROM_VEGPARAM
+LAI_SRC               FROM_VEGPARAM
 
 SNOW_BAND             1
 

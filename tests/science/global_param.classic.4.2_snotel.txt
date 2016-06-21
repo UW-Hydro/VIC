@@ -70,7 +70,7 @@ JULY_TAVG_SUPPLIED  FALSE   # TRUE = final column of the soil parameter file wil
 VEGPARAM        $test_data_dir/datasets/snotel/parameters/Snotel_VIC.4.1.2_vegparam.txt
 
 VEGPARAM_LAI    TRUE    # TRUE = read LAI from veg param file; FALSE = read LAI from veg library file
-LAI_SRC     LAI_FROM_VEGPARAM
+LAI_SRC         FROM_VEGPARAM
 
 ROOT_ZONES      3   # Number of root zones (must match format of veg param file)
 

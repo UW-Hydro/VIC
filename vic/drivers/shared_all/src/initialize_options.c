@@ -94,11 +94,5 @@ initialize_options()
     options.INIT_STATE = false;
     options.SAVE_STATE = false;
     // output options
-    options.ALMA_OUTPUT = false;
-    options.OUT_FORMAT = UNSET_FILE_FORMAT;
-    options.COMPRESS = false;
-    options.MOISTFRACT = false;
-    options.Noutfiles = 2;
-    options.PRT_HEADER = false;
-    options.PRT_SNOW_BAND = false;
+    options.Noutstreams = 2;
 }

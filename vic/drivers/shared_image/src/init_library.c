@@ -176,7 +176,7 @@ initialize_global_structures(void)
     extern int           mpi_rank;
 
     initialize_domain_info(&local_domain.info);
-    if (mpi_rank == 0) {
+    if (mpi_rank == VIC_MPI_ROOT) {
         initialize_options();
         initialize_global();
         initialize_parameters();

@@ -571,7 +571,7 @@ estimate_layer_ice_content(layer_data_struct *layer,
                 layer[lidx].ice[frost_area] +=
                     (tmpZ[lidx][nidx + 1] - tmpZ[lidx][nidx]) *
                     (tmp_ice[nidx + 1][frost_area] +
-                    tmp_ice[nidx][frost_area]) / 2.;
+                     tmp_ice[nidx][frost_area]) / 2.;
             }
         }
         for (frost_area = 0; frost_area < options.Nfrost; frost_area++) {
@@ -674,7 +674,7 @@ estimate_layer_ice_content_quick_flux(layer_data_struct *layer,
                 else {
                     tmp_fract +=
                         (frost_fract[frost_area - 1] /
-                        2. + frost_fract[frost_area] / 2.);
+                         2. + frost_fract[frost_area] / 2.);
                 }
                 tmpT = linear_interp(tmp_fract, 0, 1, min_temp, max_temp);
                 tmp_ice = layer[lidx].moist -

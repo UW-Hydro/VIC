@@ -43,25 +43,27 @@ MPI_Comm            MPI_COMM_VIC = MPI_COMM_WORLD;
 MPI_Datatype        mpi_global_struct_type;
 MPI_Datatype        mpi_filenames_struct_type;
 MPI_Datatype        mpi_location_struct_type;
-MPI_Datatype        mpi_nc_file_struct_type;
+MPI_Datatype        mpi_alarm_struct_type;
 MPI_Datatype        mpi_option_struct_type;
 MPI_Datatype        mpi_param_struct_type;
 int                *mpi_map_local_array_sizes = NULL;
 int                *mpi_map_global_array_offsets = NULL;
 int                 mpi_rank;
 int                 mpi_size;
-nc_file_struct      nc_hist_file;
-nc_var_struct       nc_vars[N_OUTVAR_TYPES];
 option_struct       options;
-out_data_struct   **out_data;
 parameters_struct   param;
 param_set_struct    param_set;
-save_data_struct   *save_data;
 soil_con_struct    *soil_con = NULL;
 veg_con_map_struct *veg_con_map = NULL;
 veg_con_struct    **veg_con = NULL;
 veg_hist_struct   **veg_hist = NULL;
 veg_lib_struct    **veg_lib = NULL;
+metadata_struct     state_metadata[N_STATE_VARS];
+metadata_struct     out_metadata[N_OUTVAR_TYPES];
+save_data_struct   *save_data;  // [ncells]
+double           ***out_data = NULL;  // [ncells, nvars, nelem]
+stream_struct      *output_streams = NULL;  // [nstreams]
+nc_file_struct     *nc_hist_files = NULL;  // [nstreams]
 
 /******************************************************************************
  * @brief   Stand-alone image mode driver of the VIC model
@@ -91,7 +93,7 @@ main(int    argc,
     initialize_mpi();
 
     // process command line arguments
-    if (mpi_rank == 0) {
+    if (mpi_rank == VIC_MPI_ROOT) {
         cmd_proc(argc, argv, filenames.global);
     }
 
@@ -108,7 +110,7 @@ main(int    argc,
     vic_populate_model_state();
 
     // initialize output structures
-    vic_init_output();
+    vic_init_output(&(dmy[0]));
 
     // loop over all timesteps
     for (current = 0; current < global_param.nrecs; current++) {
@@ -118,12 +120,10 @@ main(int    argc,
         // run vic over the domain
         vic_image_run(&(dmy[current]));
 
-        // if output:
-        if (check_write_flag(current)) {
-            vic_write(&(dmy[current]));
-        }
+        // Write history files
+        vic_write_output(&(dmy[current]));
 
-        // if save:
+        // Write state file
         if (check_save_state_flag(current)) {
             vic_store(&(dmy[current]));
         }

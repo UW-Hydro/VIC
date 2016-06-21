@@ -43,7 +43,6 @@ SNOW_BAND	    1 $test_data_dir/image/Stehekin/parameters/Stehekin_test_params_20
 
 RESULT_DIR  $result_dir/
 
-format, typestr, multstr, aggstr
 # Instantaneous output
 OUTFILE     STREAM_NSTEPS_1
 AGGFREQ     NSTEPS        1

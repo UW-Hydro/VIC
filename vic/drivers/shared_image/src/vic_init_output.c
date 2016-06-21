@@ -294,7 +294,7 @@ initialize_history_file(nc_file_struct *nc,
 
     // open the netcdf file
     status = nc_create(stream->filename,
-                       NC_WRITE | get_nc_mode(stream->file_format),
+                       get_nc_mode(stream->file_format),
                        &(nc->nc_id));
     check_nc_status(status, "Error creating %s", stream->filename);
     nc->open = true;

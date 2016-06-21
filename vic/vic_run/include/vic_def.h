@@ -46,6 +46,7 @@
 #define MAXSTRING    2048
 #define MISSING      -99999.   /**< missing value */
 #define MISSING_USI  99999.    /**< missing value for unsigned ints */
+#define MISSING_S    "MISSING"    /**< missing value for strings */
 #define NODATA_VH    -1        /**< missing value for veg_hist inputs */
 #define NODATA_VEG   -1        /**< flag for veg types not in grid cell */
 #define ERROR        -999      /**< Error Flag returned by subroutines */
@@ -154,44 +155,6 @@ enum
 };
 
 /***** Data Structures *****/
-
-/******************************************************************************
- * @brief   file structures
- *****************************************************************************/
-typedef struct {
-    FILE *forcing[2];   /**< atmospheric forcing data files */
-    FILE *globalparam;  /**< global parameters file */
-    FILE *constants;    /**< model constants parameter file */
-    FILE *domain;       /**< domain file */
-    FILE *init_state;   /**< initial model state file */
-    FILE *lakeparam;    /**< lake parameter file */
-    FILE *snowband;     /**< snow elevation band data file */
-    FILE *soilparam;    /**< soil parameters for all grid cells */
-    FILE *statefile;    /**< output model state file */
-    FILE *veglib;       /**< vegetation parameters for all vege types */
-    FILE *vegparam;     /**< fractional coverage info for grid cell */
-    FILE *logfile;      /**< log file */
-} filep_struct;
-
-/******************************************************************************
- * @brief   This structure stores input and output filenames.
- *****************************************************************************/
-typedef struct {
-    char forcing[2][MAXSTRING];    /**< atmospheric forcing data file names */
-    char f_path_pfx[2][MAXSTRING]; /**< path and prefix for atmospheric forcing data file names */
-    char global[MAXSTRING];        /**< global control file name */
-    char domain[MAXSTRING];        /**< domain file name */
-    char constants[MAXSTRING];     /**< model constants file name */
-    char init_state[MAXSTRING];    /**< initial model state file name */
-    char lakeparam[MAXSTRING];     /**< lake model constants file */
-    char result_dir[MAXSTRING];    /**< directory where results will be written */
-    char snowband[MAXSTRING];      /**< snow band parameter file name */
-    char soil[MAXSTRING];          /**< soil parameter file name */
-    char statefile[MAXSTRING];     /**< name of file in which to store model state */
-    char veg[MAXSTRING];           /**< vegetation grid coverage file */
-    char veglib[MAXSTRING];        /**< vegetation parameter library file */
-    char log_path[MAXSTRING];      /**< Location to write log file to*/
-} filenames_struct;
 
 /******************************************************************************
  * @brief   This structure stores model options.
@@ -320,16 +283,7 @@ typedef struct {
     bool SAVE_STATE;     /**< TRUE = save state file */
 
     // output options
-    bool ALMA_OUTPUT;    /**< TRUE = output variables are in ALMA-compliant units; FALSE = standard VIC units */
-    unsigned short int OUT_FORMAT;  /**< TRUE = output files are in binary, not ASCII */
-    bool COMPRESS;       /**< TRUE = Compress all output files */
-    bool MOISTFRACT;     /**< TRUE = output soil moisture as fractional moisture content */
-    size_t Noutfiles;    /**< Number of output files (not including state files) */
-    bool PRT_HEADER;     /**< TRUE = insert header at beginning of output file; FALSE = no header */
-    bool PRT_SNOW_BAND;  /**< TRUE = print snow parameters for each snow band. This is only used when default
-                                   output files are used (for backwards-compatibility); if outfiles and
-                                   variables are explicitly mentioned in global parameter file, this option
-                                   is ignored. */
+    size_t Noutstreams;  /**< Number of output stream */
 } option_struct;
 
 /******************************************************************************
@@ -342,12 +296,10 @@ typedef struct {
     double snow_dt;                /**< Snow model time step in seconds */
     double runoff_dt;              /**< Runoff time step in seconds */
     double atmos_dt;               /**< Atmos time step in seconds */
-    double out_dt;                 /**< Output time step in seconds */
     size_t model_steps_per_day;    /**< Number of model timesteps per day */
     size_t snow_steps_per_day;     /**< Number of snow timesteps per day */
     size_t runoff_steps_per_day;   /**< Number of runoff timesteps per day */
     size_t atmos_steps_per_day;    /**< Number of atmos timesteps per day */
-    size_t output_steps_per_day;   /**< Number of output timesteps per day */
     unsigned short int endday;     /**< Last day of model simulation */
     unsigned short int endmonth;   /**< Last month of model simulation */
     unsigned short int endyear;    /**< Last year of model simulation */
@@ -361,8 +313,6 @@ typedef struct {
                                       the start of the forcing file */
     unsigned short int forceyear[2];  /**< year forcing files start */
     size_t nrecs;                /**< Number of time steps simulated */
-    unsigned short int skipyear;  /**< Number of years to skip before writing
-                                      output data */
     unsigned short int startday;  /**< Starting day of the simulation */
     unsigned short int startmonth;  /**< Starting month of the simulation */
     unsigned int startsec;          /**< Seconds since midnight when simulation
@@ -378,6 +328,7 @@ typedef struct {
     unsigned short int calendar;  /**< Date/time calendar */
     unsigned short int time_units;  /**< Units for numeric times */
     double time_origin_num;        /**< Numeric date origin */
+    char time_origin_str[MAXSTRING];  /**< string date origin */
 } global_param_struct;
 
 /******************************************************************************

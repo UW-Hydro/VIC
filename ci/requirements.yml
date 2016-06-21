@@ -13,3 +13,5 @@ dependencies:
   - pip:
     - git+https://github.com/UW-Hydro/tonic.git
     - engarde
+    - pytest-faulthandler
+    - pytest-xdist

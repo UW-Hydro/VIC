@@ -46,7 +46,6 @@ initialize_global()
     global_param.snow_steps_per_day = 0;
     global_param.runoff_steps_per_day = 0;
     global_param.atmos_steps_per_day = 0;
-    global_param.output_steps_per_day = 1;
     global_param.nrecs = 0;
     global_param.startyear = 0;
     global_param.startmonth = 0;
@@ -65,12 +64,10 @@ initialize_global()
         global_param.forceskip[i] = 0;
         global_param.forceoffset[i] = 0;
     }
-    global_param.skipyear = 0;
     global_param.stateyear = 0;
     global_param.statemonth = 0;
     global_param.stateday = 0;
     global_param.statesec = 0;
-    global_param.out_dt = SEC_PER_DAY;
     global_param.calendar = CALENDAR_STANDARD;
     global_param.time_units = TIME_UNITS_DAYS;
     global_param.time_origin_num = MISSING;

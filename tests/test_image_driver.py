@@ -11,8 +11,8 @@ def test_image_driver_no_output_file_nans(fnames, domain_file):
     Test that all VIC image driver output files have the same nan structure as
     the domain file
     '''
+    ds_domain = xr.open_dataset(domain_file)
     for fname in fnames:
-        ds_domain = xr.open_dataset(domain_file)
         ds_output = xr.open_dataset(fname)
         assert_nan_equal(ds_domain, ds_output)
 
@@ -34,7 +34,7 @@ def assert_nan_equal(ds_domain, ds_output):
         npt.assert_allclose(ds_output[var], ds_domain[var], equal_nan=True)
 
     # check that nans are occurring in the same place in the arrays
-    # --- check all variables in the dataset ---#
+    # check all variables in the dataset
     for da in ds_output.data_vars:
         # get dimensions to reduce DataArray on
         dim_diff = set(ds_domain['mask'].dims).symmetric_difference(

@@ -31,122 +31,186 @@
  * @brief    Get output info from global parameter file.
  *****************************************************************************/
 void
-parse_output_info(FILE                  *gp,
-                  out_data_file_struct **out_data_files,
-                  out_data_struct       *out_data)
+parse_output_info(FILE           *gp,
+                  stream_struct **streams,
+                  dmy_struct     *dmy_current)
 {
-    extern option_struct options;
+    extern option_struct       options;
+    extern global_param_struct global_param;
 
-    char                 cmdstr[MAXSTRING];
-    char                 optstr[MAXSTRING];
-    short int            outfilenum;
-    char                 varname[MAXSTRING];
-    int                  outvarnum;
-    char                 format[MAXSTRING];
-    char                 typestr[MAXSTRING];
-    int                  type;
-    char                 multstr[MAXSTRING];
-    double               mult;
-    size_t               noutfiles;
-
-    strcpy(format, "*");
+    char                       cmdstr[MAXSTRING];
+    char                       optstr[MAXSTRING];
+    char                       flgstr[MAXSTRING];
+    short int                  streamnum;
+    char                       varname[MAXSTRING];
+    int                        outvarnum;
+    char                       freq_type_str[MAXSTRING];
+    char                       freq_value_str[MAXSTRING];
+    char                       format[MAXSTRING];
+    char                       typestr[MAXSTRING];
+    int                        type;
+    char                       multstr[MAXSTRING];
+    char                       aggstr[MAXSTRING];
+    double                     mult;
+    unsigned short int         freq;
+    int                        freq_n;
+    dmy_struct                 freq_dmy;
+    unsigned short int         agg_type;
+    int                        found;
+    size_t                     nstream_vars[MAX_OUTPUT_STREAMS];
+    bool                       default_outputs = false;
 
     /** Read through global control file to find output info **/
 
-    fgets(cmdstr, MAXSTRING, gp);
-
-    outfilenum = -1;
-    outvarnum = 0;
-
     // Count the number of output files listed in the global param file
-    noutfiles = count_n_outfiles(gp);
+    count_nstreams_nvars(gp, &(options.Noutstreams), nstream_vars);
+
+    // If there weren't any output streams specified, get the defaults
+    if (options.Noutstreams == 0) {
+        default_outputs = true;
+        get_default_nstreams_nvars(&(options.Noutstreams), nstream_vars);
+    }
+
+    // Allocate streams
+    *streams = calloc(options.Noutstreams, sizeof(*(*streams)));
+    if (*streams == NULL) {
+        log_err("Memory allocation error in parse_output_info().");
+    }
+
+    // Setup streams
+    for (streamnum = 0;
+         streamnum < (short int) options.Noutstreams;
+         streamnum++) {
+        setup_stream(&(*streams)[streamnum], nstream_vars[streamnum], 1);
+    }
 
     // only parse the output info if there are output files to parse
-    if (noutfiles > 0) {
-        options.Noutfiles = noutfiles;
+    if (!default_outputs) {
+        // initialize counters
+        streamnum = -1;
+        outvarnum = 0;
 
-        *out_data_files = calloc(options.Noutfiles, sizeof(*(*out_data_files)));
-        if (*out_data_files == NULL) {
-            log_err("Memory allocation error in parse_output_info().");
-        }
-        init_output_list(out_data, false, "%.4g", OUT_TYPE_FLOAT, 1);
-
-        // PRT_SNOW_BAND is ignored if options.Noutfiles > 0
-        options.PRT_SNOW_BAND = false;
-
+        // rewind the global parameter file to the begining and parse only the
+        // output file info.
+        rewind(gp);
+        fgets(cmdstr, MAXSTRING, gp);
         while (!feof(gp)) {
             if (cmdstr[0] != '#' && cmdstr[0] != '\n' && cmdstr[0] != '\0') {
                 sscanf(cmdstr, "%s", optstr);
 
                 if (strcasecmp("OUTFILE", optstr) == 0) {
-                    outfilenum++;
-                    if (outfilenum >= (short int)options.Noutfiles) {
+                    streamnum++;
+                    if (streamnum >= (short int) options.Noutstreams) {
                         log_err("Found too many output files, was expecting "
-                                "%zu but found %hu", options.Noutfiles,
-                                outfilenum);
+                                "%zu but found %hu", options.Noutstreams,
+                                streamnum);
                     }
-                    sscanf(cmdstr, "%*s %s",
-                           (*out_data_files)[outfilenum].prefix);
-
-                    // determine how many variable will be in this file before
-                    // allocating (GH: 209)
-                    (*out_data_files)[outfilenum].nvars =
-                        count_outfile_nvars(gp);
-
-                    (*out_data_files)[outfilenum].varid =
-                        calloc((*out_data_files)[outfilenum].nvars,
-                               sizeof(*((*out_data_files)[outfilenum].varid)));
-                    if ((*out_data_files)[outfilenum].varid == NULL) {
-                        log_err(
-                            "Memory allocation error in parse_output_info().");
+                    if (sscanf(cmdstr, "%*s %s",
+                               (*streams)[streamnum].prefix) != 1) {
+                        log_err("Invalid specification for OUTFILE");
                     }
+
+                    // set default file format
+                    (*streams)[streamnum].file_format = ASCII;
+
                     outvarnum = 0;
                 }
+                else if (strcasecmp("AGGFREQ", optstr) == 0) {
+                    if (streamnum < 0) {
+                        log_err("Error in global param file: \"OUTFILE\" must be "
+                                "specified before you can specify \"AGGFREQ\".");
+                    }
+                    found = sscanf(cmdstr, "%*s %s %s", freq_type_str,
+                                   freq_value_str);
+
+                    if (!found) {
+                        log_err("No arguments found after OUTFREQ");
+                    }
+                    // parse the frequency string to an enum value
+                    freq = str_to_freq_flag(freq_type_str);
+
+                    if (freq == FREQ_DATE) {
+                        // Make sure we have a datestring
+                        if (found != 2) {
+                            log_err(
+                                "AGGFREQ was set to DATE but no date string was found");
+                        }
+                        // parse date from freq_value_str
+                        strpdmy(freq_value_str, "%Y-%m-%d", &freq_dmy);
+                        // set the alarm
+                        set_alarm(dmy_current, freq, &freq_dmy,
+                                  (&(*streams)[streamnum].agg_alarm));
+                    }
+                    else {
+                        if (found != 2) {
+                            // Default frequency is 1
+                            freq_n = 1;
+                        }
+                        else {
+                            // get the frequency value as an integer
+                            freq_n = atoi(freq_value_str);
+                        }
+                        // set the alarm
+                        set_alarm(dmy_current, freq, &freq_n,
+                                  (&(*streams)[streamnum].agg_alarm));
+                    }
+                }
+                else if (strcasecmp("COMPRESS", optstr) == 0) {
+                    if (streamnum < 0) {
+                        log_err("Error in global param file: \"OUTFILE\" must be "
+                                "specified before you can specify \"COMPRESS\".");
+                    }
+                    sscanf(cmdstr, "%*s %s", flgstr);
+                    if (strcasecmp("TRUE", flgstr) == 0) {
+                        (*streams)[streamnum].compress = COMPRESSION_LVL_UNSET;
+                    }
+                    else if (strcasecmp("FALSE", flgstr) == 0) {
+                        (*streams)[streamnum].compress = 0;
+                    }
+                    else {
+                        (*streams)[streamnum].compress = atoi(flgstr);
+                    }
+                }
+                else if (strcasecmp("OUT_FORMAT", optstr) == 0) {
+                    if (streamnum < 0) {
+                        log_err("Error in global param file: \"OUTFILE\" must be "
+                                "specified before you can specify \"OUT_FORMAT\".");
+                    }
+                    sscanf(cmdstr, "%*s %s", flgstr);
+                    if (strcasecmp("ASCII", flgstr) == 0) {
+                        (*streams)[streamnum].file_format = ASCII;
+                    }
+                    else if (strcasecmp("BINARY", flgstr) == 0) {
+                        (*streams)[streamnum].file_format = BINARY;
+                    }
+                    else {
+                        log_err("Classic driver file format must be ASCII or "
+                                "BINARY [stream=%hu]", streamnum);
+                    }
+                }
                 else if (strcasecmp("OUTVAR", optstr) == 0) {
-                    if (outfilenum < 0) {
+                    if (streamnum < 0) {
                         log_err("Error in global param file: \"OUTFILE\" must be "
                                 "specified before you can specify \"OUTVAR\".");
                     }
+                    // parse outvar options
                     strcpy(format, "");
                     strcpy(typestr, "");
                     strcpy(multstr, "");
-                    sscanf(cmdstr, "%*s %s %s %s %s", varname, format, typestr,
-                           multstr);
-                    if (strcasecmp("", format) == 0) {
-                        strcpy(format, "*");
-                        type = OUT_TYPE_DEFAULT;
-                        mult = 0; // 0 means default multiplier
+                    found = sscanf(cmdstr, "%*s %s %s %s %s %s", varname,
+                                   format, typestr, multstr, aggstr);
+                    if (!found) {
+                        log_err("OUTVAR specified but no variable was listed");
                     }
-                    else {
-                        if (strcasecmp("OUT_TYPE_USINT", typestr) == 0) {
-                            type = OUT_TYPE_USINT;
-                        }
-                        else if (strcasecmp("OUT_TYPE_SINT", typestr) == 0) {
-                            type = OUT_TYPE_SINT;
-                        }
-                        else if (strcasecmp("OUT_TYPE_FLOAT", typestr) == 0) {
-                            type = OUT_TYPE_FLOAT;
-                        }
-                        else if (strcasecmp("OUT_TYPE_DOUBLE", typestr) == 0) {
-                            type = OUT_TYPE_DOUBLE;
-                        }
-                        else {
-                            type = OUT_TYPE_DEFAULT;
-                        }
-                        if (strcmp("*", multstr) == 0) {
-                            mult = 0; // 0 means use default multiplier
-                        }
-                        else {
-                            mult = (double) atof(multstr);
-                        }
-                    }
-                    if (set_output_var((*out_data_files), true, outfilenum,
-                                       out_data, varname, outvarnum, format,
-                                       type,
-                                       mult) != 0) {
-                        log_err("Invalid output variable specification.");
-                    }
-                    strcpy(format, "");
+                    // interpret string options, set defaults if necessary
+                    str_to_ascii_format(format);
+                    agg_type = str_to_agg_type(aggstr);
+                    type = str_to_out_type(typestr);
+                    mult = str_to_out_mult(multstr);
+
+                    // Add OUTVAR to stream
+                    set_output_var(&(*streams)[streamnum], varname, outvarnum,
+                                   format, type, mult, agg_type);
                     outvarnum++;
                 }
             }
@@ -155,93 +219,14 @@ parse_output_info(FILE                  *gp,
     }
     // Otherwise, set output files and their contents to default configuration
     else {
-        *out_data_files = set_output_defaults(out_data);
+        set_output_defaults(streams, dmy_current, ASCII);
     }
     fclose(gp);
-}
 
-/******************************************************************************
- * @brief    This routine determines the counts the number of output variables
-             in each output file specified in the global parameter file.
- *****************************************************************************/
-size_t
-count_outfile_nvars(FILE *gp)
-{
-    size_t        nvars;
-    unsigned long start_position;
-    char          cmdstr[MAXSTRING];
-    char          optstr[MAXSTRING];
-    // Figure out where we are in the input file
-    fflush(gp);
-    start_position = ftell(gp);
-
-    // read the first line
-    fgets(cmdstr, MAXSTRING, gp);
-
-    // initalize nvars
-    nvars = 0;
-
-    // Loop through the lines
-    while (!feof(gp)) {
-        if (cmdstr[0] != '#' && cmdstr[0] != '\n' && cmdstr[0] != '\0') {
-            // line is not blank or a comment
-            sscanf(cmdstr, "%s", optstr);
-
-            // if the line starts with OUTFILE
-            if (strcasecmp("OUTVAR", optstr) == 0) {
-                nvars++;
-            }
-            // else we're done with this file so break out of loop
-            else {
-                break;
-            }
-        }
-        fgets(cmdstr, MAXSTRING, gp);
+    for (streamnum = 0;
+         streamnum < (short int) options.Noutstreams;
+         streamnum++) {
+        // Allocate memory for the stream aggdata arrays
+        alloc_aggdata(&(*streams)[streamnum]);
     }
-
-    // put the position in the file back to where we started
-    fseek(gp, start_position, SEEK_SET);
-
-    return nvars;
-}
-
-/******************************************************************************
- * @brief    This routine determines the counts the number of output files
-             specified in the global parameter file.
- *****************************************************************************/
-size_t
-count_n_outfiles(FILE *gp)
-{
-    size_t        n_outfiles;
-    unsigned long start_position;
-    char          cmdstr[MAXSTRING];
-    char          optstr[MAXSTRING];
-    // Figure out where we are in the input file
-    fflush(gp);
-    start_position = ftell(gp);
-
-    // read the first line
-    fgets(cmdstr, MAXSTRING, gp);
-
-    // initalize n_outfiles
-    n_outfiles = 0;
-
-    // Loop through the lines
-    while (!feof(gp)) {
-        if (cmdstr[0] != '#' && cmdstr[0] != '\n' && cmdstr[0] != '\0') {
-            // line is not blank or a comment
-            sscanf(cmdstr, "%s", optstr);
-
-            // if the line starts with OUTFILE
-            if (strcasecmp("OUTFILE", optstr) == 0) {
-                n_outfiles++;
-            }
-        }
-        fgets(cmdstr, MAXSTRING, gp);
-    }
-
-    // put the position in the file back to where we started
-    fseek(gp, start_position, SEEK_SET);
-
-    return n_outfiles;
 }

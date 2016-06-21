@@ -1,5 +1,7 @@
 #!/usr/bin/env python
 ''' VIC Image Driver testing '''
+import os
+import re
 
 import xarray as xr
 import numpy as np
@@ -44,3 +46,64 @@ def assert_nan_equal(ds_domain, ds_output):
         # raise AssertionError if NaNs do not match
         npt.assert_array_equal(da_null_reduced.values,
                                np.isnan(ds_domain['mask']))
+
+
+def check_multistream_image(fnames):
+    '''
+    Test the multistream aggregation in the image driver
+    '''
+
+    how_dict = {'OUT_ALBEDO': 'max',
+                'OUT_SOIL_TEMP': 'min',
+                'OUT_PRESSURE': 'sum',
+                'OUT_AIR_TEMP': 'first',
+                'OUT_SWDOWN': 'mean',
+                'OUT_LWDOWN': 'last'}
+
+    streams = {}  # Dictionary to store parsed stream names
+    stream_fnames = {}
+
+    for path in fnames:
+        # split up the path name to get info about the stream
+        resultdir, fname = os.path.split(path)
+        pieces = re.split('[_.]', fname)
+        stream = '_'.join(pieces[:-2])  # stream name
+        freq_n = pieces[2]  # stream frequency n
+
+        stream_fnames[stream] = path
+
+        # set the stream frequency for resample
+        if 'NSTEPS' in stream:
+            inst_stream = stream
+        else:
+            if 'NDAYS' in stream:
+                streams[stream] = '{}D'.format(freq_n)
+            elif 'NHOURS' in stream:
+                streams[stream] = '{}H'.format(freq_n)
+            elif 'NMINUTES' in stream:
+                streams[stream] = '{}min'.format(freq_n)
+            elif 'NSECONDS' in stream:
+                streams[stream] = '{}S'.format(freq_n)
+            else:
+                ValueError('stream %s not supported in this test' % stream)
+
+    # Loop over all streams
+    instant_ds = xr.open_dataset(stream_fnames[inst_stream])
+
+    # Loop over all streams
+    for stream, freq in streams.items():
+        agg_ds = xr.open_dataset(stream_fnames[stream])
+
+        # Loop over the variables in the stream
+        for key, how in how_dict.items():
+
+            # Resample of the instantaneous data
+            expected = instant_ds[key].resample(freq, dim='time', how=how)
+
+            # Get the aggregated values (from VIC)
+            actual = agg_ds[key].values
+
+            # Compare the actual and expected (with tolerance)
+            npt.assert_array_equal(actual, expected,
+                                   err_msg='Variable=%s, freq=%s, how=%s: failed'
+                                           ' comparison' % (key, freq, how))

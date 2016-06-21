@@ -141,7 +141,8 @@ def process_error(error, vic_exe):
     elif isinstance(error, AssertionError):
         test_comment = 'AssertionError raised during testing'
     else:
-        raise error
+        test_comment = 'Unknown test failure'
+
     error_message = error
     traceback.print_stack()
     print('\t{0}'.format(test_comment))
@@ -237,13 +238,10 @@ def find_global_param_value(gp, param_name):
             return line_list[1]
 
 
-def check_multistream(fnames, driver):
+def check_multistream_classic(fnames):
     '''
-
+    Test the multistream aggregation in the classic driver
     '''
-
-    if driver.lower() != 'classic':
-        raise ValueError('only classic driver is supported in this test')
 
     how_dict = {'OUT_ALBEDO': 'max',
                 'OUT_SOIL_TEMP_1': 'min',

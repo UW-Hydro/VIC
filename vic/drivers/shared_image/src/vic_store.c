@@ -60,7 +60,7 @@ vic_store(dmy_struct *dmy_current)
     set_nc_state_file_info(&nc_state_file);
 
     // only open and initialize the netcdf file on the first thread
-    if (mpi_rank == (mpi_rank == VIC_MPI_ROOT)) {
+    if (mpi_rank == VIC_MPI_ROOT) {
         // create netcdf file for storing model state
         sprintf(filename, "%s.%04d%02d%02d_%05u.nc",
                 filenames.statefile, dmy_current->year, dmy_current->month,
@@ -1257,7 +1257,7 @@ vic_store(dmy_struct *dmy_current)
     }
 
     // close the netcdf file if it is still open
-    if (mpi_rank == (mpi_rank == VIC_MPI_ROOT)) {
+    if (mpi_rank == VIC_MPI_ROOT) {
         if (nc_state_file.open == true) {
             status = nc_close(nc_state_file.nc_id);
             if (status != NC_NOERR) {

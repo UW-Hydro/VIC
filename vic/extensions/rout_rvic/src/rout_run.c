@@ -35,8 +35,9 @@ rout_run(void)
     log_info("In Routing Lohmann Model");
 
     extern rout_struct       rout;
-    extern out_data_struct **out_data;
-    extern dmy_struct       *dmy;
+//    extern out_data_struct **out_data;
+    extern double           ***out_data;
+
     size_t                   iSource, iOutlet, iTimestep, jTimestep;
     int                      offset; /*2d indicies*/
     size_t                   iRing, iUH; /*1d indicies*/
@@ -71,16 +72,15 @@ rout_run(void)
             rout.ring[iRing] += (rout.rout_param.unit_hydrograph[iUH] *
                                  (out_data[rout.rout_param.source_VIC_index[
                                                iSource]][
-                                      OUT_RUNOFF].data[0] +
+                                      OUT_RUNOFF][0] +
                                   out_data[rout.rout_param.source_VIC_index[
                                                iSource]][
-                                      OUT_BASEFLOW].data[0]));
+                                      OUT_BASEFLOW][0]));
         }
     }
 
     // Write to output struct...
     for (iOutlet = 0; iOutlet < rout.rout_param.nOutlets; iOutlet++) {
-        out_data[rout.rout_param.outlet_VIC_index[iOutlet]][OUT_DISCHARGE].
-        aggdata[0] = rout.ring[iOutlet];
+        out_data[rout.rout_param.outlet_VIC_index[iOutlet]][OUT_DISCHARGE][0] = rout.ring[iOutlet];
     }
 }

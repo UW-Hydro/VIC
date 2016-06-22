@@ -337,7 +337,7 @@ vic_force(void)
         global_param.forceoffset[1] += NF;
     }
 
-    
+
     // allocate memory for t_offset
     t_offset = malloc(local_domain.ncells_active * sizeof(*t_offset));
     if (dvar == NULL) {
@@ -483,7 +483,7 @@ get_forcing_file_info(param_set_struct *param_set,
     get_nc_var_attr(filenames.forcing[0], "time", "calendar", &calendar_char);
 
     // parse the calendar string and check to make sure it matches the global clock
-    calendar = calendar_from_chars(calendar_char);
+    calendar = str_to_calendar(calendar_char);
 
     // parse the time units
     parse_nc_time_units(nc_unit_chars, &time_units, &nc_origin_dmy);
@@ -527,8 +527,8 @@ get_forcing_file_info(param_set_struct *param_set,
                 param_set->force_steps_per_day[file_num])
     }
     if (calendar != global_param.calendar) {
-        log_err("Calendar in forcing file does not match the calendar of "
-                "VIC's clock: %s", calendar_char);
+        log_err("Calendar in forcing file (%s) does not match the calendar of "
+                "VIC's clock", calendar_char);
     }
 
     // Free attribute character arrays

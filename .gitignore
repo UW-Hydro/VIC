@@ -13,6 +13,7 @@
 .cache
 build/
 dist/
+vic_headers.py
 
 # Shared objects (inc. Windows DLLs)
 *.dll

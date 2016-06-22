@@ -1,0 +1,111 @@
+NLAYER                3
+NODES                 3
+MODEL_STEPS_PER_DAY   24
+SNOW_STEPS_PER_DAY    24
+RUNOFF_STEPS_PER_DAY  24
+STARTYEAR             1949
+STARTMONTH            01
+STARTDAY              01
+ENDYEAR               1949
+ENDMONTH              01
+ENDDAY                10
+FULL_ENERGY           FALSE
+FROZEN_SOIL           FALSE
+
+#INIT_STATE
+STATENAME       $state_dir/states
+STATEYEAR       1949
+STATEMONTH      1
+STATEDAY        10
+STATESEC        82800
+STATE_FORMAT    ASCII
+
+FORCING1             $test_data_dir/classic/Stehekin/forcings/full_data_
+FORCE_FORMAT         ASCII
+FORCE_TYPE           PREC
+FORCE_TYPE           AIR_TEMP
+FORCE_TYPE           SWDOWN
+FORCE_TYPE           LWDOWN
+FORCE_TYPE           SKIP  # This column is air density, which is not needed by VIC
+FORCE_TYPE           PRESSURE
+FORCE_TYPE           VP
+FORCE_TYPE           WIND
+FORCE_STEPS_PER_DAY  24
+FORCEYEAR            1949
+FORCEMONTH           01
+FORCEDAY             01
+GRID_DECIMAL         4
+WIND_H               10.0
+
+SOIL                $test_data_dir/classic/Stehekin/parameters/Stehekin_soil.txt
+BASEFLOW            ARNO
+JULY_TAVG_SUPPLIED  FALSE
+ORGANIC_FRACT       FALSE
+VEGLIB              $test_data_dir/classic/Stehekin/parameters/Stehekin_veglib.txt
+VEGPARAM            $test_data_dir/classic/Stehekin/parameters/Stehekin_vegparam.txt
+ROOT_ZONES          3
+VEGPARAM_LAI        TRUE
+LAI_SRC             FROM_VEGPARAM
+SNOW_BAND           5  $test_data_dir/classic/Stehekin/parameters/Stehekin_snowbands.txt
+
+RESULT_DIR              $result_dir
+
+# Instantaneous output
+OUTFILE     STREAM_NSTEPS_1
+AGGFREQ     NSTEPS        1
+OUTVAR      OUT_ALBEDO    *   *   *   AGG_TYPE_BEG
+OUTVAR      OUT_SOIL_TEMP *   *   *   AGG_TYPE_BEG
+OUTVAR      OUT_PRESSURE  *   *   *   AGG_TYPE_BEG
+OUTVAR      OUT_AIR_TEMP  *   *   *   AGG_TYPE_BEG
+OUTVAR      OUT_SWDOWN    *   *   *   AGG_TYPE_BEG
+OUTVAR      OUT_LWDOWN    *   *   *   AGG_TYPE_BEG
+
+# Output every 7200 seconds
+OUTFILE     STREAM_NSECONDS_7200
+AGGFREQ     NSECONDS      7200
+OUTVAR      OUT_ALBEDO    *   *   *   AGG_TYPE_MAX
+OUTVAR      OUT_SOIL_TEMP *   *   *   AGG_TYPE_MIN
+OUTVAR      OUT_PRESSURE  *   *   *   AGG_TYPE_SUM
+OUTVAR      OUT_AIR_TEMP  *   *   *   AGG_TYPE_BEG
+OUTVAR      OUT_SWDOWN    *   *   *   AGG_TYPE_AVG
+OUTVAR      OUT_LWDOWN    *   *   *   AGG_TYPE_END
+
+# Output every 180 minutes (3 hours)
+OUTFILE     STREAM_NMINUTES_180
+AGGFREQ     NMINUTES      180
+OUTVAR      OUT_ALBEDO    *   *   *   AGG_TYPE_MAX
+OUTVAR      OUT_SOIL_TEMP *   *   *   AGG_TYPE_MIN
+OUTVAR      OUT_PRESSURE  *   *   *   AGG_TYPE_SUM
+OUTVAR      OUT_AIR_TEMP  *   *   *   AGG_TYPE_BEG
+OUTVAR      OUT_SWDOWN    *   *   *   AGG_TYPE_AVG
+OUTVAR      OUT_LWDOWN    *   *   *   AGG_TYPE_END
+
+# Output every 4 hours
+OUTFILE     STREAM_NHOURS_4
+AGGFREQ     NHOURS        4
+OUTVAR      OUT_ALBEDO    *   *   *   AGG_TYPE_MAX
+OUTVAR      OUT_SOIL_TEMP *   *   *   AGG_TYPE_MIN
+OUTVAR      OUT_PRESSURE  *   *   *   AGG_TYPE_SUM
+OUTVAR      OUT_AIR_TEMP  *   *   *   AGG_TYPE_BEG
+OUTVAR      OUT_SWDOWN    *   *   *   AGG_TYPE_AVG
+OUTVAR      OUT_LWDOWN    *   *   *   AGG_TYPE_END
+
+# Output every 1 day
+OUTFILE     STREAM_NDAYS_1
+AGGFREQ     NDAYS         1
+OUTVAR      OUT_ALBEDO    *   *   *   AGG_TYPE_MAX
+OUTVAR      OUT_SOIL_TEMP *   *   *   AGG_TYPE_MIN
+OUTVAR      OUT_PRESSURE  *   *   *   AGG_TYPE_SUM
+OUTVAR      OUT_AIR_TEMP  *   *   *   AGG_TYPE_BEG
+OUTVAR      OUT_SWDOWN    *   *   *   AGG_TYPE_AVG
+OUTVAR      OUT_LWDOWN    *   *   *   AGG_TYPE_END
+
+# Output every 2 days
+OUTFILE     STREAM_NDAYS_2
+AGGFREQ     NDAYS        2
+OUTVAR      OUT_ALBEDO    *   *   *   AGG_TYPE_MAX
+OUTVAR      OUT_SOIL_TEMP *   *   *   AGG_TYPE_MIN
+OUTVAR      OUT_PRESSURE  *   *   *   AGG_TYPE_SUM
+OUTVAR      OUT_AIR_TEMP  *   *   *   AGG_TYPE_BEG
+OUTVAR      OUT_SWDOWN    *   *   *   AGG_TYPE_AVG
+OUTVAR      OUT_LWDOWN    *   *   *   AGG_TYPE_END

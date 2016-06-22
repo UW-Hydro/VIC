@@ -36,7 +36,7 @@ vic_alloc(void)
     extern atmos_data_struct  *atmos;
     extern domain_struct       local_domain;
     extern option_struct       options;
-    extern out_data_struct   **out_data;
+    extern double           ***out_data;
     extern save_data_struct   *save_data;
     extern soil_con_struct    *soil_con;
     extern veg_con_map_struct *veg_con_map;
@@ -199,8 +199,6 @@ vic_alloc(void)
         }
 
         all_vars[i] = make_all_vars(veg_con_map[i].nv_active);
-
-        out_data[i] = create_output_list();
 
         // allocate memory for veg_hist
         veg_hist[i] = calloc(veg_con_map[i].nv_active, sizeof(*(veg_hist[i])));

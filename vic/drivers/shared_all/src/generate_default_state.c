@@ -44,11 +44,11 @@ generate_default_state(all_vars_struct *all_vars,
     size_t                   band;
     size_t                   lidx;
     size_t                   k;
-    size_t                     tmpTshape[] = {
+    size_t                   tmpTshape[] = {
         options.Nlayer, options.Nnode,
         options.Nfrost + 1
     };
-    size_t                     tmpZshape[] = {
+    size_t                   tmpZshape[] = {
         options.Nlayer, options.Nnode
     };
     double                   Cv;

@@ -46,25 +46,27 @@ MPI_Datatype        mpi_domain_struct_type;
 MPI_Datatype        mpi_global_struct_type;
 MPI_Datatype        mpi_filenames_struct_type;
 MPI_Datatype        mpi_location_struct_type;
-MPI_Datatype        mpi_nc_file_struct_type;
+MPI_Datatype        mpi_alarm_struct_type;
 MPI_Datatype        mpi_option_struct_type;
 MPI_Datatype        mpi_param_struct_type;
 int                *mpi_map_local_array_sizes = NULL;
 int                *mpi_map_global_array_offsets = NULL;
 int                 mpi_rank;
 int                 mpi_size;
-nc_file_struct      nc_hist_file;
-nc_var_struct       nc_vars[N_OUTVAR_TYPES];
 option_struct       options;
 parameters_struct   param;
-out_data_struct   **out_data;
-save_data_struct   *save_data;
 param_set_struct    param_set;
 soil_con_struct    *soil_con = NULL;
 veg_con_map_struct *veg_con_map = NULL;
 veg_con_struct    **veg_con = NULL;
 veg_hist_struct   **veg_hist = NULL;
 veg_lib_struct    **veg_lib = NULL;
+metadata_struct     state_metadata[N_STATE_VARS];
+metadata_struct     out_metadata[N_OUTVAR_TYPES];
+save_data_struct   *save_data;  // [ncells]
+double           ***out_data = NULL;  // [ncells, nvars, nelem]
+stream_struct      *output_streams = NULL;  // [nstreams]
+nc_file_struct     *nc_hist_files = NULL;  // [nstreams]
 
 /******************************************************************************
  * @brief    Initialization function for CESM driver
@@ -89,9 +91,9 @@ vic_cesm_init(vic_clock     *vclock,
     vic_populate_model_state(trim(cmeta->starttype));
 
     // initialize output structures
-    vic_init_output();
+    vic_init_output(&dmy_current);
 
-    return 0;
+    return EXIT_SUCCESS;
 }
 
 /******************************************************************************
@@ -112,14 +114,11 @@ vic_cesm_run(vic_clock *vclock)
     // return fields to coupler
     vic_cesm_put_data();
 
-    // if output:
-    if (check_write_flag(current)) {
-        vic_write(&dmy_current);
-    }
+    // Write history files
+    vic_write_output(&dmy_current);
 
     // if save:
     if (vclock->state_flag) {
-        log_warn("Skipping state file write");
         vic_store(&dmy_current);
     }
 
@@ -130,7 +129,7 @@ vic_cesm_run(vic_clock *vclock)
     advance_time();
     assert_time_insync(vclock, &dmy_current);
 
-    return 0;
+    return EXIT_SUCCESS;
 }
 
 /******************************************************************************
@@ -142,5 +141,5 @@ vic_cesm_final()
     // clean up
     vic_cesm_finalize();
 
-    return 0;
+    return EXIT_SUCCESS;
 }

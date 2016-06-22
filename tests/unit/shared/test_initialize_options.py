@@ -9,4 +9,4 @@ def test_initialize_options():
 def test_initialize_options_bools():
     assert vic_lib.initialize_options() is None
     assert not vic_lib.options.BLOWING
-    assert not vic_lib.options.PRT_SNOW_BAND
+    assert vic_lib.options.TFALLBACK

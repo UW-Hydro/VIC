@@ -41,6 +41,7 @@ param_set_struct    param_set;
 parameters_struct   param;
 filenames_struct    filenames;
 filep_struct        filep;
+metadata_struct     out_metadata[N_OUTVAR_TYPES];
 
 /******************************************************************************
  * @brief   Classic driver of the VIC model
@@ -55,28 +56,27 @@ main(int   argc,
      char *argv[])
 {
     /** Variable Declarations **/
-    extern FILE          *LOG_DEST;
+    extern FILE       *LOG_DEST;
 
-    char                  MODEL_DONE;
-    char                  RUN_MODEL;
-    char                  write_flag;
-    char                  dmy_str[MAXSTRING];
-    size_t                rec;
-    size_t                Nveg_type;
-    int                   cellnum;
-    int                   startrec;
-    int                   ErrorFlag;
-    size_t                filenum;
-    dmy_struct           *dmy;
-    atmos_data_struct    *atmos;
-    veg_hist_struct     **veg_hist;
-    veg_con_struct       *veg_con;
-    soil_con_struct       soil_con;
-    all_vars_struct       all_vars;
-    lake_con_struct       lake_con;
-    out_data_file_struct *out_data_files;
-    out_data_struct      *out_data;
-    save_data_struct      save_data;
+    char               MODEL_DONE;
+    char               RUN_MODEL;
+    char               dmy_str[MAXSTRING];
+    size_t             rec;
+    size_t             Nveg_type;
+    int                cellnum;
+    int                startrec;
+    int                ErrorFlag;
+    size_t             streamnum;
+    dmy_struct        *dmy;
+    atmos_data_struct *atmos;
+    veg_hist_struct  **veg_hist;
+    veg_con_struct    *veg_con;
+    soil_con_struct    soil_con;
+    all_vars_struct    all_vars;
+    lake_con_struct    lake_con;
+    stream_struct     *streams = NULL;
+    double          ***out_data;   // [1, nvars, nelem]
+    save_data_struct   save_data;
 
     // Initialize Log Destination
     initialize_log();
@@ -109,17 +109,17 @@ main(int   argc,
     // Check that model parameters are valid
     validate_parameters();
 
+    /** Make Date Data Structure **/
+    initialize_time();
+    dmy = make_dmy(&global_param);
+
     /** Set up output data structures **/
-    out_data = create_output_list();
+    set_output_met_data_info();
+    // out_data is shape [ngridcells (1), N_OUTVAR_TYPES]
+    alloc_out_data(1, &out_data);
     filep.globalparam = open_file(filenames.global, "r");
-    parse_output_info(filep.globalparam, &out_data_files, out_data);
-    for (filenum = 0; filenum < options.Noutfiles; filenum++) {
-        if (out_data_files[filenum].nvars == 0) {
-            log_err("No output variables were set in OUTFILE %zu. "
-                    "Must set at least one output variable (OUTVAR) "
-                    "for each OUTFILE.", filenum + 1);
-        }
-    }
+    parse_output_info(filep.globalparam, &streams, &(dmy[0]));
+    validate_streams(&streams);
 
     /** Check and Open Files **/
     check_files(&filep, &filenames);
@@ -129,10 +129,6 @@ main(int   argc,
 
     /** Initialize Parameters **/
     cellnum = -1;
-
-    /** Make Date Data Structure **/
-    initialize_time();
-    dmy = make_dmy(&global_param);
 
     /** allocate memory for the atmos_data_struct **/
     alloc_atmos(global_param.nrecs, &atmos);
@@ -176,12 +172,8 @@ main(int   argc,
             }
 
             /** Build Gridded Filenames, and Open **/
-            make_in_and_outfiles(&filep, &filenames, &soil_con, out_data_files);
-
-            if (options.PRT_HEADER) {
-                /** Write output file headers **/
-                write_header(out_data_files, out_data, dmy, global_param);
-            }
+            make_in_and_outfiles(&filep, &filenames, &soil_con,
+                                 &streams, dmy);
 
             /** Read Elevation Band Data if Used **/
             read_snowband(filep.snowband, &soil_con);
@@ -209,15 +201,10 @@ main(int   argc,
 
             /** Update Error Handling Structure **/
             Error.filep = filep;
-            Error.out_data_files = out_data_files;
 
             /** Initialize the storage terms in the water and energy balances **/
-
-            /** Sending a negative record number (-global_param.nrecs) to
-                put_data() will accomplish this **/
-            put_data(&all_vars, &atmos[0], &soil_con, veg_con, veg_lib,
-                     &lake_con,
-                     out_data, &save_data, -global_param.nrecs);
+            initialize_save_data(&all_vars, &atmos[0], &soil_con, veg_con,
+                                 veg_lib, &lake_con, out_data[0], &save_data);
 
             /******************************************
                Run Model in Grid Cell for all Time Steps
@@ -247,14 +234,17 @@ main(int   argc,
                    Calculate cell average values for current time step
                 **************************************************/
                 put_data(&all_vars, &atmos[rec], &soil_con, veg_con, veg_lib,
-                         &lake_con, out_data, &save_data, rec);
+                         &lake_con, out_data[0], &save_data);
 
-                write_flag = check_write_flag(rec);
+                for (streamnum = 0;
+                     streamnum < options.Noutstreams;
+                     streamnum++) {
+                    agg_stream_data(&(streams[streamnum]), &(dmy[rec]),
+                                    out_data);
+                }
 
                 // Write cell average values for current time step
-                if (write_flag) {
-                    write_output(out_data, out_data_files, &dmy[rec], rec);
-                }
+                write_output(&streams, &dmy[rec]);
 
                 /************************************
                    Save model state at assigned date
@@ -288,7 +278,7 @@ main(int   argc,
                 }
             } /* End Rec Loop */
 
-            close_files(&filep, out_data_files, &filenames);
+            close_files(&filep, &streams);
 
             free_veg_hist(global_param.nrecs, veg_con[0].vegetat_type_num,
                           &veg_hist);
@@ -305,8 +295,8 @@ main(int   argc,
     /** cleanup **/
     free_atmos(global_param.nrecs, &atmos);
     free_dmy(&dmy);
-    free_out_data_files(&out_data_files);
-    free_out_data(&out_data);
+    free_streams(&streams);
+    free_out_data(1, out_data);  // 1 is for the number of gridcells, 1 in classic driver
     fclose(filep.soilparam);
     free_veglib(&veg_lib);
     fclose(filep.vegparam);

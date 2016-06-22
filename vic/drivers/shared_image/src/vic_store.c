@@ -1539,7 +1539,6 @@ initialize_state_file(char           *filename,
     size_t                     j;
     size_t                     dcount[MAXDIMS];
     size_t                     dstart[MAXDIMS];
-    int                        time_var_id;
     int                        lon_var_id;
     int                        lat_var_id;
     int                        veg_var_id;
@@ -1576,10 +1575,10 @@ initialize_state_file(char           *filename,
 
     // define the variable time
     status = nc_def_var(nc_state_file->nc_id, "time", NC_DOUBLE, 1,
-                        &(nc_state_file->time_dimid), &(time_var_id));
+                        &(nc_state_file->time_dimid), &(nc_state_file->time_varid));
     check_nc_status(status, "Error defining time variable in %s", filename);
-    status = nc_put_att_text(nc_state_file->nc_id, time_var_id, "standard_name",
-                             strlen("time"), "time");
+    status = nc_put_att_text(nc_state_file->nc_id, nc_state_file->time_varid,
+                             "standard_name", strlen("time"), "time");
     check_nc_status(status, "Error adding attribute in %s", filename);
 
     // adding units attribute to time variable
@@ -1587,15 +1586,15 @@ initialize_state_file(char           *filename,
 
     sprintf(str, "%s since %s", unit_str, global_param.time_origin_str);
 
-    status = nc_put_att_text(nc_state_file->nc_id, time_var_id, "units",
-                             strlen(str), str);
+    status = nc_put_att_text(nc_state_file->nc_id, nc_state_file->time_varid,
+                             "units", strlen(str), str);
     check_nc_status(status, "Error adding attribute in %s", filename);
 
     // adding calendar attribute to time variable
     str_from_calendar(global_param.calendar, str);
 
-    status = nc_put_att_text(nc_state_file->nc_id, time_var_id, "calendar",
-                             strlen(str), str);
+    status = nc_put_att_text(nc_state_file->nc_id, nc_state_file->time_varid,
+                             "calendar", strlen(str), str);
     check_nc_status(status, "Error adding calendar attribute in %s", filename);
 
     // define netcdf dimensions
@@ -1887,7 +1886,7 @@ initialize_state_file(char           *filename,
 
     status = nc_put_var1_double(nc_state_file->nc_id,
                                 nc_state_file->time_varid,
-                                dstart, &dtime);
+                                0, &dtime);
     check_nc_status(status, "Error writing time variable");
 
     // populate lat/lon

@@ -1652,15 +1652,6 @@ initialize_state_file(char           *filename,
 
     // write dimension variables
 
-    // time variable
-    dtime = date2num(global_param.time_origin_num, dmy_current, 0.,
-                     global_param.calendar, global_param.time_units);
-
-    status = nc_put_var1_double(nc_state_file->nc_id,
-                                nc_state_file->time_varid,
-                                dstart, &dtime);
-    check_nc_status(status, "Error writing time variable");
-
     // Coordinate variables
     ndims = global_domain.info.n_coord_dims;
     dstart[0] = 0;
@@ -1889,6 +1880,15 @@ initialize_state_file(char           *filename,
     // leave define mode
     status = nc_enddef(nc_state_file->nc_id);
     check_nc_status(status, "Error leaving define mode for %s", filename);
+
+    // time variable
+    dtime = date2num(global_param.time_origin_num, dmy_current, 0.,
+                     global_param.calendar, global_param.time_units);
+
+    status = nc_put_var1_double(nc_state_file->nc_id,
+                                nc_state_file->time_varid,
+                                dstart, &dtime);
+    check_nc_status(status, "Error writing time variable");
 
     // populate lat/lon
     if (global_domain.info.n_coord_dims == 1) {

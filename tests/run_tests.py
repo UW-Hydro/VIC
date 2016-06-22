@@ -115,19 +115,20 @@ def main():
                         default=['unit', 'system'], nargs='+')
     parser.add_argument('--system', type=str,
                         help='system tests configuration file',
-                        default='./system/system_tests.cfg')
+                        default=os.path.join(test_dir, 'system/system_tests.cfg'))
     parser.add_argument('--science', type=str,
                         help='science tests configuration file',
-                        default='./science/science.cfg')
+                        default=os.path.join(test_dir, 'science/science.cfg'))
     parser.add_argument('--examples', type=str,
                         help='examples tests configuration file',
-                        default='./examples/examples.cfg')
+                        default=os.path.join(test_dir, 'examples/examples.cfg'))
     parser.add_argument('--release', type=str,
                         help='release tests configuration file',
-                        default='./release/release.cfg')
+                        default=os.path.join(test_dir, 'release/release.cfg'))
     parser.add_argument('--vic_exe', type=str,
                         help='VIC executable to test',
-                        default='../vic/drivers/classic/vic_classic.exe')
+                        default=os.path.join(
+                            test_dir, '../vic/drivers/classic/vic_classic.exe'))
     parser.add_argument('--driver', type=str,
                         help='VIC driver to test',
                         choices=['classic', 'image'],
@@ -137,7 +138,7 @@ def main():
                         default='$WORKDIR/VIC_tests_{0}'.format(ymd))
     parser.add_argument('--data_dir', type=str,
                         help='directory to find test data',
-                        default='./samples/VIC_sample_data')
+                        default=os.path.join(test_dir, '../samples/VIC_sample_data'))
     args = parser.parse_args()
 
     # Define test directories

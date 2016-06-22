@@ -159,7 +159,7 @@ def main():
     # Setup VIC executable
     if not (len(args.tests) == 1 and args.tests[0] == 'unit'):
         vic_exe = VIC(args.vic_exe)
-        print('VIC version string:\n{0}'.format(vic_exe.version.decode()))
+        print('VIC version information:\n\n{0}'.format(vic_exe.version.decode()))
 
     # run test sets
     # unit

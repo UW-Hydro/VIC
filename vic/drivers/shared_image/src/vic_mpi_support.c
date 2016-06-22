@@ -1843,8 +1843,6 @@ gather_put_nc_field_float(int     nc_id,
     size_t               grid_size;
     size_t               i;
 
-    debug("checkpoint");
-
     if (mpi_rank == VIC_MPI_ROOT) {
         grid_size = global_domain.n_nx * global_domain.n_ny;
         fvar = malloc(grid_size * sizeof(*fvar));

@@ -55,7 +55,7 @@ def check_multistream_image(fnames):
 
     how_dict = {'OUT_ALBEDO': 'max',
                 'OUT_SOIL_TEMP': 'min',
-                'OUT_PRESSURE': 'sum',
+                'OUT_PRESSURE': np.sum,  # use numpy sum so nans are carried forward
                 'OUT_AIR_TEMP': 'first',
                 'OUT_SWDOWN': 'mean',
                 'OUT_LWDOWN': 'last'}
@@ -96,14 +96,17 @@ def check_multistream_image(fnames):
 
         # Loop over the variables in the stream
         for key, how in how_dict.items():
-
             # Resample of the instantaneous data
-            expected = instant_ds[key].resample(freq, dim='time', how=how)
+            expected = instant_ds[key].resample(freq, dim='time', how=how).values
 
             # Get the aggregated values (from VIC)
             actual = agg_ds[key].values
 
             # Compare the actual and expected (with tolerance)
-            npt.assert_array_equal(actual, expected,
-                                   err_msg='Variable=%s, freq=%s, how=%s: failed'
-                                           ' comparison' % (key, freq, how))
+            try:
+                npt.assert_array_max_ulp(actual, expected)
+            except AssertionError as e:
+                print('Variable=%s, freq=%s, how=%s: failed comparison' %
+                      (key, freq, how))
+                print('actual=%s\nexpected=%s' % (actual, expected))
+                raise e

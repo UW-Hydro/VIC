@@ -142,16 +142,15 @@ def process_error(error, vic_exe):
         test_comment = 'AssertionError raised during testing'
     else:
         test_comment = 'Unknown test failure'
+        traceback.print_stack()
 
-    error_message = error
-    traceback.print_stack()
     print('\t{0}'.format(test_comment))
-    print('\t{0}'.format(error_message))
+    print('\t{0}'.format(error))
     if tail is not None:
         print('\tLast {0} lines of standard out:'.format(ERROR_TAIL))
         print_tail(tail, n=ERROR_TAIL)
 
-    return test_comment, error_message
+    return test_comment, error
 
 
 def test_classic_driver_all_complete(fnames):

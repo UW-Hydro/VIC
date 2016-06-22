@@ -66,7 +66,7 @@ vic_store(dmy_struct *dmy_current)
                 filenames.statefile, dmy_current->year, dmy_current->month,
                 dmy_current->day, dmy_current->dayseconds);
 
-        initialize_state_file(filename, &nc_state_file);
+        initialize_state_file(filename, &nc_state_file, dmy_current);
     }
 
     // write state variables
@@ -1301,7 +1301,6 @@ set_nc_state_file_info(nc_file_struct *nc_state_file)
     nc_state_file->veg_dimid = MISSING;
 
     // Set dimension sizes
-    nc_state_file->time_size = 1;
     nc_state_file->band_size = options.SNOW_BAND;
     nc_state_file->front_size = MAX_FRONTS;
     nc_state_file->frost_size = options.Nfrost;
@@ -1524,7 +1523,8 @@ set_nc_state_var_info(nc_file_struct *nc)
  *****************************************************************************/
 void
 initialize_state_file(char           *filename,
-                      nc_file_struct *nc_state_file)
+                      nc_file_struct *nc_state_file,
+                      dmy_struct     *dmy_current)
 {
     extern option_struct       options;
     extern domain_struct       global_domain;
@@ -1552,6 +1552,7 @@ initialize_state_file(char           *filename,
     char                       unit_str[MAXSTRING];
     char                       str[MAXSTRING];
     size_t                     ndims;
+    double                     dtime;
     double                    *dvar = NULL;
     int                       *ivar = NULL;
 
@@ -1650,6 +1651,15 @@ initialize_state_file(char           *filename,
     }
 
     // write dimension variables
+
+    // time variable
+    dtime = date2num(global_param.time_origin_num, dmy_current, 0.,
+                     global_param.calendar, global_param.time_units);
+
+    status = nc_put_var1_double(nc_state_file->nc_id,
+                                nc_state_file->time_varid,
+                                dstart, &dtime);
+    check_nc_status(status, "Error writing time variable");
 
     // Coordinate variables
     ndims = global_domain.info.n_coord_dims;

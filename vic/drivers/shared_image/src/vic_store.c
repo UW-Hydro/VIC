@@ -1884,9 +1884,10 @@ initialize_state_file(char           *filename,
     dtime = date2num(global_param.time_origin_num, dmy_current, 0.,
                      global_param.calendar, global_param.time_units);
 
+    dstart[0] = 0;
     status = nc_put_var1_double(nc_state_file->nc_id,
                                 nc_state_file->time_varid,
-                                0, &dtime);
+                                dstart, &dtime);
     check_nc_status(status, "Error writing time variable");
 
     // populate lat/lon

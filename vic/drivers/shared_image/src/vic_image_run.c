@@ -25,6 +25,7 @@
  *****************************************************************************/
 
 #include <vic_driver_shared_image.h>
+#include <rout.h>
 
 /******************************************************************************
  * @brief    Run VIC for one timestep and store output data

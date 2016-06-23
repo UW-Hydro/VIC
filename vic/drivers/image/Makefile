@@ -72,7 +72,7 @@ SHELL = /bin/bash
 ifeq (true, ${TRAVIS})
 CC = ${MPIPATH}/bin/mpicc
 else ifeq ($(UNAME_S), Linux)
-CC = ${MPIPATH}/bin/mpicc
+CC = /usr/lib64/mpich/bin/mpicc 
 else
 CC = mpicc
 endif

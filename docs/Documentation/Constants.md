@@ -1,6 +1,6 @@
 # Model Constants and Miscellaneous Parameters
 
-The VIC model requires the specification of many model parameters to run. While some parameters are spatially distributed (e.g. [soil](), [vegetation](), [snowbands]()), others are more appropriately held constant across the model domain.
+The VIC model requires the specification of many model parameters to run. While some parameters are spatially distributed (e.g. _soil_, _vegetation_, or _snowbands_), others are more appropriately held constant across the model domain.
 
 ## Physical Constants
 

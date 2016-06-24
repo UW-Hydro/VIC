@@ -26,6 +26,24 @@
 
 #include <vic_driver_shared_image.h>
 
+
+/******************************************************************************
+ *  * @brief   Print MPI Error String
+ *   *****************************************************************************/
+void
+print_mpi_error_str(int error_code)
+{
+    extern int mpi_rank;
+
+    char       error_string[MAXSTRING];
+    int        length_of_error_string;
+
+    if (error_code != MPI_SUCCESS) {
+        MPI_Error_string(error_code, error_string, &length_of_error_string);
+        fprintf(LOG_DEST, "MPI Error in rank %d\n%s\n", mpi_rank, error_string);
+    }
+}
+
 /******************************************************************************
  * @brief   Initialize MPI functionality
  *****************************************************************************/
@@ -48,6 +66,9 @@ initialize_mpi(void)
     if (status != MPI_SUCCESS) {
         log_err("MPI error in initialize_mpi(): %d\n", status);
     }
+
+    // set mpi error handling
+    MPI_Errhandler_set(MPI_COMM_VIC, MPI_ERRORS_RETURN);
 
     status = MPI_Comm_size(MPI_COMM_VIC, &mpi_size);
     if (status != MPI_SUCCESS) {
@@ -1869,9 +1890,8 @@ gather_put_nc_field_float(int     nc_id,
                          fvar_gathered, mpi_map_local_array_sizes,
                          mpi_map_global_array_offsets, MPI_FLOAT,
                          VIC_MPI_ROOT, MPI_COMM_VIC);
-    if (status != MPI_SUCCESS) {
-        log_err("MPI error");
-    }
+    check_mpi_status(status, "Error with gather of floats");
+ 
     if (mpi_rank == VIC_MPI_ROOT) {
         // remap the array
         map(sizeof(float), global_domain.ncells_active, NULL,

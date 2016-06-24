@@ -67,6 +67,8 @@ vic_store(dmy_struct *dmy_current)
                 dmy_current->day, dmy_current->dayseconds);
 
         initialize_state_file(filename, &nc_state_file, dmy_current);
+
+        debug("writing state file: %s", filename);
     }
 
     // write state variables
@@ -1575,7 +1577,8 @@ initialize_state_file(char           *filename,
 
     // define the variable time
     status = nc_def_var(nc_state_file->nc_id, "time", NC_DOUBLE, 1,
-                        &(nc_state_file->time_dimid), &(nc_state_file->time_varid));
+                        &(nc_state_file->time_dimid),
+                        &(nc_state_file->time_varid));
     check_nc_status(status, "Error defining time variable in %s", filename);
     status = nc_put_att_text(nc_state_file->nc_id, nc_state_file->time_varid,
                              "standard_name", strlen("time"), "time");

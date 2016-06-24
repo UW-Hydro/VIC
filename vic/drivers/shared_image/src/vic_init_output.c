@@ -173,12 +173,7 @@ vic_init_output(dmy_struct *dmy_current)
         }
 
         // format
-        status = MPI_Bcast(output_streams[streamnum].format,
-                           output_streams[streamnum].nvars * MAXSTRING,
-                           MPI_CHAR, VIC_MPI_ROOT, MPI_COMM_VIC);
-        if (status != MPI_SUCCESS) {
-            log_err("MPI error brodcasting to format: %d\n", status);
-        }
+        // skip broadcast
 
         // varid
         status = MPI_Bcast(output_streams[streamnum].varid,

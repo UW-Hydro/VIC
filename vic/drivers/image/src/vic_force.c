@@ -49,7 +49,7 @@ vic_force(void)
     extern parameters_struct   param;
     extern param_set_struct    param_set;
 
-    double                    *t_offset;
+    double                    *t_offset = NULL;
     double                    *dvar = NULL;
     size_t                     i;
     size_t                     j;
@@ -64,9 +64,7 @@ vic_force(void)
 
     // allocate memory for variables to be read
     dvar = malloc(local_domain.ncells_active * sizeof(*dvar));
-    if (dvar == NULL) {
-        log_err("Memory allocation error in vic_force().");
-    }
+    check_alloc_status(dvar, "Memory allocation error.");
 
     // for now forcing file is determined by the year
     sprintf(filenames.forcing[0], "%s%4d.nc", filenames.f_path_pfx[0],
@@ -340,9 +338,7 @@ vic_force(void)
 
     // allocate memory for t_offset
     t_offset = malloc(local_domain.ncells_active * sizeof(*t_offset));
-    if (dvar == NULL) {
-        log_err("Memory allocation error in vic_force().");
-    }
+    check_alloc_status(t_offset, "Memory allocation error.");
 
     for (i = 0; i < local_domain.ncells_active; i++) {
         if (options.SNOW_BAND > 1) {

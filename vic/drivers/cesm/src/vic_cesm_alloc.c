@@ -40,17 +40,13 @@ vic_cesm_alloc(void)
 
     // allocate memory for x2l_vic structure
     x2l_vic = malloc(local_domain.ncells_active * sizeof(*x2l_vic));
-    if (x2l_vic == NULL) {
-        log_err("Memory allocation error in vic_alloc().");
-    }
+    check_alloc_status(x2l_vic, "Memory allocation error.");
     // initialize x2l data
     initialize_x2l_data();
 
     // allocate memory for l2x_vic structure
     l2x_vic = malloc(local_domain.ncells_active * sizeof(*l2x_vic));
-    if (l2x_vic == NULL) {
-        log_err("Memory allocation error in vic_alloc().");
-    }
+    check_alloc_status(l2x_vic, "Memory allocation error.");
     // initialize l2x data
     initialize_l2x_data();
 

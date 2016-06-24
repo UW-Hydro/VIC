@@ -320,18 +320,16 @@ polint(double  xa[],
 {
     int     i, m, ns;
     double  den, dif, dift, ho, hp, w;
-    double *c, *d;
+    double *c = NULL;
+    double *d = NULL;
 
     ns = 1;
     dif = fabs(x - xa[1]);
     c = (double *)malloc((size_t) ((n + 1) * sizeof(double)));
-    if (!c) {
-        log_err("allocation failure in vector()");
-    }
+    check_alloc_status(c, "Memory allocation error.");
     d = (double *)malloc((size_t) ((n + 1) * sizeof(double)));
-    if (!d) {
-        log_err("allocation failure in vector()");
-    }
+    check_alloc_status(d, "Memory allocation error.");
+
 
     for (i = 1; i <= n; i++) {
         if ((dift = fabs(x - xa[i])) < dif) {

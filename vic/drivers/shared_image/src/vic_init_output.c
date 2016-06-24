@@ -86,26 +86,19 @@ vic_init_output(dmy_struct *dmy_current)
     // broadcast Noutstreams and nstream_vars
     status = MPI_Bcast(&(options.Noutstreams), 1, MPI_AINT, VIC_MPI_ROOT,
                        MPI_COMM_VIC);
-    if (status != MPI_SUCCESS) {
-        log_err("MPI error %d\n", status);
-    }
+    check_mpi_status(status, "MPI Error.");
     status = MPI_Bcast(&(nstream_vars), MAX_OUTPUT_STREAMS, MPI_AINT,
                        VIC_MPI_ROOT,
                        MPI_COMM_VIC);
-    if (status != MPI_SUCCESS) {
-        log_err("MPI error %d\n", status);
-    }
+    check_mpi_status(status, "MPI Error.");
 
     // allocate output streams
     output_streams = calloc(options.Noutstreams, sizeof(*output_streams));
-    if (output_streams == NULL) {
-        log_err("Memory allocation error");
-    }
+    check_alloc_status(output_streams, "Memory allocation error.");
+
     // allocate netcdf history files array
     nc_hist_files = calloc(options.Noutstreams, sizeof(*nc_hist_files));
-    if (nc_hist_files == NULL) {
-        log_err("Memory allocation error");
-    }
+    check_alloc_status(nc_hist_files, "Memory allocation error.");
 
     // allocate memory for streams, initialize to default/missing values
     for (streamnum = 0; streamnum < options.Noutstreams; streamnum++) {
@@ -129,48 +122,36 @@ vic_init_output(dmy_struct *dmy_current)
         // prefix
         status = MPI_Bcast(output_streams[streamnum].prefix,
                            MAXSTRING, MPI_CHAR, VIC_MPI_ROOT, MPI_COMM_VIC);
-        if (status != MPI_SUCCESS) {
-            log_err("MPI error brodcasting to prefix: %d\n", status);
-        }
+        check_mpi_status(status, "MPI error.");
 
         // filename
         status = MPI_Bcast(output_streams[streamnum].filename,
                            MAXSTRING, MPI_CHAR, VIC_MPI_ROOT, MPI_COMM_VIC);
-        if (status != MPI_SUCCESS) {
-            log_err("MPI error brodcasting to filename: %d\n", status);
-        }
+        check_mpi_status(status, "MPI error.");
 
         // skip fh
 
         // file_format
         status = MPI_Bcast(&(output_streams[streamnum].file_format),
                            1, MPI_UNSIGNED_SHORT, VIC_MPI_ROOT, MPI_COMM_VIC);
-        if (status != MPI_SUCCESS) {
-            log_err("MPI error brodcasting to file_format: %d\n", status);
-        }
+        check_mpi_status(status, "MPI error.");
 
         // compress
         status = MPI_Bcast(&(output_streams[streamnum].compress),
                            1, MPI_SHORT, VIC_MPI_ROOT, MPI_COMM_VIC);
-        if (status != MPI_SUCCESS) {
-            log_err("MPI error brodcasting to compress: %d\n", status);
-        }
+        check_mpi_status(status, "MPI error.");
 
         // type
         status = MPI_Bcast(output_streams[streamnum].type,
                            output_streams[streamnum].nvars,
                            MPI_UNSIGNED_SHORT, VIC_MPI_ROOT, MPI_COMM_VIC);
-        if (status != MPI_SUCCESS) {
-            log_err("MPI error brodcasting to type: %d\n", status);
-        }
+        check_mpi_status(status, "MPI error.");
 
         // mult
         status = MPI_Bcast(output_streams[streamnum].mult,
                            output_streams[streamnum].nvars,
                            MPI_DOUBLE, VIC_MPI_ROOT, MPI_COMM_VIC);
-        if (status != MPI_SUCCESS) {
-            log_err("MPI error brodcasting to mult: %d\n", status);
-        }
+        check_mpi_status(status, "MPI error.");
 
         // format
         // skip broadcast
@@ -179,31 +160,23 @@ vic_init_output(dmy_struct *dmy_current)
         status = MPI_Bcast(output_streams[streamnum].varid,
                            output_streams[streamnum].nvars,
                            MPI_UNSIGNED, VIC_MPI_ROOT, MPI_COMM_VIC);
-        if (status != MPI_SUCCESS) {
-            log_err("MPI error brodcasting to varid: %d\n", status);
-        }
+        check_mpi_status(status, "MPI error.");
 
         // aggtype
         status = MPI_Bcast(output_streams[streamnum].aggtype,
                            output_streams[streamnum].nvars, MPI_UNSIGNED_SHORT,
                            VIC_MPI_ROOT, MPI_COMM_VIC);
-        if (status != MPI_SUCCESS) {
-            log_err("MPI error brodcasting to aggtype: %d\n", status);
-        }
+        check_mpi_status(status, "MPI error.");
 
         // skip agg data
 
         // Now brodcast the alarms
         status = MPI_Bcast(&(output_streams[streamnum].agg_alarm), 1,
                            mpi_alarm_struct_type, VIC_MPI_ROOT, MPI_COMM_VIC);
-        if (status != MPI_SUCCESS) {
-            log_err("MPI error %d\n", status);
-        }
+        check_mpi_status(status, "MPI error.");
         status = MPI_Bcast(&(output_streams[streamnum].write_alarm), 1,
                            mpi_alarm_struct_type, VIC_MPI_ROOT, MPI_COMM_VIC);
-        if (status != MPI_SUCCESS) {
-            log_err("MPI error %d\n", status);
-        }
+        check_mpi_status(status, "MPI error.");
 
         // allocate agg data
         alloc_aggdata(&(output_streams[streamnum]));
@@ -526,9 +499,7 @@ initialize_history_file(nc_file_struct *nc,
     // fill the netcdf variables lat/lon
     if (global_domain.info.n_coord_dims == 1) {
         dvar = calloc(nc->ni_size, sizeof(*dvar));
-        if (dvar == NULL) {
-            log_err("Memory allocation error");
-        }
+        check_alloc_status(dvar, "Memory allocation error.");
 
         dcount[0] = nc->ni_size;
         for (i = 0; i < nc->ni_size; i++) {
@@ -541,9 +512,7 @@ initialize_history_file(nc_file_struct *nc,
         free(dvar);
 
         dvar = calloc(nc->nj_size, sizeof(*dvar));
-        if (dvar == NULL) {
-            log_err("Memory allocation error");
-        }
+        check_alloc_status(dvar, "Memory allocation error.");
         dcount[0] = nc->nj_size;
         for (i = 0; i < nc->nj_size; i++) {
             dvar[i] =
@@ -558,9 +527,7 @@ initialize_history_file(nc_file_struct *nc,
     }
     else if (global_domain.info.n_coord_dims == 2) {
         dvar = calloc(nc->nj_size * nc->ni_size, sizeof(*dvar));
-        if (dvar == NULL) {
-            log_err("Memory allocation error");
-        }
+        check_alloc_status(dvar, "Memory allocation error.");
 
         for (i = 0; i < nc->nj_size * nc->ni_size; i++) {
             dvar[i] = (double) global_domain.locations[i].longitude;
@@ -714,9 +681,7 @@ initialize_nc_file(nc_file_struct     *nc_file,
 
     // allocate memory for nc_vars
     nc_file->nc_vars = calloc(nvars, sizeof(*(nc_file->nc_vars)));
-    if (nc_file->nc_vars == NULL) {
-        log_err("Memory allocation error");
-    }
+    check_alloc_status(nc_file->nc_vars, "Memory allocation error.");
 
     for (i = 0; i < nvars; i++) {
         set_nc_var_info(varids[i], dtypes[i], nc_file, &(nc_file->nc_vars[i]));

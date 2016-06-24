@@ -60,9 +60,7 @@ vic_start(void)
 
     status = MPI_Bcast(&filenames, 1, mpi_filenames_struct_type,
                        VIC_MPI_ROOT, MPI_COMM_VIC);
-    if (status != MPI_SUCCESS) {
-        log_err("MPI error in vic_start(): %d\n", status);
-    }
+    check_mpi_status(status, "MPI error.");
 
     // Set Log Destination
     setup_logging(mpi_rank);
@@ -123,32 +121,22 @@ vic_start(void)
     // broadcast global, option, param structures as well as global valies
     // such as NF and NR
     status = MPI_Bcast(&NF, 1, MPI_UNSIGNED_LONG, VIC_MPI_ROOT, MPI_COMM_VIC);
-    if (status != MPI_SUCCESS) {
-        log_err("MPI error in vic_start(): %d\n", status);
-    }
+    check_mpi_status(status, "MPI error.");
 
     status = MPI_Bcast(&NR, 1, MPI_UNSIGNED_LONG, VIC_MPI_ROOT, MPI_COMM_VIC);
-    if (status != MPI_SUCCESS) {
-        log_err("MPI error in vic_start(): %d\n", status);
-    }
+    check_mpi_status(status, "MPI error.");
 
     status = MPI_Bcast(&global_param, 1, mpi_global_struct_type,
                        VIC_MPI_ROOT, MPI_COMM_VIC);
-    if (status != MPI_SUCCESS) {
-        log_err("MPI error in vic_start(): %d\n", status);
-    }
+    check_mpi_status(status, "MPI error.");
 
     status = MPI_Bcast(&options, 1, mpi_option_struct_type,
                        VIC_MPI_ROOT, MPI_COMM_VIC);
-    if (status != MPI_SUCCESS) {
-        log_err("MPI error in vic_start(): %d\n", status);
-    }
+    check_mpi_status(status, "MPI error.");
 
     status = MPI_Bcast(&param, 1, mpi_param_struct_type,
                        VIC_MPI_ROOT, MPI_COMM_VIC);
-    if (status != MPI_SUCCESS) {
-        log_err("MPI error in vic_start(): %d\n", status);
-    }
+    check_mpi_status(status, "MPI error.");
 
     // setup the local domain_structs
 
@@ -157,9 +145,7 @@ vic_start(void)
                          &local_ncells_active, 1, MPI_INT, VIC_MPI_ROOT,
                          MPI_COMM_VIC);
     local_domain.ncells_active = (size_t) local_ncells_active;
-    if (status != MPI_SUCCESS) {
-        log_err("MPI error in vic_start(): %d\n", status);
-    }
+    check_mpi_status(status, "MPI error.");
 
     // Allocate memory for the local locations
     local_domain.locations = malloc(local_domain.ncells_active *
@@ -210,9 +196,7 @@ vic_start(void)
                           local_domain.locations, local_domain.ncells_active,
                           mpi_location_struct_type,
                           VIC_MPI_ROOT, MPI_COMM_VIC);
-    if (status != MPI_SUCCESS) {
-        log_err("MPI error in vic_start(): %d\n", status);
-    }
+    check_mpi_status(status, "MPI error.");
     // Set the local index value
     for (i = 0; i < (size_t) local_domain.ncells_active; i++) {
         local_domain.locations[i].local_idx = i;

@@ -49,7 +49,7 @@ function vic_before_install {
         find ${TRAVIS_MPIPATH} -name mpiexec
         find ${TRAVIS_MPIPATH} -name mpicc
 	fi
-    alias mpiexec=${TRAVIS_MPIPATH}/bin/mpiexec
+    export $TRAVIS_MPIPATH/bin:$PATH
     mpiexec --version
 }
 

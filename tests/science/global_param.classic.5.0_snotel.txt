@@ -26,8 +26,6 @@ FORCE_TYPE            PREC
 FORCE_TYPE            VP
 FORCE_TYPE            WIND
 
-# FORCE_TYPE            SKIP
-
 FORCE_STEPS_PER_DAY   24
 FORCEYEAR             2007
 FORCEMONTH            11

@@ -28,8 +28,8 @@
 
 
 /******************************************************************************
- *  * @brief   Print MPI Error String
- *   *****************************************************************************/
+ * @brief   Print MPI Error String to LOG_DEST, this function is used by loggers
+ ******************************************************************************/
 void
 print_mpi_error_str(int error_code)
 {

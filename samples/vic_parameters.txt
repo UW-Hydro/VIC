@@ -35,6 +35,7 @@ EMISS_GRND 0.97  # Ground emissivity
 EMISS_VEG 0.97  # Veg emissivity
 EMISS_ICE 0.97  # Ice emissivity
 EMISS_SNOW 0.97  # Snow emissivity
+EMISS_H2O 0.98 # Emissivity of open water surface
 ###############################################################################
 
 ###############################################################################

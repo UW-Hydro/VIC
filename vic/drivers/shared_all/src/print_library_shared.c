@@ -678,7 +678,6 @@ print_parameters(parameters_struct *param)
     fprintf(LOG_DEST, "\tGAUGE_HEIGHT: %.4f\n", param->GAUGE_HEIGHT);
     fprintf(LOG_DEST, "\tHUGE_RESIST: %.4f\n", param->HUGE_RESIST);
     fprintf(LOG_DEST, "\tALBEDO_BARE_SOIL: %.4f\n", param->ALBEDO_BARE_SOIL);
-    fprintf(LOG_DEST, "\tALBEDO_H20_SURF: %.4f\n", param->ALBEDO_H20_SURF);
     fprintf(LOG_DEST, "\tEMISS_GRND: %.4f\n", param->EMISS_GRND);
     fprintf(LOG_DEST, "\tEMISS_VEG: %.4f\n", param->EMISS_VEG);
     fprintf(LOG_DEST, "\tEMISS_ICE: %.4f\n", param->EMISS_ICE);

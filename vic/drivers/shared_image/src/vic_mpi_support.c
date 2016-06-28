@@ -1887,7 +1887,7 @@ gather_put_nc_field_float(int     nc_id,
                          mpi_map_global_array_offsets, MPI_FLOAT,
                          VIC_MPI_ROOT, MPI_COMM_VIC);
     check_mpi_status(status, "Error with gather of floats");
- 
+
     if (mpi_rank == VIC_MPI_ROOT) {
         // remap the array
         map(sizeof(float), global_domain.ncells_active, NULL,

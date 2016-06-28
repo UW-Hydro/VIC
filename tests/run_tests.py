@@ -594,6 +594,16 @@ def run_science(config_file, vic_exe, test_data_dir, out_dir, driver):
             # if we got this far, the test passed.
             test_passed = True
 
+            # plot science test results
+            plot_science_tests(test_dict['driver'],
+                                testname,
+                                dirs['results'],
+                                dirs['plots']
+                                test_dict['vic4.2.d'],
+                                test_dict['vic5.0.0'],
+                                test_dict['observations_path'],
+                                test_dict['plots'])
+
         # Handle errors
         except Exception as e:
             test_comment, error_message = process_error(e, vic_exe)

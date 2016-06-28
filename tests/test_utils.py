@@ -367,33 +367,36 @@ def plot_snotel_comparison(driver, testname, result_dir, plot_dir, vic_42_dir, v
                                             format='%Y%m%d')
 
         # load VIC 4.2 data
-        vic_42_file_snow = 'snow_%s_%s' % (lat, lng)
-        vic_42_file_ebal = 'en_bal_%s_%s' %(lat, lng)
+        vic_42_file = '%s_%s' % (lat, lng)
 
-        vic_42_snow = pd.read_csv(os.path.join(vic_42_dir, vic_42_file_snow),
-                                sep='\t',
-                                skiprows=5)
-        vic_42_ebal = pd.read_csv(os.path.join(vic_42_dir, vic_42_file_ebal),
+        vic_42 = pd.read_csv(os.path.join(vic_42_dir, vic_42_file),
                                 sep='\t',
                                 skiprows=5)
 
         # remove comment sign from column names in DataFrames
-        vic_42_snow = vic_42_snow.rename(columns=lambda x: x.replace('#', ''))
-        vic_42_ebal = vic_42_ebal.rename(columns=lambda x: x.replace('#', ''))
+        vic_42 = vic_42.rename(columns=lambda x: x.replace('#', ''))
 
         # load VIC 5.0 data
 
-        vic_50_file_snow = 'snow_%s_%s.txt' %(lat, lng)
-        vic_50_file_ebal = 'en_bal_%s_%s.txt' %(lat, lon)
+        vic_50_file = '%s_%s.txt' %(lat, lng)
 
-        vic_50_snow = pd.read_csv(os.path.join(vic_50_dir, vic_50_file_snow),
-                                skiprows=3,
-                                sep='\t')
-        vic_50_ebal = pd.read(csv(os.path.join(vic_50_dir, vic_50_file_ebal),
+        vic_50 = pd.read_csv(os.path.join(vic_50_dir, vic_50_file),
                                 skiprows=3,
                                 sep='\t')
 
-        snow_variables = ['OUT_SWE', 'OUT_ALBEDO', 'OUT_SALBEDO']
+        vic_5x_file = '%s_%s.txt' %(lat, lng)
+
+        vic_50x = pd.read_csv(os.path.join(result_dir, vic_5x_file),
+                                skiprows=3,
+                                sep='\t')
+
+        # variables to plot
+        plot_variables = ['OUT_SWE', 'OUT_ALBEDO', 'OUT_SALBEDO', 'OUT_SNOW_DEPTH',
+                        'OUT_SNOW_CANOPY', 'OUT_SNOW_PACK_TEMP', 'OUT_SNOW_MELT',
+                        'OUT_R_NET', 'OUT_LATENT', 'OUT_SENSIBLE']
+
+        plot_units = ['mm', 'fraction', 'fraction', 'mm', '%', 'degrees C',
+                        'mm', 'W/$m^2$', 'W/$m^2$', 'W/$m^2$']
 
         len_dates = len(snotel_swe['DATES'])
 
@@ -401,25 +404,39 @@ def plot_snotel_comparison(driver, testname, result_dir, plot_dir, vic_42_dir, v
         lw = 4.0
         # loop over variables to plot
 
-        for snow_variable in snow_variables:
-            if snow_variable == "OUT_SWE":
+        for i, plot_variable in enumerate(plot_variables):
 
-                # plot SnoTel SWE observations
-                plt.plot(snotel_swe['DATES'], snotel_swe[snow_variable],
-                        'k', label='Snotel', linewidth=lw)
+            if 'water_year' in plots_to_make:
 
-            # plot VIC 4.2 simulations
-            plt.plot(snotel_swe['DATES'], vic_42_snow[snow_variable][:len_dates],
-                    'b', label='VIC 4.2', linewidth=lw)
+                plt.figure(figsize=(10,10))
+                
+                if plot_variable == "OUT_SWE":
 
-            # plot VIC 5.0 simulations
-            plt.plot(snotel_swe['DATES'], vic_50_snow[snow_variable][:len_dates],
-                    'r', label='VIC 5.0', linewidth=lw)
+                    # plot SnoTel SWE observations
+                    plt.plot(snotel_swe['DATES'], snotel_swe[plot_variable],
+                            'k', label='Snotel', linewidth=lw)
 
-            # plot VIC 5.0.x simulations
-            plt.plot(snotel_swe['DATES'], vic_50x_snow[snow_variable][:len_dates]),
-                    'y', label='VIC 5.0.x', linewidth=lw)
+                # plot VIC 4.2 simulations
+                plt.plot(snotel_swe['DATES'], vic_42_snow[plot_variable][:len_dates],
+                        'b', label='VIC 4.2', linewidth=lw)
 
+                # plot VIC 5.0 simulations
+                plt.plot(snotel_swe['DATES'], vic_50_snow[plot_variable][:len_dates],
+                        'r', label='VIC 5.0', linewidth=lw)
+
+                # plot VIC 5.0.x simulations
+                plt.plot(snotel_swe['DATES'], vic_50x_snow[snow_variable][:len_dates]),
+                        'y', label='VIC 5.0.x', linewidth=lw)
+
+                plt.title(plot_variable)
+                plt.legend(loc='upper left')
+                plt.ylabel(plot_units[i])
+
+                # save figure
+                os.makedirs(os.path.join(plot_dir, 'plot_variable'), exist_ok=True)
+                plotname = '%s_%s.png'
+                savepath = os.path.join(plot_dir, 'plot_variable', plotname)
+                plt.savefig(savepath)
 
 
 def plot_fluxnet_comparison(driver, testname, result_dir, plot_dir, vic_42_dir, vic_50_dir,

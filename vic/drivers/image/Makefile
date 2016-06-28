@@ -69,7 +69,7 @@ SHELL = /bin/bash
 ifeq (true, ${TRAVIS})
 CC = ${MPIPATH}/bin/mpicc
 else ifeq ($(UNAME_S), Linux)
-CC = /usr/lib64/mpich/bin/mpicc 
+CC = /usr/lib64/mpich/bin/mpicc
 else
 CC = mpicc
 endif
@@ -100,6 +100,12 @@ CFLAGS  =  ${INCLUDES} -ggdb -O0 -Wall -Wextra -std=c99 \
 					 -DGIT_VERSION=\"$(GIT_VERSION)\" \
 					 -DUSERNAME=\"$(USER)\" \
 					 -DHOSTNAME=\"$(HOSTNAME)\"
+
+ifeq (true, ${TRAVIS})
+# Add extra debugging for builds on travis
+CFLAGS += -rdynamic -Wl,-export-dynamic
+endif
+
 LIBRARY = -lm -L${NETCDFPATH}/lib -lnetcdf
 
 COMPEXE = vic_image

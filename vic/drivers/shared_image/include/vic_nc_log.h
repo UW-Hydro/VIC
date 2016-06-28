@@ -43,8 +43,10 @@
 
 #include <vic_def.h>
 
+void print_mpi_error_str(int error_code);
+
 // Macros for logging
-#define clean_ncerrno(e) (e == 0 ? "None" : nc_strerror(e))
+#define clean_ncerrno(e) (e == NC_NOERR ? "None" : nc_strerror(e))
 
 // Error Level is always active
 #ifdef NO_LINENOS
@@ -66,5 +68,18 @@
                                                                  ## __VA_ARGS__); \
                                                        errno = 0; exit( \
                                                            EXIT_FAILURE); }
+
+#define log_mpi_err(e, M, ...) print_trace(); \
+    print_mpi_error_str(e); fprintf(LOG_DEST, \
+                                    "[ERROR] %s:%d: errno: %d: " M " \n", \
+                                    __FILE__, __LINE__, e, \
+                                    ## __VA_ARGS__); \
+    MPI_Abort(MPI_COMM_VIC, e);
+
+#define check_mpi_status(A, M, ...) if (A != MPI_SUCCESS) {log_mpi_err(A, M, \
+                                                                       ## __VA_ARGS__); \
+                                                           errno = 0; MPI_Abort( \
+                                                               MPI_COMM_VIC, A); \
+}
 
 #endif

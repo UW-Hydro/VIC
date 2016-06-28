@@ -9,6 +9,7 @@ import argparse
 import datetime
 from collections import OrderedDict
 import string
+import warnings
 
 import pytest
 
@@ -21,8 +22,9 @@ from test_utils import (setup_test_dirs, print_test_dict,
                         test_classic_driver_all_complete,
                         test_classic_driver_no_output_file_nans,
                         find_global_param_value,
-                        check_multistream)
-from test_image_driver import test_image_driver_no_output_file_nans
+                        check_multistream_classic)
+from test_image_driver import (test_image_driver_no_output_file_nans,
+                               check_multistream_image)
 from test_restart import (prepare_restart_run_periods,
                           setup_subdirs_and_fill_in_global_param_restart_test,
                           check_exact_restart_fluxes,
@@ -114,19 +116,20 @@ def main():
                         default=['unit', 'system'], nargs='+')
     parser.add_argument('--system', type=str,
                         help='system tests configuration file',
-                        default='./system/system_tests.cfg')
+                        default=os.path.join(test_dir, 'system/system_tests.cfg'))
     parser.add_argument('--science', type=str,
                         help='science tests configuration file',
-                        default='./science/science.cfg')
+                        default=os.path.join(test_dir, 'science/science.cfg'))
     parser.add_argument('--examples', type=str,
                         help='examples tests configuration file',
-                        default='./examples/examples.cfg')
+                        default=os.path.join(test_dir, 'examples/examples.cfg'))
     parser.add_argument('--release', type=str,
                         help='release tests configuration file',
-                        default='./release/release.cfg')
+                        default=os.path.join(test_dir, 'release/release.cfg'))
     parser.add_argument('--vic_exe', type=str,
                         help='VIC executable to test',
-                        default='../vic/drivers/classic/vic_classic.exe')
+                        default=os.path.join(
+                            test_dir, '../vic/drivers/classic/vic_classic.exe'))
     parser.add_argument('--driver', type=str,
                         help='VIC driver to test',
                         choices=['classic', 'image'],
@@ -136,7 +139,7 @@ def main():
                         default='$WORKDIR/VIC_tests_{0}'.format(ymd))
     parser.add_argument('--data_dir', type=str,
                         help='directory to find test data',
-                        default='./samples/VIC_sample_data')
+                        default=os.path.join(test_dir, '../samples/VIC_sample_data'))
     args = parser.parse_args()
 
     # Define test directories
@@ -158,7 +161,7 @@ def main():
     # Setup VIC executable
     if not (len(args.tests) == 1 and args.tests[0] == 'unit'):
         vic_exe = VIC(args.vic_exe)
-        print('VIC version string:\n{0}'.format(vic_exe.version.decode()))
+        print('VIC version information:\n\n{0}'.format(vic_exe.version.decode()))
 
     # run test sets
     # unit
@@ -453,7 +456,11 @@ def run_system(config_file, vic_exe, test_data_dir, out_dir, driver):
 
                 if 'multistream' in test_dict['check']:
                     fnames = glob.glob(os.path.join(dirs['results'], '*'))
-                    check_multistream(fnames, driver)
+                    if driver == 'classic':
+                        check_multistream_classic(fnames)
+                    elif driver == 'image':
+                        warnings.warn('Skipping multistream image driver test')
+                        # TODO: check_multistream_image(fnames)
 
             # if we got this far, the test passed.
             test_passed = True

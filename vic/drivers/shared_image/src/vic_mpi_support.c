@@ -790,7 +790,7 @@ create_MPI_param_struct_type(MPI_Datatype *mpi_type)
     MPI_Datatype   *mpi_types;
 
     // nitems has to equal the number of elements in parameters_struct
-    nitems = 154;
+    nitems = 153;
     blocklengths = malloc(nitems * sizeof(*blocklengths));
     if (blocklengths == NULL) {
         log_err("Memory allocation error in create_MPI_param_struct_type().")
@@ -828,10 +828,6 @@ create_MPI_param_struct_type(MPI_Datatype *mpi_type)
 
     // double ALBEDO_BARE_SOIL;
     offsets[i] = offsetof(parameters_struct, ALBEDO_BARE_SOIL);
-    mpi_types[i++] = MPI_DOUBLE;
-
-    // double ALBEDO_H20_SURF;
-    offsets[i] = offsetof(parameters_struct, ALBEDO_H20_SURF);
     mpi_types[i++] = MPI_DOUBLE;
 
     // double EMISS_GRND;

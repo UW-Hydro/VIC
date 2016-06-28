@@ -211,11 +211,11 @@ surface_fluxes(bool                 overstory,
 
     // Carbon cycling
     double            dryFrac;
-    double           *LAIlayer;
-    double           *faPAR;
+    double           *LAIlayer = NULL;
+    double           *faPAR = NULL;
     size_t            cidx;
     double            store_gc;
-    double           *store_gsLayer;
+    double           *store_gsLayer = NULL;
     double            store_Ci;
     double            store_GPP;
     double            store_Rdark;
@@ -234,6 +234,7 @@ surface_fluxes(bool                 overstory,
 
     if (options.CARBON) {
         store_gsLayer = calloc(options.Ncanopy, sizeof(*store_gsLayer));
+        check_alloc_status(store_gsLayer, "Memory allocation error.");
     }
 
     /***********************************************************************
@@ -400,7 +401,9 @@ surface_fluxes(bool                 overstory,
         // compute LAI and absorbed PAR per canopy layer
         if (options.CARBON && iveg < Nveg) {
             LAIlayer = calloc(options.Ncanopy, sizeof(*LAIlayer));
+            check_alloc_status(LAIlayer, "Memory allocation error.");
             faPAR = calloc(options.Ncanopy, sizeof(*faPAR));
+            check_alloc_status(faPAR, "Memory allocation error.");
 
             /* Compute absorbed PAR per ground area per canopy layer (W/m2)
                normalized to PAR = 1 W, i.e. the canopy albedo in the PAR

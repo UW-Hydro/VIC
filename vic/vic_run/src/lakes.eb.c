@@ -1841,8 +1841,8 @@ water_balance(lake_var_struct *lake,
     double                     Dsmax, resid_moist, liq, rel_moist;
     double                    *frost_fract;
     double                     volume_save;
-    double                    *delta_moist;
-    double                    *moist;
+    double                    *delta_moist = NULL;
+    double                    *moist = NULL;
     double                     max_newfraction;
 
     cell = all_vars->cell;
@@ -1853,7 +1853,9 @@ water_balance(lake_var_struct *lake,
     frost_fract = soil_con.frost_fract;
 
     delta_moist = calloc(options.Nlayer, sizeof(*delta_moist));
+    check_alloc_status(delta_moist, "Memory allocation error.");
     moist = calloc(options.Nlayer, sizeof(*moist));
+    check_alloc_status(moist, "Memory allocation error.");
 
     /**********************************************************************
     * 1. Preliminary stuff

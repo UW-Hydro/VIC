@@ -43,9 +43,10 @@ prepare_full_energy(int              iveg,
     extern option_struct options;
 
     size_t               i, band;
-    layer_data_struct   *layer;
+    layer_data_struct   *layer = NULL;
 
     layer = calloc(options.Nlayer, sizeof(*layer));
+    check_alloc_status(layer, "Memory allocation error.");
 
     for (band = 0; band < options.SNOW_BAND; band++) {
         if (soil_con->AreaFract[band] > 0.0) {

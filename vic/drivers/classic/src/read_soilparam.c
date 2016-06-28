@@ -822,15 +822,15 @@ read_soilparam(FILE *soilparam,
         *************************************************/
         Nbands = options.SNOW_BAND;
         temp.AreaFract = calloc(Nbands, sizeof(*(temp.AreaFract)));
+        check_alloc_status(temp.AreaFract, "Memory allocation error.");
         temp.BandElev = calloc(Nbands, sizeof(*(temp.BandElev)));
+        check_alloc_status(temp.BandElev, "Memory allocation error.");
         temp.Tfactor = calloc(Nbands, sizeof(*(temp.Tfactor)));
+        check_alloc_status(temp.Tfactor, "Memory allocation error.");
         temp.Pfactor = calloc(Nbands, sizeof(*(temp.Pfactor)));
+        check_alloc_status(temp.Pfactor, "Memory allocation error.");
         temp.AboveTreeLine = calloc(Nbands, sizeof(*(temp.AboveTreeLine)));
-
-        if (temp.Tfactor == NULL || temp.Pfactor == NULL ||
-            temp.AreaFract == NULL) {
-            log_err("Memory allocation failure in read_snowband");
-        }
+        check_alloc_status(temp.AboveTreeLine, "Memory allocation error.");
 
         /** Set default values for factors to use unmodified forcing data **/
         for (band = 0; band < Nbands; band++) {

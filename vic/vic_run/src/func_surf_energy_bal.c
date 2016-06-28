@@ -203,7 +203,7 @@ func_surf_energy_bal(double  Ts,
     double             T1_plus;
     double             D1_minus;
     double             D1_plus;
-    double            *transp;
+    double            *transp = NULL;
     double             Ra_bare[3];
     double             tmp_wind[3];
     double             tmp_height;
@@ -367,6 +367,7 @@ func_surf_energy_bal(double  Ts,
     TMean = Ts;
 
     transp = calloc(options.Nlayer, sizeof(*transp));
+    check_alloc_status(transp, "Memory allocation error.");
     for (i = 0; i < options.Nlayer; i++) {
         transp[i] = 0.;
     }

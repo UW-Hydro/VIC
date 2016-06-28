@@ -66,14 +66,10 @@ vic_restore(void)
 
     // allocate memory for variables to be stored
     ivar = malloc(local_domain.ncells_active * sizeof(*ivar));
-    if (ivar == NULL) {
-        log_err("Memory allocation error in vic_restore().");
-    }
+    check_alloc_status(ivar, "Memory allocation error");
 
     dvar = malloc(local_domain.ncells_active * sizeof(*dvar));
-    if (dvar == NULL) {
-        log_err("Memory allocation error in vic_restore().");
-    }
+    check_alloc_status(dvar, "Memory allocation error");
 
     // initialize starts and counts
     d2start[0] = 0;
@@ -960,9 +956,8 @@ check_init_state_file(void)
     if (global_domain.info.n_coord_dims == 1) {
         d1start[0] = 0;
         dvar = calloc(global_domain.n_nx, sizeof(*dvar));
-        if (dvar == NULL) {
-            log_err("Memory allocation error in check_init_state_file().");
-        }
+        check_alloc_status(dvar, "Memory allocation error");
+
         d1count[0] = global_domain.n_nx;
         status = nc_get_vara_double(nc.nc_id, lon_var_id,
                                     d1start, d1count, dvar);
@@ -980,9 +975,8 @@ check_init_state_file(void)
         free(dvar);
 
         dvar = calloc(global_domain.n_ny, sizeof(*dvar));
-        if (dvar == NULL) {
-            log_err("Memory allocation error in check_init_state_file().");
-        }
+        check_alloc_status(dvar, "Memory allocation error");
+
         d1count[0] = global_domain.n_ny;
         status = nc_get_vara_double(nc.nc_id, lat_var_id,
                                     d1start, d1count, dvar);
@@ -1006,9 +1000,8 @@ check_init_state_file(void)
         d2start[0] = 0;
         d2start[1] = 0;
         dvar = calloc(global_domain.n_ny * global_domain.n_nx, sizeof(*dvar));
-        if (dvar == NULL) {
-            log_err("Memory allocation error in check_init_state_file().");
-        }
+        check_alloc_status(dvar, "Memory allocation error");
+
         d2count[0] = global_domain.n_ny;
         d2count[1] = global_domain.n_nx;
         status = nc_get_vara_double(nc.nc_id, lon_var_id,
@@ -1043,9 +1036,8 @@ check_init_state_file(void)
 
     // soil thermal node deltas
     dvar = calloc(options.Nnode, sizeof(*dvar));
-    if (dvar == NULL) {
-        log_err("Memory allocation error in check_init_state_file().");
-    }
+    check_alloc_status(dvar, "Memory allocation error");
+
     get_nc_field_double(filenames.init_state, "dz_node",
                         d1start, d1count, dvar);
     for (i = 0; i < options.Nnode; i++) {
@@ -1058,9 +1050,8 @@ check_init_state_file(void)
 
     // soil thermal node depths
     dvar = calloc(options.Nnode, sizeof(*dvar));
-    if (dvar == NULL) {
-        log_err("Memory allocation error in check_init_state_file().");
-    }
+    check_alloc_status(dvar, "Memory allocation error");
+
     get_nc_field_double(filenames.init_state, "node_depth",
                         d1start, d1count, dvar);
     for (i = 0; i < options.Nnode; i++) {

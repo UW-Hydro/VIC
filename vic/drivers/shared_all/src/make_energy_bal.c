@@ -40,16 +40,13 @@ make_energy_bal(size_t nveg)
     energy_bal_struct  **temp = NULL;
 
     temp = calloc(nveg, sizeof(*temp));
-    if (temp == NULL) {
-        log_err("Memory allocation error in make_energy_bal().");
-    }
+    check_alloc_status(temp, "Memory allocation error.");
 
     /** Initialize all records to unfrozen conditions */
     for (i = 0; i < nveg; i++) {
         temp[i] = calloc(options.SNOW_BAND, sizeof(*(temp[i])));
-        if (temp[i] == NULL) {
-            log_err("Memory allocation error in make_energy_bal().");
-        }
+        check_alloc_status(temp[i], "Memory allocation error.");
+
         for (j = 0; j < options.SNOW_BAND; j++) {
             temp[i][j].frozen = false;
         }

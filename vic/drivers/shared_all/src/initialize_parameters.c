@@ -46,7 +46,6 @@ initialize_parameters()
 
     // Surface Albedo Parameters
     param.ALBEDO_BARE_SOIL = 0.2;
-    param.ALBEDO_H20_SURF = 0.08;
 
     // Surface Emissivities
     param.EMISS_GRND = 0.97;

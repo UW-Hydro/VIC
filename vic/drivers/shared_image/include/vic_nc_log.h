@@ -42,6 +42,9 @@
 #define __vic_nc_log_h__
 
 #include <vic_def.h>
+#include <vic_mpi.h>
+
+void print_mpi_error_str(int error_code);
 
 void print_mpi_error_str(int error_code);
 

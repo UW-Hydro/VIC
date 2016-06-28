@@ -75,14 +75,12 @@ vic_store(dmy_struct *dmy_current)
 
     // allocate memory for variables to be stored
     ivar = malloc(local_domain.ncells_active * sizeof(*ivar));
-    if (ivar == NULL) {
-        log_err("Memory allocation error");
-    }
+    check_alloc_status(ivar, "Memory allocation error");
+
 
     dvar = malloc(local_domain.ncells_active * sizeof(*dvar));
-    if (dvar == NULL) {
-        log_err("Memory allocation error");
-    }
+    check_alloc_status(dvar, "Memory allocation error");
+
 
     // initialize starts and counts
     d2start[0] = 0;
@@ -1262,9 +1260,7 @@ vic_store(dmy_struct *dmy_current)
     if (mpi_rank == VIC_MPI_ROOT) {
         if (nc_state_file.open == true) {
             status = nc_close(nc_state_file.nc_id);
-            if (status != NC_NOERR) {
-                log_err("Error closing %s", filename);
-            }
+            check_nc_status(status, "Error closing %s", filename);
         }
     }
 
@@ -1317,9 +1313,7 @@ set_nc_state_file_info(nc_file_struct *nc_state_file)
     // allocate memory for nc_vars
     nc_state_file->nc_vars =
         calloc(N_STATE_VARS, sizeof(*(nc_state_file->nc_vars)));
-    if (nc_state_file->nc_vars == NULL) {
-        log_err("Memory allocation error");
-    }
+    check_alloc_status(nc_state_file->nc_vars, "Memory allocation error");
 }
 
 /******************************************************************************
@@ -1896,9 +1890,7 @@ initialize_state_file(char           *filename,
     // populate lat/lon
     if (global_domain.info.n_coord_dims == 1) {
         dvar = calloc(nc_state_file->ni_size, sizeof(*dvar));
-        if (dvar == NULL) {
-            log_err("Memory allocation error");
-        }
+        check_alloc_status(dvar, "Memory allocation error");
 
         dcount[0] = nc_state_file->ni_size;
         // implicitly nested loop over ni and nj with j set to 0
@@ -1911,9 +1903,7 @@ initialize_state_file(char           *filename,
         free(dvar);
 
         dvar = calloc(nc_state_file->nj_size, sizeof(*dvar));
-        if (dvar == NULL) {
-            log_err("Memory allocation error");
-        }
+        check_alloc_status(dvar, "Memory allocation error");
         dcount[0] = nc_state_file->nj_size;
         // implicitly nested loop over ni and nj with i set to 0;
         // j stride = ni_size
@@ -1931,9 +1921,7 @@ initialize_state_file(char           *filename,
     }
     else if (global_domain.info.n_coord_dims == 2) {
         dvar = calloc(global_domain.ncells_total, sizeof(*dvar));
-        if (dvar == NULL) {
-            log_err("Memory allocation error");
-        }
+        check_alloc_status(dvar, "Memory allocation error");
 
         for (i = 0; i < global_domain.ncells_total; i++) {
             dvar[i] = (double) global_domain.locations[i].longitude;
@@ -1963,9 +1951,8 @@ initialize_state_file(char           *filename,
     dimids[0] = nc_state_file->veg_dimid;
     dcount[0] = nc_state_file->veg_size;
     ivar = malloc(nc_state_file->veg_size * sizeof(*ivar));
-    if (ivar == NULL) {
-        log_err("Memory allocation error");
-    }
+    check_alloc_status(ivar, "Memory allocation error");
+
     for (j = 0; j < nc_state_file->veg_size; j++) {
         ivar[j] = (int) j + 1;
     }
@@ -1982,9 +1969,8 @@ initialize_state_file(char           *filename,
     dimids[0] = nc_state_file->band_dimid;
     dcount[0] = nc_state_file->band_size;
     ivar = malloc(nc_state_file->band_size * sizeof(*ivar));
-    if (ivar == NULL) {
-        log_err("Memory allocation error");
-    }
+    check_alloc_status(ivar, "Memory allocation error");
+
     for (j = 0; j < nc_state_file->band_size; j++) {
         ivar[j] = (int) j;
     }
@@ -2001,9 +1987,8 @@ initialize_state_file(char           *filename,
     dimids[0] = nc_state_file->layer_dimid;
     dcount[0] = nc_state_file->layer_size;
     ivar = malloc(nc_state_file->layer_size * sizeof(*ivar));
-    if (ivar == NULL) {
-        log_err("Memory allocation error");
-    }
+    check_alloc_status(ivar, "Memory allocation error");
+
     for (j = 0; j < nc_state_file->layer_size; j++) {
         ivar[j] = (int) j;
     }
@@ -2020,9 +2005,8 @@ initialize_state_file(char           *filename,
     dimids[0] = nc_state_file->frost_dimid;
     dcount[0] = nc_state_file->frost_size;
     ivar = malloc(nc_state_file->frost_size * sizeof(*ivar));
-    if (ivar == NULL) {
-        log_err("Memory allocation error");
-    }
+    check_alloc_status(ivar, "Memory allocation error");
+
     for (j = 0; j < nc_state_file->frost_size; j++) {
         ivar[j] = (int) j;
     }
@@ -2062,9 +2046,8 @@ initialize_state_file(char           *filename,
         dimids[0] = nc_state_file->lake_node_dimid;
         dcount[0] = nc_state_file->lake_node_size;
         ivar = malloc(nc_state_file->lake_node_size * sizeof(*ivar));
-        if (ivar == NULL) {
-            log_err("Memory allocation error");
-        }
+        check_alloc_status(ivar, "Memory allocation error");
+
         for (j = 0; j < nc_state_file->lake_node_size; j++) {
             ivar[j] = (int) j;
         }

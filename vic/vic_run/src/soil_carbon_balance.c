@@ -48,11 +48,11 @@ soil_carbon_balance(soil_con_struct   *soil_con,
 
     size_t                     i;
     size_t                     Nnodes;
-    double                    *dZ;
-    double                    *dZCum;
+    double                    *dZ = NULL;
+    double                    *dZCum = NULL;
     double                     dZTot;
-    double                    *T;
-    double                    *w;
+    double                    *T = NULL;
+    double                    *w = NULL;
     double                     tmp_double;
     double                     b;
     double                     wtd;
@@ -73,9 +73,13 @@ soil_carbon_balance(soil_con_struct   *soil_con,
         Nnodes--;
     }
     dZ = calloc(Nnodes, sizeof(*dZ));
+    check_alloc_status(dZ, "Memory allocation error");
     dZCum = calloc(Nnodes, sizeof(*dZCum));
+    check_alloc_status(dZCum, "Memory allocation error");
     T = calloc(Nnodes, sizeof(*T));
+    check_alloc_status(T, "Memory allocation error");
     w = calloc(Nnodes, sizeof(*w));
+    check_alloc_status(w, "Memory allocation error");
 
     // Assign node thicknesses and temperatures for subset
     dZTot = 0;

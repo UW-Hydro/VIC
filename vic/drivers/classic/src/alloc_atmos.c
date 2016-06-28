@@ -37,75 +37,43 @@ alloc_atmos(int                 nrecs,
     int                  i;
 
     *atmos = calloc(nrecs, sizeof(atmos_data_struct));
-    if (*atmos == NULL) {
-        log_err("Memory allocation error in alloc_atmos().");
-    }
+    check_alloc_status(*atmos, "Memory allocation error.");
 
     for (i = 0; i < nrecs; i++) {
         (*atmos)[i].air_temp = calloc(NR + 1, sizeof(*(*atmos)[i].air_temp));
-        if ((*atmos)[i].air_temp == NULL) {
-            log_err("Memory allocation error in alloc_atmos().");
-        }
+        check_alloc_status((*atmos)[i].air_temp, "Memory allocation error.");
         (*atmos)[i].density = calloc(NR + 1, sizeof(*(*atmos)[i].density));
-        if ((*atmos)[i].density == NULL) {
-            log_err("Memory allocation error in alloc_atmos().");
-        }
+        check_alloc_status((*atmos)[i].density, "Memory allocation error.");
         (*atmos)[i].longwave = calloc(NR + 1, sizeof(*(*atmos)[i].longwave));
-        if ((*atmos)[i].longwave == NULL) {
-            log_err("Memory allocation error in alloc_atmos().");
-        }
+        check_alloc_status((*atmos)[i].longwave, "Memory allocation error.");
         (*atmos)[i].prec = calloc(NR + 1, sizeof(*(*atmos)[i].prec));
-        if ((*atmos)[i].prec == NULL) {
-            log_err("Memory allocation error in alloc_atmos().");
-        }
+        check_alloc_status((*atmos)[i].prec, "Memory allocation error.");
         (*atmos)[i].pressure = calloc(NR + 1, sizeof(*(*atmos)[i].pressure));
-        if ((*atmos)[i].pressure == NULL) {
-            log_err("Memory allocation error in alloc_atmos().");
-        }
+        check_alloc_status((*atmos)[i].pressure, "Memory allocation error.");
         (*atmos)[i].shortwave = calloc(NR + 1, sizeof(*(*atmos)[i].shortwave));
-        if ((*atmos)[i].shortwave == NULL) {
-            log_err("Memory allocation error in alloc_atmos().");
-        }
+        check_alloc_status((*atmos)[i].shortwave, "Memory allocation error.");
         (*atmos)[i].snowflag = calloc(NR + 1, sizeof(*(*atmos)[i].snowflag));
-        if ((*atmos)[i].snowflag == NULL) {
-            log_err("Memory allocation error in alloc_atmos().");
-        }
+        check_alloc_status((*atmos)[i].snowflag, "Memory allocation error.");
         (*atmos)[i].vp = calloc(NR + 1, sizeof(*(*atmos)[i].vp));
-        if ((*atmos)[i].vp == NULL) {
-            log_err("Memory allocation error in alloc_atmos().");
-        }
+        check_alloc_status((*atmos)[i].vp, "Memory allocation error.");
         (*atmos)[i].vpd = calloc(NR + 1, sizeof(*(*atmos)[i].vpd));
-        if ((*atmos)[i].vpd == NULL) {
-            log_err("Memory allocation error in alloc_atmos().");
-        }
+        check_alloc_status((*atmos)[i].vpd, "Memory allocation error.");
         (*atmos)[i].wind = calloc(NR + 1, sizeof(*(*atmos)[i].wind));
-        if ((*atmos)[i].wind == NULL) {
-            log_err("Memory allocation error in alloc_atmos().");
-        }
+        check_alloc_status((*atmos)[i].wind, "Memory allocation error.");
         if (options.LAKES) {
             (*atmos)[i].channel_in =
                 calloc(NR + 1, sizeof(*(*atmos)[i].channel_in));
-            if ((*atmos)[i].channel_in == NULL) {
-                log_err("Memory allocation error in alloc_atmos().");
-            }
+            check_alloc_status((*atmos)[i].channel_in, "Memory allocation error.");
         }
         if (options.CARBON) {
             (*atmos)[i].Catm = calloc(NR + 1, sizeof(*(*atmos)[i].Catm));
-            if ((*atmos)[i].Catm == NULL) {
-                log_err("Memory allocation error in alloc_atmos().");
-            }
+            check_alloc_status((*atmos)[i].Catm, "Memory allocation error.");
             (*atmos)[i].coszen = calloc(NR + 1, sizeof(*(*atmos)[i].coszen));
-            if ((*atmos)[i].coszen == NULL) {
-                log_err("Memory allocation error in alloc_atmos().");
-            }
+            check_alloc_status((*atmos)[i].coszen, "Memory allocation error.");
             (*atmos)[i].fdir = calloc(NR + 1, sizeof(*(*atmos)[i].fdir));
-            if ((*atmos)[i].fdir == NULL) {
-                log_err("Memory allocation error in alloc_atmos().");
-            }
+            check_alloc_status((*atmos)[i].fdir, "Memory allocation error.");
             (*atmos)[i].par = calloc(NR + 1, sizeof(*(*atmos)[i].par));
-            if ((*atmos)[i].par == NULL) {
-                log_err("Memory allocation error in alloc_atmos().");
-            }
+            check_alloc_status((*atmos)[i].par, "Memory allocation error.");
         }
     }
 }

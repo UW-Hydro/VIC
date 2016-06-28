@@ -61,6 +61,9 @@ count_nstreams_nvars(FILE   *gp,
     fflush(gp);
     start_position = ftell(gp);
 
+    // Move the position to the begining of the file
+    rewind(gp);
+
     // read the first line
     fgets(cmdstr, MAXSTRING, gp);
 
@@ -79,9 +82,6 @@ count_nstreams_nvars(FILE   *gp,
             // if the line starts with OUTFILE, increment nstreams
             if (strcasecmp("OUTFILE", optstr) == 0) {
                 (*nstreams)++;
-                if (*nstreams > MAX_OUTPUT_STREAMS) {
-                    log_err("Too many output streams specified.");
-                }
             }
 
             // if the line starts with OUTVAR, add another variable to nvars
@@ -90,6 +90,10 @@ count_nstreams_nvars(FILE   *gp,
             }
         }
         fgets(cmdstr, MAXSTRING, gp);
+    }
+
+    if (*nstreams > MAX_OUTPUT_STREAMS) {
+        log_err("Too many output streams specified.");
     }
 
     // put the position in the file back to where we started

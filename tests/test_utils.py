@@ -308,6 +308,23 @@ def check_multistream(fnames, driver):
                     err_msg='Variable=%s, freq=%s, how=%s: '
                             'failed comparison' % (key, freq, how))
 
+def tsplit(string, delimiters):
+    '''Behaves like str.split but supports multiple delimiters.
+    
+    '''
+
+    delimiters = tuple(delimiters)
+    stack = [string,]
+
+    for delimiter in delimiters:
+        for i, substring in enumerate(stack):
+            substack = substring.split(delimiter)
+            stack.pop(i)
+            for j, _substring in enumerate(substack):
+                stack.insert(i+j, _substring)
+
+    return stack
+
 def plot_science_tests(driver, testname, result_dir, plot_dir, vic_42_dir, vic_50_dir,
                         obs_dir, plots_to_make):
 
@@ -409,7 +426,7 @@ def plot_snotel_comparison(driver, testname, result_dir, plot_dir, vic_42_dir, v
             if 'water_year' in plots_to_make:
 
                 plt.figure(figsize=(10,10))
-                
+
                 if plot_variable == "OUT_SWE":
 
                     # plot SnoTel SWE observations

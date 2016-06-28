@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-''' VIC exact restart testing '''
 
 import os
 from collections import OrderedDict
@@ -8,6 +7,8 @@ import traceback
 
 import numpy as np
 import pandas as pd
+import glob
+import re
 
 from tonic.models.vic.vic import (VICRuntimeError,
                                   default_vic_valgrind_error_code)
@@ -306,3 +307,124 @@ def check_multistream(fnames, driver):
                     actual, expected, decimal=4,
                     err_msg='Variable=%s, freq=%s, how=%s: '
                             'failed comparison' % (key, freq, how))
+
+def plot_science_tests(driver, testname, result_dir, plot_dir, vic_42_dir, vic_50_dir,
+                        obs_dir, plots_to_make):
+
+    ''' makes science test figures
+
+    Parameters
+    ----------
+    driver: <str>
+        Name of Driver
+    testname: <str>
+        Name of test
+    result_dir: <str>
+        Result directory
+    plot_dir: <str>
+        Directory for output plots
+    vic_42_dir: <str>
+        Directory for VIC 4.2 archive
+    vic_50_dir <str>
+        Directory for VIC 5.0 archive
+    obs_dir <str>
+        Directory for observations archive
+    plots_to_make <Dict>
+        Keys that indicate which plots should be made
+
+    Returns
+    ----------
+    '''
+    if testname == "science_test_snotel":
+        plot_snotel_comparison(driver, testname, result_dir, plot_dir, vic_42_dir, vic_50_dir,
+                                obs_dir, plots_to_make)
+    elif testname == "science_test_fluxnet"
+        plot_fluxnet_comparison(driver, testname, result_dir, plot_dir, vic_42_dir, vic_50_dir,
+                                obs_dir, plots_to_make)
+    else:
+        print("this has not yet been implemented in the VIC 5.0 science test suite")
+
+def plot_snotel_comparison(driver, testname, result_dir, plot_dir, vic_42_dir, vic_50_dir,
+                        obs_dir, plots_to_make):
+    ''' makes snotel figures
+
+    '''
+    for filename in os.listdir(obs_dir):
+        filename_fullpath = os.path.join(obs_dir, filename)
+        file_split = re.split('_', filename)
+        lng = file_split[3].split('.txt')[0]
+        lat = file_split[2]
+
+        # load snotel obs
+        snotel_swe = pd.read_csv(filename_fullpath,
+                                skiprows=0,
+                                delim_whitespace=True,
+                                names=['YEAR', 'MONTH', 'DAY', 'OUT_SWE'])
+        # add datetime object column to snotel DataFrame
+        snotel_swe['DATES'] = pd.to_datetime(snotel_swe.YEAR * 10000 +
+                                            snotel_swe.MONTH * 100 +
+                                            snotel_swe.DAY,
+                                            format='%Y%m%d')
+
+        # load VIC 4.2 data
+        vic_42_file_snow = 'snow_%s_%s' % (lat, lng)
+        vic_42_file_ebal = 'en_bal_%s_%s' %(lat, lng)
+
+        vic_42_snow = pd.read_csv(os.path.join(vic_42_dir, vic_42_file_snow),
+                                sep='\t',
+                                skiprows=5)
+        vic_42_ebal = pd.read_csv(os.path.join(vic_42_dir, vic_42_file_ebal),
+                                sep='\t',
+                                skiprows=5)
+
+        # remove comment sign from column names in DataFrames
+        vic_42_snow = vic_42_snow.rename(columns=lambda x: x.replace('#', ''))
+        vic_42_ebal = vic_42_ebal.rename(columns=lambda x: x.replace('#', ''))
+
+        # load VIC 5.0 data
+
+        vic_50_file_snow = 'snow_%s_%s.txt' %(lat, lng)
+        vic_50_file_ebal = 'en_bal_%s_%s.txt' %(lat, lon)
+
+        vic_50_snow = pd.read_csv(os.path.join(vic_50_dir, vic_50_file_snow),
+                                skiprows=3,
+                                sep='\t')
+        vic_50_ebal = pd.read(csv(os.path.join(vic_50_dir, vic_50_file_ebal),
+                                skiprows=3,
+                                sep='\t')
+
+        snow_variables = ['OUT_SWE', 'OUT_ALBEDO', 'OUT_SALBEDO']
+
+        len_dates = len(snotel_swe['DATES'])
+
+        # plotting preferences
+        lw = 4.0
+        # loop over variables to plot
+
+        for snow_variable in snow_variables:
+            if snow_variable == "OUT_SWE":
+
+                # plot SnoTel SWE observations
+                plt.plot(snotel_swe['DATES'], snotel_swe[snow_variable],
+                        'k', label='Snotel', linewidth=lw)
+
+            # plot VIC 4.2 simulations
+            plt.plot(snotel_swe['DATES'], vic_42_snow[snow_variable][:len_dates],
+                    'b', label='VIC 4.2', linewidth=lw)
+
+            # plot VIC 5.0 simulations
+            plt.plot(snotel_swe['DATES'], vic_50_snow[snow_variable][:len_dates],
+                    'r', label='VIC 5.0', linewidth=lw)
+
+            # plot VIC 5.0.x simulations
+            plt.plot(snotel_swe['DATES'], vic_50x_snow[snow_variable][:len_dates]),
+                    'y', label='VIC 5.0.x', linewidth=lw)
+
+
+
+def plot_fluxnet_comparison(driver, testname, result_dir, plot_dir, vic_42_dir, vic_50_dir,
+                        obs_dir, plots_to_make):
+
+    ''' makes Ameriflux figures
+
+    '''

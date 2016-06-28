@@ -46,6 +46,8 @@
 
 void print_mpi_error_str(int error_code);
 
+void print_mpi_error_str(int error_code);
+
 // Macros for logging
 #define clean_ncerrno(e) (e == NC_NOERR ? "None" : nc_strerror(e))
 

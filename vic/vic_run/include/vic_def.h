@@ -346,7 +346,6 @@ typedef struct {
 
     // Surface Albedo Parameters
     double ALBEDO_BARE_SOIL;  /**< Broadband albedo of bare soil */
-    double ALBEDO_H20_SURF;  /**< Broadband albedo of open water surface */
 
     // Surface Emissivities
     double EMISS_GRND;  /**< Emissivity of bare soil */

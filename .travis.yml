@@ -73,11 +73,6 @@ matrix:
   - compiler: gcc
     os: osx
     env: TESTID=classic BREW_INSTALLS=valgrind
-    # clang builds temporarily fail due to llvm apt down
-    # see https://github.com/travis-ci/travis-ci/issues/6120
-  - compiler: clang
-    os: linux
-    env: TESTID=classic USE_CC=clang-3.6
 before_install:
   - source ci/vic_install_utils
   - source ci/${TESTID}.travis

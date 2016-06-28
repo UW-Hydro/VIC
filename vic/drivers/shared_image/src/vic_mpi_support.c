@@ -68,6 +68,9 @@ initialize_mpi(void)
     // set mpi error handling
     MPI_Errhandler_set(MPI_COMM_VIC, MPI_ERRORS_RETURN);
 
+    // set mpi error handling
+    MPI_Errhandler_set(MPI_COMM_VIC, MPI_ERRORS_RETURN);
+
     status = MPI_Comm_size(MPI_COMM_VIC, &mpi_size);
     check_mpi_status(status, "MPI Error");
 
@@ -771,7 +774,7 @@ create_MPI_param_struct_type(MPI_Datatype *mpi_type)
     MPI_Datatype   *mpi_types;
 
     // nitems has to equal the number of elements in parameters_struct
-    nitems = 154;
+    nitems = 153;
     blocklengths = malloc(nitems * sizeof(*blocklengths));
     check_alloc_status(blocklengths, "Memory allocation error.");
 
@@ -803,10 +806,6 @@ create_MPI_param_struct_type(MPI_Datatype *mpi_type)
 
     // double ALBEDO_BARE_SOIL;
     offsets[i] = offsetof(parameters_struct, ALBEDO_BARE_SOIL);
-    mpi_types[i++] = MPI_DOUBLE;
-
-    // double ALBEDO_H20_SURF;
-    offsets[i] = offsetof(parameters_struct, ALBEDO_H20_SURF);
     mpi_types[i++] = MPI_DOUBLE;
 
     // double EMISS_GRND;

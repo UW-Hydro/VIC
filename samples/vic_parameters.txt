@@ -30,18 +30,13 @@ LAPSE_RATE -0.0065   # temperature lapse rate in C/m
 
 ###############################################################################
 ALBEDO_BARE_SOIL 0.2  # albedo for bare soil
-ALBEDO_H20_SURF 0.08  # albedo for deep water surface
 
 EMISS_GRND 0.97  # Ground emissivity
 EMISS_VEG 0.97  # Veg emissivity
 EMISS_ICE 0.97  # Ice emissivity
 EMISS_SNOW 0.97  # Snow emissivity
-EMISS_H2O 0.98
+EMISS_H2O 0.98 # Emissivity of open water surface
 ###############################################################################
-
-
-DEFAULT_WIND_SPEED 3.0  # Default wind speed [m/s] used when wind is not
-                        # supplied as a forcing
 
 ###############################################################################
 # Physical Constraints

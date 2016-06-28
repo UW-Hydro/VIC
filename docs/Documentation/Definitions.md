@@ -1,7 +1,7 @@
 #Definitions
 
 ### annual_prec
-VIC uses the regression published by Kimball et. al. to improve the estimation of the dew point temperature in dry regions. This regression requires the average annual precipitation in mm for each grid cell. If the value of annual_prec is negative, the model will use the daily minimum temperature without modification for the dew point temperature.
+VIC uses the regression published by Kimball et. al. to improve the estimation of the dew point temperature in dry regions. This regression requires the average annual precipitation in mm for each grid cell. If the value of `annual_prec` is negative, the model will use the daily minimum temperature without modification for the dew point temperature.
 
 ### avg_T
 This parameter is the temperature of the soil at the [damping depth](#dp). This temperature is often assumed to be the same as the average annual air temperature. This temperature is used as the bottom boundary of all thermal flux calculations made for the soil column.
@@ -29,7 +29,7 @@ The bulk density in layers used in the VIC model can be compiled from data avail
 
 This reports bulk density for each of 11 individual layers, which cover a depth of 2.5 meters. The majority of data does not extend beyond 1.5 meters, which includes the first 9 of their 11 layers. The Penn State data is available in gridded form at a resolution of 30 arc-seconds.
 
-The gridded bulk density data is imported into Arc/Info, where it is averaged for the appropriate individual layers and aggregated to the grid cell size. An example Arc/Info macro to perform this can be downloaded [here.](bulkdens.aml)
+The gridded bulk density data is imported into Arc/Info, where it is averaged for the appropriate individual layers and aggregated to the grid cell size.
 
 ### cellnum
 Cell numbers are assigned to each grid cell beginning with 1 at the upper left corner of the basin, and numbering consecutively by rows. Cell numbers will be referenced in soil files, as well as in the vegetation parameter file.
@@ -41,21 +41,21 @@ Depth is the depth of each layer in meters. Though this can be changed in the ca
 This is the soil theraml damping depth. It is defined as the depth in the soil column at which the soil temperature remains nearly constant annually. This is the depth to which soil thermal flux calculations will be made, and is often set to 4m. The constant temperature at this boundary is defined with the parameter [avg_T](#avg_t).
 
 ### Ds
-The soil parameter Ds represents the fraction of the Dsmax parameter at which non-linear base-flow occurs. This is typically a parameter that is adjusted during the calibration of the VIC model. An initial value of 0.001 may be used. Typically this value is small (less than 1).
+The soil parameter `Ds` represents the fraction of the Dsmax parameter at which non-linear base-flow occurs. This is typically a parameter that is adjusted during the calibration of the VIC model. An initial value of 0.001 may be used. Typically this value is small (less than 1).
 
 ### Dsmax
 The parameter Dsmax is the maximum velocity of baseflow for each grid cell. This can be estimated using the saturated hydraulic conductivity, [Ksat](#ksat), for each grid cell multiplied by the slope of the grid cell. The values for [Ksat](#ksat) can be averaged for the layers for which baseflow will be included. When working in decimal degrees, the elevation data for the basin should be projected to an equal area map projection, in order to have horizontal dimensions in the same units as the vertical dimensions so that the slopes computed in Arc/Info are meaningful values.
 
 ### expt
-The Exponent (expt) parameter is the exponent, n, from the Brooks-Corey relationship (see, e.g., Table 5.1.1 in Rawls, et al). Values can be estimated from the table of soil hydraulic properties indexed by soil texture [(see table here)](soiltext.md). Values should be > 3.0.
+The Exponent (`expt`) parameter is the exponent, `n`, from the Brooks-Corey relationship (see, e.g., Table 5.1.1 in Rawls, et al). Values can be estimated from the table of soil hydraulic properties indexed by soil texture [(see table here)](soiltext.md). Values should be > 3.0.
 
 Reference: Rawls et al., Infiltration and Soil Water Movement, In: _Handbook of Hydrology_, D. Maidment (ed.), 1993
 
 ### init_moist
-Initial moisture content of each layer can be set at any reasonable value. One approach is to use fractional soil moisture content (expressed as a fraction of the maximum soil moisture; max. `soil moisture = porosity * layer depth`) at the critical point, Wcr, which can be computed for each layer as a depth in millimeters by multiplying `Wcr` by the thickness of the layer in meters, and then multiplying by 1000.
+Initial moisture content of each layer can be set at any reasonable value. One approach is to use fractional soil moisture content (expressed as a fraction of the maximum soil moisture; max. `soil moisture = porosity * layer depth`) at the critical point, `Wcr`, which can be computed for each layer as a depth in millimeters by multiplying `Wcr` by the thickness of the layer in meters, and then multiplying by 1000.
 
 ### Ksat
-The parameter Ksat is the saturated hydraulic conductivity for each layer used in a VIC model. Ksat is approximated using data onsoil textures available for the basin.
+The parameter `Ksat` is the saturated hydraulic conductivity for each layer used in a VIC model. `Ksat` is approximated using data on soil textures available for the basin.
 
 Soil textures are from the STATSGO database (USDA NRCS), which has been compiled from a state-by-state format into a U.S. database, available through Penn State University at [http://dbwww.essc.psu.edu/geotree/dbtop/amer_n/us_48/data/soilprop/statsgo_geo/soiltext/doc.html](http://dbwww.essc.psu.edu/geotree/dbtop/amer_n/us_48/data/soilprop/statsgo_geo/soiltext/doc.html)
 
@@ -64,18 +64,18 @@ This reports 16 different soil texture classes for 11 layers, which cover a dept
 The soil texture data is then imported into Arc/Info, where it is indexed to values of Ksat according to an index table soil hydraulic properties [(see sample table here)](soiltext.md). The data in this table are placed into an INFO file in Arc/Info, and the individual relates are then created to be used in an Arc/Info macro to create the Ksat grid for each layer.
 
 ### MIN_WIND_SPEED
-MIN_WIND_SPEED defines the minimum observable wind speed, which is then used to correct the model forcing data. Anemometers typically have a minimum observable wind speed on the order of 0.5 m/s. When forcing the VIC model with hourly wind speeds, the model's surface flux estimates have been observed to "hiccup" (especially in dry climates), while this does not impact the long term energy balance, it will be very noticable when looking at daily fluxes. Therefore, VIC will use MIN_WIND_SPEED to restrict the minimum value of wind speed used to force the model.
+`MIN_WIND_SPEED` defines the minimum observable wind speed, which is then used to correct the model forcing data. Anemometers typically have a minimum observable wind speed on the order of 0.5 m/s. When forcing the VIC model with hourly wind speeds, the model's surface flux estimates have been observed to "hiccup" (especially in dry climates), while this does not impact the long term energy balance, it will be very noticeable when looking at daily fluxes. Therefore, VIC will use MIN_WIND_SPEED to restrict the minimum value of wind speed used to force the model.
 
 Default value is set to 0 m/s, which works well when the model is forced with daily or monthly winds.
 
 ### NLAYER
-NLAYER is the number of soil moisture layers to be used by the model. Typically the number of layers is 2 or 3. The model cannot be run in energy balance mode with fewer than 3 layers (the top layer is thin 5-15cm), but the water balance model used to have only 2 layers. The model has not been tested with more than 3 layers, so problems may develop.
+`NLAYER` is the number of soil moisture layers to be used by the model. Typically the number of layers is 2 or 3. The model cannot be run in energy balance mode with fewer than 3 layers (the top layer is thin 5-15cm), but the water balance model used to have only 2 layers. The model has not been tested with more than 3 layers, so problems may develop.
 
 ### NODES
-NODES defines the number of soil thermal nodes used by the model to explicitly solve soil thermal fluxes. At this time the explicit solution of the soil thermal fluxes occurs only when the model is run with the frozen soil algorithm activated. The model uses a node at the surface, a node at the bottom of the thin (5-15cm) top layer, and a node at the damping depth. If more nodes are defined they are distributed evenly between the bottom of the top layer and the damping depth. More nodes improves the accuracy of the soil heat flux solution, but also increases the computational time. I reccommend at least 5 nodes.
+`NODES` defines the number of soil thermal nodes used by the model to explicitly solve soil thermal fluxes. At this time the explicit solution of the soil thermal fluxes occurs only when the model is run with the frozen soil algorithm activated. The model uses a node at the surface, a node at the bottom of the thin (5-15cm) top layer, and a node at the damping depth. If more nodes are defined they are distributed evenly between the bottom of the top layer and the damping depth. More nodes improves the accuracy of the soil heat flux solution, but also increases the computational time. We recommend at least 5 nodes.
 
 ### off_gmt
-off_gmt is the number of hours difference from GMT (aka UTC). These are the number of hours to be added to GMT/UTC to obtain local time for each grid cell. Sample offsets are listed in the table below. since UTC does not use any daylight savings adjustment, the gmt offset will decrease by one hour for those areas using daylight savings. For example, Eastern Standard Time (EST) changes from GMT-5 hours to Eastern Daylight Time (EDT) at GMT-4 hours.
+`off_gmt` is the number of hours difference from GMT (aka UTC). These are the number of hours to be added to GMT/UTC to obtain local time for each grid cell. Sample offsets are listed in the table below. since UTC does not use any daylight savings adjustment, the gmt offset will decrease by one hour for those areas using daylight savings. For example, Eastern Standard Time (EST) changes from GMT-5 hours to Eastern Daylight Time (EDT) at GMT-4 hours.
 
 **Table of GMT Offsets in hours**
 
@@ -137,11 +137,11 @@ Soil textures are from the STATSGO database (USDA NRCS), which has been compiled
 
 This reports 16 different soil texture classes for 11 layers, which cover a depth of 2.5 meters. The majority of data does not extend beyond 1.5 meters, which includes the first 9 of their 11 layers. The Penn State data is available in gridded form at a resolution of 30 arc-seconds.
 
-The soil texture data is then imported into Arc/Info, where it is indexed to values of `Wcr` according to the table [SOILTEXT.](soiltext.md) The data in this table are placed into an INFO file in Arc/Info, and the individual relates are then created to be used in an Arc/Info macro to create the `Wcr` grid. An example Arc/Info macro can be downloaded [here](text_wcrit.aml).
+The soil texture data is then imported into Arc/Info, where it is indexed to values of `Wcr` according to the table [SOILTEXT.](soiltext.md) The data in this table are placed into an INFO file in Arc/Info, and the individual relates are then created to be used in an Arc/Info macro to create the `Wcr` grid.
 
 ### wind_h
 
-The measurement wind height is the height above the ground at which wind observations were recorded. Typically wind observations are taken at a height of 2 m in clearings. However, the VIC model assumes wind observations are made above the vegetation cover in each grid cell and that wind speeds through and below the canopy can be found using exponential and logorithmic wind profiles. For short vegetation types (grasses, shrubs, etc.), the wind measurement height should be ~2 m above the top of the vegetation. For tall vegetation types (trees), especially those defined with an overstory, the wind measurement height should be set much higher than the vegetation. This is physically justified because a forest canopy impacts atmospheric stability to a much higher elevation, than shorter vegetation. If the model is required to run with an overstory defined, and the wind height set to just above the vegetation (for example the tree height + 2m) large negative evaporations and sublimations may be found during the winter months, as the snow interception algorithm is forced to use unrealistically strong wind speeds.
+The measurement wind height is the height above the ground at which wind observations were recorded. Typically wind observations are taken at a height of 2 m in clearings. However, the VIC model assumes wind observations are made above the vegetation cover in each grid cell and that wind speeds through and below the canopy can be found using exponential and logarithmic wind profiles. For short vegetation types (grasses, shrubs, etc.), the wind measurement height should be ~2 m above the top of the vegetation. For tall vegetation types (trees), especially those defined with an overstory, the wind measurement height should be set much higher than the vegetation. This is physically justified because a forest canopy impacts atmospheric stability to a much higher elevation, than shorter vegetation. If the model is required to run with an overstory defined, and the wind height set to just above the vegetation (for example the tree height + 2m) large negative evaporations and sublimations may be found during the winter months, as the snow interception algorithm is forced to use unrealistically strong wind speeds.
 
 **When defining a vegetation type with overstory, it is strongly recommended that wind_h be defined at least 10 m higher than the height of the vegetation.**
 
@@ -152,8 +152,6 @@ The parameter `Wpwp_FRACT` (`wp`) is the fractional soil moisture (expressed as 
 Soil textures are from the STATSGO database (USDA NRCS), which has been compiled from a state-by-state format into a U.S. database, available through Penn State University at [http://dbwww.essc.psu.edu/geotree/dbtop/amer_n/us_48/data/soilprop/statsgo_geo/soiltext/doc.html](http://dbwww.essc.psu.edu/geotree/dbtop/amer_n/us_48/data/soilprop/statsgo_geo/soiltext/doc.html)
 
 This reports 16 different soil texture classes for 11 layers, which cover a depth of 2.5 meters. The majority of data does not extend beyond 1.5 meters, which includes the first 9 of their 11 layers. The Penn State data is available in gridded form at a resolution of 30 arc-seconds.
-
-The soil texture data is then imported into Arc/Info, where it is indexed to values of Wp according to the table [SOILTEXT](soiltext.md). The data in this table are placed into an INFO file in Arc/Info, and the individual relates are then created to be used in an Arc/Info macro to create the Wp grid. An example Arc/Info macro can be downloaded [here.](text_wiltp.aml)
 
 ### Ws
 The parameter Ws is the fraction of maximum soil moisture where non-linear baseflow occurs. As with the [`Ds`](#ds) parameter, this is generally adjusted during the calibration phase of applying the VIC model. Values for Ws are typically greater than 0.5. An initial value of 0.9 can be used.

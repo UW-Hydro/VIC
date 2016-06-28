@@ -26,9 +26,9 @@ log_level = 0
 MAJOR = 5
 MINOR = 0
 MICRO = 0
-ISRELEASED = False
+ISRELEASED = True
 VERSION = '%d.%d.%d' % (MAJOR, MINOR, MICRO)
-QUALIFIER = ''
+QUALIFIER = 'rc1'
 
 FULLVERSION = VERSION
 write_version = False

@@ -8,7 +8,7 @@ The soil parameter file serves three main purposes:
 
 The soil parameters are supplied to VIC as a single ASCII file, with a separate row for each grid cell, with each field containing a different parameter value (description of this file is below).
 
-Soil hydrologic and thermal parameters needed for the different VIC model set-ups are listed below. All columns of the input file must be filled, but certain parameters need only be defined if the full energy or frozen soil models are activated. <font color="#ff0000">Red</font> text indicates parameters needed for the energy balance model. <font color="#800080">Violet</font> text indicates parameters needed for the frozen soil model. Header lines can be added by starting the line with a '#'.
+Soil hydrologic and thermal parameters needed for the different VIC model set-ups are listed below. All columns of the input file must be filled, but certain parameters need only be defined if the full energy or frozen soil models are activated. Variables in <font color="#ff0000">Red</font> only need to have meaningful values if `FULL_ENERGY` is `TRUE`, otherwise they will be ignored (but a placeholder value of -9999 must still be present in that field unless the documentation explicitly says the field is optional). <font color="#800080">Violet</font> text indicates parameters needed for the frozen soil model. Header lines can be added by starting the line with a '#'.
 
 In previous versions certain parameters were read as average values for the entire soil column. In version 4.0 all soil parameter values are now read for all layers. Converting the soil parameter file from older model versions, should simply require copying column average values to separate columns for each soil moisture layer.
 

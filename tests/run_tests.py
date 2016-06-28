@@ -455,6 +455,14 @@ def run_system(config_file, vic_exe, test_data_dir, out_dir, driver):
                     fnames = glob.glob(os.path.join(dirs['results'], '*'))
                     check_multistream(fnames, driver)
 
+                if 'compare_drivers' in test_dict:
+                    compare_test = os.path.join(dirs['test'], '../',
+                                                test_dict['compare_drivers'])
+                    if os.path.isdir(compare_test):
+                        test_image_driver_matches_classic_driver()
+                    else:
+                        raise SkipTest('compare test is not present in %s' % compare_test)
+
             # if we got this far, the test passed.
             test_passed = True
 

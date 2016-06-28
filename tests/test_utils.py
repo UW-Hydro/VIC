@@ -2,12 +2,13 @@
 ''' VIC exact restart testing '''
 
 import os
-from collections import OrderedDict
+from collections import OrderedDict, namedtuple
 
 import traceback
 
 import numpy as np
 import pandas as pd
+import xarray as xr
 
 from tonic.models.vic.vic import (VICRuntimeError,
                                   default_vic_valgrind_error_code)
@@ -17,11 +18,18 @@ OUTPUT_WIDTH = 100
 ERROR_TAIL = 20  # lines
 
 
+VICOutFile = namedtuple('vic_out_file', ('dirpath', 'prefix', 'lat', 'lon', 'suffix'))
+
+
 class VICReturnCodeError(Exception):
     pass
 
 
 class VICValgrindError(Exception):
+    pass
+
+
+class SkipTest(Exception):
     pass
 
 
@@ -306,3 +314,29 @@ def check_multistream(fnames, driver):
                     actual, expected, decimal=4,
                     err_msg='Variable=%s, freq=%s, how=%s: '
                             'failed comparison' % (key, freq, how))
+
+
+def parse_classic_driver_outfile_name(fname):
+    '''helper function to parse VIC classic driver output file name'''
+    resultdir, filename = os.path.split(fname)
+    prefix, suffix = os.path.splitext(filename)
+    pieces = prefix.split('_')
+    lat, lon = map(float, pieces[-2:])
+    return VICOutFile(resultdir, prefix, lat, lon, suffix)
+
+
+def test_image_driver_matches_classic_driver(image_fname, classic_fnames):
+    '''test to see that the classic and image driver produce equivalent output'''
+
+    ds_image = xr.open_dataset(image_fname)
+
+    for fname in classic_fnames:
+        gcell = parse_classic_driver_outfile_name(fname)
+        df_image = ds_image.sel(lat=gcell.lat, lon=gcell.lon).to_dataframe()
+        df_classic = read_vic_ascii(fname)
+
+        for var in df_image.columns:
+            np.testing.assert_almost_equal(
+                df_image[var], df_classic[var], decimal=4,
+                err_msg='Variable=%s is different in the classic and image '
+                        'drivers' % var)

@@ -1,0 +1,49 @@
+NLAYER              3
+NODES               3
+TIME_STEP           24
+SNOW_STEP           1
+STARTYEAR           1948
+STARTMONTH          01
+STARTDAY            01
+STARTHOUR           00
+ENDYEAR             2007
+ENDMONTH            10
+ENDDAY              31
+FULL_ENERGY         TRUE
+FROZEN_SOIL         FALSE
+FORCING1            {test_data_dir}/global_0.5deg/forcings/data_
+FORCE_FORMAT        BINARY
+FORCE_ENDIAN        LITTLE
+N_TYPES             4
+FORCE_TYPE          PREC    UNSIGNED    40
+FORCE_TYPE          TMAX    SIGNED      100
+FORCE_TYPE          TMIN    SIGNED      100
+FORCE_TYPE          WIND    SIGNED      100
+FORCE_DT            24
+FORCEYEAR           1948
+FORCEMONTH          01
+FORCEDAY            01
+FORCEHOUR           00
+GRID_DECIMAL        4
+WIND_H              10.0
+MEASURE_H           2.0
+SOIL                {test_data_dir}/global_0.5deg/parameters/soil_param.txt
+ARC_SOIL            FALSE
+BASEFLOW            ARNO
+JULY_TAVG_SUPPLIED  FALSE
+ORGANIC_FRACT       FALSE
+VEGLIB              {test_data_dir}/global_0.5deg/parameters/world_veg_lib.txt
+VEGPARAM            {test_data_dir}/global_0.5deg/parameters/veg_param.txt
+ROOT_ZONES          3
+VEGPARAM_LAI        TRUE
+LAI_SRC             FROM_VEGLIB
+SNOW_BAND           5    {test_data_dir}/global_0.5deg/parameters/snowbands.txt
+RESULT_DIR          {outdir}/{testname)/results/
+OUT_STEP            0
+SKIPYEAR            0
+COMPRESS            FALSE
+BINARY_OUTPUT       FALSE
+ALMA_OUTPUT         FALSE
+MOISTFRACT          FALSE
+PRT_HEADER          TRUE
+PRT_SNOW_BAND       FALSE

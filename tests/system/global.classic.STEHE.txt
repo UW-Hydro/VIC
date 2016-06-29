@@ -1,0 +1,74 @@
+NLAYER                3
+NODES                 3
+MODEL_STEPS_PER_DAY   24
+SNOW_STEPS_PER_DAY    24
+RUNOFF_STEPS_PER_DAY  24
+STARTYEAR             1949
+STARTMONTH            01
+STARTDAY              01
+ENDYEAR               1949
+ENDMONTH              01
+ENDDAY                10
+FULL_ENERGY           FALSE
+FROZEN_SOIL           FALSE
+
+#INIT_STATE
+STATENAME       $state_dir/states
+STATEYEAR       1949
+STATEMONTH      1
+STATEDAY        10
+STATESEC        82800
+STATE_FORMAT    ASCII
+
+FORCING1             $test_data_dir/classic/Stehekin/forcings/full_data_
+FORCE_FORMAT         ASCII
+FORCE_TYPE           PREC
+FORCE_TYPE           AIR_TEMP
+FORCE_TYPE           SWDOWN
+FORCE_TYPE           LWDOWN
+FORCE_TYPE           SKIP  # This column is air density, which is not needed by VIC
+FORCE_TYPE           PRESSURE
+FORCE_TYPE           VP
+FORCE_TYPE           WIND
+FORCE_STEPS_PER_DAY  24
+FORCEYEAR            1949
+FORCEMONTH           01
+FORCEDAY             01
+GRID_DECIMAL         4
+WIND_H               10.0
+
+SOIL                $test_data_dir/classic/Stehekin/parameters/Stehekin_soil.txt
+BASEFLOW            ARNO
+JULY_TAVG_SUPPLIED  FALSE
+ORGANIC_FRACT       FALSE
+VEGLIB              $test_data_dir/classic/Stehekin/parameters/Stehekin_veglib.txt
+VEGPARAM            $test_data_dir/classic/Stehekin/parameters/Stehekin_vegparam.txt
+ROOT_ZONES          3
+VEGPARAM_LAI        TRUE
+LAI_SRC             FROM_VEGPARAM
+SNOW_BAND           5  $test_data_dir/classic/Stehekin/parameters/Stehekin_snowbands.txt
+
+RESULT_DIR              $result_dir
+
+OUTFILE     fluxes
+AGGFREQ     NHOURS   1
+OUTVAR      OUT_PREC
+OUTVAR      OUT_RAINF
+OUTVAR      OUT_SNOWF
+OUTVAR      OUT_AIR_TEMP
+OUTVAR      OUT_SWDOWN
+OUTVAR      OUT_LWDOWN
+OUTVAR      OUT_PRESSURE
+OUTVAR      OUT_WIND
+OUTVAR      OUT_DENSITY
+OUTVAR      OUT_REL_HUMID
+OUTVAR      OUT_QAIR
+OUTVAR      OUT_VP
+OUTVAR      OUT_VPD
+OUTVAR      OUT_RUNOFF
+OUTVAR      OUT_BASEFLOW
+OUTVAR      OUT_EVAP
+OUTVAR      OUT_SWE
+OUTVAR      OUT_SOIL_MOIST
+OUTVAR      OUT_ALBEDO
+OUTVAR      OUT_SOIL_TEMP

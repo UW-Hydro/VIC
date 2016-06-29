@@ -1,0 +1,17 @@
+name: vic_test_env
+dependencies:
+  - python=3.5
+  - numpy
+  - scipy
+  - pytest
+  - netCDF4
+  - cffi
+  - pandas
+  - configobj
+  - xarray
+  - bottleneck
+  - pip:
+    - git+https://github.com/UW-Hydro/tonic.git
+    - engarde
+    - pytest-faulthandler
+    - pytest-xdist

@@ -14,7 +14,7 @@ Bohn, T. J., B. Livneh, J. W. Oyler, S. W. Running, B. Nijssen, and D. P. Letten
 
 Bohn, T. J., E. Podest, R. Schroeder, N. Pinto, K. C. McDonald, M. Glagolev, I. Filippov, S. Maksyutov, M. Heimann, X. Chen, and D. P. Lettenmaier, 2013b: Modeling the effects of surface moisture heterogeneity on wetland carbon fluxes in the West Siberian Lowland, _Biogeosciences_, **10**, 6559-6576, [doi:10.5194/bg-10-6559-2013](http://dx.doi.org/10.5194/bg-10-6559-2013).
 
-Bohn, T. J., and E. R. Vivoni, 2015: Process-based characterization of evapotranspiration sources in the North American monsoon region, _Water Resour. Res._, accepted.
+Bohn, T. J., and E. R. Vivoni, 2016: Process-based characterization of evapotranspiration sources in the North American monsoon region, _Water Resour. Res._, **52**(1), 358-384, doi: 10.1002/2015WR017934.
 
 Bowling, L. C., J. W. Pomeroy and D. P. Lettenmaier, 2004: Parameterization of blowing snow sublimation in a macroscale hydrology model, _J. Hydromet._, **5**(5), 745-762, doi: 10.1175/1525-7541.
 
@@ -48,11 +48,11 @@ Lohmann, D., E. Raschke, B. Nijssen and D. P. Lettenmaier, 1998: Regional scale 
 
 Lohmann, D., E. Raschke, B. Nijssen, and D. P. Lettenmaier, 1998: Regional Scale Hydrology: II. Application of the VIC-2L Model to the Weser River, Germany, _Hydrological Sciences Journal_, **43**(1), 143-157.
 
-Nijssen, B.N., D.P. Lettenmaier, X. Liang, S.W. Wetzel, and E.F. Wood, 1997: Streamflow simulation for continental-scale river basins,_ Water Resour. Res._, **33**(4), 711-724.
+Nijssen, B.N., D.P. Lettenmaier, X. Liang, S.W. Wetzel, and E.F. Wood, 1997: Streamflow simulation for continental-scale river basins, _Water Resour. Res._, **33**(4), 711-724.
 
 ## Selected Application References
 
-Abdulla, F.A., D.P. Lettenmaier, E.F. Wood and J.A. Smith, 1996: Application of a macroscale hydrologic model to estimate the water balance of the Arkansas-Red river basin,_ J. Geophys. Res._, **101**(D3), 7449-7459.
+Abdulla, F.A., D.P. Lettenmaier, E.F. Wood and J.A. Smith, 1996: Application of a macroscale hydrologic model to estimate the water balance of the Arkansas-Red river basin, _J. Geophys. Res._, **101**(D3), 7449-7459.
 
 Adam, J.C. and D.P. Lettenmaier, 2003: Adjustment of global gridded precipitation for systematic bias, _J. Geophys. Res._, **108**(D9), 1-14, doi:10.1029/2002JD002499.
 
@@ -106,7 +106,7 @@ Shukla, S., A. C. Steinemann, and D. P. Lettenmaier, 2010: Drought Monitoring fo
 
 Tang, Q., H. Gao, P. Yeh, T. Oki, F. Su, and D.P. Lettenmaier, 2010: Dynamics of terrestrial water storage change from satellite and surface observations and modeling, Journal of Hydrometeorology 11, 156-170. doi:10.1175/2009JHM1152.1.
 
-Wood, E.F., D. Lettenmaier, X. Liang, B. Nijssen and S.W. Wetzel, 1997: Hydrological modeling of continental-scale basins_ Annu. Rev. Earth Planet. Sci._, **25**, 279-300.
+Wood, E. F., Lettenmaier, D., Liang, X., Nijssen, B., & Wetzel, S. W. (1997). Hydrological modeling of continental-scale basins. _Annual Review of Earth and Planetary Sciences_, 25(1), 279-300.
 
 ## Other References
 
@@ -123,12 +123,6 @@ Hostetler, S. W., and P. J. Bartlein, 1990: Simulation of lake evaporation with 
 Hostetler, S. W., 1991: Simulation of lake ice and its effect on the late-Pleistocene evaporation rate of Lake Lahontan, _Climate Dynamics_, **6**, 43-48.
 
 Hostetler, S. W., Bartlein, P. J., Clark, P. U., Small, E. E., and A. M. Soloman, 2000: Simulated influences of Lake Agassiz on the climate of central North America 11,000 years ago, _Nature_, **405**(6784), 334-337.
-
-Kimball, J. S., S. W. Running, and R. R. Nemani, 1997: An improved method for estimating surface humidity from daily minimum temperature, _Agr. Forest Meteorol._, **85**, 87-98.
-
-Thornton, P. E., and S. W. Running, 1999: An improved algorithm for estimating incident daily solar radiation from measurements of temperature, humidity, and precipitation, _Agr. Forest Meteorol._, **93**, 211-228.
-
-Thornton, P. E., H. Hasenauer, and M. A. White, 2000: Simultaneous estimation of daily solar radiation and humidity from observed temperature and precipitation: an application over complex terrain in Austria, _Agr. Forest Meteorol._, **104**, 255-271, doi: 10.1016/S0168-1923(00)00170-2.
 
 Ying Fan, E. Wood, M.L. Baeck, and J. Smith. 1996. Fractional Coverage of Rainfall Over a Grid: Analyses of NEXRAD data over the southern Plains. Water Resour. Res., vol. 32, no. 9, pp. 2787-2802, September 1996
 

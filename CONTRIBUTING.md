@@ -42,7 +42,7 @@ If you think you have found a bug in VIC, please file an issue on Github [here](
 
 If you can provide more information that is great. If you know how to run the model in a debugger, you may be able to pinpoint where the problem occurs.
 
-#### Requesting New features
+#### Proposing New Features
 
 The VIC model is under active development.  If you would like to propose a new feature, driver, or extension to the VIC model, please raise a Github issue [here](https://github.com/UW-Hydro/VIC/issues). Also, because VIC is an open source model with no official support for development, be prepared to contribute to the implementation of your feature request. Also note that features that are only of interest to you are unlikely to be implemented in the main source code repo (although you are of course free to modify the code in any way you see fit).
 

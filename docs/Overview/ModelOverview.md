@@ -6,7 +6,7 @@ The VIC model ([Liang et al., 1994](../Documentation/References.md#primary-histo
 
 1. The land surface is modeled as a grid of large (>>1km), flat, uniform cells
     - Sub-grid heterogeneity (e.g. elevation, land cover) is handled via statistical distributions
-1. Inputs are time series of daily or sub-daily meteorological drivers (e.g. precipitation, air temperature, wind speed)
+1. Inputs are time series of sub-daily meteorological drivers (e.g. precipitation, air temperature, wind speed, radiation, etc.)
 1. Land-atmosphere fluxes, and the water and energy balances at the land surface, are simulated at a daily or sub-daily time step
 1. Water can only enter a grid cell via the atmosphere
     - Non-channel flow between grid cells is ignored
@@ -15,10 +15,7 @@ The VIC model ([Liang et al., 1994](../Documentation/References.md#primary-histo
 
 This last point has several consequences for VIC model implementation:
 
-1. Grid cells are simulated independently of each other
-    - Entire simulation is run for each grid cell separately, 1 grid cell at a time, rather than, for each time step, looping over all grid cells
-    - Meteorological input data for each grid cell (for the entire simulation period) are read from a file specific to that grid cell
-    - Time series of output variables for each grid cell (for the entire simulation period) are stored in files specific to that grid cell
+1. Grid cells are simulated independently of each other, there is no communication between grid cells
 2. Routing of stream flow is performed separately from the land surface simulation, using a separate model (typically the routing model of [Lohmann et al., 1996 and 1998](../Documentation/References.md#streamflow-routing-model-references))
 
 ## Land Cover and Soil
@@ -35,15 +32,17 @@ Figure 1.  VIC land cover tiles and soil column, with major water and energy flu
 - fluxes and storages from the tiles are averaged together (weighted by area fraction) to give grid-cell average for writing to output files.
 - for a given tile, jarvis-style veg stomatal response used in computing transpiration.
 - considers canopy energy balance separately from ground surface.
-- accounts for soil evaporation and different wind and radiation attenuation in spaces between individual plants (or gaps in the canopy); vegetated and non-vegetated area fractions are controlled by vegetated area fraction (fv) (Figure 2).  See [Bohn and Vivoni (accepted)](../Documentation/References.md#other-historical-references) for more details.
-- supports optional input of daily timeseries of LAI, albedo, and vegetated area fraction from forcing files instead of using the monthly climatology specified in the veg library or veg parameter files.  See [Bohn and Vivoni (accepted)](../Documentation/References.md#other-historical-references)for more details.
+- accounts for soil evaporation and different wind and radiation attenuation in spaces between individual plants (or gaps in the canopy); vegetated and non-vegetated area fractions are controlled by vegetated area fraction (fv) (Figure 2).  See [Bohn and Vivoni (2016)](../Documentation/References.md#other-historical-references) for more details.
+- supports optional input of daily timeseries of LAI, albedo, and vegetated area fraction from forcing files instead of using the monthly climatology specified in the veg library or veg parameter files.  See [Bohn and Vivoni (2016)](../Documentation/References.md#other-historical-references)for more details.
 
 ![Partial Vegetation Cover Schematic](../img/PartialVegCoverSchematic.bw.png)
 
-Figure 2. Schematic of the big leaf (pre-VIC 4.2) and clumped (4.2 and later) vegetation schemes. The spatial average leaf area index (LAI) within a given vegetation tile is assumed uniformly distributed in the big leaf scheme, but is rescaled by the vegetated area fraction (fv) to estimate a plant-specific LAI in the clumped scheme. Transpiration (T) and evaporation of canopy interception (Ecan) is complemented by soil evaporation (Esoil) in the clumped scheme. 
+Figure 2. Schematic of the big leaf (pre-VIC 4.2) and clumped (4.2 and later) vegetation schemes. The spatial average leaf area index (LAI) within a given vegetation tile is assumed uniformly distributed in the big leaf scheme, but is rescaled by the vegetated area fraction (fv) to estimate a plant-specific LAI in the clumped scheme. Transpiration (T) and evaporation of canopy interception (Ecan) is complemented by soil evaporation (Esoil) in the clumped scheme.
 
->>#### Note Regarding Evapotranspiration and Time Step
->>In order to compensate for the inaccuracies in simulating canopy interception and evaporation at a 24-hour time step, VIC makes an exception for the 24-hour case: in this case, canopy evaporation is allowed to encompass not only the water in the canopy at the beginning of the time step, but also any precipitation, up to the atmospheric demand for water.  At smaller time steps, canopy evaporation is limited to just the amount of water stored in the canopy at the beginning of the time step.  This can result in a) inaccurate apportioning of total ET between canopy evaporation and transpiration, and b) different behavior between VIC simulations at 24 hour time steps and simulations at smaller time steps (with the biggest differences occurring between 12-hour and 24-hour time steps).  For more information, see [Haddeland et al (2006a)](../Documentation/References.md#selected-application-references).
+- computes potential evapotranspiration as the area-weighted sum of potential transpiration and potential soil evaporation.  Potential transpiration is computed for the current vegetation, using its current architectural resistance and LAI to compute canopy resistance in the absence of limitation from soil moisture, vapor pressure deficit, temperature, or insolation.
+
+!!!Note "Regarding Evapotranspiration and Time Step"
+    In order to compensate for the inaccuracies in simulating canopy interception and evaporation at a 24-hour time step, VIC makes an exception for the 24-hour case: in this case, canopy evaporation is allowed to encompass not only the water in the canopy at the beginning of the time step, but also any precipitation, up to the atmospheric demand for water.  At smaller time steps, canopy evaporation is limited to just the amount of water stored in the canopy at the beginning of the time step.  This can result in a) inaccurate apportioning of total ET between canopy evaporation and transpiration, and b) different behavior between VIC simulations at 24 hour time steps and simulations at smaller time steps (with the biggest differences occurring between 12-hour and 24-hour time steps).  For more information, see [Haddeland et al (2006a)](../Documentation/References.md#selected-application-references).
 
 ### Soil
 
@@ -78,19 +77,25 @@ Figure 3.  VIC snow model.
 
 ### Meteorological Input Data
 
-VIC can use any combination of daily or sub-daily meteorological forcings, from point observations, gridded observations, or reanalysis fields.  At minimum, VIC requires daily {precipitation, max/min air temperature, and wind speed}.  VIC will derive all other needed forcings via the approach described in [Bohn et al., 2013a](../Documentation/References.md#other-historical-references), which includes:
+VIC requires the following meteorological forcing variables.
 
-- If incoming shortwave radiation or humidity are not supplied as forcings, VIC can estimate their daily average values via the algorithms of [Kimball et al. (1997)](../Documentation/References.md#other-references), [Thornton and Running (1999)](../Documentation/References.md#other-references), and [Thornton et al. (2000)](../Documentation/References.md#other-references). These algorithms are part of a stand-alone system called MTCLIM, produced by Steve Running's Numerical Terradynamics Simulation Group at U. Montana.
-- If incoming longwave radiation is not supplied, VIC can estimate this via the Tennessee Valley Authority algorithm ([TVA, 1972](../Documentation/References.md#other-references)) or the [Prata (1996)](../Documentation/References.md#other-references) algorithm, Prata is the default.
-- VIC can disaggregate daily forcings to sub-daily as needed, using a cubic spline to interpolate between min and max temperatures, and deriving the other variables from that ([Bohn et al., 2013a](../Documentation/References.md#other-historical-references))
+- Precipitation
+- Air temperature
+- Wind speed
+- Longwave radiation
+- Shortwave radiation
+- Atmospheric pressure
+- Specific humidity
+
+These forcings must be provided at the timestep that the model will be run at (e.g. `SNOW_STEPS_PER_DAY` or `MODEL_STEPS_PER_DAY`). Traditionally, VIC users have used the MTCLIM package to generate and disaggregate forcings variables. See [Bohn et al., 2013a](../Documentation/References.md#other-historical-references) for more information on how this has been done in the past.
 
 ### Non-Meteorological Input Data
 
-Can read daily timeseries of land cover information such as albedo, LAI, and partial vegetation cover fraction as forcing variables ([Bohn and Vivoni, accepted](../Documentation/References.md#other-historical-references)).
+Can read daily timeseries of land cover information such as albedo, LAI, and vegetation canopy cover fraction as forcing variables ([Bohn and Vivoni, 2016](../Documentation/References.md#other-historical-references)).
 
 ### Elevation Bands
 
-VIC can consider spatial heterogeneity in precipitation, arising from either storm fronts/local convection or topographic heterogeneity.  Here we consider the influence of topography, via elevation bands (Figure 4).  This is primarily used to produce more accurate estimates of mountain snow pack.  This functionality is controlled by the SNOW_BAND option in the [global parameter file](../Documentation/GlobalParam.md).  Main features:
+VIC can consider spatial heterogeneity in precipitation, arising from either storm fronts/local convection or topographic heterogeneity.  Here we consider the influence of topography, via elevation bands (Figure 4).  This is primarily used to produce more accurate estimates of mountain snow pack.  This functionality is controlled by the `SNOW_BAND` option in the *global parameter file*.  Main features:
 
 
 - Can subdivide the grid cell into arbitrary number of elevation bands, to account for variation of topography within cell
@@ -111,8 +116,8 @@ Figure 4.  VIC snow (elevation) bands.
 
 VIC can use either the approximate soil temperature profile of [Liang et al. (1999)](../Documentation/References.md#other-historical-references) or a finite difference solution that takes soil ice content into account, described in [Cherkauer and Lettenmaier (1999)](../Documentation/References.md#other-historical-references). (Figure 5)
 
-- Liang et al. (1999): set QUICK_FLUX to TRUE in global parameter file; this is the default for FULL_ENERGY = TRUE and FROZEN_SOIL = FALSE.
-- Cherkauer et al. (1999): set QUICK_FLUX to FALSE in global parameter file; this is the default for FROZEN_SOIL = TRUE.
+- Liang et al. (1999): set `QUICK_FLUX = TRUE` in *global parameter file*; this is the default for `FULL_ENERGY = TRUE` and `FROZEN_SOIL = FALSE`.
+- Cherkauer et al. (1999): set `QUICK_FLUX = FALSE` in *global parameter file*; this is the default for `FROZEN_SOIL = TRUE`.
     - By default, the finite difference formulation uses implicit scheme.
     - By default, the nodes of the finite difference formulation are distributed exponentially.
 
@@ -188,13 +193,6 @@ Figure 9.  VIC dynamic lake/wetland interaction.
 - Respiration from the three soil carbon pools is proportional to (the amount of carbon stored in the pool) * exp(-residence time) * (Lloyd-Taylor temperature dependence) * (function of soil moisture).
 - A constant fraction of respiration from each pool enters the atmosphere as CO2. For the litter pool, the remainder of respired carbon is sent to the intermediate and slow pools. For the intermediate pool, the remainder is sent to the slow pool. For the slow pool, all respired carbon is sent to the atmosphere.
 
-## Flow Routing
+## Streamflow Routing
 
-- Routing of stream flow (Figure 10) is performed separately from the land surface simulation, using a separate model, typically the routing model of [Lohmann, et al. (1996; 1998)](../Documentation/References.md#streamflow-routing-model-references)
-- Each grid cell is represented by a node in the channel network
-- The total runoff and baseflow from each grid cell is first convolved with a unit hydrograph representing the distribution of travel times of water from its points of origin to the channel network
-- Then, each grid cell's input into the channel network is routed through the channel using linearized St. Venant's equations
-
-![VIC Routing Model Schematic Link](../img/VIC_routing_model_schematic.png)
-
-Figure 10.  Routing model schematic.
+Routing of stream flow is performed separately from the land surface simulation, using a separate model, typically the routing model of [Lohmann, et al. (1996; 1998)](../Documentation/References.md#streamflow-routing-model-references). The original Lohmann routing model is no longer supported but remains available [here](https://github.com/UW-Hydro/VIC_Routing). An updated version of the model, RVIC, is available [here](http://rvic.readthedocs.org).

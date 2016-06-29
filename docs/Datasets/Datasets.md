@@ -1,13 +1,17 @@
 # Sample Data Sets
 
-*   Stehekin Basin ([vic.sample.stehekin.tgz](ftp://ftp.hydro.washington.edu/pub/HYDRO/models/VIC/Datasets/vic.sample.stehekin.tgz)): example of meteorological forcings, VIC parameters, routing model parameters, for learning to use VIC and the routing model.
-*   Forcings and VIC parameters for the PILPS-2E experiment, Torne-Kalix basin, Sweden: [pilps.tar](ftp://ftp.hydro.washington.edu/pub/HYDRO/models/VIC/Datasets/pilps.tar)
-*   Forcings, VIC parameters, and observations of snow depth and soil moisture and temperatures for the Rosemount site, Illinois: [RosemountTestSet.tgz](ftp://ftp.hydro.washington.edu/pub/HYDRO/models/VIC/Datasets/RosemountTestSet.tgz).
+*   Stehekin Basin ([VIC_sample_data](https://github.com/UW-Hydro/VIC_sample_data)): example of meteorological forcings, and VIC parameters for learning to use the VIC classic and image drivers.
 
+# Test Data Sets
+
+The [VIC test suite](../Development/Testing.md) includes a series of datasets routinely used for testing and validating VIC model output. Reference the test suite [documentation](../Development/Testing.md) for more information on these datasets.
 
 # VIC Input and Output Data Sets
 
 Here are some notable input and output data sets for VIC. If you use these data sets, please cite the corresponding references.
+
+!!! note
+    Some of the following datasets are formatted for earlier versions of VIC. Users should not expect that they are can be used with the current VIC version without modification. If you do modify one of these datasets for use with the current version of VIC, we would appreciate it if you alerted the VIC developers so we can update the publicly available dataset here.
 
 ## Global Datasets
 

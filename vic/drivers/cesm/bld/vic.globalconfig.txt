@@ -1,0 +1,80 @@
+# VIC Global Configuration File
+
+NODES                  50
+OUT_TIME_UNITS         DAYS
+
+# Soil Temperature Options
+FROZEN_SOIL    TRUE
+QUICK_FLUX     FALSE
+QUICK_SOLVE    FALSE
+NOFLUX         TRUE
+IMPLICIT       TRUE
+EXP_TRANS      TRUE
+
+# Snow Options
+SNOW_DENSITY          DENS_SNTHRM
+BLOWING                FALSE
+BLOWING_VAR_THRESHOLD  FALSE
+BLOWING_CALC_PROB      FALSE
+BLOWING_SIMPLE         TRUE
+BLOWING_FETCH          FALSE
+BLOWING_SPATIAL_WIND   FALSE
+
+# MISC
+CORRPREC          FALSE
+CLOSE_ENERGY      TRUE
+COMPUTE_TREELINE  FALSE
+
+AERO_RESIST_CANSNOW  AR_410
+GRND_FLUX_TYPE       GF_410
+SPATIAL_FROST        FALSE
+SPATIAL_SNOW         FALSE
+TFALLBACK            TRUE
+SHARE_LAYER_MOIST    TRUE
+CANOPY_LAYERS        3
+RC_MODE              RC_JARVIS
+
+# Input Files and PATHS
+CONSTANTS        {vic_constants}
+LOG_DIR          {rundir}/
+SOIL             {vic_params}
+VEGPARAM         {vic_params}
+LAI_SRC          FROM_VEGPARAM
+ALB_SRC          FROM_VEGPARAM
+FCAN_SRC         FROM_DEFAULT
+VEGLIB           {vic_params}
+SNOW_BAND        1
+RESULT_DIR       {rundir}/vic.testing.h0.nc
+
+# Domain File
+DOMAIN           {vic_domain}
+DOMAIN_TYPE      LAT     yc
+DOMAIN_TYPE      LON     xc
+DOMAIN_TYPE      MASK    mask
+DOMAIN_TYPE      AREA    area
+DOMAIN_TYPE      FRAC    frac
+DOMAIN_TYPE      YDIM    nj
+DOMAIN_TYPE      XDIM    ni
+
+N_OUTFILES
+OUTFILE     fluxes
+OUTVAR      OUT_PREC
+OUTVAR      OUT_RAINF
+OUTVAR      OUT_SNOWF
+OUTVAR      OUT_AIR_TEMP
+OUTVAR      OUT_SWDOWN
+OUTVAR      OUT_LWDOWN
+OUTVAR      OUT_PRESSURE
+OUTVAR      OUT_WIND
+OUTVAR      OUT_DENSITY
+OUTVAR      OUT_REL_HUMID
+OUTVAR      OUT_QAIR
+OUTVAR      OUT_VP
+OUTVAR      OUT_VPD
+OUTVAR      OUT_RUNOFF
+OUTVAR      OUT_BASEFLOW
+OUTVAR      OUT_EVAP
+OUTVAR      OUT_SWE
+OUTVAR      OUT_SOIL_MOIST
+OUTVAR      OUT_ALBEDO
+OUTVAR      OUT_SOIL_TEMP

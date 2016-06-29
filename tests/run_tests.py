@@ -480,7 +480,8 @@ def run_system(config_file, vic_exe, test_data_dir, out_dir, driver):
     return test_results
 
 
-def run_science(config_file, vic_exe, test_data_dir, out_dir, driver):
+def run_science(config_file, vic_exe, science_test_data_dir,
+                test_data_dir, out_dir, driver):
     '''Run science tests from config file
 
     Parameters
@@ -489,6 +490,8 @@ def run_science(config_file, vic_exe, test_data_dir, out_dir, driver):
         Configuration file for science tests.
     vic_exe : VIC (object)
         VIC executable object (see tonic documentation).
+    science_test_data_dir: str
+        Path to science test data sets (archived VIC runs and observations)
     test_data_dir : str
         Path to test data sets.
     out_dir : str
@@ -519,6 +522,10 @@ def run_science(config_file, vic_exe, test_data_dir, out_dir, driver):
 
     # drop invalid driver tests
     config = drop_tests(config, driver)
+
+    # check to make sure science test data directory exists
+    if not os.path.exists(science_test_data_dir):
+        raise VICTestError("directory for science test data does not exist or has not been defined")
 
     test_results = OrderedDict()
 
@@ -600,6 +607,7 @@ def run_science(config_file, vic_exe, test_data_dir, out_dir, driver):
             # plot science test results
             plot_science_tests(test_dict['driver'],
                                 testname,
+                                science_test_data_dir,
                                 dirs['results'],
                                 dirs['plots']
                                 test_dict['vic4.2.d'],

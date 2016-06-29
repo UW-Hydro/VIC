@@ -325,7 +325,7 @@ def tsplit(string, delimiters):
 
     return stack
 
-def plot_science_tests(driver, testname, result_dir, plot_dir, vic_42_dir, vic_50_dir,
+def plot_science_tests(driver, testname, science_test_data_dir, result_dir, plot_dir, vic_42_dir, vic_50_dir,
                         obs_dir, plots_to_make):
 
     ''' makes science test figures
@@ -336,6 +336,8 @@ def plot_science_tests(driver, testname, result_dir, plot_dir, vic_42_dir, vic_5
         Name of Driver
     testname: <str>
         Name of test
+    science_test_data_dir: <str>
+        Science test data directory
     result_dir: <str>
         Result directory
     plot_dir: <str>
@@ -353,11 +355,23 @@ def plot_science_tests(driver, testname, result_dir, plot_dir, vic_42_dir, vic_5
     ----------
     '''
     if testname == "science_test_snotel":
-        plot_snotel_comparison(driver, testname, result_dir, plot_dir, vic_42_dir, vic_50_dir,
-                                obs_dir, plots_to_make)
+        plot_snotel_comparison(driver,
+                                testname,
+                                result_dir,
+                                plot_dir,
+                                os.path.join(science_test_data_dir, 'test_runs', vic_42_dir, 'snotel', 'results'),
+                                os.path.join(science_test_data_dir, 'test_runs', vic_50_dir, 'snotel', 'results'),
+                                os.path.join(science_test_data_dir, 'datasets', obs_dir, 'observations')
+                                plots_to_make)
     elif testname == "science_test_fluxnet"
-        plot_fluxnet_comparison(driver, testname, result_dir, plot_dir, vic_42_dir, vic_50_dir,
-                                obs_dir, plots_to_make)
+        plot_fluxnet_comparison(driver,
+                                testname,
+                                result_dir,
+                                plot_dir,
+                                os.path.join(science_test_data_dir, 'test_runs', vic_42_dir, 'ecflux', 'results'),
+                                os.path.join(science_test_data_dir, 'test_runs', vic_50_dir, 'ecflux', 'results'),
+                                os.path.join(science_test_data_dir, 'datasets', obs_dir, 'observations')
+                                plots_to_make)
     else:
         print("this has not yet been implemented in the VIC 5.0 science test suite")
 

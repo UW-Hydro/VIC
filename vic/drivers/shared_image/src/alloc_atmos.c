@@ -35,68 +35,53 @@ alloc_atmos(atmos_data_struct *atmos)
     extern option_struct options;
 
     atmos->air_temp = calloc(NR + 1, sizeof(*(atmos->air_temp)));
-    if (atmos->air_temp == NULL) {
-        log_err("Memory allocation error in alloc_atmos().");
-    }
+    check_alloc_status(atmos->air_temp, "Memory allocation error.");
+
     atmos->density = calloc(NR + 1, sizeof(*(atmos->density)));
-    if (atmos->density == NULL) {
-        log_err("Memory allocation error in alloc_atmos().");
-    }
+    check_alloc_status(atmos->density, "Memory allocation error.");
+
     atmos->longwave = calloc(NR + 1, sizeof(*(atmos->longwave)));
-    if (atmos->longwave == NULL) {
-        log_err("Memory allocation error in alloc_atmos().");
-    }
+    check_alloc_status(atmos->longwave, "Memory allocation error.");
+
     atmos->prec = calloc(NR + 1, sizeof(*(atmos->prec)));
-    if (atmos->prec == NULL) {
-        log_err("Memory allocation error in alloc_atmos().");
-    }
+    check_alloc_status(atmos->prec, "Memory allocation error.");
+
     atmos->pressure = calloc(NR + 1, sizeof(*(atmos->pressure)));
-    if (atmos->pressure == NULL) {
-        log_err("Memory allocation error in alloc_atmos().");
-    }
+    check_alloc_status(atmos->pressure, "Memory allocation error.");
+
     atmos->shortwave = calloc(NR + 1, sizeof(*(atmos->shortwave)));
-    if (atmos->shortwave == NULL) {
-        log_err("Memory allocation error in alloc_atmos().");
-    }
+    check_alloc_status(atmos->shortwave, "Memory allocation error.");
+
     atmos->snowflag = calloc(NR + 1, sizeof(*(atmos->snowflag)));
-    if (atmos->snowflag == NULL) {
-        log_err("Memory allocation error in alloc_atmos().");
-    }
+    check_alloc_status(atmos->snowflag, "Memory allocation error.");
+
     atmos->vp = calloc(NR + 1, sizeof(*(atmos->vp)));
-    if (atmos->vp == NULL) {
-        log_err("Memory allocation error in alloc_atmos().");
-    }
+    check_alloc_status(atmos->vp, "Memory allocation error.");
+
     atmos->vpd = calloc(NR + 1, sizeof(*(atmos->vpd)));
-    if (atmos->vpd == NULL) {
-        log_err("Memory allocation error in alloc_atmos().");
-    }
+    check_alloc_status(atmos->vpd, "Memory allocation error.");
+
     atmos->wind = calloc(NR + 1, sizeof(*(atmos->wind)));
-    if (atmos->wind == NULL) {
-        log_err("Memory allocation error in alloc_atmos().");
-    }
+    check_alloc_status(atmos->wind, "Memory allocation error.");
+
     if (options.LAKES) {
         atmos->channel_in = calloc(NR + 1, sizeof(*(atmos->channel_in)));
-        if (atmos->channel_in == NULL) {
-            log_err("Memory allocation error in alloc_atmos().");
-        }
+        check_alloc_status(atmos->channel_in, "Memory allocation error.");
+
     }
     if (options.CARBON) {
         atmos->Catm = calloc(NR + 1, sizeof(*(atmos->Catm)));
-        if (atmos->Catm == NULL) {
-            log_err("Memory allocation error in alloc_atmos().");
-        }
+        check_alloc_status(atmos->Catm, "Memory allocation error.");
+
         atmos->coszen = calloc(NR + 1, sizeof(*(atmos->coszen)));
-        if (atmos->coszen == NULL) {
-            log_err("Memory allocation error in alloc_atmos().");
-        }
+        check_alloc_status(atmos->coszen, "Memory allocation error.");
+
         atmos->fdir = calloc(NR + 1, sizeof(*(atmos->fdir)));
-        if (atmos->fdir == NULL) {
-            log_err("Memory allocation error in alloc_atmos().");
-        }
+        check_alloc_status(atmos->fdir, "Memory allocation error.");
+
         atmos->par = calloc(NR + 1, sizeof(*(atmos->par)));
-        if (atmos->par == NULL) {
-            log_err("Memory allocation error in alloc_atmos().");
-        }
+        check_alloc_status(atmos->par, "Memory allocation error.");
+
     }
 }
 

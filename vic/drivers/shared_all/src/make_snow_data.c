@@ -41,16 +41,11 @@ make_snow_data(size_t nveg)
 
     temp = calloc(nveg, sizeof(*temp));
 
-    if (temp == NULL) {
-        log_err("Memory allocation error in make_snow_data().");
-    }
-
+    check_alloc_status(temp, "Memory allocation error.");
 
     for (i = 0; i < nveg; i++) {
         temp[i] = calloc(options.SNOW_BAND, sizeof(*(temp[i])));
-        if (temp[i] == NULL) {
-            log_err("Memory allocation error in make_snow_data().");
-        }
+        check_alloc_status(temp[i], "Memory allocation error.");
     }
 
     return temp;

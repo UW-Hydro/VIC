@@ -181,7 +181,8 @@ void initialize_domain_info(domain_info_struct *info);
 void initialize_global_structures(void);
 void initialize_history_file(nc_file_struct *nc, stream_struct *stream,
                              dmy_struct *dmy_current);
-void initialize_state_file(char *filename, nc_file_struct *nc_state_file);
+void initialize_state_file(char *filename, nc_file_struct *nc_state_file,
+                           dmy_struct *dmy_current);
 void initialize_location(location_struct *location);
 int initialize_model_state(all_vars_struct *all_vars, size_t Nveg,
                            size_t Nnodes, double surf_temp,

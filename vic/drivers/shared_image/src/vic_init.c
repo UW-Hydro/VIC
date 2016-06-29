@@ -72,19 +72,15 @@ vic_init(void)
 
     // allocate memory for Cv_sum
     Cv_sum = malloc(local_domain.ncells_active * sizeof(*Cv_sum));
-    if (Cv_sum == NULL) {
-        log_err("Memory allocation error in vic_init().");
-    }
+    check_alloc_status(Cv_sum, "Memory allocation error.");
+
 
     // allocate memory for variables to be read
     dvar = malloc(local_domain.ncells_active * sizeof(*dvar));
-    if (dvar == NULL) {
-        log_err("Memory allocation error in vic_init().");
-    }
+    check_alloc_status(dvar, "Memory allocation error.");
     ivar = malloc(local_domain.ncells_active * sizeof(*ivar));
-    if (ivar == NULL) {
-        log_err("Memory allocation error in vic_init().");
-    }
+    check_alloc_status(ivar, "Memory allocation error.");
+
 
     // The method used to convert the NetCDF fields to VIC structures for
     // individual grid cells is to read a 2D slice and then loop over the

@@ -13,39 +13,39 @@ If VIC doesn't already compute the variable you need, or computes it but doesn't
 The list of output variables is a C `enum`.  To add a new variable, begin by appending the new variable to the ***next to*** last position in the `enum`. See the example of adding `OUT_NEW_VAR_NAME` below:
 
 ```C
-/******************************************************************************
- * @brief   Output Variable Types
- *****************************************************************************/
-enum
-{
-    // Water Balance Terms - state variables
-    OUT_ASAT,             /**< Saturated Area Fraction */
-    ...
-    OUT_CSLOW,            /**< Carbon density in slow pool [g C/m2] */
-    OUT_NEW_VAR_NAME      /**< Description of new output variable [units] */
-    // Last value of enum - DO NOT ADD ANYTHING BELOW THIS LINE!!
-    // used as a loop counter and must be >= the largest value in this enum
-    N_OUTVAR_TYPES        /**< used as a loop counter*/
-};
+    /******************************************************************************
+     * @brief   Output Variable Types
+     *****************************************************************************/
+    enum
+    {
+        // Water Balance Terms - state variables
+        OUT_ASAT,             /**< Saturated Area Fraction */
+        ...
+        OUT_CSLOW,            /**< Carbon density in slow pool [g C/m2] */
+        OUT_NEW_VAR_NAME      /**< Description of new output variable [units] */
+        // Last value of enum - DO NOT ADD ANYTHING BELOW THIS LINE!!
+        // used as a loop counter and must be >= the largest value in this enum
+        N_OUTVAR_TYPES        /**< used as a loop counter*/
+    };
 ```
 
 Similarly, for input meteorological variables, we have:
 
 ```C
-/******************************************************************************
- * @brief   Forcing Variable Types
- *****************************************************************************/
-enum
-{
-    AIR_TEMP,       /**< air temperature per time step [C] (ALMA_INPUT: [K]) */
-    ...
-    WIND,           /**< meridional component of wind speed [m/s] */
-    NEW_FORCE_VAR,  /**< Description of new forcing variable [units] */
-    SKIP,           /**< place holder for unused data columns */
-    // Last value of enum - DO NOT ADD ANYTHING BELOW THIS LINE!!
-    // used as a loop counter and must be >= the largest value in this enum
-    N_FORCING_TYPES  /**< Number of forcing types*/
-};
+    /******************************************************************************
+     * @brief   Forcing Variable Types
+     *****************************************************************************/
+    enum
+    {
+        AIR_TEMP,       /**< air temperature per time step [C] (ALMA_INPUT: [K]) */
+        ...
+        WIND,           /**< meridional component of wind speed [m/s] */
+        NEW_FORCE_VAR,  /**< Description of new forcing variable [units] */
+        SKIP,           /**< place holder for unused data columns */
+        // Last value of enum - DO NOT ADD ANYTHING BELOW THIS LINE!!
+        // used as a loop counter and must be >= the largest value in this enum
+        N_FORCING_TYPES  /**< Number of forcing types*/
+    };
 ```
 
 ## 3. For output variables, populate the variable's metadata in `vic_metadata.c`.
@@ -84,15 +84,15 @@ Next, define your variable's default aggregation method. This refers to the meth
 Once again, to add an entry, copy an existing entry and modify it. Possible aggregation methods are:
 
 ```Shell
-AGG_TYPE_AVG : Aggregated value = average of the values over the interval
-                                  (default; used for energy balance terms)
-AGG_TYPE_END : Aggregated value = final value over the interval (used for
-                                  moisture storage terms)
-AGG_TYPE_SUM : Aggregated value = sum of the values over the interval (used
-                                  for moisture fluxes)
-AGG_TYPE_BEG : Aggregated value = first value over the interval
-AGG_TYPE_MIN : Aggregated value = minimum of the values over the interval
-AGG_TYPE_MAX : Aggregated value = maximum of the values over the interval
+    AGG_TYPE_AVG : Aggregated value = average of the values over the interval
+                                      (default; used for energy balance terms)
+    AGG_TYPE_END : Aggregated value = final value over the interval (used for
+                                      moisture storage terms)
+    AGG_TYPE_SUM : Aggregated value = sum of the values over the interval (used
+                                      for moisture fluxes)
+    AGG_TYPE_BEG : Aggregated value = first value over the interval
+    AGG_TYPE_MIN : Aggregated value = minimum of the values over the interval
+    AGG_TYPE_MAX : Aggregated value = maximum of the values over the interval
 ```
 
 ## 4. For output variables, add logic to `put_data.c` to set the variable in the `out_data` array

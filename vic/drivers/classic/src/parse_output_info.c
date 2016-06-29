@@ -73,9 +73,7 @@ parse_output_info(FILE           *gp,
 
     // Allocate streams
     *streams = calloc(options.Noutstreams, sizeof(*(*streams)));
-    if (*streams == NULL) {
-        log_err("Memory allocation error in parse_output_info().");
-    }
+    check_alloc_status(*streams, "Memory allocation error.");
 
     // Setup streams
     for (streamnum = 0;

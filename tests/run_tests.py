@@ -137,6 +137,9 @@ def main():
     parser.add_argument('--data_dir', type=str,
                         help='directory to find test data',
                         default='./samples/VIC_sample_data')
+    parser_add_argument('--science_test_data_dir', type=str,
+                        help='directory to find science test data',
+                        default='./test_runs')
     args = parser.parse_args()
 
     # Define test directories

@@ -398,7 +398,7 @@ def plot_snotel_comparison(driver, testname, result_dir, plot_dir, vic_42_dir, v
                                             format='%Y%m%d')
 
         # load VIC 4.2 data
-        vic_42_file = '%s_%s' % (lat, lng)
+        vic_42_file = 'outfile_%s_%s' % (lat, lng)
 
         vic_42 = pd.read_csv(os.path.join(vic_42_dir, vic_42_file),
                                 sep='\t',
@@ -409,7 +409,7 @@ def plot_snotel_comparison(driver, testname, result_dir, plot_dir, vic_42_dir, v
 
         # load VIC 5.0 data
 
-        vic_50_file = '%s_%s.txt' %(lat, lng)
+        vic_50_file = 'outfile_%s_%s.txt' %(lat, lng)
 
         vic_50 = pd.read_csv(os.path.join(vic_50_dir, vic_50_file),
                                 skiprows=3,

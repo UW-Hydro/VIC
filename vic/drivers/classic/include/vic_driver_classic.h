@@ -35,6 +35,42 @@
 #define MAX_VEGPARAM_LINE_LENGTH 500
 #define ASCII_STATE_FLOAT_FMT "%.16g"
 
+/******************************************************************************
+ * @brief   file structures
+ *****************************************************************************/
+typedef struct {
+    FILE *forcing[MAX_FORCE_FILES];   /**< atmospheric forcing data files */
+    FILE *globalparam;  /**< global parameters file */
+    FILE *constants;    /**< model constants parameter file */
+    FILE *init_state;   /**< initial model state file */
+    FILE *lakeparam;    /**< lake parameter file */
+    FILE *snowband;     /**< snow elevation band data file */
+    FILE *soilparam;    /**< soil parameters for all grid cells */
+    FILE *statefile;    /**< output model state file */
+    FILE *veglib;       /**< vegetation parameters for all vege types */
+    FILE *vegparam;     /**< fractional coverage info for grid cell */
+    FILE *logfile;      /**< log file */
+} filep_struct;
+
+/******************************************************************************
+ * @brief   This structure stores input and output filenames.
+ *****************************************************************************/
+typedef struct {
+    char forcing[MAX_FORCE_FILES][MAXSTRING];    /**< atmospheric forcing data file names */
+    char f_path_pfx[MAX_FORCE_FILES][MAXSTRING]; /**< path and prefix for atmospheric forcing data file names */
+    char global[MAXSTRING];        /**< global control file name */
+    char constants[MAXSTRING];     /**< model constants file name */
+    char init_state[MAXSTRING];    /**< initial model state file name */
+    char lakeparam[MAXSTRING];     /**< lake model constants file */
+    char result_dir[MAXSTRING];    /**< directory where results will be written */
+    char snowband[MAXSTRING];      /**< snow band parameter file name */
+    char soil[MAXSTRING];          /**< soil parameter file name */
+    char statefile[MAXSTRING];     /**< name of file in which to store model state */
+    char veg[MAXSTRING];           /**< vegetation grid coverage file */
+    char veglib[MAXSTRING];        /**< vegetation parameter library file */
+    char log_path[MAXSTRING];      /**< Location to write log file to*/
+} filenames_struct;
+
 void alloc_atmos(int, atmos_data_struct **);
 void alloc_veg_hist(int nrecs, int nveg, veg_hist_struct ***veg_hist);
 void calc_netlongwave(double *, double, double, double);
@@ -50,6 +86,8 @@ void free_veglib(veg_lib_struct **);
 double get_dist(double lat1, double long1, double lat2, double long2);
 void get_force_type(char *, int, int *);
 void get_global_param(FILE *);
+void initialize_filenames(void);
+void initialize_fileps(void);
 void initialize_forcing_files(void);
 void make_in_and_outfiles(filep_struct *filep, filenames_struct *filenames,
                           soil_con_struct *soil, stream_struct **streams,

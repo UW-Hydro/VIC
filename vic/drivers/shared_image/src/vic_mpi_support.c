@@ -293,7 +293,7 @@ create_MPI_filenames_struct_type(MPI_Datatype *mpi_type)
     MPI_Datatype *mpi_types;
 
     // nitems has to equal the number of elements in filenames_struct
-    nitems = 14;
+    nitems = 10;
     blocklengths = malloc(nitems * sizeof(*blocklengths));
     check_alloc_status(blocklengths, "Memory allocation error.");
 
@@ -338,32 +338,16 @@ create_MPI_filenames_struct_type(MPI_Datatype *mpi_type)
     offsets[i] = offsetof(filenames_struct, init_state);
     mpi_types[i++] = MPI_CHAR;
 
-    // char lakeparam[MAXSTRING];
-    offsets[i] = offsetof(filenames_struct, lakeparam);
+    // char params[MAXSTRING];
+    offsets[i] = offsetof(filenames_struct, params);
     mpi_types[i++] = MPI_CHAR;
 
     // char result_dir[MAXSTRING];
     offsets[i] = offsetof(filenames_struct, result_dir);
     mpi_types[i++] = MPI_CHAR;
 
-    // char snowband[MAXSTRING];
-    offsets[i] = offsetof(filenames_struct, snowband);
-    mpi_types[i++] = MPI_CHAR;
-
-    // char soil[MAXSTRING];
-    offsets[i] = offsetof(filenames_struct, soil);
-    mpi_types[i++] = MPI_CHAR;
-
     // char statefile[MAXSTRING];
     offsets[i] = offsetof(filenames_struct, statefile);
-    mpi_types[i++] = MPI_CHAR;
-
-    // char veg[MAXSTRING];
-    offsets[i] = offsetof(filenames_struct, veg);
-    mpi_types[i++] = MPI_CHAR;
-
-    // char veglib[MAXSTRING];
-    offsets[i] = offsetof(filenames_struct, veglib);
     mpi_types[i++] = MPI_CHAR;
 
     // char log_path[MAXSTRING];

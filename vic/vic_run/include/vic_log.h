@@ -64,7 +64,7 @@ void finalize_logging(void);
 void get_logname(const char *path, int id, char *filename);
 void initialize_log(void);
 void print_trace(void);
-void setup_logging(int id);
+void setup_logging(int id, char log_path[], FILE **logfile);
 
 
 // Macros for logging

@@ -15,7 +15,7 @@ FROZEN_SOIL	FALSE
 
 AERO_RESIST_CANSNOW AR_406
 
-DOMAIN $test_data_dir/image/Stehekin/parameters/domain.stehekin.20151028.nc
+DOMAIN         $test_data_dir/image/Stehekin/parameters/domain.stehekin.20151028.nc
 DOMAIN_TYPE    LAT     lat
 DOMAIN_TYPE    LON     lon
 DOMAIN_TYPE    MASK    mask
@@ -24,22 +24,19 @@ DOMAIN_TYPE    FRAC    frac
 DOMAIN_TYPE    YDIM    lat
 DOMAIN_TYPE    XDIM    lon
 
-FORCING1	  $test_data_dir/image/Stehekin/forcings/Stehekin_image_test.forcings_10days.
+FORCING1	    $test_data_dir/image/Stehekin/forcings/Stehekin_image_test.forcings_10days.
 FORCE_TYPE    AIR_TEMP 	   tas
 FORCE_TYPE    PREC 	       prcp
 FORCE_TYPE    PRESSURE 	   pres
 FORCE_TYPE    SWDOWN       dswrf
-FORCE_TYPE    LWDOWN 	   dlwrf
+FORCE_TYPE    LWDOWN 	     dlwrf
 FORCE_TYPE    VP           shum
 FORCE_TYPE    WIND         wind
 WIND_H        10.0
 
-SOIL            $test_data_dir/image/Stehekin/parameters/Stehekin_test_params_20160327.nc
+PARAMETERS      $test_data_dir/image/Stehekin/parameters/Stehekin_test_params_20160327.nc
 NODES           3
-VEGPARAM        $test_data_dir/image/Stehekin/parameters/Stehekin_test_params_20160327.nc
-ROOT_ZONES      3
-VEGLIB	        $test_data_dir/image/Stehekin/parameters/Stehekin_test_params_20160327.nc
-SNOW_BAND	    1 $test_data_dir/image/Stehekin/parameters/Stehekin_test_params_20160327.nc
+SNOW_BAND       TRUE
 
 RESULT_DIR  $result_dir
 

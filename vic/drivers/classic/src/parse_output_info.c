@@ -36,7 +36,6 @@ parse_output_info(FILE           *gp,
                   dmy_struct     *dmy_current)
 {
     extern option_struct       options;
-    extern global_param_struct global_param;
 
     char                       cmdstr[MAXSTRING];
     char                       optstr[MAXSTRING];
@@ -120,6 +119,10 @@ parse_output_info(FILE           *gp,
                     }
                     found = sscanf(cmdstr, "%*s %s %s", freq_type_str,
                                    freq_value_str);
+
+                    debug("Printing AGGFREQ: %s", cmdstr);
+                    debug("Printing freq_type_str: %s", freq_type_str);
+                    debug("Printing freq_value_str: %s", freq_value_str);
 
                     if (!found) {
                         log_err("No arguments found after OUTFREQ");

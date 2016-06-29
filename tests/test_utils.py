@@ -310,7 +310,7 @@ def check_multistream(fnames, driver):
 
 def tsplit(string, delimiters):
     '''Behaves like str.split but supports multiple delimiters.
-    
+
     '''
 
     delimiters = tuple(delimiters)
@@ -462,3 +462,166 @@ def plot_fluxnet_comparison(driver, testname, result_dir, plot_dir, vic_42_dir, 
     ''' makes Ameriflux figures
 
     '''
+
+    # loop over Ameriflux sites
+    for subdir in os.listdir(obs_dir):
+
+        lat_issue = False
+
+        if os.listdir(os.path.join(obs_dir, subdir) != []:
+
+            subdir_files = True
+
+            # get CSV file from site directory to get lat/lng for site
+            try:
+                site_csv_file = glob.glob(os.path.join(obs_dir, subdir, 'AMF*.csv'))[0]
+            except IndexError:
+                site_csv_file = glob.glob(os.path.join(obs_dir, subdir, 'us*.csv'))[0]
+            with open(site_csv_file) as file:
+                second_line = list(file)[1]
+
+            # parse line from header to get lat/lng
+            str_split = tsplit(second_line, ('Latitude: ', 'Longitude: ', 'Elevation (masl): '))
+            lat = str_split[1].strip()
+            lng = str_split[2].strip()
+
+            # load Ameriflux data
+            filename = '%s.stdfmt.hourly.local.txt' %subdir
+
+            # column names for DataFrame
+            # column names
+            names = ['Year', 'Month', 'Day', 'Hour', 'P', 'Tair', 'SWdown', 'LWdown', 'RH', 'Patm',
+                    'Wind', 'ET', 'Tsdep1', 'Tsdep2', 'Tsdep3', 'Tsdep4', 'Tsdep5', 'SM1', 'SM2',
+                    'SM3', 'SM4', 'SM5', 'Tsoil1', 'Tsoil2', 'Tsoil3', 'Tsoil4', 'Tsoil5', 'SWnet',
+                    'LWnet', 'H', 'LE', 'FG']
+
+            # read in data with -9999.0000 as NaNs
+            ecflux_df = pd.read_csv(os.path.join(obs_dir, subdir, filename),
+                    skiprows=0,
+                    delim_whitespace=True,
+                    header=None,
+                    names=names,
+                    na_values=-9999.0000)
+
+            ecflux_df['DATES'] = pd.to_datetime(ecflux_df.Year * 10000 +
+                                         ecflux_df.Month * 100 +
+                                         ecflux_df.Day,format='%Y%m%d')
+
+        else:
+            subdir_files = False
+
+        # load VIC 4.2 simulations
+        ebal_42_file = 'en_bal_%s_%s' % (lat, lng)
+
+        try:
+
+            ebal_42 = pd.read_csv(os.path.join(vic_42_dir,
+                                            ebal_42_file),
+                                            sep='\t',
+                                            skiprows=5)
+
+            # remove comment sign from column names in DataFrame
+            ebal_42 = ebal_42.rename(columns=lambda x: x.replace('#', ''))
+            ebal_42 = ebal_42.rename(columns=lambda x: x.replace(' ', ''))
+
+            ebal_42['DATES'] = pd.to_datetime(ebal_42.YEAR * 10000 +
+                                     ebal_42.MONTH * 100 +
+                                     ebal_42.DAY, format='%Y%m%d')
+        except OSError:
+            lat_issue=True
+
+        # load VIC 5.0 simulations
+        ebal_50_file = 'en_bal_%s_%s.txt' %(lat, lng)
+
+        try:
+
+            # load VIC 5 simulations
+            ebal_50 = pd.read_csv(os.path.join(vic_50_dir,
+                                 ebal_50_file),
+                                 skiprows=3,
+                                 sep='\t')
+
+            # remove space from column names in DataFrame
+            ebal_50 = ebal_50.rename(columns=lambda x: x.replace(' ', ''))
+
+            ebal_50['DATES'] = pd.to_datetime(ebal_50.YEAR * 10000 +
+                                         ebal_50.MONTH * 100 +
+                                         ebal_50.DAY, format='%Y%m%d')
+
+        except OSError:
+            # To-Do: deal with lat/lng precision issue
+
+        try:
+
+            # load VIC 5.x simulations
+            ebal_50x = pd.read_csv(os.path.join(result_dir,
+                                 ebal_50_file),
+                                 skiprows=3,
+                                 sep='\t')
+            # remove space from column names in DataFrame
+            ebal_50x = ebal_50x.rename(columns=lambda x: x.replace(' ', ''))
+
+            ebal_50x['DATES'] = pd.to_datetime(ebal_50x.YEAR * 10000 +
+                                             ebal_50x.MONTH * 100 +
+                                             ebal_50x.DAY, format='%Y%m%d')
+
+        except:
+            OSError
+            # To-Do: deal with lat/lng precision issue for some sites
+
+        # make figures
+
+        ecflux_vars = ['LE', 'H']
+        vic_vars = ['OUT_LATENT', 'OUT_SENSIBLE']
+        variable_names = ['Latent Heat', 'Sensible Heat']
+
+        # plot preferences
+        lw = 4.0
+        fs = 15
+
+        if not lat_issue:
+            if 'annual_mean_diurnal_cycle' in plots_to_make:
+
+                # make annual mean diurnal cycle plots
+                f, axarr = plt.subplots(2, 1, figsize=(8,8))
+
+                for i, ecflux_var in enumerate(ecflux_vars):
+
+                    ebal_42.index = ebal_42.DATES
+
+                    # plt VIC 4.2
+                    axarr[i].plot(ebal_42[vic_vars[i]].groupby(ebal_42['HOUR']).mean(),
+                                'b', label='VIC 4.2', linewidth=lw)
+
+                    # plot VIC 5.0
+                    ebal_50.index = ebal_50.DATES
+
+                    # convert seconds column to hours for groupby
+                    ebal_50['HOUR'] = (ebal_50['SEC'] * (1/3600)).astype(int)
+
+                    axarr[i].plot(ebal_50[vic_vars[i]].groupby(ebal_50['HOUR']).mean(),
+                                'r', label='VIC 5.0', linewidth=lw)
+
+                    # plot VIC 5.0.x
+                    ebal_50x.index = ebal50x.DATES
+
+                    # convert seconds column to hours for groupby
+                    ebal_50x['HOUR'] = (ebal_50x['SEC'] * (1/3600)).astype(int)
+
+                    axarr[i].plot(ebal_50x[vic_vars[i]].groupby(ebal_50x['HOUR']).mean(),
+                                'y', label='VIC 5.0.x', linewidth=lw)
+
+                    axarr[i].legend(loc='upper left')
+                    axarr[i].set_title(variable_names[i])
+                    axarr[i].set_ylabel('W / $m^2$', size=fs))
+                    axarr[i].set_xlim([0,24])
+
+                # save plot
+                plotname = '%s_%s.png'
+                os.makedirs(os.path.join(plot_dir, 'annual_mean'), exist_ok=True)
+                savepath = os.path.join(plot_dir, 'annual_mean', plotname)
+                plt.savefig(savepath, bbox_inches='tight')
+
+            elif 'monthly_mean_diurnal_cycle' in plots_to_make:
+            else:
+                print("this has not yet been implemented")

@@ -59,9 +59,9 @@ MOISTFRACT            FALSE
 PRT_HEADER            TRUE
 PRT_SNOW_BAND         FALSE
 
-N_OUTFILES  2
+N_OUTFILES  1
 
-OUTFILE         snow 14
+OUTFILE         outfile 24
 OUTVAR          OUT_SWE                 %.4f    *       *
 OUTVAR          OUT_SNOW_DEPTH          %.4f    *       *
 OUTVAR          OUT_SNOW_CANOPY         %.4f    *       *
@@ -78,8 +78,6 @@ OUTVAR          OUT_SNOW_PACK_TEMP      %.4f    *       *
 OUTVAR          OUT_SNOW_MELT           %.4f    *       *
 OUTVAR          OUT_ALBEDO              %.4f    *       *
 OUTVAR          OUT_SALBEDO             %.4f    *       *
-
-OUTFILE         en_bal 10
 OUTVAR          OUT_ADV_SENS            %.4f    *       *
 OUTVAR          OUT_ADVECTION           %.4f    *       *
 OUTVAR          OUT_DELTAH              %.4f    *       *

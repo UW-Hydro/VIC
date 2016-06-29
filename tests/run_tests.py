@@ -21,7 +21,8 @@ from test_utils import (setup_test_dirs, print_test_dict,
                         test_classic_driver_all_complete,
                         test_classic_driver_no_output_file_nans,
                         find_global_param_value,
-                        check_multistream)
+                        check_multistream,
+                        plot_science_tests)
 from test_image_driver import test_image_driver_no_output_file_nans
 from test_restart import (prepare_restart_run_periods,
                           setup_subdirs_and_fill_in_global_param_restart_test,
@@ -137,7 +138,7 @@ def main():
     parser.add_argument('--data_dir', type=str,
                         help='directory to find test data',
                         default='./samples/VIC_sample_data')
-    parser_add_argument('--science_test_data_dir', type=str,
+    parser.add_argument('--science_test_data_dir', type=str,
                         help='directory to find science test data',
                         default='./test_runs')
     args = parser.parse_args()
@@ -146,6 +147,11 @@ def main():
     data_dir = args.data_dir
     out_dir = os.path.expandvars(args.output_dir)
     os.makedirs(out_dir, exist_ok=True)
+
+    # check to make sure science test data directory exists
+    science_test_data_dir = args.science_test_data_dir
+    if not os.path.exists(science_test_data_dir):
+        raise VICTestError("directory for science test data does not exist or has not been defined")
 
     # Validate input directories
     if not (len(args.tests) == 1 and args.tests[0] == 'unit'):
@@ -175,7 +181,9 @@ def main():
                                             args.driver)
     # science
     if any(i in ['all', 'science'] for i in args.tests):
-        test_results['science'] = run_science(args.science, vic_exe, data_dir,
+        test_results['science'] = run_science(args.science, vic_exe,
+                                              science_test_data_dir,
+                                              data_dir,
                                               os.path.join(out_dir, 'science'),
                                               args.driver)
     # examples
@@ -523,10 +531,6 @@ def run_science(config_file, vic_exe, science_test_data_dir,
     # drop invalid driver tests
     config = drop_tests(config, driver)
 
-    # check to make sure science test data directory exists
-    if not os.path.exists(science_test_data_dir):
-        raise VICTestError("directory for science test data does not exist or has not been defined")
-
     test_results = OrderedDict()
 
     # Run individual tests
@@ -541,7 +545,8 @@ def run_science(config_file, vic_exe, science_test_data_dir,
                                mkdirs=['results', 'state', 'logs', 'plots'])
 
         # read template global parameter file
-        infile = os.path.join(test_dir, test_dict['global_parameter_file'])
+        infile = os.path.join(test_dir, 'science', test_dict['global_parameter_file'])
+        print(infile)
 
         with open(infile, 'r') as global_file:
             global_param = global_file.read()
@@ -550,7 +555,7 @@ def run_science(config_file, vic_exe, science_test_data_dir,
         s = string.Template(global_param)
 
         # fill in global parameter options
-        global_param = s.safe_substitute(test_data_dir=test_data_dir,
+        global_param = s.safe_substitute(test_data_dir=science_test_data_dir,
                                          result_dir=dirs['results'],
                                          state_dir=dirs['state'],
                                          testname=testname,
@@ -609,7 +614,7 @@ def run_science(config_file, vic_exe, science_test_data_dir,
                                 testname,
                                 science_test_data_dir,
                                 dirs['results'],
-                                dirs['plots']
+                                dirs['plots'],
                                 test_dict['vic4.2.d'],
                                 test_dict['vic5.0.0'],
                                 test_dict['observations_path'],

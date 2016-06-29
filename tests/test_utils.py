@@ -9,9 +9,11 @@ import numpy as np
 import pandas as pd
 import glob
 import re
+import matplotlib.pyplot as plt
 
-from tonic.models.vic.vic import (VICRuntimeError,
-                                  default_vic_valgrind_error_code)
+from tonic.models.vic.vic import VICRuntimeError
+from tonic.models.vic.vic import default_vic_valgrind_error_code
+## Note ## that importing this is causing an error so it's commented out
 from tonic.testing import check_completed, check_for_nans, VICTestError
 
 OUTPUT_WIDTH = 100
@@ -361,16 +363,16 @@ def plot_science_tests(driver, testname, science_test_data_dir, result_dir, plot
                                 plot_dir,
                                 os.path.join(science_test_data_dir, 'test_runs', vic_42_dir, 'snotel', 'results'),
                                 os.path.join(science_test_data_dir, 'test_runs', vic_50_dir, 'snotel', 'results'),
-                                os.path.join(science_test_data_dir, 'datasets', obs_dir, 'observations')
+                                os.path.join(science_test_data_dir, 'datasets', obs_dir, 'observations'),
                                 plots_to_make)
-    elif testname == "science_test_fluxnet"
+    elif testname == "science_test_fluxnet":
         plot_fluxnet_comparison(driver,
                                 testname,
                                 result_dir,
                                 plot_dir,
                                 os.path.join(science_test_data_dir, 'test_runs', vic_42_dir, 'ecflux', 'results'),
                                 os.path.join(science_test_data_dir, 'test_runs', vic_50_dir, 'ecflux', 'results'),
-                                os.path.join(science_test_data_dir, 'datasets', obs_dir, 'observations')
+                                os.path.join(science_test_data_dir, 'datasets', obs_dir, 'obs'),
                                 plots_to_make)
     else:
         print("this has not yet been implemented in the VIC 5.0 science test suite")
@@ -404,22 +406,33 @@ def plot_snotel_comparison(driver, testname, result_dir, plot_dir, vic_42_dir, v
                                 sep='\t',
                                 skiprows=5)
 
-        # remove comment sign from column names in DataFrames
+        # remove comment sign from column names in DataFrame
         vic_42 = vic_42.rename(columns=lambda x: x.replace('#', ''))
+
+        # remove spaces from column names in DataFrame
+        vic_42 = vic_42.rename(columns=lambda x: x.replace(' ', ''))
 
         # load VIC 5.0 data
 
-        vic_50_file = 'outfile_%s_%s.txt' %(lat, lng)
+        vic_50_file = 'outfile_%s_%s.txt' % (lat, lng)
 
         vic_50 = pd.read_csv(os.path.join(vic_50_dir, vic_50_file),
                                 skiprows=3,
                                 sep='\t')
 
-        vic_5x_file = '%s_%s.txt' %(lat, lng)
+        # remove spaces from column names
+        vic_50 = vic_50.rename(columns=lambda x: x.replace(' ', ''))
 
-        vic_50x = pd.read_csv(os.path.join(result_dir, vic_5x_file),
+        # load VIC 5.0.x data
+
+        vic_50x_file = 'outfile_%s_%s.txt' % (lat, lng)
+
+        vic_50x = pd.read_csv(os.path.join(result_dir, vic_50x_file),
                                 skiprows=3,
                                 sep='\t')
+
+        # remove spaces from column names
+        vic_50x = vic_50x.rename(columns=lambda x: x.replace(' ', ''))
 
         # variables to plot
         plot_variables = ['OUT_SWE', 'OUT_ALBEDO', 'OUT_SALBEDO', 'OUT_SNOW_DEPTH',
@@ -448,15 +461,15 @@ def plot_snotel_comparison(driver, testname, result_dir, plot_dir, vic_42_dir, v
                             'k', label='Snotel', linewidth=lw)
 
                 # plot VIC 4.2 simulations
-                plt.plot(snotel_swe['DATES'], vic_42_snow[plot_variable][:len_dates],
+                plt.plot(snotel_swe['DATES'], vic_42[plot_variable][:len_dates],
                         'b', label='VIC 4.2', linewidth=lw)
 
                 # plot VIC 5.0 simulations
-                plt.plot(snotel_swe['DATES'], vic_50_snow[plot_variable][:len_dates],
+                plt.plot(snotel_swe['DATES'], vic_50[plot_variable][:len_dates],
                         'r', label='VIC 5.0', linewidth=lw)
 
                 # plot VIC 5.0.x simulations
-                plt.plot(snotel_swe['DATES'], vic_50x_snow[snow_variable][:len_dates]),
+                plt.plot(snotel_swe['DATES'], vic_50x[plot_variable][:len_dates],
                         'y', label='VIC 5.0.x', linewidth=lw)
 
                 plt.title(plot_variable)
@@ -464,10 +477,13 @@ def plot_snotel_comparison(driver, testname, result_dir, plot_dir, vic_42_dir, v
                 plt.ylabel(plot_units[i])
 
                 # save figure
-                os.makedirs(os.path.join(plot_dir, 'plot_variable'), exist_ok=True)
-                plotname = '%s_%s.png'
-                savepath = os.path.join(plot_dir, 'plot_variable', plotname)
-                plt.savefig(savepath)
+                os.makedirs(os.path.join(plot_dir, plot_variable), exist_ok=True)
+                plotname = '%s_%s.png' % (lat, lng)
+                savepath = os.path.join(plot_dir, plot_variable, plotname)
+                plt.savefig(savepath, bbox_inches='tight')
+
+                plt.clf()
+                plt.close()
 
 
 def plot_fluxnet_comparison(driver, testname, result_dir, plot_dir, vic_42_dir, vic_50_dir,
@@ -482,8 +498,9 @@ def plot_fluxnet_comparison(driver, testname, result_dir, plot_dir, vic_42_dir, 
 
         lat_issue = False
 
-        if os.listdir(os.path.join(obs_dir, subdir) != []:
+        if os.listdir(os.path.join(obs_dir, subdir)) != []:
 
+            # some sites do not have data
             subdir_files = True
 
             # get CSV file from site directory to get lat/lng for site
@@ -563,15 +580,21 @@ def plot_fluxnet_comparison(driver, testname, result_dir, plot_dir, vic_42_dir, 
                                          ebal_50.DAY, format='%Y%m%d')
 
         except OSError:
+            print("this site has a lat/lng precision issue")
+            lat_issue=True
             # To-Do: deal with lat/lng precision issue
+
+        # load VIC 5.0.x simulations
+        ebal_50x_file = 'en_bal_%s_%s.txt' %(lat, lng)
 
         try:
 
             # load VIC 5.x simulations
             ebal_50x = pd.read_csv(os.path.join(result_dir,
-                                 ebal_50_file),
+                                 ebal_50x_file),
                                  skiprows=3,
                                  sep='\t')
+
             # remove space from column names in DataFrame
             ebal_50x = ebal_50x.rename(columns=lambda x: x.replace(' ', ''))
 
@@ -579,8 +602,9 @@ def plot_fluxnet_comparison(driver, testname, result_dir, plot_dir, vic_42_dir, 
                                              ebal_50x.MONTH * 100 +
                                              ebal_50x.DAY, format='%Y%m%d')
 
-        except:
-            OSError
+
+        except OSError:
+            lat_issue=True
             # To-Do: deal with lat/lng precision issue for some sites
 
         # make figures
@@ -592,6 +616,7 @@ def plot_fluxnet_comparison(driver, testname, result_dir, plot_dir, vic_42_dir, 
         # plot preferences
         lw = 4.0
         fs = 15
+        alpha = 1.0
 
         if not lat_issue:
             if 'annual_mean_diurnal_cycle' in plots_to_make:
@@ -617,7 +642,7 @@ def plot_fluxnet_comparison(driver, testname, result_dir, plot_dir, vic_42_dir, 
                                 'r', label='VIC 5.0', linewidth=lw)
 
                     # plot VIC 5.0.x
-                    ebal_50x.index = ebal50x.DATES
+                    ebal_50x.index = ebal_50x.DATES
 
                     # convert seconds column to hours for groupby
                     ebal_50x['HOUR'] = (ebal_50x['SEC'] * (1/3600)).astype(int)
@@ -625,18 +650,33 @@ def plot_fluxnet_comparison(driver, testname, result_dir, plot_dir, vic_42_dir, 
                     axarr[i].plot(ebal_50x[vic_vars[i]].groupby(ebal_50x['HOUR']).mean(),
                                 'y', label='VIC 5.0.x', linewidth=lw)
 
+                    # plot Ameriflux data if it exists for this site
+                    if subdir_files:
+                        ecflux_df.index = ecflux_df.DATES
+
+                        axarr[i].plot(ecflux_df[ecflux_vars[i]].groupby(
+                                ecflux_df["Hour"]).mean(),
+                                'k', label='Ameriflux', linewidth=lw,
+                                alpha=alpha)
+
                     axarr[i].legend(loc='upper left')
                     axarr[i].set_title(variable_names[i])
-                    axarr[i].set_ylabel('W / $m^2$', size=fs))
+                    axarr[i].set_ylabel('W / $m^2$', size=fs)
                     axarr[i].set_xlim([0,24])
 
                 # save plot
-                plotname = '%s_%s.png'
+                plotname = '%s_%s.png' % (lat, lng)
                 os.makedirs(os.path.join(plot_dir, 'annual_mean'), exist_ok=True)
                 savepath = os.path.join(plot_dir, 'annual_mean', plotname)
                 plt.savefig(savepath, bbox_inches='tight')
 
-            elif 'monthly_mean_diurnal_cycle' in plots_to_make:
+                plt.clf()
+                plt.close()
+
+            if 'monthly_mean_diurnal_cycle' in plots_to_make:
+
+                # make monthly mean diurnal cycle plots
+                f, axarr = plt.subplots(2, 12, figsize=(35,7))
 
                 for i, ecflux_var in enumerate(ecflux_vars):
                     for j in range(12):
@@ -682,11 +722,24 @@ def plot_fluxnet_comparison(driver, testname, result_dir, plot_dir, vic_42_dir, 
                         axarr[i,j].plot(vic_monthly_mean_50x[j+1], 'y',
                                         label='VIC 5.0.x', linewidth=lw)
 
+                        # plot Ameriflux data if it exists for this site
+                        if subdir_files:
+                            ecflux_df.index = ecflux_df.DATES
+
+                            # calculate monthly mean diurnal cycle
+                            ecflux_monthly_mean = ecflux_df[ecflux_vars[i]].groupby(
+                                        [ecflux_df['Month'],
+                                        ecflux_df['Hour']]).mean()
+
+                            axarr[i,j].plot(ecflux_monthly_mean[j+1],
+                                        'k', label='Ameriflux', linewidth=lw,
+                                        alpha=alpha)
+
                 # save plot
-                plotname = '%s_%s.png'
+                plotname = '%s_%s.png' % (lat, lng)
                 os.makedirs(os.path.join(plot_dir, 'monthly_mean'), exist_ok=True)
-                savepath = os.path.join(plot_dir, 'montly_mean', plotname)
+                savepath = os.path.join(plot_dir, 'monthly_mean', plotname)
                 plt.savefig(savepath, bbox_inches='tight')
 
-            else:
-                print("this has not yet been implemented")
+                plt.clf()
+                plt.close()

@@ -623,5 +623,56 @@ def plot_fluxnet_comparison(driver, testname, result_dir, plot_dir, vic_42_dir, 
                 plt.savefig(savepath, bbox_inches='tight')
 
             elif 'monthly_mean_diurnal_cycle' in plots_to_make:
+
+                for i, ecflux_var in enumerate(ecflux_vars):
+                    for j in range(12):
+
+                        # plot VIC 4.2
+                        # make datetime column the DataFrame index
+                        ebal_42.index = ebal_42.DATES
+
+                        # calculate monthly mean diurnal cycle
+                        vic_monthly_mean_42 = ebal_42[vic_vars[i]].groupby(
+                                                    [ebal_42['MONTH'], ebal_42['HOUR']]).mean()
+
+                        axarr[i,j].plot(vic_monthly_mean_42[j+1], 'b',
+                                        label='VIC 4.2', linewidth=lw)
+
+                        # plot VIC 5.0
+
+                        # make datetime column the DataFrame index
+                        ebal_50.index = ebal_50.DATES
+
+                        # convert seconds column to hours for groupby
+                        ebal_50['HOUR'] = (ebal_50['SEC'] * (1/3600)).astype(int)
+
+                        # calculate monthly mean diurnal cycle
+                        vic_monthly_mean_50 = ebal_50[vic_vars[i]].groupby(
+                                                    [ebal_50['MONTH'], ebal_50['HOUR']]).mean()
+
+                        axarr[i,j].plot(vic_monthly_mean_50[j+1], 'r',
+                                        label='VIC 5.0', linewidth=lw)
+
+                        # plot VIC 5.0.x
+
+                        # make datetime column the DataFrame index
+                        ebal_50x.index = ebal_50x.DATES
+
+                        # convert seconds column to hours for groupby
+                        ebal_50x['HOUR'] = (ebal_50x['SEC'] * (1/3600)).astype(int)
+
+                        # calculate monthly mean diurnal cycle
+                        vic_monthly_mean_50x = ebal_50x[vic_vars[i]].groupby(
+                                                    [ebal_50x['MONTH'], ebal_50x['HOUR']]).mean()
+
+                        axarr[i,j].plot(vic_monthly_mean_50x[j+1], 'y',
+                                        label='VIC 5.0.x', linewidth=lw)
+
+                # save plot
+                plotname = '%s_%s.png'
+                os.makedirs(os.path.join(plot_dir, 'monthly_mean'), exist_ok=True)
+                savepath = os.path.join(plot_dir, 'montly_mean', plotname)
+                plt.savefig(savepath, bbox_inches='tight')
+
             else:
                 print("this has not yet been implemented")

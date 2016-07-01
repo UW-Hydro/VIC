@@ -69,37 +69,36 @@ ALMA_OUTPUT           FALSE
 MOISTFRACT            FALSE
 PRT_HEADER            TRUE
 PRT_SNOW_BAND         FALSE
+AGGFREQ               NHOURS
 
 N_OUTFILES  2
 
 OUTFILE         snow 16
-OUTVAR          OUT_SWE                 %.4f    *       *
-OUTVAR          OUT_SNOW_DEPTH          %.4f    *       *
-OUTVAR          OUT_SNOW_CANOPY         %.4f    *       *
-OUTVAR          OUT_SNOW_COVER          %.4f    *       *
-OUTVAR          OUT_ADVECTION           %.4f    *       *
-OUTVAR          OUT_DELTACC             %.4f    *       *
-OUTVAR          OUT_SNOW_FLUX           %.4f    *       *
-OUTVAR          OUT_RFRZ_ENERGY         %.4f    *       *
-OUTVAR          OUT_MELT_ENERGY         %.4f    *       *
-OUTVAR          OUT_ADV_SENS            %.4f    *       *
-OUTVAR          OUT_LATENT_SUB          %.4f    *       *
-OUTVAR          OUT_SNOW_SURF_TEMP      %.4f    *       *
-OUTVAR          OUT_SNOW_PACK_TEMP      %.4f    *       *
-OUTVAR          OUT_SNOW_MELT           %.4f    *       *
-OUTVAR          OUT_ALBEDO              %.4f    *       *
-OUTVAR          OUT_SALBEDO             %.4f    *       *
+OUTVAR          OUT_SWE                 %.6g    *       *
+OUTVAR          OUT_SNOW_DEPTH          %.6g    *       *
+OUTVAR          OUT_SNOW_CANOPY         %.6g    *       *
+OUTVAR          OUT_SNOW_COVER          %.6g    *       *
+OUTVAR          OUT_ADVECTION           %.6g    *       *
+OUTVAR          OUT_DELTACC             %.6g    *       *
+OUTVAR          OUT_SNOW_FLUX           %.6g    *       *
+OUTVAR          OUT_RFRZ_ENERGY         %.6g    *       *
+OUTVAR          OUT_MELT_ENERGY         %.6g    *       *
+OUTVAR          OUT_ADV_SENS            %.6g    *       *
+OUTVAR          OUT_LATENT_SUB          %.6g    *       *
+OUTVAR          OUT_SNOW_SURF_TEMP      %.6g    *       *
+OUTVAR          OUT_SNOW_PACK_TEMP      %.6g    *       *
+OUTVAR          OUT_SNOW_MELT           %.6g    *       *
+OUTVAR          OUT_ALBEDO              %.6g    *       *
+OUTVAR          OUT_SALBEDO             %.6g    *       *
 
 OUTFILE         en_bal 10
-OUTVAR          OUT_ADV_SENS            %.4f    *       *
-OUTVAR          OUT_ADVECTION           %.4f    *       *
-OUTVAR          OUT_DELTAH              %.4f    *       *
-OUTVAR          OUT_GRND_FLUX           %.4f    *       *
-OUTVAR          OUT_IN_LONG             %.4f    *       *
-OUTVAR          OUT_LATENT              %.4f    *       *
-OUTVAR          OUT_LATENT_SUB          %.4f    *       *
-OUTVAR          OUT_R_NET               %.4f    *       *
-OUTVAR          OUT_SENSIBLE            %.4f    *       *
-OUTVAR          OUT_RAD_TEMP            %.4f    *       *
-Status API Training Shop Blog About
-© 2016 GitHub, Inc. Terms Privacy Security Contact Help
+OUTVAR          OUT_ADV_SENS            %.6g    *       *
+OUTVAR          OUT_ADVECTION           %.6g    *       *
+OUTVAR          OUT_DELTAH              %.6g    *       *
+OUTVAR          OUT_GRND_FLUX           %.6g    *       *
+OUTVAR          OUT_IN_LONG             %.6g    *       *
+OUTVAR          OUT_LATENT              %.6g    *       *
+OUTVAR          OUT_LATENT_SUB          %.6g    *       *
+OUTVAR          OUT_R_NET               %.6g    *       *
+OUTVAR          OUT_SENSIBLE            %.6g    *       *
+OUTVAR          OUT_RAD_TEMP            %.6g    *       *

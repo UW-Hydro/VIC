@@ -1,7 +1,8 @@
 /******************************************************************************
  * @section DESCRIPTION
  *
- * Get netCDF dimension.
+ * This subroutine initalizes all filefilenames before they are called by
+ * the model.
  *
  * @section LICENSE
  *
@@ -27,36 +28,44 @@
 #include <vic_driver_shared_image.h>
 
 /******************************************************************************
- * @brief    Get netCDF dimension.
+ * @brief    Initialize all filenames before they are called by the
+ *           model.
  *****************************************************************************/
-int
-get_nc_varndimensions(char *nc_name,
-                      char *var_name)
+void
+initialize_filenames()
 {
-    int nc_id;
-    int var_id;
-    int ndims;
-    int status;
+    extern filenames_struct filenames;
 
-    // open the netcdf file
-    status = nc_open(nc_name, NC_NOWRITE, &nc_id);
-    check_nc_status(status, "Error opening %s", nc_name);
+    size_t                  i;
 
-    // get variable id
-    status = nc_inq_varid(nc_id, var_name, &var_id);
-    check_nc_status(status, "Error getting variable id %s in %s", var_name,
-                    nc_name);
+    strcpy(filenames.init_state, "MISSING");
+    strcpy(filenames.statefile, "MISSING");
+    strcpy(filenames.constants, "MISSING");
+    strcpy(filenames.params, "MISSING");
+    strcpy(filenames.result_dir, "MISSING");
+    strcpy(filenames.log_path, "MISSING");
+    for (i = 0; i < 2; i++) {
+        strcpy(filenames.f_path_pfx[i], "MISSING");
+    }
+}
 
-    // get number of dimensions
-    status = nc_inq_varndims(nc_id, var_id, &ndims);
-    check_nc_status(status,
-                    "Error getting number of dimensions for var %s in %s",
-                    var_name,
-                    nc_name);
+/******************************************************************************
+ * @brief    Initialize all file pointers
+ *****************************************************************************/
+void
+initialize_fileps()
+{
+    extern filep_struct filep;
 
-    // close the netcdf file
-    status = nc_close(nc_id);
-    check_nc_status(status, "Error closing %s", nc_name);
+    size_t              i;
 
-    return ndims;
+    filep.globalparam = NULL;
+    filep.constants = NULL;
+    filep.init_state = NULL;
+    filep.paramfile = NULL;
+    filep.statefile = NULL;
+    filep.logfile = NULL;
+    for (i = 0; i < 2; i++) {
+        filep.forcing[i] = NULL;
+    }
 }

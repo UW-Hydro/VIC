@@ -154,6 +154,36 @@ typedef struct {
     double *Cv;    /**< array of fractional coverage for nc_types */
 } veg_con_map_struct;
 
+/******************************************************************************
+ * @brief   file structures
+ *****************************************************************************/
+typedef struct {
+    FILE *forcing[MAX_FORCE_FILES];   /**< atmospheric forcing data files */
+    FILE *globalparam;  /**< global parameters file */
+    FILE *constants;    /**< model constants parameter file */
+    FILE *domain;       /**< domain file */
+    FILE *init_state;   /**< initial model state file */
+    FILE *paramfile;    /**< parameter file */
+    FILE *statefile;    /**< output model state file */
+    FILE *logfile;      /**< log file */
+} filep_struct;
+
+/******************************************************************************
+ * @brief   This structure stores input and output filenames.
+ *****************************************************************************/
+typedef struct {
+    char forcing[MAX_FORCE_FILES][MAXSTRING];    /**< atmospheric forcing data file names */
+    char f_path_pfx[MAX_FORCE_FILES][MAXSTRING]; /**< path and prefix for atmospheric forcing data file names */
+    char global[MAXSTRING];        /**< global control file name */
+    char domain[MAXSTRING];        /**< domain file name */
+    char constants[MAXSTRING];     /**< model constants file name */
+    char params[MAXSTRING];        /**< model parameters file name */
+    char init_state[MAXSTRING];    /**< initial model state file name */
+    char result_dir[MAXSTRING];    /**< directory where results will be written */
+    char statefile[MAXSTRING];     /**< name of file in which to store model state */
+    char log_path[MAXSTRING];      /**< Location to write log file to */
+} filenames_struct;
+
 void add_nveg_to_global_domain(char *nc_name, domain_struct *global_domain);
 void alloc_atmos(atmos_data_struct *atmos);
 void alloc_veg_hist(veg_hist_struct *veg_hist);
@@ -178,6 +208,8 @@ int get_nc_dtype(unsigned short int dtype);
 int get_nc_mode(unsigned short int format);
 void initialize_domain(domain_struct *domain);
 void initialize_domain_info(domain_info_struct *info);
+void initialize_filenames(void);
+void initialize_fileps(void);
 void initialize_global_structures(void);
 void initialize_history_file(nc_file_struct *nc, stream_struct *stream,
                              dmy_struct *dmy_current);

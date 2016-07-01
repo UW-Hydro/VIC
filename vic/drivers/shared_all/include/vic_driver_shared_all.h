@@ -42,6 +42,8 @@
 #define OUT_MULT_DEFAULT 0  // Why is this not 1?
 #define OUT_ASCII_FORMAT_DEFAULT "%.4f"
 
+// Default snow band setting
+#define SNOW_BAND_UNSET 99999
 
 /******************************************************************************
  * @brief   File formats
@@ -438,44 +440,6 @@ enum time_units
 };
 
 /******************************************************************************
- * @brief   file structures
- *****************************************************************************/
-typedef struct {
-    FILE *forcing[MAX_FORCE_FILES];   /**< atmospheric forcing data files */
-    FILE *globalparam;  /**< global parameters file */
-    FILE *constants;    /**< model constants parameter file */
-    FILE *domain;       /**< domain file */
-    FILE *init_state;   /**< initial model state file */
-    FILE *lakeparam;    /**< lake parameter file */
-    FILE *snowband;     /**< snow elevation band data file */
-    FILE *soilparam;    /**< soil parameters for all grid cells */
-    FILE *statefile;    /**< output model state file */
-    FILE *veglib;       /**< vegetation parameters for all vege types */
-    FILE *vegparam;     /**< fractional coverage info for grid cell */
-    FILE *logfile;      /**< log file */
-} filep_struct;
-
-/******************************************************************************
- * @brief   This structure stores input and output filenames.
- *****************************************************************************/
-typedef struct {
-    char forcing[MAX_FORCE_FILES][MAXSTRING];    /**< atmospheric forcing data file names */
-    char f_path_pfx[MAX_FORCE_FILES][MAXSTRING]; /**< path and prefix for atmospheric forcing data file names */
-    char global[MAXSTRING];        /**< global control file name */
-    char domain[MAXSTRING];        /**< domain file name */
-    char constants[MAXSTRING];     /**< model constants file name */
-    char init_state[MAXSTRING];    /**< initial model state file name */
-    char lakeparam[MAXSTRING];     /**< lake model constants file */
-    char result_dir[MAXSTRING];    /**< directory where results will be written */
-    char snowband[MAXSTRING];      /**< snow band parameter file name */
-    char soil[MAXSTRING];          /**< soil parameter file name */
-    char statefile[MAXSTRING];     /**< name of file in which to store model state */
-    char veg[MAXSTRING];           /**< vegetation grid coverage file */
-    char veglib[MAXSTRING];        /**< vegetation parameter library file */
-    char log_path[MAXSTRING];      /**< Location to write log file to*/
-} filenames_struct;
-
-/******************************************************************************
  * @brief    Stores forcing file input information.
  *****************************************************************************/
 typedef struct {
@@ -575,7 +539,6 @@ typedef struct {
     atmos_data_struct *atmos;
     double dt;
     energy_bal_struct *energy;
-    filep_struct filep;
     size_t rec;
     double **out_data;
     stream_struct *output_streams;
@@ -641,8 +604,6 @@ void get_parameters(FILE *paramfile);
 void init_output_list(double **out_data, int write, char *format, int type,
                       double mult);
 void initialize_energy(energy_bal_struct **energy, size_t nveg);
-void initialize_filenames(void);
-void initialize_fileps(void);
 void initialize_global(void);
 void initialize_options(void);
 void initialize_parameters(void);
@@ -678,8 +639,6 @@ void print_alarm(alarm_struct *alarm);
 void print_cell_data(cell_data_struct *cell, size_t nlayers, size_t nfrost);
 void print_dmy(dmy_struct *dmy);
 void print_energy_bal(energy_bal_struct *eb, size_t nnodes, size_t nfronts);
-void print_filenames(filenames_struct *fnames);
-void print_filep(filep_struct *fp);
 void print_force_type(force_type_struct *force_type);
 void print_global_param(global_param_struct *gp);
 void print_lake_con(lake_con_struct *lcon, size_t nlnodes);

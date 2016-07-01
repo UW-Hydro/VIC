@@ -44,12 +44,14 @@ get_nc_dimension(char *nc_name,
 
     // get dimension id
     status = nc_inq_dimid(nc_id, dim_name, &dim_id);
-    check_nc_status(status, "Error getting dimension id %s in %s", dim_name, nc_name);
+    check_nc_status(status, "Error getting dimension id %s in %s", dim_name,
+                    nc_name);
 
     // get dimension size
     status = nc_inq_dimlen(nc_id, dim_id, &dim_size);
-    check_nc_status(status, "Error getting dimension size for dim %s in %s", dim_name,
-                nc_name);
+    check_nc_status(status, "Error getting dimension size for dim %s in %s",
+                    dim_name,
+                    nc_name);
 
     // close the netcdf file
     status = nc_close(nc_id);

@@ -483,7 +483,7 @@ get_global_param(FILE *gp)
             else if (strcasecmp("SNOW_BAND", optstr) == 0) {
                 sscanf(cmdstr, "%*s %s", flgstr);
                 if (str_to_bool(flgstr)) {
-                    options.SNOW_BAND = SNOW_BAND_UNSET;
+                    options.SNOW_BAND = SNOW_BAND_TRUE_BUT_UNSET;
                 }
             }
             else if (strcasecmp("LAKES", optstr) == 0) {

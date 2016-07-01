@@ -43,7 +43,7 @@
 #define OUT_ASCII_FORMAT_DEFAULT "%.4f"
 
 // Default snow band setting
-#define SNOW_BAND_UNSET 99999
+#define SNOW_BAND_TRUE_BUT_UNSET 99999
 
 /******************************************************************************
  * @brief   File formats

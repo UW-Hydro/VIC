@@ -229,7 +229,7 @@ void print_atmos_data(atmos_data_struct *atmos);
 void print_domain(domain_struct *domain, bool print_loc);
 void print_location(location_struct *location);
 void print_nc_file(nc_file_struct *nc);
-void print_nc_var(nc_var_struct *nc_var, size_t ndims);
+void print_nc_var(nc_var_struct *nc_var);
 void print_veg_con_map(veg_con_map_struct *veg_con_map);
 void put_nc_attr(int nc_id, int var_id, const char *name, const char *value);
 void set_force_type(char *cmdstr, int file_num, int *field);

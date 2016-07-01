@@ -40,22 +40,17 @@ alloc_out_data(size_t     ngridcells,
     size_t                 k;
 
     *out_data = calloc(ngridcells, sizeof(*(*out_data)));
-    if ((*out_data) == NULL) {
-        log_err("Memory allocation error.");
-    }
+    check_alloc_status(*out_data, "Memory allocation error.");
 
     for (i = 0; i < ngridcells; i++) {
         (*out_data)[i] = calloc(N_OUTVAR_TYPES, sizeof(*((*out_data)[i])));
-        if ((*out_data)[i] == NULL) {
-            log_err("Memory allocation error.");
-        }
+        check_alloc_status((*out_data)[i], "Memory allocation error.");
         // Allocate space for data
         for (j = 0; j < N_OUTVAR_TYPES; j++) {
             (*out_data)[i][j] =
                 calloc(out_metadata[j].nelem, sizeof(*((*out_data)[i][j])));
-            if ((*out_data)[i][j] == NULL) {
-                log_err("Memory allocation error.");
-            }
+            check_alloc_status((*out_data)[i][j], "Memory allocation error.");
+
             // initialize data member
             for (k = 0; k < out_metadata[j].nelem; k++) {
                 (*out_data)[i][j][k] = 0;
@@ -90,31 +85,24 @@ setup_stream(stream_struct *stream,
 
     // Allocate stream members of shape [nvars]
     stream->varid = calloc(nvars, sizeof(*(stream->varid)));
-    if (stream->varid == NULL) {
-        log_err("Memory allocation error.");
-    }
+    check_alloc_status(stream->varid, "Memory allocation error.");
+
     stream->aggtype = calloc(nvars, sizeof(*(stream->aggtype)));
-    if (stream->aggtype == NULL) {
-        log_err("Memory allocation error.");
-    }
+    check_alloc_status(stream->aggtype, "Memory allocation error.");
+
     stream->type = calloc(nvars, sizeof(*(stream->type)));
-    if (stream->type == NULL) {
-        log_err("Memory allocation error.");
-    }
+    check_alloc_status(stream->type, "Memory allocation error.");
+
     stream->mult = calloc(nvars, sizeof(*(stream->mult)));
-    if (stream->mult == NULL) {
-        log_err("Memory allocation error.");
-    }
+    check_alloc_status(stream->mult, "Memory allocation error.");
+
     // Question: do we have to dynamically allocate the length of each string
     stream->format = calloc(nvars, sizeof(*(stream->format)));
-    if (stream->format == NULL) {
-        log_err("Memory allocation error.");
-    }
+    check_alloc_status(stream->format, "Memory allocation error.");
+
     for (i = 0; i < nvars; i++) {
         stream->format[i] = calloc(MAXSTRING, sizeof(*(stream->format[i])));
-        if (stream->format[i] == NULL) {
-            log_err("Memory allocation error.");
-        }
+        check_alloc_status(stream->format[i], "Memory allocation error.");
     }
     // Initialize some of the stream members
     // these will be overwritten in set_output_var
@@ -182,29 +170,23 @@ alloc_aggdata(stream_struct *stream)
     size_t                 nelem;
 
     stream->aggdata = calloc(stream->ngridcells, sizeof(*(stream->aggdata)));
-    if (stream->aggdata == NULL) {
-        log_err("Memory allocation error.");
-    }
+    check_alloc_status(stream->aggdata, "Memory allocation error.");
+
     for (i = 0; i < stream->ngridcells; i++) {
         stream->aggdata[i] =
             calloc(stream->nvars, sizeof(*(stream->aggdata[i])));
-        if (stream->aggdata[i] == NULL) {
-            log_err("Memory allocation error.");
-        }
+        check_alloc_status(stream->aggdata[i], "Memory allocation error.");
         for (j = 0; j < stream->nvars; j++) {
             nelem = out_metadata[stream->varid[j]].nelem;
             stream->aggdata[i][j] =
                 calloc(nelem, sizeof(*(stream->aggdata[i][j])));
-            if (stream->aggdata[i][j] == NULL) {
-                log_err("Memory allocation error.");
-            }
+            check_alloc_status(stream->aggdata[i][j], "Memory allocation error.");
+
             for (k = 0; k < nelem; k++) {
                 // TODO: Also allocate for nbins, for now just setting to size 1
                 stream->aggdata[i][j][k] =
                     calloc(1, sizeof(*(stream->aggdata[i][j][k])));
-                if (stream->aggdata[i][j][k] == NULL) {
-                    log_err("Memory allocation error.");
-                }
+                check_alloc_status(stream->aggdata[i][j][k], "Memory allocation error.");
             }
         }
     }

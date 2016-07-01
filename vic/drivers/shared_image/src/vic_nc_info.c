@@ -197,7 +197,7 @@ get_nc_mode(unsigned short int format)
         nc_format = NC_64BIT_OFFSET;
         break;
     case NETCDF4_CLASSIC:
-        nc_format = (NC_NETCDF4 | NC_CLASSIC_MODEL);
+        nc_format = NC_CLASSIC_MODEL;
         break;
     case NETCDF4:
         nc_format = NC_NETCDF4;

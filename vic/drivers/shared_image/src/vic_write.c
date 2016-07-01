@@ -92,45 +92,39 @@ vic_write(stream_struct  *stream,
             if (dvar == NULL) {
                 // allocate memory for variables to be stored
                 dvar = malloc(local_domain.ncells_active * sizeof(*dvar));
-                if (dvar == NULL) {
-                    log_err("Memory allocation error");
-                }
+                check_alloc_status(dvar, "Memory allocation error");
+
             }
         }
         else if (nc_hist_file->nc_vars[k].nc_type == NC_FLOAT) {
             if (fvar == NULL) {
                 // allocate memory for variables to be stored
                 fvar = malloc(local_domain.ncells_active * sizeof(*fvar));
-                if (fvar == NULL) {
-                    log_err("Memory allocation error");
-                }
+                check_alloc_status(fvar, "Memory allocation error");
             }
         }
         else if (nc_hist_file->nc_vars[k].nc_type == NC_INT) {
             if (ivar == NULL) {
                 // allocate memory for variables to be stored
                 ivar = malloc(local_domain.ncells_active * sizeof(*ivar));
-                if (ivar == NULL) {
-                    log_err("Memory allocation error");
-                }
+                check_alloc_status(ivar, "Memory allocation error");
+
             }
         }
         else if (nc_hist_file->nc_vars[k].nc_type == NC_SHORT) {
             if (svar == NULL) {
                 // allocate memory for variables to be stored
                 svar = malloc(local_domain.ncells_active * sizeof(*svar));
-                if (svar == NULL) {
-                    log_err("Memory allocation error");
-                }
+                check_alloc_status(svar, "Memory allocation error");
+
             }
         }
         else if (nc_hist_file->nc_vars[k].nc_type == NC_CHAR) {
             if (cvar == NULL) {
                 // allocate memory for variables to be stored
                 cvar = malloc(local_domain.ncells_active * sizeof(*cvar));
-                if (cvar == NULL) {
-                    log_err("Memory allocation error");
-                }
+                check_alloc_status(cvar, "Memory allocation error");
+
             }
         }
         else {

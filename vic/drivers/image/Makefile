@@ -111,6 +111,12 @@ CFLAGS  =  ${INCLUDES} -ggdb -O0 -Wall -Wextra -std=c99 \
 					 -DGIT_VERSION=\"$(GIT_VERSION)\" \
 					 -DUSERNAME=\"$(USER)\" \
 					 -DHOSTNAME=\"$(HOSTNAME)\"
+
+ifeq (true, ${TRAVIS})
+# Add extra debugging for builds on travis
+CFLAGS += -rdynamic -Wl,-export-dynamic
+endif
+
 LIBRARY = -lm -L${NETCDFPATH}/lib -lnetcdf
 
 COMPEXE = vic_image

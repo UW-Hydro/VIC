@@ -47,24 +47,31 @@ compute_soil_resp(int     Nnodes,
 
     int                      i;
     double                   Tref;
-    double                  *TK;
+    double                  *TK = NULL;
     double                   fTLitter;
-    double                  *fTSoil;
+    double                  *fTSoil = NULL;
     double                   fMLitter;
-    double                  *fMSoil;
-    double                  *CInterNode;
-    double                  *CSlowNode;
-    double                  *RhInter;
-    double                  *RhSlow;
+    double                  *fMSoil = NULL;
+    double                  *CInterNode = NULL;
+    double                  *CSlowNode = NULL;
+    double                  *RhInter = NULL;
+    double                  *RhSlow = NULL;
 
     /* Allocate temp arrays */
     TK = calloc(Nnodes, sizeof(*TK));
+    check_alloc_status(TK, "Memory allocation error.");
     fTSoil = calloc(Nnodes, sizeof(*fTSoil));
+    check_alloc_status(fTSoil, "Memory allocation error.");
     fMSoil = calloc(Nnodes, sizeof(*fMSoil));
+    check_alloc_status(fMSoil, "Memory allocation error.");
     CInterNode = calloc(Nnodes, sizeof(*CInterNode));
+    check_alloc_status(CInterNode, "Memory allocation error.");
     CSlowNode = calloc(Nnodes, sizeof(*CSlowNode));
+    check_alloc_status(CSlowNode, "Memory allocation error.");
     RhInter = calloc(Nnodes, sizeof(*RhInter));
+    check_alloc_status(RhInter, "Memory allocation error.");
     RhSlow = calloc(Nnodes, sizeof(*RhSlow));
+    check_alloc_status(RhSlow, "Memory allocation error.");
 
     /* Compute Lloyd-Taylor temperature dependence */
     Tref = 10. + CONST_TKFRZ; /* reference temperature of 10 C */

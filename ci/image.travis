@@ -49,7 +49,8 @@ function vic_before_install {
         find ${TRAVIS_MPIPATH} -name mpiexec
         find ${TRAVIS_MPIPATH} -name mpicc
 	fi
-
+    export PATH=$TRAVIS_MPIPATH/bin:$PATH
+    mpiexec --version
 }
 
 function vic_install {
@@ -80,8 +81,7 @@ function vic_script {
     ./tests/run_tests.py unit examples system \
         --vic_exe=${DRIVER_EXE} \
         --driver=${TESTID} \
-        --data_dir=${SAMPLES_PATH}/data \
-        --examples=./tests/examples/examples.cfg
+        --data_dir=${SAMPLES_PATH}/data
 
 }
 

@@ -120,10 +120,6 @@ parse_output_info(FILE           *gp,
                     found = sscanf(cmdstr, "%*s %s %s", freq_type_str,
                                    freq_value_str);
 
-                    debug("Printing AGGFREQ: %s", cmdstr);
-                    debug("Printing freq_type_str: %s", freq_type_str);
-                    debug("Printing freq_value_str: %s", freq_value_str);
-
                     if (!found) {
                         log_err("No arguments found after OUTFREQ");
                     }
@@ -198,6 +194,7 @@ parse_output_info(FILE           *gp,
                     strcpy(format, "");
                     strcpy(typestr, "");
                     strcpy(multstr, "");
+                    strcpy(aggstr, "");
                     found = sscanf(cmdstr, "%*s %s %s %s %s %s", varname,
                                    format, typestr, multstr, aggstr);
                     if (!found) {

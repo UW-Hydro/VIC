@@ -34,13 +34,12 @@ rout_run(void)
 {
     log_info("In Routing Lohmann Model");
 
-    extern rout_struct       rout;
-//    extern out_data_struct **out_data;
-    extern double           ***out_data;
-
-    size_t                   iSource, iOutlet, iTimestep, jTimestep;
-    int                      offset; /*2d indicies*/
-    size_t                   iRing, iUH; /*1d indicies*/
+    extern rout_struct   rout;
+    extern double     ***out_data;
+    extern domain_struct local_domain;
+    size_t               iSource, iOutlet, iTimestep, jTimestep;
+    int                  offset;     /*2d indicies*/
+    size_t               iRing, iUH;     /*1d indicies*/
 
     // Zero out current ring
     // in python: (from variables.py) self.ring[tracer][0, :] = 0.
@@ -81,6 +80,10 @@ rout_run(void)
 
     // Write to output struct...
     for (iOutlet = 0; iOutlet < rout.rout_param.nOutlets; iOutlet++) {
-        out_data[rout.rout_param.outlet_VIC_index[iOutlet]][OUT_DISCHARGE][0] = rout.ring[iOutlet];
+        out_data[rout.rout_param.outlet_VIC_index[iOutlet]][OUT_DISCHARGE][0] =
+            rout.ring[iOutlet] *
+            local_domain
+            .locations[rout.rout_param.outlet_VIC_index[iOutlet]].area /
+            (SEC_PER_DAY * MM_PER_M);
     }
 }

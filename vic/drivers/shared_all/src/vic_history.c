@@ -250,7 +250,6 @@ get_default_outvar_aggtype(unsigned int varid)
 
     switch (varid) {
     // AGG_TYPE_END
-    case OUT_DISCHARGE:
     case OUT_ASAT:
     case OUT_LAKE_AREA_FRAC:
     case OUT_LAKE_DEPTH:
@@ -285,6 +284,7 @@ get_default_outvar_aggtype(unsigned int varid)
         agg_type = AGG_TYPE_END;
         break;
     // AGG_TYPE_SUM
+    case OUT_DISCHARGE:
     case OUT_BASEFLOW:
     case OUT_DELINTERCEPT:
     case OUT_DELSOILMOIST:

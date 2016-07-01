@@ -36,7 +36,7 @@ WIND_H        10.0
 
 PARAMETERS      $test_data_dir/image/Stehekin/parameters/Stehekin_test_params_20160327.nc
 NODES           3
-SNOW_BAND	      TRUE
+SNOW_BAND       TRUE
 
 RESULT_DIR  $result_dir/
 

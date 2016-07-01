@@ -112,10 +112,12 @@ initialize_log(void)
  * @brief    Set global log destination
  *****************************************************************************/
 void
-setup_logging(int id, char log_path[], FILE **logfile)
+setup_logging(int    id,
+              char   log_path[],
+              FILE **logfile)
 {
-    extern FILE            *LOG_DEST;
-    char                    logfilename[MAXSTRING];
+    extern FILE *LOG_DEST;
+    char         logfilename[MAXSTRING];
 
     if (strcmp(log_path, "MISSING") != 0) {
         // Create logfile name

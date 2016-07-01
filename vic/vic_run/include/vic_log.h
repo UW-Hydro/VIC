@@ -130,7 +130,10 @@ void setup_logging(int id, char log_path[], FILE **logfile);
 
 #define check(A, M, ...) if (!(A)) {log_err(M, ## __VA_ARGS__); errno = 0; exit( \
                                         EXIT_FAILURE); }
-#define check_alloc_status(A, M, ...) if (A == NULL) {log_err(M, ## __VA_ARGS__); errno = 0; exit(EXIT_FAILURE); }
+#define check_alloc_status(A, M, \
+                           ...) if (A == NULL) {log_err(M, ## __VA_ARGS__); \
+                                                errno = 0; exit( \
+                                                    EXIT_FAILURE); }
 
 #define sentinel(M, ...)  {log_err(M, ## __VA_ARGS__); errno = 0; exit( \
                                EXIT_FAILURE); }

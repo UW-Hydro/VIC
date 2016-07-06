@@ -30,7 +30,7 @@
  * @brief    Print atmos data structure.
  *****************************************************************************/
 void
-print_atmos_data(atmos_data_struct *atmos,
+print_atmos_data(force_data_struct *force,
                  size_t             nr)
 {
     extern option_struct options;
@@ -39,90 +39,90 @@ print_atmos_data(atmos_data_struct *atmos,
     fprintf(LOG_DEST, "atmos_data  :\n");
     fprintf(LOG_DEST, "\tair_temp  :");
     for (i = 0; i <= nr; i++) {
-        fprintf(LOG_DEST, "\t%.4f", atmos->air_temp[i]);
+        fprintf(LOG_DEST, "\t%.4f", force->air_temp[i]);
     }
     fprintf(LOG_DEST, "\n");
     fprintf(LOG_DEST, "\tdensity   :");
     for (i = 0; i <= nr; i++) {
-        fprintf(LOG_DEST, "\t%.4f", atmos->density[i]);
+        fprintf(LOG_DEST, "\t%.4f", force->density[i]);
     }
     fprintf(LOG_DEST, "\n");
     fprintf(LOG_DEST, "\tlongwave  :");
     for (i = 0; i <= nr; i++) {
-        fprintf(LOG_DEST, "\t%.4f", atmos->longwave[i]);
+        fprintf(LOG_DEST, "\t%.4f", force->longwave[i]);
     }
     fprintf(LOG_DEST, "\n");
     fprintf(LOG_DEST, "\tout_prec  :");
     for (i = 0; i <= nr; i++) {
-        fprintf(LOG_DEST, "\t%.4f", atmos->out_prec);
+        fprintf(LOG_DEST, "\t%.4f", force->out_prec);
     }
     fprintf(LOG_DEST, "\n");
     fprintf(LOG_DEST, "\tout_rain  :");
     for (i = 0; i <= nr; i++) {
-        fprintf(LOG_DEST, "\t%.4f", atmos->out_rain);
+        fprintf(LOG_DEST, "\t%.4f", force->out_rain);
     }
     fprintf(LOG_DEST, "\n");
     fprintf(LOG_DEST, "\tout_snow  :");
     for (i = 0; i <= nr; i++) {
-        fprintf(LOG_DEST, "\t%.4f", atmos->out_snow);
+        fprintf(LOG_DEST, "\t%.4f", force->out_snow);
     }
     fprintf(LOG_DEST, "\n");
     fprintf(LOG_DEST, "\tprec      :");
     for (i = 0; i <= nr; i++) {
-        fprintf(LOG_DEST, "\t%.4f", atmos->prec[i]);
+        fprintf(LOG_DEST, "\t%.4f", force->prec[i]);
     }
     fprintf(LOG_DEST, "\n");
     fprintf(LOG_DEST, "\tpressure  :");
     for (i = 0; i <= nr; i++) {
-        fprintf(LOG_DEST, "\t%.4f", atmos->pressure[i]);
+        fprintf(LOG_DEST, "\t%.4f", force->pressure[i]);
     }
     fprintf(LOG_DEST, "\n");
     fprintf(LOG_DEST, "\tshortwave :");
     for (i = 0; i <= nr; i++) {
-        fprintf(LOG_DEST, "\t%.4f", atmos->shortwave[i]);
+        fprintf(LOG_DEST, "\t%.4f", force->shortwave[i]);
     }
     fprintf(LOG_DEST, "\n");
     fprintf(LOG_DEST, "\tsnowflag  :");
     for (i = 0; i <= nr; i++) {
-        fprintf(LOG_DEST, "\t%d\n", atmos->snowflag[i]);
+        fprintf(LOG_DEST, "\t%d\n", force->snowflag[i]);
     }
     fprintf(LOG_DEST, "\n");
     fprintf(LOG_DEST, "\tvp        :");
     for (i = 0; i <= nr; i++) {
-        fprintf(LOG_DEST, "\t%.4f", atmos->vp[i]);
+        fprintf(LOG_DEST, "\t%.4f", force->vp[i]);
     }
     fprintf(LOG_DEST, "\n");
     fprintf(LOG_DEST, "\tvpd       :");
     for (i = 0; i <= nr; i++) {
-        fprintf(LOG_DEST, "\t%.4f", atmos->vpd[i]);
+        fprintf(LOG_DEST, "\t%.4f", force->vpd[i]);
     }
     fprintf(LOG_DEST, "\n");
     fprintf(LOG_DEST, "\twind      :");
     for (i = 0; i <= nr; i++) {
-        fprintf(LOG_DEST, "\t%.4f", atmos->wind[i]);
+        fprintf(LOG_DEST, "\t%.4f", force->wind[i]);
     }
     fprintf(LOG_DEST, "\n");
     if (options.LAKES) {
         fprintf(LOG_DEST, "\tchannel_in:");
         for (i = 0; i <= nr; i++) {
-            fprintf(LOG_DEST, "\t%.4f", atmos->channel_in[i]);
+            fprintf(LOG_DEST, "\t%.4f", force->channel_in[i]);
         }
         fprintf(LOG_DEST, "\n");
     }
     if (options.CARBON) {
         fprintf(LOG_DEST, "\tCatm      :");
         for (i = 0; i <= nr; i++) {
-            fprintf(LOG_DEST, "\t%.4f", atmos->Catm[i]);
+            fprintf(LOG_DEST, "\t%.4f", force->Catm[i]);
         }
         fprintf(LOG_DEST, "\n");
         fprintf(LOG_DEST, "\tfdir      :");
         for (i = 0; i <= nr; i++) {
-            fprintf(LOG_DEST, "\t%.4f", atmos->fdir[i]);
+            fprintf(LOG_DEST, "\t%.4f", force->fdir[i]);
         }
         fprintf(LOG_DEST, "\n");
         fprintf(LOG_DEST, "\tpar       :");
         for (i = 0; i <= nr; i++) {
-            fprintf(LOG_DEST, "\t%.4f", atmos->par[i]);
+            fprintf(LOG_DEST, "\t%.4f", force->par[i]);
         }
         fprintf(LOG_DEST, "\n");
     }

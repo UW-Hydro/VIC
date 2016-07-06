@@ -536,7 +536,7 @@ typedef struct {
  *          routines.
  *****************************************************************************/
 typedef struct {
-    atmos_data_struct *atmos;
+    force_data_struct *force;
     double dt;
     energy_bal_struct *energy;
     size_t rec;
@@ -566,11 +566,11 @@ void collect_eb_terms(energy_bal_struct, snow_data_struct, cell_data_struct,
                       double *, double, double **);
 void collect_wb_terms(cell_data_struct, veg_var_struct, snow_data_struct,
                       double, double, double, bool, double, bool, double *,
-                      double *, double **);
+                      double **);
 void compute_derived_state_vars(all_vars_struct *, soil_con_struct *,
                                 veg_con_struct *);
 void compute_lake_params(lake_con_struct *, soil_con_struct);
-void compute_treeline(atmos_data_struct *, dmy_struct *, double, double *,
+void compute_treeline(force_data_struct *, dmy_struct *, double, double *,
                       bool *);
 size_t count_force_vars(FILE *gp);
 void count_nstreams_nvars(FILE *gp, size_t *nstreams, size_t nvars[]);
@@ -607,7 +607,7 @@ void initialize_energy(energy_bal_struct **energy, size_t nveg);
 void initialize_global(void);
 void initialize_options(void);
 void initialize_parameters(void);
-void initialize_save_data(all_vars_struct *all_vars, atmos_data_struct *atmos,
+void initialize_save_data(all_vars_struct *all_vars, force_data_struct *force,
                           soil_con_struct *soil_con, veg_con_struct *veg_con,
                           veg_lib_struct *veg_lib, lake_con_struct *lake_con,
                           double **out_data, save_data_struct *save_data);
@@ -632,7 +632,7 @@ void num2date(double origin, double time_value, double tzoffset,
 FILE *open_file(char string[], char type[]);
 void parse_nc_time_units(char *nc_unit_chars, unsigned short int *units,
                          dmy_struct *dmy);
-void put_data(all_vars_struct *, atmos_data_struct *, soil_con_struct *,
+void put_data(all_vars_struct *, force_data_struct *, soil_con_struct *,
               veg_con_struct *, veg_lib_struct *veg_lib, lake_con_struct *,
               double **out_data, save_data_struct *);
 void print_alarm(alarm_struct *alarm);

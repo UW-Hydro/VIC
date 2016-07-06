@@ -83,7 +83,7 @@ solve_snow(char               overstory,
            double            *CanopLayerBnd,
            double            *dryFrac,
            dmy_struct        *dmy,
-           atmos_data_struct *atmos,
+           force_data_struct *force,
            energy_bal_struct *energy,
            layer_data_struct *layer,
            snow_data_struct  *snow,
@@ -114,12 +114,12 @@ solve_snow(char               overstory,
     month = dmy->month;
     day_in_year = dmy->day_in_year;
 
-    density = atmos->density[hidx];
-    longwave = atmos->longwave[hidx];
-    pressure = atmos->pressure[hidx];
-    shortwave = atmos->shortwave[hidx];
-    vp = atmos->vp[hidx];
-    vpd = atmos->vpd[hidx];
+    density = force->density[hidx];
+    longwave = force->longwave[hidx];
+    pressure = force->pressure[hidx];
+    shortwave = force->shortwave[hidx];
+    vp = force->vp[hidx];
+    vpd = force->vpd[hidx];
 
     /* initialize moisture variables */
     melt = 0.;
@@ -217,7 +217,7 @@ solve_snow(char               overstory,
                                            *UnderStory, band,
                                            iveg, month, hidx,
                                            veg_class,
-                                           CanopLayerBnd, dryFrac, atmos,
+                                           CanopLayerBnd, dryFrac, force,
                                            layer, soil_con, veg_var);
                 if (ErrorFlag == ERROR) {
                     return (ERROR);

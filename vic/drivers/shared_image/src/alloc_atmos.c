@@ -67,7 +67,6 @@ alloc_atmos(atmos_data_struct *atmos)
     if (options.LAKES) {
         atmos->channel_in = calloc(NR + 1, sizeof(*(atmos->channel_in)));
         check_alloc_status(atmos->channel_in, "Memory allocation error.");
-
     }
     if (options.CARBON) {
         atmos->Catm = calloc(NR + 1, sizeof(*(atmos->Catm)));
@@ -81,7 +80,6 @@ alloc_atmos(atmos_data_struct *atmos)
 
         atmos->par = calloc(NR + 1, sizeof(*(atmos->par)));
         check_alloc_status(atmos->par, "Memory allocation error.");
-
     }
 }
 

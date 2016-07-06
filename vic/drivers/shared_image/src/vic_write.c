@@ -93,7 +93,6 @@ vic_write(stream_struct  *stream,
                 // allocate memory for variables to be stored
                 dvar = malloc(local_domain.ncells_active * sizeof(*dvar));
                 check_alloc_status(dvar, "Memory allocation error");
-
             }
         }
         else if (nc_hist_file->nc_vars[k].nc_type == NC_FLOAT) {
@@ -108,7 +107,6 @@ vic_write(stream_struct  *stream,
                 // allocate memory for variables to be stored
                 ivar = malloc(local_domain.ncells_active * sizeof(*ivar));
                 check_alloc_status(ivar, "Memory allocation error");
-
             }
         }
         else if (nc_hist_file->nc_vars[k].nc_type == NC_SHORT) {
@@ -116,7 +114,6 @@ vic_write(stream_struct  *stream,
                 // allocate memory for variables to be stored
                 svar = malloc(local_domain.ncells_active * sizeof(*svar));
                 check_alloc_status(svar, "Memory allocation error");
-
             }
         }
         else if (nc_hist_file->nc_vars[k].nc_type == NC_CHAR) {
@@ -124,7 +121,6 @@ vic_write(stream_struct  *stream,
                 // allocate memory for variables to be stored
                 cvar = malloc(local_domain.ncells_active * sizeof(*cvar));
                 check_alloc_status(cvar, "Memory allocation error");
-
             }
         }
         else {

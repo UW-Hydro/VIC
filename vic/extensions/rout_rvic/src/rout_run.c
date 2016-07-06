@@ -81,9 +81,7 @@ rout_run(void)
     // Write to output struct...
     for (iOutlet = 0; iOutlet < rout.rout_param.nOutlets; iOutlet++) {
         out_data[rout.rout_param.outlet_VIC_index[iOutlet]][OUT_DISCHARGE][0] =
-            rout.ring[iOutlet] *
-            local_domain
-            .locations[rout.rout_param.outlet_VIC_index[iOutlet]].area /
-            (SEC_PER_DAY * MM_PER_M);
+            rout.ring[iOutlet] * local_domain.locations[rout.rout_param.outlet_VIC_index[iOutlet]].area /
+            MM_PER_M;// / CONST_CDAY;
     }
 }

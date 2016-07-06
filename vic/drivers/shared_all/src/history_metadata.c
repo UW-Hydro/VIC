@@ -124,11 +124,11 @@ set_output_met_data_info()
     strcpy(out_metadata[OUT_LAKE_SWE].description,
            "liquid water equivalent of snow on top of lake ice");
 
-    /* river discharge [m3 s-1] */
+    /* river discharge [m3] */
     strcpy(out_metadata[OUT_DISCHARGE].varname, "OUT_DISCHARGE");
     strcpy(out_metadata[OUT_DISCHARGE].long_name, "river_discharge");
     strcpy(out_metadata[OUT_DISCHARGE].standard_name, "river_discharge");
-    strcpy(out_metadata[OUT_DISCHARGE].units, "m3 s-1");
+    strcpy(out_metadata[OUT_DISCHARGE].units, "m3");
     strcpy(out_metadata[OUT_DISCHARGE].description,  "river discharge");
     
     /* volumetric liquid water equivalent of snow on top of lake ice [m3] */

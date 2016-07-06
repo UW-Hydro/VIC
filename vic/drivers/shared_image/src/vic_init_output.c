@@ -36,7 +36,7 @@ void
 vic_init_output(dmy_struct *dmy_current)
 {
     extern all_vars_struct   *all_vars;
-    extern atmos_data_struct *atmos;
+    extern force_data_struct *force;
     extern domain_struct      local_domain;
     extern filep_struct       filep;
     extern MPI_Comm           MPI_COMM_VIC;
@@ -66,7 +66,7 @@ vic_init_output(dmy_struct *dmy_current)
 
     // initialize the save data structures
     for (i = 0; i < local_domain.ncells_active; i++) {
-        initialize_save_data(&(all_vars[i]), &(atmos[i]), &(soil_con[i]),
+        initialize_save_data(&(all_vars[i]), &(force[i]), &(soil_con[i]),
                              veg_con[i], veg_lib[i], &lake_con, out_data[i],
                              &(save_data[i]));
     }

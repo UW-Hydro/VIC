@@ -33,7 +33,7 @@
  *****************************************************************************/
 void
 put_data(all_vars_struct   *all_vars,
-         atmos_data_struct *atmos,
+         force_data_struct *force,
          soil_con_struct   *soil_con,
          veg_con_struct    *veg_con,
          veg_lib_struct    *veg_lib,
@@ -129,31 +129,31 @@ put_data(all_vars_struct   *all_vars,
     zero_output_list(out_data);
 
     // Set output versions of input forcings
-    out_data[OUT_AIR_TEMP][0] = atmos->air_temp[NR];
-    out_data[OUT_DENSITY][0] = atmos->density[NR];
-    out_data[OUT_LWDOWN][0] = atmos->longwave[NR];
-    out_data[OUT_PREC][0] = atmos->out_prec;  // mm over grid cell
-    out_data[OUT_PRESSURE][0] = atmos->pressure[NR] / PA_PER_KPA;
-    out_data[OUT_QAIR][0] = CONST_EPS * atmos->vp[NR] /
-                            atmos->pressure[NR];
-    out_data[OUT_RAINF][0] = atmos->out_rain;   // mm over grid cell
-    out_data[OUT_REL_HUMID][0] = FRACT_TO_PERCENT * atmos->vp[NR] /
-                                 (atmos->vp[NR] + atmos->vpd[NR]);
+    out_data[OUT_AIR_TEMP][0] = force->air_temp[NR];
+    out_data[OUT_DENSITY][0] = force->density[NR];
+    out_data[OUT_LWDOWN][0] = force->longwave[NR];
+    out_data[OUT_PREC][0] = force->out_prec;  // mm over grid cell
+    out_data[OUT_PRESSURE][0] = force->pressure[NR] / PA_PER_KPA;
+    out_data[OUT_QAIR][0] = CONST_EPS * force->vp[NR] /
+                            force->pressure[NR];
+    out_data[OUT_RAINF][0] = force->out_rain;   // mm over grid cell
+    out_data[OUT_REL_HUMID][0] = FRACT_TO_PERCENT * force->vp[NR] /
+                                 (force->vp[NR] + force->vpd[NR]);
     if (options.LAKES && lake_con->Cl[0] > 0) {
-        out_data[OUT_LAKE_CHAN_IN][0] = atmos->channel_in[NR];  // mm over grid cell
+        out_data[OUT_LAKE_CHAN_IN][0] = force->channel_in[NR];  // mm over grid cell
     }
     else {
         out_data[OUT_LAKE_CHAN_IN][0] = 0;
     }
-    out_data[OUT_SWDOWN][0] = atmos->shortwave[NR];
-    out_data[OUT_SNOWF][0] = atmos->out_snow;   // mm over grid cell
-    out_data[OUT_VP][0] = atmos->vp[NR] / PA_PER_KPA;
-    out_data[OUT_VPD][0] = atmos->vpd[NR] / PA_PER_KPA;
-    out_data[OUT_WIND][0] = atmos->wind[NR];
+    out_data[OUT_SWDOWN][0] = force->shortwave[NR];
+    out_data[OUT_SNOWF][0] = force->out_snow;   // mm over grid cell
+    out_data[OUT_VP][0] = force->vp[NR] / PA_PER_KPA;
+    out_data[OUT_VPD][0] = force->vpd[NR] / PA_PER_KPA;
+    out_data[OUT_WIND][0] = force->wind[NR];
     if (options.CARBON) {
-        out_data[OUT_CATM][0] = atmos->Catm[NR] / PPM_to_MIXRATIO;
-        out_data[OUT_FDIR][0] = atmos->fdir[NR];
-        out_data[OUT_PAR][0] = atmos->par[NR];
+        out_data[OUT_CATM][0] = force->Catm[NR] / PPM_to_MIXRATIO;
+        out_data[OUT_FDIR][0] = force->fdir[NR];
+        out_data[OUT_PAR][0] = force->par[NR];
     }
     else {
         out_data[OUT_CATM][0] = MISSING;
@@ -1048,7 +1048,7 @@ collect_eb_terms(energy_bal_struct energy,
  *****************************************************************************/
 void
 initialize_save_data(all_vars_struct   *all_vars,
-                     atmos_data_struct *atmos,
+                     force_data_struct *atmos,
                      soil_con_struct   *soil_con,
                      veg_con_struct    *veg_con,
                      veg_lib_struct    *veg_lib,

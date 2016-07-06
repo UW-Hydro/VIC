@@ -103,7 +103,8 @@ void read_initial_model_state(FILE *, all_vars_struct *, int, int, int,
                               soil_con_struct *, lake_con_struct);
 lake_con_struct read_lakeparam(FILE *, soil_con_struct, veg_con_struct *);
 void read_snowband(FILE *, soil_con_struct *);
-soil_con_struct read_soilparam(FILE *, char *, char *);
+void read_soilparam(FILE *soilparam, soil_con_struct *temp, bool *RUN_MODEL,
+                    bool *MODEL_DONE);
 veg_lib_struct *read_veglib(FILE *, size_t *);
 veg_con_struct *read_vegparam(FILE *, int, size_t);
 void vic_force(force_data_struct *, dmy_struct *, FILE **, veg_con_struct *,

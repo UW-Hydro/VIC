@@ -58,8 +58,8 @@ main(int   argc,
     /** Variable Declarations **/
     extern FILE       *LOG_DEST;
 
-    char               MODEL_DONE;
-    char               RUN_MODEL;
+    bool               MODEL_DONE;
+    bool               RUN_MODEL;
     char               dmy_str[MAXSTRING];
     size_t             rec;
     size_t             Nveg_type;
@@ -156,7 +156,7 @@ main(int   argc,
     ************************************/
     MODEL_DONE = false;
     while (!MODEL_DONE) {
-        soil_con = read_soilparam(filep.soilparam, &RUN_MODEL, &MODEL_DONE);
+        read_soilparam(filep.soilparam, &soil_con, &RUN_MODEL, &MODEL_DONE);
 
         if (RUN_MODEL) {
             cellnum++;

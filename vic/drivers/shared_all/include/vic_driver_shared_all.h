@@ -566,7 +566,7 @@ void collect_eb_terms(energy_bal_struct, snow_data_struct, cell_data_struct,
                       double *, double, double **);
 void collect_wb_terms(cell_data_struct, veg_var_struct, snow_data_struct,
                       double, double, double, bool, double, bool, double *,
-                      double *, double **);
+                      double **);
 void compute_derived_state_vars(all_vars_struct *, soil_con_struct *,
                                 veg_con_struct *);
 void compute_lake_params(lake_con_struct *, soil_con_struct);

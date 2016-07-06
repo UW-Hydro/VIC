@@ -228,7 +228,6 @@ put_data(all_vars_struct   *all_vars,
                                      HasVeg,
                                      (1 - Clake),
                                      overstory,
-                                     depth,
                                      frost_fract,
                                      out_data);
 
@@ -298,7 +297,6 @@ put_data(all_vars_struct   *all_vars,
                                          0,
                                          Clake,
                                          overstory,
-                                         depth,
                                          frost_fract,
                                          out_data);
 
@@ -491,10 +489,12 @@ put_data(all_vars_struct   *all_vars,
         out_data[OUT_SMLIQFRAC][index] = out_data[OUT_SOIL_LIQ][index] /
                                          out_data[OUT_SOIL_MOIST][index];
         out_data[OUT_SMFROZFRAC][index] = 1 - out_data[OUT_SMLIQFRAC][index];
-        out_data[OUT_SOIL_LIQ_FRAC][index] = out_data[OUT_SOIL_LIQ][index] / (depth[index] *
-                                             MM_PER_M);
-        out_data[OUT_SOIL_ICE_FRAC][index] = out_data[OUT_SOIL_ICE][index] / (depth[index] *
-                                             MM_PER_M);
+        out_data[OUT_SOIL_LIQ_FRAC][index] = out_data[OUT_SOIL_LIQ][index] /
+                                             (depth[index] *
+                                              MM_PER_M);
+        out_data[OUT_SOIL_ICE_FRAC][index] = out_data[OUT_SOIL_ICE][index] /
+                                             (depth[index] *
+                                              MM_PER_M);
     }
     out_data[OUT_DELSOILMOIST][0] -= save_data->total_soil_moist;
     out_data[OUT_DELSWE][0] = out_data[OUT_SWE][0] +
@@ -582,7 +582,6 @@ collect_wb_terms(cell_data_struct cell,
                  bool             HasVeg,
                  double           lakefactor,
                  bool             overstory,
-                 double          *depth,
                  double          *frost_fract,
                  double         **out_data)
 {
@@ -696,7 +695,6 @@ collect_wb_terms(cell_data_struct cell,
 
         out_data[OUT_SOIL_LIQ][index] += tmp_moist * AreaFactor;
         out_data[OUT_SOIL_ICE][index] += tmp_ice * AreaFactor;
-
     }
     out_data[OUT_SOIL_WET][0] += cell.wetness * AreaFactor;
     out_data[OUT_ROOTMOIST][0] += cell.rootmoist * AreaFactor;

@@ -37,7 +37,5 @@ size_t              NF; /* array index loop counter limit for atmos
 global_param_struct global_param;
 option_struct       options;
 parameters_struct   param;
-filenames_struct    filenames;
-filep_struct        filep;
 param_set_struct    param_set;
 metadata_struct     out_metadata[N_OUTVAR_TYPES];

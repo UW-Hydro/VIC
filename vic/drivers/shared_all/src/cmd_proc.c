@@ -136,10 +136,10 @@ print_license()
     fprintf(stdout,
             "\n  Variable Infiltration Capacity (VIC) macroscale hydrologic\n");
     fprintf(stdout,
-            "  model version %s, Copyright (C) 2016 Computational Hydrology\n",
+            "  model version %s, Copyright (C) 2016 Computational\n",
             SHORT_VERSION);
     fprintf(stdout,
-            "  Group, Dept. of Civil and Environmental Engineering,\n");
+            "  Hydrology Group, Dept. of Civil and Environmental Engineering,\n");
     fprintf(stdout,
             "  University of Washington.  VIC comes with ABSOLUTELY NO\n");
     fprintf(stdout,

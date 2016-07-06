@@ -99,7 +99,7 @@ main(int   argc,
     fclose(filep.globalparam);
 
     // Set Log Destination
-    setup_logging(MISSING);
+    setup_logging(MISSING, filenames.log_path, &(filep.logfile));
 
     /** Set model constants **/
     if (strcmp(filenames.constants, "MISSING") != 0) {
@@ -198,9 +198,6 @@ main(int   argc,
 
             vic_populate_model_state(&all_vars, filep, soil_con.gridcel,
                                      &soil_con, veg_con, lake_con);
-
-            /** Update Error Handling Structure **/
-            Error.filep = filep;
 
             /** Initialize the storage terms in the water and energy balances **/
             initialize_save_data(&all_vars, &atmos[0], &soil_con, veg_con,

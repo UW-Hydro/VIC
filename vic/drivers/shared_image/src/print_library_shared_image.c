@@ -157,21 +157,20 @@ print_nc_file(nc_file_struct *nc)
  * @brief    Print netCDF variable structure.
  *****************************************************************************/
 void
-print_nc_var(nc_var_struct *nc_var,
-             size_t         ndims)
+print_nc_var(nc_var_struct *nc_var)
 {
     size_t i;
 
     fprintf(LOG_DEST, "nc_var:\n");
     fprintf(LOG_DEST, "\tnc_varid: %d\n", nc_var->nc_varid);
     fprintf(LOG_DEST, "\tnc_type: %d\n", nc_var->nc_type);
-    fprintf(LOG_DEST, "\tnc_dimids:");
-    for (i = 0; i < ndims; i++) {
+    fprintf(LOG_DEST, "\tnc_dimids (%zu):", nc_var->nc_dims);
+    for (i = 0; i < nc_var->nc_dims; i++) {
         fprintf(LOG_DEST, "\t%d", nc_var->nc_dimids[i]);
     }
     fprintf(LOG_DEST, "\n");
     fprintf(LOG_DEST, "\tnc_counts:");
-    for (i = 0; i < ndims; i++) {
+    for (i = 0; i < nc_var->nc_dims; i++) {
         fprintf(LOG_DEST, "\t%zu", nc_var->nc_counts[i]);
     }
     fprintf(LOG_DEST, "\n");

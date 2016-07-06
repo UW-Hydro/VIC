@@ -63,7 +63,8 @@ alloc_atmos(int                 nrecs,
         if (options.LAKES) {
             (*atmos)[i].channel_in =
                 calloc(NR + 1, sizeof(*(*atmos)[i].channel_in));
-            check_alloc_status((*atmos)[i].channel_in, "Memory allocation error.");
+            check_alloc_status((*atmos)[i].channel_in,
+                               "Memory allocation error.");
         }
         if (options.CARBON) {
             (*atmos)[i].Catm = calloc(NR + 1, sizeof(*(*atmos)[i].Catm));

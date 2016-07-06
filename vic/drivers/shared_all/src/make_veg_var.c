@@ -49,16 +49,20 @@ make_veg_var(size_t veg_type_num)
                 temp[i][j].NscaleFactor = calloc(options.Ncanopy,
                                                  sizeof(*(temp[i][j].
                                                           NscaleFactor)));
-                check_alloc_status(temp[i][j].NscaleFactor, "Memory allocation error.");
+                check_alloc_status(temp[i][j].NscaleFactor,
+                                   "Memory allocation error.");
                 temp[i][j].aPARLayer = calloc(options.Ncanopy,
                                               sizeof(*(temp[i][j].aPARLayer)));
-                check_alloc_status(temp[i][j].aPARLayer, "Memory allocation error.");
+                check_alloc_status(temp[i][j].aPARLayer,
+                                   "Memory allocation error.");
                 temp[i][j].CiLayer = calloc(options.Ncanopy,
                                             sizeof(*(temp[i][j].CiLayer)));
-                check_alloc_status(temp[i][j].CiLayer, "Memory allocation error.");
+                check_alloc_status(temp[i][j].CiLayer,
+                                   "Memory allocation error.");
                 temp[i][j].rsLayer = calloc(options.Ncanopy,
                                             sizeof(*(temp[i][j].rsLayer)));
-                check_alloc_status(temp[i][j].rsLayer, "Memory allocation error.");
+                check_alloc_status(temp[i][j].rsLayer,
+                                   "Memory allocation error.");
             }
         }
     }

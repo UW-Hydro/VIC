@@ -58,8 +58,8 @@ main(int   argc,
     /** Variable Declarations **/
     extern FILE       *LOG_DEST;
 
-    char               MODEL_DONE;
-    char               RUN_MODEL;
+    bool               MODEL_DONE;
+    bool               RUN_MODEL;
     char               dmy_str[MAXSTRING];
     size_t             rec;
     size_t             Nveg_type;
@@ -68,7 +68,7 @@ main(int   argc,
     int                ErrorFlag;
     size_t             streamnum;
     dmy_struct        *dmy;
-    atmos_data_struct *atmos;
+    force_data_struct *force;
     veg_hist_struct  **veg_hist;
     veg_con_struct    *veg_con;
     soil_con_struct    soil_con;
@@ -130,8 +130,8 @@ main(int   argc,
     /** Initialize Parameters **/
     cellnum = -1;
 
-    /** allocate memory for the atmos_data_struct **/
-    alloc_atmos(global_param.nrecs, &atmos);
+    /** allocate memory for the force_data_struct **/
+    alloc_atmos(global_param.nrecs, &force);
 
     /** Initial state **/
     startrec = 0;
@@ -156,7 +156,7 @@ main(int   argc,
     ************************************/
     MODEL_DONE = false;
     while (!MODEL_DONE) {
-        soil_con = read_soilparam(filep.soilparam, &RUN_MODEL, &MODEL_DONE);
+        read_soilparam(filep.soilparam, &soil_con, &RUN_MODEL, &MODEL_DONE);
 
         if (RUN_MODEL) {
             cellnum++;
@@ -190,7 +190,7 @@ main(int   argc,
                Have not Been Specifically Set
             **************************************************/
 
-            vic_force(atmos, dmy, filep.forcing, veg_con, veg_hist, &soil_con);
+            vic_force(force, dmy, filep.forcing, veg_con, veg_hist, &soil_con);
 
             /**************************************************
                Initialize Energy Balance and Snow Variables
@@ -200,7 +200,7 @@ main(int   argc,
                                      &soil_con, veg_con, lake_con);
 
             /** Initialize the storage terms in the water and energy balances **/
-            initialize_save_data(&all_vars, &atmos[0], &soil_con, veg_con,
+            initialize_save_data(&all_vars, &force[0], &soil_con, veg_con,
                                  veg_lib, &lake_con, out_data[0], &save_data);
 
             /******************************************
@@ -223,14 +223,14 @@ main(int   argc,
                 /**************************************************
                    Compute cell physics for 1 timestep
                 **************************************************/
-                ErrorFlag = vic_run(&atmos[rec], &all_vars,
+                ErrorFlag = vic_run(&force[rec], &all_vars,
                                     &(dmy[rec]), &global_param, &lake_con,
                                     &soil_con, veg_con, veg_lib);
 
                 /**************************************************
                    Calculate cell average values for current time step
                 **************************************************/
-                put_data(&all_vars, &atmos[rec], &soil_con, veg_con, veg_lib,
+                put_data(&all_vars, &force[rec], &soil_con, veg_con, veg_lib,
                          &lake_con, out_data[0], &save_data);
 
                 for (streamnum = 0;
@@ -290,7 +290,7 @@ main(int   argc,
     }   /* End Grid Loop */
 
     /** cleanup **/
-    free_atmos(global_param.nrecs, &atmos);
+    free_atmos(global_param.nrecs, &force);
     free_dmy(&dmy);
     free_streams(&streams);
     free_out_data(1, out_data);  // 1 is for the number of gridcells, 1 in classic driver

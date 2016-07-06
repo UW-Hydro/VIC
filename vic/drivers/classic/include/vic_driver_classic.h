@@ -71,7 +71,7 @@ typedef struct {
     char log_path[MAXSTRING];      /**< Location to write log file to*/
 } filenames_struct;
 
-void alloc_atmos(int, atmos_data_struct **);
+void alloc_atmos(int, force_data_struct **);
 void alloc_veg_hist(int nrecs, int nveg, veg_hist_struct ***veg_hist);
 void calc_netlongwave(double *, double, double, double);
 double calc_netshort(double, int, double, double *);
@@ -80,7 +80,7 @@ bool check_save_state_flag(dmy_struct *, size_t);
 FILE  *check_state_file(char *, size_t, size_t, int *);
 void close_files(filep_struct *filep, stream_struct **streams);
 void compute_cell_area(soil_con_struct *);
-void free_atmos(int nrecs, atmos_data_struct **atmos);
+void free_atmos(int nrecs, force_data_struct **force);
 void free_veg_hist(int nrecs, int nveg, veg_hist_struct ***veg_hist);
 void free_veglib(veg_lib_struct **);
 double get_dist(double lat1, double long1, double lat2, double long2);
@@ -93,7 +93,7 @@ void make_in_and_outfiles(filep_struct *filep, filenames_struct *filenames,
                           soil_con_struct *soil, stream_struct **streams,
                           dmy_struct *dmy);
 FILE *open_state_file(global_param_struct *, filenames_struct, size_t, size_t);
-void print_atmos_data(atmos_data_struct *atmos, size_t nr);
+void print_atmos_data(force_data_struct *force, size_t nr);
 void parse_output_info(FILE *gp, stream_struct **output_streams,
                        dmy_struct *dmy_current);
 void read_atmos_data(FILE *, global_param_struct, int, int, double **,
@@ -103,10 +103,11 @@ void read_initial_model_state(FILE *, all_vars_struct *, int, int, int,
                               soil_con_struct *, lake_con_struct);
 lake_con_struct read_lakeparam(FILE *, soil_con_struct, veg_con_struct *);
 void read_snowband(FILE *, soil_con_struct *);
-soil_con_struct read_soilparam(FILE *, char *, char *);
+void read_soilparam(FILE *soilparam, soil_con_struct *temp, bool *RUN_MODEL,
+                    bool *MODEL_DONE);
 veg_lib_struct *read_veglib(FILE *, size_t *);
 veg_con_struct *read_vegparam(FILE *, int, size_t);
-void vic_force(atmos_data_struct *, dmy_struct *, FILE **, veg_con_struct *,
+void vic_force(force_data_struct *, dmy_struct *, FILE **, veg_con_struct *,
                veg_hist_struct **, soil_con_struct *);
 void vic_populate_model_state(all_vars_struct *, filep_struct, size_t,
                               soil_con_struct *, veg_con_struct *,

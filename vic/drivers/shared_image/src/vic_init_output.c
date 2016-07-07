@@ -36,7 +36,7 @@ void
 vic_init_output(dmy_struct *dmy_current)
 {
     extern all_vars_struct   *all_vars;
-    extern atmos_data_struct *atmos;
+    extern force_data_struct *force;
     extern domain_struct      local_domain;
     extern filep_struct       filep;
     extern MPI_Comm           MPI_COMM_VIC;
@@ -66,7 +66,7 @@ vic_init_output(dmy_struct *dmy_current)
 
     // initialize the save data structures
     for (i = 0; i < local_domain.ncells_active; i++) {
-        initialize_save_data(&(all_vars[i]), &(atmos[i]), &(soil_con[i]),
+        initialize_save_data(&(all_vars[i]), &(force[i]), &(soil_con[i]),
                              veg_con[i], veg_lib[i], &lake_con, out_data[i],
                              &(save_data[i]));
     }
@@ -186,20 +186,13 @@ vic_init_output(dmy_struct *dmy_current)
                            output_streams[streamnum].nvars,
                            output_streams[streamnum].varid,
                            output_streams[streamnum].type);
-
-        if (mpi_rank == VIC_MPI_ROOT) {
-            // open the netcdf history file
-            initialize_history_file(&(nc_hist_files[streamnum]),
-                                    &(output_streams[streamnum]),
-                                    dmy_current);
-        }
     }
     // validate streams
     validate_streams(&output_streams);
 }
 
 /******************************************************************************
- * @brief    Initialize history files
+ * @brief    Initialize history file
  *****************************************************************************/
 void
 initialize_history_file(nc_file_struct *nc,
@@ -645,6 +638,8 @@ initialize_nc_file(nc_file_struct     *nc_file,
     extern domain_struct global_domain;
 
     size_t               i;
+
+    nc_file->open = false;
 
     // Set fill values
     nc_file->c_fillvalue = NC_FILL_CHAR;

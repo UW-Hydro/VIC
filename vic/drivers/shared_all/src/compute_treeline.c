@@ -41,7 +41,7 @@
  * @brief    Compute treeline.
  *****************************************************************************/
 void
-compute_treeline(atmos_data_struct *atmos,
+compute_treeline(force_data_struct *force,
                  dmy_struct        *dmy,
                  double             avgJulyAirTemp,
                  double            *Tfactor,
@@ -74,7 +74,7 @@ compute_treeline(atmos_data_struct *atmos,
                 MonthCnt = 0;
                 while (dmy[rec].month == 7) {
                     for (i = 0; i < NF; i++) {
-                        MonthSum += atmos[rec].air_temp[i];
+                        MonthSum += force[rec].air_temp[i];
                         MonthCnt++;
                     }
                     rec++;

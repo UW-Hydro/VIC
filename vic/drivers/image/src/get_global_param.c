@@ -379,16 +379,8 @@ get_global_param(FILE *gp)
             else if (strcasecmp("DOMAIN_TYPE", optstr) == 0) {
                 get_domain_type(cmdstr);
             }
-            else if (strcasecmp("SOIL", optstr) == 0) {
-                sscanf(cmdstr, "%*s %s", filenames.soil);
-            }
-            else if (strcasecmp("ARC_SOIL", optstr) == 0) {
-                sscanf(cmdstr, "%*s %s", flgstr);
-                if (strcasecmp("TRUE", flgstr) == 0) {
-                    log_err("\"ARC_SOIL\" is no longer a supported option.\n"
-                            "Please convert your soil parameter file and "
-                            "remove this option from your global file.");
-                }
+            else if (strcasecmp("PARAMETERS", optstr) == 0) {
+                sscanf(cmdstr, "%*s %s", filenames.params);
             }
             else if (strcasecmp("ARNO_PARAMS", optstr) == 0) {
                 sscanf(cmdstr, "%*s %s", flgstr);
@@ -433,15 +425,9 @@ get_global_param(FILE *gp)
                 sscanf(cmdstr, "%*s %s", flgstr);
                 options.ORGANIC_FRACT = str_to_bool(flgstr);
             }
-            else if (strcasecmp("VEGLIB", optstr) == 0) {
-                sscanf(cmdstr, "%*s %s", filenames.veglib);
-            }
             else if (strcasecmp("VEGLIB_PHOTO", optstr) == 0) {
                 sscanf(cmdstr, "%*s %s", flgstr);
                 options.VEGLIB_PHOTO = str_to_bool(flgstr);
-            }
-            else if (strcasecmp("VEGPARAM", optstr) == 0) {
-                sscanf(cmdstr, "%*s %s", filenames.veg);
             }
             else if (strcasecmp("LAI_SRC", optstr) == 0) {
                 sscanf(cmdstr, "%*s %s", flgstr);
@@ -494,22 +480,15 @@ get_global_param(FILE *gp)
                             "control file.");
                 }
             }
-            else if (strcasecmp("ROOT_ZONES", optstr) == 0) {
-                sscanf(cmdstr, "%*s %zu", &options.ROOT_ZONES);
-            }
             else if (strcasecmp("SNOW_BAND", optstr) == 0) {
-                sscanf(cmdstr, "%*s %zu %s", &options.SNOW_BAND,
-                       filenames.snowband);
+                sscanf(cmdstr, "%*s %s", flgstr);
+                if (str_to_bool(flgstr)) {
+                    options.SNOW_BAND = SNOW_BAND_TRUE_BUT_UNSET;
+                }
             }
             else if (strcasecmp("LAKES", optstr) == 0) {
                 sscanf(cmdstr, "%*s %s", flgstr);
-                if (strcasecmp("FALSE", flgstr) == 0) {
-                    options.LAKES = false;
-                }
-                else {
-                    options.LAKES = true;
-                    strcpy(filenames.lakeparam, flgstr);
-                }
+                options.LAKES = str_to_bool(flgstr);
             }
             else if (strcasecmp("LAKE_PROFILE", optstr) == 0) {
                 sscanf(cmdstr, "%*s %s", flgstr);
@@ -846,27 +825,11 @@ get_global_param(FILE *gp)
                 "begins with \"RESULT_DIR\".");
     }
 
-    // Validate soil parameter file information
-    if (strcmp(filenames.soil, "MISSING") == 0) {
-        log_err("No soil parameter file has been defined.  Make sure that the "
-                "global file defines the soil parameter file on the line that "
-                "begins with \"SOIL\".");
-    }
-
-    // Validate veg parameter information
-    if (strcmp(filenames.veg, "MISSING") == 0) {
-        log_err("No vegetation parameter file has been defined.  Make sure "
-                "that the global file defines the vegetation parameter "
-                "file on the line that begins with \"VEGPARAM\".");
-    }
-    if (strcmp(filenames.veglib, "MISSING") == 0) {
-        log_err("No vegetation library file has been defined.  Make sure "
-                "that the global file defines the vegetation library file "
-                "on the line that begins with \"VEGLIB\".");
-    }
-    if (options.ROOT_ZONES == 0) {
-        log_err("ROOT_ZONES must be defined to a positive integer greater "
-                "than 0, in the global control file.");
+    // Validate parameter file information
+    if (strcmp(filenames.params, "MISSING") == 0) {
+        log_err("A parameters file has not been defined.  Make sure that the "
+                "global file defines the parameters parameter file on the line "
+                "that begins with \"PARAMETERS\".");
     }
 
     // Validate SPATIAL_FROST information
@@ -898,27 +861,6 @@ get_global_param(FILE *gp)
                     "carbon-specific veg parameters must be listed in your "
                     "veg library file.");
         }
-    }
-
-    // Validate the elevation band file information
-    if (options.SNOW_BAND > 1) {
-        if (strcmp(filenames.snowband, "MISSING") == 0) {
-            log_err("\"SNOW_BAND\" was specified with %zu elevation bands, "
-                    "but no elevation band file has been defined.  "
-                    "Make sure that the global file defines the elevation "
-                    "band file on the line that begins with \"SNOW_BAND\" "
-                    "(after the number of bands).", options.SNOW_BAND);
-        }
-        if (options.SNOW_BAND > MAX_BANDS) {
-            log_err("Global file wants more snow bands (%zu) than are "
-                    "defined by MAX_BANDS (%d).  Edit vic_driver_shared.h and "
-                    "recompile.", options.SNOW_BAND, MAX_BANDS);
-        }
-    }
-    else if (options.SNOW_BAND <= 0) {
-        log_err("Invalid number of elevation bands specified in global "
-                "file (%zu).  Number of bands must be >= 1.",
-                options.SNOW_BAND);
     }
 
     // Validate the input state file information
@@ -1039,12 +981,6 @@ get_global_param(FILE *gp)
         if (!options.FULL_ENERGY) {
             log_err("FULL_ENERGY must be TRUE if the lake model is to "
                     "be run.");
-        }
-        if (strcmp(filenames.lakeparam, "MISSING") == 0) {
-            log_err("\"LAKES\" was specified, but no lake parameter "
-                    "file has been defined.  Make sure that the global "
-                    "file defines the lake parameter file on the line that "
-                    "begins with \"LAKES\".");
         }
         if (options.COMPUTE_TREELINE) {
             log_err("LAKES = TRUE and COMPUTE_TREELINE = TRUE are "

@@ -31,7 +31,7 @@ size_t              current;
 size_t             *filter_active_cells = NULL;
 size_t             *mpi_map_mapping_array = NULL;
 all_vars_struct    *all_vars = NULL;
-atmos_data_struct  *atmos = NULL;
+force_data_struct  *force = NULL;
 dmy_struct         *dmy = NULL;
 filenames_struct    filenames;
 filep_struct        filep;

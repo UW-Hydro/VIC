@@ -269,8 +269,7 @@ display_current_settings(int mode)
 
     fprintf(LOG_DEST, "\n");
     fprintf(LOG_DEST, "Constants File\t\t%s\n", filenames.constants);
-    fprintf(LOG_DEST, "Input Soil Data:\n");
-    fprintf(LOG_DEST, "Soil file\t\t%s\n", filenames.soil);
+    fprintf(LOG_DEST, "Parameters file\t\t%s\n", filenames.params);
     if (options.BASEFLOW == ARNO) {
         fprintf(LOG_DEST, "BASEFLOW\t\tARNO\n");
     }
@@ -291,15 +290,12 @@ display_current_settings(int mode)
     }
 
     fprintf(LOG_DEST, "\n");
-    fprintf(LOG_DEST, "Input Veg Data:\n");
-    fprintf(LOG_DEST, "Veg library file\t%s\n", filenames.veglib);
     if (options.VEGLIB_PHOTO) {
         fprintf(LOG_DEST, "VEGLIB_PHOTO\t\tTRUE\n");
     }
     else {
         fprintf(LOG_DEST, "VEGLIB_PHOTO\t\tFALSE\n");
     }
-    fprintf(LOG_DEST, "Veg param file\t\t%s\n", filenames.veg);
     fprintf(LOG_DEST, "ROOT_ZONES\t\t%zu\n", options.ROOT_ZONES);
     if (options.VEGPARAM_LAI) {
         fprintf(LOG_DEST, "VEGPARAM_LAI\t\tTRUE\n");
@@ -353,8 +349,7 @@ display_current_settings(int mode)
     fprintf(LOG_DEST, "\n");
     fprintf(LOG_DEST, "Input Elevation Data:\n");
     if (options.SNOW_BAND > 1) {
-        fprintf(LOG_DEST, "SNOW_BAND\t\t%zu\t%s\n", options.SNOW_BAND,
-                filenames.snowband);
+        fprintf(LOG_DEST, "SNOW_BAND\t\t%zu\n", options.SNOW_BAND);
     }
     else if (options.SNOW_BAND == 1) {
         fprintf(LOG_DEST,
@@ -368,7 +363,7 @@ display_current_settings(int mode)
     fprintf(LOG_DEST, "\n");
     fprintf(LOG_DEST, "Input Lake Data:\n");
     if (options.LAKES) {
-        fprintf(LOG_DEST, "LAKES\t\tTRUE\t%s\n", filenames.lakeparam);
+        fprintf(LOG_DEST, "LAKES\t\tTRUE\n");
     }
     else {
         fprintf(LOG_DEST, "LAKES\t\tFALSE\n");

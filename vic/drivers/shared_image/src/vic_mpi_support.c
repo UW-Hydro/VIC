@@ -28,8 +28,8 @@
 
 
 /******************************************************************************
- * @brief   Print MPI Error String to LOG_DEST, this function is used by loggers
- ******************************************************************************/
+* @brief   Print MPI Error String to LOG_DEST, this function is used by loggers
+******************************************************************************/
 void
 print_mpi_error_str(int error_code)
 {
@@ -283,17 +283,17 @@ create_MPI_global_struct_type(MPI_Datatype *mpi_type)
 void
 create_MPI_filenames_struct_type(MPI_Datatype *mpi_type)
 {
-    extern MPI_Comm     MPI_COMM_VIC;
+    extern MPI_Comm MPI_COMM_VIC;
 
-    int           nitems; // number of elements in struct
-    int           status;
-    int          *blocklengths;
-    size_t        i;
-    MPI_Aint     *offsets;
-    MPI_Datatype *mpi_types;
+    int             nitems; // number of elements in struct
+    int             status;
+    int            *blocklengths;
+    size_t          i;
+    MPI_Aint       *offsets;
+    MPI_Datatype   *mpi_types;
 
     // nitems has to equal the number of elements in filenames_struct
-    nitems = 14;
+    nitems = 10;
     blocklengths = malloc(nitems * sizeof(*blocklengths));
     check_alloc_status(blocklengths, "Memory allocation error.");
 
@@ -338,32 +338,16 @@ create_MPI_filenames_struct_type(MPI_Datatype *mpi_type)
     offsets[i] = offsetof(filenames_struct, init_state);
     mpi_types[i++] = MPI_CHAR;
 
-    // char lakeparam[MAXSTRING];
-    offsets[i] = offsetof(filenames_struct, lakeparam);
+    // char params[MAXSTRING];
+    offsets[i] = offsetof(filenames_struct, params);
     mpi_types[i++] = MPI_CHAR;
 
     // char result_dir[MAXSTRING];
     offsets[i] = offsetof(filenames_struct, result_dir);
     mpi_types[i++] = MPI_CHAR;
 
-    // char snowband[MAXSTRING];
-    offsets[i] = offsetof(filenames_struct, snowband);
-    mpi_types[i++] = MPI_CHAR;
-
-    // char soil[MAXSTRING];
-    offsets[i] = offsetof(filenames_struct, soil);
-    mpi_types[i++] = MPI_CHAR;
-
     // char statefile[MAXSTRING];
     offsets[i] = offsetof(filenames_struct, statefile);
-    mpi_types[i++] = MPI_CHAR;
-
-    // char veg[MAXSTRING];
-    offsets[i] = offsetof(filenames_struct, veg);
-    mpi_types[i++] = MPI_CHAR;
-
-    // char veglib[MAXSTRING];
-    offsets[i] = offsetof(filenames_struct, veglib);
     mpi_types[i++] = MPI_CHAR;
 
     // char log_path[MAXSTRING];
@@ -402,14 +386,14 @@ create_MPI_filenames_struct_type(MPI_Datatype *mpi_type)
 void
 create_MPI_location_struct_type(MPI_Datatype *mpi_type)
 {
-    extern MPI_Comm     MPI_COMM_VIC;
+    extern MPI_Comm MPI_COMM_VIC;
 
-    int           nitems; // number of elements in struct
-    int           status;
-    int          *blocklengths;
-    size_t        i;
-    MPI_Aint     *offsets;
-    MPI_Datatype *mpi_types;
+    int             nitems; // number of elements in struct
+    int             status;
+    int            *blocklengths;
+    size_t          i;
+    MPI_Aint       *offsets;
+    MPI_Datatype   *mpi_types;
 
     // nitems has to equal the number of elements in location_struct
     nitems = 9;
@@ -496,14 +480,14 @@ create_MPI_location_struct_type(MPI_Datatype *mpi_type)
 void
 create_MPI_option_struct_type(MPI_Datatype *mpi_type)
 {
-    extern MPI_Comm     MPI_COMM_VIC;
+    extern MPI_Comm MPI_COMM_VIC;
 
-    int           nitems; // number of elements in struct
-    int           status;
-    int          *blocklengths;
-    size_t        i;
-    MPI_Aint     *offsets;
-    MPI_Datatype *mpi_types;
+    int             nitems; // number of elements in struct
+    int             status;
+    int            *blocklengths;
+    size_t          i;
+    MPI_Aint       *offsets;
+    MPI_Datatype   *mpi_types;
 
     // nitems has to equal the number of elements in option_struct
     nitems = 53;
@@ -1431,14 +1415,14 @@ create_MPI_param_struct_type(MPI_Datatype *mpi_type)
 void
 create_MPI_dmy_struct_type(MPI_Datatype *mpi_type)
 {
-    extern MPI_Comm     MPI_COMM_VIC;
+    extern MPI_Comm MPI_COMM_VIC;
 
-    int           nitems; // number of elements in struct
-    int           status;
-    int          *blocklengths;
-    size_t        i;
-    MPI_Aint     *offsets;
-    MPI_Datatype *mpi_types;
+    int             nitems; // number of elements in struct
+    int             status;
+    int            *blocklengths;
+    size_t          i;
+    MPI_Aint       *offsets;
+    MPI_Datatype   *mpi_types;
 
     // nitems has to equal the number of elements in dmy_struct
     nitems = 5;
@@ -1506,15 +1490,15 @@ create_MPI_dmy_struct_type(MPI_Datatype *mpi_type)
 void
 create_MPI_alarm_struct_type(MPI_Datatype *mpi_type)
 {
-    extern MPI_Comm     MPI_COMM_VIC;
+    extern MPI_Comm MPI_COMM_VIC;
 
-    int           nitems; // number of elements in struct
-    int           status;
-    int          *blocklengths;
-    size_t        i;
-    MPI_Aint     *offsets;
-    MPI_Datatype *mpi_types;
-    MPI_Datatype  mpi_dmy_type;
+    int             nitems; // number of elements in struct
+    int             status;
+    int            *blocklengths;
+    size_t          i;
+    MPI_Aint       *offsets;
+    MPI_Datatype   *mpi_types;
+    MPI_Datatype    mpi_dmy_type;
 
     // nitems has to equal the number of elements in alarm_struct
     nitems = 6;
@@ -1738,7 +1722,6 @@ gather_put_nc_field_double(int     nc_id,
         dvar_remapped =
             malloc(global_domain.ncells_active * sizeof(*dvar_remapped));
         check_alloc_status(dvar_remapped, "Memory allocation error.");
-
     }
     // Gather the results from the nodes, result for the local node is in the
     // array *var (which is a function argument)
@@ -1746,7 +1729,7 @@ gather_put_nc_field_double(int     nc_id,
                          dvar_gathered, mpi_map_local_array_sizes,
                          mpi_map_global_array_offsets, MPI_DOUBLE,
                          VIC_MPI_ROOT, MPI_COMM_VIC);
-check_mpi_status(status, "MPI error.");
+    check_mpi_status(status, "MPI error.");
     if (mpi_rank == VIC_MPI_ROOT) {
         // remap the array
         map(sizeof(double), global_domain.ncells_active, NULL,
@@ -1806,7 +1789,6 @@ gather_put_nc_field_float(int     nc_id,
         fvar_remapped =
             malloc(global_domain.ncells_active * sizeof(*fvar_remapped));
         check_alloc_status(fvar_remapped, "Memory allocation error.");
-
     }
     // Gather the results from the nodes, result for the local node is in the
     // array *var (which is a function argument)
@@ -1874,13 +1856,12 @@ gather_put_nc_field_int(int     nc_id,
 
         ivar_gathered =
             malloc(global_domain.ncells_active * sizeof(*ivar_gathered));
-            check_alloc_status(ivar_gathered, "Memory allocation error.");
+        check_alloc_status(ivar_gathered, "Memory allocation error.");
 
 
         ivar_remapped =
             malloc(global_domain.ncells_active * sizeof(*ivar_remapped));
-            check_alloc_status(ivar_remapped, "Memory allocation error.");
-
+        check_alloc_status(ivar_remapped, "Memory allocation error.");
     }
     // Gather the results from the nodes, result for the local node is in the
     // array *var (which is a function argument)
@@ -1888,7 +1869,7 @@ gather_put_nc_field_int(int     nc_id,
                          ivar_gathered, mpi_map_local_array_sizes,
                          mpi_map_global_array_offsets, MPI_INT,
                          VIC_MPI_ROOT, MPI_COMM_VIC);
-check_mpi_status(status, "MPI error.");
+    check_mpi_status(status, "MPI error.");
 
     if (mpi_rank == VIC_MPI_ROOT) {
         // remap the array
@@ -1948,13 +1929,12 @@ gather_put_nc_field_short(int        nc_id,
 
         svar_gathered =
             malloc(global_domain.ncells_active * sizeof(*svar_gathered));
-            check_alloc_status(svar_gathered, "Memory allocation error.");
+        check_alloc_status(svar_gathered, "Memory allocation error.");
 
 
         svar_remapped =
             malloc(global_domain.ncells_active * sizeof(*svar_remapped));
-            check_alloc_status(svar_remapped, "Memory allocation error.");
-
+        check_alloc_status(svar_remapped, "Memory allocation error.");
     }
     // Gather the results from the nodes, result for the local node is in the
     // array *var (which is a function argument)
@@ -1962,7 +1942,7 @@ gather_put_nc_field_short(int        nc_id,
                          svar_gathered, mpi_map_local_array_sizes,
                          mpi_map_global_array_offsets, MPI_SHORT,
                          VIC_MPI_ROOT, MPI_COMM_VIC);
-check_mpi_status(status, "MPI error.");
+    check_mpi_status(status, "MPI error.");
 
     if (mpi_rank == VIC_MPI_ROOT) {
         // remap the array
@@ -2022,13 +2002,12 @@ gather_put_nc_field_schar(int     nc_id,
 
         cvar_gathered =
             malloc(global_domain.ncells_active * sizeof(*cvar_gathered));
-            check_alloc_status(cvar_gathered, "Memory allocation error.");
+        check_alloc_status(cvar_gathered, "Memory allocation error.");
 
 
         cvar_remapped =
             malloc(global_domain.ncells_active * sizeof(*cvar_remapped));
-            check_alloc_status(cvar_remapped, "Memory allocation error.");
-
+        check_alloc_status(cvar_remapped, "Memory allocation error.");
     }
     // Gather the results from the nodes, result for the local node is in the
     // array *var (which is a function argument)
@@ -2036,7 +2015,7 @@ gather_put_nc_field_schar(int     nc_id,
                          cvar_gathered, mpi_map_local_array_sizes,
                          mpi_map_global_array_offsets, MPI_CHAR,
                          VIC_MPI_ROOT, MPI_COMM_VIC);
-check_mpi_status(status, "MPI error.");
+    check_mpi_status(status, "MPI error.");
 
     if (mpi_rank == VIC_MPI_ROOT) {
         // remap the array
@@ -2088,11 +2067,11 @@ get_scatter_nc_field_double(char   *nc_name,
 
         dvar_filtered =
             malloc(global_domain.ncells_active * sizeof(*dvar_filtered));
-            check_alloc_status(dvar, "Memory allocation error.");
+        check_alloc_status(dvar, "Memory allocation error.");
 
         dvar_mapped =
             malloc(global_domain.ncells_active * sizeof(*dvar_mapped));
-            check_alloc_status(dvar_mapped, "Memory allocation error.");
+        check_alloc_status(dvar_mapped, "Memory allocation error.");
 
         get_nc_field_double(nc_name, var_name, start, count, dvar);
         // filter the active cells only
@@ -2149,11 +2128,11 @@ get_scatter_nc_field_float(char   *nc_name,
 
         fvar_filtered =
             malloc(global_domain.ncells_active * sizeof(*fvar_filtered));
-            check_alloc_status(fvar_filtered, "Memory allocation error.");
+        check_alloc_status(fvar_filtered, "Memory allocation error.");
 
         fvar_mapped =
             malloc(global_domain.ncells_active * sizeof(*fvar_mapped));
-            check_alloc_status(fvar_mapped, "Memory allocation error.");
+        check_alloc_status(fvar_mapped, "Memory allocation error.");
 
         get_nc_field_float(nc_name, var_name, start, count, fvar);
         // filter the active cells only
@@ -2215,7 +2194,7 @@ get_scatter_nc_field_int(char   *nc_name,
 
         ivar_mapped =
             malloc(global_domain.ncells_active * sizeof(*ivar_mapped));
-            check_alloc_status(ivar_mapped, "Memory allocation error.");
+        check_alloc_status(ivar_mapped, "Memory allocation error.");
 
         get_nc_field_int(nc_name, var_name, start, count, ivar);
         // filter the active cells only
@@ -2252,7 +2231,7 @@ get_scatter_nc_field_int(char   *nc_name,
 size_t *filter_active_cells = NULL;
 size_t *mpi_map_mapping_array = NULL;
 // all_vars_struct    *all_vars = NULL;
-// atmos_data_struct  *atmos = NULL;
+// force_data_struct  *force = NULL;
 // dmy_struct         *dmy = NULL;
 filenames_struct filenames;
 filep_struct     filep;

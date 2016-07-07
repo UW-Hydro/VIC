@@ -22,10 +22,9 @@ from test_utils import (setup_test_dirs, print_test_dict,
                         test_classic_driver_all_complete,
                         test_classic_driver_no_output_file_nans,
                         find_global_param_value,
-                        check_multistream,
+                        check_multistream_classic,
                         plot_science_tests)
-from test_image_driver import test_image_driver_no_output_file_nans,
-                        check_multistream_classic)
+from test_image_driver import (test_image_driver_no_output_file_nans)
 from test_image_driver import (test_image_driver_no_output_file_nans,
                                check_multistream_image)
 from test_restart import (prepare_restart_run_periods,
@@ -145,8 +144,7 @@ def main():
                         default='./samples/VIC_sample_data')
     parser.add_argument('--science_test_data_dir', type=str,
                         help='directory to find science test data',
-                        default='./test_runs')
-                        default=os.path.join(test_dir, '../samples/VIC_sample_data'))
+                        default='./samples/VIC_sample_data')
 
     args = parser.parse_args()
 
@@ -537,7 +535,7 @@ def run_science(config_file, vic_exe, science_test_data_dir,
     print('-'.ljust(OUTPUT_WIDTH, '-'))
 
     # Get setup
-    config = read_config(config_file)
+    config = read_configobj(config_file)
 
     # drop invalid driver tests
     config = drop_tests(config, driver)
@@ -545,19 +543,19 @@ def run_science(config_file, vic_exe, science_test_data_dir,
     test_results = OrderedDict()
 
     # Run individual tests
-    for i, (testname, test_dict) in enumerate(config.items()):
+    for i, (test_type, test_dict) in enumerate(config.items()):
 
         # print out status info
         print('Running test {0}/{1}: {2}'.format(i + 1, len(config.items()),
-                                                 testname))
+                                                 test_type))
 
         # Setup directories for test
-        dirs = setup_test_dirs(testname, out_dir,
+        dirs = setup_test_dirs(test_type, out_dir,
                                mkdirs=['results', 'state', 'logs', 'plots'])
 
         # read template global parameter file
-        infile = os.path.join(test_dir, 'science', test_dict['global_parameter_file'])
-        print(infile)
+        infile = os.path.join(test_dir, 'science',
+                                test_dict['global_parameter_file'])
 
         with open(infile, 'r') as global_file:
             global_param = global_file.read()
@@ -569,11 +567,11 @@ def run_science(config_file, vic_exe, science_test_data_dir,
         global_param = s.safe_substitute(test_data_dir=science_test_data_dir,
                                          result_dir=dirs['results'],
                                          state_dir=dirs['state'],
-                                         testname=testname,
+                                         testname=test_type,
                                          test_root=test_dir)
 
         test_global_file = os.path.join(dirs['test'],
-                                        '{0}_globalparam.txt'.format(testname))
+                                        '{0}_globalparam.txt'.format(test_type))
 
         # write global parameter file
         with open(test_global_file, 'w') as f:
@@ -622,21 +620,20 @@ def run_science(config_file, vic_exe, science_test_data_dir,
 
             # plot science test results
             plot_science_tests(test_dict['driver'],
-                                testname,
+                                test_type,
                                 science_test_data_dir,
                                 dirs['results'],
                                 dirs['plots'],
-                                test_dict['vic4.2.d'],
-                                test_dict['vic5.0.0'],
-                                test_dict['observations_path'],
-                                test_dict['plots'])
+                                test_dict['plots'],
+                                test_dict['compare_data'])
 
         # Handle errors
         except Exception as e:
+            print(e)
             test_comment, error_message = process_error(e, vic_exe)
 
         # record the test results
-        test_results[testname] = TestResults(testname,
+        test_results[test_type] = TestResults(test_type,
                                              test_complete=test_complete,
                                              passed=test_passed,
                                              comment=test_comment,

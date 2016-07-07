@@ -10,10 +10,9 @@ import pandas as pd
 import glob
 import re
 import matplotlib.pyplot as plt
+import warnings
 
-from tonic.models.vic.vic import VICRuntimeError
-from tonic.models.vic.vic import default_vic_valgrind_error_code
-## Note ## that importing this is causing an error so it's commented out
+from tonic.models.vic.vic import VICRuntimeError, default_vic_valgrind_error_code
 from tonic.testing import check_completed, check_for_nans, VICTestError
 
 OUTPUT_WIDTH = 100
@@ -309,7 +308,6 @@ def check_multistream_classic(fnames):
 
 def tsplit(string, delimiters):
     '''Behaves like str.split but supports multiple delimiters.
-
     '''
 
     delimiters = tuple(delimiters)
@@ -324,8 +322,126 @@ def tsplit(string, delimiters):
 
     return stack
 
-def plot_science_tests(driver, testname, science_test_data_dir, result_dir, plot_dir, vic_42_dir, vic_50_dir,
-                        obs_dir, plots_to_make):
+def read_snotel_swe_obs(filename, science_test_data_dir, items):
+
+    ''' reads in Snotel SWE obs and returns DataFrame
+    '''
+
+    filename_fullpath = os.path.join(science_test_data_dir,
+                                    'datasets',
+                                    items['archive'],
+                                    'observations',
+                                    filename)
+
+    # load snotel obs
+    snotel_swe = pd.read_csv(filename_fullpath,
+                            skiprows=0,
+                            delim_whitespace=True,
+                            names=['YEAR', 'MONTH', 'DAY', 'OUT_SWE'])
+
+    # add datetime object column to snotel DataFrame
+    snotel_swe['DATES'] = pd.to_datetime(snotel_swe.YEAR * 10000 +
+                                        snotel_swe.MONTH * 100 +
+                                        snotel_swe.DAY,
+                                        format='%Y%m%d')
+
+    # remove year, month, day columns of DataFrame
+    snotel_swe.drop(['YEAR', 'MONTH', 'DAY'], inplace=True, axis=1)
+
+    snotel_swe.index = snotel_swe['DATES']
+
+    return(snotel_swe)
+
+def read_vic_42(lat, lng, science_test_data_dir, items):
+    ''' reads output from VIC 4.2
+    '''
+
+    if 'ecflux' in items['compare_to']:
+        vic_42_file = 'en_bal_%s_%s' % (lat, lng)
+        vic_42_dir = os.path.join(science_test_data_dir, 'test_runs',
+                                items['archive'], 'ecflux', 'results')
+
+    elif 'snotel' in items['compare_to']:
+        vic_42_file = 'outfile_%s_%s' % (lat, lng)
+        vic_42_dir = os.path.join(science_test_data_dir, 'test_runs',
+                                items['archive'], 'snotel', 'results')
+
+    else:
+        raise ValueError("this option has not yet been implemented")
+
+    vic_42 = pd.read_csv(os.path.join(vic_42_dir, vic_42_file),
+                            sep='\t',
+                            skiprows=5)
+
+    # remove comment sign from column names in DataFrame
+    vic_42 = vic_42.rename(columns=lambda x: x.replace('#', ''))
+
+    # remove spaces from column names in DataFrame
+    vic_42 = vic_42.rename(columns=lambda x: x.replace(' ', ''))
+
+    # add datetime object column to snotel DataFrame
+    vic_42['DATES'] = pd.to_datetime(vic_42.YEAR * 10000 +
+                                            vic_42.MONTH * 100 +
+                                            vic_42.DAY,
+                                            format='%Y%m%d')
+
+    # remove year, day columns of DataFrame
+    vic_42.drop(['YEAR', 'DAY'], inplace=True, axis=1)
+
+    if ('HOUR' not in vic_42) and ('SEC' in vic_42):
+        # add hour column for groupby
+        vic_42['HOUR'] = (vic_42['SEC'] * (1/3600)
+                                        ).astype(int)
+
+    vic_42.index = vic_42.DATES
+
+    return(vic_42)
+
+def read_vic_5(lat, lng, science_test_data_dir, items):
+
+    ''' read VIC 5.0.x outout
+    '''
+
+    if 'ecflux' in items['compare_to']:
+        vic_5_file = 'en_bal_%s_%s.txt' % (lat, lng)
+        vic_5_dir = os.path.join(science_test_data_dir, 'test_runs',
+                                items['archive'], 'ecflux', 'results')
+
+    elif 'snotel' in items['compare_to']:
+        vic_5_file = 'outfile_%s_%s.txt' % (lat, lng)
+        vic_5_dir = os.path.join(science_test_data_dir, 'test_runs',
+                                items['archive'], 'snotel', 'results')
+
+    else:
+        raise ValueError("this option has not yet been implemented")
+
+    vic_5 = pd.read_csv(os.path.join(vic_5_dir, vic_5_file),
+                            skiprows=3,
+                            sep='\t')
+
+    # remove spaces from column names
+    vic_5 = vic_5.rename(columns=lambda x: x.replace(' ', ''))
+
+    # add datetime object column to snotel DataFrame
+    vic_5['DATES'] = pd.to_datetime(vic_5.YEAR * 10000 +
+                                            vic_5.MONTH * 100 +
+                                            vic_5.DAY,
+                                            format='%Y%m%d')
+
+    # remove year, day columns of DataFrame
+    vic_5.drop(['YEAR', 'DAY'], inplace=True, axis=1)
+
+    if ('HOUR' not in vic_5) and ('SEC' in vic_5):
+        # add hour column for groupby
+        vic_5['HOUR'] = (vic_5['SEC'] * (1/3600)
+                                        ).astype(int)
+
+    vic_5.index = vic_5.DATES
+
+    return(vic_5)
+
+def plot_science_tests(driver, test_type, science_test_data_dir, result_dir,
+                        plot_dir, plots_to_make, compare_data):
 
     ''' makes science test figures
 
@@ -333,7 +449,7 @@ def plot_science_tests(driver, testname, science_test_data_dir, result_dir, plot
     ----------
     driver: <str>
         Name of Driver
-    testname: <str>
+    test_type: <str>
         Name of test
     science_test_data_dir: <str>
         Science test data directory
@@ -341,137 +457,107 @@ def plot_science_tests(driver, testname, science_test_data_dir, result_dir, plot
         Result directory
     plot_dir: <str>
         Directory for output plots
-    vic_42_dir: <str>
-        Directory for VIC 4.2 archive
-    vic_50_dir <str>
-        Directory for VIC 5.0 archive
-    obs_dir <str>
-        Directory for observations archive
     plots_to_make <Dict>
         Keys that indicate which plots should be made
+    compare_data <Dict>
+        Keys that indicate which datasets and model output to use for comparison
 
     Returns
     ----------
     '''
-    if testname == "science_test_snotel":
+    if test_type == "science_test_snotel":
         plot_snotel_comparison(driver,
-                                testname,
+                                science_test_data_dir,
+                                compare_data,
                                 result_dir,
                                 plot_dir,
-                                os.path.join(science_test_data_dir, 'test_runs', vic_42_dir, 'snotel', 'results'),
-                                os.path.join(science_test_data_dir, 'test_runs', vic_50_dir, 'snotel', 'results'),
-                                os.path.join(science_test_data_dir, 'datasets', obs_dir, 'observations'),
                                 plots_to_make)
-    elif testname == "science_test_fluxnet":
+
+    elif test_type == "science_test_fluxnet":
         plot_fluxnet_comparison(driver,
-                                testname,
+                                science_test_data_dir,
+                                compare_data,
                                 result_dir,
                                 plot_dir,
-                                os.path.join(science_test_data_dir, 'test_runs', vic_42_dir, 'ecflux', 'results'),
-                                os.path.join(science_test_data_dir, 'test_runs', vic_50_dir, 'ecflux', 'results'),
-                                os.path.join(science_test_data_dir, 'datasets', obs_dir, 'obs'),
                                 plots_to_make)
     else:
-        print("this has not yet been implemented in the VIC 5.0 science test suite")
+        print("this has not been implemented in the VIC 5.0 science test suite")
 
-def plot_snotel_comparison(driver, testname, result_dir, plot_dir, vic_42_dir, vic_50_dir,
-                        obs_dir, plots_to_make):
+def plot_snotel_comparison(driver, science_test_data_dir,
+                            compare_data_dict,
+                            result_dir, plot_dir,
+                            plots_to_make):
     ''' makes snotel figures
 
     '''
-    for filename in os.listdir(obs_dir):
-        filename_fullpath = os.path.join(obs_dir, filename)
+
+    # plot settings
+    plot_variables = ['OUT_SWE', 'OUT_ALBEDO', 'OUT_SALBEDO', 'OUT_SNOW_DEPTH',
+                    'OUT_SNOW_CANOPY', 'OUT_SNOW_PACK_TEMP', 'OUT_SNOW_MELT',
+                    'OUT_R_NET', 'OUT_LATENT', 'OUT_SENSIBLE']
+
+    plot_units = ['mm', 'fraction', 'fraction', 'mm', '%', 'degrees C',
+                    'mm', 'W/$m^2$', 'W/$m^2$', 'W/$m^2$']
+    lw = 4.0
+
+    for filename in os.listdir(os.path.join(science_test_data_dir,
+                                            'datasets',
+                                            'snotel',
+                                            'observations')):
+
+        # get lat/lng from filename
         file_split = re.split('_', filename)
         lng = file_split[3].split('.txt')[0]
         lat = file_split[2]
 
-        # load snotel obs
-        snotel_swe = pd.read_csv(filename_fullpath,
-                                skiprows=0,
-                                delim_whitespace=True,
-                                names=['YEAR', 'MONTH', 'DAY', 'OUT_SWE'])
-        # add datetime object column to snotel DataFrame
-        snotel_swe['DATES'] = pd.to_datetime(snotel_swe.YEAR * 10000 +
-                                            snotel_swe.MONTH * 100 +
-                                            snotel_swe.DAY,
-                                            format='%Y%m%d')
+        # loop over data to compare
+        data = {}
+        for key, items in compare_data_dict.items():
 
-        # load VIC 4.2 data
-        vic_42_file = 'outfile_%s_%s' % (lat, lng)
+            # read in data
 
-        vic_42 = pd.read_csv(os.path.join(vic_42_dir, vic_42_file),
-                                sep='\t',
-                                skiprows=5)
+            if key == "snotel":
 
-        # remove comment sign from column names in DataFrame
-        vic_42 = vic_42.rename(columns=lambda x: x.replace('#', ''))
+                data[key] = read_snotel_swe_obs(filename,
+                                                science_test_data_dir,
+                                                items)
 
-        # remove spaces from column names in DataFrame
-        vic_42 = vic_42.rename(columns=lambda x: x.replace(' ', ''))
+            elif key == "VIC.4.2.d":
 
-        # load VIC 5.0 data
+                data[key] = read_vic_42(lat, lng,
+                                        science_test_data_dir,
+                                        items)
 
-        vic_50_file = 'outfile_%s_%s.txt' % (lat, lng)
+            else:
 
-        vic_50 = pd.read_csv(os.path.join(vic_50_dir, vic_50_file),
-                                skiprows=3,
-                                sep='\t')
+                data[key] = read_vic_5(lat, lng,
+                                        science_test_data_dir,
+                                        items)
 
-        # remove spaces from column names
-        vic_50 = vic_50.rename(columns=lambda x: x.replace(' ', ''))
-
-        # load VIC 5.0.x data
-
-        vic_50x_file = 'outfile_%s_%s.txt' % (lat, lng)
-
-        vic_50x = pd.read_csv(os.path.join(result_dir, vic_50x_file),
-                                skiprows=3,
-                                sep='\t')
-
-        # remove spaces from column names
-        vic_50x = vic_50x.rename(columns=lambda x: x.replace(' ', ''))
-
-        # variables to plot
-        plot_variables = ['OUT_SWE', 'OUT_ALBEDO', 'OUT_SALBEDO', 'OUT_SNOW_DEPTH',
-                        'OUT_SNOW_CANOPY', 'OUT_SNOW_PACK_TEMP', 'OUT_SNOW_MELT',
-                        'OUT_R_NET', 'OUT_LATENT', 'OUT_SENSIBLE']
-
-        plot_units = ['mm', 'fraction', 'fraction', 'mm', '%', 'degrees C',
-                        'mm', 'W/$m^2$', 'W/$m^2$', 'W/$m^2$']
-
-        len_dates = len(snotel_swe['DATES'])
-
-        # plotting preferences
-        lw = 4.0
         # loop over variables to plot
-
         for i, plot_variable in enumerate(plot_variables):
 
             if 'water_year' in plots_to_make:
 
-                plt.figure(figsize=(10,10))
+                fig, ax = plt.subplots(figsize=(10,10))
 
-                if plot_variable == "OUT_SWE":
+                df = pd.DataFrame({key: d[plot_variable] for key, d in
+                                            data.items() if plot_variable in d})
 
-                    # plot SnoTel SWE observations
-                    plt.plot(snotel_swe['DATES'], snotel_swe[plot_variable],
-                            'k', label='Snotel', linewidth=lw)
+                # merge DateTime indexes (time series lengths are different)
+                if 'snotel' in data.keys():
+                    df_join = data.pop('snotel').merge(next(iter(data.values())),
+                                                    how='outer', on='DATES')
+                    df.index = df_join['DATES']
+                else:
+                    df.index = next(iter(data.values()))['DATES']
 
-                # plot VIC 4.2 simulations
-                plt.plot(snotel_swe['DATES'], vic_42[plot_variable][:len_dates],
-                        'b', label='VIC 4.2', linewidth=lw)
+                for key, series in df.iteritems():
+                    series.plot(linewidth=lw, ax=ax, color=compare_data_dict[
+                                                            key]['color'])
 
-                # plot VIC 5.0 simulations
-                plt.plot(snotel_swe['DATES'], vic_50[plot_variable][:len_dates],
-                        'r', label='VIC 5.0', linewidth=lw)
-
-                # plot VIC 5.0.x simulations
-                plt.plot(snotel_swe['DATES'], vic_50x[plot_variable][:len_dates],
-                        'y', label='VIC 5.0.x', linewidth=lw)
-
-                plt.title(plot_variable)
-                plt.legend(loc='upper left')
-                plt.ylabel(plot_units[i])
+                ax.legend(loc='upper left')
+                ax.set_ylabel("%s [%s]" % (plot_variable, plot_units[i]))
 
                 # save figure
                 os.makedirs(os.path.join(plot_dir, plot_variable), exist_ok=True)
@@ -482,190 +568,161 @@ def plot_snotel_comparison(driver, testname, result_dir, plot_dir, vic_42_dir, v
                 plt.clf()
                 plt.close()
 
+def check_site_files(obs_dir, subdir):
+    if os.listdir(os.path.join(obs_dir, subdir)) != []:
+        return(True)
+    else:
+        return(False)
 
-def plot_fluxnet_comparison(driver, testname, result_dir, plot_dir, vic_42_dir, vic_50_dir,
-                        obs_dir, plots_to_make):
+def get_fluxnet_lat_lon(obs_dir, subdir):
+
+    # get CSV file from site directory to get lat/lng for site
+    try:
+        site_csv_file = glob.glob(os.path.join(obs_dir, subdir, 'AMF*.csv'))[0]
+    except IndexError:
+        site_csv_file = glob.glob(os.path.join(obs_dir, subdir, 'us*.csv'))[0]
+    with open(site_csv_file) as file:
+        second_line = list(file)[1]
+
+    # parse line from header to get lat/lng
+    str_split = tsplit(second_line, ('Latitude: ', 'Longitude: ', 'Elevation (masl): '))
+    lat = str_split[1].strip()
+    lng = str_split[2].strip()
+
+    return(lat, lng)
+
+def read_fluxnet_obs(subdir, science_test_data_dir, items):
+
+    filename = '%s.stdfmt.hourly.local.txt' %subdir
+
+    # column names for DataFrame (same as VIC variable names)
+    names = ['YEAR', 'MONTH', 'DAY', 'HOUR', 'PREC', 'AIR_TEMP', 'SWDOWN',
+            'LWDOWN','OUT_REL_HUMID', 'PRESSURE', 'WIND', 'OUT_EVAP',
+            'SOIL_TEMP_DEPTH1', 'SOIL_TEMP_DEPTH2', 'SOIL_TEMP_DEPTH3',
+            'SOIL_TEMP_DEPTH4', 'SOIL_TEMP_DEPTH5', 'OUT_SOIL_MOIST1',
+            'OUT_SOIL_MOIST2', 'OUT_SOIL_MOIST3', 'OUT_SOIL_MOIST4',
+            'OUT_SOIL_MOIST5', 'OUT_SOIL_TEMP1', 'OUT_SOIL_TEMP2',
+            'OUT_SOIL_TEMP3', 'OUT_SOIL_TEMP4', 'OUT_SOIL_TEMP5', 'SWNET',
+            'LWNET', 'OUT_SENSIBLE', 'OUT_LATENT', 'OUT_GRND_FLUX']
+
+    # read in data with -9999.0000 as NaNs
+    obs_dir = os.path.join(science_test_data_dir, 'datasets',
+                            'ec_flux_towers', 'obs')
+    ecflux_df = pd.read_csv(os.path.join(obs_dir, subdir, filename),
+            skiprows=0,
+            delim_whitespace=True,
+            header=None,
+            names=names,
+            na_values=-9999.0000)
+
+    ecflux_df['DATES'] = pd.to_datetime(ecflux_df.YEAR * 10000 +
+                                 ecflux_df.MONTH * 100 +
+                                 ecflux_df.DAY,format='%Y%m%d')
+
+    ecflux_df.index = ecflux_df.DATES
+
+    ecflux_df.drop(['YEAR', 'DAY'], inplace=True, axis=1)
+
+    if ('HOUR' not in ecflux_df) and ('SEC' in ecflux_df):
+        # add hour column for groupby
+        ecflux_df['HOUR'] = (ecflux_df['SEC'] * (1/3600)
+                                        ).astype(int)
+
+    return(ecflux_df)
+
+def plot_fluxnet_comparison(driver, science_test_data_dir,
+                            compare_data_dict,
+                            result_dir, plot_dir,
+                            plots_to_make):
 
     ''' makes Ameriflux figures
-
     '''
 
     # loop over Ameriflux sites
+    obs_dir = os.path.join(science_test_data_dir,
+                            'datasets',
+                            'ec_flux_towers',
+                            'obs')
+
     for subdir in os.listdir(obs_dir):
 
-        lat_issue = False
-
-        if os.listdir(os.path.join(obs_dir, subdir)) != []:
-
-            # some sites do not have data
-            subdir_files = True
-
+        if check_site_files(obs_dir, subdir):
             # get CSV file from site directory to get lat/lng for site
-            try:
-                site_csv_file = glob.glob(os.path.join(obs_dir, subdir, 'AMF*.csv'))[0]
-            except IndexError:
-                site_csv_file = glob.glob(os.path.join(obs_dir, subdir, 'us*.csv'))[0]
-            with open(site_csv_file) as file:
-                second_line = list(file)[1]
+            lat, lng = get_fluxnet_lat_lon(obs_dir, subdir)
 
-            # parse line from header to get lat/lng
-            str_split = tsplit(second_line, ('Latitude: ', 'Longitude: ', 'Elevation (masl): '))
-            lat = str_split[1].strip()
-            lng = str_split[2].strip()
+            # loop over data to compare
+            data = {}
+            for key, items in compare_data_dict.items():
 
-            # load Ameriflux data
-            filename = '%s.stdfmt.hourly.local.txt' %subdir
+                if key == "ecflux":
+                    try:
+                        # load Ameriflux data
+                        data[key] = read_fluxnet_obs(subdir,
+                                                science_test_data_dir, items)
+                    except OSError:
+                        warnings.warn("this site does not have data")
 
-            # column names for DataFrame
-            # column names
-            names = ['Year', 'Month', 'Day', 'Hour', 'P', 'Tair', 'SWdown', 'LWdown', 'RH', 'Patm',
-                    'Wind', 'ET', 'Tsdep1', 'Tsdep2', 'Tsdep3', 'Tsdep4', 'Tsdep5', 'SM1', 'SM2',
-                    'SM3', 'SM4', 'SM5', 'Tsoil1', 'Tsoil2', 'Tsoil3', 'Tsoil4', 'Tsoil5', 'SWnet',
-                    'LWnet', 'H', 'LE', 'FG']
+                elif key == "VIC.4.2.d":
+                    try:
+                        # load VIC 4.2 simulations
+                        data[key] = read_vic_42(lat, lng, science_test_data_dir,
+                                                items)
 
-            # read in data with -9999.0000 as NaNs
-            ecflux_df = pd.read_csv(os.path.join(obs_dir, subdir, filename),
-                    skiprows=0,
-                    delim_whitespace=True,
-                    header=None,
-                    names=names,
-                    na_values=-9999.0000)
+                    except OSError:
+                        warnings.warn("this site has a lat/lng precision issue")
 
-            ecflux_df['DATES'] = pd.to_datetime(ecflux_df.Year * 10000 +
-                                         ecflux_df.Month * 100 +
-                                         ecflux_df.Day,format='%Y%m%d')
+                    #except AssertionError:
+                        #print("blah")
+                else:
+                    try:
+                        # load VIC 5 simulations
+                        data[key] = read_vic_5(lat, lng, science_test_data_dir,
+                                                items)
+                    except OSError:
+                        warnings.warn("this site has a lat/lng precision issue")
 
-        else:
-            subdir_files = False
+            # make figures
+            vic_vars = ['OUT_LATENT', 'OUT_SENSIBLE']
+            variable_names = ['Latent Heat', 'Sensible Heat']
 
-        # load VIC 4.2 simulations
-        ebal_42_file = 'en_bal_%s_%s' % (lat, lng)
+            # plot preferences
+            lw = 4.0
+            fs = 15
+            alpha = 1.0
+            dpi = 150
 
-        try:
-
-            ebal_42 = pd.read_csv(os.path.join(vic_42_dir,
-                                            ebal_42_file),
-                                            sep='\t',
-                                            skiprows=5)
-
-            # remove comment sign from column names in DataFrame
-            ebal_42 = ebal_42.rename(columns=lambda x: x.replace('#', ''))
-            ebal_42 = ebal_42.rename(columns=lambda x: x.replace(' ', ''))
-
-            ebal_42['DATES'] = pd.to_datetime(ebal_42.YEAR * 10000 +
-                                     ebal_42.MONTH * 100 +
-                                     ebal_42.DAY, format='%Y%m%d')
-        except OSError:
-            lat_issue=True
-
-        # load VIC 5.0 simulations
-        ebal_50_file = 'en_bal_%s_%s.txt' %(lat, lng)
-
-        try:
-
-            # load VIC 5 simulations
-            ebal_50 = pd.read_csv(os.path.join(vic_50_dir,
-                                 ebal_50_file),
-                                 skiprows=3,
-                                 sep='\t')
-
-            # remove space from column names in DataFrame
-            ebal_50 = ebal_50.rename(columns=lambda x: x.replace(' ', ''))
-
-            ebal_50['DATES'] = pd.to_datetime(ebal_50.YEAR * 10000 +
-                                         ebal_50.MONTH * 100 +
-                                         ebal_50.DAY, format='%Y%m%d')
-
-        except OSError:
-            print("this site has a lat/lng precision issue")
-            lat_issue=True
-            # To-Do: deal with lat/lng precision issue
-
-        # load VIC 5.0.x simulations
-        ebal_50x_file = 'en_bal_%s_%s.txt' %(lat, lng)
-
-        try:
-
-            # load VIC 5.x simulations
-            ebal_50x = pd.read_csv(os.path.join(result_dir,
-                                 ebal_50x_file),
-                                 skiprows=3,
-                                 sep='\t')
-
-            # remove space from column names in DataFrame
-            ebal_50x = ebal_50x.rename(columns=lambda x: x.replace(' ', ''))
-
-            ebal_50x['DATES'] = pd.to_datetime(ebal_50x.YEAR * 10000 +
-                                             ebal_50x.MONTH * 100 +
-                                             ebal_50x.DAY, format='%Y%m%d')
-
-
-        except OSError:
-            lat_issue=True
-            # To-Do: deal with lat/lng precision issue for some sites
-
-        # make figures
-
-        ecflux_vars = ['LE', 'H']
-        vic_vars = ['OUT_LATENT', 'OUT_SENSIBLE']
-        variable_names = ['Latent Heat', 'Sensible Heat']
-
-        # plot preferences
-        lw = 4.0
-        fs = 15
-        alpha = 1.0
-
-        if not lat_issue:
             if 'annual_mean_diurnal_cycle' in plots_to_make:
 
                 # make annual mean diurnal cycle plots
-                f, axarr = plt.subplots(2, 1, figsize=(8,8))
+                f, axarr = plt.subplots(2, 1, figsize=(8,8), sharex=True)
 
-                for i, ecflux_var in enumerate(ecflux_vars):
+                for i, vic_var in enumerate(vic_vars):
 
-                    ebal_42.index = ebal_42.DATES
+                    # calculate annual mean diurnal cycle for each DataFrame
+                    annual_mean = {}
+                    for (key, df) in data.items():
+                        annual_mean[key] = pd.DataFrame(df[vic_var].groupby(
+                                                        df['HOUR']).mean())
 
-                    # plt VIC 4.2
-                    axarr[i].plot(ebal_42[vic_vars[i]].groupby(ebal_42['HOUR']).mean(),
-                                'b', label='VIC 4.2', linewidth=lw)
+                    df = pd.DataFrame({key: d[vic_var] for key, d in
+                                    annual_mean.items() if vic_var in d})
 
-                    # plot VIC 5.0
-                    ebal_50.index = ebal_50.DATES
-
-                    # convert seconds column to hours for groupby
-                    ebal_50['HOUR'] = (ebal_50['SEC'] * (1/3600)).astype(int)
-
-                    axarr[i].plot(ebal_50[vic_vars[i]].groupby(ebal_50['HOUR']).mean(),
-                                'r', label='VIC 5.0', linewidth=lw)
-
-                    # plot VIC 5.0.x
-                    ebal_50x.index = ebal_50x.DATES
-
-                    # convert seconds column to hours for groupby
-                    ebal_50x['HOUR'] = (ebal_50x['SEC'] * (1/3600)).astype(int)
-
-                    axarr[i].plot(ebal_50x[vic_vars[i]].groupby(ebal_50x['HOUR']).mean(),
-                                'y', label='VIC 5.0.x', linewidth=lw)
-
-                    # plot Ameriflux data if it exists for this site
-                    if subdir_files:
-                        ecflux_df.index = ecflux_df.DATES
-
-                        axarr[i].plot(ecflux_df[ecflux_vars[i]].groupby(
-                                ecflux_df["Hour"]).mean(),
-                                'k', label='Ameriflux', linewidth=lw,
-                                alpha=alpha)
+                    for key, series in df.iteritems():
+                        series.plot(linewidth=lw,
+                                    ax=axarr[i],
+                                    color=compare_data_dict[key]['color'])
 
                     axarr[i].legend(loc='upper left')
-                    axarr[i].set_title(variable_names[i])
-                    axarr[i].set_ylabel('W / $m^2$', size=fs)
+                    axarr[i].set_ylabel('%s W / $m^2$' %variable_names[i],
+                                        size=fs)
                     axarr[i].set_xlim([0,24])
 
                 # save plot
                 plotname = '%s_%s.png' % (lat, lng)
-                os.makedirs(os.path.join(plot_dir, 'annual_mean'), exist_ok=True)
+                os.makedirs(os.path.join(plot_dir, 'annual_mean'),
+                                        exist_ok=True)
                 savepath = os.path.join(plot_dir, 'annual_mean', plotname)
-                plt.savefig(savepath, bbox_inches='tight')
+                plt.savefig(savepath, bbox_inches='tight', dpi=dpi)
 
                 plt.clf()
                 plt.close()
@@ -673,70 +730,53 @@ def plot_fluxnet_comparison(driver, testname, result_dir, plot_dir, vic_42_dir, 
             if 'monthly_mean_diurnal_cycle' in plots_to_make:
 
                 # make monthly mean diurnal cycle plots
-                f, axarr = plt.subplots(2, 12, figsize=(35,7))
+                f, axarr = plt.subplots(2, 12, figsize=(35,7), sharex=True,
+                                        sharey=True)
 
-                for i, ecflux_var in enumerate(ecflux_vars):
+                months = ['January', 'February', 'March', 'April', 'May',
+                            'June', 'July', 'August', 'September',
+                            'October', 'November', 'December']
+
+                for i, vic_var in enumerate(vic_vars):
                     for j in range(12):
 
-                        # plot VIC 4.2
-                        # make datetime column the DataFrame index
-                        ebal_42.index = ebal_42.DATES
-
                         # calculate monthly mean diurnal cycle
-                        vic_monthly_mean_42 = ebal_42[vic_vars[i]].groupby(
-                                                    [ebal_42['MONTH'], ebal_42['HOUR']]).mean()
+                        monthly_mean = {}
+                        for (key, df) in data.items():
+                            monthly_mean[key] = pd.DataFrame(df[vic_var].
+                                                    groupby([df['MONTH'],
+                                                    df['HOUR']]).mean())
 
-                        axarr[i,j].plot(vic_monthly_mean_42[j+1], 'b',
-                                        label='VIC 4.2', linewidth=lw)
+                        df = pd.DataFrame({key: d[vic_var] for key, d in
+                                        monthly_mean.items() if vic_var in d})
 
-                        # plot VIC 5.0
-
-                        # make datetime column the DataFrame index
-                        ebal_50.index = ebal_50.DATES
-
-                        # convert seconds column to hours for groupby
-                        ebal_50['HOUR'] = (ebal_50['SEC'] * (1/3600)).astype(int)
-
-                        # calculate monthly mean diurnal cycle
-                        vic_monthly_mean_50 = ebal_50[vic_vars[i]].groupby(
-                                                    [ebal_50['MONTH'], ebal_50['HOUR']]).mean()
-
-                        axarr[i,j].plot(vic_monthly_mean_50[j+1], 'r',
-                                        label='VIC 5.0', linewidth=lw)
-
-                        # plot VIC 5.0.x
-
-                        # make datetime column the DataFrame index
-                        ebal_50x.index = ebal_50x.DATES
-
-                        # convert seconds column to hours for groupby
-                        ebal_50x['HOUR'] = (ebal_50x['SEC'] * (1/3600)).astype(int)
-
-                        # calculate monthly mean diurnal cycle
-                        vic_monthly_mean_50x = ebal_50x[vic_vars[i]].groupby(
-                                                    [ebal_50x['MONTH'], ebal_50x['HOUR']]).mean()
-
-                        axarr[i,j].plot(vic_monthly_mean_50x[j+1], 'y',
-                                        label='VIC 5.0.x', linewidth=lw)
-
-                        # plot Ameriflux data if it exists for this site
-                        if subdir_files:
-                            ecflux_df.index = ecflux_df.DATES
-
-                            # calculate monthly mean diurnal cycle
-                            ecflux_monthly_mean = ecflux_df[ecflux_vars[i]].groupby(
-                                        [ecflux_df['Month'],
-                                        ecflux_df['Hour']]).mean()
-
-                            axarr[i,j].plot(ecflux_monthly_mean[j+1],
-                                        'k', label='Ameriflux', linewidth=lw,
+                        for key, series in df.iteritems():
+                            series[j+1].plot(linewidth=lw,
+                                        ax=axarr[i,j],
+                                        color=compare_data_dict[key]
+                                        ['color'],
                                         alpha=alpha)
+
+                        if i == 0 and j == 11:
+                            axarr[i,j].legend(loc='center left',
+                                                bbox_to_anchor=(1, 0.5))
+                        axarr[i,j].set_ylabel('%s W/$m^2$' %variable_names[i],
+                                            size=fs)
+                        axarr[i,j].set_xlim([0,24])
+                        if i == 0:
+                            axarr[i,j].set_title(months[j])
 
                 # save plot
                 plotname = '%s_%s.png' % (lat, lng)
-                os.makedirs(os.path.join(plot_dir, 'monthly_mean'), exist_ok=True)
-                savepath = os.path.join(plot_dir, 'monthly_mean', plotname)
-                plt.savefig(savepath, bbox_inches='tight')
+                os.makedirs(os.path.join(plot_dir, 'monthly_mean'),
+                            exist_ok=True)
+                savepath = os.path.join(plot_dir,
+                                        'monthly_mean', plotname)
+                plt.savefig(savepath, bbox_inches='tight', dpi=dpi)
 
                 plt.clf()
                 plt.close()
+
+        else:
+            subdir_files = False
+            warnings.warn("this site does not have data")

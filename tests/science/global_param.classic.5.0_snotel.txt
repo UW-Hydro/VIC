@@ -50,19 +50,10 @@ SNOW_BAND             1
 
 RESULT_DIR            $result_dir
 
-OUTPUT_STEPS_PER_DAY  1
-SKIPYEAR              0
-COMPRESS              FALSE
-OUT_FORMAT            ASCII
-ALMA_OUTPUT           FALSE
-MOISTFRACT            FALSE
-PRT_HEADER            TRUE
-PRT_SNOW_BAND         FALSE
-AGGFREQ               NDAYS
-
-N_OUTFILES  1
-
 OUTFILE         outfile 24
+AGGFREQ         NDAYS
+COMPRESS        FALSE
+OUT_FORMAT      ASCII
 OUTVAR          OUT_SWE                 %.6g    *       *
 OUTVAR          OUT_SNOW_DEPTH          %.6g    *       *
 OUTVAR          OUT_SNOW_CANOPY         %.6g    *       *

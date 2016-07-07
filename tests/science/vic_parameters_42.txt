@@ -1,4 +1,3 @@
-atom .###############################################################################
  # @section DESCRIPTION
  #
  # VIC Model Parameters Namelist

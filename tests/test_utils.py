@@ -166,6 +166,7 @@ def test_classic_driver_all_complete(fnames):
     start = None
     end = None
     for fname in fnames:
+        print(fname)
         df = read_vic_ascii(fname)
 
         # check that each dataframe includes all timestamps
@@ -174,11 +175,14 @@ def test_classic_driver_all_complete(fnames):
         else:
             start = df.index[0]
             end = df.index[-1]
+            print("start = %s" %str(start))
+            print("end = %s" %str(end))
 
 
 def test_classic_driver_no_output_file_nans(fnames):
     '''Test that all VIC classic driver output files in fnames have no nans'''
     for fname in fnames:
+        print(fname)
         df = read_vic_ascii(fname)
         check_for_nans(df)
 
@@ -204,8 +208,9 @@ def read_vic_ascii(filepath, parse_dates=True, datetime_index=None, sep='\t',
         raise ValueError('cannot specify both parse_dates and datetime_index')
 
     if parse_dates:
-        time_cols = ['YEAR', 'MONTH', 'DAY']
-        df.index = pd.to_datetime(df[time_cols])
+        time_cols = ['YEAR', 'MONTH', 'DAY', 'SEC']
+        df.index = pd.to_datetime(df.YEAR * 10000 + df.MONTH * 100 +
+                                    df.DAY, format='%Y%m%d')
         if 'SEC' in df:
             df.index += pd.Series([pd.Timedelta(s, unit='s') for s in df['SEC']],
                                   index=df.index)

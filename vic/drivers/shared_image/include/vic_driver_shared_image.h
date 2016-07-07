@@ -190,10 +190,12 @@ void alloc_veg_hist(veg_hist_struct *veg_hist);
 double air_density(double t, double p);
 double average(double *ar, size_t n);
 void check_init_state_file(void);
+void compare_ncdomain_with_global_domain(char *ncfile);
 void free_force(force_data_struct *force);
 void free_veg_hist(veg_hist_struct *veg_hist);
 void get_domain_type(char *cmdstr);
-size_t get_global_domain(char *fname, domain_struct *global_domain);
+size_t get_global_domain(char *fname, domain_struct *global_domain,
+                         bool coords_only);
 size_t get_nc_dimension(char *nc_name, char *dim_name);
 void get_nc_var_attr(char *nc_name, char *var_name, char *attr_name,
                      char **attr);

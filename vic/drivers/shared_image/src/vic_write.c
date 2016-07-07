@@ -78,6 +78,13 @@ vic_write(stream_struct  *stream,
     unsigned int               varid;
     int                        status;
 
+    if (mpi_rank == VIC_MPI_ROOT) {
+        // If the output file is not open, initialize the history file now.
+        if (nc_hist_file->open == false) {
+            // open the netcdf history file
+            initialize_history_file(nc_hist_file, stream, dmy_current);
+        }
+    }
 
     // initialize dimids to invalid values - helps debugging
     for (i = 0; i < MAXDIMS; i++) {
@@ -216,7 +223,15 @@ vic_write(stream_struct  *stream,
 
     // Advance the position in the history file
     stream->write_alarm.count++;
-    // TODO: Decide if it is time to close this file and open a new one.
+    if (raise_alarm(&(stream->write_alarm), dmy_current)) {
+        // close this history file
+        if (mpi_rank == VIC_MPI_ROOT) {
+            status = nc_close(nc_hist_file->nc_id);
+            check_nc_status(status, "Error closing history file");
+            nc_hist_file->open = false;
+        }
+        reset_alarm(&(stream->write_alarm), dmy_current);
+    }
 
     // free memory
     if (dvar != NULL) {

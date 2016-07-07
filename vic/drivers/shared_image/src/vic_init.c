@@ -74,13 +74,11 @@ vic_init(void)
     Cv_sum = malloc(local_domain.ncells_active * sizeof(*Cv_sum));
     check_alloc_status(Cv_sum, "Memory allocation error.");
 
-
     // allocate memory for variables to be read
     dvar = malloc(local_domain.ncells_active * sizeof(*dvar));
     check_alloc_status(dvar, "Memory allocation error.");
     ivar = malloc(local_domain.ncells_active * sizeof(*ivar));
     check_alloc_status(ivar, "Memory allocation error.");
-
 
     // The method used to convert the NetCDF fields to VIC structures for
     // individual grid cells is to read a 2D slice and then loop over the
@@ -404,9 +402,6 @@ vic_init(void)
     }
 
     // read_soilparam()
-
-    // Nlayer
-    options.Nlayer = get_nc_dimension(filenames.params, "nlayer");
 
     // Validate Nlayer
     if ((options.FULL_ENERGY ||

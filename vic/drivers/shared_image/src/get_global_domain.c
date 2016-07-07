@@ -175,9 +175,9 @@ get_global_domain(char          *nc_name,
                 nc_name);
     }
 
-    // get area
-    // TBD: read var id from file
     if (!coords_only) {
+        // get area
+        // TBD: read var id from file
         get_nc_field_double(nc_name, global_domain->info.area_var,
                             d2start, d2count, var);
         for (i = 0; i < global_domain->ncells_total; i++) {

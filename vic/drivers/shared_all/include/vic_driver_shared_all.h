@@ -146,7 +146,7 @@ enum
     OUT_DELSOILMOIST,     /**< change in soil water content  [mm] */
     OUT_DELSURFSTOR,      /**< change in surface liquid water storage  [mm] */
     OUT_DELSWE,           /**< change in snow water equivalent  [mm] */
-    OUT_DISCHARGE,        /**< river discharge [m3]) */
+    OUT_DISCHARGE,        /**< river discharge [m3 s-1]) */
     OUT_EVAP,             /**< total net evaporation [mm] */
     OUT_EVAP_BARE,        /**< net evaporation from bare soil [mm] */
     OUT_EVAP_CANOP,       /**< net evaporation from canopy interception [mm] */

@@ -629,7 +629,6 @@ def run_science(config_file, vic_exe, science_test_data_dir,
 
         # Handle errors
         except Exception as e:
-            print(e)
             test_comment, error_message = process_error(e, vic_exe)
 
         # record the test results

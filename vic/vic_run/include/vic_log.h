@@ -64,7 +64,7 @@ void finalize_logging(void);
 void get_logname(const char *path, int id, char *filename);
 void initialize_log(void);
 void print_trace(void);
-void setup_logging(int id);
+void setup_logging(int id, char log_path[], FILE **logfile);
 
 
 // Macros for logging
@@ -130,7 +130,10 @@ void setup_logging(int id);
 
 #define check(A, M, ...) if (!(A)) {log_err(M, ## __VA_ARGS__); errno = 0; exit( \
                                         EXIT_FAILURE); }
-#define check_alloc_status(A, M, ...) if (A == NULL) {log_err(M, ## __VA_ARGS__); errno = 0; exit(EXIT_FAILURE); }
+#define check_alloc_status(A, M, \
+                           ...) if (A == NULL) {log_err(M, ## __VA_ARGS__); \
+                                                errno = 0; exit( \
+                                                    EXIT_FAILURE); }
 
 #define sentinel(M, ...)  {log_err(M, ## __VA_ARGS__); errno = 0; exit( \
                                EXIT_FAILURE); }

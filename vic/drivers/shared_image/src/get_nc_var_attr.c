@@ -46,12 +46,14 @@ get_nc_var_attr(char  *nc_name,
 
     // get variable id
     status = nc_inq_varid(nc_id, var_name, &var_id);
-    check_nc_status(status, "Error getting variable id %s in %s", var_name, nc_name);
+    check_nc_status(status, "Error getting variable id %s in %s", var_name,
+                    nc_name);
 
     // get size of the attribute
     status = nc_inq_attlen(nc_id, var_id, attr_name, &attr_len);
-    check_nc_status(status, "Error getting attribute length for %s:%s in %s", var_name,
-                attr_name, nc_name);
+    check_nc_status(status, "Error getting attribute length for %s:%s in %s",
+                    var_name,
+                    attr_name, nc_name);
 
     // allocate memory for attribute
     *attr = malloc((attr_len + 1) * sizeof(**attr));
@@ -59,8 +61,10 @@ get_nc_var_attr(char  *nc_name,
 
     // read attribute text
     status = nc_get_att_text(nc_id, var_id, attr_name, *attr);
-    check_nc_status(status, "Error getting netCDF attribute %s for var %s in %s", attr_name,
-                var_name, nc_name);
+    check_nc_status(status,
+                    "Error getting netCDF attribute %s for var %s in %s",
+                    attr_name,
+                    var_name, nc_name);
 
     // we need to null terminate the string ourselves according to NetCDF docs
     (*attr)[attr_len] = '\0';

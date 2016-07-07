@@ -11,7 +11,6 @@ dependencies:
   - xarray
   - bottleneck
   - matplotlib
-  - warnings
   - pip:
     - git+https://github.com/UW-Hydro/tonic.git
     - engarde

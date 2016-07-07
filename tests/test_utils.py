@@ -182,7 +182,6 @@ def test_classic_driver_all_complete(fnames):
 def test_classic_driver_no_output_file_nans(fnames):
     '''Test that all VIC classic driver output files in fnames have no nans'''
     for fname in fnames:
-        print(fname)
         df = read_vic_ascii(fname)
         check_for_nans(df)
 

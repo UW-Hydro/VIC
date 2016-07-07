@@ -155,7 +155,7 @@ def main():
 
     # check to make sure science test data directory exists
     science_test_data_dir = args.science_test_data_dir
-    if 'science' in args.test and not os.path.exists(science_test_data_dir):
+    if 'science' in args.tests and not os.path.exists(science_test_data_dir):
         raise VICTestError("directory for science test data does not exist or has not been defined")
 
     # Validate input directories

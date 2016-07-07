@@ -102,6 +102,8 @@ vic_cesm_init(vic_clock     *vclock,
 int
 vic_cesm_run(vic_clock *vclock)
 {
+    char state_filename[MAXSTRING];
+
     // reset l2x fields
     initialize_l2x_data();
 
@@ -119,7 +121,8 @@ vic_cesm_run(vic_clock *vclock)
 
     // if save:
     if (vclock->state_flag) {
-        vic_store(&dmy_current);
+        vic_store(&dmy_current, state_filename);
+        write_rpointer_file(state_filename);
     }
 
     // reset x2l fields

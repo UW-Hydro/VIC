@@ -77,7 +77,8 @@ int
 main(int    argc,
      char **argv)
 {
-    int status;
+    int  status;
+    char state_filename[MAXSTRING];
 
     // Initialize MPI - note: logging not yet initialized
     status = MPI_Init(&argc, &argv);
@@ -125,7 +126,8 @@ main(int    argc,
 
         // Write state file
         if (check_save_state_flag(current)) {
-            vic_store(&(dmy[current]));
+            vic_store(&(dmy[current]), state_filename);
+            debug("finished storing state file: %s", state_filename)
         }
     }
 

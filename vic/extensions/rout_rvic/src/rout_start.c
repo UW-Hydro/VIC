@@ -39,7 +39,7 @@ rout_start(void)
     extern filep_struct     filep;
     extern int              mpi_rank;
 
-    if (mpi_rank == 0) {
+    if (mpi_rank == VIC_MPI_ROOT) {
         // read global settings
         filep.globalparam = open_file(filenames.global, "r");
         get_global_param_rout(filep.globalparam);

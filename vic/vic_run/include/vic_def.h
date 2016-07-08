@@ -38,6 +38,7 @@
 #include <stddef.h>
 #include <unistd.h>
 #include <time.h>
+#include <sys/time.h>
 
 #include <vic_physical_constants.h>
 #include <vic_log.h>

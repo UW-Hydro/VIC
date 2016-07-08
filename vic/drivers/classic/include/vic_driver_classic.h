@@ -117,4 +117,5 @@ void write_header(stream_struct **streams, dmy_struct *dmy);
 void write_model_state(all_vars_struct *, int, int, filep_struct *,
                        soil_con_struct *);
 void write_output(stream_struct **streams, dmy_struct *dmy);
+void write_vic_timing_table(timer_struct *timers);
 #endif

@@ -67,6 +67,7 @@ save_data_struct   *save_data;  // [ncells]
 double           ***out_data = NULL;  // [ncells, nvars, nelem]
 stream_struct      *output_streams = NULL;  // [nstreams]
 nc_file_struct     *nc_hist_files = NULL;  // [nstreams]
+timer_struct        global_timers[N_TIMERS];
 
 /******************************************************************************
  * @brief    Initialization function for CESM driver
@@ -75,6 +76,11 @@ int
 vic_cesm_init(vic_clock     *vclock,
               case_metadata *cmeta)
 {
+    // start vic all timer
+    timer_start(&(global_timers[TIMER_VIC_ALL]));
+    // start vic init timer
+    timer_start(&(global_timers[TIMER_VIC_INIT]));
+
     // read global parameters
     vic_cesm_start(vclock, cmeta);
 
@@ -93,6 +99,11 @@ vic_cesm_init(vic_clock     *vclock,
     // initialize output structures
     vic_init_output(&dmy_current);
 
+    // stop init timer
+    timer_stop(&(global_timers[TIMER_VIC_INIT]));
+    // stop vic all timer
+    timer_stop(&(global_timers[TIMER_VIC_ALL]));
+
     return EXIT_SUCCESS;
 }
 
@@ -102,6 +113,11 @@ vic_cesm_init(vic_clock     *vclock,
 int
 vic_cesm_run(vic_clock *vclock)
 {
+    // continue vic all timer
+    timer_continue(&(global_timers[TIMER_VIC_ALL]));
+    // start vic run timer
+    timer_start(&(global_timers[TIMER_VIC_RUN]));
+
     // reset l2x fields
     initialize_l2x_data();
 
@@ -129,6 +145,11 @@ vic_cesm_run(vic_clock *vclock)
     advance_time();
     assert_time_insync(vclock, &dmy_current);
 
+    // stop vic run timer
+    timer_stop(&(global_timers[TIMER_VIC_RUN]));
+    // stop vic all timer
+    timer_stop(&(global_timers[TIMER_VIC_ALL]));
+
     return EXIT_SUCCESS;
 }
 
@@ -138,8 +159,20 @@ vic_cesm_run(vic_clock *vclock)
 int
 vic_cesm_final()
 {
+    // continue vic all timer
+    timer_continue(&(global_timers[TIMER_VIC_ALL]));
+    // start vic run timer
+    timer_start(&(global_timers[TIMER_VIC_RUN]));
+
     // clean up
     vic_cesm_finalize();
+
+    // stop vic final timer
+    timer_stop(&(global_timers[TIMER_VIC_FINAL]));
+    // stop vic all timer
+    timer_stop(&(global_timers[TIMER_VIC_ALL]));
+    // write timing info
+    write_vic_timing_table(global_timers, VIC_DRIVER);
 
     return EXIT_SUCCESS;
 }

@@ -255,4 +255,5 @@ void vic_store(dmy_struct *dmy_current);
 void vic_write(stream_struct *stream, nc_file_struct *nc_hist_file,
                dmy_struct *dmy_current);
 void vic_write_output(dmy_struct *dmy);
+void write_vic_timing_table(timer_struct *timers, char *driver);
 #endif

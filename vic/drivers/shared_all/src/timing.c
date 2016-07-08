@@ -25,7 +25,6 @@
  *****************************************************************************/
 
 #include <vic_driver_shared_all.h>
-#include <sys/time.h>
 
 /******************************************************************************
  * @brief    Get wall time
@@ -34,7 +33,7 @@ double
 get_wall_time()
 {
     struct timeval time;
-    if (gettimeofday(&time, NULL)){
+    if (gettimeofday(&time, NULL)) {
         log_err("get_wall_time failed")
     }
     return (double) time.tv_sec + (double) time.tv_usec * 0.000001;
@@ -53,22 +52,43 @@ get_cpu_time()
  * @brief    Start timer
  *****************************************************************************/
 void
-timer_start(timer_struct *t) {
+timer_start(timer_struct *t)
+{
+    timer_init(t);
+
     t->start_wall = get_wall_time();
     t->start_cpu = get_cpu_time();
-
-    t->delta_wall = 0;
-    t->delta_cpu = 0;
 }
 
 /******************************************************************************
  * @brief    Stop timer
  *****************************************************************************/
 void
-timer_stop(timer_struct *t) {
+timer_stop(timer_struct *t)
+{
     t->stop_wall = get_wall_time();
     t->stop_cpu = get_cpu_time();
 
-    t->delta_wall = t->stop_wall - t->start_wall;
-    t->delta_cpu = t->stop_cpu - t->start_cpu;
+    t->delta_wall += t->stop_wall - t->start_wall;
+    t->delta_cpu += t->stop_cpu - t->start_cpu;
+}
+
+/******************************************************************************
+ * @brief    Continue timer without reseting counters
+ *****************************************************************************/
+void
+timer_continue(timer_struct *t)
+{
+    t->start_wall = get_wall_time();
+    t->start_cpu = get_cpu_time();
+}
+
+/******************************************************************************
+ * @brief    Initialize timer values
+ *****************************************************************************/
+void
+timer_init(timer_struct *t)
+{
+    t->delta_wall = 0;
+    t->delta_cpu = 0;
 }

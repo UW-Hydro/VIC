@@ -39,7 +39,8 @@ put_data(all_vars_struct   *all_vars,
          veg_lib_struct    *veg_lib,
          lake_con_struct   *lake_con,
          double           **out_data,
-         save_data_struct  *save_data)
+         save_data_struct  *save_data,
+         timer_struct      *timer)
 {
     extern global_param_struct global_param;
     extern option_struct       options;
@@ -567,6 +568,10 @@ put_data(all_vars_struct   *all_vars,
     else {
         out_data[OUT_ENERGY_ERROR][0] = MISSING;
     }
+
+    // vic_run run time
+    out_data[OUT_TIME_VICRUN_WALL][0] = timer->delta_wall;
+    out_data[OUT_TIME_VICRUN_CPU][0] = timer->delta_cpu;
 }
 
 /******************************************************************************
@@ -1052,11 +1057,12 @@ initialize_save_data(all_vars_struct   *all_vars,
                      veg_lib_struct    *veg_lib,
                      lake_con_struct   *lake_con,
                      double           **out_data,
-                     save_data_struct  *save_data)
+                     save_data_struct  *save_data,
+                     timer_struct      *timer)
 {
     // Calling put data will populate the save data storage terms
     put_data(all_vars, atmos, soil_con, veg_con, veg_lib, lake_con,
-             out_data, save_data);
+             out_data, save_data, timer);
 
     zero_output_list(out_data);
 }

@@ -27,6 +27,9 @@
 #ifndef VIC_DRIVER_SHARED_H
 #define VIC_DRIVER_SHARED_H
 
+#include <pwd.h>
+#include <sys/types.h>
+
 #include <vic_run.h>
 #include <vic_version.h>
 
@@ -279,6 +282,9 @@ enum
     OUT_CLITTER,          /**< Carbon density in litter pool [g C/m2] */
     OUT_CINTER,           /**< Carbon density in intermediate pool [g C/m2] */
     OUT_CSLOW,            /**< Carbon density in slow pool [g C/m2] */
+    // Timing and Profiling Terms
+    OUT_TIME_VICRUN_WALL, /**< Wall time spent inside vic_run [seconds] */
+    OUT_TIME_VICRUN_CPU,  /**< Wall time spent inside vic_run [seconds] */
     // Last value of enum - DO NOT ADD ANYTHING BELOW THIS LINE!!
     // used as a loop counter and must be >= the largest value in this enum
     N_OUTVAR_TYPES        /**< used as a loop counter*/
@@ -437,6 +443,18 @@ enum time_units
     TIME_UNITS_MINUTES,
     TIME_UNITS_HOURS,
     TIME_UNITS_DAYS
+};
+
+/******************************************************************************
+ * @brief   Codes for timers
+ *****************************************************************************/
+enum timers
+{
+    TIMER_VIC_ALL,
+    TIMER_VIC_INIT,
+    TIMER_VIC_RUN,
+    TIMER_VIC_FINAL,
+    N_TIMERS
 };
 
 /******************************************************************************
@@ -624,7 +642,8 @@ void initialize_parameters(void);
 void initialize_save_data(all_vars_struct *all_vars, force_data_struct *force,
                           soil_con_struct *soil_con, veg_con_struct *veg_con,
                           veg_lib_struct *veg_lib, lake_con_struct *lake_con,
-                          double **out_data, save_data_struct *save_data);
+                          double **out_data, save_data_struct *save_data,
+                          timer_struct *timer);
 void initialize_snow(snow_data_struct **snow, size_t veg_num);
 void initialize_soil(cell_data_struct **cell, size_t veg_num);
 void initialize_time(void);
@@ -648,7 +667,7 @@ void parse_nc_time_units(char *nc_unit_chars, unsigned short int *units,
                          dmy_struct *dmy);
 void put_data(all_vars_struct *, force_data_struct *, soil_con_struct *,
               veg_con_struct *, veg_lib_struct *veg_lib, lake_con_struct *,
-              double **out_data, save_data_struct *);
+              double **out_data, save_data_struct *, timer_struct *timer);
 void print_alarm(alarm_struct *alarm);
 void print_cell_data(cell_data_struct *cell, size_t nlayers, size_t nfrost);
 void print_dmy(dmy_struct *dmy);
@@ -707,6 +726,8 @@ unsigned short int str_to_out_type(char typestr[]);
 unsigned short int str_to_timeunits(char units_chars[]);
 void strpdmy(const char *s, const char *format, dmy_struct *dmy);
 double time_delta(dmy_struct *dmy_current, unsigned short int freq, int n);
+void timer_continue(timer_struct *t);
+void timer_init(timer_struct *t);
 void timer_start(timer_struct *t);
 void timer_stop(timer_struct *t);
 int update_step_vars(all_vars_struct *, veg_con_struct *, veg_hist_struct *);

@@ -240,6 +240,16 @@ get_global_param(FILE *gp)
             else if (strcasecmp("LOG_DIR", optstr) == 0) {
                 sscanf(cmdstr, "%*s %s", filenames.log_path);
             }
+            else if (strcasecmp("INIT_STATE", optstr) == 0) {
+                sscanf(cmdstr, "%*s %s", flgstr);
+                if (strcasecmp("FALSE", flgstr) == 0) {
+                    options.INIT_STATE = false;
+                }
+                else {
+                    options.INIT_STATE = true;
+                    strcpy(filenames.init_state, flgstr);
+                }
+            }
             // Define state file format
             else if (strcasecmp("STATE_FORMAT", optstr) == 0) {
                 sscanf(cmdstr, "%*s %s", flgstr);

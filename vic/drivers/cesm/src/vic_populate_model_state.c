@@ -48,21 +48,32 @@ vic_populate_model_state(char *runtype_str)
 
     runtype = start_type_from_char(runtype_str);
 
-    // read the model state from the netcdf file if there is one
+    // read the model state from the netcdf file
     if (runtype == CESM_RUNTYPE_RESTART || runtype == CESM_RUNTYPE_BRANCH) {
         // Get restart file from rpointer file
         read_rpointer_file(filenames.init_state);
 
-        // read initial state file
+        // set options.INIT_STATE to true since we have found a state file in
+        // the rpointer file.
+        options.INIT_STATE = true;
+
+        // read initial state file -- specified in rpointer file
         vic_restore();
     }
     else if (runtype == CESM_RUNTYPE_CLEANSTART) {
-        // run type is clean start
-        for (i = 0; i < local_domain.ncells_active; i++) {
-            generate_default_state(&(all_vars[i]), &(soil_con[i]), veg_con[i]);
-            if (options.LAKES) {
-                generate_default_lake_state(&(all_vars[i]), &(soil_con[i]),
-                                            lake_con[i]);
+        if (options.INIT_STATE) {
+            // read initial state file -- specified in global param file
+            vic_restore();
+        }
+        else {
+            // no initial state file specified - generate default state
+            for (i = 0; i < local_domain.ncells_active; i++) {
+                generate_default_state(&(all_vars[i]), &(soil_con[i]),
+                                       veg_con[i]);
+                if (options.LAKES) {
+                    generate_default_lake_state(&(all_vars[i]), &(soil_con[i]),
+                                                lake_con[i]);
+                }
             }
         }
     }
@@ -105,20 +116,39 @@ void
 read_rpointer_file(char *fname)
 {
     FILE *fp = NULL;
+    char  linestr[MAXSTRING];
 
-    fname = NULL;
+    fp = open_file(RPOINTER, "r");
 
-    fp = fopen(RPOINTER, "r");
+    fgets(linestr, MAXSTRING, fp);
 
-    if (fp == NULL) {
-        log_err("Error reading rpointer file %s", RPOINTER);
+    // Read through rpointer file file to find state file name
+    while (!feof(fp)) {
+        if (linestr[0] != '#' && linestr[0] != '\n' && linestr[0] != '\0') {
+            sscanf(linestr, "%s", fname);
+            break;
+        }
+        fgets(linestr, MAXSTRING, fp);
     }
-
-    fgets(fname, MAXSTRING, fp);
-
     fclose(fp);
 
-    if (fname == NULL) {
-        log_err("Error reading rpointer file %s", RPOINTER);
-    }
+    // remove trailing newline if present
+    fname[strcspn(fname, "\n")] = 0;
+}
+
+/******************************************************************************
+ * @brief Write rpointer file
+ *****************************************************************************/
+void
+write_rpointer_file(char *fname)
+{
+    FILE *fp = NULL;
+    char *header = "# VIC CESM Driver restart pointer file\n";
+
+    fp = open_file(RPOINTER, "w");
+
+    fprintf(fp, header, fname);
+    fprintf(fp, "%s\n", fname);
+
+    fclose(fp);
 }

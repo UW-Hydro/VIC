@@ -251,7 +251,7 @@ void vic_init(void);
 void vic_init_output(dmy_struct *dmy_current);
 void vic_restore(void);
 void vic_start(void);
-void vic_store(dmy_struct *dmy_current);
+void vic_store(dmy_struct *dmy_current, char *state_filename);
 void vic_write(stream_struct *stream, nc_file_struct *nc_hist_file,
                dmy_struct *dmy_current);
 void vic_write_output(dmy_struct *dmy);

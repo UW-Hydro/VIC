@@ -64,7 +64,7 @@ vic_finalize(void)
     int                        status;
 
 
-    if (mpi_rank == 0) {
+    if (mpi_rank == VIC_MPI_ROOT) {
         // close the global parameter file
         fclose(filep.globalparam);
 

@@ -79,6 +79,7 @@ main(int    argc,
 {
     int          status;
     timer_struct global_timers[N_TIMERS];
+    char state_filename[MAXSTRING];
 
     // start vic all timer
     timer_start(&(global_timers[TIMER_VIC_ALL]));
@@ -136,7 +137,8 @@ main(int    argc,
 
         // Write state file
         if (check_save_state_flag(current)) {
-            vic_store(&(dmy[current]));
+            vic_store(&(dmy[current]), state_filename);
+            debug("finished storing state file: %s", state_filename)
         }
     }
     // stop vic run timer

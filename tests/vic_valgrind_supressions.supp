@@ -114,7 +114,7 @@
 {
    supress_stringcopy_not_vic_specific
    Memcheck:Leak
-   match-leak-kinds: possible
+   # match-leak-kinds: possible
    fun:malloc_zone_malloc
    fun:_objc_copyClassNamesForImage
    fun:_ZL9protocolsv

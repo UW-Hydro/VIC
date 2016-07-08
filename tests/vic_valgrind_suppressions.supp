@@ -16,125 +16,63 @@
    supress_dispatch_not_vic_specific
    Memcheck:Leak
    # match-leak-kinds: definite
-   fun:malloc
-   fun:_ZL23_collecting_in_criticalv
-   fun:lookUpImpOrForward
-   fun:lookUpImpOrForward
-   fun:-[OS_xpc_object _xref_dispose]
-   fun:xpc_pipe_routine
-   fun:_xpc_interface_routine
-   fun:bootstrap_look_up3
-   fun:bootstrap_look_up2
-   fun:___notify_lib_init_block_invoke
-   fun:_dispatch_client_callout
+   ...
    fun:dispatch_once_f
+   ...
 }
 {
    supress_getpwuid1_not_vic_specific
    Memcheck:Leak
    # match-leak-kinds: definite
-   fun:calloc
-   fun:LI_get_thread_info
-   fun:LI_set_thread_item
+   ...
    fun:getpwuid
-   fun:write_vic_timing_table
-   fun:main
+   ...
 }
 {
    supress_localtime_not_vic_specific
    Memcheck:Leak
    # match-leak-kinds: definite
-   fun:malloc
+   ...
    fun:localtime
-   fun:write_vic_timing_table
-   fun:main
+   ...
 }
 {
    supress_bootstrap_not_vic_specific
    Memcheck:Leak
    # match-leak-kinds: definite
-   fun:calloc
-   fun:call_load_methods
-   fun:call_load_methods
-   fun:prepare_load_methods
-   fun:class_createInstance
-   fun:class_createInstance
-   fun:class_createInstance
-   fun:NXMapRemove
-   fun:objc_msgSend
-   fun:xpc_pipe_routine
-   fun:_xpc_interface_routine
+   ...
    fun:bootstrap_look_up3
-}
-{
-   supress_getpwuid2_not_vic_specific
-   Memcheck:Leak
-   # match-leak-kinds: definite
-   fun:calloc
-   fun:_ZL12realizeClassP10objc_class
-   fun:_os_object_alloc_realized
-   fun:_xpc_pipe_create
-   fun:xpc_pipe_create
-   fun:_od_xpc_pipe
-   fun:_od_running
-   fun:ds_user_byuid
-   fun:search_item_bynumber
-   fun:getpwuid
-   fun:write_vic_timing_table
-   fun:main
+   ...
 }
 {
    supress_sprintf_not_vic_specific
    Memcheck:Leak
    # match-leak-kinds: definite
-   fun:malloc
-   fun:__Balloc_D2A
-   fun:__d2b_D2A
-   fun:__dtoa
-   fun:__vfprintf
-   fun:__v2printf
-   fun:_vsnprintf
-   fun:vsnprintf
+   ...
    fun:__sprintf_chk
-   fun:make_in_and_outfiles
-   fun:main
+   ...
 }
 {
    supress_sscanf_not_vic_specific
    Memcheck:Leak
    # match-leak-kinds: definite
-   fun:malloc
-   fun:__parsefloat_buf
-   fun:__svfscanf_l
-   fun:vsscanf_l
+   ...
    fun:sscanf
-   fun:get_global_param
-   fun:main
+   ...
 }
 {
    supress_stringcopy_not_vic_specific
    Memcheck:Leak
    # match-leak-kinds: possible
-   fun:malloc_zone_malloc
-   fun:_objc_copyClassNamesForImage
-   fun:_ZL9protocolsv
-   fun:_Z9readClassP10objc_classbb
-   fun:gc_init
-   fun:_ZL33objc_initializeClassPair_internalP10objc_classPKcS0_S0_
-   fun:layout_string_create
-   fun:_ZL12realizeClassP10objc_class
+   ...
    fun:_ZL22copySwiftV1MangledNamePKcb
-   fun:_ZL22copySwiftV1MangledNamePKcb
-   fun:_ZL22copySwiftV1MangledNamePKcb
-   fun:_ZL22copySwiftV1MangledNamePKcb
+   ...
 }
 {
-   supress_getpwuid3_not_vic_specific
+   supress_getpwuid_r_not_vic_specific
    Memcheck:Leak
    # match-leak-kinds: definite
    ...
    fun:getpwuid_r
-   fun:getpwuid
-   fun:write_vic_timing_table
-   fun:main
+   ...
 }

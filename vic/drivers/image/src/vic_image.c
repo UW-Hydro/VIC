@@ -32,7 +32,7 @@ size_t              current;
 size_t             *filter_active_cells = NULL;
 size_t             *mpi_map_mapping_array = NULL;
 all_vars_struct    *all_vars = NULL;
-atmos_data_struct  *atmos = NULL;
+force_data_struct  *force = NULL;
 dmy_struct         *dmy = NULL;
 filenames_struct    filenames;
 filep_struct        filep;
@@ -79,7 +79,8 @@ int
 main(int    argc,
      char **argv)
 {
-    int status;
+    int  status;
+    char state_filename[MAXSTRING];
 
     // Initialize MPI - note: logging not yet initialized
     status = MPI_Init(&argc, &argv);
@@ -142,7 +143,8 @@ main(int    argc,
 
         // Write state file
         if (check_save_state_flag(current)) {
-            vic_store(&(dmy[current]));
+            vic_store(&(dmy[current]), state_filename);
+            debug("finished storing state file: %s", state_filename)
         }
     }
 

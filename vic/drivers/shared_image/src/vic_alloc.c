@@ -33,7 +33,7 @@ void
 vic_alloc(void)
 {
     extern all_vars_struct    *all_vars;
-    extern atmos_data_struct  *atmos;
+    extern force_data_struct  *force;
     extern domain_struct       local_domain;
     extern option_struct       options;
     extern double           ***out_data;
@@ -47,9 +47,9 @@ vic_alloc(void)
     size_t                     i;
     size_t                     j;
 
-    // allocate memory for atmos structure
-    atmos = malloc(local_domain.ncells_active * sizeof(*atmos));
-    check_alloc_status(atmos, "Memory allocation error.");
+    // allocate memory for force structure
+    force = malloc(local_domain.ncells_active * sizeof(*force));
+    check_alloc_status(force, "Memory allocation error.");
 
     // allocate memory for veg_hist structure
     veg_hist = malloc(local_domain.ncells_active * sizeof(*veg_hist));
@@ -91,8 +91,8 @@ vic_alloc(void)
 
     // allocate memory for individual grid cells
     for (i = 0; i < local_domain.ncells_active; i++) {
-        // atmos allocation - allocate enough memory for NR+1 steps
-        alloc_atmos(&(atmos[i]));
+        // force allocation - allocate enough memory for NR+1 steps
+        alloc_force(&(force[i]));
 
         // snow band allocation
         soil_con[i].AreaFract = calloc(options.SNOW_BAND,

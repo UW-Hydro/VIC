@@ -158,7 +158,7 @@ typedef struct {
  * @brief   file structures
  *****************************************************************************/
 typedef struct {
-    FILE *forcing[MAX_FORCE_FILES];   /**< atmospheric forcing data files */
+    FILE *forcing[MAX_FORCE_FILES];   /**< forcing data files */
     FILE *globalparam;  /**< global parameters file */
     FILE *constants;    /**< model constants parameter file */
     FILE *domain;       /**< domain file */
@@ -185,15 +185,17 @@ typedef struct {
 } filenames_struct;
 
 void add_nveg_to_global_domain(char *nc_name, domain_struct *global_domain);
-void alloc_atmos(atmos_data_struct *atmos);
+void alloc_force(force_data_struct *force);
 void alloc_veg_hist(veg_hist_struct *veg_hist);
 double air_density(double t, double p);
 double average(double *ar, size_t n);
 void check_init_state_file(void);
-void free_atmos(atmos_data_struct *atmos);
+void compare_ncdomain_with_global_domain(char *ncfile);
+void free_force(force_data_struct *force);
 void free_veg_hist(veg_hist_struct *veg_hist);
 void get_domain_type(char *cmdstr);
-size_t get_global_domain(char *fname, domain_struct *global_domain);
+size_t get_global_domain(char *fname, domain_struct *global_domain,
+                         bool coords_only);
 size_t get_nc_dimension(char *nc_name, char *dim_name);
 void get_nc_var_attr(char *nc_name, char *var_name, char *attr_name,
                      char **attr);
@@ -225,7 +227,7 @@ void initialize_soil_con(soil_con_struct *soil_con);
 void initialize_veg_con(veg_con_struct *veg_con);
 void parse_output_info(FILE *gp, stream_struct **output_streams,
                        dmy_struct *dmy_current);
-void print_atmos_data(atmos_data_struct *atmos);
+void print_force_data(force_data_struct *force);
 void print_domain(domain_struct *domain, bool print_loc);
 void print_location(location_struct *location);
 void print_nc_file(nc_file_struct *nc);
@@ -249,7 +251,7 @@ void vic_init(void);
 void vic_init_output(dmy_struct *dmy_current);
 void vic_restore(void);
 void vic_start(void);
-void vic_store(dmy_struct *dmy_current);
+void vic_store(dmy_struct *dmy_current, char *state_filename);
 void vic_write(stream_struct *stream, nc_file_struct *nc_hist_file,
                dmy_struct *dmy_current);
 void vic_write_output(dmy_struct *dmy);

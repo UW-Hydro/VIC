@@ -1475,6 +1475,8 @@ set_output_met_data_info()
     out_metadata[OUT_SMFROZFRAC].nelem = options.Nlayer;
     out_metadata[OUT_SOIL_ICE].nelem = options.Nlayer;
     out_metadata[OUT_SOIL_LIQ].nelem = options.Nlayer;
+    out_metadata[OUT_SOIL_ICE_FRAC].nelem = options.Nlayer;
+    out_metadata[OUT_SOIL_LIQ_FRAC].nelem = options.Nlayer;
     out_metadata[OUT_SOIL_MOIST].nelem = options.Nlayer;
     out_metadata[OUT_SOIL_TEMP].nelem = options.Nlayer;
     out_metadata[OUT_SOIL_TNODE].nelem = options.Nnode;

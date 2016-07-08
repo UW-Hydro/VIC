@@ -34,7 +34,7 @@ veg_lib_struct *vic_run_veg_lib;
 *               energy and water balance models, as well as frozen soils.
 ******************************************************************************/
 int
-vic_run(atmos_data_struct   *atmos,
+vic_run(force_data_struct   *force,
         all_vars_struct     *all_vars,
         dmy_struct          *dmy,
         global_param_struct *gp,
@@ -117,17 +117,17 @@ vic_run(atmos_data_struct   *atmos,
     /* Compute gauge undercatch correction factors
        - this assumes that the gauge is free of vegetation effects, so gauge
        correction is constant for the entire grid cell */
-    if (options.CORRPREC && atmos->prec[NR] > 0) {
-        correct_precip(gauge_correction, atmos->wind[NR], gp->wind_h,
+    if (options.CORRPREC && force->prec[NR] > 0) {
+        correct_precip(gauge_correction, force->wind[NR], gp->wind_h,
                        soil_con->rough, soil_con->snow_rough);
     }
     else {
         gauge_correction[0] = 1;
         gauge_correction[1] = 1;
     }
-    atmos->out_prec = 0;
-    atmos->out_rain = 0;
-    atmos->out_snow = 0;
+    force->out_prec = 0;
+    force->out_rain = 0;
+    force->out_snow = 0;
 
     // Convert LAI from global to local
     for (iveg = 0; iveg < Nveg; iveg++) {
@@ -240,7 +240,7 @@ vic_run(atmos_data_struct   *atmos,
             *************************************/
 
             /* Initialize wind speeds */
-            tmp_wind[0] = atmos->wind[NR];
+            tmp_wind[0] = force->wind[NR];
             tmp_wind[1] = MISSING;
             tmp_wind[2] = MISSING;
 
@@ -296,7 +296,7 @@ vic_run(atmos_data_struct   *atmos,
                         vic_run_veg_lib[veg_class].NscaleFlag,
                         veg_con[iveg].CanopLayerBnd,
                         veg_var[iveg][band].LAI,
-                        atmos->coszen[NR],
+                        force->coszen[NR],
                         veg_var[iveg][band].NscaleFactor);
                     // TBD: move this outside of vic_run()
                     if (dmy->day_in_year == 1) {
@@ -333,7 +333,7 @@ vic_run(atmos_data_struct   *atmos,
                                                &snow_inflow[band],
                                                tmp_wind, veg_con[iveg].root,
                                                options.Nlayer, Nveg, band, dp,
-                                               iveg, veg_class, atmos, dmy,
+                                               iveg, veg_class, force, dmy,
                                                &(energy[iveg][band]), gp,
                                                &(cell[iveg][band]),
                                                &(snow[iveg][band]),
@@ -345,11 +345,11 @@ vic_run(atmos_data_struct   *atmos,
                         return (ERROR);
                     }
 
-                    atmos->out_prec +=
+                    force->out_prec +=
                         out_prec[band * 2] * Cv * soil_con->AreaFract[band];
-                    atmos->out_rain +=
+                    force->out_rain +=
                         out_rain[band * 2] * Cv * soil_con->AreaFract[band];
-                    atmos->out_snow +=
+                    force->out_snow +=
                         out_snow[band * 2] * Cv * soil_con->AreaFract[band];
 
                     /********************************************************
@@ -438,10 +438,10 @@ vic_run(atmos_data_struct   *atmos,
         lake_var->baseflow_in =
             (sum_baseflow * lake_con->rpercent +
              wetland_baseflow) * soil_con->cell_area / MM_PER_M;                                                 // m3
-        lake_var->channel_in = atmos->channel_in[NR] * soil_con->cell_area /
+        lake_var->channel_in = force->channel_in[NR] * soil_con->cell_area /
                                MM_PER_M;                                        // m3
-        lake_var->prec = atmos->prec[NR] * lake_var->sarea / MM_PER_M; // m3
-        rainonly = calc_rainonly(atmos->air_temp[NR], atmos->prec[NR],
+        lake_var->prec = force->prec[NR] * lake_var->sarea / MM_PER_M; // m3
+        rainonly = calc_rainonly(force->air_temp[NR], force->prec[NR],
                                  param.SNOW_MAX_SNOW_TEMP,
                                  param.SNOW_MIN_RAIN_TEMP);
         if ((int) rainonly == ERROR) {
@@ -452,19 +452,19 @@ vic_run(atmos_data_struct   *atmos,
            Solve the energy budget for the lake.
         **********************************************************************/
 
-        snowprec = gauge_correction[SNOW] * (atmos->prec[NR] - rainonly);
+        snowprec = gauge_correction[SNOW] * (force->prec[NR] - rainonly);
         rainprec = gauge_correction[SNOW] * rainonly;
         Cv = veg_con[iveg].Cv * lakefrac;
-        atmos->out_prec += (snowprec + rainprec) * Cv;
-        atmos->out_rain += rainprec * Cv;
-        atmos->out_snow += snowprec * Cv;
+        force->out_prec += (snowprec + rainprec) * Cv;
+        force->out_rain += rainprec * Cv;
+        force->out_snow += snowprec * Cv;
 
-        ErrorFlag = solve_lake(snowprec, rainprec, atmos->air_temp[NR],
-                               atmos->wind[NR], atmos->vp[NR] / PA_PER_KPA,
-                               atmos->shortwave[NR], atmos->longwave[NR],
-                               atmos->vpd[NR] / PA_PER_KPA,
-                               atmos->pressure[NR] / PA_PER_KPA,
-                               atmos->density[NR], lake_var,
+        ErrorFlag = solve_lake(snowprec, rainprec, force->air_temp[NR],
+                               force->wind[NR], force->vp[NR] / PA_PER_KPA,
+                               force->shortwave[NR], force->longwave[NR],
+                               force->vpd[NR] / PA_PER_KPA,
+                               force->pressure[NR] / PA_PER_KPA,
+                               force->density[NR], lake_var,
                                *soil_con, gp->dt, gp->wind_h, *dmy,
                                fraci);
         if (ErrorFlag == ERROR) {

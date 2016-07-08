@@ -123,14 +123,8 @@ write_vic_timing_table(timer_struct *timers)
             timers[TIMER_VIC_FINAL].delta_wall);
     fprintf(LOG_DEST, "\n");
 
-    // fprintf(LOG_DEST, "Timing table for individual timers\n");
-    // fprintf(LOG_DEST, "----------------------------------\n");
-    // TODO...
-
     fprintf(LOG_DEST,
             "\n------------------------------"
             " END VIC TIMING PROFILE "
             "------------------------------\n\n");
-
-    free(timeinfo);
 }

@@ -32,60 +32,65 @@
 void
 rout_run(void)
 {
-    log_info("In Routing Lohmann Model");
+    extern int mpi_rank;
+    if (mpi_rank == VIC_MPI_ROOT) {
+        log_info("In Routing Lohmann Model");
 
-    extern rout_struct         rout;
-    extern double           ***out_data;
-    extern domain_struct       local_domain;
-    extern global_param_struct global_param;
+        extern rout_struct         rout;
+        extern double           ***out_data;
+        extern domain_struct       local_domain;
+        extern global_param_struct global_param;
 
-    size_t                     iSource, iOutlet, iTimestep, jTimestep;
-    int                        offset; /*2d indicies*/
-    size_t                     iRing, iUH; /*1d indicies*/
+        size_t                     iSource, iOutlet, iTimestep, jTimestep;
+        int                        offset; /*2d indicies*/
+        size_t                     iRing, iUH; /*1d indicies*/
 
-    // Zero out current ring
-    // in python: (from variables.py) self.ring[tracer][0, :] = 0.
-    for (iOutlet = 0; iOutlet < rout.rout_param.nOutlets; iOutlet++) {
-        rout.ring[iOutlet] = 0.0;
-    }
-
-    // Equivalent to Fortran 90 cshift function, in python: (from variables.py) self.ring[tracer] = np.roll(self.ring[tracer], -1, axis=0)
-    cshift(rout.ring, rout.rout_param.full_time_length,
-           rout.rout_param.nOutlets, 0,
-           1);
-
-    /*Loop through all sources*/
-    for (iSource = 0; iSource < rout.rout_param.nSources; iSource++) {
-        iOutlet = rout.rout_param.source2outlet_ind[iSource];
-        offset = rout.rout_param.source_time_offset[iSource];
-
-        /* Do the convolution */
-        // iTimestep is the position in the unit hydrograph
-        // jTimestep is the position in the ring
-        for (iTimestep = 0; iTimestep < rout.rout_param.nTimesteps;
-             iTimestep++) {
-            jTimestep = iTimestep + offset;
-
-            // index locations
-            iRing = (jTimestep * rout.rout_param.nOutlets) + iOutlet;
-            iUH = (iTimestep * rout.rout_param.nSources) + iSource;
-
-            rout.ring[iRing] += (rout.rout_param.unit_hydrograph[iUH] *
-                                 (out_data[rout.rout_param.source_VIC_index[
-                                               iSource]][
-                                      OUT_RUNOFF][0] +
-                                  out_data[rout.rout_param.source_VIC_index[
-                                               iSource]][
-                                      OUT_BASEFLOW][0]));
+        // Zero out current ring
+        // in python: (from variables.py) self.ring[tracer][0, :] = 0.
+        for (iOutlet = 0; iOutlet < rout.rout_param.nOutlets; iOutlet++) {
+            rout.ring[iOutlet] = 0.0;
         }
-    }
 
-    // Write to output struct...
-    for (iOutlet = 0; iOutlet < rout.rout_param.nOutlets; iOutlet++) {
-        out_data[rout.rout_param.outlet_VIC_index[iOutlet]][OUT_DISCHARGE][0] =
-            rout.ring[iOutlet] *
-            local_domain.locations[rout.rout_param.outlet_VIC_index[iOutlet]].
-            area /
-            MM_PER_M / global_param.dt;
+        // Equivalent to Fortran 90 cshift function, in python: (from variables.py) self.ring[tracer] = np.roll(self.ring[tracer], -1, axis=0)
+        cshift(rout.ring, rout.rout_param.full_time_length,
+               rout.rout_param.nOutlets, 0,
+               1);
+
+        /*Loop through all sources*/
+        for (iSource = 0; iSource < rout.rout_param.nSources; iSource++) {
+            iOutlet = rout.rout_param.source2outlet_ind[iSource];
+            offset = rout.rout_param.source_time_offset[iSource];
+
+            /* Do the convolution */
+            // iTimestep is the position in the unit hydrograph
+            // jTimestep is the position in the ring
+            for (iTimestep = 0; iTimestep < rout.rout_param.nTimesteps;
+                 iTimestep++) {
+                jTimestep = iTimestep + offset;
+
+                // index locations
+                iRing = (jTimestep * rout.rout_param.nOutlets) + iOutlet;
+                iUH = (iTimestep * rout.rout_param.nSources) + iSource;
+
+                rout.ring[iRing] += (rout.rout_param.unit_hydrograph[iUH] *
+                                     (out_data[rout.rout_param.source_VIC_index[
+                                                   iSource]][
+                                          OUT_RUNOFF][0] +
+                                      out_data[rout.rout_param.source_VIC_index[
+                                                   iSource]][
+                                          OUT_BASEFLOW][0]));
+            }
+        }
+
+        // Write to output struct...
+        for (iOutlet = 0; iOutlet < rout.rout_param.nOutlets; iOutlet++) {
+            out_data[rout.rout_param.outlet_VIC_index[iOutlet]][OUT_DISCHARGE][0
+            ] =
+                rout.ring[iOutlet] *
+                local_domain.locations[rout.rout_param.outlet_VIC_index[iOutlet]
+                ].
+                area /
+                MM_PER_M / global_param.dt;
+        }
     }
 }

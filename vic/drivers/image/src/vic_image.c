@@ -79,7 +79,7 @@ main(int    argc,
 {
     int          status;
     timer_struct global_timers[N_TIMERS];
-    char state_filename[MAXSTRING];
+    char         state_filename[MAXSTRING];
 
     // start vic all timer
     timer_start(&(global_timers[TIMER_VIC_ALL]));

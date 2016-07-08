@@ -1,7 +1,21 @@
+#
+# This is a valgrind suppression file that should be used when using valgrind.
+# It is used to keep valgrind from reporting errors on known errors in libraries
+# VIC uses.
+#
+#  Here's an example of running valgrind:
+#
+#	cd vic/drivers/classic
+#	valgrind -v --leak-check=full --error-exitcode=125 \
+#      --suppressions=vic_valgrind_supressions.supp vic_classic.exe -g global_param.txt
+#
+# all tool names: Addrcheck,Memcheck,cachegrind,helgrind,massif
+#
+
 {
    supress_dispatch_not_vic_specific
    Memcheck:Leak
-   match-leak-kinds: definite
+   # match-leak-kinds: definite
    fun:malloc
    fun:_ZL23_collecting_in_criticalv
    fun:lookUpImpOrForward
@@ -18,7 +32,7 @@
 {
    supress_getpwuid1_not_vic_specific
    Memcheck:Leak
-   match-leak-kinds: definite
+   # match-leak-kinds: definite
    fun:calloc
    fun:LI_get_thread_info
    fun:LI_set_thread_item
@@ -29,7 +43,7 @@
 {
    supress_localtime_not_vic_specific
    Memcheck:Leak
-   match-leak-kinds: definite
+   # match-leak-kinds: definite
    fun:malloc
    fun:localtime
    fun:write_vic_timing_table
@@ -38,7 +52,7 @@
 {
    supress_bootstrap_not_vic_specific
    Memcheck:Leak
-   match-leak-kinds: definite
+   # match-leak-kinds: definite
    fun:calloc
    fun:call_load_methods
    fun:call_load_methods
@@ -55,7 +69,7 @@
 {
    supress_getpwuid2_not_vic_specific
    Memcheck:Leak
-   match-leak-kinds: definite
+   # match-leak-kinds: definite
    fun:calloc
    fun:_ZL12realizeClassP10objc_class
    fun:_os_object_alloc_realized
@@ -72,7 +86,7 @@
 {
    supress_sprintf_not_vic_specific
    Memcheck:Leak
-   match-leak-kinds: definite
+   # match-leak-kinds: definite
    fun:malloc
    fun:__Balloc_D2A
    fun:__d2b_D2A
@@ -88,7 +102,7 @@
 {
    supress_sscanf_not_vic_specific
    Memcheck:Leak
-   match-leak-kinds: definite
+   # match-leak-kinds: definite
    fun:malloc
    fun:__parsefloat_buf
    fun:__svfscanf_l

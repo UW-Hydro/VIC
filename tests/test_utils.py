@@ -207,7 +207,6 @@ def read_vic_ascii(filepath, parse_dates=True, datetime_index=None, sep='\t',
         raise ValueError('cannot specify both parse_dates and datetime_index')
 
     if parse_dates:
-        time_cols = ['YEAR', 'MONTH', 'DAY', 'SEC']
         df.index = pd.to_datetime(df.YEAR * 10000 + df.MONTH * 100 +
                                     df.DAY, format='%Y%m%d')
         if 'SEC' in df:
@@ -772,6 +771,8 @@ def plot_fluxnet_comparison(driver, science_test_data_dir,
                         axarr[i,j].set_xlim([0,24])
                         if i == 0:
                             axarr[i,j].set_title(months[j])
+                        if vic_var == 'OUT_LATENT':
+                            axarr[i,j].set_ylim([-50,250])
 
                 # save plot
                 plotname = '%s_%s.png' % (lat, lng)

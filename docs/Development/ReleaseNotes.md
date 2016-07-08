@@ -66,6 +66,10 @@ This is a major update from VIC 4. The VIC 5.0.0 release aims to have nearly ide
 
 	A comprehensive testing platform has been implemented and is available for public use along with the VIC model. A small subset of the test platform is run on [Travis-CI](https://travis-ci.org/UW-Hydro/VIC), which facilitates continuous integration of the VIC test platform. More information on the test platform is [here](Testing.md)
 
+11. Run-time profiling and timing ([GH#442](https://github.com/UW-Hydro/VIC/pull/442))
+
+	A timing module has been added to VIC in order to assess the computational cost and throughput of the VIC model. New output variables (`OUT_TIME_VICRUN_WALL` and `OUT_TIME_VICRUN_CPU`) document the time spent in `vic_run` for each variable. Additionally, a timing table is printed to `LOG_DEST` at the end of each simulation.
+
 #### Backwards Incompatible Changes:
 
 1.  Classic Driver I/O Formatting ([GH#18](https://github.com/UW-Hydro/VIC/issues/18), [GH#204](https://github.com/UW-Hydro/VIC/issues/204), [GH#227](https://github.com/UW-Hydro/VIC/pull/227))
@@ -155,13 +159,17 @@ This is a major update from VIC 4. The VIC 5.0.0 release aims to have nearly ide
 
 3. Fix related to exact restart ([GH#481](https://github.com/UW-Hydro/VIC/pull/481), [GH#507](https://github.com/UW-Hydro/VIC/pull/507), [GH#509](https://github.com/UW-Hydro/VIC/pull/509))
 
-	Previously, VIC did not produce the same results (fluxes and states) if a simulation is separated into multiple shorter-period runs by saving the state variables and restarting. This was due to: 1) the MTCLIM algorithm resulted in slightly different sub-daily meteorological variable values for different length of forcing (MTCLIM is deprecated in the current version); 2) a few bugs resulting in inexact restart. The following bugs have been fixed:
+	Previously, VIC did not produce the same results (fluxes and states) if a simulation is separated into multiple shorter-period runs by saving the state variables and restarting. This was due to:
+		1. The MTCLIM algorithm resulted in slightly different sub-daily meteorological variable values for different length of forcing (MTCLIM is deprecated in the current version)
+		2. A few bugs resulting in inexact restart.
+
+	The following bugs have been fixed:
 
 	- The prognostic state variable `energy.Tfoliage` (foliage temperature) is now saved to the state file
 	- Two flux variables `energy.LongUnderOut` and `energy.snow_flux` are now saved to the state file.
 
 		!!!Note
-				This is a temporary solution to ensure exact restart. A better way of handling the two flux variables needs to be done in the future (see [GH#479](https://github.com/UW-Hydro/VIC/issues/479))
+				This is a temporary solution to ensure exact restart. A better way of handling these two flux variables needs to be done in the future (see [GH#479](https://github.com/UW-Hydro/VIC/issues/479))
 
 4. Fix for binary state file I/O ([GH#487](https://github.com/UW-Hydro/VIC/pull/487))
 

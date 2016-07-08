@@ -131,4 +131,6 @@ write_vic_timing_table(timer_struct *timers)
             "\n------------------------------"
             " END VIC TIMING PROFILE "
             "------------------------------\n\n");
+
+    free(timeinfo);
 }

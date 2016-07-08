@@ -622,6 +622,9 @@ set_global_nc_attributes(int ncid,
     put_nc_attr(ncid, NC_GLOBAL, "VIC_GIT_VERSION", GIT_VERSION);
     // TODO: pass in driver as an argmument to this function
     put_nc_attr(ncid, NC_GLOBAL, "VIC_Driver", "Image");
+
+    free(timeinfo);
+
 }
 
 /******************************************************************************

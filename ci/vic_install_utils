@@ -7,7 +7,7 @@ if [ -z "$WORKDIR" ]; then
     mkdir -p $WORKDIR
 fi
 
-export VIC_VALGRIND_SUPRESSIONS=${TRAVIS_BUILD_DIR}/tests/vic_valgrind_supressions.supp
+export VIC_VALGRIND_SUPPRESSIONS=${TRAVIS_BUILD_DIR}/tests/vic_valgrind_suppressions.supp
 
 function install_mpich {
     wget --no-check-certificate -q http://www.mpich.org/static/downloads/3.2/mpich-3.2.tar.gz

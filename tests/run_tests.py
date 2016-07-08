@@ -33,10 +33,10 @@ from test_restart import (prepare_restart_run_periods,
 test_dir = os.path.dirname(os.path.abspath(__file__))
 
 # Set path to valgrind supressions file if not already set.
-if 'VIC_VALGRIND_SUPRESSIONS' not in os.environ:
-    sup_file = os.path.join(test_dir, default_vic_valgrind_supressions_path)
+if 'VIC_VALGRIND_SUPPRESSIONS' not in os.environ:
+    sup_file = os.path.join(test_dir, default_vic_valgrind_suppressions_path)
     if os.path.isfile(sup_file):
-        os.environ["VIC_VALGRIND_SUPRESSIONS"] = sup_file
+        os.environ["VIC_VALGRIND_SUPPRESSIONS"] = sup_file
 
 OUTPUT_WIDTH = 100
 

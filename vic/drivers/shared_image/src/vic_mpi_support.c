@@ -2067,7 +2067,7 @@ get_scatter_nc_field_double(char   *nc_name,
 
         dvar_filtered =
             malloc(global_domain.ncells_active * sizeof(*dvar_filtered));
-        check_alloc_status(dvar, "Memory allocation error.");
+        check_alloc_status(dvar_filtered, "Memory allocation error.");
 
         dvar_mapped =
             malloc(global_domain.ncells_active * sizeof(*dvar_mapped));

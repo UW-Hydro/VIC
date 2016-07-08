@@ -39,7 +39,7 @@ rout_init(void)
     extern int mpi_rank;
     if (mpi_rank == VIC_MPI_ROOT) {
         extern rout_struct   rout;
-        extern domain_struct local_domain;
+        extern domain_struct global_domain;
 
         int                 *ivar = NULL;
         double              *dvar = NULL;
@@ -80,7 +80,7 @@ rout_init(void)
         }
 
         // discharge
-        for (j = 0; j < local_domain.ncells_active; j++) {
+        for (j = 0; j < global_domain.ncells_active; j++) {
             rout.discharge[j] = 0.0;
         }
 
@@ -162,11 +162,11 @@ rout_init(void)
         // Mapping: Let the routing-source index numbers correspond to the VIC index numbers
         size_t iSource;
         for (iSource = 0; iSource < rout.rout_param.nSources; iSource++) {
-            for (i = 0; i < local_domain.ncells_active; i++) {
+            for (i = 0; i < global_domain.ncells_total; i++) {
                 if (rout.rout_param.source_lat[iSource] ==
-                    local_domain.locations[i].latitude &&
+                    global_domain.locations[i].latitude &&
                     rout.rout_param.source_lon[iSource] ==
-                    local_domain.locations[i].longitude) {
+                    global_domain.locations[i].longitude) {
                     rout.rout_param.source_VIC_index[iSource] = i;
                 }
             }
@@ -176,7 +176,7 @@ rout_init(void)
         for (iSource = 0; iSource < rout.rout_param.nSources; iSource++) {
             if ((size_t)rout.rout_param.source_VIC_index[iSource] < 0 ||
                 (size_t)rout.rout_param.source_VIC_index[iSource] >
-                local_domain.ncells_active) {
+                global_domain.ncells_total) {
                 log_err("invalid source, index of VIC gridcell");
             }
         }
@@ -184,11 +184,11 @@ rout_init(void)
         // Mapping: Let the routing-outlet index numbers correspond to the VIC index numbers
         size_t iOutlet;
         for (iOutlet = 0; iOutlet < rout.rout_param.nOutlets; iOutlet++) {
-            for (i = 0; i < local_domain.ncells_active; i++) {
+            for (i = 0; i < global_domain.ncells_total; i++) {
                 if (rout.rout_param.outlet_lat[iOutlet] ==
-                    local_domain.locations[i].latitude &&
+                    global_domain.locations[i].latitude &&
                     rout.rout_param.outlet_lon[iOutlet] ==
-                    local_domain.locations[i].longitude) {
+                    global_domain.locations[i].longitude) {
                     rout.rout_param.outlet_VIC_index[iOutlet] = i;
                 }
             }
@@ -198,7 +198,7 @@ rout_init(void)
         for (iOutlet = 0; iOutlet < rout.rout_param.nOutlets; iOutlet++) {
             if ((size_t)rout.rout_param.outlet_VIC_index[iOutlet] < 0 ||
                 (size_t)rout.rout_param.outlet_VIC_index[iOutlet] >
-                local_domain.ncells_active) {
+                global_domain.ncells_total) {
                 log_err("invalid outlet, index of VIC gridcell");
             }
         }

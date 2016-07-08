@@ -37,7 +37,7 @@ rout_alloc(void)
 {
     extern int mpi_rank;
     if (mpi_rank == VIC_MPI_ROOT) {
-        extern domain_struct local_domain;
+        extern domain_struct global_domain;
         extern rout_struct   rout;
         int                  ivar;
         size_t               d1count[1];
@@ -129,12 +129,12 @@ rout_alloc(void)
         }
         rout.rout_param.aggrunin =
             malloc(
-                local_domain.ncells_active * sizeof(*rout.rout_param.aggrunin));
+                global_domain.ncells_total * sizeof(*rout.rout_param.aggrunin));
         if (rout.rout_param.aggrunin == NULL) {
             log_err("Memory allocation error in rout.rout_param.aggrunin().");
         }
         rout.discharge =
-            malloc(local_domain.ncells_active * sizeof(*rout.discharge));
+            malloc(global_domain.ncells_total * sizeof(*rout.discharge));
         if (rout.discharge == NULL) {
             log_err("Memory allocation error in rout.rout_param.discharge().");
         }

@@ -30,5 +30,4 @@
 void
 rout_write()
 {
-    log_info("In rout_write");
 }

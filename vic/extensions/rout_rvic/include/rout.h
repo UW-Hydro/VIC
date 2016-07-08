@@ -73,6 +73,12 @@ void rout_write(void);      // write routine for routing
 void rout_finalize(void);   // clean up routine for routing
 
 /******************************************************************************
+ * @brief   MPI Function prototypes for the rout_rvic extension
+ *****************************************************************************/
+void get_scatter_var_double(double *, double *);
+void gather_put_var_double(double *, double *);
+
+/******************************************************************************
  * @brief   Convolution function adapted from the RVIC scheme
  *****************************************************************************/
 void get_global_param_rout(FILE *gp);

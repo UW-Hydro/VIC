@@ -128,3 +128,13 @@
    fun:_ZL22copySwiftV1MangledNamePKcb
    fun:_ZL22copySwiftV1MangledNamePKcb
 }
+{
+   supress_getpwuid3_not_vic_specific
+   Memcheck:Leak
+   # match-leak-kinds: definite
+   ...
+   fun:getpwuid_r
+   fun:getpwuid
+   fun:write_vic_timing_table
+   fun:main
+}

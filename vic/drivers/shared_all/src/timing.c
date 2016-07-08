@@ -87,7 +87,7 @@ timer_stop(timer_struct *t)
 }
 
 /******************************************************************************
- * @brief    Continue timer without reseting counters
+ * @brief    Continue timer without resetting counters
  *****************************************************************************/
 void
 timer_continue(timer_struct *t)

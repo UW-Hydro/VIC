@@ -159,8 +159,8 @@ This is a major update from VIC 4. The VIC 5.0.0 release aims to have nearly ide
 
 3. Fix related to exact restart ([GH#481](https://github.com/UW-Hydro/VIC/pull/481), [GH#507](https://github.com/UW-Hydro/VIC/pull/507), [GH#509](https://github.com/UW-Hydro/VIC/pull/509))
 
-	Previously, VIC did not produce the same results (fluxes and states) if a simulation is separated into multiple shorter-period runs by saving the state variables and restarting. This was due to:
-		1. The MTCLIM algorithm resulted in slightly different sub-daily meteorological variable values for different length of forcing (MTCLIM is deprecated in the current version)
+	Previously, VIC did not produce the same results (fluxes and states) if a simulation was separated into multiple shorter-period runs by saving the state variables and restarting. This was due to:
+		1. The MTCLIM algorithm resulted in slightly different sub-daily meteorological variable values for different lengths of forcings (MTCLIM is deprecated in the current version)
 		2. A few bugs resulting in inexact restart.
 
 	The following bugs have been fixed:

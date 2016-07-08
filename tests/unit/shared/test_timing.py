@@ -12,17 +12,9 @@ def test_vic_timers():
 
     # init sets delta to zero
     vic_lib.timer_init(timer)
-    assert timer[0].delta_wall == 0.
-    assert timer[0].delta_cpu == 0.
-    assert timer[0].start_wall == 0.
-    assert timer[0].start_cpu == 0.
 
     # start gets current time
     vic_lib.timer_start(timer)
-    assert timer[0].delta_wall == 0.
-    assert timer[0].delta_cpu == 0.
-    assert timer[0].start_wall != 0.
-    assert timer[0].start_cpu != 0.
 
     # sleep
     time.sleep(sleeptime)
@@ -30,8 +22,8 @@ def test_vic_timers():
     # stop pauses the timer
     vic_lib.timer_stop(timer)
     assert timer[0].delta_wall >= sleeptime
-    assert timer[0].delta_cpu >= 0.
     assert timer[0].delta_wall < sleeptime + delta
+    assert timer[0].delta_cpu >= 0.
 
     # start the timer again
     vic_lib.timer_continue(timer)

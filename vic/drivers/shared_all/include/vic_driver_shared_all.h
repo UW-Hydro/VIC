@@ -27,9 +27,6 @@
 #ifndef VIC_DRIVER_SHARED_H
 #define VIC_DRIVER_SHARED_H
 
-#include <pwd.h>
-#include <sys/types.h>
-
 #include <vic_run.h>
 #include <vic_version.h>
 

@@ -48,7 +48,7 @@ write_vic_timing_table(timer_struct *timers)
     // datestr
     curr_date_time = time(NULL);
     if (curr_date_time == -1) {
-        log_err("Something went wrong getting the current time!");
+        log_err("Failed to get the current time!");
     }
     timeinfo = localtime(&curr_date_time);
 
@@ -94,12 +94,12 @@ write_vic_timing_table(timer_struct *timers)
             global_param.endyear, global_param.endmonth, global_param.endday);
     fprintf(LOG_DEST, "  Nrecs                     : %zu\n",
             global_param.nrecs);
-    fprintf(LOG_DEST, "  Model Timestep (seconds)  : %lf\n", global_param.dt);
-    fprintf(LOG_DEST, "  Snow Timestep (seconds)   : %lf\n",
+    fprintf(LOG_DEST, "  Model Timestep (seconds)  : %g\n", global_param.dt);
+    fprintf(LOG_DEST, "  Snow Timestep (seconds)   : %g\n",
             global_param.snow_dt);
-    fprintf(LOG_DEST, "  Runoff Timestep (seconds) : %lf\n",
+    fprintf(LOG_DEST, "  Runoff Timestep (seconds) : %g\n",
             global_param.runoff_dt);
-    fprintf(LOG_DEST, "  Atmos Timestep (seconds)  : %lf\n",
+    fprintf(LOG_DEST, "  Atmos Timestep (seconds)  : %g\n",
             global_param.atmos_dt);
     fprintf(LOG_DEST, "\n");
 
@@ -107,20 +107,28 @@ write_vic_timing_table(timer_struct *timers)
 
     fprintf(LOG_DEST, "  Overall Metrics\n");
     fprintf(LOG_DEST, "  ---------------\n");
-    fprintf(LOG_DEST, "    Model Cost       : %lf pe-hrs/simulated_year\n",
+    fprintf(LOG_DEST, "    Model Cost       : %g pe-hrs/simulated_year\n",
             timers[TIMER_VIC_ALL].delta_wall / SEC_PER_HOUR / nyears);
-    fprintf(LOG_DEST, "    Model Throughput : %lf simulated_years/day\n",
+    fprintf(LOG_DEST, "    Model Throughput : %g simulated_years/day\n",
             nyears / (timers[TIMER_VIC_ALL].delta_wall / SEC_PER_DAY));
     fprintf(LOG_DEST, "\n");
-    fprintf(LOG_DEST, "    Total Time       : %lf seconds \n",
-            timers[TIMER_VIC_ALL].delta_wall);
-    fprintf(LOG_DEST, "    Init Time        : %lf seconds \n",
-            timers[TIMER_VIC_INIT].delta_wall);
-    fprintf(LOG_DEST, "    Run Time         : %lf seconds  %lf seconds/day \n",
-            timers[TIMER_VIC_RUN].delta_wall,
-            timers[TIMER_VIC_RUN].delta_wall / ndays);
-    fprintf(LOG_DEST, "    Final time       : %lf seconds \n",
-            timers[TIMER_VIC_FINAL].delta_wall);
+    fprintf(LOG_DEST, "  Timing Table:\n");
+    fprintf(LOG_DEST, "|------------|----------------------|----------------------|----------------------|----------------------|\n");
+    fprintf(LOG_DEST, "| Timer      | Wall Time (secs)     | CPU Time (secs)      | Wall Time (secs/day) | CPU Time (secs/day)  |\n");
+    fprintf(LOG_DEST, "|------------|----------------------|----------------------|----------------------|----------------------|\n");
+    fprintf(LOG_DEST, "| Init Time  | %20g | %20g | %20g | %20g |\n",
+            timers[TIMER_VIC_INIT].delta_wall, timers[TIMER_VIC_INIT].delta_cpu,
+            timers[TIMER_VIC_INIT].delta_wall / ndays, timers[TIMER_VIC_INIT].delta_cpu / ndays);
+    fprintf(LOG_DEST, "| Run Time   | %20g | %20g | %20g | %20g |\n",
+            timers[TIMER_VIC_RUN].delta_wall, timers[TIMER_VIC_RUN].delta_cpu,
+            timers[TIMER_VIC_RUN].delta_wall / ndays, timers[TIMER_VIC_RUN].delta_cpu / ndays);
+    fprintf(LOG_DEST, "| Final Time | %20g | %20g | %20g | %20g |\n",
+            timers[TIMER_VIC_FINAL].delta_wall, timers[TIMER_VIC_FINAL].delta_cpu,
+            timers[TIMER_VIC_FINAL].delta_wall / ndays, timers[TIMER_VIC_FINAL].delta_cpu / ndays);
+    fprintf(LOG_DEST, "| Total Time | %20g | %20g | %20g | %20g |\n",
+            timers[TIMER_VIC_ALL].delta_wall, timers[TIMER_VIC_ALL].delta_cpu,
+            timers[TIMER_VIC_ALL].delta_wall / ndays, timers[TIMER_VIC_ALL].delta_cpu / ndays);
+    fprintf(LOG_DEST, "|------------|----------------------|----------------------|----------------------|----------------------|\n");
     fprintf(LOG_DEST, "\n");
 
     fprintf(LOG_DEST,

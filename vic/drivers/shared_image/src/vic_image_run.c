@@ -53,8 +53,9 @@ vic_image_run(dmy_struct *dmy_current)
     timer_struct               timer;
 
     // Print the current timestep info before running vic_run
-    sprint_dmy(dmy_str, dmy_current);
-    debug("Running timestep %zu: %s", current, dmy_str);
+    printf("Timestep %4zu, %u-%02hu-%02hu, sec: %5u\n",
+            current, dmy_current->year, dmy_current->month, 
+            dmy_current->day, dmy_current->dayseconds);
 
     for (i = 0; i < local_domain.ncells_active; i++) {
         // Set global reference string (for debugging inside vic_run)

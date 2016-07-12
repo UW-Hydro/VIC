@@ -62,7 +62,7 @@ rout_run(void) {
 
     // Do the routing on the master node
     if (mpi_rank == VIC_MPI_ROOT) {
-        log_info("In Routing Lohmann Model");
+        debug("In Routing Lohmann Model");
 
         extern rout_struct rout;
         extern domain_struct global_domain;

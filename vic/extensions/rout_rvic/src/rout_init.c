@@ -172,7 +172,7 @@ rout_init(void)
             }
         }
 
-        printf("\nsource, index of VIC gridcell: \n ");
+        // Check source index of VIC gridcell
         for (iSource = 0; iSource < rout.rout_param.nSources; iSource++) {
             if ((size_t)rout.rout_param.source_VIC_index[iSource] < 0 ||
                 (size_t)rout.rout_param.source_VIC_index[iSource] >
@@ -194,7 +194,7 @@ rout_init(void)
             }
         }
 
-        printf("\noutlet, index of VIC gridcell: \n ");
+        // Check outlet index of VIC gridcell
         for (iOutlet = 0; iOutlet < rout.rout_param.nOutlets; iOutlet++) {
             if ((size_t)rout.rout_param.outlet_VIC_index[iOutlet] < 0 ||
                 (size_t)rout.rout_param.outlet_VIC_index[iOutlet] >

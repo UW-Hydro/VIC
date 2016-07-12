@@ -94,7 +94,7 @@ include ${EXTPATH}/${ROUT}/rout.mk
 # | WARNING   | < 30             |
 # | INFO      | < 20             |
 # | DEBUG     | < 10             |
-LOG_LVL = 5
+LOG_LVL = 15
 
 # set includes
 INCLUDES = -I ${DRIVERPATH}/include \

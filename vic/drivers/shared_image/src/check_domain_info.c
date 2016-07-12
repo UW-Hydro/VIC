@@ -58,7 +58,7 @@ compare_ncdomain_with_global_domain(char *ncfile)
     // loop over all grid cells and check that the two domains are identical
     for (i = 0; i < global_domain.ncells_total; i++) {
         // mask matches
-        if (ncfile_domain.locations[i].run > global_domain.locations[i].run) {
+        if (ncfile_domain.locations[i].run < global_domain.locations[i].run) {
             log_err("parameter file mask for gridcell %zu is zero and the "
                     "domain file specifies that this cell should be run", i);
         }

@@ -77,8 +77,14 @@ int
 main(int    argc,
      char **argv)
 {
-    int  status;
-    char state_filename[MAXSTRING];
+    int          status;
+    timer_struct global_timers[N_TIMERS];
+    char         state_filename[MAXSTRING];
+
+    // start vic all timer
+    timer_start(&(global_timers[TIMER_VIC_ALL]));
+    // start vic init timer
+    timer_start(&(global_timers[TIMER_VIC_INIT]));
 
     // Initialize MPI - note: logging not yet initialized
     status = MPI_Init(&argc, &argv);
@@ -113,6 +119,11 @@ main(int    argc,
     // initialize output structures
     vic_init_output(&(dmy[0]));
 
+    // stop init timer
+    timer_stop(&(global_timers[TIMER_VIC_INIT]));
+    // start vic run timer
+    timer_start(&(global_timers[TIMER_VIC_RUN]));
+
     // loop over all timesteps
     for (current = 0; current < global_param.nrecs; current++) {
         // read forcing data
@@ -130,7 +141,10 @@ main(int    argc,
             debug("finished storing state file: %s", state_filename)
         }
     }
-
+    // stop vic run timer
+    timer_stop(&(global_timers[TIMER_VIC_RUN]));
+    // start vic final timer
+    timer_start(&(global_timers[TIMER_VIC_FINAL]));
     // clean up
     vic_image_finalize();
 
@@ -141,6 +155,13 @@ main(int    argc,
     }
 
     log_info("Completed running VIC %s", VIC_DRIVER);
+
+    // stop vic final timer
+    timer_stop(&(global_timers[TIMER_VIC_FINAL]));
+    // stop vic all timer
+    timer_stop(&(global_timers[TIMER_VIC_ALL]));
+    // write timing info
+    write_vic_timing_table(global_timers, VIC_DRIVER);
 
     return EXIT_SUCCESS;
 }

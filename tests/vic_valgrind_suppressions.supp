@@ -1,0 +1,78 @@
+#
+# This is a valgrind suppression file that should be used when using valgrind.
+# It is used to keep valgrind from reporting errors on known errors in libraries
+# VIC uses.
+#
+#  Here's an example of running valgrind:
+#
+#	cd vic/drivers/classic
+#	valgrind -v --leak-check=full --error-exitcode=125 \
+#      --suppressions=vic_valgrind_supressions.supp vic_classic.exe -g global_param.txt
+#
+# all tool names: Addrcheck,Memcheck,cachegrind,helgrind,massif
+#
+
+{
+   supress_dispatch_not_vic_specific
+   Memcheck:Leak
+   # match-leak-kinds: definite
+   ...
+   fun:dispatch_once_f
+   ...
+}
+{
+   supress_getpwuid1_not_vic_specific
+   Memcheck:Leak
+   # match-leak-kinds: definite
+   ...
+   fun:getpwuid
+   ...
+}
+{
+   supress_localtime_not_vic_specific
+   Memcheck:Leak
+   # match-leak-kinds: definite
+   ...
+   fun:localtime
+   ...
+}
+{
+   supress_bootstrap_not_vic_specific
+   Memcheck:Leak
+   # match-leak-kinds: definite
+   ...
+   fun:bootstrap_look_up3
+   ...
+}
+{
+   supress_sprintf_not_vic_specific
+   Memcheck:Leak
+   # match-leak-kinds: definite
+   ...
+   fun:__sprintf_chk
+   ...
+}
+{
+   supress_sscanf_not_vic_specific
+   Memcheck:Leak
+   # match-leak-kinds: definite
+   ...
+   fun:sscanf
+   ...
+}
+{
+   supress_stringcopy_not_vic_specific
+   Memcheck:Leak
+   # match-leak-kinds: possible
+   ...
+   fun:_ZL22copySwiftV1MangledNamePKcb
+   ...
+}
+{
+   supress_getpwuid_r_not_vic_specific
+   Memcheck:Leak
+   # match-leak-kinds: definite
+   ...
+   fun:getpwuid_r
+   ...
+}

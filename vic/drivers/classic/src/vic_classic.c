@@ -77,6 +77,13 @@ main(int   argc,
     stream_struct     *streams = NULL;
     double          ***out_data;   // [1, nvars, nelem]
     save_data_struct   save_data;
+    timer_struct       global_timers[N_TIMERS];
+    timer_struct       cell_timer;
+
+    // start vic all timer
+    timer_start(&(global_timers[TIMER_VIC_ALL]));
+    // start vic init timer
+    timer_start(&(global_timers[TIMER_VIC_INIT]));
 
     // Initialize Log Destination
     initialize_log();
@@ -155,6 +162,12 @@ main(int   argc,
        Run Model for all Active Grid Cells
     ************************************/
     MODEL_DONE = false;
+
+    // stop init timer
+    timer_stop(&(global_timers[TIMER_VIC_INIT]));
+    // start vic run timer
+    timer_start(&(global_timers[TIMER_VIC_RUN]));
+
     while (!MODEL_DONE) {
         read_soilparam(filep.soilparam, &soil_con, &RUN_MODEL, &MODEL_DONE);
 
@@ -201,7 +214,8 @@ main(int   argc,
 
             /** Initialize the storage terms in the water and energy balances **/
             initialize_save_data(&all_vars, &force[0], &soil_con, veg_con,
-                                 veg_lib, &lake_con, out_data[0], &save_data);
+                                 veg_lib, &lake_con, out_data[0], &save_data,
+                                 &cell_timer);
 
             /******************************************
                Run Model in Grid Cell for all Time Steps
@@ -223,15 +237,17 @@ main(int   argc,
                 /**************************************************
                    Compute cell physics for 1 timestep
                 **************************************************/
+                timer_start(&cell_timer);
                 ErrorFlag = vic_run(&force[rec], &all_vars,
                                     &(dmy[rec]), &global_param, &lake_con,
                                     &soil_con, veg_con, veg_lib);
+                timer_stop(&cell_timer);
 
                 /**************************************************
                    Calculate cell average values for current time step
                 **************************************************/
                 put_data(&all_vars, &force[rec], &soil_con, veg_con, veg_lib,
-                         &lake_con, out_data[0], &save_data);
+                         &lake_con, out_data[0], &save_data, &cell_timer);
 
                 for (streamnum = 0;
                      streamnum < options.Noutstreams;
@@ -289,6 +305,11 @@ main(int   argc,
         } /* End Run Model Condition */
     }   /* End Grid Loop */
 
+    // stop vic run timer
+    timer_stop(&(global_timers[TIMER_VIC_RUN]));
+    // start vic final timer
+    timer_start(&(global_timers[TIMER_VIC_FINAL]));
+
     /** cleanup **/
     free_atmos(global_param.nrecs, &force);
     free_dmy(&dmy);
@@ -313,6 +334,13 @@ main(int   argc,
     finalize_logging();
 
     log_info("Completed running VIC %s", VIC_DRIVER);
+
+    // stop vic final timer
+    timer_stop(&(global_timers[TIMER_VIC_FINAL]));
+    // stop vic all timer
+    timer_stop(&(global_timers[TIMER_VIC_ALL]));
+    // write timing info
+    write_vic_timing_table(global_timers);
 
     return EXIT_SUCCESS;
 }       /* End Main Program */

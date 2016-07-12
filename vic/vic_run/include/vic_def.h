@@ -27,6 +27,10 @@
 #ifndef VIC_DEF_H
 #define VIC_DEF_H
 
+#define _BSD_SOURCE
+#define __USE_XOPEN
+#define _GNU_SOURCE
+
 #include <float.h>
 #include <math.h>
 #include <stdarg.h>
@@ -38,6 +42,9 @@
 #include <stddef.h>
 #include <unistd.h>
 #include <time.h>
+#include <pwd.h>
+#include <sys/time.h>
+#include <sys/types.h>
 
 #include <vic_physical_constants.h>
 #include <vic_log.h>

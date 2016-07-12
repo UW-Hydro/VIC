@@ -13,7 +13,7 @@ import warnings
 
 import pytest
 
-from tonic.models.vic.vic import VIC
+from tonic.models.vic.vic import VIC, default_vic_valgrind_suppressions_path
 from tonic.io import read_config, read_configobj
 from tonic.testing import VICTestError
 from test_utils import (setup_test_dirs, print_test_dict,
@@ -31,6 +31,12 @@ from test_restart import (prepare_restart_run_periods,
                           check_exact_restart_states)
 
 test_dir = os.path.dirname(os.path.abspath(__file__))
+
+# Set path to valgrind supressions file if not already set.
+if 'VIC_VALGRIND_SUPPRESSIONS' not in os.environ:
+    sup_file = os.path.join(test_dir, default_vic_valgrind_suppressions_path)
+    if os.path.isfile(sup_file):
+        os.environ["VIC_VALGRIND_SUPPRESSIONS"] = sup_file
 
 OUTPUT_WIDTH = 100
 

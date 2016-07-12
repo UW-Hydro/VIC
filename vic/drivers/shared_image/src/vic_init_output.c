@@ -24,8 +24,6 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  *****************************************************************************/
 
-#include <pwd.h>
-#include <sys/types.h>
 #include <vic_driver_shared_image.h>
 
 /******************************************************************************
@@ -57,6 +55,7 @@ vic_init_output(dmy_struct *dmy_current)
     size_t                    streamnum;
     size_t                    nstream_vars[MAX_OUTPUT_STREAMS];
     bool                      default_outputs = false;
+    timer_struct              timer;
 
     // initialize the output data structures
     set_output_met_data_info();
@@ -68,7 +67,7 @@ vic_init_output(dmy_struct *dmy_current)
     for (i = 0; i < local_domain.ncells_active; i++) {
         initialize_save_data(&(all_vars[i]), &(force[i]), &(soil_con[i]),
                              veg_con[i], veg_lib[i], &lake_con, out_data[i],
-                             &(save_data[i]));
+                             &(save_data[i]), &timer);
     }
 
     if (mpi_rank == VIC_MPI_ROOT) {

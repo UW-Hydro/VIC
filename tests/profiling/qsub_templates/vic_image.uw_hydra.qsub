@@ -1,0 +1,22 @@
+#!/bin/bash
+#
+#$ -N VIC_scaling_test
+#$ -cwd
+#$ -j y
+#$ -S /bin/bash
+#$ -m be
+#$ -pe orte 64
+
+# Qsub template for UW's Hydra Cluster
+# Scheduler: SGE
+# Valid values for np 1-64
+if [ "$np" -gt "64" ]
+  echo "$np exceeds maximum number of processes on Hydra"
+  exit 1
+fi
+
+START=$(date +%s)
+/usr/lib64/mpich/bin/mpiexec -np $np $vic_exe -g $vic_global
+END=$(date +%s)
+DIFF=$(echo "$END - $START" | bc)
+printf "%5s | %f\n" $np $DIFF >> $timing_table_file

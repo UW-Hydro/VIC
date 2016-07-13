@@ -29,6 +29,9 @@ vic_image
 liblnd.a
 _vic.py
 
+vic_call_graph*
+gmon.out
+
 .DS_Store
 TAGS
 

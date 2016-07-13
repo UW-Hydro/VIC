@@ -39,7 +39,6 @@ echo "User                      : $USER"
 echo "VIC Test Git Version      : $GIT_VERSION"
 echo "VIC Executable            : $vic_exe"
 echo "VIC Global Parameter File : $vic_global"
-echo "Test Maximum MPI Cores    : $max_cores"
 echo ""
 
 echo "VIC Executable Version Info"
@@ -49,7 +48,8 @@ echo ""
 
 $vic_exe -g $vic_global &> /dev/null
 
-gprof $vic_exe | gprof2dot.py | dot -Tpng -o output.png
+now=`date +"%y%m%d"`
+gprof $vic_exe | gprof2dot | dot -Tpng -o vic_call_graph_$now.png
 
 echo ""
 echo "------------------------ END VIC GPROF PROFILING ------------------------"

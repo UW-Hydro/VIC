@@ -46,4 +46,6 @@ image_test
 uncrust.sh
 *.exe
 
+# WUR specific
 not4git
+samples_wur

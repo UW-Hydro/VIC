@@ -39,6 +39,8 @@ function vic_before_install {
     else
 		export TRAVIS_NETCDFPATH=/usr
 		export TRAVIS_MPIPATH="${HOME}/mpich"
+        export NC_LIBS=$(/usr/bin/nc-config --libs)
+        export NC_CFLAGS=$(/usr/bin/nc-config --cflags)
 
         # Install MPICH
         if [ ! -d ${TRAVIS_MPIPATH} ]; then
@@ -49,7 +51,8 @@ function vic_before_install {
         find ${TRAVIS_MPIPATH} -name mpiexec
         find ${TRAVIS_MPIPATH} -name mpicc
 	fi
-    export PATH=$TRAVIS_MPIPATH/bin:$PATH
+    export PATH=${TRAVIS_MPIPATH}/bin:${PATH}
+    export MPICC="${TRAVIS_MPIPATH}/bin/mpicc"
     mpiexec --version
 }
 

@@ -40,9 +40,17 @@ VICPATH = ../../vic_run
 
 UNAME_S := $(shell uname -s)
 
+ifndef NC_CFLAGS
 NC_LIBS = $(shell nc-config --libs)
+endif
+
+ifndef NC_CFLAGS
 NC_CFLAGS = $(shell nc-config --cflags)
-CC = mpicc 
+endif
+
+ifndef MPICC
+CC = mpicc
+endif
 
 GIT_VERSION := $(shell git describe --abbrev=4 --dirty --always --tags)
 HOSTNAME := $(shell uname -n)

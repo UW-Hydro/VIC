@@ -40,39 +40,9 @@ VICPATH = ../../vic_run
 
 UNAME_S := $(shell uname -s)
 
-# NETCDF include .. change the path depending on travis or other location
-ifeq (true, ${TRAVIS})
-NETCDFPATH = ${TRAVIS_NETCDFPATH}
-else ifeq (hydro-c1, $(shell hostname))
-NETCDFPATH = /usr/local/netcdf-4.3.0+gcc-4.7.2
-else ifeq ($(UNAME_S), Linux)
-NETCDFPATH = /usr
-else
-NETCDFPATH = /opt/local
-endif
-
-# MPI include .. change the path depending on travis or other location
-ifeq (true, ${TRAVIS})
-MPIPATH = ${TRAVIS_MPIPATH}
-else ifeq (hydro-c1, $(shell hostname))
-MPIPATH = /usr/local/netcdf-4.3.0+gcc-4.7.2
-else ifeq ($(UNAME_S), Linux)
-MPIPATH = /usr
-else
-MPIPATH = /opt/local
-endif
-
-# Set SHELL = your shell here
-SHELL = /bin/bash
-
-# Set CC = your compiler here
-ifeq (true, ${TRAVIS})
-CC = ${MPIPATH}/bin/mpicc
-else ifeq ($(UNAME_S), Linux)
-CC = ${MPIPATH}/bin/mpicc
-else
-CC = mpicc
-endif
+NC_LIBS = $(shell nc-config --libs)
+NC_CFLAGS = $(shell nc-config --cflags)
+CC = mpicc 
 
 GIT_VERSION := $(shell git describe --abbrev=4 --dirty --always --tags)
 HOSTNAME := $(shell uname -n)
@@ -91,11 +61,10 @@ LOG_LVL = 5
 INCLUDES = -I ${DRIVERPATH}/include \
 		   -I ${VICPATH}/include \
 		   -I ${SHAREDPATH}/include \
-		   -I ${SHAREDIMAGEPATH}/include \
-		   -I ${NETCDFPATH}/include \
+		   -I ${SHAREDIMAGEPATH}/include
 
 # Uncomment to include debugging information
-CFLAGS  =  ${INCLUDES} -ggdb -O0 -Wall -Wextra -std=c99 \
+CFLAGS  =  ${INCLUDES} ${NC_CFLAGS}  -ggdb -O0 -Wall -Wextra -std=c99 \
 					 -DLOG_LVL=$(LOG_LVL) \
 					 -DGIT_VERSION=\"$(GIT_VERSION)\" \
 					 -DUSERNAME=\"$(USER)\" \
@@ -106,7 +75,7 @@ ifeq (true, ${TRAVIS})
 CFLAGS += -rdynamic -Wl,-export-dynamic
 endif
 
-LIBRARY = -lm -L${NETCDFPATH}/lib -lnetcdf
+LIBRARY = -lm ${NC_LIBS}
 
 COMPEXE = vic_image
 EXT = .exe

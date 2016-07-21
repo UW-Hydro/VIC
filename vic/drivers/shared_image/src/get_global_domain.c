@@ -34,6 +34,8 @@ get_global_domain(char          *nc_name,
                   domain_struct *global_domain,
                   bool           coords_only)
 {
+    extern nc_struct     netcdf;
+    int status;
     int    *run = NULL;
     double *var = NULL;
     double *var_lon = NULL;
@@ -193,7 +195,13 @@ get_global_domain(char          *nc_name,
         }
     }
 
-
+    if (netcdf.id) {
+        status = nc_close(netcdf.id);
+        check_nc_status(status, "Error closing %s", netcdf.name);
+        netcdf.id=0;
+        netcdf.name='\0';
+    }
+   
     // free memory
     free(var);
     free(run);

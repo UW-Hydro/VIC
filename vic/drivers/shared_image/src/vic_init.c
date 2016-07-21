@@ -44,6 +44,8 @@ vic_init(void)
     extern veg_lib_struct    **veg_lib;
     extern lake_con_struct    *lake_con;
     extern parameters_struct   param;
+    
+    extern nc_struct           netcdf;
 
     bool                       found;
     char                       locstr[MAXSTRING];
@@ -67,6 +69,7 @@ vic_init(void)
     size_t                     d4count[4];
     size_t                     d4start[4];
     int                        tmp_lake_idx;
+    int                        status;
     double                     Zsum, dp;
     double                     tmpdp, tmpadj, Bexp;
 
@@ -109,7 +112,8 @@ vic_init(void)
     current = 0;
 
     // read_veglib()
-
+    
+  
     // Assign veg class ids
     for (i = 0; i < local_domain.ncells_active; i++) {
         Cv_sum[i] = 0.;
@@ -129,7 +133,8 @@ vic_init(void)
             veg_lib[i][j].overstory = ivar[i];
         }
     }
-
+   
+    
     // rarc
     for (j = 0; j < options.NVEGTYPES; j++) {
         d3start[0] = j;
@@ -292,7 +297,7 @@ vic_init(void)
         // Ctype
         for (j = 0; j < options.NVEGTYPES; j++) {
             d3start[0] = j;
-            get_scatter_nc_field_int(filenames.params, "Ctype",
+            get_scatter_nc_field_int( filenames.params, "Ctype",
                                      d3start, d3count, ivar);
             for (i = 0; i < local_domain.ncells_active; i++) {
                 veg_lib[i][j].Ctype = ivar[i];
@@ -357,7 +362,7 @@ vic_init(void)
         // Nscale flag
         for (j = 0; j < options.NVEGTYPES; j++) {
             d3start[0] = j;
-            get_scatter_nc_field_int(filenames.params, "Nscale",
+            get_scatter_nc_field_int( filenames.params, "Nscale",
                                      d3start, d3count, ivar);
             for (i = 0; i < local_domain.ncells_active; i++) {
                 veg_lib[i][j].NscaleFlag = ivar[i];
@@ -1552,6 +1557,14 @@ vic_init(void)
         initialize_energy(all_vars[i].energy, nveg);
     }
 
+    //test
+    if (netcdf.id) {
+        status = nc_close(netcdf.id);
+        check_nc_status(status, "Error closing %s", filenames.params);
+        netcdf.id = 0;
+        netcdf.name = '\0';
+    }
+    
     // set state metadata structure
     set_state_meta_data_info();
 

@@ -48,12 +48,13 @@ function vic_before_install {
         else
             echo "MPICH installed..."
         fi
-        find ${TRAVIS_MPIPATH} -name mpiexec
-        find ${TRAVIS_MPIPATH} -name mpicc
 	fi
     export PATH=${TRAVIS_MPIPATH}/bin:${PATH}
-    export MPICC="${TRAVIS_MPIPATH}/bin/mpicc"
+    find ${TRAVIS_MPIPATH} -name mpiexec
     mpiexec --version
+    find ${TRAVIS_MPIPATH} -name mpicc
+    export MPICC="${TRAVIS_MPIPATH}/bin/mpicc"
+    $MPICC --version
 }
 
 function vic_install {

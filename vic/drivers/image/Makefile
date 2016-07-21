@@ -38,8 +38,6 @@ SHAREDIMAGEPATH = ../shared_image
 # VIC RUN PATH
 VICPATH = ../../vic_run
 
-UNAME_S := $(shell uname -s)
-
 ifndef NC_CFLAGS
 NC_LIBS = $(shell nc-config --libs)
 endif
@@ -49,10 +47,11 @@ NC_CFLAGS = $(shell nc-config --cflags)
 endif
 
 ifndef MPICC
-CC = mpicc
+MPICC = mpicc
 endif
 
 GIT_VERSION := $(shell git describe --abbrev=4 --dirty --always --tags)
+UNAME_S := $(shell uname -s)
 HOSTNAME := $(shell uname -n)
 
 # Set the log level
@@ -125,7 +124,7 @@ clean::
 	\rm -rf ${COMPEXE}${EXT} ${COMPEXE}${EXT}.dSYM
 
 model: $(OBJS)
-	$(CC) -o ${COMPEXE}${EXT} $(OBJS) $(CFLAGS) $(LIBRARY)
+	$(MPICC) -o ${COMPEXE}${EXT} $(OBJS) $(CFLAGS) $(LIBRARY)
 
 # -------------------------------------------------------------
 # tags
@@ -143,7 +142,7 @@ clean::
 # -------------------------------------------------------------
 depend: .depend
 .depend: $(SRCS) $(HDRS)
-	$(CC) $(CFLAGS) -M $(SRCS) > $@
+	$(MPICC) $(CFLAGS) -M $(SRCS) > $@
 
 clean::
 	\rm -f .depend

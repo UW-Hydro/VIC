@@ -2195,7 +2195,7 @@ get_scatter_nc_field_int(char   *nc_name,
         ivar_mapped =
             malloc(global_domain.ncells_active * sizeof(*ivar_mapped));
         check_alloc_status(ivar_mapped, "Memory allocation error.");
-        //test
+
         get_nc_field_int(nc_name, var_name, start, count, ivar);
         // filter the active cells only
         map(sizeof(int), global_domain.ncells_active, filter_active_cells, NULL,

@@ -189,7 +189,6 @@ typedef struct {
     char *name;
 } nc_struct;
 
-
 void add_nveg_to_global_domain(char *nc_name, domain_struct *global_domain);
 void alloc_force(force_data_struct *force);
 void alloc_veg_hist(veg_hist_struct *veg_hist);

@@ -49,7 +49,7 @@ vic_force(void)
     extern parameters_struct   param;
     extern param_set_struct    param_set;
     extern nc_struct           netcdf;
-    
+
     double                    *t_offset = NULL;
     double                    *dvar = NULL;
     size_t                     i;
@@ -84,8 +84,7 @@ vic_force(void)
     d3count[0] = 1;
     d3count[1] = global_domain.n_ny;
     d3count[2] = global_domain.n_nx;
-    
-    
+
     // Air temperature: tas
     for (j = 0; j < NF; j++) {
         d3start[0] = global_param.forceskip[0] + global_param.forceoffset[0] +
@@ -228,7 +227,7 @@ vic_force(void)
             }
         }
     }
-    
+
     // Update the offset counter
     global_param.forceoffset[0] += NF;
 
@@ -333,7 +332,7 @@ vic_force(void)
                 }
             }
         }
-        
+
         // Update the offset counter
         global_param.forceoffset[1] += NF;
     }
@@ -450,12 +449,12 @@ vic_force(void)
         }
     }
 
-    //test
+    // Close last NetCDF if not already closed
     if (netcdf.id) {
         status = nc_close(netcdf.id);
         check_nc_status(status, "Error closing %s", netcdf.name);
-        netcdf.id=0;
-        netcdf.name='\0';
+        netcdf.id = 0;
+        netcdf.name = '\0';
     }
 
     // cleanup

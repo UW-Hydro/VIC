@@ -940,11 +940,12 @@ check_init_state_file(void)
         }
     }
 
-     // open the netcdf file
+    // read dimension variables
+
+    // open the netcdf file
     status = nc_open(filenames.init_state, NC_SHARE, &(nc.nc_id));
     check_nc_status(status, "Error opening %s", filenames.init_state);
-    
-    // read dimension variables
+
     // lat/lon
     status = nc_inq_varid(nc.nc_id, global_domain.info.lon_var, &lon_var_id);
     check_nc_status(status, "Unable to find variable \"%s\" in %s",
@@ -1029,11 +1030,10 @@ check_init_state_file(void)
         log_err("global_domain.info.n_coord_dims should be 1 or 2");
     }
 
-    // close
+    // close NetCDF file
     status = nc_close(nc.nc_id);
     check_nc_status(status, "Error closing %s", filenames.init_state);
-    
-    
+
     // Variables for other dimensions
     d1start[0] = 0;
     d1count[0] = options.Nnode;

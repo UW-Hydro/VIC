@@ -109,8 +109,7 @@ vic_init(void)
     current = 0;
 
     // read_veglib()
-    
-  
+
     // Assign veg class ids
     for (i = 0; i < local_domain.ncells_active; i++) {
         Cv_sum[i] = 0.;
@@ -130,8 +129,7 @@ vic_init(void)
             veg_lib[i][j].overstory = ivar[i];
         }
     }
-   
-    
+
     // rarc
     for (j = 0; j < options.NVEGTYPES; j++) {
         d3start[0] = j;
@@ -294,7 +292,7 @@ vic_init(void)
         // Ctype
         for (j = 0; j < options.NVEGTYPES; j++) {
             d3start[0] = j;
-            get_scatter_nc_field_int( filenames.params, "Ctype",
+            get_scatter_nc_field_int(filenames.params, "Ctype",
                                      d3start, d3count, ivar);
             for (i = 0; i < local_domain.ncells_active; i++) {
                 veg_lib[i][j].Ctype = ivar[i];
@@ -359,7 +357,7 @@ vic_init(void)
         // Nscale flag
         for (j = 0; j < options.NVEGTYPES; j++) {
             d3start[0] = j;
-            get_scatter_nc_field_int( filenames.params, "Nscale",
+            get_scatter_nc_field_int(filenames.params, "Nscale",
                                      d3start, d3count, ivar);
             for (i = 0; i < local_domain.ncells_active; i++) {
                 veg_lib[i][j].NscaleFlag = ivar[i];
@@ -1553,7 +1551,7 @@ vic_init(void)
         }
         initialize_energy(all_vars[i].energy, nveg);
     }
-    
+
     // set state metadata structure
     set_state_meta_data_info();
 

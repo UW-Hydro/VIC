@@ -33,26 +33,26 @@ size_t
 get_nc_dimension(char *nc_name,
                  char *dim_name)
 {
-    int    dim_id;
-    size_t dim_size;
-    int    status;
+    int              dim_id;
+    size_t           dim_size;
+    int              status;
 
-        extern nc_struct netcdf;
-    
+    extern nc_struct netcdf;
+
     if (!netcdf.name) {
         netcdf.name = nc_name;
         status = nc_open(nc_name, NC_NOWRITE, &(netcdf.id));
         check_nc_status(status, "Error opening %s", netcdf.name);
     }
     else {
-        //check if another netcdf has to be opened
-        if (strcmp(netcdf.name,nc_name) != false) { 
+        // check if another netcdf has to be opened
+        if (strcmp(netcdf.name, nc_name) != false) {
             // close the old netcdf file
             status = nc_close(netcdf.id);
             check_nc_status(status, "Error closing %s", netcdf.name);
-            netcdf.id=0;
-            netcdf.name='\0';
-            
+            netcdf.id = 0;
+            netcdf.name = '\0';
+
             // open the new netcdf file
             status = nc_open(nc_name, NC_NOWRITE, &(netcdf.id));
             check_nc_status(status, "Error opening %s", nc_name);

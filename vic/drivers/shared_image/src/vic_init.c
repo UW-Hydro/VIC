@@ -44,8 +44,6 @@ vic_init(void)
     extern veg_lib_struct    **veg_lib;
     extern lake_con_struct    *lake_con;
     extern parameters_struct   param;
-    
-    extern nc_struct           netcdf;
 
     bool                       found;
     char                       locstr[MAXSTRING];
@@ -69,7 +67,6 @@ vic_init(void)
     size_t                     d4count[4];
     size_t                     d4start[4];
     int                        tmp_lake_idx;
-    int                        status;
     double                     Zsum, dp;
     double                     tmpdp, tmpadj, Bexp;
 
@@ -1555,14 +1552,6 @@ vic_init(void)
                             &(all_vars[i].cell[tmp_lake_idx][0]), false);
         }
         initialize_energy(all_vars[i].energy, nveg);
-    }
-
-    //test
-    if (netcdf.id) {
-        status = nc_close(netcdf.id);
-        check_nc_status(status, "Error closing %s", filenames.params);
-        netcdf.id = 0;
-        netcdf.name = '\0';
     }
     
     // set state metadata structure

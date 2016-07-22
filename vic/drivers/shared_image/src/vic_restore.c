@@ -39,9 +39,7 @@ vic_restore(void)
     extern veg_con_map_struct *veg_con_map;
     extern filenames_struct    filenames;
     extern metadata_struct     state_metadata[N_STATE_VARS];
-    
-    extern nc_struct            netcdf;
-    int status;
+
     int                        v;
     size_t                     i;
     size_t                     j;
@@ -60,7 +58,6 @@ vic_restore(void)
     size_t                     d5start[5];
     size_t                     d6count[6];
     size_t                     d6start[6];
-   
 
     // validate state file dimensions and coordinate variables
     check_init_state_file();
@@ -119,7 +116,7 @@ vic_restore(void)
     d6count[3] = 1;
     d6count[4] = global_domain.n_ny;
     d6count[5] = global_domain.n_nx;
-       
+
     // total soil moisture
     for (m = 0; m < options.NVEGTYPES; m++) {
         d5start[0] = m;
@@ -127,7 +124,7 @@ vic_restore(void)
             d5start[1] = k;
             for (j = 0; j < options.Nlayer; j++) {
                 d5start[2] = j;
-                get_scatter_nc_field_double(filenames.init_state, 
+                get_scatter_nc_field_double(filenames.init_state,
                                             state_metadata[STATE_SOIL_MOISTURE].varname,
                                             d5start, d5count, dvar);
                 for (i = 0; i < local_domain.ncells_active; i++) {
@@ -306,7 +303,7 @@ vic_restore(void)
         d4start[0] = m;
         for (k = 0; k < options.SNOW_BAND; k++) {
             d4start[1] = k;
-            get_scatter_nc_field_double(filenames.init_state, 
+            get_scatter_nc_field_double(filenames.init_state,
                                         state_metadata[STATE_SNOW_COVERAGE].varname,
                                         d4start, d4count, dvar);
             for (i = 0; i < local_domain.ncells_active; i++) {
@@ -323,7 +320,7 @@ vic_restore(void)
         d4start[0] = m;
         for (k = 0; k < options.SNOW_BAND; k++) {
             d4start[1] = k;
-            get_scatter_nc_field_double(filenames.init_state, 
+            get_scatter_nc_field_double(filenames.init_state,
                                         state_metadata[
                                             STATE_SNOW_WATER_EQUIVALENT].varname,
                                         d4start, d4count, dvar);
@@ -341,7 +338,7 @@ vic_restore(void)
         d4start[0] = m;
         for (k = 0; k < options.SNOW_BAND; k++) {
             d4start[1] = k;
-            get_scatter_nc_field_double(filenames.init_state, 
+            get_scatter_nc_field_double(filenames.init_state,
                                         state_metadata[STATE_SNOW_SURF_TEMP].varname,
                                         d4start, d4count, dvar);
             for (i = 0; i < local_domain.ncells_active; i++) {
@@ -358,7 +355,7 @@ vic_restore(void)
         d4start[0] = m;
         for (k = 0; k < options.SNOW_BAND; k++) {
             d4start[1] = k;
-            get_scatter_nc_field_double(filenames.init_state, 
+            get_scatter_nc_field_double(filenames.init_state,
                                         state_metadata[STATE_SNOW_SURF_WATER].varname,
                                         d4start, d4count, dvar);
             for (i = 0; i < local_domain.ncells_active; i++) {
@@ -375,7 +372,7 @@ vic_restore(void)
         d4start[0] = m;
         for (k = 0; k < options.SNOW_BAND; k++) {
             d4start[1] = k;
-            get_scatter_nc_field_double(filenames.init_state, 
+            get_scatter_nc_field_double(filenames.init_state,
                                         state_metadata[STATE_SNOW_PACK_TEMP].varname,
                                         d4start, d4count, dvar);
             for (i = 0; i < local_domain.ncells_active; i++) {
@@ -392,7 +389,7 @@ vic_restore(void)
         d4start[0] = m;
         for (k = 0; k < options.SNOW_BAND; k++) {
             d4start[1] = k;
-            get_scatter_nc_field_double(filenames.init_state, 
+            get_scatter_nc_field_double(filenames.init_state,
                                         state_metadata[STATE_SNOW_PACK_WATER].varname,
                                         d4start, d4count, dvar);
             for (i = 0; i < local_domain.ncells_active; i++) {
@@ -409,7 +406,7 @@ vic_restore(void)
         d4start[0] = m;
         for (k = 0; k < options.SNOW_BAND; k++) {
             d4start[1] = k;
-            get_scatter_nc_field_double(filenames.init_state, 
+            get_scatter_nc_field_double(filenames.init_state,
                                         state_metadata[STATE_SNOW_DENSITY].varname,
                                         d4start, d4count, dvar);
             for (i = 0; i < local_domain.ncells_active; i++) {
@@ -868,14 +865,6 @@ vic_restore(void)
         }
     }
 
-    //test
-    if (netcdf.id) {
-        status = nc_close(netcdf.id);
-        check_nc_status(status, "Error closing %s", filenames.init_state);
-        netcdf.id = 0;
-        netcdf.name ='\0';
-    }
-    
     free(ivar);
     free(dvar);
 }
@@ -891,7 +880,6 @@ check_init_state_file(void)
     extern domain_struct    global_domain;
     extern option_struct    options;
     extern soil_con_struct *soil_con;
-    extern nc_struct        netcdf;
 
     int                     status;
     size_t                  dimlen;
@@ -907,10 +895,6 @@ check_init_state_file(void)
     double                  rtol = 0.0; // maybe move this to a .h file
     double                  abs_tol = 0.0001; // maybe move this to a .h file
     nc_file_struct          nc;
-
-    // open the netcdf file
-    status = nc_open(filenames.init_state, NC_SHARE, &(nc.nc_id));
-    check_nc_status(status, "Error opening %s", filenames.init_state);
 
     // read and validate dimension lengths
     dimlen = get_nc_dimension(filenames.init_state, global_domain.info.x_dim);
@@ -956,8 +940,11 @@ check_init_state_file(void)
         }
     }
 
+     // open the netcdf file
+    status = nc_open(filenames.init_state, NC_SHARE, &(nc.nc_id));
+    check_nc_status(status, "Error opening %s", filenames.init_state);
+    
     // read dimension variables
-
     // lat/lon
     status = nc_inq_varid(nc.nc_id, global_domain.info.lon_var, &lon_var_id);
     check_nc_status(status, "Unable to find variable \"%s\" in %s",
@@ -1042,6 +1029,11 @@ check_init_state_file(void)
         log_err("global_domain.info.n_coord_dims should be 1 or 2");
     }
 
+    // close
+    status = nc_close(nc.nc_id);
+    check_nc_status(status, "Error closing %s", filenames.init_state);
+    
+    
     // Variables for other dimensions
     d1start[0] = 0;
     d1count[0] = options.Nnode;
@@ -1072,14 +1064,5 @@ check_init_state_file(void)
                     "those computed by VIC");
         }
     }
-    
-    //test
-    if (netcdf.id) {
-        status = nc_close(netcdf.id);
-        check_nc_status(status, "Error closing %s", filenames.init_state);
-        netcdf.id = 0;
-        netcdf.name = '\0';
-    }
-    
     free(dvar);
 }

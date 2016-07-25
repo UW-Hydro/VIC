@@ -41,14 +41,17 @@ VICPATH = ../../vic_run
 ifndef NC_LIBS
 NC_LIBS = $(shell nc-config --libs)
 endif
+$(info $$NC_LIBS is [${NC_LIBS}])
 
 ifndef NC_CFLAGS
 NC_CFLAGS = $(shell nc-config --cflags)
 endif
+$(info $$NC_CFLAGS is [${NC_CFLAGS}])
 
 ifndef MPICC
 MPICC = mpicc
 endif
+$(info $$MPICC is [${MPICC}])
 
 GIT_VERSION := $(shell git describe --abbrev=4 --dirty --always --tags)
 UNAME_S := $(shell uname -s)

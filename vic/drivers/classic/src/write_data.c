@@ -105,8 +105,8 @@ write_data(stream_struct *stream,
                      elem_idx < out_metadata[varid].nelem;
                      elem_idx++) {
                     tmp_usiptr[ptr_idx++] =
-                        (unsigned short int) stream->aggdata[var_idx][elem_idx][
-                            0];
+                        (unsigned short int) stream->aggdata[0][var_idx][
+                            elem_idx][0];
                 }
                 fwrite(tmp_usiptr, sizeof(unsigned short int), ptr_idx,
                        stream->fh);

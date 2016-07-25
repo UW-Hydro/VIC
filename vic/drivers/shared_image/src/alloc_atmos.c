@@ -1,7 +1,7 @@
 /******************************************************************************
  * @section DESCRIPTION
  *
- * Allocate and free memory for the atmos data struct
+ * Allocate and free memory for the force data struct
  *
  * @section LICENSE
  *
@@ -27,93 +27,91 @@
 #include <vic_driver_shared_image.h>
 
 /******************************************************************************
- * @brief    Allocate memory for the atmos data structure.
+ * @brief    Allocate memory for the force data structure.
  *****************************************************************************/
 void
-alloc_atmos(atmos_data_struct *atmos)
+alloc_force(force_data_struct *force)
 {
     extern option_struct options;
 
-    atmos->air_temp = calloc(NR + 1, sizeof(*(atmos->air_temp)));
-    check_alloc_status(atmos->air_temp, "Memory allocation error.");
+    force->air_temp = calloc(NR + 1, sizeof(*(force->air_temp)));
+    check_alloc_status(force->air_temp, "Memory allocation error.");
 
-    atmos->density = calloc(NR + 1, sizeof(*(atmos->density)));
-    check_alloc_status(atmos->density, "Memory allocation error.");
+    force->density = calloc(NR + 1, sizeof(*(force->density)));
+    check_alloc_status(force->density, "Memory allocation error.");
 
-    atmos->longwave = calloc(NR + 1, sizeof(*(atmos->longwave)));
-    check_alloc_status(atmos->longwave, "Memory allocation error.");
+    force->longwave = calloc(NR + 1, sizeof(*(force->longwave)));
+    check_alloc_status(force->longwave, "Memory allocation error.");
 
-    atmos->prec = calloc(NR + 1, sizeof(*(atmos->prec)));
-    check_alloc_status(atmos->prec, "Memory allocation error.");
+    force->prec = calloc(NR + 1, sizeof(*(force->prec)));
+    check_alloc_status(force->prec, "Memory allocation error.");
 
-    atmos->pressure = calloc(NR + 1, sizeof(*(atmos->pressure)));
-    check_alloc_status(atmos->pressure, "Memory allocation error.");
+    force->pressure = calloc(NR + 1, sizeof(*(force->pressure)));
+    check_alloc_status(force->pressure, "Memory allocation error.");
 
-    atmos->shortwave = calloc(NR + 1, sizeof(*(atmos->shortwave)));
-    check_alloc_status(atmos->shortwave, "Memory allocation error.");
+    force->shortwave = calloc(NR + 1, sizeof(*(force->shortwave)));
+    check_alloc_status(force->shortwave, "Memory allocation error.");
 
-    atmos->snowflag = calloc(NR + 1, sizeof(*(atmos->snowflag)));
-    check_alloc_status(atmos->snowflag, "Memory allocation error.");
+    force->snowflag = calloc(NR + 1, sizeof(*(force->snowflag)));
+    check_alloc_status(force->snowflag, "Memory allocation error.");
 
-    atmos->vp = calloc(NR + 1, sizeof(*(atmos->vp)));
-    check_alloc_status(atmos->vp, "Memory allocation error.");
+    force->vp = calloc(NR + 1, sizeof(*(force->vp)));
+    check_alloc_status(force->vp, "Memory allocation error.");
 
-    atmos->vpd = calloc(NR + 1, sizeof(*(atmos->vpd)));
-    check_alloc_status(atmos->vpd, "Memory allocation error.");
+    force->vpd = calloc(NR + 1, sizeof(*(force->vpd)));
+    check_alloc_status(force->vpd, "Memory allocation error.");
 
-    atmos->wind = calloc(NR + 1, sizeof(*(atmos->wind)));
-    check_alloc_status(atmos->wind, "Memory allocation error.");
+    force->wind = calloc(NR + 1, sizeof(*(force->wind)));
+    check_alloc_status(force->wind, "Memory allocation error.");
 
     if (options.LAKES) {
-        atmos->channel_in = calloc(NR + 1, sizeof(*(atmos->channel_in)));
-        check_alloc_status(atmos->channel_in, "Memory allocation error.");
-
+        force->channel_in = calloc(NR + 1, sizeof(*(force->channel_in)));
+        check_alloc_status(force->channel_in, "Memory allocation error.");
     }
     if (options.CARBON) {
-        atmos->Catm = calloc(NR + 1, sizeof(*(atmos->Catm)));
-        check_alloc_status(atmos->Catm, "Memory allocation error.");
+        force->Catm = calloc(NR + 1, sizeof(*(force->Catm)));
+        check_alloc_status(force->Catm, "Memory allocation error.");
 
-        atmos->coszen = calloc(NR + 1, sizeof(*(atmos->coszen)));
-        check_alloc_status(atmos->coszen, "Memory allocation error.");
+        force->coszen = calloc(NR + 1, sizeof(*(force->coszen)));
+        check_alloc_status(force->coszen, "Memory allocation error.");
 
-        atmos->fdir = calloc(NR + 1, sizeof(*(atmos->fdir)));
-        check_alloc_status(atmos->fdir, "Memory allocation error.");
+        force->fdir = calloc(NR + 1, sizeof(*(force->fdir)));
+        check_alloc_status(force->fdir, "Memory allocation error.");
 
-        atmos->par = calloc(NR + 1, sizeof(*(atmos->par)));
-        check_alloc_status(atmos->par, "Memory allocation error.");
-
+        force->par = calloc(NR + 1, sizeof(*(force->par)));
+        check_alloc_status(force->par, "Memory allocation error.");
     }
 }
 
 /******************************************************************************
- * @brief    Free memory for the atmos data structure.
+ * @brief    Free memory for the force data structure.
  *****************************************************************************/
 void
-free_atmos(atmos_data_struct *atmos)
+free_force(force_data_struct *force)
 {
     extern option_struct options;
 
-    if (atmos == NULL) {
+    if (force == NULL) {
         return;
     }
 
-    free(atmos->air_temp);
-    free(atmos->density);
-    free(atmos->longwave);
-    free(atmos->prec);
-    free(atmos->pressure);
-    free(atmos->shortwave);
-    free(atmos->snowflag);
-    free(atmos->vp);
-    free(atmos->vpd);
-    free(atmos->wind);
+    free(force->air_temp);
+    free(force->density);
+    free(force->longwave);
+    free(force->prec);
+    free(force->pressure);
+    free(force->shortwave);
+    free(force->snowflag);
+    free(force->vp);
+    free(force->vpd);
+    free(force->wind);
     if (options.LAKES) {
-        free(atmos->channel_in);
+        free(force->channel_in);
     }
     if (options.CARBON) {
-        free(atmos->Catm);
-        free(atmos->coszen);
-        free(atmos->fdir);
-        free(atmos->par);
+        free(force->Catm);
+        free(force->coszen);
+        free(force->fdir);
+        free(force->par);
     }
 }

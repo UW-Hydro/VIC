@@ -31,49 +31,50 @@
  *****************************************************************************/
 void
 alloc_atmos(int                 nrecs,
-            atmos_data_struct **atmos)
+            force_data_struct **force)
 {
     extern option_struct options;
     int                  i;
 
-    *atmos = calloc(nrecs, sizeof(atmos_data_struct));
-    check_alloc_status(*atmos, "Memory allocation error.");
+    *force = calloc(nrecs, sizeof(force_data_struct));
+    check_alloc_status(*force, "Memory allocation error.");
 
     for (i = 0; i < nrecs; i++) {
-        (*atmos)[i].air_temp = calloc(NR + 1, sizeof(*(*atmos)[i].air_temp));
-        check_alloc_status((*atmos)[i].air_temp, "Memory allocation error.");
-        (*atmos)[i].density = calloc(NR + 1, sizeof(*(*atmos)[i].density));
-        check_alloc_status((*atmos)[i].density, "Memory allocation error.");
-        (*atmos)[i].longwave = calloc(NR + 1, sizeof(*(*atmos)[i].longwave));
-        check_alloc_status((*atmos)[i].longwave, "Memory allocation error.");
-        (*atmos)[i].prec = calloc(NR + 1, sizeof(*(*atmos)[i].prec));
-        check_alloc_status((*atmos)[i].prec, "Memory allocation error.");
-        (*atmos)[i].pressure = calloc(NR + 1, sizeof(*(*atmos)[i].pressure));
-        check_alloc_status((*atmos)[i].pressure, "Memory allocation error.");
-        (*atmos)[i].shortwave = calloc(NR + 1, sizeof(*(*atmos)[i].shortwave));
-        check_alloc_status((*atmos)[i].shortwave, "Memory allocation error.");
-        (*atmos)[i].snowflag = calloc(NR + 1, sizeof(*(*atmos)[i].snowflag));
-        check_alloc_status((*atmos)[i].snowflag, "Memory allocation error.");
-        (*atmos)[i].vp = calloc(NR + 1, sizeof(*(*atmos)[i].vp));
-        check_alloc_status((*atmos)[i].vp, "Memory allocation error.");
-        (*atmos)[i].vpd = calloc(NR + 1, sizeof(*(*atmos)[i].vpd));
-        check_alloc_status((*atmos)[i].vpd, "Memory allocation error.");
-        (*atmos)[i].wind = calloc(NR + 1, sizeof(*(*atmos)[i].wind));
-        check_alloc_status((*atmos)[i].wind, "Memory allocation error.");
+        (*force)[i].air_temp = calloc(NR + 1, sizeof(*(*force)[i].air_temp));
+        check_alloc_status((*force)[i].air_temp, "Memory allocation error.");
+        (*force)[i].density = calloc(NR + 1, sizeof(*(*force)[i].density));
+        check_alloc_status((*force)[i].density, "Memory allocation error.");
+        (*force)[i].longwave = calloc(NR + 1, sizeof(*(*force)[i].longwave));
+        check_alloc_status((*force)[i].longwave, "Memory allocation error.");
+        (*force)[i].prec = calloc(NR + 1, sizeof(*(*force)[i].prec));
+        check_alloc_status((*force)[i].prec, "Memory allocation error.");
+        (*force)[i].pressure = calloc(NR + 1, sizeof(*(*force)[i].pressure));
+        check_alloc_status((*force)[i].pressure, "Memory allocation error.");
+        (*force)[i].shortwave = calloc(NR + 1, sizeof(*(*force)[i].shortwave));
+        check_alloc_status((*force)[i].shortwave, "Memory allocation error.");
+        (*force)[i].snowflag = calloc(NR + 1, sizeof(*(*force)[i].snowflag));
+        check_alloc_status((*force)[i].snowflag, "Memory allocation error.");
+        (*force)[i].vp = calloc(NR + 1, sizeof(*(*force)[i].vp));
+        check_alloc_status((*force)[i].vp, "Memory allocation error.");
+        (*force)[i].vpd = calloc(NR + 1, sizeof(*(*force)[i].vpd));
+        check_alloc_status((*force)[i].vpd, "Memory allocation error.");
+        (*force)[i].wind = calloc(NR + 1, sizeof(*(*force)[i].wind));
+        check_alloc_status((*force)[i].wind, "Memory allocation error.");
         if (options.LAKES) {
-            (*atmos)[i].channel_in =
-                calloc(NR + 1, sizeof(*(*atmos)[i].channel_in));
-            check_alloc_status((*atmos)[i].channel_in, "Memory allocation error.");
+            (*force)[i].channel_in =
+                calloc(NR + 1, sizeof(*(*force)[i].channel_in));
+            check_alloc_status((*force)[i].channel_in,
+                               "Memory allocation error.");
         }
         if (options.CARBON) {
-            (*atmos)[i].Catm = calloc(NR + 1, sizeof(*(*atmos)[i].Catm));
-            check_alloc_status((*atmos)[i].Catm, "Memory allocation error.");
-            (*atmos)[i].coszen = calloc(NR + 1, sizeof(*(*atmos)[i].coszen));
-            check_alloc_status((*atmos)[i].coszen, "Memory allocation error.");
-            (*atmos)[i].fdir = calloc(NR + 1, sizeof(*(*atmos)[i].fdir));
-            check_alloc_status((*atmos)[i].fdir, "Memory allocation error.");
-            (*atmos)[i].par = calloc(NR + 1, sizeof(*(*atmos)[i].par));
-            check_alloc_status((*atmos)[i].par, "Memory allocation error.");
+            (*force)[i].Catm = calloc(NR + 1, sizeof(*(*force)[i].Catm));
+            check_alloc_status((*force)[i].Catm, "Memory allocation error.");
+            (*force)[i].coszen = calloc(NR + 1, sizeof(*(*force)[i].coszen));
+            check_alloc_status((*force)[i].coszen, "Memory allocation error.");
+            (*force)[i].fdir = calloc(NR + 1, sizeof(*(*force)[i].fdir));
+            check_alloc_status((*force)[i].fdir, "Memory allocation error.");
+            (*force)[i].par = calloc(NR + 1, sizeof(*(*force)[i].par));
+            check_alloc_status((*force)[i].par, "Memory allocation error.");
         }
     }
 }
@@ -83,36 +84,36 @@ alloc_atmos(int                 nrecs,
  *****************************************************************************/
 void
 free_atmos(int                 nrecs,
-           atmos_data_struct **atmos)
+           force_data_struct **force)
 {
     extern option_struct options;
     int                  i;
 
-    if (*atmos == NULL) {
+    if (*force == NULL) {
         return;
     }
 
     for (i = 0; i < nrecs; i++) {
-        free((*atmos)[i].air_temp);
-        free((*atmos)[i].density);
-        free((*atmos)[i].longwave);
-        free((*atmos)[i].prec);
-        free((*atmos)[i].pressure);
-        free((*atmos)[i].shortwave);
-        free((*atmos)[i].snowflag);
-        free((*atmos)[i].vp);
-        free((*atmos)[i].vpd);
-        free((*atmos)[i].wind);
+        free((*force)[i].air_temp);
+        free((*force)[i].density);
+        free((*force)[i].longwave);
+        free((*force)[i].prec);
+        free((*force)[i].pressure);
+        free((*force)[i].shortwave);
+        free((*force)[i].snowflag);
+        free((*force)[i].vp);
+        free((*force)[i].vpd);
+        free((*force)[i].wind);
         if (options.LAKES) {
-            free((*atmos)[i].channel_in);
+            free((*force)[i].channel_in);
         }
         if (options.CARBON) {
-            free((*atmos)[i].Catm);
-            free((*atmos)[i].coszen);
-            free((*atmos)[i].fdir);
-            free((*atmos)[i].par);
+            free((*force)[i].Catm);
+            free((*force)[i].coszen);
+            free((*force)[i].fdir);
+            free((*force)[i].par);
         }
     }
 
-    free(*atmos);
+    free(*force);
 }

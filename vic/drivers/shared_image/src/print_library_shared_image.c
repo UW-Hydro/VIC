@@ -30,31 +30,31 @@
  * @brief    Print atmos data structure.
  *****************************************************************************/
 void
-print_atmos_data(atmos_data_struct *atmos)
+print_force_data(force_data_struct *force)
 {
     extern option_struct options;
 
-    fprintf(LOG_DEST, "atmos_data  :\n");
-    fprintf(LOG_DEST, "\tair_temp  : %.4f\n", atmos->air_temp[0]);
-    fprintf(LOG_DEST, "\tdensity   : %.4f\n", atmos->density[0]);
-    fprintf(LOG_DEST, "\tlongwave  : %.4f\n", atmos->longwave[0]);
-    fprintf(LOG_DEST, "\tout_prec  : %.4f\n", atmos->out_prec);
-    fprintf(LOG_DEST, "\tout_rain  : %.4f\n", atmos->out_rain);
-    fprintf(LOG_DEST, "\tout_snow  : %.4f\n", atmos->out_snow);
-    fprintf(LOG_DEST, "\tprec      : %.4f\n", atmos->prec[0]);
-    fprintf(LOG_DEST, "\tpressure  : %.4f\n", atmos->pressure[0]);
-    fprintf(LOG_DEST, "\tshortwave : %.4f\n", atmos->shortwave[0]);
-    fprintf(LOG_DEST, "\tsnowflag  : %d\n", atmos->snowflag[0]);
-    fprintf(LOG_DEST, "\tvp        : %.4f\n", atmos->vp[0]);
-    fprintf(LOG_DEST, "\tvpd       : %.4f\n", atmos->vpd[0]);
-    fprintf(LOG_DEST, "\twind      : %.4f\n", atmos->wind[0]);
+    fprintf(LOG_DEST, "force_data  :\n");
+    fprintf(LOG_DEST, "\tair_temp  : %.4f\n", force->air_temp[0]);
+    fprintf(LOG_DEST, "\tdensity   : %.4f\n", force->density[0]);
+    fprintf(LOG_DEST, "\tlongwave  : %.4f\n", force->longwave[0]);
+    fprintf(LOG_DEST, "\tout_prec  : %.4f\n", force->out_prec);
+    fprintf(LOG_DEST, "\tout_rain  : %.4f\n", force->out_rain);
+    fprintf(LOG_DEST, "\tout_snow  : %.4f\n", force->out_snow);
+    fprintf(LOG_DEST, "\tprec      : %.4f\n", force->prec[0]);
+    fprintf(LOG_DEST, "\tpressure  : %.4f\n", force->pressure[0]);
+    fprintf(LOG_DEST, "\tshortwave : %.4f\n", force->shortwave[0]);
+    fprintf(LOG_DEST, "\tsnowflag  : %d\n", force->snowflag[0]);
+    fprintf(LOG_DEST, "\tvp        : %.4f\n", force->vp[0]);
+    fprintf(LOG_DEST, "\tvpd       : %.4f\n", force->vpd[0]);
+    fprintf(LOG_DEST, "\twind      : %.4f\n", force->wind[0]);
     if (options.LAKES) {
-        fprintf(LOG_DEST, "\tchannel_in: %.4f\n", atmos->channel_in[0]);
+        fprintf(LOG_DEST, "\tchannel_in: %.4f\n", force->channel_in[0]);
     }
     if (options.CARBON) {
-        fprintf(LOG_DEST, "\tCatm      : %.4f\n", atmos->Catm[0]);
-        fprintf(LOG_DEST, "\tfdir      : %.4f\n", atmos->fdir[0]);
-        fprintf(LOG_DEST, "\tpar       : %.4f\n", atmos->par[0]);
+        fprintf(LOG_DEST, "\tCatm      : %.4f\n", force->Catm[0]);
+        fprintf(LOG_DEST, "\tfdir      : %.4f\n", force->fdir[0]);
+        fprintf(LOG_DEST, "\tpar       : %.4f\n", force->par[0]);
     }
 }
 
@@ -157,21 +157,20 @@ print_nc_file(nc_file_struct *nc)
  * @brief    Print netCDF variable structure.
  *****************************************************************************/
 void
-print_nc_var(nc_var_struct *nc_var,
-             size_t         ndims)
+print_nc_var(nc_var_struct *nc_var)
 {
     size_t i;
 
     fprintf(LOG_DEST, "nc_var:\n");
     fprintf(LOG_DEST, "\tnc_varid: %d\n", nc_var->nc_varid);
     fprintf(LOG_DEST, "\tnc_type: %d\n", nc_var->nc_type);
-    fprintf(LOG_DEST, "\tnc_dimids:");
-    for (i = 0; i < ndims; i++) {
+    fprintf(LOG_DEST, "\tnc_dimids (%zu):", nc_var->nc_dims);
+    for (i = 0; i < nc_var->nc_dims; i++) {
         fprintf(LOG_DEST, "\t%d", nc_var->nc_dimids[i]);
     }
     fprintf(LOG_DEST, "\n");
     fprintf(LOG_DEST, "\tnc_counts:");
-    for (i = 0; i < ndims; i++) {
+    for (i = 0; i < nc_var->nc_dims; i++) {
         fprintf(LOG_DEST, "\t%zu", nc_var->nc_counts[i]);
     }
     fprintf(LOG_DEST, "\n");

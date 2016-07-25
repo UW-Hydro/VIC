@@ -30,7 +30,8 @@
  * @brief    Save model state.
  *****************************************************************************/
 void
-vic_store(dmy_struct *dmy_current)
+vic_store(dmy_struct *dmy_current,
+          char       *filename)
 {
     extern filenames_struct    filenames;
     extern all_vars_struct    *all_vars;
@@ -39,7 +40,6 @@ vic_store(dmy_struct *dmy_current)
     extern veg_con_map_struct *veg_con_map;
     extern int                 mpi_rank;
 
-    char                       filename[MAXSTRING];
     int                        status;
     int                        v;
     size_t                     i;

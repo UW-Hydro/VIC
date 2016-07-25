@@ -38,7 +38,7 @@ SHAREDIMAGEPATH = ../shared_image
 # VIC RUN PATH
 VICPATH = ../../vic_run
 
-ifndef NC_CFLAGS
+ifndef NC_LIBS
 NC_LIBS = $(shell nc-config --libs)
 endif
 

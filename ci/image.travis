@@ -37,12 +37,14 @@ function vic_before_install {
 		export TRAVIS_NETCDFPATH=/usr/local
 		export TRAVIS_MPIPATH=/usr/local
     else
+        locate nc-config
 		export TRAVIS_NETCDFPATH=/usr
 		export TRAVIS_MPIPATH="${HOME}/mpich"
         export NC_LIBS=$(/usr/bin/nc-config --libs)
         export NC_CFLAGS=$(/usr/bin/nc-config --cflags)
         echo "NETCDF LIB FLAGS ------> ${NC_LIBS}"
         echo "NETCDF C FLAGS --------> ${NC_CFLAGS}"
+        exit
 
         # Install MPICH
         if [ ! -d ${TRAVIS_MPIPATH} ]; then

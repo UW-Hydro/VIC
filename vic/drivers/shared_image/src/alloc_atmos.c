@@ -1,7 +1,7 @@
 /******************************************************************************
  * @section DESCRIPTION
  *
- * Allocate and free memory for the atmos data struct
+ * Allocate and free memory for the force data struct
  *
  * @section LICENSE
  *
@@ -27,108 +27,91 @@
 #include <vic_driver_shared_image.h>
 
 /******************************************************************************
- * @brief    Allocate memory for the atmos data structure.
+ * @brief    Allocate memory for the force data structure.
  *****************************************************************************/
 void
-alloc_atmos(atmos_data_struct *atmos)
+alloc_force(force_data_struct *force)
 {
     extern option_struct options;
 
-    atmos->air_temp = calloc(NR + 1, sizeof(*(atmos->air_temp)));
-    if (atmos->air_temp == NULL) {
-        log_err("Memory allocation error in alloc_atmos().");
-    }
-    atmos->density = calloc(NR + 1, sizeof(*(atmos->density)));
-    if (atmos->density == NULL) {
-        log_err("Memory allocation error in alloc_atmos().");
-    }
-    atmos->longwave = calloc(NR + 1, sizeof(*(atmos->longwave)));
-    if (atmos->longwave == NULL) {
-        log_err("Memory allocation error in alloc_atmos().");
-    }
-    atmos->prec = calloc(NR + 1, sizeof(*(atmos->prec)));
-    if (atmos->prec == NULL) {
-        log_err("Memory allocation error in alloc_atmos().");
-    }
-    atmos->pressure = calloc(NR + 1, sizeof(*(atmos->pressure)));
-    if (atmos->pressure == NULL) {
-        log_err("Memory allocation error in alloc_atmos().");
-    }
-    atmos->shortwave = calloc(NR + 1, sizeof(*(atmos->shortwave)));
-    if (atmos->shortwave == NULL) {
-        log_err("Memory allocation error in alloc_atmos().");
-    }
-    atmos->snowflag = calloc(NR + 1, sizeof(*(atmos->snowflag)));
-    if (atmos->snowflag == NULL) {
-        log_err("Memory allocation error in alloc_atmos().");
-    }
-    atmos->vp = calloc(NR + 1, sizeof(*(atmos->vp)));
-    if (atmos->vp == NULL) {
-        log_err("Memory allocation error in alloc_atmos().");
-    }
-    atmos->vpd = calloc(NR + 1, sizeof(*(atmos->vpd)));
-    if (atmos->vpd == NULL) {
-        log_err("Memory allocation error in alloc_atmos().");
-    }
-    atmos->wind = calloc(NR + 1, sizeof(*(atmos->wind)));
-    if (atmos->wind == NULL) {
-        log_err("Memory allocation error in alloc_atmos().");
-    }
+    force->air_temp = calloc(NR + 1, sizeof(*(force->air_temp)));
+    check_alloc_status(force->air_temp, "Memory allocation error.");
+
+    force->density = calloc(NR + 1, sizeof(*(force->density)));
+    check_alloc_status(force->density, "Memory allocation error.");
+
+    force->longwave = calloc(NR + 1, sizeof(*(force->longwave)));
+    check_alloc_status(force->longwave, "Memory allocation error.");
+
+    force->prec = calloc(NR + 1, sizeof(*(force->prec)));
+    check_alloc_status(force->prec, "Memory allocation error.");
+
+    force->pressure = calloc(NR + 1, sizeof(*(force->pressure)));
+    check_alloc_status(force->pressure, "Memory allocation error.");
+
+    force->shortwave = calloc(NR + 1, sizeof(*(force->shortwave)));
+    check_alloc_status(force->shortwave, "Memory allocation error.");
+
+    force->snowflag = calloc(NR + 1, sizeof(*(force->snowflag)));
+    check_alloc_status(force->snowflag, "Memory allocation error.");
+
+    force->vp = calloc(NR + 1, sizeof(*(force->vp)));
+    check_alloc_status(force->vp, "Memory allocation error.");
+
+    force->vpd = calloc(NR + 1, sizeof(*(force->vpd)));
+    check_alloc_status(force->vpd, "Memory allocation error.");
+
+    force->wind = calloc(NR + 1, sizeof(*(force->wind)));
+    check_alloc_status(force->wind, "Memory allocation error.");
+
     if (options.LAKES) {
-        atmos->channel_in = calloc(NR + 1, sizeof(*(atmos->channel_in)));
-        if (atmos->channel_in == NULL) {
-            log_err("Memory allocation error in alloc_atmos().");
-        }
+        force->channel_in = calloc(NR + 1, sizeof(*(force->channel_in)));
+        check_alloc_status(force->channel_in, "Memory allocation error.");
     }
     if (options.CARBON) {
-        atmos->Catm = calloc(NR + 1, sizeof(*(atmos->Catm)));
-        if (atmos->Catm == NULL) {
-            log_err("Memory allocation error in alloc_atmos().");
-        }
-        atmos->coszen = calloc(NR + 1, sizeof(*(atmos->coszen)));
-        if (atmos->coszen == NULL) {
-            log_err("Memory allocation error in alloc_atmos().");
-        }
-        atmos->fdir = calloc(NR + 1, sizeof(*(atmos->fdir)));
-        if (atmos->fdir == NULL) {
-            log_err("Memory allocation error in alloc_atmos().");
-        }
-        atmos->par = calloc(NR + 1, sizeof(*(atmos->par)));
-        if (atmos->par == NULL) {
-            log_err("Memory allocation error in alloc_atmos().");
-        }
+        force->Catm = calloc(NR + 1, sizeof(*(force->Catm)));
+        check_alloc_status(force->Catm, "Memory allocation error.");
+
+        force->coszen = calloc(NR + 1, sizeof(*(force->coszen)));
+        check_alloc_status(force->coszen, "Memory allocation error.");
+
+        force->fdir = calloc(NR + 1, sizeof(*(force->fdir)));
+        check_alloc_status(force->fdir, "Memory allocation error.");
+
+        force->par = calloc(NR + 1, sizeof(*(force->par)));
+        check_alloc_status(force->par, "Memory allocation error.");
     }
 }
 
 /******************************************************************************
- * @brief    Free memory for the atmos data structure.
+ * @brief    Free memory for the force data structure.
  *****************************************************************************/
 void
-free_atmos(atmos_data_struct *atmos)
+free_force(force_data_struct *force)
 {
     extern option_struct options;
 
-    if (atmos == NULL) {
+    if (force == NULL) {
         return;
     }
 
-    free(atmos->air_temp);
-    free(atmos->density);
-    free(atmos->longwave);
-    free(atmos->prec);
-    free(atmos->pressure);
-    free(atmos->shortwave);
-    free(atmos->snowflag);
-    free(atmos->vp);
-    free(atmos->vpd);
-    free(atmos->wind);
+    free(force->air_temp);
+    free(force->density);
+    free(force->longwave);
+    free(force->prec);
+    free(force->pressure);
+    free(force->shortwave);
+    free(force->snowflag);
+    free(force->vp);
+    free(force->vpd);
+    free(force->wind);
     if (options.LAKES) {
-        free(atmos->channel_in);
+        free(force->channel_in);
     }
     if (options.CARBON) {
-        free(atmos->Catm);
-        free(atmos->coszen);
-        free(atmos->fdir);
-        free(atmos->par);
+        free(force->Catm);
+        free(force->coszen);
+        free(force->fdir);
+        free(force->par);
     }
 }

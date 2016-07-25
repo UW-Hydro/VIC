@@ -202,7 +202,7 @@ transpiration(layer_data_struct *layer,
     double                   avail_moist[MAX_LAYERS]; /* moisture available for trans */
     double                   ice[MAX_LAYERS];
     double                   gc;
-    double                  *gsLayer;
+    double                  *gsLayer = NULL;
     size_t                   cidx;
 
     /**********************************************************************
@@ -373,6 +373,7 @@ transpiration(layer_data_struct *layer,
         gc = 0;
         if (options.CARBON) {
             gsLayer = calloc(options.Ncanopy, sizeof(*gsLayer));
+            check_alloc_status(gsLayer, "Memory allocation error.");
             for (cidx = 0; cidx < options.Ncanopy; cidx++) {
                 gsLayer[cidx] = 0;
             }

@@ -37,44 +37,36 @@ alloc_veg_hist(int                nrecs,
     int i, j;
 
     *veg_hist = calloc(nrecs, sizeof(*(*veg_hist)));
-    if ((*veg_hist) == NULL) {
-        log_err("Memory allocation error in alloc_veg_hist().");
-    }
+    check_alloc_status((*veg_hist), "Memory allocation error.");
 
     for (i = 0; i < nrecs; i++) {
         (*veg_hist)[i] = calloc(nveg + 1, sizeof(*((*veg_hist)[i])));
-        if ((*veg_hist)[i] == NULL) {
-            log_err("Memory allocation error in alloc_veg_hist().");
-        }
+        check_alloc_status((*veg_hist)[i], "Memory allocation error.");
+
         for (j = 0; j < nveg + 1; j++) {
             (*veg_hist)[i][j].albedo =
                 calloc(NR + 1, sizeof(*((*veg_hist)[i][j].albedo)));
-            if ((*veg_hist)[i][j].albedo == NULL) {
-                log_err("Memory allocation error in alloc_veg_hist().");
-            }
+            check_alloc_status((*veg_hist)[i][j].albedo,
+                               "Memory allocation error.");
             (*veg_hist)[i][j].displacement = calloc(NR + 1,
                                                     sizeof(*((*veg_hist)[i][j].
                                                              displacement)));
-            if ((*veg_hist)[i][j].displacement == NULL) {
-                log_err("Memory allocation error in alloc_veg_hist().");
-            }
+            check_alloc_status((*veg_hist)[i][j].displacement,
+                               "Memory allocation error.");
             (*veg_hist)[i][j].fcanopy = calloc(NR + 1,
                                                sizeof(*((*veg_hist)[i][j].
                                                         fcanopy)));
-            if ((*veg_hist)[i][j].fcanopy == NULL) {
-                log_err("Memory allocation error in alloc_veg_hist().");
-            }
+            check_alloc_status((*veg_hist)[i][j].fcanopy,
+                               "Memory allocation error.");
             (*veg_hist)[i][j].LAI =
                 calloc(NR + 1, sizeof(*((*veg_hist)[i][j].LAI)));
-            if ((*veg_hist)[i][j].LAI == NULL) {
-                log_err("Memory allocation error in alloc_veg_hist().");
-            }
+            check_alloc_status((*veg_hist)[i][j].LAI,
+                               "Memory allocation error.");
             (*veg_hist)[i][j].roughness = calloc(NR + 1,
                                                  sizeof(*((*veg_hist)[i][j].
                                                           roughness)));
-            if ((*veg_hist)[i][j].roughness == NULL) {
-                log_err("Memory allocation error in alloc_veg_hist().");
-            }
+            check_alloc_status((*veg_hist)[i][j].roughness,
+                               "Memory allocation error.");
         }
     }
 }

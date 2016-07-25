@@ -38,7 +38,6 @@ put_nc_attr(int         nc_id,
     int status;
 
     status = nc_put_att_text(nc_id, var_id, name, strlen(value), value);
-    if (status != NC_NOERR) {
-        log_err("Error adding %s attribute in ncid %d", name, nc_id);
-    }
+    check_nc_status(status, "Error adding %s attribute in ncid %d", name,
+                    nc_id);
 }

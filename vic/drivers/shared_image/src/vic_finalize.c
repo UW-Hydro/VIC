@@ -35,7 +35,7 @@ vic_finalize(void)
     extern size_t             *filter_active_cells;
     extern size_t             *mpi_map_mapping_array;
     extern all_vars_struct    *all_vars;
-    extern atmos_data_struct  *atmos;
+    extern force_data_struct  *force;
     extern domain_struct       global_domain;
     extern domain_struct       local_domain;
     extern filep_struct        filep;
@@ -64,7 +64,7 @@ vic_finalize(void)
     int                        status;
 
 
-    if (mpi_rank == 0) {
+    if (mpi_rank == VIC_MPI_ROOT) {
         // close the global parameter file
         fclose(filep.globalparam);
 
@@ -80,7 +80,7 @@ vic_finalize(void)
     }
 
     for (i = 0; i < local_domain.ncells_active; i++) {
-        free_atmos(&(atmos[i]));
+        free_force(&(force[i]));
         free(soil_con[i].AreaFract);
         free(soil_con[i].BandElev);
         free(soil_con[i].Tfactor);
@@ -104,7 +104,7 @@ vic_finalize(void)
 
     free_streams(&output_streams);
     free_out_data(local_domain.ncells_active, out_data);
-    free(atmos);
+    free(force);
     free(soil_con);
     free(veg_con_map);
     free(veg_con);

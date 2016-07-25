@@ -30,7 +30,8 @@
  * @brief    Save model state.
  *****************************************************************************/
 void
-vic_store(dmy_struct *dmy_current)
+vic_store(dmy_struct *dmy_current,
+          char       *filename)
 {
     extern filenames_struct    filenames;
     extern all_vars_struct    *all_vars;
@@ -39,7 +40,6 @@ vic_store(dmy_struct *dmy_current)
     extern veg_con_map_struct *veg_con_map;
     extern int                 mpi_rank;
 
-    char                       filename[MAXSTRING];
     int                        status;
     int                        v;
     size_t                     i;
@@ -60,27 +60,27 @@ vic_store(dmy_struct *dmy_current)
     set_nc_state_file_info(&nc_state_file);
 
     // only open and initialize the netcdf file on the first thread
-    if (mpi_rank == (mpi_rank == VIC_MPI_ROOT)) {
+    if (mpi_rank == VIC_MPI_ROOT) {
         // create netcdf file for storing model state
         sprintf(filename, "%s.%04d%02d%02d_%05u.nc",
                 filenames.statefile, dmy_current->year, dmy_current->month,
                 dmy_current->day, dmy_current->dayseconds);
 
-        initialize_state_file(filename, &nc_state_file);
+        initialize_state_file(filename, &nc_state_file, dmy_current);
+
+        debug("writing state file: %s", filename);
     }
 
     // write state variables
 
     // allocate memory for variables to be stored
     ivar = malloc(local_domain.ncells_active * sizeof(*ivar));
-    if (ivar == NULL) {
-        log_err("Memory allocation error");
-    }
+    check_alloc_status(ivar, "Memory allocation error");
+
 
     dvar = malloc(local_domain.ncells_active * sizeof(*dvar));
-    if (dvar == NULL) {
-        log_err("Memory allocation error");
-    }
+    check_alloc_status(dvar, "Memory allocation error");
+
 
     // initialize starts and counts
     d2start[0] = 0;
@@ -346,10 +346,10 @@ vic_store(dmy_struct *dmy_current)
                     ivar[i] = nc_state_file.i_fillvalue;
                 }
             }
-            gather_put_nc_field_double(nc_state_file.nc_id,
-                                       nc_var->nc_varid,
-                                       nc_state_file.d_fillvalue,
-                                       d4start, nc_var->nc_counts, dvar);
+            gather_put_nc_field_int(nc_state_file.nc_id,
+                                    nc_var->nc_varid,
+                                    nc_state_file.d_fillvalue,
+                                    d4start, nc_var->nc_counts, ivar);
             for (i = 0; i < local_domain.ncells_active; i++) {
                 ivar[i] = nc_state_file.i_fillvalue;
             }
@@ -372,10 +372,10 @@ vic_store(dmy_struct *dmy_current)
                     ivar[i] = nc_state_file.i_fillvalue;
                 }
             }
-            gather_put_nc_field_double(nc_state_file.nc_id,
-                                       nc_var->nc_varid,
-                                       nc_state_file.d_fillvalue,
-                                       d4start, nc_var->nc_counts, dvar);
+            gather_put_nc_field_int(nc_state_file.nc_id,
+                                    nc_var->nc_varid,
+                                    nc_state_file.d_fillvalue,
+                                    d4start, nc_var->nc_counts, ivar);
             for (i = 0; i < local_domain.ncells_active; i++) {
                 ivar[i] = nc_state_file.i_fillvalue;
             }
@@ -809,10 +809,10 @@ vic_store(dmy_struct *dmy_current)
         for (i = 0; i < local_domain.ncells_active; i++) {
             ivar[i] = (int) all_vars[i].lake_var.snow.last_snow;
         }
-        gather_put_nc_field_double(nc_state_file.nc_id,
-                                   nc_var->nc_varid,
-                                   nc_state_file.d_fillvalue,
-                                   d2start, nc_var->nc_counts, dvar);
+        gather_put_nc_field_int(nc_state_file.nc_id,
+                                nc_var->nc_varid,
+                                nc_state_file.d_fillvalue,
+                                d2start, nc_var->nc_counts, ivar);
         for (i = 0; i < local_domain.ncells_active; i++) {
             ivar[i] = nc_state_file.i_fillvalue;
         }
@@ -822,10 +822,10 @@ vic_store(dmy_struct *dmy_current)
         for (i = 0; i < local_domain.ncells_active; i++) {
             ivar[i] = (int) all_vars[i].lake_var.snow.MELTING;
         }
-        gather_put_nc_field_double(nc_state_file.nc_id,
-                                   nc_var->nc_varid,
-                                   nc_state_file.d_fillvalue,
-                                   d2start, nc_var->nc_counts, dvar);
+        gather_put_nc_field_int(nc_state_file.nc_id,
+                                nc_var->nc_varid,
+                                nc_state_file.d_fillvalue,
+                                d2start, nc_var->nc_counts, ivar);
         for (i = 0; i < local_domain.ncells_active; i++) {
             ivar[i] = nc_state_file.i_fillvalue;
         }
@@ -1257,12 +1257,10 @@ vic_store(dmy_struct *dmy_current)
     }
 
     // close the netcdf file if it is still open
-    if (mpi_rank == (mpi_rank == VIC_MPI_ROOT)) {
+    if (mpi_rank == VIC_MPI_ROOT) {
         if (nc_state_file.open == true) {
             status = nc_close(nc_state_file.nc_id);
-            if (status != NC_NOERR) {
-                log_err("Error closing %s", filename);
-            }
+            check_nc_status(status, "Error closing %s", filename);
         }
     }
 
@@ -1301,7 +1299,6 @@ set_nc_state_file_info(nc_file_struct *nc_state_file)
     nc_state_file->veg_dimid = MISSING;
 
     // Set dimension sizes
-    nc_state_file->time_size = 1;
     nc_state_file->band_size = options.SNOW_BAND;
     nc_state_file->front_size = MAX_FRONTS;
     nc_state_file->frost_size = options.Nfrost;
@@ -1316,9 +1313,7 @@ set_nc_state_file_info(nc_file_struct *nc_state_file)
     // allocate memory for nc_vars
     nc_state_file->nc_vars =
         calloc(N_STATE_VARS, sizeof(*(nc_state_file->nc_vars)));
-    if (nc_state_file->nc_vars == NULL) {
-        log_err("Memory allocation error");
-    }
+    check_alloc_status(nc_state_file->nc_vars, "Memory allocation error");
 }
 
 /******************************************************************************
@@ -1339,6 +1334,10 @@ set_nc_state_var_info(nc_file_struct *nc)
         nc->nc_vars[i].nc_dims = 0;
 
         switch (i) {
+        case STATE_SNOW_AGE:
+        case STATE_SNOW_MELT_STATE:
+        case STATE_LAKE_SNOW_AGE:
+        case STATE_LAKE_SNOW_MELT_STATE:
         case STATE_LAKE_ACTIVE_LAYERS:
             nc->nc_vars[i].nc_type = NC_INT;
             break;
@@ -1520,12 +1519,14 @@ set_nc_state_var_info(nc_file_struct *nc)
  *****************************************************************************/
 void
 initialize_state_file(char           *filename,
-                      nc_file_struct *nc_state_file)
+                      nc_file_struct *nc_state_file,
+                      dmy_struct     *dmy_current)
 {
     extern option_struct       options;
     extern domain_struct       global_domain;
     extern global_param_struct global_param;
     extern metadata_struct     state_metadata[N_STATE_VARS];
+    extern soil_con_struct    *soil_con;
 
     int                        status;
     int                        dimids[MAXDIMS];
@@ -1534,7 +1535,6 @@ initialize_state_file(char           *filename,
     size_t                     j;
     size_t                     dcount[MAXDIMS];
     size_t                     dstart[MAXDIMS];
-    int                        time_var_id;
     int                        lon_var_id;
     int                        lat_var_id;
     int                        veg_var_id;
@@ -1547,11 +1547,12 @@ initialize_state_file(char           *filename,
     char                       unit_str[MAXSTRING];
     char                       str[MAXSTRING];
     size_t                     ndims;
+    double                     dtime;
     double                    *dvar = NULL;
     int                       *ivar = NULL;
 
     // open the netcdf file
-    status = nc_create(filename, NC_WRITE | get_nc_mode(options.STATE_FORMAT),
+    status = nc_create(filename, get_nc_mode(options.STATE_FORMAT),
                        &(nc_state_file->nc_id));
     check_nc_status(status, "Error creating %s", filename);
     nc_state_file->open = true;
@@ -1570,10 +1571,11 @@ initialize_state_file(char           *filename,
 
     // define the variable time
     status = nc_def_var(nc_state_file->nc_id, "time", NC_DOUBLE, 1,
-                        &(nc_state_file->time_dimid), &(time_var_id));
+                        &(nc_state_file->time_dimid),
+                        &(nc_state_file->time_varid));
     check_nc_status(status, "Error defining time variable in %s", filename);
-    status = nc_put_att_text(nc_state_file->nc_id, time_var_id, "standard_name",
-                             strlen("time"), "time");
+    status = nc_put_att_text(nc_state_file->nc_id, nc_state_file->time_varid,
+                             "standard_name", strlen("time"), "time");
     check_nc_status(status, "Error adding attribute in %s", filename);
 
     // adding units attribute to time variable
@@ -1581,15 +1583,15 @@ initialize_state_file(char           *filename,
 
     sprintf(str, "%s since %s", unit_str, global_param.time_origin_str);
 
-    status = nc_put_att_text(nc_state_file->nc_id, time_var_id, "units",
-                             strlen(str), str);
+    status = nc_put_att_text(nc_state_file->nc_id, nc_state_file->time_varid,
+                             "units", strlen(str), str);
     check_nc_status(status, "Error adding attribute in %s", filename);
 
     // adding calendar attribute to time variable
     str_from_calendar(global_param.calendar, str);
 
-    status = nc_put_att_text(nc_state_file->nc_id, time_var_id, "calendar",
-                             strlen(str), str);
+    status = nc_put_att_text(nc_state_file->nc_id, nc_state_file->time_varid,
+                             "calendar", strlen(str), str);
     check_nc_status(status, "Error adding calendar attribute in %s", filename);
 
     // define netcdf dimensions
@@ -1875,12 +1877,20 @@ initialize_state_file(char           *filename,
     status = nc_enddef(nc_state_file->nc_id);
     check_nc_status(status, "Error leaving define mode for %s", filename);
 
+    // time variable
+    dtime = date2num(global_param.time_origin_num, dmy_current, 0.,
+                     global_param.calendar, global_param.time_units);
+
+    dstart[0] = 0;
+    status = nc_put_var1_double(nc_state_file->nc_id,
+                                nc_state_file->time_varid,
+                                dstart, &dtime);
+    check_nc_status(status, "Error writing time variable");
+
     // populate lat/lon
     if (global_domain.info.n_coord_dims == 1) {
         dvar = calloc(nc_state_file->ni_size, sizeof(*dvar));
-        if (dvar == NULL) {
-            log_err("Memory allocation error");
-        }
+        check_alloc_status(dvar, "Memory allocation error");
 
         dcount[0] = nc_state_file->ni_size;
         // implicitly nested loop over ni and nj with j set to 0
@@ -1893,9 +1903,7 @@ initialize_state_file(char           *filename,
         free(dvar);
 
         dvar = calloc(nc_state_file->nj_size, sizeof(*dvar));
-        if (dvar == NULL) {
-            log_err("Memory allocation error");
-        }
+        check_alloc_status(dvar, "Memory allocation error");
         dcount[0] = nc_state_file->nj_size;
         // implicitly nested loop over ni and nj with i set to 0;
         // j stride = ni_size
@@ -1913,9 +1921,7 @@ initialize_state_file(char           *filename,
     }
     else if (global_domain.info.n_coord_dims == 2) {
         dvar = calloc(global_domain.ncells_total, sizeof(*dvar));
-        if (dvar == NULL) {
-            log_err("Memory allocation error");
-        }
+        check_alloc_status(dvar, "Memory allocation error");
 
         for (i = 0; i < global_domain.ncells_total; i++) {
             dvar[i] = (double) global_domain.locations[i].longitude;
@@ -1945,9 +1951,8 @@ initialize_state_file(char           *filename,
     dimids[0] = nc_state_file->veg_dimid;
     dcount[0] = nc_state_file->veg_size;
     ivar = malloc(nc_state_file->veg_size * sizeof(*ivar));
-    if (ivar == NULL) {
-        log_err("Memory allocation error");
-    }
+    check_alloc_status(ivar, "Memory allocation error");
+
     for (j = 0; j < nc_state_file->veg_size; j++) {
         ivar[j] = (int) j + 1;
     }
@@ -1964,9 +1969,8 @@ initialize_state_file(char           *filename,
     dimids[0] = nc_state_file->band_dimid;
     dcount[0] = nc_state_file->band_size;
     ivar = malloc(nc_state_file->band_size * sizeof(*ivar));
-    if (ivar == NULL) {
-        log_err("Memory allocation error");
-    }
+    check_alloc_status(ivar, "Memory allocation error");
+
     for (j = 0; j < nc_state_file->band_size; j++) {
         ivar[j] = (int) j;
     }
@@ -1983,9 +1987,8 @@ initialize_state_file(char           *filename,
     dimids[0] = nc_state_file->layer_dimid;
     dcount[0] = nc_state_file->layer_size;
     ivar = malloc(nc_state_file->layer_size * sizeof(*ivar));
-    if (ivar == NULL) {
-        log_err("Memory allocation error");
-    }
+    check_alloc_status(ivar, "Memory allocation error");
+
     for (j = 0; j < nc_state_file->layer_size; j++) {
         ivar[j] = (int) j;
     }
@@ -2002,9 +2005,8 @@ initialize_state_file(char           *filename,
     dimids[0] = nc_state_file->frost_dimid;
     dcount[0] = nc_state_file->frost_size;
     ivar = malloc(nc_state_file->frost_size * sizeof(*ivar));
-    if (ivar == NULL) {
-        log_err("Memory allocation error");
-    }
+    check_alloc_status(ivar, "Memory allocation error");
+
     for (j = 0; j < nc_state_file->frost_size; j++) {
         ivar[j] = (int) j;
     }
@@ -2021,7 +2023,7 @@ initialize_state_file(char           *filename,
     dimids[0] = nc_state_file->node_dimid;
     dcount[0] = nc_state_file->node_size;
     status = nc_put_vara_double(nc_state_file->nc_id, dz_node_var_id, dstart,
-                                dcount, dvar);
+                                dcount, soil_con[0].dz_node);
     check_nc_status(status, "Error writing thermal node deltas");
     for (i = 0; i < ndims; i++) {
         dimids[i] = -1;
@@ -2032,7 +2034,7 @@ initialize_state_file(char           *filename,
     dimids[0] = nc_state_file->node_dimid;
     dcount[0] = nc_state_file->node_size;
     status = nc_put_vara_double(nc_state_file->nc_id, node_depth_var_id, dstart,
-                                dcount, dvar);
+                                dcount, soil_con[0].Zsum_node);
     check_nc_status(status, "Error writing thermal node depths");
     for (i = 0; i < ndims; i++) {
         dimids[i] = -1;
@@ -2044,9 +2046,8 @@ initialize_state_file(char           *filename,
         dimids[0] = nc_state_file->lake_node_dimid;
         dcount[0] = nc_state_file->lake_node_size;
         ivar = malloc(nc_state_file->lake_node_size * sizeof(*ivar));
-        if (ivar == NULL) {
-            log_err("Memory allocation error");
-        }
+        check_alloc_status(ivar, "Memory allocation error");
+
         for (j = 0; j < nc_state_file->lake_node_size; j++) {
             ivar[j] = (int) j;
         }

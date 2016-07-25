@@ -61,7 +61,7 @@ canopy_assimilation(char    Ctype,
     double                   pz;
     size_t                   cidx;
     double                   dLAI;
-    double                  *CiLayer;
+    double                  *CiLayer = NULL;
     double                   AgrossLayer;
     double                   RdarkLayer;
     double                   RphotoLayer;
@@ -75,6 +75,7 @@ canopy_assimilation(char    Ctype,
     pz = CONST_PSTD * exp(-(double) elevation / h);
 
     CiLayer = calloc(options.Ncanopy, sizeof(*CiLayer));
+    check_alloc_status(CiLayer, "Memory allocation error.");
 
     if (!strcasecmp(mode, "ci")) {
         /* Assume a default leaf-internal CO2; compute assimilation,

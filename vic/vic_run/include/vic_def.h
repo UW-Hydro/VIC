@@ -27,6 +27,10 @@
 #ifndef VIC_DEF_H
 #define VIC_DEF_H
 
+#define _BSD_SOURCE
+#define __USE_XOPEN
+#define _GNU_SOURCE
+
 #include <float.h>
 #include <math.h>
 #include <stdarg.h>
@@ -38,6 +42,9 @@
 #include <stddef.h>
 #include <unistd.h>
 #include <time.h>
+#include <pwd.h>
+#include <sys/time.h>
+#include <sys/types.h>
 
 #include <vic_physical_constants.h>
 #include <vic_log.h>
@@ -83,9 +90,9 @@
 #define min(a, b) (a < b) ? a : b
 #define max(a, b) (a > b) ? a : b
 
-extern size_t NR;       /**< array index for atmos struct that indicates
+extern size_t NR;       /**< array index for force struct that indicates
                              the model step avarage or sum */
-extern size_t NF;       /**< array index loop counter limit for atmos
+extern size_t NF;       /**< array index loop counter limit for force
                              struct that indicates the SNOW_STEP values */
 char          vic_run_ref_str[MAXSTRING];
 
@@ -346,7 +353,6 @@ typedef struct {
 
     // Surface Albedo Parameters
     double ALBEDO_BARE_SOIL;  /**< Broadband albedo of bare soil */
-    double ALBEDO_H20_SURF;  /**< Broadband albedo of open water surface */
 
     // Surface Emissivities
     double EMISS_GRND;  /**< Emissivity of bare soil */
@@ -707,7 +713,7 @@ typedef struct {
 } veg_hist_struct;
 
 /******************************************************************************
- * @brief   This structure stores the atmospheric forcing data for each model
+ * @brief   This structure stores the forcing data for each model
  * time step for a single grid cell.  Each array stores the values for the
  * SNOW_STEPs during the current model step and the value for the entire model
  * step.  The latter is referred to by array[NR].  Looping over the SNOW_STEPs
@@ -735,7 +741,7 @@ typedef struct {
     double *vp;      /**< atmospheric vapor pressure (kPa) */
     double *vpd;     /**< atmospheric vapor pressure deficit (kPa) */
     double *wind;    /**< wind speed (m/s) */
-} atmos_data_struct;
+} force_data_struct;
 
 /******************************************************************************
  * @brief   This structure stores information about the time and date of the

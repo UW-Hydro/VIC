@@ -31,7 +31,8 @@
  *****************************************************************************/
 size_t
 get_global_domain(char          *nc_name,
-                  domain_struct *global_domain)
+                  domain_struct *global_domain,
+                  bool           coords_only)
 {
     int    *run = NULL;
     double *var = NULL;
@@ -57,9 +58,7 @@ get_global_domain(char          *nc_name,
 
     // allocate memory for cells to be run
     run = malloc(global_domain->ncells_total * sizeof(*run));
-    if (run == NULL) {
-        log_err("Memory allocation error in get_global_domain().");
-    }
+    check_alloc_status(run, "Memory allocation error.");
 
     get_nc_field_int(nc_name, global_domain->info.mask_var, d2start, d2count,
                      run);
@@ -72,21 +71,16 @@ get_global_domain(char          *nc_name,
     debug("%zu active grid cells found in domain mask",
           global_domain->ncells_active);
 
-    // if MASTER_PROC
     global_domain->locations =
         malloc(global_domain->ncells_total * sizeof(*global_domain->locations));
-    if (global_domain->locations == NULL) {
-        log_err("Memory allocation error in get_global_domain().");
-    }
+    check_alloc_status(global_domain->locations, "Memory allocation error.");
     for (i = 0; i < global_domain->ncells_total; i++) {
         initialize_location(&(global_domain->locations[i]));
     }
 
     // allocate memory for variables
     var = malloc(global_domain->ncells_total * sizeof(*var));
-    if (var == NULL) {
-        log_err("Memory allocation error in get_global_domain().");
-    }
+    check_alloc_status(var, "Memory allocation error.");
 
     for (i = 0; i < global_domain->ncells_total; i++) {
         if (run[i] == 1) {
@@ -115,13 +109,10 @@ get_global_domain(char          *nc_name,
     if (global_domain->info.n_coord_dims == 1) {
         // allocate memory for variables
         var_lon = malloc(global_domain->n_nx * sizeof(*var_lon));
-        if (var_lon == NULL) {
-            log_err("Memory allocation error in get_global_domain().");
-        }
+        check_alloc_status(var_lon, "Memory allocation error.");
         var_lat = malloc(global_domain->n_ny * sizeof(*var_lat));
-        if (var_lat == NULL) {
-            log_err("Memory allocation error in get_global_domain().");
-        }
+        check_alloc_status(var_lat, "Memory allocation error.");
+
 
         d1start[0] = 0;
         d1count[0] = global_domain->n_nx;
@@ -184,21 +175,24 @@ get_global_domain(char          *nc_name,
                 nc_name);
     }
 
-    // get area
-    // TBD: read var id from file
-    get_nc_field_double(nc_name, global_domain->info.area_var,
-                        d2start, d2count, var);
-    for (i = 0; i < global_domain->ncells_total; i++) {
-        global_domain->locations[i].area = var[i];
+    if (!coords_only) {
+        // get area
+        // TBD: read var id from file
+        get_nc_field_double(nc_name, global_domain->info.area_var,
+                            d2start, d2count, var);
+        for (i = 0; i < global_domain->ncells_total; i++) {
+            global_domain->locations[i].area = var[i];
+        }
+
+        // get fraction
+        // TBD: read var id from file
+        get_nc_field_double(nc_name, global_domain->info.frac_var,
+                            d2start, d2count, var);
+        for (i = 0; i < global_domain->ncells_total; i++) {
+            global_domain->locations[i].frac = var[i];
+        }
     }
 
-    // get fraction
-    // TBD: read var id from file
-    get_nc_field_double(nc_name, global_domain->info.frac_var,
-                        d2start, d2count, var);
-    for (i = 0; i < global_domain->ncells_total; i++) {
-        global_domain->locations[i].frac = var[i];
-    }
 
     // free memory
     free(var);
@@ -260,9 +254,7 @@ add_nveg_to_global_domain(char          *nc_name,
     int   *ivar = NULL;
 
     ivar = malloc(global_domain->ncells_total * sizeof(*ivar));
-    if (ivar == NULL) {
-        log_err("Memory allocation error in add_nveg_to_global_domain().");
-    }
+    check_alloc_status(ivar, "Memory allocation error.");
 
     d2start[0] = 0;
     d2start[1] = 0;

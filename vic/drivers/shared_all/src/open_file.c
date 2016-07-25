@@ -33,7 +33,7 @@
  * @type     Type has one of the associated values with it:
  *             - "r"    open for reading
  *             - "w"    truncate or create for writing
- *             -  "a"   append; open for writing at end of file, or create for
+ *             - "a"    append; open for writing at end of file, or create for
  *                      writing
  *             - "r+"   open for update (reading and writing)
  *             - "w+"   truncate or create for update

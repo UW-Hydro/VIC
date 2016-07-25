@@ -40,28 +40,23 @@ get_nc_varndimensions(char *nc_name,
 
     // open the netcdf file
     status = nc_open(nc_name, NC_NOWRITE, &nc_id);
-    if (status != NC_NOERR) {
-        log_err("Error opening %s", nc_name);
-    }
+    check_nc_status(status, "Error opening %s", nc_name);
 
     // get variable id
     status = nc_inq_varid(nc_id, var_name, &var_id);
-    if (status != NC_NOERR) {
-        log_err("Error getting variable id %s in %s", var_name, nc_name);
-    }
+    check_nc_status(status, "Error getting variable id %s in %s", var_name,
+                    nc_name);
 
     // get number of dimensions
     status = nc_inq_varndims(nc_id, var_id, &ndims);
-    if (status != NC_NOERR) {
-        log_err("Error getting number of dimensions for var %s in %s", var_name,
-                nc_name);
-    }
+    check_nc_status(status,
+                    "Error getting number of dimensions for var %s in %s",
+                    var_name,
+                    nc_name);
 
     // close the netcdf file
     status = nc_close(nc_id);
-    if (status != NC_NOERR) {
-        log_err("Error closing %s", nc_name);
-    }
+    check_nc_status(status, "Error closing %s", nc_name);
 
     return ndims;
 }

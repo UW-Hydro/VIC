@@ -60,12 +60,10 @@ vic_start(void)
 
     status = MPI_Bcast(&filenames, 1, mpi_filenames_struct_type,
                        VIC_MPI_ROOT, MPI_COMM_VIC);
-    if (status != MPI_SUCCESS) {
-        log_err("MPI error in vic_start(): %d\n", status);
-    }
+    check_mpi_status(status, "MPI error.");
 
     // Set Log Destination
-    setup_logging(mpi_rank);
+    setup_logging(mpi_rank, filenames.log_path, &(filep.logfile));
 
     if (mpi_rank == VIC_MPI_ROOT) {
         // set model constants
@@ -76,11 +74,11 @@ vic_start(void)
         }
 
         // read domain info
-        get_global_domain(filenames.domain, &global_domain);
+        get_global_domain(filenames.domain, &global_domain, false);
 
         // add the number of vegetation type to the location info in the
         // global domain struct. This just makes life easier
-        add_nveg_to_global_domain(filenames.veg, &global_domain);
+        add_nveg_to_global_domain(filenames.params, &global_domain);
 
         // decompose the mask
         mpi_map_decomp_domain(global_domain.ncells_active, mpi_size,
@@ -101,20 +99,19 @@ vic_start(void)
         }
 
         // get dimensions (number of vegetation types, soil zones, etc)
-        options.ROOT_ZONES = get_nc_dimension(filenames.soil, "root_zone");
-        options.Nlayer = get_nc_dimension(filenames.soil, "nlayer");
-        options.NVEGTYPES = get_nc_dimension(filenames.veg, "veg_class");
-        if (options.SNOW_BAND > 1) {
-            if (options.SNOW_BAND !=
-                get_nc_dimension(filenames.snowband, "snow_band")) {
-                log_err("Number of snow bands in global file does not "
-                        "match parameter file");
-            }
+        options.ROOT_ZONES = get_nc_dimension(filenames.params, "root_zone");
+        options.Nlayer = get_nc_dimension(filenames.params, "nlayer");
+        options.NVEGTYPES = get_nc_dimension(filenames.params, "veg_class");
+        if (options.SNOW_BAND == SNOW_BAND_TRUE_BUT_UNSET) {
+            options.SNOW_BAND = get_nc_dimension(filenames.params, "snow_band");
         }
         if (options.LAKES) {
-            options.NLAKENODES = get_nc_dimension(filenames.lakeparam,
+            options.NLAKENODES = get_nc_dimension(filenames.params,
                                                   "lake_node");
         }
+
+        // Validate the parameters file
+        compare_ncdomain_with_global_domain(filenames.params);
 
         // Check that model parameters are valid
         validate_parameters();
@@ -123,32 +120,22 @@ vic_start(void)
     // broadcast global, option, param structures as well as global valies
     // such as NF and NR
     status = MPI_Bcast(&NF, 1, MPI_UNSIGNED_LONG, VIC_MPI_ROOT, MPI_COMM_VIC);
-    if (status != MPI_SUCCESS) {
-        log_err("MPI error in vic_start(): %d\n", status);
-    }
+    check_mpi_status(status, "MPI error.");
 
     status = MPI_Bcast(&NR, 1, MPI_UNSIGNED_LONG, VIC_MPI_ROOT, MPI_COMM_VIC);
-    if (status != MPI_SUCCESS) {
-        log_err("MPI error in vic_start(): %d\n", status);
-    }
+    check_mpi_status(status, "MPI error.");
 
     status = MPI_Bcast(&global_param, 1, mpi_global_struct_type,
                        VIC_MPI_ROOT, MPI_COMM_VIC);
-    if (status != MPI_SUCCESS) {
-        log_err("MPI error in vic_start(): %d\n", status);
-    }
+    check_mpi_status(status, "MPI error.");
 
     status = MPI_Bcast(&options, 1, mpi_option_struct_type,
                        VIC_MPI_ROOT, MPI_COMM_VIC);
-    if (status != MPI_SUCCESS) {
-        log_err("MPI error in vic_start(): %d\n", status);
-    }
+    check_mpi_status(status, "MPI error.");
 
     status = MPI_Bcast(&param, 1, mpi_param_struct_type,
                        VIC_MPI_ROOT, MPI_COMM_VIC);
-    if (status != MPI_SUCCESS) {
-        log_err("MPI error in vic_start(): %d\n", status);
-    }
+    check_mpi_status(status, "MPI error.");
 
     // setup the local domain_structs
 
@@ -157,9 +144,7 @@ vic_start(void)
                          &local_ncells_active, 1, MPI_INT, VIC_MPI_ROOT,
                          MPI_COMM_VIC);
     local_domain.ncells_active = (size_t) local_ncells_active;
-    if (status != MPI_SUCCESS) {
-        log_err("MPI error in vic_start(): %d\n", status);
-    }
+    check_mpi_status(status, "MPI error.");
 
     // Allocate memory for the local locations
     local_domain.locations = malloc(local_domain.ncells_active *
@@ -210,9 +195,7 @@ vic_start(void)
                           local_domain.locations, local_domain.ncells_active,
                           mpi_location_struct_type,
                           VIC_MPI_ROOT, MPI_COMM_VIC);
-    if (status != MPI_SUCCESS) {
-        log_err("MPI error in vic_start(): %d\n", status);
-    }
+    check_mpi_status(status, "MPI error.");
     // Set the local index value
     for (i = 0; i < (size_t) local_domain.ncells_active; i++) {
         local_domain.locations[i].local_idx = i;

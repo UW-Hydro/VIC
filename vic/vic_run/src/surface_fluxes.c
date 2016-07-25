@@ -56,7 +56,7 @@ surface_fluxes(bool                 overstory,
                double               dp,
                unsigned short       iveg,
                unsigned short       veg_class,
-               atmos_data_struct   *atmos,
+               force_data_struct   *force,
                dmy_struct          *dmy,
                energy_bal_struct   *energy,
                global_param_struct *gp,
@@ -211,11 +211,11 @@ surface_fluxes(bool                 overstory,
 
     // Carbon cycling
     double            dryFrac;
-    double           *LAIlayer;
-    double           *faPAR;
+    double           *LAIlayer = NULL;
+    double           *faPAR = NULL;
     size_t            cidx;
     double            store_gc;
-    double           *store_gsLayer;
+    double           *store_gsLayer = NULL;
     double            store_Ci;
     double            store_GPP;
     double            store_Rdark;
@@ -234,6 +234,7 @@ surface_fluxes(bool                 overstory,
 
     if (options.CARBON) {
         store_gsLayer = calloc(options.Ncanopy, sizeof(*store_gsLayer));
+        check_alloc_status(store_gsLayer, "Memory allocation error.");
     }
 
     /***********************************************************************
@@ -280,7 +281,7 @@ surface_fluxes(bool                 overstory,
        if frozen soils are present)
     ********************************/
 
-    if (snow->swq > 0 || snow->snow_canopy > 0 || atmos->snowflag[NR]) {
+    if (snow->swq > 0 || snow->snow_canopy > 0 || force->snowflag[NR]) {
         hidx = 0;
         step_inc = 1;
         endhidx = hidx + NF;
@@ -380,16 +381,16 @@ surface_fluxes(bool                 overstory,
 
 
         /* set air temperature and precipitation for this snow band */
-        Tair = atmos->air_temp[hidx] + soil_con->Tfactor[band];
-        step_prec = atmos->prec[hidx] * soil_con->Pfactor[band];
+        Tair = force->air_temp[hidx] + soil_con->Tfactor[band];
+        step_prec = force->prec[hidx] * soil_con->Pfactor[band];
 
         // initialize ground surface temperaure
         Tgrnd = energy->T[0];
 
         // initialize canopy terms
         Tcanopy = Tair;
-        VPcanopy = atmos->vp[hidx];
-        VPDcanopy = atmos->vpd[hidx];
+        VPcanopy = force->vp[hidx];
+        VPDcanopy = force->vpd[hidx];
 
         over_iter = 0;
         tol_over = 999;
@@ -400,7 +401,9 @@ surface_fluxes(bool                 overstory,
         // compute LAI and absorbed PAR per canopy layer
         if (options.CARBON && iveg < Nveg) {
             LAIlayer = calloc(options.Ncanopy, sizeof(*LAIlayer));
+            check_alloc_status(LAIlayer, "Memory allocation error.");
             faPAR = calloc(options.Ncanopy, sizeof(*faPAR));
+            check_alloc_status(faPAR, "Memory allocation error.");
 
             /* Compute absorbed PAR per ground area per canopy layer (W/m2)
                normalized to PAR = 1 W, i.e. the canopy albedo in the PAR
@@ -408,8 +411,8 @@ surface_fluxes(bool                 overstory,
             faparl(CanopLayerBnd,
                    veg_var->LAI,
                    soil_con->AlbedoPar,
-                   atmos->coszen[hidx],
-                   atmos->fdir[hidx],
+                   force->coszen[hidx],
+                   force->fdir[hidx],
                    LAIlayer,
                    faPAR);
 
@@ -419,16 +422,16 @@ surface_fluxes(bool                 overstory,
             for (cidx = 0; cidx < options.Ncanopy; cidx++) {
                 if (LAIlayer[cidx] > 1e-10) {
                     veg_var->aPARLayer[cidx] =
-                        (atmos->par[hidx] /
+                        (force->par[hidx] /
                          param.PHOTO_EPAR) * faPAR[cidx] / LAIlayer[cidx];
-                    veg_var->aPAR += atmos->par[hidx] * faPAR[cidx] /
+                    veg_var->aPAR += force->par[hidx] * faPAR[cidx] /
                                      LAIlayer[cidx];
                 }
                 else {
-                    veg_var->aPARLayer[cidx] = atmos->par[hidx] /
+                    veg_var->aPARLayer[cidx] = force->par[hidx] /
                                                param.PHOTO_EPAR *
                                                faPAR[cidx] / 1e-10;
-                    veg_var->aPAR += atmos->par[hidx] * faPAR[cidx] / 1e-10;
+                    veg_var->aPAR += force->par[hidx] * faPAR[cidx] / 1e-10;
                 }
             }
             free((char*) LAIlayer);
@@ -442,8 +445,8 @@ surface_fluxes(bool                 overstory,
                                                      step_snow.last_snow,
                                                      step_snow.surf_water,
                                                      wind[2], Ls,
-                                                     atmos->density[hidx],
-                                                     atmos->vp[hidx],
+                                                     force->density[hidx],
+                                                     force->vp[hidx],
                                                      roughness[2],
                                                      ref_height[2],
                                                      step_snow.depth,
@@ -566,7 +569,7 @@ surface_fluxes(bool                 overstory,
                                        Nveg, iveg, band, step_dt, hidx,
                                        veg_class,
                                        &UnderStory, CanopLayerBnd, &dryFrac,
-                                       dmy, atmos, &(iter_snow_energy),
+                                       dmy, force, &(iter_snow_energy),
                                        iter_layer, &(iter_snow),
                                        soil_con,
                                        &(iter_snow_veg_var));
@@ -619,7 +622,7 @@ surface_fluxes(bool                 overstory,
                                              UnderStory, options.Nnode, Nveg,
                                              step_dt, hidx, iveg,
                                              (int) overstory, veg_class,
-                                             CanopLayerBnd, &dryFrac, atmos,
+                                             CanopLayerBnd, &dryFrac, force,
                                              dmy, &iter_soil_energy,
                                              iter_layer,
                                              &(iter_snow), soil_con,
@@ -652,7 +655,7 @@ surface_fluxes(bool                 overstory,
                         iter_snow_energy.NetShortOver,
                         iter_soil_energy.NetShortUnder,
                         iter_aero_resist_veg[1], Tair,
-                        atmos->density[hidx],
+                        force->density[hidx],
                         &iter_soil_energy.AtmosError,
                         &iter_soil_energy.AtmosLatent,
                         &iter_soil_energy.AtmosLatentSub,
@@ -735,10 +738,10 @@ surface_fluxes(bool                 overstory,
                                     vic_run_veg_lib[veg_class].CO2Specificity,
                                     iter_soil_veg_var.NscaleFactor,
                                     Tair,
-                                    atmos->shortwave[hidx],
+                                    force->shortwave[hidx],
                                     iter_soil_veg_var.aPARLayer,
                                     soil_con->elevation,
-                                    atmos->Catm[hidx],
+                                    force->Catm[hidx],
                                     CanopLayerBnd,
                                     veg_var->LAI,
                                     "rs",
@@ -792,7 +795,7 @@ surface_fluxes(bool                 overstory,
 
         compute_pot_evap(gp->model_steps_per_day,
                          vic_run_veg_lib[veg_class].rmin,
-                         iter_soil_veg_var.albedo, atmos->shortwave[hidx],
+                         iter_soil_veg_var.albedo, force->shortwave[hidx],
                          iter_soil_energy.NetLongAtmos,
                          vic_run_veg_lib[veg_class].RGL, Tair, VPDcanopy,
                          iter_soil_veg_var.LAI, soil_con->elevation,

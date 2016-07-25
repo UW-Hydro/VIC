@@ -45,20 +45,27 @@ read_forcing_data(FILE              **infile,
 
     /** Allocate data arrays for input forcing data **/
     forcing_data = calloc(N_FORCING_TYPES, sizeof(*forcing_data));
+    check_alloc_status(forcing_data, "Memory allocation error.");
     (*veg_hist_data) = calloc(N_FORCING_TYPES, sizeof(*(*veg_hist_data)));
+    check_alloc_status((*veg_hist_data), "Memory allocation error.");
     for (i = 0; i < N_FORCING_TYPES; i++) {
         if (param_set.TYPE[i].SUPPLIED) {
             if (i != ALBEDO && i != LAI_IN && i != FCANOPY) {
                 forcing_data[i] = calloc(global_param.nrecs * NF,
                                          sizeof(*(forcing_data[i])));
+                check_alloc_status(forcing_data[i], "Memory allocation error.");
             }
             else {
                 (*veg_hist_data)[i] = calloc(param_set.TYPE[i].N_ELEM,
                                              sizeof(*((*veg_hist_data)[i])));
+                check_alloc_status((*veg_hist_data)[i],
+                                   "Memory allocation error.");
                 for (j = 0; j < param_set.TYPE[i].N_ELEM; j++) {
                     (*veg_hist_data)[i][j] = calloc(global_param.nrecs * NF,
                                                     sizeof(*((*veg_hist_data)[i]
                                                              [j])));
+                    check_alloc_status((*veg_hist_data)[i][j],
+                                       "Memory allocation error.");
                 }
             }
         }

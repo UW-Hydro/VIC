@@ -37,7 +37,6 @@ function vic_before_install {
 		export TRAVIS_NETCDFPATH=/usr/local
 		export TRAVIS_MPIPATH=/usr/local
     else
-        locate nc-config
 		export TRAVIS_NETCDFPATH=/usr
 		export TRAVIS_MPIPATH="${HOME}/mpich"
         export NC_LIBS=$(/usr/bin/nc-config --libs)

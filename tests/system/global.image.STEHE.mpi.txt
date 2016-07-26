@@ -22,11 +22,11 @@ DOMAIN_TYPE    YDIM    lat
 DOMAIN_TYPE    XDIM    lon
 
 #INIT_STATE
-STATENAME   $state_dir/states
-STATEYEAR   1949
-STATEMONTH  1
-STATEDAY    10
-STATESEC    82800
+#STATENAME   $state_dir/states
+#STATEYEAR   1949
+#STATEMONTH  1
+#STATEDAY    10
+#STATESEC    82800
 
 FORCING1      $test_data_dir/image/Stehekin/forcings/Stehekin_image_test.forcings_10days.
 FORCE_TYPE    AIR_TEMP      tas

@@ -154,6 +154,7 @@ vic_write(stream_struct  *stream,
                 for (i = 0; i < local_domain.ncells_active; i++) {
                     dvar[i] = (double) stream->aggdata[i][k][j][0];
                 }
+                debug("Debugging MPI failure when output state file");
                 gather_put_nc_field_double(nc_hist_file->nc_id,
                                            nc_hist_file->nc_vars[k].nc_varid,
                                            nc_hist_file->d_fillvalue,
@@ -163,6 +164,7 @@ vic_write(stream_struct  *stream,
                 for (i = 0; i < local_domain.ncells_active; i++) {
                     fvar[i] = (float) stream->aggdata[i][k][j][0];
                 }
+                debug("Debugging MPI failure when output state file");
                 gather_put_nc_field_float(nc_hist_file->nc_id,
                                           nc_hist_file->nc_vars[k].nc_varid,
                                           nc_hist_file->f_fillvalue,
@@ -172,6 +174,7 @@ vic_write(stream_struct  *stream,
                 for (i = 0; i < local_domain.ncells_active; i++) {
                     ivar[i] = (int) stream->aggdata[i][k][j][0];
                 }
+                debug("Debugging MPI failure when output state file");
                 gather_put_nc_field_int(nc_hist_file->nc_id,
                                         nc_hist_file->nc_vars[k].nc_varid,
                                         nc_hist_file->i_fillvalue,
@@ -181,6 +184,7 @@ vic_write(stream_struct  *stream,
                 for (i = 0; i < local_domain.ncells_active; i++) {
                     svar[i] = (short int) stream->aggdata[i][k][j][0];
                 }
+                debug("Debugging MPI failure when output state file");
                 gather_put_nc_field_short(nc_hist_file->nc_id,
                                           nc_hist_file->nc_vars[k].nc_varid,
                                           nc_hist_file->s_fillvalue,
@@ -190,6 +194,7 @@ vic_write(stream_struct  *stream,
                 for (i = 0; i < local_domain.ncells_active; i++) {
                     cvar[i] = (char) stream->aggdata[i][k][j][0];
                 }
+                debug("Debugging MPI failure when output state file");
                 gather_put_nc_field_schar(nc_hist_file->nc_id,
                                           nc_hist_file->nc_vars[k].nc_varid,
                                           nc_hist_file->d_fillvalue,

@@ -41,6 +41,12 @@ At the command prompt, type:
 
 where `global_parameter_filename` = name of the global parameter file corresponding to your project.
 
+To run VIC image driver using multiple processor, type the following instead:
+
+`mpiexec -np n_proc vic_image.exe -g global_parameter_filename`
+
+where `n_proc` = number of processors to be used
+
 ## Other Command Line Options
 
 VIC has a few other command line options:

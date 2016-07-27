@@ -119,6 +119,11 @@ main(int    argc,
     // initialize output structures
     vic_init_output(&(dmy[0]));
 
+    // Initialization is complete, print settings
+    log_info("Initialization is complete, print global param and options structures");
+    print_global_param(&global_param);
+    print_option(&options);
+
     // stop init timer
     timer_stop(&(global_timers[TIMER_VIC_INIT]));
     // start vic run timer
@@ -137,6 +142,7 @@ main(int    argc,
 
         // Write state file
         if (check_save_state_flag(current)) {
+            debug("writing state file for timestep %zu", current);
             vic_store(&(dmy[current]), state_filename);
             debug("finished storing state file: %s", state_filename)
         }
@@ -160,8 +166,11 @@ main(int    argc,
     timer_stop(&(global_timers[TIMER_VIC_FINAL]));
     // stop vic all timer
     timer_stop(&(global_timers[TIMER_VIC_ALL]));
-    // write timing info
-    write_vic_timing_table(global_timers, VIC_DRIVER);
+
+    if (mpi_rank == VIC_MPI_ROOT) {
+        // write timing info
+        write_vic_timing_table(global_timers, VIC_DRIVER);
+    }
 
     return EXIT_SUCCESS;
 }

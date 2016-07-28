@@ -62,7 +62,7 @@
 #elif defined(__ICC) || defined(__INTEL_COMPILER)
 /* Intel ICC/ICPC. ------------------------------------------ */
 # define COMPILER "icc"
-# define COMPILER_VERSION __version__
+# define COMPILER_VERSION __VERSION__
 
 #elif defined(__GNUC__) || defined(__GNUG__)
 /* GNU GCC/G++. --------------------------------------------- */

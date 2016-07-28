@@ -28,6 +28,8 @@ vic_classic
 vic_image
 liblnd.a
 _vic.py
+vic_timing_*txt
+massif.out.*
 
 .DS_Store
 TAGS

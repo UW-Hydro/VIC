@@ -137,12 +137,14 @@ def main():
 
 
 def run_profiling(args):
+    '''wrapper function for profiling tests'''
     cmd = './profiling/run_gprof.bash -e {vic_exe} -g {vic_global}'.format(
         vic_exe=args.vic_exe, vic_global=args.global_param)
     check_call(cmd, shell=True)
 
 
 def run_scaling(args):
+    '''wrapper function for scaling tests'''
     config = hosts[args.host]
     vic_exe = VIC(args.vic_exe)
 
@@ -195,12 +197,13 @@ def run_scaling(args):
 
 
 def log2_range(m):
+    '''make an array of integers that increase by 2^n with maximum value of m'''
     n = int(np.floor(np.log2(m))) + 1
-    return np.exp2(np.arange(n))
+    return np.exp2(np.arange(n)).astype(np.int)
 
 
 def get_header_info(vic_exe, vic_global, max_cores):
-
+    '''get info for timing table headers'''
     header_kwargs = {}
     header_kwargs['date'] = datetime.datetime.now()
     header_kwargs['hostname'] = socket.gethostname()

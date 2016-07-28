@@ -30,6 +30,7 @@ liblnd.a
 _vic.py
 vic_timing_*txt
 massif.out.*
+vic_call_graph_*
 
 vic_call_graph*
 gmon.out

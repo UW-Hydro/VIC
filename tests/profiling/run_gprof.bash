@@ -14,7 +14,7 @@ function usage {
 }
 
 
-while getopts "h?e::g::n:" opt; do
+while getopts "h?e::g::" opt; do
     case "$opt" in
     h|\?)
         usage
@@ -46,7 +46,7 @@ echo "---------------------------"
 $vic_exe -v
 echo ""
 
-$vic_exe -g $vic_global 2>&1 | tail -n 55 
+$vic_exe -g $vic_global 2>&1 | tail -n 55
 
 now=`date +"%y%m%d"`
 gprof $vic_exe | gprof2dot | dot -Tpng -o vic_call_graph_$now.png

@@ -132,7 +132,6 @@ vic_store(dmy_struct *dmy_current,
                         dvar[i] = nc_state_file.d_fillvalue;
                     }
                 }
-                debug("Debugging MPI failure when output state file");
                 gather_put_nc_field_double(nc_state_file.nc_id,
                                            nc_var->nc_varid,
                                            nc_state_file.d_fillvalue,
@@ -164,7 +163,6 @@ vic_store(dmy_struct *dmy_current,
                             dvar[i] = nc_state_file.d_fillvalue;
                         }
                     }
-                    debug("Debugging MPI failure when output state file");
                     gather_put_nc_field_double(nc_state_file.nc_id,
                                                nc_var->nc_varid,
                                                nc_state_file.d_fillvalue,
@@ -194,7 +192,6 @@ vic_store(dmy_struct *dmy_current,
                     dvar[i] = nc_state_file.d_fillvalue;
                 }
             }
-            debug("Debugging MPI failure when output state file");
             gather_put_nc_field_double(nc_state_file.nc_id,
                                        nc_var->nc_varid,
                                        nc_state_file.d_fillvalue,
@@ -222,7 +219,6 @@ vic_store(dmy_struct *dmy_current,
                         dvar[i] = nc_state_file.d_fillvalue;
                     }
                 }
-                debug("Debugging MPI failure when output state file");
                 gather_put_nc_field_double(nc_state_file.nc_id,
                                            nc_var->nc_varid,
                                            nc_state_file.d_fillvalue,
@@ -249,7 +245,6 @@ vic_store(dmy_struct *dmy_current,
                         dvar[i] = nc_state_file.d_fillvalue;
                     }
                 }
-                debug("Debugging MPI failure when output state file");
                 gather_put_nc_field_double(nc_state_file.nc_id,
                                            nc_var->nc_varid,
                                            nc_state_file.d_fillvalue,
@@ -275,7 +270,6 @@ vic_store(dmy_struct *dmy_current,
                         dvar[i] = nc_state_file.d_fillvalue;
                     }
                 }
-                debug("Debugging MPI failure when output state file");
                 gather_put_nc_field_double(nc_state_file.nc_id,
                                            nc_var->nc_varid,
                                            nc_state_file.d_fillvalue,
@@ -301,7 +295,6 @@ vic_store(dmy_struct *dmy_current,
                         dvar[i] = nc_state_file.d_fillvalue;
                     }
                 }
-                debug("Debugging MPI failure when output state file");
                 gather_put_nc_field_double(nc_state_file.nc_id,
                                            nc_var->nc_varid,
                                            nc_state_file.d_fillvalue,
@@ -327,7 +320,6 @@ vic_store(dmy_struct *dmy_current,
                         dvar[i] = nc_state_file.d_fillvalue;
                     }
                 }
-                debug("Debugging MPI failure when output state file");
                 gather_put_nc_field_double(nc_state_file.nc_id,
                                            nc_var->nc_varid,
                                            nc_state_file.d_fillvalue,
@@ -354,7 +346,6 @@ vic_store(dmy_struct *dmy_current,
                     ivar[i] = nc_state_file.i_fillvalue;
                 }
             }
-            debug("Debugging MPI failure when output state file");
             gather_put_nc_field_int(nc_state_file.nc_id,
                                     nc_var->nc_varid,
                                     nc_state_file.d_fillvalue,
@@ -381,7 +372,6 @@ vic_store(dmy_struct *dmy_current,
                     ivar[i] = nc_state_file.i_fillvalue;
                 }
             }
-            debug("Debugging MPI failure when output state file");
             gather_put_nc_field_int(nc_state_file.nc_id,
                                     nc_var->nc_varid,
                                     nc_state_file.d_fillvalue,
@@ -408,7 +398,6 @@ vic_store(dmy_struct *dmy_current,
                     dvar[i] = nc_state_file.d_fillvalue;
                 }
             }
-            debug("Debugging MPI failure when output state file");
             gather_put_nc_field_double(nc_state_file.nc_id,
                                        nc_var->nc_varid,
                                        nc_state_file.d_fillvalue,
@@ -435,7 +424,6 @@ vic_store(dmy_struct *dmy_current,
                     dvar[i] = nc_state_file.d_fillvalue;
                 }
             }
-            debug("Debugging MPI failure when output state file");
             gather_put_nc_field_double(nc_state_file.nc_id,
                                        nc_var->nc_varid,
                                        nc_state_file.d_fillvalue,
@@ -462,7 +450,6 @@ vic_store(dmy_struct *dmy_current,
                     dvar[i] = nc_state_file.d_fillvalue;
                 }
             }
-            debug("Debugging MPI failure when output state file");
             gather_put_nc_field_double(nc_state_file.nc_id,
                                        nc_var->nc_varid,
                                        nc_state_file.d_fillvalue,
@@ -489,7 +476,6 @@ vic_store(dmy_struct *dmy_current,
                     dvar[i] = nc_state_file.d_fillvalue;
                 }
             }
-            debug("Debugging MPI failure when output state file");
             gather_put_nc_field_double(nc_state_file.nc_id,
                                        nc_var->nc_varid,
                                        nc_state_file.d_fillvalue,
@@ -516,7 +502,6 @@ vic_store(dmy_struct *dmy_current,
                     dvar[i] = nc_state_file.d_fillvalue;
                 }
             }
-            debug("Debugging MPI failure when output state file");
             gather_put_nc_field_double(nc_state_file.nc_id,
                                        nc_var->nc_varid,
                                        nc_state_file.d_fillvalue,
@@ -543,7 +528,6 @@ vic_store(dmy_struct *dmy_current,
                     dvar[i] = nc_state_file.d_fillvalue;
                 }
             }
-            debug("Debugging MPI failure when output state file");
             gather_put_nc_field_double(nc_state_file.nc_id,
                                        nc_var->nc_varid,
                                        nc_state_file.d_fillvalue,
@@ -570,7 +554,6 @@ vic_store(dmy_struct *dmy_current,
                     dvar[i] = nc_state_file.d_fillvalue;
                 }
             }
-            debug("Debugging MPI failure when output state file");
             gather_put_nc_field_double(nc_state_file.nc_id,
                                        nc_var->nc_varid,
                                        nc_state_file.d_fillvalue,
@@ -597,7 +580,6 @@ vic_store(dmy_struct *dmy_current,
                     dvar[i] = nc_state_file.d_fillvalue;
                 }
             }
-            debug("Debugging MPI failure when output state file");
             gather_put_nc_field_double(nc_state_file.nc_id,
                                        nc_var->nc_varid,
                                        nc_state_file.d_fillvalue,
@@ -624,7 +606,6 @@ vic_store(dmy_struct *dmy_current,
                     dvar[i] = nc_state_file.d_fillvalue;
                 }
             }
-            debug("Debugging MPI failure when output state file");
             gather_put_nc_field_double(nc_state_file.nc_id,
                                        nc_var->nc_varid,
                                        nc_state_file.d_fillvalue,
@@ -653,7 +634,6 @@ vic_store(dmy_struct *dmy_current,
                         dvar[i] = nc_state_file.d_fillvalue;
                     }
                 }
-                debug("Debugging MPI failure when output state file");
                 gather_put_nc_field_double(nc_state_file.nc_id,
                                            nc_var->nc_varid,
                                            nc_state_file.d_fillvalue,
@@ -681,7 +661,6 @@ vic_store(dmy_struct *dmy_current,
                     dvar[i] = nc_state_file.d_fillvalue;
                 }
             }
-            debug("Debugging MPI failure when output state file");
             gather_put_nc_field_double(nc_state_file.nc_id,
                                        nc_var->nc_varid,
                                        nc_state_file.d_fillvalue,
@@ -709,7 +688,6 @@ vic_store(dmy_struct *dmy_current,
                     dvar[i] = nc_state_file.d_fillvalue;
                 }
             }
-            debug("Debugging MPI failure when output state file");
             gather_put_nc_field_double(nc_state_file.nc_id,
                                        nc_var->nc_varid,
                                        nc_state_file.d_fillvalue,
@@ -737,7 +715,6 @@ vic_store(dmy_struct *dmy_current,
                     dvar[i] = nc_state_file.d_fillvalue;
                 }
             }
-            debug("Debugging MPI failure when output state file");
             gather_put_nc_field_double(nc_state_file.nc_id,
                                        nc_var->nc_varid,
                                        nc_state_file.d_fillvalue,

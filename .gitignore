@@ -31,6 +31,9 @@ _vic.py
 vic_timing_*txt
 massif.out.*
 
+vic_call_graph*
+gmon.out
+
 .DS_Store
 TAGS
 

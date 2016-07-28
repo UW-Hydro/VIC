@@ -61,5 +61,6 @@ void mpi_map_decomp_domain(size_t ncells, size_t mpi_size,
                            int **mpi_map_local_array_sizes,
                            int **mpi_map_global_array_offsets,
                            size_t **mpi_map_mapping_array);
+void print_mpi_error_str(int error_code);
 
 #endif

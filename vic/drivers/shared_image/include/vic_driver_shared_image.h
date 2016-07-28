@@ -28,7 +28,7 @@
 #define VIC_DRIVER_SHARED_IMAGE_H
 
 #include <vic_driver_shared_all.h>
-#include <vic_nc_log.h>
+#include <vic_image_log.h>
 #include <vic_mpi.h>
 
 #include <netcdf.h>

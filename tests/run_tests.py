@@ -16,13 +16,16 @@ import pytest
 from tonic.models.vic.vic import VIC, default_vic_valgrind_suppressions_path
 from tonic.io import read_config, read_configobj
 from tonic.testing import VICTestError
-from test_utils import (setup_test_dirs, print_test_dict,
-                        replace_global_values, drop_tests, pop_run_kwargs,
-                        check_returncode, process_error,
-                        test_classic_driver_all_complete,
-                        test_classic_driver_no_output_file_nans,
-                        find_global_param_value,
-                        check_multistream_classic)
+from test_utils import (
+            setup_test_dirs, print_test_dict,
+            replace_global_values, drop_tests, pop_run_kwargs,
+            check_returncode, process_error,
+            test_classic_driver_all_complete,
+            test_classic_driver_no_output_file_nans,
+            find_global_param_value,
+            check_multistream_classic,
+            setup_subdirs_and_fill_in_global_param_driver_match_test,
+            check_drivers_match_fluxes)
 from test_image_driver import (test_image_driver_no_output_file_nans,
                                check_multistream_image,
                                setup_subdirs_and_fill_in_global_param_mpi_test,
@@ -124,7 +127,8 @@ def main():
                         default=['unit', 'system'], nargs='+')
     parser.add_argument('--system', type=str,
                         help='system tests configuration file',
-                        default=os.path.join(test_dir, 'system/system_tests.cfg'))
+                        default=os.path.join(test_dir,
+                                             'system/system_tests.cfg'))
     parser.add_argument('--science', type=str,
                         help='science tests configuration file',
                         default=os.path.join(test_dir, 'science/science.cfg'))
@@ -137,11 +141,15 @@ def main():
     parser.add_argument('--vic_exe', type=str,
                         help='VIC executable to test',
                         default=os.path.join(
-                            test_dir, '../vic/drivers/classic/vic_classic.exe'))
+                            test_dir, '../vic/drivers/classic/vic_classic.exe'),
+                        nargs='+')
     parser.add_argument('--driver', type=str,
-                        help='VIC driver to test',
+                        help='VIC driver to test. Can be a list of drivers '
+                             'for cross-driver tests, in which case a list of '
+                             'corresponding vic_exe in the same order must '
+                             'also be specified',
                         choices=['classic', 'image'],
-                        default='classic')
+                        default='classic', nargs='+')
     parser.add_argument('--output_dir', type=str,
                         help='directory to write test output to',
                         default='$WORKDIR/VIC_tests_{0}'.format(ymd))
@@ -167,9 +175,18 @@ def main():
     print('Running Test Set: {0}'.format(', '.join(args.tests)))
 
     # Setup VIC executable
+    # --- if not only unit test --- #
     if not (len(args.tests) == 1 and args.tests[0] == 'unit'):
-        vic_exe = VIC(args.vic_exe)
-        print('VIC version information:\n\n{0}'.format(vic_exe.version.decode()))
+        if len(args.driver) == 1:  # if one driver
+            vic_exe = VIC(args.vic_exe[0])
+            print('VIC version information:\n\n{0}'.format(
+                                        vic_exe.version.decode()))
+        else:  # if multiple drivers
+            list_vic_exe = []
+            for vic_exe in args.vic_exe:
+                list_vic_exe.append(VIC(vic_exe))
+            print('VIC version information:\n\n{0}'.format(
+                                        list_vic_exe[0].version.decode()))
 
     # run test sets
     # unit
@@ -178,9 +195,19 @@ def main():
 
     # system
     if any(i in ['all', 'system'] for i in args.tests):
-        test_results['system'] = run_system(args.system, vic_exe, data_dir,
-                                            os.path.join(out_dir, 'system'),
-                                            args.driver)
+        if len(args.driver) == 1:  # if only one driver
+            driver = args.driver[0]
+            test_results['system'] = run_system(args.system, vic_exe, data_dir,
+                                                os.path.join(out_dir,
+                                                             'system'),
+                                                driver)
+        else:  # if multiple drivers
+            list_driver = args.driver
+            test_results['system'] = run_system(args.system, list_vic_exe,
+                                                data_dir,
+                                                os.path.join(out_dir,
+                                                             'system'),
+                                                list_driver)
     # science
     if any(i in ['all', 'science'] for i in args.tests):
         test_results['science'] = run_science(args.science, vic_exe, data_dir,
@@ -275,13 +302,15 @@ def run_system(config_file, vic_exe, test_data_dir, out_dir, driver):
     ----------
     config_file : str
         Configuration file for system tests.
-    vic_exe : VIC (object)
+    vic_exe : VIC (object), or a list of VIC objects
         VIC executable object (see tonic documentation).
+        If driver is a list (for cross-driver tests), then vic_exe must be a
+        list of VIC objects in the same order with `driver`
     test_data_dir : str
         Path to test data sets.
     out_dir : str
         Path to output location
-    driver : {'classic', 'image'}
+    driver : {'classic', 'image'}, or a list of drivers
         Driver to run tests on.
 
     Returns
@@ -305,7 +334,13 @@ def run_system(config_file, vic_exe, test_data_dir, out_dir, driver):
     # Get setup
     config = read_configobj(config_file)
 
-    # drop invalid driver tests
+    # If multiple drivers, put VIC objects in a dict
+    if isinstance(driver, list):
+        dict_vic_exe = {}
+        for i, d in enumerate(driver):
+            dict_vic_exe[d] = vic_exe[i]
+
+    # Drop invalid driver tests
     config = drop_tests(config, driver)
 
     test_results = OrderedDict()
@@ -322,21 +357,30 @@ def run_system(config_file, vic_exe, test_data_dir, out_dir, driver):
                                mkdirs=['results', 'state', 'logs', 'plots'])
 
         # read template global parameter file
-        infile = os.path.join(test_dir, 'system',
-                              test_dict['global_parameter_file'])
-
-        with open(infile, 'r') as global_file:
-            global_param = global_file.read()
+        # --- if single driver --- #
+        if not isinstance(driver, list):
+            infile = os.path.join(test_dir, 'system',
+                                  test_dict['global_parameter_file'])
+            with open(infile, 'r') as global_file:
+                global_param = global_file.read()
+        # --- if multiple drivers, put global template files in a dict --- #
+        else:
+            dict_global_param = {}
+            for i, d in enumerate(test_dict['driver']):
+                infile = os.path.join(test_dir, 'system',
+                                    test_dict['global_parameter_file'][i])
+                with open(infile, 'r') as global_file:
+                    dict_global_param[d] = global_file.read()
 
         # If restart test, prepare running periods
-        # (1) Find STATESEC option (and STATE_FORMAT option for later use)
-        statesec = find_global_param_value(global_param, 'STATESEC')
-        if driver == 'classic':
-            state_format = find_global_param_value(global_param,
-                                                   'STATE_FORMAT')
-        # (2) Prepare running periods and initial state file info for restart
-        # test
         if 'exact_restart' in test_dict['check']:
+            # (1) Find STATESEC option (and STATE_FORMAT option for later use)
+            statesec = find_global_param_value(global_param, 'STATESEC')
+            if driver == 'classic':
+                state_format = find_global_param_value(global_param,
+                                                       'STATE_FORMAT')
+            # (2) Prepare running periods and initial state file info for
+            # restart test
             run_periods = prepare_restart_run_periods(
                                 test_dict['restart'],
                                 dirs['state'], statesec)
@@ -349,7 +393,14 @@ def run_system(config_file, vic_exe, test_data_dir, out_dir, driver):
             list_n_proc = test_dict['mpi']['n_proc']
 
         # create template string
-        s = string.Template(global_param)
+        # --- if single driver --- #
+        if not isinstance(driver, list):
+            s = string.Template(global_param)
+        # --- if multiple drivers --- #
+        else:
+            dict_s = {}
+            for d in driver:
+                dict_s[d] = string.Template(dict_global_param[d])
 
         # fill in global parameter options
         # --- if restart test, multiple runs --- #
@@ -368,7 +419,14 @@ def run_system(config_file, vic_exe, test_data_dir, out_dir, driver):
                 setup_subdirs_and_fill_in_global_param_mpi_test(
                     s, list_n_proc, dirs['results'], dirs['state'],
                     test_data_dir)
+        # --- if driver-match test, one run for each driver --- #
+        elif 'driver_match' in test_dict['check']:
         # --- else, single run --- #
+            # Set up subdirectories and output directories in global file for
+            # driver-match testing
+            dict_global_param = \
+                setup_subdirs_and_fill_in_global_param_driver_match_test(
+                    dict_s, dirs['results'], dirs['state'], test_data_dir)
         else:
             global_param = s.safe_substitute(test_data_dir=test_data_dir,
                                              result_dir=dirs['results'],
@@ -380,11 +438,14 @@ def run_system(config_file, vic_exe, test_data_dir, out_dir, driver):
             replacements = test_dict['options']
         else:
             replacements = OrderedDict()
-        # --- if STATE_FORMAT is specified, then the specified value (instead
-        # of the one in the global template file) --- #
-        if 'STATE_FORMAT' in replacements:
-            state_format = replacements['STATE_FORMAT']
         # --- replace global options --- #
+        # For the purpose of exact restart, if STATE_FORMAT is specified,
+        # then record the specified value (instead of the one in the global
+        # template file)
+        if 'exact_restart' in test_dict['check']:
+            if 'STATE_FORMAT' in replacements:
+                state_format = replacements['STATE_FORMAT']
+
         if 'exact_restart' in test_dict['check'] or\
            'mpi' in test_dict['check']:  # if multiple runs
             for j, gp in enumerate(list_global_param):
@@ -392,6 +453,16 @@ def run_system(config_file, vic_exe, test_data_dir, out_dir, driver):
                 replacements_cp = replacements.copy()
                 # replace global options for this global file
                 list_global_param[j] = replace_global_values(gp, replacements)
+                replacements = replacements_cp
+        elif 'driver_match' in test_dict['check']:  # if cross-driver runs
+            for dr in dict_global_param.keys():
+                gp = dict_global_param[dr]
+                # save a copy of replacements for the next global file
+                replacements_cp = replacements.copy()
+                # replace global options for this global file
+                dict_global_param[dr] = replace_global_values(
+                                                        gp,
+                                                        replacements)
                 replacements = replacements_cp
         else:  # if single run
             global_param = replace_global_values(global_param, replacements)
@@ -421,6 +492,18 @@ def run_system(config_file, vic_exe, test_data_dir, out_dir, driver):
                 with open(test_global_file, mode='w') as f:
                     for line in gp:
                         f.write(line)
+        elif 'driver_match' in test_dict['check']:
+            dict_test_global_file = {}
+            for dr in dict_global_param.keys():
+                gp = dict_global_param[dr]
+                test_global_file = os.path.join(
+                        dirs['test'],
+                        '{}_globalparam_{}.txt'.format(
+                            testname, dr))
+                dict_test_global_file[dr] = test_global_file
+                with open(test_global_file, mode='w') as f:
+                    for line in gp:
+                        f.write(line)
         else:
             test_global_file = os.path.join(
                                 dirs['test'],
@@ -447,7 +530,7 @@ def run_system(config_file, vic_exe, test_data_dir, out_dir, driver):
                     # Check return code
                     check_returncode(vic_exe,
                                      test_dict.pop('expected_retval', 0))
-            if 'mpi' in test_dict['check']:
+            elif 'mpi' in test_dict['check']:
                 for j, test_global_file in enumerate(list_test_global_file):
                     # Overwrite mpi_proc in option kwargs
                     n_proc = list_n_proc[j]
@@ -461,6 +544,26 @@ def run_system(config_file, vic_exe, test_data_dir, out_dir, driver):
                                              **run_kwargs)
                     # Check return code
                     check_returncode(vic_exe,
+                                     test_dict.pop('expected_retval', 0))
+            elif 'driver_match' in test_dict['check']:
+                for dr in dict_test_global_file.keys():
+                    # Reset mpi_proc in option kwargs to None for classic
+                    # driver run
+#                    if dr == 'classic':
+#                        run_kwargs_classic = run_kwargs
+#                        run_kwargs_classic['mpi_proc'] = None
+#                        returncode = dict_vic_exe[dr].run(
+#                                        dict_test_global_file[dr],
+#                                        logdir=dirs['logs'],
+#                                        **run_kwargs_classic)
+#                    else:
+#                        returncode = dict_vic_exe[dr].run(
+#                                        dict_test_global_file[dr],
+#                                        logdir=dirs['logs'],
+#                                        **run_kwargs)
+                    returncode = 0
+                    # Check return code
+                    check_returncode(dict_vic_exe[dr],
                                      test_dict.pop('expected_retval', 0))
             else:
                 returncode = vic_exe.run(test_global_file, logdir=dirs['logs'],
@@ -519,12 +622,20 @@ def run_system(config_file, vic_exe, test_data_dir, out_dir, driver):
                     check_mpi_fluxes(dirs['results'], list_n_proc)
                     check_mpi_states(dirs['state'], list_n_proc)
 
+                # check that results from different drivers match
+                if 'driver_match' in test_dict['check']:
+                    check_drivers_match_fluxes(driver, dirs['results'])
+
             # if we got this far, the test passed.
             test_passed = True
 
         # Handle errors
         except Exception as e:
-            test_comment, error_message = process_error(e, vic_exe)
+            if not isinstance(driver, list):  # if single driver
+                test_comment, error_message = process_error(e, vic_exe)
+            else:  # if multiple drivers
+                test_comment, error_message = process_error(
+                        e, dict_vic_exe['classic'])
 
         # record the test results
         test_results[testname] = TestResults(testname,

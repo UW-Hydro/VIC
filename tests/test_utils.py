@@ -2,12 +2,14 @@
 ''' VIC exact restart testing '''
 
 import os
-from collections import OrderedDict
+from collections import OrderedDict, namedtuple
+import glob
 
 import traceback
 
 import numpy as np
 import pandas as pd
+import xarray as xr
 
 from tonic.models.vic.vic import (VICRuntimeError,
                                   default_vic_valgrind_error_code)
@@ -16,6 +18,8 @@ from tonic.testing import check_completed, check_for_nans, VICTestError
 OUTPUT_WIDTH = 100
 ERROR_TAIL = 20  # lines
 
+VICOutFile = namedtuple('vic_out_file',
+                        ('dirpath', 'prefix', 'lat', 'lon', 'suffix'))
 
 class VICReturnCodeError(Exception):
     pass
@@ -96,13 +100,33 @@ def replace_global_values(gp, replace):
 
 def drop_tests(config, driver):
     '''helper function to remove tests that should not be run for driver'''
+
     new = {}
-    for key, test_cfg in config.items():
-        try:
-            if test_cfg['driver'].lower() == driver.lower():
-                new[key] = test_cfg
-        except KeyError:
-            raise KeyError('test configuration must specify driver')
+
+    if not isinstance(driver, list):  # if single driver
+        for key, test_cfg in config.items():
+            try:
+                if not isinstance(test_cfg['driver'], list):
+                    if test_cfg['driver'].lower() == driver.lower():
+                        new[key] = test_cfg
+            except KeyError:
+                raise KeyError('test configuration must specify driver')
+    else:  # if multiple drivers
+        for key, test_cfg in config.items():
+            try:
+                if isinstance(test_cfg['driver'], list):
+                    # check whether the test has the same number of drivers
+                    if len(test_cfg['driver']) == len(driver):
+                        # check whether the test wants to test the same drivers
+                        flag = 1
+                        for d in driver:
+                            if d not in test_cfg['driver']:
+                                flag = 0
+                        if flag == 1:
+                            new[key] = test_cfg
+            except KeyError:
+                raise KeyError('test configuration must specify driver')
+
     return new
 
 
@@ -306,3 +330,164 @@ def check_multistream_classic(fnames):
                     actual, expected, decimal=4,
                     err_msg='Variable=%s, freq=%s, how=%s: '
                             'failed comparison' % (key, freq, how))
+
+
+def setup_subdirs_and_fill_in_global_param_driver_match_test(
+        dict_s, result_basedir, state_basedir, test_data_dir):
+    ''' Fill in global parameter output directories for multiple driver runs
+        for driver-match testing
+
+    Parameters
+    ----------
+    dict_s: <dict of string.Template>
+        A dict of template of the global param file to be filled in
+        Keys: driver name
+    result_basedir: <str>
+        Base directory of output fluxes results; runs with different number of
+        processors are output to subdirectories under the base directory
+    state_basedir: <str>
+        Base directory of output state results; runs with different number of
+        processors are output to subdirectories under the base directory
+    test_data_dir: <str>
+        Base directory of test data
+
+    Returns
+    ----------
+    dict_global_param: <dict>
+        A dict of global parameter strings to be run with parameters filled in
+
+    Require
+    ----------
+    os
+    '''
+
+    dict_global_param = {}
+    for driver in dict_s.keys():
+        # Set up subdirectories for results and states
+        result_dir = os.path.join(result_basedir, driver)
+        state_dir = os.path.join(state_basedir, driver)
+        os.makedirs(result_dir, exist_ok=True)
+        os.makedirs(state_dir, exist_ok=True)
+
+        # Fill in global parameter options
+        s = dict_s[driver]
+        dict_global_param[driver] = s.safe_substitute(
+                test_data_dir=test_data_dir,
+                result_dir=result_dir,
+                state_dir=state_dir)
+
+    return(dict_global_param)
+
+
+def parse_classic_driver_outfile_name(fname):
+    '''helper function to parse VIC classic driver output file name'''
+    resultdir, filename = os.path.split(fname)
+    prefix, suffix = os.path.splitext(filename)
+    pieces = prefix.split('_')
+    lat, lon = map(float, pieces[-2:])
+    return VICOutFile(resultdir, prefix, lat, lon, suffix)
+
+
+def check_drivers_match_fluxes(list_drivers, result_basedir):
+    ''' Check whether the flux results are similar cross multiple drivers
+
+    Parameters
+    ----------
+    list_drivers: <dict>
+        A list of driver names to be compared
+        e.g., ['classic'; 'image']
+        NOTE: must have classic driver; classic driver will be the base for
+        comparison
+    result_basedir: <str>
+        Base directory of output fluxes results; results for drivers are
+        subdirectories under the base directory
+
+    Require
+    ----------
+    glob
+    xarray
+    numpy
+    collections.namedtuple
+    parse_classic_driver_outfile_name
+    VICOutFile
+    read_vic_ascii
+    '''
+
+    # Identify all classic driver output flux files
+    try:
+        list_fnames_classic = glob.glob(os.path.join(
+                                    result_basedir, 'classic', '*'))
+    except:
+        print('Error: must have classic driver for driver-match test!')
+        raise
+
+    # Loop over all other drivers and compare with classic driver
+    for driver in list_drivers:
+        # skip classic driver
+        if driver == 'classic':
+            continue
+        # if image driver
+        if driver == 'image':
+            # load flux file
+            if len(glob.glob(os.path.join(
+                    result_basedir, driver, '*.nc'))) > 1:
+                print('Warning: more than one netCDF file found under'
+                      'directory {}'.format(result_dir))
+            fname = glob.glob(os.path.join(result_basedir, driver, '*.nc'))[0]
+            ds_image = xr.open_dataset(fname)
+           
+            import matplotlib.pyplot as plt
+            # loop over each grid cell from classic driver
+            for fname in list_fnames_classic:
+                gcell = parse_classic_driver_outfile_name(fname)
+                df_classic = read_vic_ascii(fname)
+                ds_image_cell = ds_image.sel(lat=gcell.lat, lon=gcell.lon)
+                # compare each variable
+                print('Plot grid cell {} {}'.format(gcell.lat, gcell.lon))
+                for var in ds_image_cell.data_vars:
+                    if len(ds_image_cell[var].coords) == 3:  # if a time series
+                        pass
+                        fig = plt.figure()
+                        ds_image_cell[var].to_series().plot(
+                                color='k', style='-', label='image')
+                        df_classic[var].plot(color='r', style='--', label='classic')
+                        plt.xlabel('Time')
+                        plt.ylabel(var)
+                        plt.legend()
+                        plt.title('{}, {}, {}'.format(var, gcell.lat, gcell.lon))
+                        fig.savefig('./check_plots/{}_{}_{}.png'.format(
+                                            var, gcell.lat, gcell.lon),
+                                    format='png')
+
+
+#                        try:  # try absolute difference
+#                            np.testing.assert_almost_equal(
+#                                ds_image_cell[var].values, df_classic[var].values,
+#                                decimal=1,
+#                                err_msg='Variable={} is different (in absolute value) in the classic '
+#                                        'and image drivers'.format(var))
+#                        except AssertionError:  # if try relative difference
+#                            np.testing.assert_allclose(
+#                                ds_image_cell[var].values, df_classic[var].values,
+#                                rtol=0.10, atol=0,
+#                                err_msg='Variable=%s is different (in relative value) in the classic '
+#                                        'and image drivers' % var)
+
+                    elif len(ds_image_cell[var].coords) == 4:  # if [time, nlayer]
+                        for l in ds_image['nlayer']:
+                            s_classic = df_classic['{}_{}'.format(var, l.values)]
+                            s_image = ds_image_cell[var].sel(nlayer=l).to_series()
+                            fig = plt.figure()
+                            s_image.plot(
+                                color='k', style='-', label='image')
+                            s_classic.plot(color='r', style='--', label='classic')
+                            plt.xlabel('Time')
+                            plt.ylabel(var)
+                            plt.legend()
+                            plt.title('{}, layer {}, {}, {}'.format(
+                                    var, l.values, gcell.lat, gcell.lon))
+                            fig.savefig('./check_plots/{}_{}_{}_{}.png'.format(
+                                            var, l.values, gcell.lat, gcell.lon),
+                                        format='png')
+
+    exit()

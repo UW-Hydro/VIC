@@ -103,7 +103,7 @@ create_MPI_global_struct_type(MPI_Datatype *mpi_type)
     MPI_Datatype   *mpi_types;
 
     // nitems has to equal the number of elements in global_param_struct
-    nitems = 31;
+    nitems = 32;
     blocklengths = malloc(nitems * sizeof(*blocklengths));
     check_alloc_status(blocklengths, "Memory allocation error.");
 
@@ -231,6 +231,10 @@ create_MPI_global_struct_type(MPI_Datatype *mpi_type)
     // unsigned short int statemonth;
     offsets[i] = offsetof(global_param_struct, statemonth);
     mpi_types[i++] = MPI_UNSIGNED_SHORT;
+
+    // unsigned int statesec;
+    offsets[i] = offsetof(global_param_struct, statesec);
+    mpi_types[i++] = MPI_UNSIGNED;
 
     // unsigned short int stateyear;
     offsets[i] = offsetof(global_param_struct, stateyear);
@@ -2067,7 +2071,7 @@ get_scatter_nc_field_double(char   *nc_name,
 
         dvar_filtered =
             malloc(global_domain.ncells_active * sizeof(*dvar_filtered));
-        check_alloc_status(dvar, "Memory allocation error.");
+        check_alloc_status(dvar_filtered, "Memory allocation error.");
 
         dvar_mapped =
             malloc(global_domain.ncells_active * sizeof(*dvar_mapped));

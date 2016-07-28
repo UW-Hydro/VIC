@@ -13,7 +13,7 @@ import warnings
 
 import pytest
 
-from tonic.models.vic.vic import VIC
+from tonic.models.vic.vic import VIC, default_vic_valgrind_suppressions_path
 from tonic.io import read_config, read_configobj
 from tonic.testing import VICTestError
 from test_utils import (setup_test_dirs, print_test_dict,
@@ -24,13 +24,21 @@ from test_utils import (setup_test_dirs, print_test_dict,
                         find_global_param_value,
                         check_multistream_classic)
 from test_image_driver import (test_image_driver_no_output_file_nans,
-                               check_multistream_image)
+                               check_multistream_image,
+                               setup_subdirs_and_fill_in_global_param_mpi_test,
+                               check_mpi_fluxes, check_mpi_states)
 from test_restart import (prepare_restart_run_periods,
                           setup_subdirs_and_fill_in_global_param_restart_test,
                           check_exact_restart_fluxes,
                           check_exact_restart_states)
 
 test_dir = os.path.dirname(os.path.abspath(__file__))
+
+# Set path to valgrind supressions file if not already set.
+if 'VIC_VALGRIND_SUPPRESSIONS' not in os.environ:
+    sup_file = os.path.join(test_dir, default_vic_valgrind_suppressions_path)
+    if os.path.isfile(sup_file):
+        os.environ["VIC_VALGRIND_SUPPRESSIONS"] = sup_file
 
 OUTPUT_WIDTH = 100
 
@@ -332,6 +340,13 @@ def run_system(config_file, vic_exe, test_data_dir, out_dir, driver):
             run_periods = prepare_restart_run_periods(
                                 test_dict['restart'],
                                 dirs['state'], statesec)
+        # If mpi test, prepare a list of number of processors to be run
+        elif 'mpi' in test_dict['check']:
+            if not isinstance(test_dict['mpi']['n_proc'], list):
+                print('Error: need at least two values in n_proc to run'
+                      'mpi test!')
+                raise
+            list_n_proc = test_dict['mpi']['n_proc']
 
         # create template string
         s = string.Template(global_param)
@@ -345,7 +360,15 @@ def run_system(config_file, vic_exe, test_data_dir, out_dir, driver):
                 setup_subdirs_and_fill_in_global_param_restart_test(
                     s, run_periods, driver, dirs['results'], dirs['state'],
                     test_data_dir)
-        # else, single run
+        # --- if mpi test, multiple runs --- #
+        elif 'mpi' in test_dict['check']:
+            # Set up subdirectories and output directories in global file for
+            # multiprocessor testing
+            list_global_param = \
+                setup_subdirs_and_fill_in_global_param_mpi_test(
+                    s, list_n_proc, dirs['results'], dirs['state'],
+                    test_data_dir)
+        # --- else, single run --- #
         else:
             global_param = s.safe_substitute(test_data_dir=test_data_dir,
                                              result_dir=dirs['results'],
@@ -362,14 +385,15 @@ def run_system(config_file, vic_exe, test_data_dir, out_dir, driver):
         if 'STATE_FORMAT' in replacements:
             state_format = replacements['STATE_FORMAT']
         # --- replace global options --- #
-        if 'exact_restart' in test_dict['check']:
+        if 'exact_restart' in test_dict['check'] or\
+           'mpi' in test_dict['check']:  # if multiple runs
             for j, gp in enumerate(list_global_param):
                 # save a copy of replacements for the next global file
                 replacements_cp = replacements.copy()
                 # replace global options for this global file
                 list_global_param[j] = replace_global_values(gp, replacements)
                 replacements = replacements_cp
-        else:
+        else:  # if single run
             global_param = replace_global_values(global_param, replacements)
 
         # write global parameter file
@@ -382,6 +406,17 @@ def run_system(config_file, vic_exe, test_data_dir, out_dir, driver):
                             testname,
                             run_periods[j]['start_date'].strftime("%Y%m%d"),
                             run_periods[j]['end_date'].strftime("%Y%m%d")))
+                list_test_global_file.append(test_global_file)
+                with open(test_global_file, mode='w') as f:
+                    for line in gp:
+                        f.write(line)
+        elif 'mpi' in test_dict['check']:
+            list_test_global_file = []
+            for j, gp in enumerate(list_global_param):
+                test_global_file = os.path.join(
+                        dirs['test'],
+                        '{}_globalparam_processors_{}.txt'.format(
+                            testname, list_n_proc[j]))
                 list_test_global_file.append(test_global_file)
                 with open(test_global_file, mode='w') as f:
                     for line in gp:
@@ -407,7 +442,23 @@ def run_system(config_file, vic_exe, test_data_dir, out_dir, driver):
             if 'exact_restart' in test_dict['check']:
                 for j, test_global_file in enumerate(list_test_global_file):
                     returncode = vic_exe.run(test_global_file,
-                                             logdir=dirs['logs'])
+                                             logdir=dirs['logs'],
+                                             **run_kwargs)
+                    # Check return code
+                    check_returncode(vic_exe,
+                                     test_dict.pop('expected_retval', 0))
+            if 'mpi' in test_dict['check']:
+                for j, test_global_file in enumerate(list_test_global_file):
+                    # Overwrite mpi_proc in option kwargs
+                    n_proc = list_n_proc[j]
+                    if n_proc == 1:
+                        run_kwargs['mpi_proc'] = None
+                    else:
+                        run_kwargs['mpi_proc'] = list_n_proc[j]
+                    # Run VIC
+                    returncode = vic_exe.run(test_global_file,
+                                             logdir=dirs['logs'],
+                                             **run_kwargs)
                     # Check return code
                     check_returncode(vic_exe,
                                      test_dict.pop('expected_retval', 0))
@@ -454,6 +505,7 @@ def run_system(config_file, vic_exe, test_data_dir, out_dir, driver):
                         check_exact_restart_states(dirs['state'], driver,
                                                    run_periods, statesec)
 
+                # check for multistream output
                 if 'multistream' in test_dict['check']:
                     fnames = glob.glob(os.path.join(dirs['results'], '*'))
                     if driver == 'classic':
@@ -461,6 +513,11 @@ def run_system(config_file, vic_exe, test_data_dir, out_dir, driver):
                     elif driver == 'image':
                         warnings.warn('Skipping multistream image driver test')
                         # TODO: check_multistream_image(fnames)
+
+                # check for mpi multiprocessor results
+                if 'mpi' in test_dict['check']:
+                    check_mpi_fluxes(dirs['results'], list_n_proc)
+                    check_mpi_states(dirs['state'], list_n_proc)
 
             # if we got this far, the test passed.
             test_passed = True

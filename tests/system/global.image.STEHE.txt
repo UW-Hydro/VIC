@@ -42,6 +42,7 @@ FORCE_TYPE    WIND         wind
 WIND_H        10.0
 
 PARAMETERS      $test_data_dir/image/Stehekin/parameters/Stehekin_test_params_20160327.nc
+SNOW_BAND       TRUE
 NODES           3
 
 RESULT_DIR  $result_dir/

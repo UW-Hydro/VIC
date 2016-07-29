@@ -10,8 +10,10 @@ dependencies:
   - configobj
   - xarray
   - bottleneck
+  - psutil
   - pip:
     - git+https://github.com/UW-Hydro/tonic.git
     - engarde
     - pytest-faulthandler
     - pytest-xdist
+    - gprof2dot

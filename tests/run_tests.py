@@ -421,12 +421,12 @@ def run_system(config_file, vic_exe, test_data_dir, out_dir, driver):
                     test_data_dir)
         # --- if driver-match test, one run for each driver --- #
         elif 'driver_match' in test_dict['check']:
-        # --- else, single run --- #
             # Set up subdirectories and output directories in global file for
             # driver-match testing
             dict_global_param = \
                 setup_subdirs_and_fill_in_global_param_driver_match_test(
                     dict_s, dirs['results'], dirs['state'], test_data_dir)
+        # --- else, single run --- #
         else:
             global_param = s.safe_substitute(test_data_dir=test_data_dir,
                                              result_dir=dirs['results'],
@@ -524,6 +524,21 @@ def run_system(config_file, vic_exe, test_data_dir, out_dir, driver):
         try:
             if 'exact_restart' in test_dict['check']:
                 for j, test_global_file in enumerate(list_test_global_file):
+                    returncode = vic_exe.run(test_global_file,
+                                             logdir=dirs['logs'],
+                                             **run_kwargs)
+                    # Check return code
+                    check_returncode(vic_exe,
+                                     test_dict.pop('expected_retval', 0))
+            if 'mpi' in test_dict['check']:
+                for j, test_global_file in enumerate(list_test_global_file):
+                    # Overwrite mpi_proc in option kwargs
+                    n_proc = list_n_proc[j]
+                    if n_proc == 1:
+                        run_kwargs['mpi_proc'] = None
+                    else:
+                        run_kwargs['mpi_proc'] = list_n_proc[j]
+                    # Run VIC
                     returncode = vic_exe.run(test_global_file,
                                              logdir=dirs['logs'],
                                              **run_kwargs)

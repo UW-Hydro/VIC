@@ -66,10 +66,7 @@ initialize_mpi(void)
     check_mpi_status(status, "MPI Error");
 
     // set mpi error handling
-    MPI_Errhandler_set(MPI_COMM_VIC, MPI_ERRORS_RETURN);
-
-    // set mpi error handling
-    MPI_Errhandler_set(MPI_COMM_VIC, MPI_ERRORS_RETURN);
+    MPI_Comm_set_errhandler(MPI_COMM_VIC, MPI_ERRORS_RETURN);
 
     status = MPI_Comm_size(MPI_COMM_VIC, &mpi_size);
     check_mpi_status(status, "MPI Error");
@@ -103,7 +100,7 @@ create_MPI_global_struct_type(MPI_Datatype *mpi_type)
     MPI_Datatype   *mpi_types;
 
     // nitems has to equal the number of elements in global_param_struct
-    nitems = 31;
+    nitems = 32;
     blocklengths = malloc(nitems * sizeof(*blocklengths));
     check_alloc_status(blocklengths, "Memory allocation error.");
 
@@ -231,6 +228,10 @@ create_MPI_global_struct_type(MPI_Datatype *mpi_type)
     // unsigned short int statemonth;
     offsets[i] = offsetof(global_param_struct, statemonth);
     mpi_types[i++] = MPI_UNSIGNED_SHORT;
+
+    // unsigned int statesec;
+    offsets[i] = offsetof(global_param_struct, statesec);
+    mpi_types[i++] = MPI_UNSIGNED;
 
     // unsigned short int stateyear;
     offsets[i] = offsetof(global_param_struct, stateyear);
@@ -1595,25 +1596,29 @@ map(size_t  size,
     if (to_map == NULL && from_map == NULL) {
         for (i = 0; i < n; i++) {
             // type-agnostic version of to[i] = from[i];
-            memcpy(to + i * size, from + i * size, size);
+            memcpy((void *)((char *)to + i * size),
+                   (void *)((char *)from + i * size), size);
         }
     }
     if (to_map == NULL) {
         for (i = 0; i < n; i++) {
             // type-agnostic version of to[i] = from[from_map[i]];
-            memcpy(to + i * size, from + from_map[i] * size, size);
+            memcpy((void *)((char *)to + i * size),
+                   (void *)((char *)from + from_map[i] * size), size);
         }
     }
     else if (from_map == NULL) {
         for (i = 0; i < n; i++) {
             // type-agnostic version of to[to_map[i]] = from[i];
-            memcpy(to + to_map[i] * size, from + i * size, size);
+            memcpy((void *)((char *)to + to_map[i] * size),
+                   (void *)((char *)from + i * size), size);
         }
     }
     else {
         for (i = 0; i < n; i++) {
             // type-agnostic version of to[to_map[i]] = from[from_map[i]];
-            memcpy(to + to_map[i] * size, from + from_map[i] * size, size);
+            memcpy((void *)((char *)to + to_map[i] * size),
+                   (void *)((char *)from + from_map[i] * size), size);
         }
     }
 }

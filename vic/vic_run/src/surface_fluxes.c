@@ -261,6 +261,7 @@ surface_fluxes(bool                 overstory,
     coverage = snow->coverage;
     snow_energy = (*energy);
     soil_energy = (*energy);
+    iter_soil_energy = (*energy);
     snow_veg_var = (*veg_var);
     soil_veg_var = (*veg_var);
     step_snow = (*snow);

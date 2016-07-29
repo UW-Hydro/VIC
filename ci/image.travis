@@ -1,7 +1,5 @@
 #!/usr/bin/env bash
 
-set -e
-
 DRIVER_PATH="${TRAVIS_BUILD_DIR}/vic/drivers/image/"
 DRIVER_EXE="${DRIVER_PATH}vic_image.exe"
 SAMPLES_PATH="${TRAVIS_BUILD_DIR}/samples/"

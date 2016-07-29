@@ -1,7 +1,5 @@
 #!/usr/bin/env bash
 
-set -e
-
 if [ -z "$WORKDIR" ]; then
     export WORKDIR=$HOME/workdir
     mkdir -p $WORKDIR
@@ -10,9 +8,9 @@ fi
 export VIC_VALGRIND_SUPPRESSIONS=${TRAVIS_BUILD_DIR}/tests/vic_valgrind_suppressions.supp
 
 function install_mpich {
-    wget --no-check-certificate -q http://www.mpich.org/static/downloads/3.2/mpich-3.2.tar.gz
-    tar -xzf mpich-3.2.tar.gz
-    cd mpich-3.2
+    wget --no-check-certificate -q http://www.mpich.org/static/downloads/3.1b1/mpich-3.1b1.tar.gz
+    tar -xzf mpich-3.1b1.tar.gz
+    cd mpich-3.1b1
     mkdir build && cd build
     ../configure CC=$CC CXX=$CXX --prefix=${TRAVIS_MPIPATH}
     make -j2

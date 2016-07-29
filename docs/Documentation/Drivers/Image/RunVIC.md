@@ -1,7 +1,7 @@
 # Running the VIC Image Driver
 
 ## Dependencies:
-The Image Driver's has three dependencies:
+The Image Driver has three dependencies:
 
 1. A C compiler.  We routinely test VIC using the following compilers:
 

@@ -91,7 +91,7 @@ OUTVAR          OUT_SNOW_MELT           %.6g    *       *
 OUTVAR          OUT_ALBEDO              %.6g    *       *
 OUTVAR          OUT_SALBEDO             %.6g    *       *
 
-OUTFILE         en_bal 10
+OUTFILE         en_bal 12
 OUTVAR          OUT_ADV_SENS            %.6g    *       *
 OUTVAR          OUT_ADVECTION           %.6g    *       *
 OUTVAR          OUT_DELTAH              %.6g    *       *

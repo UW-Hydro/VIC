@@ -84,7 +84,7 @@ OUTVAR          OUT_SNOW_MELT           %.6g    *       *
 OUTVAR          OUT_ALBEDO              %.6g    *       *
 OUTVAR          OUT_SALBEDO             %.6g    *       *
 
-OUTFILE         en_bal 10
+OUTFILE         en_bal 12
 AGGFREQ         NHOURS
 COMPRESS        FALSE
 OUT_FORMAT      ASCII

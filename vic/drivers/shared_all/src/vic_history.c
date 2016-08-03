@@ -52,7 +52,7 @@ alloc_out_data(size_t     ngridcells,
             check_alloc_status((*out_data)[i][j], "Memory allocation error.");
 
             // initialize data member
-            for (k = 0; k < out_metadata[i].nelem; k++) {
+            for (k = 0; k < out_metadata[j].nelem; k++) {
                 (*out_data)[i][j][k] = 0;
             }
         }

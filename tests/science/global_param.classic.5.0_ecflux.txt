@@ -96,3 +96,5 @@ OUTVAR          OUT_LATENT_SUB          %.6g    *       *
 OUTVAR          OUT_R_NET               %.6g    *       *
 OUTVAR          OUT_SENSIBLE            %.6g    *       *
 OUTVAR          OUT_RAD_TEMP            %.6g    *       *
+OUTVAR          OUT_SWNET               %.6g    *       *
+OUTVAR          OUT_LWNET               %.6g    *       *

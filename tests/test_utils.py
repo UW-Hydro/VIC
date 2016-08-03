@@ -11,6 +11,7 @@ import glob
 import re
 import matplotlib.pyplot as plt
 import warnings
+import seaborn as sns
 
 from tonic.models.vic.vic import VICRuntimeError, default_vic_valgrind_error_code
 from tonic.testing import check_completed, check_for_nans, VICTestError
@@ -359,7 +360,7 @@ def read_snotel_swe_obs(filename, science_test_data_dir, items):
 
     return(snotel_swe)
 
-def read_vic_42(lat, lng, science_test_data_dir, items):
+def read_vic_42_output(lat, lng, science_test_data_dir, items):
     ''' reads output from VIC 4.2
     '''
 
@@ -404,9 +405,9 @@ def read_vic_42(lat, lng, science_test_data_dir, items):
 
     return(vic_42)
 
-def read_vic_5(lat, lng, science_test_data_dir, items):
+def read_vic_5_output(lat, lng, science_test_data_dir, items):
 
-    ''' read VIC 5.0.x outout
+    ''' read VIC 5.0.x output
     '''
 
     if 'ecflux' in items['compare_to']:
@@ -504,8 +505,9 @@ def plot_snotel_comparison(driver, science_test_data_dir,
                     'OUT_R_NET', 'OUT_LATENT', 'OUT_SENSIBLE']
 
     plot_units = ['mm', 'fraction', 'fraction', 'mm', '%', 'degrees C',
-                    'mm', 'W/$m^2$', 'W/$m^2$', 'W/$m^2$']
+                    'mm', '$W/{m^2}$', '$W/{m^2}$', '$W/{m^2}$']
     lw = 4.0
+    sns.set_style('whitegrid')
 
     for filename in os.listdir(os.path.join(science_test_data_dir,
                                             'datasets',
@@ -531,13 +533,13 @@ def plot_snotel_comparison(driver, science_test_data_dir,
 
             elif key == "VIC.4.2.d":
 
-                data[key] = read_vic_42(lat, lng,
+                data[key] = read_vic_42_output(lat, lng,
                                         science_test_data_dir,
                                         items)
 
             else:
 
-                data[key] = read_vic_5(lat, lng,
+                data[key] = read_vic_5_output(lat, lng,
                                         science_test_data_dir,
                                         items)
 
@@ -560,8 +562,13 @@ def plot_snotel_comparison(driver, science_test_data_dir,
                     df.index = next(iter(data.values()))['DATES']
 
                 for key, series in df.iteritems():
-                    series.plot(linewidth=lw, ax=ax, color=compare_data_dict[
-                                                            key]['color'])
+                    series.plot(use_index=True,
+                                linewidth=compare_data_dict[key]['linewidth'],
+                                ax=ax,
+                                color=compare_data_dict[key]['color'],
+                                linestyle=compare_data_dict[key]['linestyle'],
+                                zorder=compare_data_dict[key]['zorder'])
+
 
                 ax.legend(loc='upper left')
                 ax.set_ylabel("%s [%s]" % (plot_variable, plot_units[i]))
@@ -571,6 +578,7 @@ def plot_snotel_comparison(driver, science_test_data_dir,
                 plotname = '%s_%s.png' % (lat, lng)
                 savepath = os.path.join(plot_dir, plot_variable, plotname)
                 plt.savefig(savepath, bbox_inches='tight')
+                print("saving figure to %s" %savepath)
 
                 plt.clf()
                 plt.close()
@@ -672,36 +680,38 @@ def plot_fluxnet_comparison(driver, science_test_data_dir,
                 elif key == "VIC.4.2.d":
                     try:
                         # load VIC 4.2 simulations
-                        data[key] = read_vic_42(lat, lng, science_test_data_dir,
+                        data[key] = read_vic_42_output(lat, lng,
+                                                science_test_data_dir,
                                                 items)
 
                     except OSError:
                         warnings.warn("this site has a lat/lng precision issue")
 
-                    #except AssertionError:
-                        #print("blah")
                 else:
                     try:
                         # load VIC 5 simulations
-                        data[key] = read_vic_5(lat, lng, science_test_data_dir,
+                        data[key] = read_vic_5_output(lat, lng,
+                                                science_test_data_dir,
                                                 items)
                     except OSError:
                         warnings.warn("this site has a lat/lng precision issue")
 
             # make figures
-            vic_vars = ['OUT_LATENT', 'OUT_SENSIBLE']
-            variable_names = ['Latent Heat', 'Sensible Heat']
+            vic_vars = ['OUT_LATENT', 'OUT_SENSIBLE', 'SWNET', 'LWNET']
+            variable_names = ['Latent Heat', 'Sensible Heat',
+                                'Net Shortwave Radiation',
+                                'Net Longwave Radiation']
 
             # plot preferences
             lw = 4.0
             fs = 15
-            alpha = 1.0
             dpi = 150
+            sns.set_style('whitegrid')
 
             if 'annual_mean_diurnal_cycle' in plots_to_make:
 
                 # make annual mean diurnal cycle plots
-                f, axarr = plt.subplots(2, 1, figsize=(8,8), sharex=True)
+                f, axarr = plt.subplots(4, 1, figsize=(8,8), sharex=True)
 
                 for i, vic_var in enumerate(vic_vars):
 
@@ -715,14 +725,20 @@ def plot_fluxnet_comparison(driver, science_test_data_dir,
                                     annual_mean.items() if vic_var in d})
 
                     for key, series in df.iteritems():
-                        series.plot(linewidth=lw,
+                        series.plot(linewidth=compare_data_dict[key]
+                                    ['linewidth'],
                                     ax=axarr[i],
-                                    color=compare_data_dict[key]['color'])
+                                    color=compare_data_dict[key]['color'],
+                                    linestyle=compare_data_dict[key]
+                                    ['linestyle'],
+                                    zorder=compare_data_dict[key]['zorder'])
 
                     axarr[i].legend(loc='upper left')
-                    axarr[i].set_ylabel('%s W / $m^2$' %variable_names[i],
+                    axarr[i].set_ylabel('%s ($W/{m^2}$)' %variable_names[i],
                                         size=fs)
+                    axarr[i].set_xlabel('Time of Day (Hour)', size=fs)
                     axarr[i].set_xlim([0,24])
+                    axarr[i].xaxis.set_ticks(np.arange(0, 24, 3))
 
                 # save plot
                 plotname = '%s_%s.png' % (lat, lng)
@@ -730,6 +746,7 @@ def plot_fluxnet_comparison(driver, science_test_data_dir,
                                         exist_ok=True)
                 savepath = os.path.join(plot_dir, 'annual_mean', plotname)
                 plt.savefig(savepath, bbox_inches='tight', dpi=dpi)
+                print("saved figure to %s" %savepath)
 
                 plt.clf()
                 plt.close()
@@ -758,22 +775,31 @@ def plot_fluxnet_comparison(driver, science_test_data_dir,
                                         monthly_mean.items() if vic_var in d})
 
                         for key, series in df.iteritems():
-                            series[j+1].plot(linewidth=lw,
+                            series[j+1].plot(linewidth=compare_data_dict[key]
+                                        ['linewidth'],
                                         ax=axarr[i,j],
                                         color=compare_data_dict[key]
                                         ['color'],
-                                        alpha=alpha)
+                                        linestyle=compare_data_dict[key]
+                                        ['linestyle'],
+                                        zorder=compare_data_dict[key]['zorder'])
 
                         if i == 0 and j == 11:
                             axarr[i,j].legend(loc='center left',
                                                 bbox_to_anchor=(1, 0.5))
-                        axarr[i,j].set_ylabel('%s W/$m^2$' %variable_names[i],
+                        axarr[i,j].set_ylabel('%s ($W/{m^2}$)'
+                                            %variable_names[i],
                                             size=fs)
+                        axarr[i,j].set_xlabel('', size=fs)
                         axarr[i,j].set_xlim([0,24])
+                        axarr[i,j].xaxis.set_ticks(np.arange(0, 24, 3))
                         if i == 0:
-                            axarr[i,j].set_title(months[j])
+                            axarr[i,j].set_title(months[j], size=fs)
                         if vic_var == 'OUT_LATENT':
-                            axarr[i,j].set_ylim([-50,250])
+                            axarr[i,j].set_ylim([-50,300])
+
+                # add common x label
+                f.text(0.5, 0.04, 'Time of Day (Hour)', ha='center', size=fs)
 
                 # save plot
                 plotname = '%s_%s.png' % (lat, lng)
@@ -782,6 +808,7 @@ def plot_fluxnet_comparison(driver, science_test_data_dir,
                 savepath = os.path.join(plot_dir,
                                         'monthly_mean', plotname)
                 plt.savefig(savepath, bbox_inches='tight', dpi=dpi)
+                print("saved figure to %s" %savepath)
 
                 plt.clf()
                 plt.close()

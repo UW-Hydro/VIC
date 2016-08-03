@@ -387,6 +387,13 @@ def read_vic_42_output(lat, lng, science_test_data_dir, items):
     # remove spaces from column names in DataFrame
     vic_42 = vic_42.rename(columns=lambda x: x.replace(' ', ''))
 
+    # rename radiation variables to be consistent with VIC 5
+    if 'ecflux' in items['compare_to']:
+        vic_42 = vic_42.rename(columns=lambda x: x.replace('OUT_NET_SHORT',
+                                'OUT_SWNET'))
+        vic_42 = vic_42.rename(columns=lambda x: x.replace('OUT_NET_LONG',
+                                'OUT_LWNET'))
+
     # add datetime object column to snotel DataFrame
     vic_42['DATES'] = pd.to_datetime(vic_42.YEAR * 10000 +
                                             vic_42.MONTH * 100 +
@@ -424,7 +431,7 @@ def read_vic_5_output(lat, lng, science_test_data_dir, items):
         raise ValueError("this option has not yet been implemented")
 
     vic_5 = pd.read_csv(os.path.join(vic_5_dir, vic_5_file),
-                            skiprows=3,
+                            skiprows=2,
                             sep='\t')
 
     # remove spaces from column names
@@ -617,8 +624,8 @@ def read_fluxnet_obs(subdir, science_test_data_dir, items):
             'SOIL_TEMP_DEPTH4', 'SOIL_TEMP_DEPTH5', 'OUT_SOIL_MOIST1',
             'OUT_SOIL_MOIST2', 'OUT_SOIL_MOIST3', 'OUT_SOIL_MOIST4',
             'OUT_SOIL_MOIST5', 'OUT_SOIL_TEMP1', 'OUT_SOIL_TEMP2',
-            'OUT_SOIL_TEMP3', 'OUT_SOIL_TEMP4', 'OUT_SOIL_TEMP5', 'SWNET',
-            'LWNET', 'OUT_SENSIBLE', 'OUT_LATENT', 'OUT_GRND_FLUX']
+            'OUT_SOIL_TEMP3', 'OUT_SOIL_TEMP4', 'OUT_SOIL_TEMP5', 'OUT_SWNET',
+            'OUT_LWNET', 'OUT_SENSIBLE', 'OUT_LATENT', 'OUT_GRND_FLUX']
 
     # read in data with -9999.0000 as NaNs
     obs_dir = os.path.join(science_test_data_dir, 'datasets',
@@ -697,10 +704,10 @@ def plot_fluxnet_comparison(driver, science_test_data_dir,
                         warnings.warn("this site has a lat/lng precision issue")
 
             # make figures
-            vic_vars = ['OUT_LATENT', 'OUT_SENSIBLE', 'SWNET', 'LWNET']
-            variable_names = ['Latent Heat', 'Sensible Heat',
-                                'Net Shortwave Radiation',
-                                'Net Longwave Radiation']
+            vic_vars = ['OUT_LATENT', 'OUT_SENSIBLE', 'OUT_SWNET', 'OUT_LWNET']
+            variable_names = ['LH', 'H',
+                                'SW NET',
+                                'LW NET']
 
             # plot preferences
             lw = 4.0
@@ -754,7 +761,7 @@ def plot_fluxnet_comparison(driver, science_test_data_dir,
             if 'monthly_mean_diurnal_cycle' in plots_to_make:
 
                 # make monthly mean diurnal cycle plots
-                f, axarr = plt.subplots(2, 12, figsize=(35,7), sharex=True,
+                f, axarr = plt.subplots(4, 12, figsize=(35,7), sharex=True,
                                         sharey=True)
 
                 months = ['January', 'February', 'March', 'April', 'May',
@@ -787,7 +794,7 @@ def plot_fluxnet_comparison(driver, science_test_data_dir,
                         if i == 0 and j == 11:
                             axarr[i,j].legend(loc='center left',
                                                 bbox_to_anchor=(1, 0.5))
-                        axarr[i,j].set_ylabel('%s ($W/{m^2}$)'
+                        axarr[i,j].set_ylabel('%s \n ($W/{m^2}$)'
                                             %variable_names[i],
                                             size=fs)
                         axarr[i,j].set_xlabel('', size=fs)
@@ -795,8 +802,8 @@ def plot_fluxnet_comparison(driver, science_test_data_dir,
                         axarr[i,j].xaxis.set_ticks(np.arange(0, 24, 3))
                         if i == 0:
                             axarr[i,j].set_title(months[j], size=fs)
-                        if vic_var == 'OUT_LATENT':
-                            axarr[i,j].set_ylim([-50,300])
+                        '''if vic_var == 'OUT_LATENT':
+                            axarr[i,j].set_ylim([-50,300])'''
 
                 # add common x label
                 f.text(0.5, 0.04, 'Time of Day (Hour)', ha='center', size=fs)

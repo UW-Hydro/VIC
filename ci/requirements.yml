@@ -13,7 +13,6 @@ dependencies:
   - matplotlib
   - seaborn
   - psutil
->>>>>>> 0601cfc7ab8de2d5d50dae1d09e22a1774f5216a
   - pip:
     - git+https://github.com/UW-Hydro/tonic.git
     - engarde

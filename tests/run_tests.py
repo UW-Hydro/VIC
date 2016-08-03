@@ -622,6 +622,7 @@ def run_science(config_file, vic_exe, science_test_data_dir,
 
         # fill in global parameter options
         global_param = s.safe_substitute(test_data_dir=science_test_data_dir,
+                                         test_dir=test_dir,
                                          result_dir=dirs['results'],
                                          state_dir=dirs['state'],
                                          testname=test_type,

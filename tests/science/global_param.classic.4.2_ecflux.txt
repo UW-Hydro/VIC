@@ -103,4 +103,4 @@ OUTVAR          OUT_R_NET               %.6g    *       *
 OUTVAR          OUT_SENSIBLE            %.6g    *       *
 OUTVAR          OUT_RAD_TEMP            %.6g    *       *
 OUTVAR          OUT_NET_SHORT           %.6g    *       *
-OUTVAR          OUT_NET_SHORT           %.6g    *       *
+OUTVAR          OUT_NET_LONG           %.6g    *       *

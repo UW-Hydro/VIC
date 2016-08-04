@@ -1,0 +1,92 @@
+NLAYER                3
+NODES                 10
+MODEL_STEPS_PER_DAY   24
+SNOW_STEPS_PER_DAY    24
+RUNOFF_STEPS_PER_DAY  24
+STARTYEAR             2007
+STARTMONTH            11
+STARTDAY              01
+STARTSEC              00
+ENDYEAR               2008
+ENDMONTH              07
+ENDDAY                31
+
+FULL_ENERGY           TRUE
+FROZEN_SOIL           FALSE
+
+QUICK_FLUX            FALSE
+
+FORCING1              $test_data_dir/datasets/snotel/forcings_vp/snotel_VIC.4.1.2_forcings_
+FORCE_FORMAT          ASCII
+FORCE_TYPE            SWDOWN
+FORCE_TYPE            LWDOWN
+FORCE_TYPE            AIR_TEMP
+FORCE_TYPE            PRESSURE
+FORCE_TYPE            PREC
+FORCE_TYPE            VP
+FORCE_TYPE            WIND
+
+FORCE_STEPS_PER_DAY   24
+FORCEYEAR             2007
+FORCEMONTH            11
+FORCEDAY              01
+GRID_DECIMAL          4
+WIND_H                17.5
+
+SOIL                  $test_data_dir/datasets/snotel/parameters/Snotel_VIC.4.1.2_soil.txt
+BASEFLOW              ARNO
+
+JULY_TAVG_SUPPLIED    FALSE
+ORGANIC_FRACT         FALSE
+
+VEGLIB                $test_data_dir/datasets/snotel/parameters/Snotel_VIC.4.1.2_veglib.txt
+VEGPARAM              $test_data_dir/datasets/snotel/parameters/Snotel_VIC.4.1.2_vegparam.txt
+ROOT_ZONES            3
+
+VEGPARAM_LAI          TRUE
+LAI_SRC               FROM_VEGPARAM
+
+SNOW_BAND             1
+
+RESULT_DIR            $result_dir
+
+OUTPUT_STEPS_PER_DAY  1
+SKIPYEAR              0
+COMPRESS              FALSE
+OUT_FORMAT            ASCII
+ALMA_OUTPUT           FALSE
+MOISTFRACT            FALSE
+PRT_HEADER            TRUE
+PRT_SNOW_BAND         FALSE
+
+N_OUTFILES  2
+
+OUTFILE         snow 14
+OUTVAR          OUT_SWE                 %.4f    *       *
+OUTVAR          OUT_SNOW_DEPTH          %.4f    *       *
+OUTVAR          OUT_SNOW_CANOPY         %.4f    *       *
+OUTVAR          OUT_SNOW_COVER          %.4f    *       *
+OUTVAR          OUT_ADVECTION           %.4f    *       *
+OUTVAR          OUT_DELTACC             %.4f    *       *
+OUTVAR          OUT_SNOW_FLUX           %.4f    *       *
+OUTVAR          OUT_RFRZ_ENERGY         %.4f    *       *
+OUTVAR          OUT_MELT_ENERGY         %.4f    *       *
+OUTVAR          OUT_ADV_SENS            %.4f    *       *
+OUTVAR          OUT_LATENT_SUB          %.4f    *       *
+OUTVAR          OUT_SNOW_SURF_TEMP      %.4f    *       *
+OUTVAR          OUT_SNOW_PACK_TEMP      %.4f    *       *
+OUTVAR          OUT_SNOW_MELT           %.4f    *       *
+OUTVAR          OUT_ALBEDO              %.4f    *       *
+OUTVAR          OUT_SALBEDO             %.4f    *       *
+
+OUTFILE         en_bal 10
+OUTVAR          OUT_ADV_SENS            %.4f    *       *
+OUTVAR          OUT_ADVECTION           %.4f    *       *
+OUTVAR          OUT_DELTAH              %.4f    *       *
+OUTVAR          OUT_GRND_FLUX           %.4f    *       *
+OUTVAR          OUT_IN_LONG             %.4f    *       *
+OUTVAR          OUT_LATENT              %.4f    *       *
+OUTVAR          OUT_LATENT_SUB          %.4f    *       *
+OUTVAR          OUT_R_NET               %.4f    *       *
+OUTVAR          OUT_SENSIBLE            %.4f    *       *
+OUTVAR          OUT_RAD_TEMP            %.4f    *       *

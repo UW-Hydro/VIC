@@ -245,7 +245,7 @@ SnowPackEnergyBalance(double  TSurf,
     }
 
     /* Calculate change in cold content */
-    *DeltaColdContent = CONST_CPICE * CONST_RHOFW * SweSurfaceLayer *
+    *DeltaColdContent = CONST_VCPICE_WQ * SweSurfaceLayer *
                         (TSurf - OldTSurf) / (Dt);
 
     /* Calculate Ground Heat Flux */

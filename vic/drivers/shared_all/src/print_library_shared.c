@@ -232,53 +232,6 @@ print_energy_bal(energy_bal_struct *eb,
 }
 
 /******************************************************************************
- * @brief    Print filenames structure.
- *****************************************************************************/
-void
-print_filenames(filenames_struct *fnames)
-{
-    fprintf(LOG_DEST, "filenames:\n");
-    fprintf(LOG_DEST, "\tforcing[0]   : %s\n", fnames->forcing[0]);
-    fprintf(LOG_DEST, "\tforcing[1]   : %s\n", fnames->forcing[1]);
-    fprintf(LOG_DEST, "\tf_path_pfx[0]: %s\n", fnames->f_path_pfx[0]);
-    fprintf(LOG_DEST, "\tf_path_pfx[1]: %s\n", fnames->f_path_pfx[1]);
-    fprintf(LOG_DEST, "\tglobal       : %s\n", fnames->global);
-    fprintf(LOG_DEST, "\tconstants    : %s\n", fnames->constants);
-    fprintf(LOG_DEST, "\tdomain       : %s\n", fnames->domain);
-    fprintf(LOG_DEST, "\tinit_state   : %s\n", fnames->init_state);
-    fprintf(LOG_DEST, "\tlakeparam    : %s\n", fnames->lakeparam);
-    fprintf(LOG_DEST, "\tresult_dir   : %s\n", fnames->result_dir);
-    fprintf(LOG_DEST, "\tsnowband     : %s\n", fnames->snowband);
-    fprintf(LOG_DEST, "\tsoil         : %s\n", fnames->soil);
-    fprintf(LOG_DEST, "\tstatefile    : %s\n", fnames->statefile);
-    fprintf(LOG_DEST, "\tveg          : %s\n", fnames->veg);
-    fprintf(LOG_DEST, "\tveglib       : %s\n", fnames->veglib);
-    fprintf(LOG_DEST, "\tlog_path     : %s\n", fnames->log_path);
-}
-
-/******************************************************************************
- * @brief    Print file path structure.
- *****************************************************************************/
-void
-print_filep(filep_struct *fp)
-{
-    fprintf(LOG_DEST, "filep:\n");
-    fprintf(LOG_DEST, "\tforcing[0] : %p\n", fp->forcing[0]);
-    fprintf(LOG_DEST, "\tforcing[1] : %p\n", fp->forcing[1]);
-    fprintf(LOG_DEST, "\tglobalparam: %p\n", fp->globalparam);
-    fprintf(LOG_DEST, "\tconstants  : %p\n", fp->constants);
-    fprintf(LOG_DEST, "\tdomain     : %p\n", fp->domain);
-    fprintf(LOG_DEST, "\tinit_state : %p\n", fp->init_state);
-    fprintf(LOG_DEST, "\tlakeparam  : %p\n", fp->lakeparam);
-    fprintf(LOG_DEST, "\tsnowband   : %p\n", fp->snowband);
-    fprintf(LOG_DEST, "\tsoilparam  : %p\n", fp->soilparam);
-    fprintf(LOG_DEST, "\tstatefile  : %p\n", fp->statefile);
-    fprintf(LOG_DEST, "\tveglib     : %p\n", fp->veglib);
-    fprintf(LOG_DEST, "\tvegparam   : %p\n", fp->vegparam);
-    fprintf(LOG_DEST, "\tlogfile    : %p\n", fp->logfile);
-}
-
-/******************************************************************************
  * @brief    Print forcing type structure.
  *****************************************************************************/
 void
@@ -329,6 +282,7 @@ print_global_param(global_param_struct *gp)
     fprintf(LOG_DEST, "\tstateday            : %hu\n", gp->stateday);
     fprintf(LOG_DEST, "\tstatemonth          : %hu\n", gp->statemonth);
     fprintf(LOG_DEST, "\tstateyear           : %hu\n", gp->stateyear);
+    fprintf(LOG_DEST, "\tstatesec            : %u\n", gp->statesec);
 }
 
 /******************************************************************************

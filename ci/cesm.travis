@@ -1,7 +1,5 @@
 #!/usr/bin/env bash
 
-set -e
-
 DRIVER_PATH="./vic/drivers/cesm/"
 DRIVER_LIB="${DRIVER_PATH}lndlib.a"
 

@@ -94,7 +94,7 @@ air_density(double t,
     // rho = (p*1000)/(Rd * *t+CONST_TKFRZ) + (pv*1000)/(Rv * *t+CONST_TKFRZ);
 
     // approximation used in VIC
-    rho = 0.003486 * p / (275.0 + t);
+    rho = p / (CONST_RDAIR * (CONST_TKFRZ + t));
 
     return rho;
 }

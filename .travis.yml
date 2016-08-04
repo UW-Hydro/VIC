@@ -13,6 +13,8 @@ matrix:
     addons:
       apt_packages:
         - libnetcdf-dev
+        - netcdf-bin
+        - netcdf-doc
         - gfortran
         - valgrind
         # open-mpi is built from source in image.travis
@@ -23,6 +25,8 @@ matrix:
     addons:
       apt_packages:
         - libnetcdf-dev
+        - netcdf-bin
+        - netcdf-doc
         - gfortran
         # open-mpi is built from source in cesm.travis
   # Classic Driver

@@ -59,7 +59,10 @@ def clip_string(string, length=50):
 
 def print_tail(string, n=20, indent='\t--->'):
     '''print tail of multiline string'''
-    lines = string.decode().splitlines()
+    try:
+        lines = string.decode().splitlines()
+    except UnicodeDecodeError:
+        lines = string.splitlines()
     for l in lines[-n:]:
         print('{0}{1}'.format(indent, l))
 

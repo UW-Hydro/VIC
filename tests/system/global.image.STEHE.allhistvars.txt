@@ -34,12 +34,9 @@ FORCE_TYPE    VP           shum
 FORCE_TYPE    WIND         wind
 WIND_H        10.0
 
-SOIL            $test_data_dir/image/Stehekin/parameters/Stehekin_test_params_20160327.nc
+PARAMETERS      $test_data_dir/image/Stehekin/parameters/Stehekin_test_params_20160327.nc
 NODES           3
-VEGPARAM        $test_data_dir/image/Stehekin/parameters/Stehekin_test_params_20160327.nc
-ROOT_ZONES      3
-VEGLIB	        $test_data_dir/image/Stehekin/parameters/Stehekin_test_params_20160327.nc
-SNOW_BAND	    1 $test_data_dir/image/Stehekin/parameters/Stehekin_test_params_20160327.nc
+SNOW_BAND       TRUE
 
 RESULT_DIR  $result_dir/
 
@@ -207,3 +204,5 @@ OUTVAR      OUT_SNOW_MELT_BAND
 OUTVAR      OUT_SNOW_PACKT_BAND
 OUTVAR      OUT_SNOW_SURFT_BAND
 OUTVAR      OUT_SWE_BAND
+OUTVAR      OUT_TIME_VICRUN_WALL
+OUTVAR      OUT_TIME_VICRUN_CPU

@@ -37,14 +37,12 @@ RC_MODE              RC_JARVIS
 # Input Files and PATHS
 CONSTANTS        {vic_constants}
 LOG_DIR          {rundir}/
-SOIL             {vic_params}
-VEGPARAM         {vic_params}
+PARAMETERS       {vic_params}
 LAI_SRC          FROM_VEGPARAM
 ALB_SRC          FROM_VEGPARAM
 FCAN_SRC         FROM_DEFAULT
-VEGLIB           {vic_params}
-SNOW_BAND        1
-RESULT_DIR       {rundir}/vic.testing.h0.nc
+SNOW_BAND        FALSE
+RESULT_DIR       {rundir}/
 
 # Domain File
 DOMAIN           {vic_domain}
@@ -56,8 +54,9 @@ DOMAIN_TYPE      FRAC    frac
 DOMAIN_TYPE      YDIM    nj
 DOMAIN_TYPE      XDIM    ni
 
-N_OUTFILES
 OUTFILE     fluxes
+AGGFREQ     NDAYS 1
+OUT_FORMAT  NETCDF4_CLASSIC
 OUTVAR      OUT_PREC
 OUTVAR      OUT_RAINF
 OUTVAR      OUT_SNOWF

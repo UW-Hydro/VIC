@@ -33,7 +33,7 @@ void
 vic_alloc(void)
 {
     extern all_vars_struct    *all_vars;
-    extern atmos_data_struct  *atmos;
+    extern force_data_struct  *force;
     extern domain_struct       local_domain;
     extern option_struct       options;
     extern double           ***out_data;
@@ -47,9 +47,9 @@ vic_alloc(void)
     size_t                     i;
     size_t                     j;
 
-    // allocate memory for atmos structure
-    atmos = malloc(local_domain.ncells_active * sizeof(*atmos));
-    check_alloc_status(atmos, "Memory allocation error.");
+    // allocate memory for force structure
+    force = malloc(local_domain.ncells_active * sizeof(*force));
+    check_alloc_status(force, "Memory allocation error.");
 
     // allocate memory for veg_hist structure
     veg_hist = malloc(local_domain.ncells_active * sizeof(*veg_hist));
@@ -75,7 +75,6 @@ vic_alloc(void)
         // allocate memory for lake structure
         lake_con = malloc(local_domain.ncells_active * sizeof(*lake_con));
         check_alloc_status(lake_con, "Memory allocation error.");
-
     }
 
     // all_vars allocation
@@ -92,8 +91,8 @@ vic_alloc(void)
 
     // allocate memory for individual grid cells
     for (i = 0; i < local_domain.ncells_active; i++) {
-        // atmos allocation - allocate enough memory for NR+1 steps
-        alloc_atmos(&(atmos[i]));
+        // force allocation - allocate enough memory for NR+1 steps
+        alloc_force(&(force[i]));
 
         // snow band allocation
         soil_con[i].AreaFract = calloc(options.SNOW_BAND,
@@ -110,7 +109,8 @@ vic_alloc(void)
         check_alloc_status(soil_con[i].Pfactor, "Memory allocation error.");
         soil_con[i].AboveTreeLine = calloc(options.SNOW_BAND,
                                            sizeof(*(soil_con[i].AboveTreeLine)));
-        check_alloc_status(soil_con[i].AboveTreeLine, "Memory allocation error.");
+        check_alloc_status(soil_con[i].AboveTreeLine,
+                           "Memory allocation error.");
 
         initialize_soil_con(&(soil_con[i]));
 
@@ -136,16 +136,18 @@ vic_alloc(void)
         for (j = 0; j < veg_con_map[i].nv_active; j++) {
             veg_con[i][j].zone_depth = calloc(options.ROOT_ZONES,
                                               sizeof(*(veg_con[i][j].zone_depth)));
-            check_alloc_status(veg_con[i][j].zone_depth, "Memory allocation error.");
+            check_alloc_status(veg_con[i][j].zone_depth,
+                               "Memory allocation error.");
             veg_con[i][j].zone_fract = calloc(options.ROOT_ZONES,
                                               sizeof(*(veg_con[i][j].zone_fract)));
-            check_alloc_status(veg_con[i][j].zone_fract, "Memory allocation error.");
+            check_alloc_status(veg_con[i][j].zone_fract,
+                               "Memory allocation error.");
             if (options.CARBON) {
                 veg_con[i][j].CanopLayerBnd = calloc(options.Ncanopy,
                                                      sizeof(*(veg_con[i][j].
                                                               CanopLayerBnd)));
-                check_alloc_status(veg_con[i][j].CanopLayerBnd, "Memory allocation error.");
-
+                check_alloc_status(veg_con[i][j].CanopLayerBnd,
+                                   "Memory allocation error.");
             }
             initialize_veg_con(&(veg_con[i][j]));
         }

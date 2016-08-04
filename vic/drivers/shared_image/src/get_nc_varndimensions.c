@@ -44,12 +44,15 @@ get_nc_varndimensions(char *nc_name,
 
     // get variable id
     status = nc_inq_varid(nc_id, var_name, &var_id);
-    check_nc_status(status, "Error getting variable id %s in %s", var_name, nc_name);
+    check_nc_status(status, "Error getting variable id %s in %s", var_name,
+                    nc_name);
 
     // get number of dimensions
     status = nc_inq_varndims(nc_id, var_id, &ndims);
-    check_nc_status(status, "Error getting number of dimensions for var %s in %s", var_name,
-                nc_name);
+    check_nc_status(status,
+                    "Error getting number of dimensions for var %s in %s",
+                    var_name,
+                    nc_name);
 
     // close the netcdf file
     status = nc_close(nc_id);

@@ -240,6 +240,16 @@ get_global_param(FILE *gp)
             else if (strcasecmp("LOG_DIR", optstr) == 0) {
                 sscanf(cmdstr, "%*s %s", filenames.log_path);
             }
+            else if (strcasecmp("INIT_STATE", optstr) == 0) {
+                sscanf(cmdstr, "%*s %s", flgstr);
+                if (strcasecmp("FALSE", flgstr) == 0) {
+                    options.INIT_STATE = false;
+                }
+                else {
+                    options.INIT_STATE = true;
+                    strcpy(filenames.init_state, flgstr);
+                }
+            }
             // Define state file format
             else if (strcasecmp("STATE_FORMAT", optstr) == 0) {
                 sscanf(cmdstr, "%*s %s", flgstr);
@@ -274,8 +284,8 @@ get_global_param(FILE *gp)
             else if (strcasecmp("DOMAIN_TYPE", optstr) == 0) {
                 get_domain_type(cmdstr);
             }
-            else if (strcasecmp("SOIL", optstr) == 0) {
-                sscanf(cmdstr, "%*s %s", filenames.soil);
+            else if (strcasecmp("PARAMETERS", optstr) == 0) {
+                sscanf(cmdstr, "%*s %s", filenames.params);
             }
             else if (strcasecmp("ARNO_PARAMS", optstr) == 0) {
                 sscanf(cmdstr, "%*s %s", flgstr);
@@ -320,15 +330,9 @@ get_global_param(FILE *gp)
                 sscanf(cmdstr, "%*s %s", flgstr);
                 options.ORGANIC_FRACT = str_to_bool(flgstr);
             }
-            else if (strcasecmp("VEGLIB", optstr) == 0) {
-                sscanf(cmdstr, "%*s %s", filenames.veglib);
-            }
             else if (strcasecmp("VEGLIB_PHOTO", optstr) == 0) {
                 sscanf(cmdstr, "%*s %s", flgstr);
                 options.VEGLIB_PHOTO = str_to_bool(flgstr);
-            }
-            else if (strcasecmp("VEGPARAM", optstr) == 0) {
-                sscanf(cmdstr, "%*s %s", filenames.veg);
             }
             else if (strcasecmp("LAI_SRC", optstr) == 0) {
                 sscanf(cmdstr, "%*s %s", flgstr);
@@ -388,7 +392,6 @@ get_global_param(FILE *gp)
                 }
                 else {
                     options.LAKES = true;
-                    strcpy(filenames.lakeparam, flgstr);
                 }
             }
             else if (strcasecmp("LAKE_PROFILE", optstr) == 0) {
@@ -458,7 +461,7 @@ validate_filenames(filenames_struct *filenames)
     extern option_struct options;
 
     // Validate log directory
-    if (strcmp(filenames->result_dir, "MISSING") == 0) {
+    if (strcmp(filenames->log_path, "MISSING") == 0) {
         log_err("Log directory must be specified in CESM driver");
     }
 
@@ -469,23 +472,11 @@ validate_filenames(filenames_struct *filenames)
                 "begins with \"RESULT_DIR\".");
     }
 
-    // Validate soil parameter file information
-    if (strcmp(filenames->soil, "MISSING") == 0) {
-        log_err("No soil parameter file has been defined.  Make sure that the "
-                "global file defines the soil parameter file on the line that "
-                "begins with \"SOIL\".");
-    }
-
-    // Validate veg parameter information
-    if (strcmp(filenames->veg, "MISSING") == 0) {
-        log_err("No vegetation parameter file has been defined.  Make sure "
-                "that the global file defines the vegetation parameter "
-                "file on the line that begins with \"VEGPARAM\".");
-    }
-    if (strcmp(filenames->veglib, "MISSING") == 0) {
-        log_err("No vegetation library file has been defined.  Make sure "
-                "that the global file defines the vegetation library file "
-                "on the line that begins with \"VEGLIB\".");
+    // Validate parameter file information
+    if (strcmp(filenames->params, "MISSING") == 0) {
+        log_err("A parameters file has not been defined.  Make sure that the "
+                "global file defines the parameters parameter file on the line "
+                "that begins with \"PARAMETERS\".");
     }
 
     // Validate snow parameter file

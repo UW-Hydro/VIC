@@ -122,13 +122,13 @@ snow_melt(double            Le,
     PackSwq = Ice - SurfaceSwq;
 
     /* Calculate cold contents */
-    SurfaceCC = CONST_CPFWICE * SurfaceSwq * snow->surf_temp;
-    PackCC = CONST_CPFWICE * PackSwq * snow->pack_temp;
+    SurfaceCC = CONST_VCPICE_WQ * SurfaceSwq * snow->surf_temp;
+    PackCC = CONST_VCPICE_WQ * PackSwq * snow->pack_temp;
     if (air_temp > 0.0) {
         SnowFallCC = 0.0;
     }
     else {
-        SnowFallCC = CONST_CPFWICE * SnowFall * air_temp;
+        SnowFallCC = CONST_VCPICE_WQ * SnowFall * air_temp;
     }
 
     /* Distribute fresh snowfall */
@@ -153,13 +153,13 @@ snow_melt(double            Le,
         SurfaceCC += SnowFallCC;
     }
     if (SurfaceSwq > 0.0) {
-        snow->surf_temp = SurfaceCC / (CONST_CPFWICE * SurfaceSwq);
+        snow->surf_temp = SurfaceCC / (CONST_VCPICE_WQ * SurfaceSwq);
     }
     else {
         snow->surf_temp = 0.0;
     }
     if (PackSwq > 0.0) {
-        snow->pack_temp = PackCC / (CONST_CPFWICE * PackSwq);
+        snow->pack_temp = PackCC / (CONST_VCPICE_WQ * PackSwq);
     }
     else {
         snow->pack_temp = 0.0;
@@ -415,9 +415,9 @@ snow_melt(double            Le,
         Ice += snow->pack_water;
         snow->pack_water = 0.0;
         if (PackSwq > 0.0) {
-            PackCC = PackSwq * CONST_CPFWICE * snow->pack_temp +
+            PackCC = PackSwq * CONST_VCPICE_WQ * snow->pack_temp +
                      PackRefreezeEnergy;
-            snow->pack_temp = PackCC / (CONST_CPFWICE * PackSwq);
+            snow->pack_temp = PackCC / (CONST_VCPICE_WQ * PackSwq);
             if (snow->pack_temp > 0.) {
                 snow->pack_temp = 0.;
             }
@@ -456,8 +456,8 @@ snow_melt(double            Le,
     Ice = PackSwq + SurfaceSwq;
 
     if (Ice > param.SNOW_MAX_SURFACE_SWE) {
-        SurfaceCC = CONST_CPFWICE * snow->surf_temp * SurfaceSwq;
-        PackCC = CONST_CPFWICE * snow->pack_temp * PackSwq;
+        SurfaceCC = CONST_VCPICE_WQ * snow->surf_temp * SurfaceSwq;
+        PackCC = CONST_VCPICE_WQ * snow->pack_temp * PackSwq;
         if (SurfaceSwq > param.SNOW_MAX_SURFACE_SWE) {
             PackCC += SurfaceCC *
                       (SurfaceSwq - param.SNOW_MAX_SURFACE_SWE) / SurfaceSwq;
@@ -474,8 +474,8 @@ snow_melt(double            Le,
             PackSwq -= param.SNOW_MAX_SURFACE_SWE - SurfaceSwq;
             SurfaceSwq += param.SNOW_MAX_SURFACE_SWE - SurfaceSwq;
         }
-        snow->pack_temp = PackCC / (CONST_CPFWICE * PackSwq);
-        snow->surf_temp = SurfaceCC / (CONST_CPFWICE * SurfaceSwq);
+        snow->pack_temp = PackCC / (CONST_VCPICE_WQ * PackSwq);
+        snow->surf_temp = SurfaceCC / (CONST_VCPICE_WQ * SurfaceSwq);
     }
     else {
         PackSwq = 0.0;

@@ -108,6 +108,8 @@
 #define CONST_CPFW 4.188e3  /**< specific heat of fresh h2o ~ J/kg/K */
 #define CONST_CPFWICE 4.2e3  /**< specific heat of fresh h2o ~ J/kg/K */
 #define CONST_CPICE 2.11727e3  /**< specific heat of fresh ice ~ J/kg/K */
+/**< volumetric heats */
+#define CONST_VCPICE_WQ (CONST_CPICE * CONST_RHOFW)  /**< heat capacity of fresh ice per volume of water equivalent ~ J/m^3/K */
 /**< latent heats */
 #define CONST_LATICE 3.337e5  /**< latent heat of fusion ~ J/kg */
 #define CONST_LATVAP 2.501e6  /**< latent heat of evaporation ~ J/kg */

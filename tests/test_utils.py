@@ -1,5 +1,3 @@
-#!/usr/bin/env python
-
 import os
 from collections import OrderedDict
 
@@ -13,7 +11,8 @@ import matplotlib.pyplot as plt
 import warnings
 import seaborn as sns
 
-from tonic.models.vic.vic import VICRuntimeError, default_vic_valgrind_error_code
+from tonic.models.vic.vic import (VICRuntimeError,
+                                  default_vic_valgrind_error_code)
 from tonic.testing import check_completed, check_for_nans, VICTestError
 
 OUTPUT_WIDTH = 100
@@ -123,7 +122,8 @@ def check_returncode(exe, expected=0):
         return None
     elif exe.returncode == default_vic_valgrind_error_code:
         raise VICValgrindError(
-            'Valgrind raised an error when running: "{}"'.format(exe.argstring))
+            'Valgrind raised an error when running: \
+            "{}"'.format(exe.argstring))
     else:
         raise VICReturnCodeError(
             'VIC return code ({0}) did not match expected ({1}) when running '
@@ -167,7 +167,6 @@ def test_classic_driver_all_complete(fnames):
     start = None
     end = None
     for fname in fnames:
-        print(fname)
         df = read_vic_ascii(fname)
 
         # check that each dataframe includes all timestamps
@@ -176,8 +175,6 @@ def test_classic_driver_all_complete(fnames):
         else:
             start = df.index[0]
             end = df.index[-1]
-            print("start = %s" %str(start))
-            print("end = %s" %str(end))
 
 
 def test_classic_driver_no_output_file_nans(fnames):
@@ -187,7 +184,8 @@ def test_classic_driver_no_output_file_nans(fnames):
         check_for_nans(df)
 
 
-# TODO: Update tonic version of this function, need to check that subdaily works
+# TODO: Update tonic version of this function,
+# need to check that subdaily works
 def read_vic_ascii(filepath, parse_dates=True, datetime_index=None, sep='\t',
                    comment='#', **kwargs):
     '''Generic reader function for VIC ASCII output with a standard header
@@ -210,9 +208,10 @@ def read_vic_ascii(filepath, parse_dates=True, datetime_index=None, sep='\t',
     if parse_dates:
         time_cols = ['YEAR', 'MONTH', 'DAY']
         df.index = pd.to_datetime(df.YEAR * 10000 + df.MONTH * 100 +
-                                    df.DAY, format='%Y%m%d')
+                                  df.DAY, format='%Y%m%d')
         if 'SEC' in df:
-            df.index += pd.Series([pd.Timedelta(s, unit='s') for s in df['SEC']],
+            df.index += pd.Series([pd.Timedelta(s, unit='s') for s in
+                                  df['SEC']],
                                   index=df.index)
             time_cols.append('SEC')
         df.drop(time_cols, axis=1)
@@ -290,12 +289,14 @@ def check_multistream_classic(fnames):
 
     # Loop over all grid cells in result dir
     for gridcell in gridcells:
-        fname = os.path.join(resultdir, '{}_{}.txt'.format(inst_stream, gridcell))
+        fname = os.path.join(resultdir,
+                             '{}_{}.txt'.format(inst_stream, gridcell))
         instant_df = read_vic_ascii(fname)
 
         # Loop over all streams
         for stream, freq in streams.items():
-            fname = os.path.join(resultdir, '{}_{}.txt'.format(stream, gridcell))
+            fname = os.path.join(resultdir,
+                                 '{}_{}.txt'.format(stream, gridcell))
             agg_df = read_vic_ascii(fname)
 
             # Setup the resample of the instantaneous data
@@ -305,7 +306,8 @@ def check_multistream_classic(fnames):
             for key, how in how_dict.items():
                 # Get the aggregated values (from VIC)
                 actual = agg_df[key].values
-                # Calculated the expected values based on the resampling from pandas
+                # Calculated the expected values based on the resampling from
+                # pandas
                 expected = rs[key].aggregate(how).values
 
                 # Compare the actual and expected (with tolerance)
@@ -314,12 +316,13 @@ def check_multistream_classic(fnames):
                     err_msg='Variable=%s, freq=%s, how=%s: '
                             'failed comparison' % (key, freq, how))
 
+
 def tsplit(string, delimiters):
     '''Behaves like str.split but supports multiple delimiters.
     '''
 
     delimiters = tuple(delimiters)
-    stack = [string,]
+    stack = [string]
 
     for delimiter in delimiters:
         for i, substring in enumerate(stack):
@@ -330,56 +333,58 @@ def tsplit(string, delimiters):
 
     return stack
 
-def read_snotel_swe_obs(filename, science_test_data_dir, items):
 
-    ''' reads in Snotel SWE obs and returns DataFrame
+def read_snotel_swe_obs(filename, science_test_data_dir, items):
+    '''Reads in Snotel SWE obs and returns DataFrame.
     '''
 
     filename_fullpath = os.path.join(science_test_data_dir,
-                                    'datasets',
-                                    items['archive'],
-                                    'observations',
-                                    filename)
+                                     'datasets',
+                                     items['archive'],
+                                     'observations',
+                                     filename)
 
     # load snotel obs
     snotel_swe = pd.read_csv(filename_fullpath,
-                            skiprows=0,
-                            delim_whitespace=True,
-                            names=['YEAR', 'MONTH', 'DAY', 'OUT_SWE'])
+                             skiprows=0,
+                             delim_whitespace=True,
+                             names=['YEAR', 'MONTH', 'DAY', 'OUT_SWE'])
 
     # add datetime object column to snotel DataFrame
     snotel_swe['DATES'] = pd.to_datetime(snotel_swe.YEAR * 10000 +
-                                        snotel_swe.MONTH * 100 +
-                                        snotel_swe.DAY,
-                                        format='%Y%m%d')
+                                         snotel_swe.MONTH * 100 +
+                                         snotel_swe.DAY,
+                                         format='%Y%m%d')
 
     # remove year, month, day columns of DataFrame
     snotel_swe.drop(['YEAR', 'MONTH', 'DAY'], inplace=True, axis=1)
 
     snotel_swe.index = snotel_swe['DATES']
 
-    return(snotel_swe)
+    return snotel_swe
+
 
 def read_vic_42_output(lat, lng, science_test_data_dir, items):
-    ''' reads output from VIC 4.2
+    ''' Reads output from VIC 4.2.
     '''
 
-    if 'ecflux' in items['compare_to']:
+    if items['compare_to'] == 'ecflux':
         vic_42_file = 'en_bal_%s_%s' % (lat, lng)
         vic_42_dir = os.path.join(science_test_data_dir, 'test_runs',
-                                items['archive'], 'ecflux', 'results')
+                                  items['archive'], 'ecflux', 'results')
 
-    elif 'snotel' in items['compare_to']:
+    elif items['compare_to'] == 'snotel':
         vic_42_file = 'outfile_%s_%s' % (lat, lng)
         vic_42_dir = os.path.join(science_test_data_dir, 'test_runs',
-                                items['archive'], 'snotel', 'results')
+                                  items['archive'], 'snotel', 'results')
 
     else:
-        raise ValueError("this option has not yet been implemented")
+        raise ValueError("this option (%s) has not yet been implemented"
+                         % items['compare_to'])
 
     vic_42 = pd.read_csv(os.path.join(vic_42_dir, vic_42_file),
-                            sep='\t',
-                            skiprows=5)
+                         sep='\t',
+                         skiprows=5)
 
     # remove comment sign from column names in DataFrame
     vic_42 = vic_42.rename(columns=lambda x: x.replace('#', ''))
@@ -388,75 +393,72 @@ def read_vic_42_output(lat, lng, science_test_data_dir, items):
     vic_42 = vic_42.rename(columns=lambda x: x.replace(' ', ''))
 
     # rename radiation variables to be consistent with VIC 5
-    if 'ecflux' in items['compare_to']:
+    if items['compare_to'] == 'ecflux':
         vic_42 = vic_42.rename(columns=lambda x: x.replace('OUT_NET_SHORT',
-                                'OUT_SWNET'))
+                               'OUT_SWNET'))
         vic_42 = vic_42.rename(columns=lambda x: x.replace('OUT_NET_LONG',
-                                'OUT_LWNET'))
+                               'OUT_LWNET'))
 
-    # add datetime object column to snotel DataFrame
-    vic_42['DATES'] = pd.to_datetime(vic_42.YEAR * 10000 +
-                                            vic_42.MONTH * 100 +
-                                            vic_42.DAY,
-                                            format='%Y%m%d')
+    # add datetime index
+    time_cols = ['YEAR', 'MONTH', 'DAY']
+    vic_42.index = pd.to_datetime(vic_42[time_cols])
+
+    if 'HOUR' in vic_42:
+        vic_42['SEC'] = vic_42.HOUR * 3600
+        vic_42.index += pd.Series([pd.Timedelta(s, unit='s') for s in
+                                  vic_42['SEC']],
+                                  index=vic_42.index)
+        time_cols.extend(['SEC', 'HOUR'])
 
     # remove year, day columns of DataFrame
-    vic_42.drop(['YEAR', 'DAY'], inplace=True, axis=1)
+    vic_42.drop(time_cols, inplace=True, axis=1)
 
-    if ('HOUR' not in vic_42) and ('SEC' in vic_42):
-        # add hour column for groupby
-        vic_42['HOUR'] = (vic_42['SEC'] * (1/3600)
-                                        ).astype(int)
+    return vic_42
 
-    vic_42.index = vic_42.DATES
-
-    return(vic_42)
 
 def read_vic_5_output(lat, lng, science_test_data_dir, items):
-
-    ''' read VIC 5.0.x output
+    ''' Read VIC 5.0.x output.
     '''
 
-    if 'ecflux' in items['compare_to']:
+    if items['compare_to'] == 'ecflux':
         vic_5_file = 'en_bal_%s_%s.txt' % (lat, lng)
         vic_5_dir = os.path.join(science_test_data_dir, 'test_runs',
-                                items['archive'], 'ecflux', 'results')
+                                 items['archive'], 'ecflux', 'results')
 
-    elif 'snotel' in items['compare_to']:
+    elif items['compare_to'] == 'snotel':
         vic_5_file = 'outfile_%s_%s.txt' % (lat, lng)
         vic_5_dir = os.path.join(science_test_data_dir, 'test_runs',
-                                items['archive'], 'snotel', 'results')
+                                 items['archive'], 'snotel', 'results')
 
     else:
-        raise ValueError("this option has not yet been implemented")
+        raise ValueError("this option (%s) has not yet been implemented"
+                         % items['compare_to'])
 
     vic_5 = pd.read_csv(os.path.join(vic_5_dir, vic_5_file),
-                            skiprows=2,
-                            sep='\t')
+                        skiprows=2,
+                        sep='\t')
 
     # remove spaces from column names
     vic_5 = vic_5.rename(columns=lambda x: x.replace(' ', ''))
 
-    # add datetime object column to snotel DataFrame
-    vic_5['DATES'] = pd.to_datetime(vic_5.YEAR * 10000 +
-                                            vic_5.MONTH * 100 +
-                                            vic_5.DAY,
-                                            format='%Y%m%d')
+    # add datetime index
+    time_cols = ['YEAR', 'MONTH', 'DAY']
+    vic_5.index = pd.to_datetime(vic_5[time_cols])
+
+    if 'SEC' in vic_5:
+        vic_5.index += pd.Series([pd.Timedelta(s, unit='s') for s in
+                                 vic_5['SEC']],
+                                 index=vic_5.index)
+        time_cols.append('SEC')
 
     # remove year, day columns of DataFrame
-    vic_5.drop(['YEAR', 'DAY'], inplace=True, axis=1)
+    vic_5.drop(time_cols, inplace=True, axis=1)
 
-    if ('HOUR' not in vic_5) and ('SEC' in vic_5):
-        # add hour column for groupby
-        vic_5['HOUR'] = (vic_5['SEC'] * (1/3600)
-                                        ).astype(int)
+    return vic_5
 
-    vic_5.index = vic_5.DATES
-
-    return(vic_5)
 
 def plot_science_tests(driver, test_type, science_test_data_dir, result_dir,
-                        plot_dir, plots_to_make, compare_data):
+                       plot_dir, plots_to_make, compare_data):
 
     ''' makes science test figures
 
@@ -475,18 +477,19 @@ def plot_science_tests(driver, test_type, science_test_data_dir, result_dir,
     plots_to_make <Dict>
         Keys that indicate which plots should be made
     compare_data <Dict>
-        Keys that indicate which datasets and model output to use for comparison
+        Keys that indicate which datasets and model output to use for
+        comparison.
 
     Returns
     ----------
     '''
     if test_type == "science_test_snotel":
         plot_snotel_comparison(driver,
-                                science_test_data_dir,
-                                compare_data,
-                                result_dir,
-                                plot_dir,
-                                plots_to_make)
+                               science_test_data_dir,
+                               compare_data,
+                               result_dir,
+                               plot_dir,
+                               plots_to_make)
 
     elif test_type == "science_test_fluxnet":
         plot_fluxnet_comparison(driver,
@@ -496,25 +499,24 @@ def plot_science_tests(driver, test_type, science_test_data_dir, result_dir,
                                 plot_dir,
                                 plots_to_make)
     else:
-        print("this has not been implemented in the VIC 5.0 science test suite")
+        raise ValueError("this option %s has not been implemented in the \
+                         VIC 5.0 science test suite" % test_type)
+
 
 def plot_snotel_comparison(driver, science_test_data_dir,
-                            compare_data_dict,
-                            result_dir, plot_dir,
-                            plots_to_make):
+                           compare_data_dict,
+                           result_dir, plot_dir,
+                           plots_to_make):
     ''' makes snotel figures
-
     '''
 
     # plot settings
-    plot_variables = ['OUT_SWE', 'OUT_ALBEDO', 'OUT_SALBEDO', 'OUT_SNOW_DEPTH',
-                    'OUT_SNOW_CANOPY', 'OUT_SNOW_PACK_TEMP', 'OUT_SNOW_MELT',
-                    'OUT_R_NET', 'OUT_LATENT', 'OUT_SENSIBLE']
-
-    plot_units = ['mm', 'fraction', 'fraction', 'mm', '%', 'degrees C',
-                    'mm', '$W/{m^2}$', '$W/{m^2}$', '$W/{m^2}$']
-    lw = 4.0
-    sns.set_style('whitegrid')
+    plot_variables = {'OUT_SWE': 'mm', 'OUT_ALBEDO': 'fraction',
+                      'OUT_SALBEDO': 'fraction', 'OUT_SNOW_DEPTH': 'mm',
+                      'OUT_SNOW_CANOPY': '%', 'OUT_SNOW_PACK_TEMP':
+                      'degrees C', 'OUT_SNOW_MELT': 'mm', 'OUT_R_NET':
+                      '$W/{m^2}$', 'OUT_LATENT': '$W/{m^2}$',
+                      'OUT_SENSIBLE': '$W/{m^2}$'}
 
     for filename in os.listdir(os.path.join(science_test_data_dir,
                                             'datasets',
@@ -531,70 +533,61 @@ def plot_snotel_comparison(driver, science_test_data_dir,
         for key, items in compare_data_dict.items():
 
             # read in data
-
             if key == "snotel":
-
                 data[key] = read_snotel_swe_obs(filename,
                                                 science_test_data_dir,
                                                 items)
 
             elif key == "VIC.4.2.d":
-
                 data[key] = read_vic_42_output(lat, lng,
-                                        science_test_data_dir,
-                                        items)
+                                               science_test_data_dir,
+                                               items)
 
             else:
-
                 data[key] = read_vic_5_output(lat, lng,
-                                        science_test_data_dir,
-                                        items)
+                                              science_test_data_dir,
+                                              items)
 
         # loop over variables to plot
-        for i, plot_variable in enumerate(plot_variables):
+        for plot_variable, units in plot_variables.items():
 
             if 'water_year' in plots_to_make:
 
-                fig, ax = plt.subplots(figsize=(10,10))
+                with plt.rc_context(dict(sns.axes_style("whitegrid"),
+                                    **sns.plotting_context("notebook"))):
+                    fig, ax = plt.subplots(figsize=(10, 10))
 
-                df = pd.DataFrame({key: d[plot_variable] for key, d in
-                                            data.items() if plot_variable in d})
+                    df = pd.DataFrame({key: d[plot_variable] for key, d in
+                                      data.items() if plot_variable in d})
 
-                # merge DateTime indexes (time series lengths are different)
-                if 'snotel' in data.keys():
-                    df_join = data.pop('snotel').merge(next(iter(data.values())),
-                                                    how='outer', on='DATES')
-                    df.index = df_join['DATES']
-                else:
-                    df.index = next(iter(data.values()))['DATES']
+                    for key, series in df.iteritems():
 
-                for key, series in df.iteritems():
-                    series.plot(use_index=True,
-                                linewidth=compare_data_dict[key]['linewidth'],
-                                ax=ax,
-                                color=compare_data_dict[key]['color'],
-                                linestyle=compare_data_dict[key]['linestyle'],
-                                zorder=compare_data_dict[key]['zorder'])
+                        series.plot(use_index=True,
+                                    linewidth=compare_data_dict[key]
+                                    ['linewidth'],
+                                    ax=ax,
+                                    color=compare_data_dict[key]['color'],
+                                    linestyle=compare_data_dict[key]
+                                    ['linestyle'],
+                                    zorder=compare_data_dict[key]['zorder'])
 
+                    ax.legend(loc='upper left')
+                    ax.set_ylabel("%s [%s]" % (plot_variable, units))
 
-                ax.legend(loc='upper left')
-                ax.set_ylabel("%s [%s]" % (plot_variable, plot_units[i]))
+                    # save figure
+                    os.makedirs(os.path.join(plot_dir, plot_variable),
+                                exist_ok=True)
+                    plotname = '%s_%s.png' % (lat, lng)
+                    savepath = os.path.join(plot_dir, plot_variable, plotname)
+                    plt.savefig(savepath, bbox_inches='tight')
 
-                # save figure
-                os.makedirs(os.path.join(plot_dir, plot_variable), exist_ok=True)
-                plotname = '%s_%s.png' % (lat, lng)
-                savepath = os.path.join(plot_dir, plot_variable, plotname)
-                plt.savefig(savepath, bbox_inches='tight')
-                print("saving figure to %s" %savepath)
+                    plt.clf()
+                    plt.close()
 
-                plt.clf()
-                plt.close()
 
 def check_site_files(obs_dir, subdir):
-    if os.listdir(os.path.join(obs_dir, subdir)) != []:
-        return(True)
-    else:
-        return(False)
+    return len(os.listdir(os.path.join(obs_dir, subdir))) > 0
+
 
 def get_fluxnet_lat_lon(obs_dir, subdir):
 
@@ -603,54 +596,62 @@ def get_fluxnet_lat_lon(obs_dir, subdir):
         site_csv_file = glob.glob(os.path.join(obs_dir, subdir, 'AMF*.csv'))[0]
     except IndexError:
         site_csv_file = glob.glob(os.path.join(obs_dir, subdir, 'us*.csv'))[0]
-    with open(site_csv_file) as file:
-        second_line = list(file)[1]
+    with open(site_csv_file) as f:
+        second_line = list(f)[1]
 
     # parse line from header to get lat/lng
-    str_split = tsplit(second_line, ('Latitude: ', 'Longitude: ', 'Elevation (masl): '))
+    str_split = tsplit(second_line,
+                       ('Latitude: ', 'Longitude: ', 'Elevation (masl): '))
     lat = str_split[1].strip()
     lng = str_split[2].strip()
 
-    return(lat, lng)
+    return lat, lng
+
 
 def read_fluxnet_obs(subdir, science_test_data_dir, items):
 
-    filename = '%s.stdfmt.hourly.local.txt' %subdir
+    filename = '%s.stdfmt.hourly.local.txt' % subdir
 
     # column names for DataFrame (same as VIC variable names)
     names = ['YEAR', 'MONTH', 'DAY', 'HOUR', 'PREC', 'AIR_TEMP', 'SWDOWN',
-            'LWDOWN','OUT_REL_HUMID', 'PRESSURE', 'WIND', 'OUT_EVAP',
-            'SOIL_TEMP_DEPTH1', 'SOIL_TEMP_DEPTH2', 'SOIL_TEMP_DEPTH3',
-            'SOIL_TEMP_DEPTH4', 'SOIL_TEMP_DEPTH5', 'OUT_SOIL_MOIST1',
-            'OUT_SOIL_MOIST2', 'OUT_SOIL_MOIST3', 'OUT_SOIL_MOIST4',
-            'OUT_SOIL_MOIST5', 'OUT_SOIL_TEMP1', 'OUT_SOIL_TEMP2',
-            'OUT_SOIL_TEMP3', 'OUT_SOIL_TEMP4', 'OUT_SOIL_TEMP5', 'OUT_SWNET',
-            'OUT_LWNET', 'OUT_SENSIBLE', 'OUT_LATENT', 'OUT_GRND_FLUX']
+             'LWDOWN', 'OUT_REL_HUMID', 'PRESSURE', 'WIND', 'OUT_EVAP',
+             'SOIL_TEMP_DEPTH1', 'SOIL_TEMP_DEPTH2', 'SOIL_TEMP_DEPTH3',
+             'SOIL_TEMP_DEPTH4', 'SOIL_TEMP_DEPTH5', 'OUT_SOIL_MOIST1',
+             'OUT_SOIL_MOIST2', 'OUT_SOIL_MOIST3', 'OUT_SOIL_MOIST4',
+             'OUT_SOIL_MOIST5', 'OUT_SOIL_TEMP1', 'OUT_SOIL_TEMP2',
+             'OUT_SOIL_TEMP3', 'OUT_SOIL_TEMP4', 'OUT_SOIL_TEMP5', 'OUT_SWNET',
+             'OUT_LWNET', 'OUT_SENSIBLE', 'OUT_LATENT', 'OUT_GRND_FLUX']
 
     # read in data with -9999.0000 as NaNs
     obs_dir = os.path.join(science_test_data_dir, 'datasets',
-                            'ec_flux_towers', 'obs')
+                           'ec_flux_towers', 'obs')
     ecflux_df = pd.read_csv(os.path.join(obs_dir, subdir, filename),
-            skiprows=0,
-            delim_whitespace=True,
-            header=None,
-            names=names,
-            na_values=-9999.0000)
+                            skiprows=0,
+                            delim_whitespace=True,
+                            header=None,
+                            names=names,
+                            na_values=-9999.0000)
 
-    ecflux_df['DATES'] = pd.to_datetime(ecflux_df.YEAR * 10000 +
-                                 ecflux_df.MONTH * 100 +
-                                 ecflux_df.DAY,format='%Y%m%d')
+    # add datetime index
+    time_cols = ['YEAR', 'MONTH', 'DAY']
+    ecflux_df.index = pd.to_datetime(ecflux_df[time_cols])
 
-    ecflux_df.index = ecflux_df.DATES
+    if 'HOUR' in ecflux_df:
+        ecflux_df.index += pd.Series([pd.Timedelta(s, unit='s') for s in
+                                     ecflux_df['HOUR'] * 3600],
+                                     index=ecflux_df.index)
+        time_cols.append('HOUR')
 
-    ecflux_df.drop(['YEAR', 'DAY'], inplace=True, axis=1)
+    # remove year, day columns of DataFrame
+    ecflux_df.drop(time_cols, inplace=True, axis=1)
 
-    if ('HOUR' not in ecflux_df) and ('SEC' in ecflux_df):
+    '''if ('HOUR' not in ecflux_df) and ('SEC' in ecflux_df):
         # add hour column for groupby
         ecflux_df['HOUR'] = (ecflux_df['SEC'] * (1/3600)
-                                        ).astype(int)
+                                        ).astype(int)'''
 
-    return(ecflux_df)
+    return ecflux_df
+
 
 def plot_fluxnet_comparison(driver, science_test_data_dir,
                             compare_data_dict,
@@ -662,9 +663,9 @@ def plot_fluxnet_comparison(driver, science_test_data_dir,
 
     # loop over Ameriflux sites
     obs_dir = os.path.join(science_test_data_dir,
-                            'datasets',
-                            'ec_flux_towers',
-                            'obs')
+                           'datasets',
+                           'ec_flux_towers',
+                           'obs')
 
     for subdir in os.listdir(obs_dir):
 
@@ -680,7 +681,8 @@ def plot_fluxnet_comparison(driver, science_test_data_dir,
                     try:
                         # load Ameriflux data
                         data[key] = read_fluxnet_obs(subdir,
-                                                science_test_data_dir, items)
+                                                     science_test_data_dir,
+                                                     items)
                     except OSError:
                         warnings.warn("this site does not have data")
 
@@ -688,137 +690,151 @@ def plot_fluxnet_comparison(driver, science_test_data_dir,
                     try:
                         # load VIC 4.2 simulations
                         data[key] = read_vic_42_output(lat, lng,
-                                                science_test_data_dir,
-                                                items)
+                                                       science_test_data_dir,
+                                                       items)
 
                     except OSError:
-                        warnings.warn("this site has a lat/lng precision issue")
+                        warnings.warn("this site has a " +
+                                      "lat/lng precision issue")
 
                 else:
                     try:
                         # load VIC 5 simulations
                         data[key] = read_vic_5_output(lat, lng,
-                                                science_test_data_dir,
-                                                items)
+                                                      science_test_data_dir,
+                                                      items)
                     except OSError:
-                        warnings.warn("this site has a lat/lng precision issue")
+                        warnings.warn("this site has a " +
+                                      "lat/lng precision issue")
 
             # make figures
-            vic_vars = ['OUT_LATENT', 'OUT_SENSIBLE', 'OUT_SWNET', 'OUT_LWNET']
-            variable_names = ['LH', 'H',
-                                'SW NET',
-                                'LW NET']
+            vars = {'OUT_LATENT': 'LH', 'OUT_SENSIBLE': 'H', 'OUT_SWNET':
+                    'SW_NET', 'OUT_LWNET': 'LW NET'}
 
             # plot preferences
-            lw = 4.0
             fs = 15
             dpi = 150
-            sns.set_style('whitegrid')
 
             if 'annual_mean_diurnal_cycle' in plots_to_make:
 
                 # make annual mean diurnal cycle plots
-                f, axarr = plt.subplots(4, 1, figsize=(8,8), sharex=True)
+                with plt.rc_context(dict(sns.axes_style("whitegrid"),
+                                    **sns.plotting_context("notebook"))):
+                    f, axarr = plt.subplots(4, 1, figsize=(8, 8), sharex=True)
 
-                for i, vic_var in enumerate(vic_vars):
+                    for i, (vic_var, variable_name) in enumerate(vars.items()):
 
-                    # calculate annual mean diurnal cycle for each DataFrame
-                    annual_mean = {}
-                    for (key, df) in data.items():
-                        annual_mean[key] = pd.DataFrame(df[vic_var].groupby(
-                                                        df['HOUR']).mean())
+                        # calculate annual mean diurnal cycle for each
+                        # DataFrame
+                        annual_mean = {}
+                        for key, df in data.items():
+                            annual_mean[key] = pd.DataFrame(df[vic_var].
+                                                            groupby(df.index.
+                                                            hour).mean())
 
-                    df = pd.DataFrame({key: d[vic_var] for key, d in
-                                    annual_mean.items() if vic_var in d})
+                        df = pd.DataFrame({key: d[vic_var] for key, d in
+                                          annual_mean.items() if vic_var in d})
 
-                    for key, series in df.iteritems():
-                        series.plot(linewidth=compare_data_dict[key]
-                                    ['linewidth'],
-                                    ax=axarr[i],
-                                    color=compare_data_dict[key]['color'],
-                                    linestyle=compare_data_dict[key]
-                                    ['linestyle'],
-                                    zorder=compare_data_dict[key]['zorder'])
+                        for key, series in df.iteritems():
+                            series.plot(linewidth=compare_data_dict[key]
+                                        ['linewidth'],
+                                        ax=axarr[i],
+                                        color=compare_data_dict[key]['color'],
+                                        linestyle=compare_data_dict[key]
+                                        ['linestyle'],
+                                        zorder=compare_data_dict[key]
+                                        ['zorder'])
 
-                    axarr[i].legend(loc='upper left')
-                    axarr[i].set_ylabel('%s ($W/{m^2}$)' %variable_names[i],
-                                        size=fs)
-                    axarr[i].set_xlabel('Time of Day (Hour)', size=fs)
-                    axarr[i].set_xlim([0,24])
-                    axarr[i].xaxis.set_ticks(np.arange(0, 24, 3))
+                        axarr[i].legend(loc='upper left')
+                        axarr[i].set_ylabel('%s ($W/{m^2}$)' % variable_name,
+                                            size=fs)
+                        axarr[i].set_xlabel('Time of Day (Hour)', size=fs)
+                        axarr[i].set_xlim([0, 24])
+                        axarr[i].xaxis.set_ticks(np.arange(0, 24, 3))
 
-                # save plot
-                plotname = '%s_%s.png' % (lat, lng)
-                os.makedirs(os.path.join(plot_dir, 'annual_mean'),
-                                        exist_ok=True)
-                savepath = os.path.join(plot_dir, 'annual_mean', plotname)
-                plt.savefig(savepath, bbox_inches='tight', dpi=dpi)
-                print("saved figure to %s" %savepath)
+                    # save plot
+                    plotname = '%s_%s.png' % (lat, lng)
+                    print(lat)
+                    print(lng)
+                    os.makedirs(os.path.join(plot_dir, 'annual_mean'),
+                                exist_ok=True)
+                    savepath = os.path.join(plot_dir, 'annual_mean', plotname)
+                    plt.savefig(savepath, bbox_inches='tight', dpi=dpi)
+                    print("saved figure to %s" % savepath)
 
-                plt.clf()
-                plt.close()
+                    plt.clf()
+                    plt.close()
 
             if 'monthly_mean_diurnal_cycle' in plots_to_make:
 
                 # make monthly mean diurnal cycle plots
-                f, axarr = plt.subplots(4, 12, figsize=(35,7), sharex=True,
-                                        sharey=True)
+                with plt.rc_context(dict(sns.axes_style("whitegrid"),
+                                    **sns.plotting_context("notebook"))):
+                    f, axarr = plt.subplots(4, 12, figsize=(35, 7),
+                                            sharex=True,
+                                            sharey=True)
 
-                months = ['January', 'February', 'March', 'April', 'May',
-                            'June', 'July', 'August', 'September',
-                            'October', 'November', 'December']
+                    months = ['January', 'February', 'March', 'April', 'May',
+                              'June', 'July', 'August', 'September',
+                              'October', 'November', 'December']
 
-                for i, vic_var in enumerate(vic_vars):
-                    for j in range(12):
+                    for i, (vic_var, variable_name) in enumerate(vars.items()):
+                        for j in range(12):
 
-                        # calculate monthly mean diurnal cycle
-                        monthly_mean = {}
-                        for (key, df) in data.items():
-                            monthly_mean[key] = pd.DataFrame(df[vic_var].
-                                                    groupby([df['MONTH'],
-                                                    df['HOUR']]).mean())
+                            # calculate monthly mean diurnal cycle
+                            monthly_mean = {}
+                            for (key, df) in data.items():
+                                monthly_mean[key] = pd.DataFrame(df[vic_var].
+                                                                 groupby(
+                                                                 [df.index.
+                                                                  month,
+                                                                  df.index.
+                                                                  hour]).
+                                                                 mean())
 
-                        df = pd.DataFrame({key: d[vic_var] for key, d in
-                                        monthly_mean.items() if vic_var in d})
+                            df = pd.DataFrame({key: d[vic_var] for key, d in
+                                              monthly_mean.items() if vic_var
+                                              in d})
 
-                        for key, series in df.iteritems():
-                            series[j+1].plot(linewidth=compare_data_dict[key]
-                                        ['linewidth'],
-                                        ax=axarr[i,j],
-                                        color=compare_data_dict[key]
-                                        ['color'],
-                                        linestyle=compare_data_dict[key]
-                                        ['linestyle'],
-                                        zorder=compare_data_dict[key]['zorder'])
+                            for key, series in df.iteritems():
+                                series[j+1].plot(linewidth=compare_data_dict
+                                                 [key]['linewidth'],
+                                                 ax=axarr[i, j],
+                                                 color=compare_data_dict[key]
+                                                 ['color'],
+                                                 linestyle=compare_data_dict
+                                                 [key]['linestyle'],
+                                                 zorder=compare_data_dict[key]
+                                                 ['zorder'])
 
-                        if i == 0 and j == 11:
-                            axarr[i,j].legend(loc='center left',
-                                                bbox_to_anchor=(1, 0.5))
-                        axarr[i,j].set_ylabel('%s \n ($W/{m^2}$)'
-                                            %variable_names[i],
-                                            size=fs)
-                        axarr[i,j].set_xlabel('', size=fs)
-                        axarr[i,j].set_xlim([0,24])
-                        axarr[i,j].xaxis.set_ticks(np.arange(0, 24, 3))
-                        if i == 0:
-                            axarr[i,j].set_title(months[j], size=fs)
-                        '''if vic_var == 'OUT_LATENT':
-                            axarr[i,j].set_ylim([-50,300])'''
+                            axarr[i, j].set_ylabel('%s \n ($W/{m^2}$)'
+                                                   % variable_name,
+                                                   size=fs)
+                            axarr[i, j].set_xlabel('', size=fs)
+                            axarr[i, j].set_xlim([0, 24])
+                            axarr[i, j].xaxis.set_ticks(np.arange(0, 24, 3))
+                            if i == 0:
+                                axarr[i, j].set_title(months[j], size=fs)
 
-                # add common x label
-                f.text(0.5, 0.04, 'Time of Day (Hour)', ha='center', size=fs)
+                    # add legend
+                    axarr[0, -1].legend(loc='center left',
+                                        bbox_to_anchor=(1, 0.5))
 
-                # save plot
-                plotname = '%s_%s.png' % (lat, lng)
-                os.makedirs(os.path.join(plot_dir, 'monthly_mean'),
-                            exist_ok=True)
-                savepath = os.path.join(plot_dir,
-                                        'monthly_mean', plotname)
-                plt.savefig(savepath, bbox_inches='tight', dpi=dpi)
-                print("saved figure to %s" %savepath)
+                    # add common x label
+                    f.text(0.5, 0.04, 'Time of Day (Hour)', ha='center',
+                           size=fs)
 
-                plt.clf()
-                plt.close()
+                    # save plot
+                    plotname = '%s_%s.png' % (lat, lng)
+                    os.makedirs(os.path.join(plot_dir, 'monthly_mean'),
+                                exist_ok=True)
+                    savepath = os.path.join(plot_dir,
+                                            'monthly_mean', plotname)
+                    plt.savefig(savepath, bbox_inches='tight', dpi=dpi)
+                    print("saved figure to %s" % savepath)
+
+                    plt.clf()
+                    plt.close()
 
         else:
             subdir_files = False

@@ -642,12 +642,12 @@ func_surf_energy_bal(double  Ts,
     /* if thin snowpack, compute the change in energy stored in the pack */
     if (INCLUDE_SNOW) {
         if (TMean > 0.) {
-            *deltaCC = CONST_CPICE *
-                       (snow_swq - snow_water) * (0. - OldTSurf) / delta_t;
+            *deltaCC = CONST_VCPICE_WQ * (snow_swq - snow_water) *
+                       (0. - OldTSurf) / delta_t;
         }
         else {
-            *deltaCC = CONST_CPICE *
-                       (snow_swq - snow_water) * (TMean - OldTSurf) / delta_t;
+            *deltaCC = CONST_VCPICE_WQ * (snow_swq - snow_water) *
+                       (TMean - OldTSurf) / delta_t;
         }
         *refreeze_energy = (snow_water * CONST_LATICE * snow_density) / delta_t;
         *deltaCC *= snow_coverage; // adjust for snow cover fraction

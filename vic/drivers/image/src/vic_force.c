@@ -366,6 +366,10 @@ vic_force(void)
             force[i].vp[j] = q_to_vp(force[i].vp[j], force[i].pressure[j]);
             // vapor pressure deficit in Pa
             force[i].vpd[j] = svp(force[i].air_temp[j]) - force[i].vp[j];
+            if (force[i].vpd[j] < 0) {
+                force[i].vpd[j]  = 0;
+                force[i].vp[j]  = svp(force[i].air_temp[j]);
+            }
             // air density in kg/m3
             force[i].density[j] = air_density(force[i].air_temp[j],
                                               force[i].pressure[j]);

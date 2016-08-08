@@ -138,6 +138,10 @@ vic_force(force_data_struct *force,
             force[rec].vp[i] = forcing_data[VP][uidx] * PA_PER_KPA;
             // vapor pressure deficit in Pa
             force[rec].vpd[i] = svp(force[rec].air_temp[i]) - force[rec].vp[i];
+            if (force[rec].vpd[i] < 0) {
+                force[rec].vpd[i] = 0;
+                force[rec].vp[i] = svp(force[rec].air_temp[i]);
+            }
             // air density in kg/m3
             force[rec].density[i] = air_density(force[rec].air_temp[i],
                                                 force[rec].pressure[i]);

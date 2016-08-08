@@ -24,7 +24,6 @@ from test_utils import (setup_test_dirs, print_test_dict,
                         find_global_param_value,
                         check_multistream_classic,
                         plot_science_tests)
-from test_image_driver import (test_image_driver_no_output_file_nans)
 from test_image_driver import (test_image_driver_no_output_file_nans,
                                check_multistream_image,
                                setup_subdirs_and_fill_in_global_param_mpi_test,
@@ -678,12 +677,12 @@ def run_science(config_file, vic_exe, science_test_data_dir,
 
             # plot science test results
             plot_science_tests(test_dict['driver'],
-                                test_type,
-                                science_test_data_dir,
-                                dirs['results'],
-                                dirs['plots'],
-                                test_dict['plots'],
-                                test_dict['compare_data'])
+                               test_type,
+                               science_test_data_dir,
+                               dirs['results'],
+                               dirs['plots'],
+                               test_dict['plots'],
+                               test_dict['compare_data'])
 
         # Handle errors
         except Exception as e:
@@ -691,11 +690,11 @@ def run_science(config_file, vic_exe, science_test_data_dir,
 
         # record the test results
         test_results[test_type] = TestResults(test_type,
-                                             test_complete=test_complete,
-                                             passed=test_passed,
-                                             comment=test_comment,
-                                             error_message=error_message,
-                                             returncode=returncode)
+                                              test_complete=test_complete,
+                                              passed=test_passed,
+                                              comment=test_comment,
+                                              error_message=error_message,
+                                              returncode=returncode)
 
     print('-'.ljust(OUTPUT_WIDTH, '-'))
     print('Finished testing science tests.')

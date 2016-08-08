@@ -206,15 +206,15 @@ def read_vic_ascii(filepath, parse_dates=True, datetime_index=None, sep='\t',
         raise ValueError('cannot specify both parse_dates and datetime_index')
 
     if parse_dates:
+        # add datetime index
         time_cols = ['YEAR', 'MONTH', 'DAY']
-        df.index = pd.to_datetime(df.YEAR * 10000 + df.MONTH * 100 +
-                                  df.DAY, format='%Y%m%d')
+        df.index = pd.to_datetime(df[time_cols]
         if 'SEC' in df:
             df.index += pd.Series([pd.Timedelta(s, unit='s') for s in
                                   df['SEC']],
                                   index=df.index)
             time_cols.append('SEC')
-        df.drop(time_cols, axis=1)
+        df.drop(time_cols, inplace=True, axis=1)
 
     if datetime_index is not None:
         df.index = datetime_index
@@ -248,8 +248,7 @@ def find_global_param_value(gp, param_name):
 
 def check_multistream_classic(fnames):
     '''
-    Test the multistream aggregation in the classic driver
-    '''
+    Test the multistream aggregation in the classic driver '''
 
     how_dict = {'OUT_ALBEDO': 'max',
                 'OUT_SOIL_TEMP_1': 'min',
@@ -318,8 +317,7 @@ def check_multistream_classic(fnames):
 
 
 def tsplit(string, delimiters):
-    '''Behaves like str.split but supports multiple delimiters.
-    '''
+    '''Behaves like str.split but supports multiple delimiters. '''
 
     delimiters = tuple(delimiters)
     stack = [string]
@@ -335,8 +333,7 @@ def tsplit(string, delimiters):
 
 
 def read_snotel_swe_obs(filename, science_test_data_dir, items):
-    '''Reads in Snotel SWE obs and returns DataFrame.
-    '''
+    '''Reads in Snotel SWE obs and returns DataFrame. '''
 
     filename_fullpath = os.path.join(science_test_data_dir,
                                      'datasets',
@@ -350,23 +347,20 @@ def read_snotel_swe_obs(filename, science_test_data_dir, items):
                              delim_whitespace=True,
                              names=['YEAR', 'MONTH', 'DAY', 'OUT_SWE'])
 
-    # add datetime object column to snotel DataFrame
-    snotel_swe['DATES'] = pd.to_datetime(snotel_swe.YEAR * 10000 +
-                                         snotel_swe.MONTH * 100 +
-                                         snotel_swe.DAY,
-                                         format='%Y%m%d')
-
-    # remove year, month, day columns of DataFrame
-    snotel_swe.drop(['YEAR', 'MONTH', 'DAY'], inplace=True, axis=1)
-
     snotel_swe.index = snotel_swe['DATES']
+
+    # add datetime index
+    time_cols = ['YEAR', 'MONTH', 'DAY']
+    snotel_swe.index = pd.to_datetime(snotel_swe[time_cols])
+
+    # remove year, day columns of DataFrame
+    snotel_swe.drop(time_cols, inplace=True, axis=1)
 
     return snotel_swe
 
 
 def read_vic_42_output(lat, lng, science_test_data_dir, items):
-    ''' Reads output from VIC 4.2.
-    '''
+    ''' Reads output from VIC 4.2. '''
 
     if items['compare_to'] == 'ecflux':
         vic_42_file = 'en_bal_%s_%s' % (lat, lng)
@@ -404,11 +398,10 @@ def read_vic_42_output(lat, lng, science_test_data_dir, items):
     vic_42.index = pd.to_datetime(vic_42[time_cols])
 
     if 'HOUR' in vic_42:
-        vic_42['SEC'] = vic_42.HOUR * 3600
-        vic_42.index += pd.Series([pd.Timedelta(s, unit='s') for s in
-                                  vic_42['SEC']],
+        vic_42.index += pd.Series([pd.Timedelta(s, unit='h') for s in
+                                  vic_42['HOUR']],
                                   index=vic_42.index)
-        time_cols.extend(['SEC', 'HOUR'])
+        time_cols.append('HOUR')
 
     # remove year, day columns of DataFrame
     vic_42.drop(time_cols, inplace=True, axis=1)
@@ -417,8 +410,7 @@ def read_vic_42_output(lat, lng, science_test_data_dir, items):
 
 
 def read_vic_5_output(lat, lng, science_test_data_dir, items):
-    ''' Read VIC 5.0.x output.
-    '''
+    ''' Read VIC 5.0.x output. '''
 
     if items['compare_to'] == 'ecflux':
         vic_5_file = 'en_bal_%s_%s.txt' % (lat, lng)
@@ -439,16 +431,15 @@ def read_vic_5_output(lat, lng, science_test_data_dir, items):
                         sep='\t')
 
     # remove spaces from column names
-    vic_5 = vic_5.rename(columns=lambda x: x.replace(' ', ''))
+    vic_5.rename(columns=lambda x: x.replace(' ', ''), inplace=True)
 
     # add datetime index
     time_cols = ['YEAR', 'MONTH', 'DAY']
     vic_5.index = pd.to_datetime(vic_5[time_cols])
 
     if 'SEC' in vic_5:
-        vic_5.index += pd.Series([pd.Timedelta(s, unit='s') for s in
-                                 vic_5['SEC']],
-                                 index=vic_5.index)
+        vic_5.index += pd.Series([pd.Timedelta(s, unit='s')
+                                  for s in vic_5['SEC']], index=vic_5.index)
         time_cols.append('SEC')
 
     # remove year, day columns of DataFrame
@@ -507,8 +498,7 @@ def plot_snotel_comparison(driver, science_test_data_dir,
                            compare_data_dict,
                            result_dir, plot_dir,
                            plots_to_make):
-    ''' makes snotel figures
-    '''
+    ''' makes snotel figures '''
 
     # plot settings
     plot_variables = {'OUT_SWE': 'mm', 'OUT_ALBEDO': 'fraction',
@@ -517,6 +507,8 @@ def plot_snotel_comparison(driver, science_test_data_dir,
                       'degrees C', 'OUT_SNOW_MELT': 'mm', 'OUT_R_NET':
                       '$W/{m^2}$', 'OUT_LATENT': '$W/{m^2}$',
                       'OUT_SENSIBLE': '$W/{m^2}$'}
+    context = "paper"
+    style = "whitegrid"
 
     for filename in os.listdir(os.path.join(science_test_data_dir,
                                             'datasets',
@@ -553,23 +545,22 @@ def plot_snotel_comparison(driver, science_test_data_dir,
 
             if 'water_year' in plots_to_make:
 
-                with plt.rc_context(dict(sns.axes_style("whitegrid"),
-                                    **sns.plotting_context("notebook"))):
+                with plt.rc_context(dict(sns.axes_style(style),
+                                    **sns.plotting_context(context))):
                     fig, ax = plt.subplots(figsize=(10, 10))
 
                     df = pd.DataFrame({key: d[plot_variable] for key, d in
-                                      data.items() if plot_variable in d})
+                                       data.items() if plot_variable in d})
 
                     for key, series in df.iteritems():
-
-                        series.plot(use_index=True,
-                                    linewidth=compare_data_dict[key]
-                                    ['linewidth'],
-                                    ax=ax,
-                                    color=compare_data_dict[key]['color'],
-                                    linestyle=compare_data_dict[key]
-                                    ['linestyle'],
-                                    zorder=compare_data_dict[key]['zorder'])
+                        series.plot(
+                            use_index=True,
+                            linewidth=compare_data_dict[key]['linewidth'],
+                            ax=ax,
+                            color=compare_data_dict[key]['color'],
+                            linestyle=compare_data_dict[key]
+                            ['linestyle'],
+                            zorder=compare_data_dict[key]['zorder'])
 
                     ax.legend(loc='upper left')
                     ax.set_ylabel("%s [%s]" % (plot_variable, units))
@@ -610,18 +601,18 @@ def get_fluxnet_lat_lon(obs_dir, subdir):
 
 def read_fluxnet_obs(subdir, science_test_data_dir, items):
 
-    filename = '%s.stdfmt.hourly.local.txt' % subdir
-
     # column names for DataFrame (same as VIC variable names)
-    names = ['YEAR', 'MONTH', 'DAY', 'HOUR', 'PREC', 'AIR_TEMP', 'SWDOWN',
-             'LWDOWN', 'OUT_REL_HUMID', 'PRESSURE', 'WIND', 'OUT_EVAP',
-             'SOIL_TEMP_DEPTH1', 'SOIL_TEMP_DEPTH2', 'SOIL_TEMP_DEPTH3',
-             'SOIL_TEMP_DEPTH4', 'SOIL_TEMP_DEPTH5', 'OUT_SOIL_MOIST1',
-             'OUT_SOIL_MOIST2', 'OUT_SOIL_MOIST3', 'OUT_SOIL_MOIST4',
-             'OUT_SOIL_MOIST5', 'OUT_SOIL_TEMP1', 'OUT_SOIL_TEMP2',
-             'OUT_SOIL_TEMP3', 'OUT_SOIL_TEMP4', 'OUT_SOIL_TEMP5', 'OUT_SWNET',
-             'OUT_LWNET', 'OUT_SENSIBLE', 'OUT_LATENT', 'OUT_GRND_FLUX']
+    fluxnet_names = ['YEAR', 'MONTH', 'DAY', 'HOUR', 'PREC', 'AIR_TEMP',
+                     'SWDOWN', 'LWDOWN', 'OUT_REL_HUMID', 'PRESSURE', 'WIND',
+                     'OUT_EVAP', 'SOIL_TEMP_DEPTH1', 'SOIL_TEMP_DEPTH2',
+                     'SOIL_TEMP_DEPTH3', 'SOIL_TEMP_DEPTH4',
+                     'SOIL_TEMP_DEPTH5', 'OUT_SOIL_MOIST1', 'OUT_SOIL_MOIST2', 'OUT_SOIL_MOIST3', 'OUT_SOIL_MOIST4', 'OUT_SOIL_MOIST5',
+                     'OUT_SOIL_TEMP1', 'OUT_SOIL_TEMP2', 'OUT_SOIL_TEMP3',
+                     'OUT_SOIL_TEMP4', 'OUT_SOIL_TEMP5', 'OUT_SWNET',
+                     'OUT_LWNET', 'OUT_SENSIBLE', 'OUT_LATENT',
+                     'OUT_GRND_FLUX']
 
+    filename = '%s.stdfmt.hourly.local.txt' % subdir
     # read in data with -9999.0000 as NaNs
     obs_dir = os.path.join(science_test_data_dir, 'datasets',
                            'ec_flux_towers', 'obs')
@@ -629,7 +620,7 @@ def read_fluxnet_obs(subdir, science_test_data_dir, items):
                             skiprows=0,
                             delim_whitespace=True,
                             header=None,
-                            names=names,
+                            names=fluxnet_names,
                             na_values=-9999.0000)
 
     # add datetime index
@@ -637,18 +628,13 @@ def read_fluxnet_obs(subdir, science_test_data_dir, items):
     ecflux_df.index = pd.to_datetime(ecflux_df[time_cols])
 
     if 'HOUR' in ecflux_df:
-        ecflux_df.index += pd.Series([pd.Timedelta(s, unit='s') for s in
-                                     ecflux_df['HOUR'] * 3600],
+        ecflux_df.index += pd.Series([pd.Timedelta(s, unit='h') for s in
+                                     ecflux_df['HOUR']],
                                      index=ecflux_df.index)
         time_cols.append('HOUR')
 
     # remove year, day columns of DataFrame
     ecflux_df.drop(time_cols, inplace=True, axis=1)
-
-    '''if ('HOUR' not in ecflux_df) and ('SEC' in ecflux_df):
-        # add hour column for groupby
-        ecflux_df['HOUR'] = (ecflux_df['SEC'] * (1/3600)
-                                        ).astype(int)'''
 
     return ecflux_df
 
@@ -657,9 +643,17 @@ def plot_fluxnet_comparison(driver, science_test_data_dir,
                             compare_data_dict,
                             result_dir, plot_dir,
                             plots_to_make):
-
     ''' makes Ameriflux figures
     '''
+
+    context = "paper"
+    style = "whitegrid"
+    var_names = {'OUT_LATENT': 'LH', 'OUT_SENSIBLE': 'H', 'OUT_SWNET':
+                 'SW_NET', 'OUT_LWNET': 'LW NET'}
+
+    months = ['January', 'February', 'March', 'April', 'May',
+              'June', 'July', 'August', 'September',
+              'October', 'November', 'December']
 
     # loop over Ameriflux sites
     obs_dir = os.path.join(science_test_data_dir,
@@ -684,7 +678,8 @@ def plot_fluxnet_comparison(driver, science_test_data_dir,
                                                      science_test_data_dir,
                                                      items)
                     except OSError:
-                        warnings.warn("this site does not have data")
+                        warnings.warn(
+                            "this %s site does not have data" % subdir)
 
                 elif key == "VIC.4.2.d":
                     try:
@@ -694,8 +689,8 @@ def plot_fluxnet_comparison(driver, science_test_data_dir,
                                                        items)
 
                     except OSError:
-                        warnings.warn("this site has a " +
-                                      "lat/lng precision issue")
+                        warnings.warn(
+                            "this site has a lat/lng precision issue")
 
                 else:
                     try:
@@ -704,12 +699,10 @@ def plot_fluxnet_comparison(driver, science_test_data_dir,
                                                       science_test_data_dir,
                                                       items)
                     except OSError:
-                        warnings.warn("this site has a " +
-                                      "lat/lng precision issue")
+                        warnings.warn(
+                            "this site has a lat/lng precision issue")
 
             # make figures
-            vars = {'OUT_LATENT': 'LH', 'OUT_SENSIBLE': 'H', 'OUT_SWNET':
-                    'SW_NET', 'OUT_LWNET': 'LW NET'}
 
             # plot preferences
             fs = 15
@@ -718,49 +711,46 @@ def plot_fluxnet_comparison(driver, science_test_data_dir,
             if 'annual_mean_diurnal_cycle' in plots_to_make:
 
                 # make annual mean diurnal cycle plots
-                with plt.rc_context(dict(sns.axes_style("whitegrid"),
-                                    **sns.plotting_context("notebook"))):
+                with plt.rc_context(dict(sns.axes_style(style),
+                                    **sns.plotting_context(context))):
                     f, axarr = plt.subplots(4, 1, figsize=(8, 8), sharex=True)
 
-                    for i, (vic_var, variable_name) in enumerate(vars.items()):
+                    for i, (vic_var, variable_name) in enumerate(
+                            var_names.items()):
 
                         # calculate annual mean diurnal cycle for each
                         # DataFrame
                         annual_mean = {}
                         for key, df in data.items():
-                            annual_mean[key] = pd.DataFrame(df[vic_var].
-                                                            groupby(df.index.
-                                                            hour).mean())
+                            annual_mean[key] = pd.DataFrame(
+                                df[vic_var].groupby(df.index.hour).mean())
 
-                        df = pd.DataFrame({key: d[vic_var] for key, d in
-                                          annual_mean.items() if vic_var in d})
+                        df = pd.DataFrame(
+                            {key: d[vic_var] for key, d in annual_mean.items()
+                             if vic_var in d})
 
                         for key, series in df.iteritems():
-                            series.plot(linewidth=compare_data_dict[key]
-                                        ['linewidth'],
-                                        ax=axarr[i],
-                                        color=compare_data_dict[key]['color'],
-                                        linestyle=compare_data_dict[key]
-                                        ['linestyle'],
-                                        zorder=compare_data_dict[key]
-                                        ['zorder'])
+                            series.plot(
+                                linewidth=compare_data_dict[key]['linewidth'],
+                                ax=axarr[i],
+                                color=compare_data_dict[key]['color'],
+                                linestyle=compare_data_dict[key]['linestyle'],
+                                zorder=compare_data_dict[key]['zorder'])
 
                         axarr[i].legend(loc='upper left')
-                        axarr[i].set_ylabel('%s ($W/{m^2}$)' % variable_name,
-                                            size=fs)
+                        axarr[i].set_ylabel(
+                            '%s ($W/{m^2}$)' % variable_name,
+                            size=fs)
                         axarr[i].set_xlabel('Time of Day (Hour)', size=fs)
                         axarr[i].set_xlim([0, 24])
                         axarr[i].xaxis.set_ticks(np.arange(0, 24, 3))
 
                     # save plot
                     plotname = '%s_%s.png' % (lat, lng)
-                    print(lat)
-                    print(lng)
                     os.makedirs(os.path.join(plot_dir, 'annual_mean'),
                                 exist_ok=True)
                     savepath = os.path.join(plot_dir, 'annual_mean', plotname)
                     plt.savefig(savepath, bbox_inches='tight', dpi=dpi)
-                    print("saved figure to %s" % savepath)
 
                     plt.clf()
                     plt.close()
@@ -768,53 +758,44 @@ def plot_fluxnet_comparison(driver, science_test_data_dir,
             if 'monthly_mean_diurnal_cycle' in plots_to_make:
 
                 # make monthly mean diurnal cycle plots
-                with plt.rc_context(dict(sns.axes_style("whitegrid"),
-                                    **sns.plotting_context("notebook"))):
+                with plt.rc_context(dict(sns.axes_style(style),
+                                    **sns.plotting_context(context))):
                     f, axarr = plt.subplots(4, 12, figsize=(35, 7),
                                             sharex=True,
                                             sharey=True)
 
-                    months = ['January', 'February', 'March', 'April', 'May',
-                              'June', 'July', 'August', 'September',
-                              'October', 'November', 'December']
+                    for i, (vic_var, variable_name) in enumerate(
+                            var_names.items()):
 
-                    for i, (vic_var, variable_name) in enumerate(vars.items()):
-                        for j in range(12):
+                        # calculate monthly mean diurnal cycle
+                        monthly_mean = {}
+                        for (key, df) in data.items():
+                            monthly_mean[key] = pd.DataFrame(
+                                df[vic_var].groupby([df.index.month,
+                                                    df.index.hour]).mean())
 
-                            # calculate monthly mean diurnal cycle
-                            monthly_mean = {}
-                            for (key, df) in data.items():
-                                monthly_mean[key] = pd.DataFrame(df[vic_var].
-                                                                 groupby(
-                                                                 [df.index.
-                                                                  month,
-                                                                  df.index.
-                                                                  hour]).
-                                                                 mean())
+                        df = pd.DataFrame(
+                            {key: d[vic_var] for key, d in monthly_mean.items()
+                             if vic_var in d})
 
-                            df = pd.DataFrame({key: d[vic_var] for key, d in
-                                              monthly_mean.items() if vic_var
-                                              in d})
+                        for j, month in enumerate(months):
 
                             for key, series in df.iteritems():
-                                series[j+1].plot(linewidth=compare_data_dict
-                                                 [key]['linewidth'],
-                                                 ax=axarr[i, j],
-                                                 color=compare_data_dict[key]
-                                                 ['color'],
-                                                 linestyle=compare_data_dict
-                                                 [key]['linestyle'],
-                                                 zorder=compare_data_dict[key]
-                                                 ['zorder'])
+                                series[j + 1].plot(
+                                    linewidth=compare_data_dict[key]['linewidth'],
+                                    ax=axarr[i, j],
+                                    color=compare_data_dict[key]['color'],
+                                    linestyle=compare_data_dict[key]['linestyle'],
+                                    zorder=compare_data_dict[key]['zorder'])
 
-                            axarr[i, j].set_ylabel('%s \n ($W/{m^2}$)'
-                                                   % variable_name,
-                                                   size=fs)
+                            axarr[i, j].set_ylabel(
+                                '%s \n ($W/{m^2}$)' % variable_name,
+                                size=fs)
                             axarr[i, j].set_xlabel('', size=fs)
                             axarr[i, j].set_xlim([0, 24])
                             axarr[i, j].xaxis.set_ticks(np.arange(0, 24, 3))
                             if i == 0:
-                                axarr[i, j].set_title(months[j], size=fs)
+                                axarr[i, j].set_title(month, size=fs)
 
                     # add legend
                     axarr[0, -1].legend(loc='center left',
@@ -831,11 +812,6 @@ def plot_fluxnet_comparison(driver, science_test_data_dir,
                     savepath = os.path.join(plot_dir,
                                             'monthly_mean', plotname)
                     plt.savefig(savepath, bbox_inches='tight', dpi=dpi)
-                    print("saved figure to %s" % savepath)
 
                     plt.clf()
                     plt.close()
-
-        else:
-            subdir_files = False
-            warnings.warn("this site does not have data")

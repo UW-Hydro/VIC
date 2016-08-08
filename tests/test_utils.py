@@ -208,7 +208,7 @@ def read_vic_ascii(filepath, parse_dates=True, datetime_index=None, sep='\t',
     if parse_dates:
         # add datetime index
         time_cols = ['YEAR', 'MONTH', 'DAY']
-        df.index = pd.to_datetime(df[time_cols]
+        df.index = pd.to_datetime(df[time_cols])
         if 'SEC' in df:
             df.index += pd.Series([pd.Timedelta(s, unit='s') for s in
                                   df['SEC']],

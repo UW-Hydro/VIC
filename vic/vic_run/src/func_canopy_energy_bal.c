@@ -256,7 +256,8 @@ func_canopy_energy_bal(double  Tfoliage,
 
     /* Calculate the advected energy */
 
-    *AdvectedEnergy = (CONST_CPFW * Tcanopy * Rainfall) / (delta_t);
+    *AdvectedEnergy = (CONST_CPFW * CONST_RHOFW * Tcanopy * Rainfall) /
+                      (delta_t);
 
     /* Calculate the amount of energy available for refreezing */
 

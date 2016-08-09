@@ -347,8 +347,6 @@ def read_snotel_swe_obs(filename, science_test_data_dir, items):
                              delim_whitespace=True,
                              names=['YEAR', 'MONTH', 'DAY', 'OUT_SWE'])
 
-    snotel_swe.index = snotel_swe['DATES']
-
     # add datetime index
     time_cols = ['YEAR', 'MONTH', 'DAY']
     snotel_swe.index = pd.to_datetime(snotel_swe[time_cols])

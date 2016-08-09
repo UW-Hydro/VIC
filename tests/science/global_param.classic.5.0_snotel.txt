@@ -50,7 +50,7 @@ SNOW_BAND             1
 
 RESULT_DIR            $result_dir
 
-CONSTANTS             $test_dir/science/vic_parameters_42.txt
+CONSTANTS             $test_dir/science/vic_parameters_42_compat.txt
 
 OUTFILE         outfile 24
 AGGFREQ         NDAYS

@@ -176,6 +176,7 @@ This is a major update from VIC 4. The VIC 5.0.0 release aims to have nearly ide
 	Fixed a bug so that the binary format state file I/O works correctly.
 
 5. Fix for a physical constant (water heat capacity) ([GH#574](https://github.com/UW-Hydro/VIC/pull/574))
+
 	Fixed a bug where volumetric heat capacity of water should be used in `func_canopy_energy_bal` (previously specific heat capacity was used).
 
 ------------------------------

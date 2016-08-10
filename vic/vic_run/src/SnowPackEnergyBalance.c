@@ -238,7 +238,7 @@ SnowPackEnergyBalance(double  TSurf,
        Equation 7.3.12 from H.B.H. for rain falling on melting snowpack */
 
     if (TMean == 0.) {
-        *AdvectedEnergy = (CONST_CPFW * (Tair) * Rain) / (Dt);
+        *AdvectedEnergy = (CONST_CPFW * CONST_RHOFW * (Tair) * Rain) / (Dt);
     }
     else {
         *AdvectedEnergy = 0.;

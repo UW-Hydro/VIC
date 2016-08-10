@@ -22,7 +22,8 @@ from test_utils import (setup_test_dirs, print_test_dict,
                         test_classic_driver_all_complete,
                         test_classic_driver_no_output_file_nans,
                         find_global_param_value,
-                        check_multistream_classic)
+                        check_multistream_classic,
+                        plot_science_tests)
 from test_image_driver import (test_image_driver_no_output_file_nans,
                                check_multistream_image,
                                setup_subdirs_and_fill_in_global_param_mpi_test,
@@ -147,13 +148,22 @@ def main():
                         default='$WORKDIR/VIC_tests_{0}'.format(ymd))
     parser.add_argument('--data_dir', type=str,
                         help='directory to find test data',
-                        default=os.path.join(test_dir, '../samples/VIC_sample_data'))
+                        default='./samples/VIC_sample_data')
+    parser.add_argument('--science_test_data_dir', type=str,
+                        help='directory to find science test data',
+                        default='./samples/VIC_sample_data')
+
     args = parser.parse_args()
 
     # Define test directories
     data_dir = args.data_dir
     out_dir = os.path.expandvars(args.output_dir)
     os.makedirs(out_dir, exist_ok=True)
+
+    # check to make sure science test data directory exists
+    science_test_data_dir = args.science_test_data_dir
+    if 'science' in args.tests and not os.path.exists(science_test_data_dir):
+        raise VICTestError("directory for science test data does not exist or has not been defined")
 
     # Validate input directories
     if not (len(args.tests) == 1 and args.tests[0] == 'unit'):
@@ -183,7 +193,9 @@ def main():
                                             args.driver)
     # science
     if any(i in ['all', 'science'] for i in args.tests):
-        test_results['science'] = run_science(args.science, vic_exe, data_dir,
+        test_results['science'] = run_science(args.science, vic_exe,
+                                              science_test_data_dir,
+                                              data_dir,
                                               os.path.join(out_dir, 'science'),
                                               args.driver)
     # examples
@@ -541,7 +553,8 @@ def run_system(config_file, vic_exe, test_data_dir, out_dir, driver):
     return test_results
 
 
-def run_science(config_file, vic_exe, test_data_dir, out_dir, driver):
+def run_science(config_file, vic_exe, science_test_data_dir,
+                test_data_dir, out_dir, driver):
     '''Run science tests from config file
 
     Parameters
@@ -550,6 +563,8 @@ def run_science(config_file, vic_exe, test_data_dir, out_dir, driver):
         Configuration file for science tests.
     vic_exe : VIC (object)
         VIC executable object (see tonic documentation).
+    science_test_data_dir: str
+        Path to science test data sets (archived VIC runs and observations)
     test_data_dir : str
         Path to test data sets.
     out_dir : str
@@ -576,7 +591,7 @@ def run_science(config_file, vic_exe, test_data_dir, out_dir, driver):
     print('-'.ljust(OUTPUT_WIDTH, '-'))
 
     # Get setup
-    config = read_config(config_file)
+    config = read_configobj(config_file)
 
     # drop invalid driver tests
     config = drop_tests(config, driver)
@@ -584,18 +599,19 @@ def run_science(config_file, vic_exe, test_data_dir, out_dir, driver):
     test_results = OrderedDict()
 
     # Run individual tests
-    for i, (testname, test_dict) in enumerate(config.items()):
+    for i, (test_type, test_dict) in enumerate(config.items()):
 
         # print out status info
         print('Running test {0}/{1}: {2}'.format(i + 1, len(config.items()),
-                                                 testname))
+                                                 test_type))
 
         # Setup directories for test
-        dirs = setup_test_dirs(testname, out_dir,
+        dirs = setup_test_dirs(test_type, out_dir,
                                mkdirs=['results', 'state', 'logs', 'plots'])
 
         # read template global parameter file
-        infile = os.path.join(test_dir, test_dict['global_parameter_file'])
+        infile = os.path.join(test_dir, 'science',
+                                test_dict['global_parameter_file'])
 
         with open(infile, 'r') as global_file:
             global_param = global_file.read()
@@ -604,14 +620,15 @@ def run_science(config_file, vic_exe, test_data_dir, out_dir, driver):
         s = string.Template(global_param)
 
         # fill in global parameter options
-        global_param = s.safe_substitute(test_data_dir=test_data_dir,
+        global_param = s.safe_substitute(test_data_dir=science_test_data_dir,
+                                         test_dir=test_dir,
                                          result_dir=dirs['results'],
                                          state_dir=dirs['state'],
-                                         testname=testname,
+                                         testname=test_type,
                                          test_root=test_dir)
 
         test_global_file = os.path.join(dirs['test'],
-                                        '{0}_globalparam.txt'.format(testname))
+                                        '{0}_globalparam.txt'.format(test_type))
 
         # write global parameter file
         with open(test_global_file, 'w') as f:
@@ -658,17 +675,26 @@ def run_science(config_file, vic_exe, test_data_dir, out_dir, driver):
             # if we got this far, the test passed.
             test_passed = True
 
+            # plot science test results
+            plot_science_tests(test_dict['driver'],
+                               test_type,
+                               science_test_data_dir,
+                               dirs['results'],
+                               dirs['plots'],
+                               test_dict['plots'],
+                               test_dict['compare_data'])
+
         # Handle errors
         except Exception as e:
             test_comment, error_message = process_error(e, vic_exe)
 
         # record the test results
-        test_results[testname] = TestResults(testname,
-                                             test_complete=test_complete,
-                                             passed=test_passed,
-                                             comment=test_comment,
-                                             error_message=error_message,
-                                             returncode=returncode)
+        test_results[test_type] = TestResults(test_type,
+                                              test_complete=test_complete,
+                                              passed=test_passed,
+                                              comment=test_comment,
+                                              error_message=error_message,
+                                              returncode=returncode)
 
     print('-'.ljust(OUTPUT_WIDTH, '-'))
     print('Finished testing science tests.')

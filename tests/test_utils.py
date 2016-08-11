@@ -492,6 +492,7 @@ def check_drivers_match_fluxes(list_drivers, result_basedir):
                                         'classic and image drivers'.
                                                 format(var))
 
+
 def tsplit(string, delimiters):
     '''Behaves like str.split but supports multiple delimiters. '''
 

@@ -564,19 +564,18 @@ def run_system(config_file, vic_exe, test_data_dir, out_dir, driver):
                 for dr in dict_test_global_file.keys():
                     # Reset mpi_proc in option kwargs to None for classic
                     # driver run
-#                    if dr == 'classic':
-#                        run_kwargs_classic = run_kwargs
-#                        run_kwargs_classic['mpi_proc'] = None
-#                        returncode = dict_vic_exe[dr].run(
-#                                        dict_test_global_file[dr],
-#                                        logdir=dirs['logs'],
-#                                        **run_kwargs_classic)
-#                    else:
-#                        returncode = dict_vic_exe[dr].run(
-#                                        dict_test_global_file[dr],
-#                                        logdir=dirs['logs'],
-#                                        **run_kwargs)
-                    returncode = 0
+                    if dr == 'classic':
+                        run_kwargs_classic = run_kwargs
+                        run_kwargs_classic['mpi_proc'] = None
+                        returncode = dict_vic_exe[dr].run(
+                                        dict_test_global_file[dr],
+                                        logdir=dirs['logs'],
+                                        **run_kwargs_classic)
+                    else:
+                        returncode = dict_vic_exe[dr].run(
+                                        dict_test_global_file[dr],
+                                        logdir=dirs['logs'],
+                                        **run_kwargs)
                     # Check return code
                     check_returncode(dict_vic_exe[dr],
                                      test_dict.pop('expected_retval', 0))

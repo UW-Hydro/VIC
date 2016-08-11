@@ -443,51 +443,44 @@ def check_drivers_match_fluxes(list_drivers, result_basedir):
                 df_classic = read_vic_ascii(fname)
                 ds_image_cell = ds_image.sel(lat=gcell.lat, lon=gcell.lon)
                 # compare each variable
-                print('Plot grid cell {} {}'.format(gcell.lat, gcell.lon))
                 for var in ds_image_cell.data_vars:
-                    if len(ds_image_cell[var].coords) == 3:  # if a time series
-                        pass
-                        fig = plt.figure()
-                        ds_image_cell[var].to_series().plot(
-                                color='k', style='-', label='image')
-                        df_classic[var].plot(color='r', style='--', label='classic')
-                        plt.xlabel('Time')
-                        plt.ylabel(var)
-                        plt.legend()
-                        plt.title('{}, {}, {}'.format(var, gcell.lat, gcell.lon))
-                        fig.savefig('./check_plots/{}_{}_{}.png'.format(
-                                            var, gcell.lat, gcell.lon),
-                                    format='png')
-
-
-#                        try:  # try absolute difference
-#                            np.testing.assert_almost_equal(
-#                                ds_image_cell[var].values, df_classic[var].values,
-#                                decimal=1,
-#                                err_msg='Variable={} is different (in absolute value) in the classic '
-#                                        'and image drivers'.format(var))
-#                        except AssertionError:  # if try relative difference
-#                            np.testing.assert_allclose(
-#                                ds_image_cell[var].values, df_classic[var].values,
-#                                rtol=0.10, atol=0,
-#                                err_msg='Variable=%s is different (in relative value) in the classic '
-#                                        'and image drivers' % var)
-
-                    elif len(ds_image_cell[var].coords) == 4:  # if [time, nlayer]
+                    # if one [time] dimension
+                    if len(ds_image_cell[var].coords) == 3:
+                        # determine precision for comparison
+                        if np.mean(ds_image_cell[var].values) == 0:
+                            decimal = 2
+                        else:
+                            decimal = int(round(- np.log10(np.max(np.absolute(
+                                            ds_image_cell[var].values)))
+                                                + 1))
+                        if decimal > 4:
+                            decimal = 4
+                        # assert almost equal
+                        np.testing.assert_almost_equal(
+                            ds_image_cell[var].values, df_classic[var].values,
+                            decimal=decimal,
+                            err_msg='Variable {} is different in the classic '
+                                    'and image drivers'.format(var))
+                    # if [time, nlayer]
+                    elif len(ds_image_cell[var].coords) == 4:
                         for l in ds_image['nlayer']:
                             s_classic = df_classic['{}_{}'.format(var, l.values)]
                             s_image = ds_image_cell[var].sel(nlayer=l).to_series()
-                            fig = plt.figure()
-                            s_image.plot(
-                                color='k', style='-', label='image')
-                            s_classic.plot(color='r', style='--', label='classic')
-                            plt.xlabel('Time')
-                            plt.ylabel(var)
-                            plt.legend()
-                            plt.title('{}, layer {}, {}, {}'.format(
-                                    var, l.values, gcell.lat, gcell.lon))
-                            fig.savefig('./check_plots/{}_{}_{}_{}.png'.format(
-                                            var, l.values, gcell.lat, gcell.lon),
-                                        format='png')
+                            # determine precision for comparison
+                            if np.mean(s_image.values) == 0:
+                                decimal = 2
+                            else:
+                                decimal = int(round(- np.log10(np.max(
+                                                np.absolute(s_image.values)))
+                                                    + 1))
+                            if decimal > 4:
+                                decimal = 4
+                            # assert almost eqaul
+                            np.testing.assert_almost_equal(
+                                s_image.values,
+                                s_classic.values,
+                                decimal=decimal,
+                                err_msg='Variable {} is different in the '
+                                        'classic and image drivers'.
+                                                format(var))
 
-    exit()

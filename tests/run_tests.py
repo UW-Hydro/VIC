@@ -556,21 +556,6 @@ def run_system(config_file, vic_exe, test_data_dir, out_dir, driver):
                     # Check return code
                     check_returncode(vic_exe,
                                      test_dict.pop('expected_retval', 0))
-            elif 'mpi' in test_dict['check']:
-                for j, test_global_file in enumerate(list_test_global_file):
-                    # Overwrite mpi_proc in option kwargs
-                    n_proc = list_n_proc[j]
-                    if n_proc == 1:
-                        run_kwargs['mpi_proc'] = None
-                    else:
-                        run_kwargs['mpi_proc'] = list_n_proc[j]
-                    # Run VIC
-                    returncode = vic_exe.run(test_global_file,
-                                             logdir=dirs['logs'],
-                                             **run_kwargs)
-                    # Check return code
-                    check_returncode(vic_exe,
-                                     test_dict.pop('expected_retval', 0))
             elif 'driver_match' in test_dict['check']:
                 for dr in dict_test_global_file.keys():
                     # Reset mpi_proc in option kwargs to None for classic

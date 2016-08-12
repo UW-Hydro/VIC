@@ -25,7 +25,8 @@ from test_utils import (
             find_global_param_value,
             check_multistream_classic,
             setup_subdirs_and_fill_in_global_param_driver_match_test,
-            check_drivers_match_fluxes)
+            check_drivers_match_fluxes,
+            plot_science_tests)
 from test_image_driver import (test_image_driver_no_output_file_nans,
                                check_multistream_image,
                                setup_subdirs_and_fill_in_global_param_mpi_test,

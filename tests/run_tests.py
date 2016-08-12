@@ -219,18 +219,23 @@ def main():
                                                 list_driver)
     # science
     if any(i in ['all', 'science'] for i in args.tests):
-        test_results['science'] = run_science(args.science, vic_exe,
-                                              science_test_data_dir,
-                                              data_dir,
-                                              os.path.join(out_dir, 'science'),
-                                              args.driver)
+        if len(args.driver) == 1:  # if only one driver
+            driver = args.driver[0]
+            test_results['science'] = run_science(
+                                            args.science, vic_exe,
+                                            science_test_data_dir,
+                                            data_dir,
+                                            os.path.join(out_dir, 'science'),
+                                            driver)
     # examples
     if any(i in ['all', 'examples'] for i in args.tests):
-        test_results['examples'] = run_examples(args.examples, vic_exe,
-                                                data_dir,
-                                                os.path.join(
-                                                    out_dir, 'examples'),
-                                                args.driver)
+        if len(args.driver) == 1:  # if only one driver
+            driver = args.driver[0]
+            test_results['examples'] = run_examples(args.examples, vic_exe,
+                                                    data_dir,
+                                                    os.path.join(
+                                                        out_dir, 'examples'),
+                                                    driver)
     # release
     if any(i in ['all', 'release'] for i in args.tests):
         test_results['release'] = run_release(args.release)

@@ -513,7 +513,8 @@ def read_snotel_swe_obs(filename, science_test_data_dir, items):
     '''Reads in Snotel SWE obs and returns DataFrame. '''
 
     filename_fullpath = os.path.join(science_test_data_dir,
-                                     'datasets',
+                                     'science',
+                                     'inputdata',
                                      items['archive'],
                                      'observations',
                                      filename)
@@ -539,12 +540,12 @@ def read_vic_42_output(lat, lng, science_test_data_dir, items):
 
     if items['compare_to'] == 'ecflux':
         vic_42_file = 'en_bal_%s_%s' % (lat, lng)
-        vic_42_dir = os.path.join(science_test_data_dir, 'test_runs',
+        vic_42_dir = os.path.join(science_test_data_dir, 'science', 'archive',
                                   items['archive'], 'ecflux', 'results')
 
     elif items['compare_to'] == 'snotel':
         vic_42_file = 'outfile_%s_%s' % (lat, lng)
-        vic_42_dir = os.path.join(science_test_data_dir, 'test_runs',
+        vic_42_dir = os.path.join(science_test_data_dir, 'science', 'archive',
                                   items['archive'], 'snotel', 'results')
 
     else:
@@ -589,12 +590,12 @@ def read_vic_5_output(lat, lng, science_test_data_dir, items):
 
     if items['compare_to'] == 'ecflux':
         vic_5_file = 'en_bal_%s_%s.txt' % (lat, lng)
-        vic_5_dir = os.path.join(science_test_data_dir, 'test_runs',
+        vic_5_dir = os.path.join(science_test_data_dir, 'science', 'archive',
                                  items['archive'], 'ecflux', 'results')
 
     elif items['compare_to'] == 'snotel':
         vic_5_file = 'outfile_%s_%s.txt' % (lat, lng)
-        vic_5_dir = os.path.join(science_test_data_dir, 'test_runs',
+        vic_5_dir = os.path.join(science_test_data_dir, 'science', 'archive',
                                  items['archive'], 'snotel', 'results')
 
     else:
@@ -686,7 +687,8 @@ def plot_snotel_comparison(driver, science_test_data_dir,
     style = "whitegrid"
 
     for filename in os.listdir(os.path.join(science_test_data_dir,
-                                            'datasets',
+                                            'science',
+                                            'inputdata',
                                             'snotel',
                                             'observations')):
 
@@ -781,7 +783,8 @@ def read_fluxnet_obs(subdir, science_test_data_dir, items):
                      'SWDOWN', 'LWDOWN', 'OUT_REL_HUMID', 'PRESSURE', 'WIND',
                      'OUT_EVAP', 'SOIL_TEMP_DEPTH1', 'SOIL_TEMP_DEPTH2',
                      'SOIL_TEMP_DEPTH3', 'SOIL_TEMP_DEPTH4',
-                     'SOIL_TEMP_DEPTH5', 'OUT_SOIL_MOIST1', 'OUT_SOIL_MOIST2', 'OUT_SOIL_MOIST3', 'OUT_SOIL_MOIST4', 'OUT_SOIL_MOIST5',
+                     'SOIL_TEMP_DEPTH5', 'OUT_SOIL_MOIST1', 'OUT_SOIL_MOIST2',
+                     'OUT_SOIL_MOIST3', 'OUT_SOIL_MOIST4', 'OUT_SOIL_MOIST5',
                      'OUT_SOIL_TEMP1', 'OUT_SOIL_TEMP2', 'OUT_SOIL_TEMP3',
                      'OUT_SOIL_TEMP4', 'OUT_SOIL_TEMP5', 'OUT_SWNET',
                      'OUT_LWNET', 'OUT_SENSIBLE', 'OUT_LATENT',
@@ -789,7 +792,7 @@ def read_fluxnet_obs(subdir, science_test_data_dir, items):
 
     filename = '%s.stdfmt.hourly.local.txt' % subdir
     # read in data with -9999.0000 as NaNs
-    obs_dir = os.path.join(science_test_data_dir, 'datasets',
+    obs_dir = os.path.join(science_test_data_dir, 'science', 'inputdata',
                            'ec_flux_towers', 'obs')
     ecflux_df = pd.read_csv(os.path.join(obs_dir, subdir, filename),
                             skiprows=0,
@@ -818,8 +821,7 @@ def plot_fluxnet_comparison(driver, science_test_data_dir,
                             compare_data_dict,
                             result_dir, plot_dir,
                             plots_to_make):
-    ''' makes Ameriflux figures
-    '''
+    ''' makes Ameriflux figures '''
 
     context = "paper"
     style = "whitegrid"
@@ -832,7 +834,8 @@ def plot_fluxnet_comparison(driver, science_test_data_dir,
 
     # loop over Ameriflux sites
     obs_dir = os.path.join(science_test_data_dir,
-                           'datasets',
+                           'science',
+                           'inputdata',
                            'ec_flux_towers',
                            'obs')
 

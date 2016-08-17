@@ -100,12 +100,13 @@ def replace_global_values(gp, replace):
     return gpl
 
 
-def drop_tests(config, driver):
+def drop_tests(config, dict_drivers):
     '''helper function to remove tests that should not be run for driver'''
 
     new = {}
 
-    if not isinstance(driver, list):  # if single driver
+    if len(dict_drivers.keys()) == 1:  # if single driver
+        driver = list(dict_drivers.keys())[0]
         for key, test_cfg in config.items():
             try:
                 if not isinstance(test_cfg['driver'], list):
@@ -118,11 +119,12 @@ def drop_tests(config, driver):
             try:
                 if isinstance(test_cfg['driver'], list):
                     # check whether the test has the same number of drivers
-                    if len(test_cfg['driver']) == len(driver):
-                        # check whether the test wants to test the same drivers
+                    if len(test_cfg['driver']) == len(dict_drivers.keys()):
+                        # check whether the test wants to test the same set
+                        # of drivers
                         flag = 1
-                        for d in driver:
-                            if d not in test_cfg['driver']:
+                        for driver in dict_drivers.keys():
+                            if driver not in test_cfg['driver']:
                                 flag = 0
                         if flag == 1:
                             new[key] = test_cfg
@@ -401,7 +403,7 @@ def check_drivers_match_fluxes(list_drivers, result_basedir):
 
     Parameters
     ----------
-    list_drivers: <dict>
+    list_drivers: <list>
         A list of driver names to be compared
         e.g., ['classic'; 'image']
         NOTE: must have classic driver; classic driver will be the base for
@@ -415,6 +417,7 @@ def check_drivers_match_fluxes(list_drivers, result_basedir):
     glob
     xarray
     numpy
+    warnings
     collections.namedtuple
     parse_classic_driver_outfile_name
     VICOutFile
@@ -426,8 +429,8 @@ def check_drivers_match_fluxes(list_drivers, result_basedir):
         list_fnames_classic = glob.glob(os.path.join(
                                     result_basedir, 'classic', '*'))
     except:
-        print('Error: must have classic driver for driver-match test!')
-        raise
+        raise ValueError('incorrect classic driver output for driver-match '
+                         'test')
 
     # Loop over all other drivers and compare with classic driver
     for driver in list_drivers:
@@ -439,8 +442,8 @@ def check_drivers_match_fluxes(list_drivers, result_basedir):
             # load flux file
             if len(glob.glob(os.path.join(
                     result_basedir, driver, '*.nc'))) > 1:
-                print('Warning: more than one netCDF file found under'
-                      'directory {}'.format(result_dir))
+                warnings.warn('More than one netCDF file found under'
+                              'directory {}'.format(result_dir))
             fname = glob.glob(os.path.join(result_basedir, driver, '*.nc'))[0]
             ds_image = xr.open_dataset(fname)
            

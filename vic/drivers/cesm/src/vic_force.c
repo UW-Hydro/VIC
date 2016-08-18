@@ -1,7 +1,7 @@
 /******************************************************************************
  * @section DESCRIPTION
  *
- * Read atmospheric forcing data.
+ * Unpack forcing data.
  *
  * @section LICENSE
  *
@@ -35,7 +35,7 @@ vic_force(void)
     extern size_t              NF;
     extern size_t              NR;
     extern size_t              current;
-    extern atmos_data_struct  *atmos;
+    extern force_data_struct  *force;
     extern x2l_data_struct    *x2l_vic;
     extern dmy_struct          dmy_current;
     extern domain_struct       global_domain;
@@ -72,7 +72,7 @@ vic_force(void)
         for (i = 0; i < local_domain.ncells_active; i++) {
             // CESM units: K
             // VIC units: C
-            atmos[i].air_temp[j] = x2l_vic[i].x2l_Sa_tbot - CONST_TKFRZ;
+            force[i].air_temp[j] = x2l_vic[i].x2l_Sa_tbot - CONST_TKFRZ;
         }
     }
 
@@ -82,7 +82,7 @@ vic_force(void)
             // CESM units: km m-2 s-1
             // VIC units: mm / timestep
             // Note: VIC does not use liquid/solid precip partitioning
-            atmos[i].prec[j] = (x2l_vic[i].x2l_Faxa_rainc +
+            force[i].prec[j] = (x2l_vic[i].x2l_Faxa_rainc +
                                 x2l_vic[i].x2l_Faxa_rainl +
                                 x2l_vic[i].x2l_Faxa_snowc +
                                 x2l_vic[i].x2l_Faxa_snowl) *
@@ -96,7 +96,7 @@ vic_force(void)
             // CESM units: W m-2
             // VIC units: W m-2
             // Note: VIC does not use partitioned shortwave fluxes.
-            atmos[i].shortwave[j] = (x2l_vic[i].x2l_Faxa_swndr +
+            force[i].shortwave[j] = (x2l_vic[i].x2l_Faxa_swndr +
                                      x2l_vic[i].x2l_Faxa_swvdr +
                                      x2l_vic[i].x2l_Faxa_swndf +
                                      x2l_vic[i].x2l_Faxa_swvdf);
@@ -108,7 +108,7 @@ vic_force(void)
         for (i = 0; i < local_domain.ncells_active; i++) {
             // CESM units: W m-2
             // VIC units: W m-2
-            atmos[i].longwave[j] = x2l_vic[i].x2l_Faxa_lwdn;
+            force[i].longwave[j] = x2l_vic[i].x2l_Faxa_lwdn;
         }
     }
 
@@ -118,7 +118,7 @@ vic_force(void)
             // CESM units: m s-1
             // VIC units: m s-1
             // Note: VIC does not use partitioned wind speeds
-            atmos[i].wind[j] = sqrt(pow(x2l_vic[i].x2l_Sa_u, 2) +
+            force[i].wind[j] = sqrt(pow(x2l_vic[i].x2l_Sa_u, 2) +
                                     pow(x2l_vic[i].x2l_Sa_v, 2));
         }
     }
@@ -128,7 +128,7 @@ vic_force(void)
         for (i = 0; i < local_domain.ncells_active; i++) {
             // CESM units: Pa
             // VIC units: kPa
-            atmos[i].pressure[j] = x2l_vic[i].x2l_Sa_pbot / PA_PER_KPA;
+            force[i].pressure[j] = x2l_vic[i].x2l_Sa_pbot / PA_PER_KPA;
         }
     }
 
@@ -137,8 +137,8 @@ vic_force(void)
         for (i = 0; i < local_domain.ncells_active; i++) {
             // CESM units: shum is specific humidity (g/g)
             // VIC units: kPa
-            atmos[i].vp[j] = q_to_vp(x2l_vic[i].x2l_Sa_shum,
-                                     atmos[i].pressure[j]);
+            force[i].vp[j] = q_to_vp(x2l_vic[i].x2l_Sa_shum,
+                                     force[i].pressure[j]);
         }
     }
 
@@ -148,14 +148,14 @@ vic_force(void)
             for (i = 0; i < local_domain.ncells_active; i++) {
                 // CESM units: n/a (calculated from SW fluxes)
                 // VIC units: fraction
-                if (atmos[i].shortwave[j] != 0.) {
-                    atmos[i].fdir[j] = (x2l_vic[i].x2l_Faxa_swndr +
+                if (force[i].shortwave[j] != 0.) {
+                    force[i].fdir[j] = (x2l_vic[i].x2l_Faxa_swndr +
                                         x2l_vic[i].x2l_Faxa_swvdr) /
                                        (x2l_vic[i].x2l_Faxa_swndf +
                                         x2l_vic[i].x2l_Faxa_swvdf);
                 }
                 else {
-                    atmos[i].fdir[j] = 0.;
+                    force[i].fdir[j] = 0.;
                 }
             }
         }
@@ -165,14 +165,14 @@ vic_force(void)
             for (i = 0; i < local_domain.ncells_active; i++) {
                 // CESM units: 1e-6 mol/mol
                 // VIC units: mol CO2/ mol air
-                atmos[i].Catm[j] = 1e6 * x2l_vic[i].x2l_Sa_co2prog;
+                force[i].Catm[j] = 1e6 * x2l_vic[i].x2l_Sa_co2prog;
             }
         }
 
         // Cosine of solar zenith angle
         for (j = 0; j < NF; j++) {
             for (i = 0; i < local_domain.ncells_active; i++) {
-                atmos[i].coszen[j] = compute_coszen(
+                force[i].coszen[j] = compute_coszen(
                     local_domain.locations[i].latitude,
                     local_domain.locations[i].longitude,
                     soil_con[i].time_zone_lng, dmy_current.day_in_year,
@@ -187,14 +187,14 @@ vic_force(void)
             for (i = 0; i < local_domain.ncells_active; i++) {
                 // CESM units: kg m-2 s-1
                 // VIC units: mm
-                atmos[i].channel_in[j] = x2l_vic[i].x2l_Flrr_flood *
+                force[i].channel_in[j] = x2l_vic[i].x2l_Flrr_flood *
                                          global_param.snow_dt;
             }
         }
     }
 
     if (options.SNOW_BAND > 1) {
-        log_err("SNOW_BAND not implemented in vic_force()");
+        log_err("SNOW_BAND not implemented");
     }
     else {
         t_offset = 0;
@@ -204,49 +204,49 @@ vic_force(void)
     for (i = 0; i < local_domain.ncells_active; i++) {
         for (j = 0; j < NF; j++) {
             // vapor pressure deficit
-            atmos[i].vpd[j] = svp(atmos[i].air_temp[j]) - atmos[i].vp[j];
+            force[i].vpd[j] = svp(force[i].air_temp[j]) - force[i].vp[j];
             // photosynthetically active radiation
             // TODO: Add CARBON_SW2PAR back to the parameters structure
-            // atmos[i].par[j] = param.CARBON_SW2PAR * atmos[i].shortwave[j];
+            // force[i].par[j] = param.CARBON_SW2PAR * force[i].shortwave[j];
             // air density
-            atmos[i].density[j] = air_density(atmos[i].air_temp[j],
-                                              atmos[i].pressure[j]);
+            force[i].density[j] = air_density(force[i].air_temp[j],
+                                              force[i].pressure[j]);
             // snow flag
-            atmos[i].snowflag[j] = will_it_snow(&(atmos[i].air_temp[j]),
+            force[i].snowflag[j] = will_it_snow(&(force[i].air_temp[j]),
                                                 t_offset,
                                                 param.SNOW_MAX_SNOW_TEMP,
-                                                &(atmos[i].prec[j]), 1);
+                                                &(force[i].prec[j]), 1);
         }
     }
 
 
     // Put average value in NR field
     for (i = 0; i < local_domain.ncells_active; i++) {
-        atmos[i].air_temp[NR] = average(atmos[i].air_temp, NF);
+        force[i].air_temp[NR] = average(force[i].air_temp, NF);
         // For precipitation put total
-        atmos[i].prec[NR] = average(atmos[i].prec, NF) * NF;
-        atmos[i].shortwave[NR] = average(atmos[i].shortwave, NF);
-        atmos[i].longwave[NR] = average(atmos[i].longwave, NF);
-        atmos[i].pressure[NR] = average(atmos[i].pressure, NF);
-        atmos[i].wind[NR] = average(atmos[i].wind, NF);
-        atmos[i].vp[NR] = average(atmos[i].vp, NF);
-        atmos[i].vpd[NR] = (svp(atmos[i].air_temp[NR]) - atmos[i].vp[NR]);
-        atmos[i].density[NR] = air_density(atmos[i].air_temp[NR],
-                                           atmos[i].pressure[NR]);
-        atmos[i].snowflag[NR] = will_it_snow(atmos[i].air_temp, t_offset,
+        force[i].prec[NR] = average(force[i].prec, NF) * NF;
+        force[i].shortwave[NR] = average(force[i].shortwave, NF);
+        force[i].longwave[NR] = average(force[i].longwave, NF);
+        force[i].pressure[NR] = average(force[i].pressure, NF);
+        force[i].wind[NR] = average(force[i].wind, NF);
+        force[i].vp[NR] = average(force[i].vp, NF);
+        force[i].vpd[NR] = (svp(force[i].air_temp[NR]) - force[i].vp[NR]);
+        force[i].density[NR] = air_density(force[i].air_temp[NR],
+                                           force[i].pressure[NR]);
+        force[i].snowflag[NR] = will_it_snow(force[i].air_temp, t_offset,
                                              param.SNOW_MAX_SNOW_TEMP,
-                                             atmos[i].prec, NF);
+                                             force[i].prec, NF);
 
         // Optional inputs
         if (options.LAKES) {
-            atmos[i].channel_in[NR] = average(atmos[i].channel_in, NF) * NF;
+            force[i].channel_in[NR] = average(force[i].channel_in, NF) * NF;
         }
         if (options.CARBON) {
-            atmos[i].Catm[NR] = average(atmos[i].Catm, NF);
-            atmos[i].fdir[NR] = average(atmos[i].fdir, NF);
-            atmos[i].par[NR] = average(atmos[i].par, NF);
+            force[i].Catm[NR] = average(force[i].Catm, NF);
+            force[i].fdir[NR] = average(force[i].fdir, NF);
+            force[i].par[NR] = average(force[i].par, NF);
             // for coszen, use value at noon
-            atmos[i].coszen[NR] = compute_coszen(
+            force[i].coszen[NR] = compute_coszen(
                 local_domain.locations[i].latitude,
                 local_domain.locations[i].longitude, soil_con[i].time_zone_lng,
                 dmy_current.day_in_year, SEC_PER_DAY / 2);

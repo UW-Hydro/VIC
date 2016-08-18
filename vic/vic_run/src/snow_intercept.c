@@ -74,7 +74,7 @@ snow_intercept(double             Dt,
                unsigned short     veg_class,
                double            *CanopLayerBnd,
                double            *dryFrac,
-               atmos_data_struct *atmos,
+               force_data_struct *force,
                layer_data_struct *layer,
                soil_con_struct   *soil_con,
                veg_var_struct    *veg_var)
@@ -127,13 +127,13 @@ snow_intercept(double             Dt,
 
     char                     ErrorString[MAXSTRING];
 
-    AirDens = atmos->density[hidx];
-    EactAir = atmos->vp[hidx];
-    Press = atmos->pressure[hidx];
-    Vpd = atmos->vpd[hidx];
-    shortwave = atmos->shortwave[hidx];
+    AirDens = force->density[hidx];
+    EactAir = force->vp[hidx];
+    Press = force->pressure[hidx];
+    Vpd = force->vpd[hidx];
+    shortwave = force->shortwave[hidx];
     if (options.CARBON) {
-        Catm = atmos->Catm[hidx];
+        Catm = force->Catm[hidx];
     }
     else {
         Catm = MISSING;

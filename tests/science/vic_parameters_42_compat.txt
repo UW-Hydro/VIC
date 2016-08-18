@@ -1,0 +1,279 @@
+ # @section DESCRIPTION
+ #
+ # VIC Model Parameters Namelist
+ #
+ # This file includes all physical constants from VIC 4.2 for compatible 
+ # testing between VIC 4.2 and VIC 5.0.
+ #
+ # @section LICENSE
+ #
+ # The Variable Infiltration Capacity (VIC) macroscale hydrological model
+ # Copyright (C) 2016 The Computational Hydrology Group, Department of Civil
+ # and Environmental Engineering, University of Washington.
+ #
+ # The VIC model is free software; you can redistribute it and/or
+ # modify it under the terms of the GNU General Public License
+ # as published by the Free Software Foundation; either version 2
+ # of the License, or (at your option) any later version.
+ #
+ # This program is distributed in the hope that it will be useful,
+ # but WITHOUT ANY WARRANTY; without even the implied warranty of
+ # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ # GNU General Public License for more details.
+ #
+ # You should have received a copy of the GNU General Public License along with
+ # this program; if not, write to the Free Software Foundation, Inc.,
+ # 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+ ##############################################################################
+
+###############################################################################
+LAPSE_RATE -0.0065   # temperature lapse rate in C/m
+###############################################################################
+
+###############################################################################
+ALBEDO_BARE_SOIL 0.2  # albedo for bare soil
+
+EMISS_GRND 1.0  # Ground emissivity
+EMISS_VEG 1.0  # Veg emissivity
+EMISS_ICE 0.97  # Ice emissivity
+EMISS_SNOW 1.0  # Snow emissivity
+###############################################################################
+
+
+DEFAULT_WIND_SPEED 3.0  # Default wind speed [m/s] used when wind is not
+                        # supplied as a forcing
+
+###############################################################################
+# Physical Constraints
+SOIL_RESID_MOIST 0.0  # define residual moisture content of soil column
+SOIL_SLAB_MOIST_FRACT 1.0  # Volumetric moisture content (fraction of porosity)
+                           # in the soil/rock below the bottom soil layer; this
+                           # assumes that the soil below the bottom layer has
+                           # the same texture as the bottom layer.
+
+# water holding capacity of snow as a fraction of snow-water-equivalent
+VEG_LIQUID_WATER_CAPACITY 0.035
+
+# multiplier to calculate the amount of available snow interception as a
+#function of LAI (m)
+VEG_LAI_SNOW_MULTIPLIER 0.0005
+
+# the amount of snow on the canopy that can only be melted off. (m)
+VEG_MIN_INTERCEPTION_STORAGE 0.005
+
+# Coefficient multiplied by the LAI to determine the amount of water that can
+# be stored in the canopy
+VEG_LAI_WATER_FACTOR 0.1
+###############################################################################
+
+###############################################################################
+# Canopy Resistance Parameters
+CANOPY_CLOSURE 4000.0  # Threshold vapor pressure deficit for stomatal closure (Pa)
+CANOPY_RSMAX 5000.0  # Maximum allowable resistance (s/m)
+CANOPY_VPDMINFACTOR 0.1  # Minimum allowable vapor pressure deficit factor
+###############################################################################
+
+###############################################################################
+# Lake Model Parameters
+
+# lake model related constants
+LAKE_TMELT 0.0
+LAKE_MAX_SURFACE_LAKE 0.6  # max. surface layer thickness for E-B (m)
+LAKE_BETA 0.001  # Curve shape parameter for lake profile.
+LAKE_FRACMIN 0.10  # min ice thickness in meters
+LAKE_FRACLIM 0.02  # lower limit on fractional ice cover
+LAKE_DM 1.38889E-07  # molecular diffusivity of water
+LAKE_SNOWCRIT 0.05  # for albedo, in m
+LAKE_ZWATER 0.0045  # 0.004 - original value
+LAKE_ZSNOW 0.005
+LAKE_RHOSNOW 250.0  # densities snow on ice
+LAKE_CONDI 2.3  # thermal conductivity of ice
+LAKE_CONDS 0.7  # thermal conductivity of snow
+
+# attenuation of short and longwave radiation through ice (1/m)
+LAKE_LAMISW 1.5  # 1.5 in Patterson & Hamblin
+LAKE_LAMILW 20.0  # 20.0 in Patterson & Hamblin
+
+# attenuation of short and longwave radiation through snow (1/m)
+LAKE_LAMSSW 6.0  # 6.0 in Patterson & Hamblin
+LAKE_LAMSLW 20.0  # 20.0 in Patterson & Hamblin
+
+# attenuation of short and longwave radiation through water (1/m)
+LAKE_LAMWSW 0.3  # San Fran Bay data: 0.31 - 29.9 1/m (visible)
+LAKE_LAMWLW 1.4  # Hostetler and Bartlein assume 0.85 1/m (total)
+LAKE_A1 0.7  # Fraction of radiation in visible band.
+LAKE_A2 0.3  # Fraction of radiation in infrared band.
+LAKE_QWTAU 43200.0  # D. Pollard sub-ice time constant. (86400. / 2.)
+###############################################################################
+
+###############################################################################
+# Saturated Vapor Pressure Curve Parameters
+SVP_A 0.61078
+SVP_B 17.269
+SVP_C 237.3
+###############################################################################
+
+###############################################################################
+# Carbon Cycling constants
+CARBON_CATMCURRENT 383.0  # Current global atmospheric CO2 mixing ratio (ppm)
+CARBON_SW2PAR 0.45  # Empirical ratio of PAR [W/m2] to SHORTWAVE [W/m2] from Lopez et al., 2001
+###############################################################################
+
+###############################################################################
+# Photosynthesis Parameters
+PHOTO_OMEGA 0.12  # single leaf scattering albedo
+PHOTO_LAIMAX 8.0  # Maximum LAI in nitrogen scaling
+PHOTO_LAILIMIT 3.0  # Minimum LAI in nitrogen scaling and maximum LAI in PAR
+                    # computation
+PHOTO_LAIMIN 1.0e-9  # Minimum LAI in PAR computation
+PHOTO_EPAR 2.2e5  # Energy content of PAR [J/mol photons]
+                    # = (4.6 mol/MJ PAR)^-1
+PHOTO_FCMAX 0.9  # Maximum fractional veg cover
+                   # (1-FcMax) = min amount of ground visible
+PHOTO_FCMIN 1.0e-3  # Minimum fractional veg cover
+                      # (1-FcMin) = max amount of ground visible
+PHOTO_ZENITHMIN 0.0174524  # Check for solar zenith angle > 89 deg
+PHOTO_ZENITHMINPAR 1.0e-3  # Cosine of the minimum solar zenith angle for
+                            # photosynthesis to take place
+PHOTO_ALBSOIPARMIN 0.0  # Minimum soil reflectivity in PAR range
+PHOTO_MINMAXETRANS 1e-12  # Minimum of maximum electron transport rate
+                          # [10e-12 mol/(m^2 s)]
+PHOTO_MINSTOMCOND 0.0  # Minimum stomatal conductance [mol H2O/m2s]
+
+# Factors that relate leaf internal CO2 concentration to ambient CO2
+# concentration
+PHOTO_FCI1C3 0.87  # C3 Plants
+PHOTO_FCI1C4 0.67  # C4 Plants
+
+# C3 PLANTS: FARQUHAR, G.D., S. VON CAEMMERER AND J.A. BERRY, 1980. A
+# BIOCHEMICAL MODEL OF PHOTOYNTHESIS IN LEAVES OF C3 SPECIES. PLANTA 149,
+# 78-90.
+PHOTO_OX 0.21  # OXYGEN CONCENTRATION [MOL(O2) / MOL(AIR)]
+PHOTO_KC0 460.0e-6  # MICHAELIS-MENTEN CONSTANT FOR CO2 AT 25C
+                   #  [MOL(CO2) / MOL(AIR)]
+PHOTO_KO0 330.0e-3  # MICHAELIS-MENTEN CONSTANT FOR O2 AT 25C
+                   # [MOL(O2) / MOL(AIR)]
+PHOTO_EC 59356.0  # ACTIVATION ENERGY FOR KC [J / MOL]
+PHOTO_EO 35948.0  # ACTIVATION ENERGY FOR KO [J / MOL]
+PHOTO_EV 58520.0  # ACTIVATION ENERGY FOR VCMAX [J / MOL]
+PHOTO_ER 45000.0  # ACTIVATION ENERGY FOR DARK RESPIRATION [J / MOL]
+PHOTO_ALC3 0.28    # EFFICIENCY OF OF PHOTON CAPTURE
+PHOTO_FRDC3 0.011  # RATIO OF DARK RESPIRATION TO "PVM" AT 25C for C3
+
+# C4 PLANTS: COLLATZ, G.J., M. RIBAS-CARBO AND J.A. BERRY, 1992.  COUPLED
+# PHOTOSYNTHESIS-STOMATAL CONDUCTANCE MODEL FOR LEAVES OF C4 PLANTS. AUST. J.
+# PLANT PHYSIOL. 19, 519-538.
+PHOTO_EK 50967.0  # Q10=2 (Collatz et al. 1992)
+PHOTO_ALC4 0.04  # EFFECTIVE QUANTUM EFFICIENCY
+PHOTO_FRDC4 0.042  # RATIO OF DARK RESPIRATION TO "PVM" AT 25C for C4
+PHOTO_THETA 0.83  # CURVATURE PARAMETER
+
+# Plant Maintenance and Growth Respiration Parameters
+PHOTO_FRLEAF 0.4  # Ratio of canopy leaf respiration to whole plant
+                  # maintenance respiration
+PHOTO_FRGROWTH 0.25  # Ratio of plant growth respiration to NPP
+###############################################################################
+
+###############################################################################
+# Soil Respiration Parameters
+SRESP_E0_LT 308.56  # Lloyd-Taylor E0 parameter [K]
+SRESP_T0_LT 227.13  # Lloyd-Taylor T0 parameter [K]
+SRESP_WMINFM 0.0  # minimum soil moisture (fraction) at which soil
+                    # respiration can occur
+SRESP_WMAXFM 1.0  # maximum soil moisture (fraction) at which soil
+                    # respiration can occur
+SRESP_WOPTFM 0.5  # soil moisture (fraction) at which maximum soil
+                    # respiration occurs
+SRESP_RHSAT 0.15  # ratio of soil respiration rate under saturated conditions
+                    # (w=wmaxFM) to that under optimal conditions (w=woptFM)
+SRESP_RFACTOR 0.5  # scaling factor to account for other (non-moisture)
+                     # sources of inhibition of respiration
+SRESP_TAULITTER 2.86  # Litter pool turnover time [y]
+SRESP_TAUINTER 33.3  # Intermediate pool turnover time [y]
+SRESP_TAUSLOW 1000.0  # Slow pool turnover time [y]
+SRESP_FAIR 0.7  # Fraction of respired carbon from litter pool that is lost
+                  # to atmosphere
+SRESP_FINTER 0.985  # Fraction of [respired carbon from litter pool that goes
+                      # to soil] that goes to intermediate pool
+###############################################################################
+
+###############################################################################
+# Iteration bracket widths
+SNOW_DT 5.0  # Used to bracket snow surface temperatures while computing the
+               # snow surface energy balance (C)
+SURF_DT 1.0  # Used to bracket soil surface temperatures while computing
+               # energy balance (C)
+SOIL_DT 0.25  # Used to bracket soil temperatures while solving the soil
+                # thermal flux (C)
+CANOPY_DT 1.0  # Used to bracket canopy air temperatures while computing
+                 #energy balance (C)
+CANOPY_VP 25.0  # Used to bracket canopy vapor pressures while computing
+                  # moisture balance (Pa)
+###############################################################################
+
+###############################################################################
+# Snow Parameters
+
+# maximum depth of the surface layer in water equivalent (m) [default 0.125]
+SNOW_MAX_SURFACE_SWE 0.125
+
+# density of new fallen snow [50]
+SNOW_NEW_SNOW_DENSITY 50.0
+
+# Density limit used in calculation of destructive metamorphism
+SNOW_DENS_DMLIMIT 100.0  # (kg/m^3)
+
+SNOW_DENS_MAX_CHANGE 0.9
+
+# Constants in snow density computation
+SNOW_DENS_ETA0 3.6e6  # viscosity of snow at T=0C and density = 0
+                        # used in calculation of true viscosity (Ns/m2)
+SNOW_DENS_C1 0.04
+SNOW_DENS_C2 2.778e-6
+SNOW_DENS_C5 0.08  # constant used in snow viscosity calculation, taken from
+                     # SNTHRM.89 (/C)
+SNOW_DENS_C6 0.021  # constant used in snow viscosity calculation, taken from
+                      # SNTHRM.89 (kg/m3)
+SNOW_DENS_F 0.6  # internal compaction rate coefficient
+
+# Minimum SWQ for which the snowpack energy balance is computed independent of
+# the soil surface temperature
+SNOW_MIN_SWQ_EB_THRES 0.0010
+
+# Attenuation coefficients for shortwave in a snowpack.  Values and equation
+# taken from Patterson and Hamblin, 1988
+SNOW_A1 0.7
+SNOW_A2 0.3
+SNOW_L1 6.0  # (1/m)
+SNOW_L2 20.0  # (1/m)
+
+# Snow albedo curve parameters.  Defaults are from Bras p263. Should not be
+# changed except for serious problems with snow melt
+SNOW_NEW_SNOW_ALB 0.85
+SNOW_ALB_ACCUM_A 0.94
+SNOW_ALB_ACCUM_B 0.58
+SNOW_ALB_THAW_A 0.82
+SNOW_ALB_THAW_B 0.46
+
+# Defines the minimum amount of new snow (mm) which will reset the snowpack
+# albedo to new snow
+SNOW_TRACESNOW 0.03
+###############################################################################
+
+###############################################################################
+# Blowing Snow Parameters
+BLOWING_KA 0.0245187  # thermal conductivity of air (W/mK)
+BLOWING_CSALT 0.68  # saltation constant m/s
+BLOWING_UTHRESH 0.25  # threshold shear velocity m/s
+BLOWING_KIN_VIS 1.3e-5  # Kinemativ viscosity of air (m2/s)
+BLOWING_MAX_ITER 100  # Max. iterations for numerical integration
+BLOWING_K 5
+BLOWING_MACHEPS 1.0e-6  # Accuracy tolerance for numerical integration
+BLOWING_SETTLING 0.3  # Particle settling velocity m/s
+BLOWING_NUMINCS 10  # Number of prob intervals to solve for wind.
+###############################################################################
+
+###############################################################################
+# July average temperature for tree line
+TREELINE_TEMPERATURE 10.0
+###############################################################################

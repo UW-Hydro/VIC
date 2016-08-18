@@ -38,20 +38,16 @@ FORCE_TYPE    VP            shum
 FORCE_TYPE    WIND          wind
 WIND_H        10.0
 
-SOIL                $test_data_dir/image/Stehekin/parameters/Stehekin_test_params_20160327.FROZEN_SOIL.nc
+PARAMETERS          $test_data_dir/image/Stehekin/parameters/Stehekin_test_params_20160327.FROZEN_SOIL.nc
 BASEFLOW            ARNO
 JULY_TAVG_SUPPLIED  FALSE
 ORGANIC_FRACT       FALSE
-VEGLIB              $test_data_dir/image/Stehekin/parameters/Stehekin_test_params_20160327.nc
-VEGPARAM            $test_data_dir/image/Stehekin/parameters/Stehekin_test_params_20160327.nc
-ROOT_ZONES          3
 LAI_SRC             FROM_VEGPARAM
-SNOW_BAND           1 $test_data_dir/image/Stehekin/parameters/Stehekin_test_params_20160327.nc
 
 RESULT_DIR              $result_dir
 
 OUTFILE     fluxes
-AGGFREQ     NHOURS   1
+AGGFREQ     NHOURS  1
 OUTVAR      OUT_PREC
 OUTVAR      OUT_RAINF
 OUTVAR      OUT_SNOWF

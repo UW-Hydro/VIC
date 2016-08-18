@@ -44,8 +44,6 @@ lib.initialize_log()
 lib.initialize_global()
 lib.initialize_options()
 lib.initialize_parameters()
-lib.initialize_filenames()
-lib.initialize_fileps()
 
 # TODO: wrappers for individual vic functions. For now, access to lib functions
 # is made directly through the lib object

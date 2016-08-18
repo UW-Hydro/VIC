@@ -112,25 +112,25 @@ initialize_log(void)
  * @brief    Set global log destination
  *****************************************************************************/
 void
-setup_logging(int id)
+setup_logging(int    id,
+              char   log_path[],
+              FILE **logfile)
 {
-    extern filenames_struct filenames;
-    extern filep_struct     filep;
-    extern FILE            *LOG_DEST;
-    char                    logfilename[MAXSTRING];
+    extern FILE *LOG_DEST;
+    char         logfilename[MAXSTRING];
 
-    if (strcmp(filenames.log_path, "MISSING") != 0) {
+    if (strcmp(log_path, "MISSING") != 0) {
         // Create logfile name
-        get_logname(filenames.log_path, id, logfilename);
+        get_logname(log_path, id, logfilename);
 
         // Open Logfile
-        filep.logfile = open_file(logfilename, "w");
+        *logfile = open_file(logfilename, "w");
 
         // Print log file name to stderr
         log_info("Initialized Log File: %s", logfilename);
 
         // Set Log Destination
-        LOG_DEST = filep.logfile;
+        LOG_DEST = *logfile;
 
         // Write first line of log file
         log_info("Initialized Log File: %s", logfilename);

@@ -37,10 +37,6 @@ display_current_settings(int mode)
     extern option_struct       options;
     extern param_set_struct    param_set;
     extern global_param_struct global_param;
-    extern filenames_struct    filenames;
-
-    int                        file_num;
-
 
     print_version(VIC_DRIVER);
 
@@ -242,34 +238,9 @@ display_current_settings(int mode)
     fprintf(LOG_DEST, "Ncanopy\t\t%zu\n", options.Ncanopy);
 
     fprintf(LOG_DEST, "\n");
-    fprintf(LOG_DEST, "Input Forcing Data:\n");
-    for (file_num = 0; file_num < 2; file_num++) {
-        if (global_param.forceyear[file_num] > 0) {
-            fprintf(LOG_DEST, "Forcing File %d:\t\t%s*\n", file_num + 1,
-                    filenames.f_path_pfx[file_num]);
-            fprintf(LOG_DEST, "FORCEYEAR\t\t%d\n",
-                    global_param.forceyear[file_num]);
-            fprintf(LOG_DEST, "FORCEMONTH\t\t%d\n",
-                    global_param.forcemonth[file_num]);
-            fprintf(LOG_DEST, "FORCEDAY\t\t%d\n",
-                    global_param.forceday[file_num]);
-            fprintf(LOG_DEST, "FORCESEC\t\t%d\n",
-                    global_param.forcesec[file_num]);
-            fprintf(LOG_DEST, "N_TYPES\t\t\t%zu\n",
-                    param_set.N_TYPES[file_num]);
-            fprintf(LOG_DEST, "FORCE_DT\t\t%f\n", param_set.FORCE_DT[file_num]);
-        }
-    }
     fprintf(LOG_DEST, "GRID_DECIMAL\t\t%hu\n", options.GRID_DECIMAL);
 
     fprintf(LOG_DEST, "\n");
-    fprintf(LOG_DEST, "Input Domain Data:\n");
-    fprintf(LOG_DEST, "Domain file\t\t%s\n", filenames.domain);
-
-    fprintf(LOG_DEST, "\n");
-    fprintf(LOG_DEST, "Constants File\t\t%s\n", filenames.constants);
-    fprintf(LOG_DEST, "Input Soil Data:\n");
-    fprintf(LOG_DEST, "Soil file\t\t%s\n", filenames.soil);
     if (options.BASEFLOW == ARNO) {
         fprintf(LOG_DEST, "BASEFLOW\t\tARNO\n");
     }
@@ -290,15 +261,12 @@ display_current_settings(int mode)
     }
 
     fprintf(LOG_DEST, "\n");
-    fprintf(LOG_DEST, "Input Veg Data:\n");
-    fprintf(LOG_DEST, "Veg library file\t%s\n", filenames.veglib);
     if (options.VEGLIB_PHOTO) {
         fprintf(LOG_DEST, "VEGLIB_PHOTO\t\tTRUE\n");
     }
     else {
         fprintf(LOG_DEST, "VEGLIB_PHOTO\t\tFALSE\n");
     }
-    fprintf(LOG_DEST, "Veg param file\t\t%s\n", filenames.veg);
     fprintf(LOG_DEST, "ROOT_ZONES\t\t%zu\n", options.ROOT_ZONES);
     if (options.VEGPARAM_LAI) {
         fprintf(LOG_DEST, "VEGPARAM_LAI\t\tTRUE\n");
@@ -352,8 +320,7 @@ display_current_settings(int mode)
     fprintf(LOG_DEST, "\n");
     fprintf(LOG_DEST, "Input Elevation Data:\n");
     if (options.SNOW_BAND > 1) {
-        fprintf(LOG_DEST, "SNOW_BAND\t\t%zu\t%s\n", options.SNOW_BAND,
-                filenames.snowband);
+        fprintf(LOG_DEST, "SNOW_BAND\t\t%zu\n", options.SNOW_BAND);
     }
     else if (options.SNOW_BAND == 1) {
         fprintf(LOG_DEST,
@@ -367,7 +334,7 @@ display_current_settings(int mode)
     fprintf(LOG_DEST, "\n");
     fprintf(LOG_DEST, "Input Lake Data:\n");
     if (options.LAKES) {
-        fprintf(LOG_DEST, "LAKES\t\tTRUE\t%s\n", filenames.lakeparam);
+        fprintf(LOG_DEST, "LAKES\t\tTRUE\n");
     }
     else {
         fprintf(LOG_DEST, "LAKES\t\tFALSE\n");
@@ -382,7 +349,7 @@ display_current_settings(int mode)
     fprintf(LOG_DEST, "\n");
     fprintf(LOG_DEST, "Input State File:\n");
     if (options.INIT_STATE) {
-        fprintf(LOG_DEST, "INIT_STATE\t\tTRUE\t%s\n", filenames.init_state);
+        fprintf(LOG_DEST, "INIT_STATE\t\tTRUE\n");
         if (options.STATE_FORMAT == BINARY) {
             fprintf(LOG_DEST, "STATE_FORMAT\tBINARY\n");
         }
@@ -398,7 +365,6 @@ display_current_settings(int mode)
     fprintf(LOG_DEST, "Output State File:\n");
     if (options.SAVE_STATE) {
         fprintf(LOG_DEST, "SAVE_STATE\t\tTRUE\n");
-        fprintf(LOG_DEST, "STATENAME\t\t%s\n", filenames.statefile);
         fprintf(LOG_DEST, "STATEYEAR\t\t%d\n", global_param.stateyear);
         fprintf(LOG_DEST, "STATEMONTH\t\t%d\n", global_param.statemonth);
         fprintf(LOG_DEST, "STATEDAY\t\t%d\n", global_param.stateday);
@@ -415,6 +381,5 @@ display_current_settings(int mode)
 
     fprintf(LOG_DEST, "\n");
     fprintf(LOG_DEST, "Output Data:\n");
-    fprintf(LOG_DEST, "Result dir:\t\t%s\n", filenames.result_dir);
     fprintf(LOG_DEST, "\n");
 }

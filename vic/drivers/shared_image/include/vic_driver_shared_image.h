@@ -28,7 +28,7 @@
 #define VIC_DRIVER_SHARED_IMAGE_H
 
 #include <vic_driver_shared_all.h>
-#include <vic_nc_log.h>
+#include <vic_image_log.h>
 #include <vic_mpi.h>
 
 #include <netcdf.h>
@@ -154,16 +154,48 @@ typedef struct {
     double *Cv;    /**< array of fractional coverage for nc_types */
 } veg_con_map_struct;
 
+/******************************************************************************
+ * @brief   file structures
+ *****************************************************************************/
+typedef struct {
+    FILE *forcing[MAX_FORCE_FILES];   /**< forcing data files */
+    FILE *globalparam;  /**< global parameters file */
+    FILE *constants;    /**< model constants parameter file */
+    FILE *domain;       /**< domain file */
+    FILE *init_state;   /**< initial model state file */
+    FILE *paramfile;    /**< parameter file */
+    FILE *statefile;    /**< output model state file */
+    FILE *logfile;      /**< log file */
+} filep_struct;
+
+/******************************************************************************
+ * @brief   This structure stores input and output filenames.
+ *****************************************************************************/
+typedef struct {
+    char forcing[MAX_FORCE_FILES][MAXSTRING];    /**< atmospheric forcing data file names */
+    char f_path_pfx[MAX_FORCE_FILES][MAXSTRING]; /**< path and prefix for atmospheric forcing data file names */
+    char global[MAXSTRING];        /**< global control file name */
+    char domain[MAXSTRING];        /**< domain file name */
+    char constants[MAXSTRING];     /**< model constants file name */
+    char params[MAXSTRING];        /**< model parameters file name */
+    char init_state[MAXSTRING];    /**< initial model state file name */
+    char result_dir[MAXSTRING];    /**< directory where results will be written */
+    char statefile[MAXSTRING];     /**< name of file in which to store model state */
+    char log_path[MAXSTRING];      /**< Location to write log file to */
+} filenames_struct;
+
 void add_nveg_to_global_domain(char *nc_name, domain_struct *global_domain);
-void alloc_atmos(atmos_data_struct *atmos);
+void alloc_force(force_data_struct *force);
 void alloc_veg_hist(veg_hist_struct *veg_hist);
 double air_density(double t, double p);
 double average(double *ar, size_t n);
 void check_init_state_file(void);
-void free_atmos(atmos_data_struct *atmos);
+void compare_ncdomain_with_global_domain(char *ncfile);
+void free_force(force_data_struct *force);
 void free_veg_hist(veg_hist_struct *veg_hist);
 void get_domain_type(char *cmdstr);
-size_t get_global_domain(char *fname, domain_struct *global_domain);
+size_t get_global_domain(char *fname, domain_struct *global_domain,
+                         bool coords_only);
 size_t get_nc_dimension(char *nc_name, char *dim_name);
 void get_nc_var_attr(char *nc_name, char *var_name, char *attr_name,
                      char **attr);
@@ -178,6 +210,8 @@ int get_nc_dtype(unsigned short int dtype);
 int get_nc_mode(unsigned short int format);
 void initialize_domain(domain_struct *domain);
 void initialize_domain_info(domain_info_struct *info);
+void initialize_filenames(void);
+void initialize_fileps(void);
 void initialize_global_structures(void);
 void initialize_history_file(nc_file_struct *nc, stream_struct *stream,
                              dmy_struct *dmy_current);
@@ -193,11 +227,11 @@ void initialize_soil_con(soil_con_struct *soil_con);
 void initialize_veg_con(veg_con_struct *veg_con);
 void parse_output_info(FILE *gp, stream_struct **output_streams,
                        dmy_struct *dmy_current);
-void print_atmos_data(atmos_data_struct *atmos);
+void print_force_data(force_data_struct *force);
 void print_domain(domain_struct *domain, bool print_loc);
 void print_location(location_struct *location);
 void print_nc_file(nc_file_struct *nc);
-void print_nc_var(nc_var_struct *nc_var, size_t ndims);
+void print_nc_var(nc_var_struct *nc_var);
 void print_veg_con_map(veg_con_map_struct *veg_con_map);
 void put_nc_attr(int nc_id, int var_id, const char *name, const char *value);
 void set_force_type(char *cmdstr, int file_num, int *field);
@@ -217,8 +251,9 @@ void vic_init(void);
 void vic_init_output(dmy_struct *dmy_current);
 void vic_restore(void);
 void vic_start(void);
-void vic_store(dmy_struct *dmy_current);
+void vic_store(dmy_struct *dmy_current, char *state_filename);
 void vic_write(stream_struct *stream, nc_file_struct *nc_hist_file,
                dmy_struct *dmy_current);
 void vic_write_output(dmy_struct *dmy);
+void write_vic_timing_table(timer_struct *timers, char *driver);
 #endif

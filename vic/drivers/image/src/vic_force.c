@@ -35,7 +35,7 @@ vic_force(void)
     extern size_t              NF;
     extern size_t              NR;
     extern size_t              current;
-    extern atmos_data_struct  *atmos;
+    extern force_data_struct  *force;
     extern dmy_struct         *dmy;
     extern domain_struct       global_domain;
     extern domain_struct       local_domain;
@@ -91,7 +91,7 @@ vic_force(void)
                                     param_set.TYPE[AIR_TEMP].varname,
                                     d3start, d3count, dvar);
         for (i = 0; i < local_domain.ncells_active; i++) {
-            atmos[i].air_temp[j] = (double) dvar[i];
+            force[i].air_temp[j] = (double) dvar[i];
         }
     }
 
@@ -103,7 +103,7 @@ vic_force(void)
                                     param_set.TYPE[PREC].varname,
                                     d3start, d3count, dvar);
         for (i = 0; i < local_domain.ncells_active; i++) {
-            atmos[i].prec[j] = (double) dvar[i];
+            force[i].prec[j] = (double) dvar[i];
         }
     }
 
@@ -115,7 +115,7 @@ vic_force(void)
                                     param_set.TYPE[SWDOWN].varname,
                                     d3start, d3count, dvar);
         for (i = 0; i < local_domain.ncells_active; i++) {
-            atmos[i].shortwave[j] = (double) dvar[i];
+            force[i].shortwave[j] = (double) dvar[i];
         }
     }
 
@@ -127,7 +127,7 @@ vic_force(void)
                                     param_set.TYPE[LWDOWN].varname,
                                     d3start, d3count, dvar);
         for (i = 0; i < local_domain.ncells_active; i++) {
-            atmos[i].longwave[j] = (double) dvar[i];
+            force[i].longwave[j] = (double) dvar[i];
         }
     }
 
@@ -139,11 +139,11 @@ vic_force(void)
                                     param_set.TYPE[WIND].varname,
                                     d3start, d3count, dvar);
         for (i = 0; i < local_domain.ncells_active; i++) {
-            atmos[i].wind[j] = (double) dvar[i];
+            force[i].wind[j] = (double) dvar[i];
         }
     }
 
-    // Specific humidity: shum
+    // vapor pressure: vp
     for (j = 0; j < NF; j++) {
         d3start[0] = global_param.forceskip[0] + global_param.forceoffset[0] +
                      j;
@@ -151,7 +151,7 @@ vic_force(void)
                                     param_set.TYPE[VP].varname,
                                     d3start, d3count, dvar);
         for (i = 0; i < local_domain.ncells_active; i++) {
-            atmos[i].vp[j] = (double) dvar[i];
+            force[i].vp[j] = (double) dvar[i];
         }
     }
 
@@ -163,7 +163,7 @@ vic_force(void)
                                     param_set.TYPE[PRESSURE].varname,
                                     d3start, d3count, dvar);
         for (i = 0; i < local_domain.ncells_active; i++) {
-            atmos[i].pressure[j] = (double) dvar[i];
+            force[i].pressure[j] = (double) dvar[i];
         }
     }
     // Optional inputs
@@ -176,7 +176,7 @@ vic_force(void)
                                     d3start, d3count, dvar);
         for (j = 0; j < NF; j++) {
             for (i = 0; i < local_domain.ncells_active; i++) {
-                atmos[i].channel_in[j] = (double) dvar[i];
+                force[i].channel_in[j] = (double) dvar[i];
             }
         }
     }
@@ -189,13 +189,13 @@ vic_force(void)
                                         param_set.TYPE[CATM].varname,
                                         d3start, d3count, dvar);
             for (i = 0; i < local_domain.ncells_active; i++) {
-                atmos[i].Catm[j] = (double) dvar[i];
+                force[i].Catm[j] = (double) dvar[i];
             }
         }
         // Cosine of solar zenith angle
         for (j = 0; j < NF; j++) {
             for (i = 0; i < local_domain.ncells_active; i++) {
-                atmos[i].coszen[j] = compute_coszen(
+                force[i].coszen[j] = compute_coszen(
                     local_domain.locations[i].latitude,
                     local_domain.locations[i].longitude,
                     soil_con[i].time_zone_lng, dmy[current].day_in_year,
@@ -210,7 +210,7 @@ vic_force(void)
                                         param_set.TYPE[FDIR].varname,
                                         d3start, d3count, dvar);
             for (i = 0; i < local_domain.ncells_active; i++) {
-                atmos[i].fdir[j] = (double) dvar[i];
+                force[i].fdir[j] = (double) dvar[i];
             }
         }
         // Photosynthetically active radiation
@@ -221,7 +221,7 @@ vic_force(void)
                                         param_set.TYPE[PAR].varname,
                                         d3start, d3count, dvar);
             for (i = 0; i < local_domain.ncells_active; i++) {
-                atmos[i].par[j] = (double) dvar[i];
+                force[i].par[j] = (double) dvar[i];
             }
         }
     }
@@ -358,22 +358,25 @@ vic_force(void)
     for (i = 0; i < local_domain.ncells_active; i++) {
         for (j = 0; j < NF; j++) {
             // temperature in Celsius
-            atmos[i].air_temp[j] -= CONST_TKFRZ;
+            force[i].air_temp[j] -= CONST_TKFRZ;
             // precipitation in mm/period
-            atmos[i].prec[j] *= global_param.snow_dt;
-            // pressure in Pa
-            // vapor pressure in Pa (we read specific humidity in kg/kg)
-            atmos[i].vp[j] = q_to_vp(atmos[i].vp[j], atmos[i].pressure[j]);
+            force[i].prec[j] *= global_param.snow_dt;
+            // vapor pressure in Pa
+            force[i].vp[j] *= PA_PER_KPA;
             // vapor pressure deficit in Pa
-            atmos[i].vpd[j] = svp(atmos[i].air_temp[j]) - atmos[i].vp[j];
+            force[i].vpd[j] = svp(force[i].air_temp[j]) - force[i].vp[j];
+            if (force[i].vpd[j] < 0) {
+                force[i].vpd[j] = 0;
+                force[i].vp[j] = svp(force[i].air_temp[j]);
+            }
             // air density in kg/m3
-            atmos[i].density[j] = air_density(atmos[i].air_temp[j],
-                                              atmos[i].pressure[j]);
+            force[i].density[j] = air_density(force[i].air_temp[j],
+                                              force[i].pressure[j]);
             // snow flag
-            atmos[i].snowflag[j] = will_it_snow(&(atmos[i].air_temp[j]),
+            force[i].snowflag[j] = will_it_snow(&(force[i].air_temp[j]),
                                                 t_offset[i],
                                                 param.SNOW_MAX_SNOW_TEMP,
-                                                &(atmos[i].prec[j]), 1);
+                                                &(force[i].prec[j]), 1);
         }
         // Check on fcanopy
         for (v = 0; v < options.NVEGTYPES; v++) {
@@ -385,7 +388,7 @@ vic_force(void)
                          (options.FCAN_SRC == FROM_VEGHIST))) {
                         // Only issue this warning once if not using veg hist fractions
                         log_warn(
-                            "cell %zu, veg` %d substep %zu fcanopy %f < minimum of %f; setting = %f\n", i, vidx, j,
+                            "cell %zu, veg` %d substep %zu fcanopy %f < minimum of %f; setting = %f", i, vidx, j,
                             veg_hist[i][vidx].fcanopy[j], MIN_FCANOPY,
                             MIN_FCANOPY);
                         veg_hist[i][vidx].fcanopy[j] = MIN_FCANOPY;
@@ -398,20 +401,20 @@ vic_force(void)
 
     // Put average value in NR field
     for (i = 0; i < local_domain.ncells_active; i++) {
-        atmos[i].air_temp[NR] = average(atmos[i].air_temp, NF);
+        force[i].air_temp[NR] = average(force[i].air_temp, NF);
         // For precipitation put total
-        atmos[i].prec[NR] = average(atmos[i].prec, NF) * NF;
-        atmos[i].shortwave[NR] = average(atmos[i].shortwave, NF);
-        atmos[i].longwave[NR] = average(atmos[i].longwave, NF);
-        atmos[i].pressure[NR] = average(atmos[i].pressure, NF);
-        atmos[i].wind[NR] = average(atmos[i].wind, NF);
-        atmos[i].vp[NR] = average(atmos[i].vp, NF);
-        atmos[i].vpd[NR] = (svp(atmos[i].air_temp[NR]) - atmos[i].vp[NR]);
-        atmos[i].density[NR] = air_density(atmos[i].air_temp[NR],
-                                           atmos[i].pressure[NR]);
-        atmos[i].snowflag[NR] = will_it_snow(atmos[i].air_temp, t_offset[i],
+        force[i].prec[NR] = average(force[i].prec, NF) * NF;
+        force[i].shortwave[NR] = average(force[i].shortwave, NF);
+        force[i].longwave[NR] = average(force[i].longwave, NF);
+        force[i].pressure[NR] = average(force[i].pressure, NF);
+        force[i].wind[NR] = average(force[i].wind, NF);
+        force[i].vp[NR] = average(force[i].vp, NF);
+        force[i].vpd[NR] = (svp(force[i].air_temp[NR]) - force[i].vp[NR]);
+        force[i].density[NR] = air_density(force[i].air_temp[NR],
+                                           force[i].pressure[NR]);
+        force[i].snowflag[NR] = will_it_snow(force[i].air_temp, t_offset[i],
                                              param.SNOW_MAX_SNOW_TEMP,
-                                             atmos[i].prec, NF);
+                                             force[i].prec, NF);
 
         for (v = 0; v < options.NVEGTYPES; v++) {
             vidx = veg_con_map[i].vidx[v];
@@ -433,14 +436,14 @@ vic_force(void)
 
         // Optional inputs
         if (options.LAKES) {
-            atmos[i].channel_in[NR] = average(atmos[i].channel_in, NF) * NF;
+            force[i].channel_in[NR] = average(force[i].channel_in, NF) * NF;
         }
         if (options.CARBON) {
-            atmos[i].Catm[NR] = average(atmos[i].Catm, NF);
-            atmos[i].fdir[NR] = average(atmos[i].fdir, NF);
-            atmos[i].par[NR] = average(atmos[i].par, NF);
+            force[i].Catm[NR] = average(force[i].Catm, NF);
+            force[i].fdir[NR] = average(force[i].fdir, NF);
+            force[i].par[NR] = average(force[i].par, NF);
             // for coszen, use value at noon
-            atmos[i].coszen[NR] = compute_coszen(
+            force[i].coszen[NR] = compute_coszen(
                 local_domain.locations[i].latitude,
                 local_domain.locations[i].longitude, soil_con[i].time_zone_lng,
                 dmy[current].day_in_year, SEC_PER_DAY / 2);

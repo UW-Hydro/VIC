@@ -33,13 +33,14 @@
  *****************************************************************************/
 void
 put_data(all_vars_struct   *all_vars,
-         atmos_data_struct *atmos,
+         force_data_struct *force,
          soil_con_struct   *soil_con,
          veg_con_struct    *veg_con,
          veg_lib_struct    *veg_lib,
          lake_con_struct   *lake_con,
          double           **out_data,
-         save_data_struct  *save_data)
+         save_data_struct  *save_data,
+         timer_struct      *timer)
 {
     extern global_param_struct global_param;
     extern option_struct       options;
@@ -129,31 +130,31 @@ put_data(all_vars_struct   *all_vars,
     zero_output_list(out_data);
 
     // Set output versions of input forcings
-    out_data[OUT_AIR_TEMP][0] = atmos->air_temp[NR];
-    out_data[OUT_DENSITY][0] = atmos->density[NR];
-    out_data[OUT_LWDOWN][0] = atmos->longwave[NR];
-    out_data[OUT_PREC][0] = atmos->out_prec;  // mm over grid cell
-    out_data[OUT_PRESSURE][0] = atmos->pressure[NR] / PA_PER_KPA;
-    out_data[OUT_QAIR][0] = CONST_EPS * atmos->vp[NR] /
-                            atmos->pressure[NR];
-    out_data[OUT_RAINF][0] = atmos->out_rain;   // mm over grid cell
-    out_data[OUT_REL_HUMID][0] = FRACT_TO_PERCENT * atmos->vp[NR] /
-                                 (atmos->vp[NR] + atmos->vpd[NR]);
+    out_data[OUT_AIR_TEMP][0] = force->air_temp[NR];
+    out_data[OUT_DENSITY][0] = force->density[NR];
+    out_data[OUT_LWDOWN][0] = force->longwave[NR];
+    out_data[OUT_PREC][0] = force->out_prec;  // mm over grid cell
+    out_data[OUT_PRESSURE][0] = force->pressure[NR] / PA_PER_KPA;
+    out_data[OUT_QAIR][0] = CONST_EPS * force->vp[NR] /
+                            force->pressure[NR];
+    out_data[OUT_RAINF][0] = force->out_rain;   // mm over grid cell
+    out_data[OUT_REL_HUMID][0] = FRACT_TO_PERCENT * force->vp[NR] /
+                                 (force->vp[NR] + force->vpd[NR]);
     if (options.LAKES && lake_con->Cl[0] > 0) {
-        out_data[OUT_LAKE_CHAN_IN][0] = atmos->channel_in[NR];  // mm over grid cell
+        out_data[OUT_LAKE_CHAN_IN][0] = force->channel_in[NR];  // mm over grid cell
     }
     else {
         out_data[OUT_LAKE_CHAN_IN][0] = 0;
     }
-    out_data[OUT_SWDOWN][0] = atmos->shortwave[NR];
-    out_data[OUT_SNOWF][0] = atmos->out_snow;   // mm over grid cell
-    out_data[OUT_VP][0] = atmos->vp[NR] / PA_PER_KPA;
-    out_data[OUT_VPD][0] = atmos->vpd[NR] / PA_PER_KPA;
-    out_data[OUT_WIND][0] = atmos->wind[NR];
+    out_data[OUT_SWDOWN][0] = force->shortwave[NR];
+    out_data[OUT_SNOWF][0] = force->out_snow;   // mm over grid cell
+    out_data[OUT_VP][0] = force->vp[NR] / PA_PER_KPA;
+    out_data[OUT_VPD][0] = force->vpd[NR] / PA_PER_KPA;
+    out_data[OUT_WIND][0] = force->wind[NR];
     if (options.CARBON) {
-        out_data[OUT_CATM][0] = atmos->Catm[NR] / PPM_to_MIXRATIO;
-        out_data[OUT_FDIR][0] = atmos->fdir[NR];
-        out_data[OUT_PAR][0] = atmos->par[NR];
+        out_data[OUT_CATM][0] = force->Catm[NR] / PPM_to_MIXRATIO;
+        out_data[OUT_FDIR][0] = force->fdir[NR];
+        out_data[OUT_PAR][0] = force->par[NR];
     }
     else {
         out_data[OUT_CATM][0] = MISSING;
@@ -228,7 +229,6 @@ put_data(all_vars_struct   *all_vars,
                                      HasVeg,
                                      (1 - Clake),
                                      overstory,
-                                     depth,
                                      frost_fract,
                                      out_data);
 
@@ -298,7 +298,6 @@ put_data(all_vars_struct   *all_vars,
                                          0,
                                          Clake,
                                          overstory,
-                                         depth,
                                          frost_fract,
                                          out_data);
 
@@ -491,6 +490,12 @@ put_data(all_vars_struct   *all_vars,
         out_data[OUT_SMLIQFRAC][index] = out_data[OUT_SOIL_LIQ][index] /
                                          out_data[OUT_SOIL_MOIST][index];
         out_data[OUT_SMFROZFRAC][index] = 1 - out_data[OUT_SMLIQFRAC][index];
+        out_data[OUT_SOIL_LIQ_FRAC][index] = out_data[OUT_SOIL_LIQ][index] /
+                                             (depth[index] *
+                                              MM_PER_M);
+        out_data[OUT_SOIL_ICE_FRAC][index] = out_data[OUT_SOIL_ICE][index] /
+                                             (depth[index] *
+                                              MM_PER_M);
     }
     out_data[OUT_DELSOILMOIST][0] -= save_data->total_soil_moist;
     out_data[OUT_DELSWE][0] = out_data[OUT_SWE][0] +
@@ -563,6 +568,10 @@ put_data(all_vars_struct   *all_vars,
     else {
         out_data[OUT_ENERGY_ERROR][0] = MISSING;
     }
+
+    // vic_run run time
+    out_data[OUT_TIME_VICRUN_WALL][0] = timer->delta_wall;
+    out_data[OUT_TIME_VICRUN_CPU][0] = timer->delta_cpu;
 }
 
 /******************************************************************************
@@ -578,7 +587,6 @@ collect_wb_terms(cell_data_struct cell,
                  bool             HasVeg,
                  double           lakefactor,
                  bool             overstory,
-                 double          *depth,
                  double          *frost_fract,
                  double         **out_data)
 {
@@ -692,11 +700,6 @@ collect_wb_terms(cell_data_struct cell,
 
         out_data[OUT_SOIL_LIQ][index] += tmp_moist * AreaFactor;
         out_data[OUT_SOIL_ICE][index] += tmp_ice * AreaFactor;
-
-        out_data[OUT_SOIL_LIQ][index] = tmp_moist * AreaFactor / depth[index] *
-                                        MM_PER_M;
-        out_data[OUT_SOIL_ICE][index] = tmp_ice * AreaFactor / depth[index] *
-                                        MM_PER_M;
     }
     out_data[OUT_SOIL_WET][0] += cell.wetness * AreaFactor;
     out_data[OUT_ROOTMOIST][0] += cell.rootmoist * AreaFactor;
@@ -1048,17 +1051,18 @@ collect_eb_terms(energy_bal_struct energy,
  *****************************************************************************/
 void
 initialize_save_data(all_vars_struct   *all_vars,
-                     atmos_data_struct *atmos,
+                     force_data_struct *atmos,
                      soil_con_struct   *soil_con,
                      veg_con_struct    *veg_con,
                      veg_lib_struct    *veg_lib,
                      lake_con_struct   *lake_con,
                      double           **out_data,
-                     save_data_struct  *save_data)
+                     save_data_struct  *save_data,
+                     timer_struct      *timer)
 {
     // Calling put data will populate the save data storage terms
     put_data(all_vars, atmos, soil_con, veg_con, veg_lib, lake_con,
-             out_data, save_data);
+             out_data, save_data, timer);
 
     zero_output_list(out_data);
 }

@@ -42,6 +42,8 @@
 #define OUT_MULT_DEFAULT 0  // Why is this not 1?
 #define OUT_ASCII_FORMAT_DEFAULT "%.4f"
 
+// Default snow band setting
+#define SNOW_BAND_TRUE_BUT_UNSET 99999
 
 /******************************************************************************
  * @brief   File formats
@@ -277,6 +279,9 @@ enum
     OUT_CLITTER,          /**< Carbon density in litter pool [g C/m2] */
     OUT_CINTER,           /**< Carbon density in intermediate pool [g C/m2] */
     OUT_CSLOW,            /**< Carbon density in slow pool [g C/m2] */
+    // Timing and Profiling Terms
+    OUT_TIME_VICRUN_WALL, /**< Wall time spent inside vic_run [seconds] */
+    OUT_TIME_VICRUN_CPU,  /**< Wall time spent inside vic_run [seconds] */
     // Last value of enum - DO NOT ADD ANYTHING BELOW THIS LINE!!
     // used as a loop counter and must be >= the largest value in this enum
     N_OUTVAR_TYPES        /**< used as a loop counter*/
@@ -438,42 +443,16 @@ enum time_units
 };
 
 /******************************************************************************
- * @brief   file structures
+ * @brief   Codes for timers
  *****************************************************************************/
-typedef struct {
-    FILE *forcing[MAX_FORCE_FILES];   /**< atmospheric forcing data files */
-    FILE *globalparam;  /**< global parameters file */
-    FILE *constants;    /**< model constants parameter file */
-    FILE *domain;       /**< domain file */
-    FILE *init_state;   /**< initial model state file */
-    FILE *lakeparam;    /**< lake parameter file */
-    FILE *snowband;     /**< snow elevation band data file */
-    FILE *soilparam;    /**< soil parameters for all grid cells */
-    FILE *statefile;    /**< output model state file */
-    FILE *veglib;       /**< vegetation parameters for all vege types */
-    FILE *vegparam;     /**< fractional coverage info for grid cell */
-    FILE *logfile;      /**< log file */
-} filep_struct;
-
-/******************************************************************************
- * @brief   This structure stores input and output filenames.
- *****************************************************************************/
-typedef struct {
-    char forcing[MAX_FORCE_FILES][MAXSTRING];    /**< atmospheric forcing data file names */
-    char f_path_pfx[MAX_FORCE_FILES][MAXSTRING]; /**< path and prefix for atmospheric forcing data file names */
-    char global[MAXSTRING];        /**< global control file name */
-    char domain[MAXSTRING];        /**< domain file name */
-    char constants[MAXSTRING];     /**< model constants file name */
-    char init_state[MAXSTRING];    /**< initial model state file name */
-    char lakeparam[MAXSTRING];     /**< lake model constants file */
-    char result_dir[MAXSTRING];    /**< directory where results will be written */
-    char snowband[MAXSTRING];      /**< snow band parameter file name */
-    char soil[MAXSTRING];          /**< soil parameter file name */
-    char statefile[MAXSTRING];     /**< name of file in which to store model state */
-    char veg[MAXSTRING];           /**< vegetation grid coverage file */
-    char veglib[MAXSTRING];        /**< vegetation parameter library file */
-    char log_path[MAXSTRING];      /**< Location to write log file to*/
-} filenames_struct;
+enum timers
+{
+    TIMER_VIC_ALL,
+    TIMER_VIC_INIT,
+    TIMER_VIC_RUN,
+    TIMER_VIC_FINAL,
+    N_TIMERS
+};
 
 /******************************************************************************
  * @brief    Stores forcing file input information.
@@ -572,10 +551,9 @@ typedef struct {
  *          routines.
  *****************************************************************************/
 typedef struct {
-    atmos_data_struct *atmos;
+    force_data_struct *force;
     double dt;
     energy_bal_struct *energy;
-    filep_struct filep;
     size_t rec;
     double **out_data;
     stream_struct *output_streams;
@@ -584,6 +562,18 @@ typedef struct {
     veg_con_struct *veg_con;
     veg_var_struct *veg_var;
 } Error_struct;
+
+/******************************************************************************
+ * @brief   This structure holds timer information for profiling
+ *****************************************************************************/
+typedef struct {
+    double start_wall;
+    double start_cpu;
+    double stop_wall;
+    double stop_cpu;
+    double delta_wall;
+    double delta_cpu;
+} timer_struct;
 
 double air_density(double t, double p);
 void agg_stream_data(stream_struct *stream, dmy_struct *dmy_current,
@@ -603,18 +593,20 @@ void collect_eb_terms(energy_bal_struct, snow_data_struct, cell_data_struct,
                       double *, double, double **);
 void collect_wb_terms(cell_data_struct, veg_var_struct, snow_data_struct,
                       double, double, double, bool, double, bool, double *,
-                      double *, double **);
+                      double **);
 void compute_derived_state_vars(all_vars_struct *, soil_con_struct *,
                                 veg_con_struct *);
 void compute_lake_params(lake_con_struct *, soil_con_struct);
-void compute_treeline(atmos_data_struct *, dmy_struct *, double, double *,
+void compute_treeline(force_data_struct *, dmy_struct *, double, double *,
                       bool *);
 size_t count_force_vars(FILE *gp);
 void count_nstreams_nvars(FILE *gp, size_t *nstreams, size_t nvars[]);
 void cmd_proc(int argc, char **argv, char *globalfilename);
 void compress_files(char string[], short int level);
 stream_struct create_outstream(stream_struct *output_streams);
+double get_cpu_time();
 void get_current_datetime(char *cdt);
+double get_wall_time();
 double date2num(double origin, dmy_struct *date, double tzoffset,
                 unsigned short int calendar, unsigned short int time_units);
 void dmy_all_30_day(double julian, dmy_struct *dmy);
@@ -641,15 +633,14 @@ void get_parameters(FILE *paramfile);
 void init_output_list(double **out_data, int write, char *format, int type,
                       double mult);
 void initialize_energy(energy_bal_struct **energy, size_t nveg);
-void initialize_filenames(void);
-void initialize_fileps(void);
 void initialize_global(void);
 void initialize_options(void);
 void initialize_parameters(void);
-void initialize_save_data(all_vars_struct *all_vars, atmos_data_struct *atmos,
+void initialize_save_data(all_vars_struct *all_vars, force_data_struct *force,
                           soil_con_struct *soil_con, veg_con_struct *veg_con,
                           veg_lib_struct *veg_lib, lake_con_struct *lake_con,
-                          double **out_data, save_data_struct *save_data);
+                          double **out_data, save_data_struct *save_data,
+                          timer_struct *timer);
 void initialize_snow(snow_data_struct **snow, size_t veg_num);
 void initialize_soil(cell_data_struct **cell, size_t veg_num);
 void initialize_time(void);
@@ -671,15 +662,13 @@ void num2date(double origin, double time_value, double tzoffset,
 FILE *open_file(char string[], char type[]);
 void parse_nc_time_units(char *nc_unit_chars, unsigned short int *units,
                          dmy_struct *dmy);
-void put_data(all_vars_struct *, atmos_data_struct *, soil_con_struct *,
+void put_data(all_vars_struct *, force_data_struct *, soil_con_struct *,
               veg_con_struct *, veg_lib_struct *veg_lib, lake_con_struct *,
-              double **out_data, save_data_struct *);
+              double **out_data, save_data_struct *, timer_struct *timer);
 void print_alarm(alarm_struct *alarm);
 void print_cell_data(cell_data_struct *cell, size_t nlayers, size_t nfrost);
 void print_dmy(dmy_struct *dmy);
 void print_energy_bal(energy_bal_struct *eb, size_t nnodes, size_t nfronts);
-void print_filenames(filenames_struct *fnames);
-void print_filep(filep_struct *fp);
 void print_force_type(force_type_struct *force_type);
 void print_global_param(global_param_struct *gp);
 void print_lake_con(lake_con_struct *lcon, size_t nlnodes);
@@ -734,6 +723,10 @@ unsigned short int str_to_out_type(char typestr[]);
 unsigned short int str_to_timeunits(char units_chars[]);
 void strpdmy(const char *s, const char *format, dmy_struct *dmy);
 double time_delta(dmy_struct *dmy_current, unsigned short int freq, int n);
+void timer_continue(timer_struct *t);
+void timer_init(timer_struct *t);
+void timer_start(timer_struct *t);
+void timer_stop(timer_struct *t);
 int update_step_vars(all_vars_struct *, veg_con_struct *, veg_hist_struct *);
 int invalid_date(unsigned short int calendar, dmy_struct *dmy);
 void validate_parameters(void);

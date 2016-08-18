@@ -58,6 +58,8 @@ set_nc_var_info(unsigned int       varid,
     case OUT_SMFROZFRAC:
     case OUT_SOIL_ICE:
     case OUT_SOIL_LIQ:
+    case OUT_SOIL_ICE_FRAC:
+    case OUT_SOIL_LIQ_FRAC:
     case OUT_SOIL_MOIST:
     case OUT_SOIL_TEMP:
         nc_var->nc_dims = 4;
@@ -133,6 +135,8 @@ set_nc_var_dimids(unsigned int    varid,
     case OUT_SMFROZFRAC:
     case OUT_SOIL_ICE:
     case OUT_SOIL_LIQ:
+    case OUT_SOIL_ICE_FRAC:
+    case OUT_SOIL_LIQ_FRAC:
     case OUT_SOIL_MOIST:
     case OUT_SOIL_TEMP:
         nc_var->nc_dimids[0] = nc_hist_file->time_dimid;
@@ -239,7 +243,7 @@ get_nc_dtype(unsigned short int dtype)
         type = NC_DOUBLE;
         break;
     default:
-        log_err("Unrecognized netCDF variable datatype %hu", dtype);
+        log_err("Unrecognized netCDF variable datatype: %hu", dtype);
     }
     return type;
 }

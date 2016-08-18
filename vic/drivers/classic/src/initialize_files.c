@@ -25,7 +25,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  *****************************************************************************/
 
-#include <vic_driver_shared_all.h>
+#include <vic_driver_classic.h>
 
 /******************************************************************************
  * @brief    Initialize all filenames before they are called by the
@@ -65,7 +65,6 @@ initialize_fileps()
 
     filep.globalparam = NULL;
     filep.constants = NULL;
-    filep.domain = NULL;
     filep.init_state = NULL;
     filep.lakeparam = NULL;
     filep.snowband = NULL;

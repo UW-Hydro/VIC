@@ -6,6 +6,7 @@ import datetime
 import os
 import glob
 import xarray as xr
+import warnings
 from test_utils import read_vic_ascii
 from tonic.testing import VICTestError
 
@@ -212,6 +213,14 @@ def check_exact_restart_fluxes(result_basedir, driver, run_periods):
     run_periods: <list>
         A list of running periods. Return from prepare_restart_run_periods()
 
+    Require:
+    ----------
+    xarray
+    glob
+    os
+    numpy
+    warnings
+    read_vic_ascii
     '''
 
     # --- Extract full run period --- #
@@ -231,9 +240,9 @@ def check_exact_restart_fluxes(result_basedir, driver, run_periods):
             dict_df_full_run[os.path.basename(fname)] = df
     elif driver == 'image':
         if len(glob.glob(os.path.join(result_dir, '*.nc'))) > 1:
-            print(
-                'Warning: more than one netCDF file found under directory {}'.
-                format(result_dir))
+            warnings.warn(
+                'More than one netCDF file found under directory {}'.
+                    format(result_dir))
         fname = glob.glob(os.path.join(result_dir, '*.nc'))[0]
         ds_full_run = xr.open_dataset(fname)
 
@@ -266,8 +275,8 @@ def check_exact_restart_fluxes(result_basedir, driver, run_periods):
         elif driver == 'image':
             # Read in flux data
             if len(glob.glob(os.path.join(result_dir, '*.nc'))) > 1:
-                print('Warning: more than one netCDF file found under'
-                      'directory {}'.format(result_dir))
+                warnings.warn('More than one netCDF file found under'
+                              'directory {}'.format(result_dir))
             fname = glob.glob(os.path.join(result_dir, '*.nc'))[0]
             ds = xr.open_dataset(fname)
             # Extract the same period from the full run

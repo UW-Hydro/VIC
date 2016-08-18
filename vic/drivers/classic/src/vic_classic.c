@@ -58,8 +58,8 @@ main(int   argc,
     /** Variable Declarations **/
     extern FILE       *LOG_DEST;
 
-    char               MODEL_DONE;
-    char               RUN_MODEL;
+    bool               MODEL_DONE;
+    bool               RUN_MODEL;
     char               dmy_str[MAXSTRING];
     size_t             rec;
     size_t             Nveg_type;
@@ -68,7 +68,7 @@ main(int   argc,
     int                ErrorFlag;
     size_t             streamnum;
     dmy_struct        *dmy;
-    atmos_data_struct *atmos;
+    force_data_struct *force;
     veg_hist_struct  **veg_hist;
     veg_con_struct    *veg_con;
     soil_con_struct    soil_con;
@@ -77,6 +77,13 @@ main(int   argc,
     stream_struct     *streams = NULL;
     double          ***out_data;   // [1, nvars, nelem]
     save_data_struct   save_data;
+    timer_struct       global_timers[N_TIMERS];
+    timer_struct       cell_timer;
+
+    // start vic all timer
+    timer_start(&(global_timers[TIMER_VIC_ALL]));
+    // start vic init timer
+    timer_start(&(global_timers[TIMER_VIC_INIT]));
 
     // Initialize Log Destination
     initialize_log();
@@ -99,7 +106,7 @@ main(int   argc,
     fclose(filep.globalparam);
 
     // Set Log Destination
-    setup_logging(MISSING);
+    setup_logging(MISSING, filenames.log_path, &(filep.logfile));
 
     /** Set model constants **/
     if (strcmp(filenames.constants, "MISSING") != 0) {
@@ -130,8 +137,8 @@ main(int   argc,
     /** Initialize Parameters **/
     cellnum = -1;
 
-    /** allocate memory for the atmos_data_struct **/
-    alloc_atmos(global_param.nrecs, &atmos);
+    /** allocate memory for the force_data_struct **/
+    alloc_atmos(global_param.nrecs, &force);
 
     /** Initial state **/
     startrec = 0;
@@ -155,8 +162,14 @@ main(int   argc,
        Run Model for all Active Grid Cells
     ************************************/
     MODEL_DONE = false;
+
+    // stop init timer
+    timer_stop(&(global_timers[TIMER_VIC_INIT]));
+    // start vic run timer
+    timer_start(&(global_timers[TIMER_VIC_RUN]));
+
     while (!MODEL_DONE) {
-        soil_con = read_soilparam(filep.soilparam, &RUN_MODEL, &MODEL_DONE);
+        read_soilparam(filep.soilparam, &soil_con, &RUN_MODEL, &MODEL_DONE);
 
         if (RUN_MODEL) {
             cellnum++;
@@ -190,7 +203,7 @@ main(int   argc,
                Have not Been Specifically Set
             **************************************************/
 
-            vic_force(atmos, dmy, filep.forcing, veg_con, veg_hist, &soil_con);
+            vic_force(force, dmy, filep.forcing, veg_con, veg_hist, &soil_con);
 
             /**************************************************
                Initialize Energy Balance and Snow Variables
@@ -199,12 +212,10 @@ main(int   argc,
             vic_populate_model_state(&all_vars, filep, soil_con.gridcel,
                                      &soil_con, veg_con, lake_con);
 
-            /** Update Error Handling Structure **/
-            Error.filep = filep;
-
             /** Initialize the storage terms in the water and energy balances **/
-            initialize_save_data(&all_vars, &atmos[0], &soil_con, veg_con,
-                                 veg_lib, &lake_con, out_data[0], &save_data);
+            initialize_save_data(&all_vars, &force[0], &soil_con, veg_con,
+                                 veg_lib, &lake_con, out_data[0], &save_data,
+                                 &cell_timer);
 
             /******************************************
                Run Model in Grid Cell for all Time Steps
@@ -226,15 +237,17 @@ main(int   argc,
                 /**************************************************
                    Compute cell physics for 1 timestep
                 **************************************************/
-                ErrorFlag = vic_run(&atmos[rec], &all_vars,
+                timer_start(&cell_timer);
+                ErrorFlag = vic_run(&force[rec], &all_vars,
                                     &(dmy[rec]), &global_param, &lake_con,
                                     &soil_con, veg_con, veg_lib);
+                timer_stop(&cell_timer);
 
                 /**************************************************
                    Calculate cell average values for current time step
                 **************************************************/
-                put_data(&all_vars, &atmos[rec], &soil_con, veg_con, veg_lib,
-                         &lake_con, out_data[0], &save_data);
+                put_data(&all_vars, &force[rec], &soil_con, veg_con, veg_lib,
+                         &lake_con, out_data[0], &save_data, &cell_timer);
 
                 for (streamnum = 0;
                      streamnum < options.Noutstreams;
@@ -264,7 +277,7 @@ main(int   argc,
                                  "so the simulation has not finished.  An "
                                  "incomplete output file has been "
                                  "generated, check your inputs before "
-                                 "rerunning the simulation.\n",
+                                 "rerunning the simulation.",
                                  soil_con.gridcel, rec);
                         break;
                     }
@@ -272,7 +285,7 @@ main(int   argc,
                         // Else exit program on cell solution error as in previous versions
                         log_err("ERROR: Grid cell %i failed in record %zu "
                                 "so the simulation has ended. Check your "
-                                "inputs before rerunning the simulation.\n",
+                                "inputs before rerunning the simulation.",
                                 soil_con.gridcel, rec);
                     }
                 }
@@ -292,8 +305,13 @@ main(int   argc,
         } /* End Run Model Condition */
     }   /* End Grid Loop */
 
+    // stop vic run timer
+    timer_stop(&(global_timers[TIMER_VIC_RUN]));
+    // start vic final timer
+    timer_start(&(global_timers[TIMER_VIC_FINAL]));
+
     /** cleanup **/
-    free_atmos(global_param.nrecs, &atmos);
+    free_atmos(global_param.nrecs, &force);
     free_dmy(&dmy);
     free_streams(&streams);
     free_out_data(1, out_data);  // 1 is for the number of gridcells, 1 in classic driver
@@ -316,6 +334,13 @@ main(int   argc,
     finalize_logging();
 
     log_info("Completed running VIC %s", VIC_DRIVER);
+
+    // stop vic final timer
+    timer_stop(&(global_timers[TIMER_VIC_FINAL]));
+    // stop vic all timer
+    timer_stop(&(global_timers[TIMER_VIC_ALL]));
+    // write timing info
+    write_vic_timing_table(global_timers);
 
     return EXIT_SUCCESS;
 }       /* End Main Program */

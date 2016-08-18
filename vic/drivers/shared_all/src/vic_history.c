@@ -52,7 +52,7 @@ alloc_out_data(size_t     ngridcells,
             check_alloc_status((*out_data)[i][j], "Memory allocation error.");
 
             // initialize data member
-            for (k = 0; k < out_metadata[i].nelem; k++) {
+            for (k = 0; k < out_metadata[j].nelem; k++) {
                 (*out_data)[i][j][k] = 0;
             }
         }
@@ -180,13 +180,15 @@ alloc_aggdata(stream_struct *stream)
             nelem = out_metadata[stream->varid[j]].nelem;
             stream->aggdata[i][j] =
                 calloc(nelem, sizeof(*(stream->aggdata[i][j])));
-            check_alloc_status(stream->aggdata[i][j], "Memory allocation error.");
+            check_alloc_status(stream->aggdata[i][j],
+                               "Memory allocation error.");
 
             for (k = 0; k < nelem; k++) {
                 // TODO: Also allocate for nbins, for now just setting to size 1
                 stream->aggdata[i][j][k] =
                     calloc(1, sizeof(*(stream->aggdata[i][j][k])));
-                check_alloc_status(stream->aggdata[i][j][k], "Memory allocation error.");
+                check_alloc_status(stream->aggdata[i][j][k],
+                                   "Memory allocation error.");
             }
         }
     }

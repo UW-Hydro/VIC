@@ -31,7 +31,8 @@
  *****************************************************************************/
 size_t
 get_global_domain(char          *nc_name,
-                  domain_struct *global_domain)
+                  domain_struct *global_domain,
+                  bool           coords_only)
 {
     int    *run = NULL;
     double *var = NULL;
@@ -70,7 +71,6 @@ get_global_domain(char          *nc_name,
     debug("%zu active grid cells found in domain mask",
           global_domain->ncells_active);
 
-    // if MASTER_PROC
     global_domain->locations =
         malloc(global_domain->ncells_total * sizeof(*global_domain->locations));
     check_alloc_status(global_domain->locations, "Memory allocation error.");
@@ -175,21 +175,24 @@ get_global_domain(char          *nc_name,
                 nc_name);
     }
 
-    // get area
-    // TBD: read var id from file
-    get_nc_field_double(nc_name, global_domain->info.area_var,
-                        d2start, d2count, var);
-    for (i = 0; i < global_domain->ncells_total; i++) {
-        global_domain->locations[i].area = var[i];
+    if (!coords_only) {
+        // get area
+        // TBD: read var id from file
+        get_nc_field_double(nc_name, global_domain->info.area_var,
+                            d2start, d2count, var);
+        for (i = 0; i < global_domain->ncells_total; i++) {
+            global_domain->locations[i].area = var[i];
+        }
+
+        // get fraction
+        // TBD: read var id from file
+        get_nc_field_double(nc_name, global_domain->info.frac_var,
+                            d2start, d2count, var);
+        for (i = 0; i < global_domain->ncells_total; i++) {
+            global_domain->locations[i].frac = var[i];
+        }
     }
 
-    // get fraction
-    // TBD: read var id from file
-    get_nc_field_double(nc_name, global_domain->info.frac_var,
-                        d2start, d2count, var);
-    for (i = 0; i < global_domain->ncells_total; i++) {
-        global_domain->locations[i].frac = var[i];
-    }
 
     // free memory
     free(var);

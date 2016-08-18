@@ -31,7 +31,7 @@
  * @brief    Initialize atmospheric variables for the model and snow time steps.
  *****************************************************************************/
 void
-vic_force(atmos_data_struct *atmos,
+vic_force(force_data_struct *force,
           dmy_struct        *dmy,
           FILE             **infile,
           veg_con_struct    *veg_con,
@@ -125,48 +125,52 @@ vic_force(atmos_data_struct *atmos,
         for (i = 0; i < NF; i++) {
             uidx = rec * NF + i;
             // temperature in Celsius
-            atmos[rec].air_temp[i] = forcing_data[AIR_TEMP][uidx];
+            force[rec].air_temp[i] = forcing_data[AIR_TEMP][uidx];
             // precipitation in mm/period
-            atmos[rec].prec[i] = forcing_data[PREC][uidx];
+            force[rec].prec[i] = forcing_data[PREC][uidx];
             // downward shortwave in W/m2
-            atmos[rec].shortwave[i] = forcing_data[SWDOWN][uidx];
+            force[rec].shortwave[i] = forcing_data[SWDOWN][uidx];
             // downward longwave in W/m2
-            atmos[rec].longwave[i] = forcing_data[LWDOWN][uidx];
+            force[rec].longwave[i] = forcing_data[LWDOWN][uidx];
             // pressure in Pa
-            atmos[rec].pressure[i] = forcing_data[PRESSURE][uidx] * PA_PER_KPA;
+            force[rec].pressure[i] = forcing_data[PRESSURE][uidx] * PA_PER_KPA;
             // vapor pressure in Pa
-            atmos[rec].vp[i] = forcing_data[VP][uidx] * PA_PER_KPA;
+            force[rec].vp[i] = forcing_data[VP][uidx] * PA_PER_KPA;
             // vapor pressure deficit in Pa
-            atmos[rec].vpd[i] = svp(atmos[rec].air_temp[i]) - atmos[rec].vp[i];
+            force[rec].vpd[i] = svp(force[rec].air_temp[i]) - force[rec].vp[i];
+            if (force[rec].vpd[i] < 0) {
+                force[rec].vpd[i] = 0;
+                force[rec].vp[i] = svp(force[rec].air_temp[i]);
+            }
             // air density in kg/m3
-            atmos[rec].density[i] = air_density(atmos[rec].air_temp[i],
-                                                atmos[rec].pressure[i]);
+            force[rec].density[i] = air_density(force[rec].air_temp[i],
+                                                force[rec].pressure[i]);
             // wind speed in m/s
-            atmos[rec].wind[i] = forcing_data[WIND][uidx];
+            force[rec].wind[i] = forcing_data[WIND][uidx];
             // snow flag
-            atmos[rec].snowflag[i] = will_it_snow(&(atmos[rec].air_temp[i]),
+            force[rec].snowflag[i] = will_it_snow(&(force[rec].air_temp[i]),
                                                   t_offset,
                                                   param.SNOW_MAX_SNOW_TEMP,
-                                                  &(atmos[rec].prec[i]), 1);
+                                                  &(force[rec].prec[i]), 1);
             // Optional inputs
             if (options.LAKES) {
                 // Channel inflow from upstream (into lake)
                 if (param_set.TYPE[CHANNEL_IN].SUPPLIED) {
-                    atmos[rec].channel_in[i] = forcing_data[CHANNEL_IN][uidx];
+                    force[rec].channel_in[i] = forcing_data[CHANNEL_IN][uidx];
                 }
                 else {
-                    atmos[rec].channel_in[i] = 0;
+                    force[rec].channel_in[i] = 0;
                 }
             }
             if (options.CARBON) {
                 // Atmospheric CO2 concentration
-                atmos[rec].Catm[i] = forcing_data[CATM][uidx];
+                force[rec].Catm[i] = forcing_data[CATM][uidx];
                 // Fraction of shortwave that is direct
-                atmos[rec].fdir[i] = forcing_data[FDIR][uidx];
+                force[rec].fdir[i] = forcing_data[FDIR][uidx];
                 // photosynthetically active radiation
-                atmos[rec].par[i] = forcing_data[PAR][uidx];
+                force[rec].par[i] = forcing_data[PAR][uidx];
                 // Cosine of solar zenith angle
-                atmos[rec].coszen[i] = compute_coszen(soil_con->lat,
+                force[rec].coszen[i] = compute_coszen(soil_con->lat,
                                                       soil_con->lng,
                                                       soil_con->time_zone_lng,
                                                       dmy[rec].day_in_year,
@@ -174,32 +178,32 @@ vic_force(atmos_data_struct *atmos,
             }
         }
         if (NF > 1) {
-            atmos[rec].air_temp[NR] = average(atmos[rec].air_temp, NF);
+            force[rec].air_temp[NR] = average(force[rec].air_temp, NF);
             // For precipitation put total
-            atmos[rec].prec[NR] = average(atmos[rec].prec, NF) * NF;
-            atmos[rec].shortwave[NR] = average(atmos[rec].shortwave, NF);
-            atmos[rec].longwave[NR] = average(atmos[rec].longwave, NF);
-            atmos[rec].pressure[NR] = average(atmos[rec].pressure, NF);
-            atmos[rec].vp[NR] = average(atmos[rec].vp, NF);
-            atmos[rec].vpd[NR] = average(atmos[rec].vpd, NF);
-            atmos[rec].density[NR] = average(atmos[rec].density, NF);
-            atmos[rec].wind[NR] = average(atmos[rec].wind, NF);
-            atmos[rec].snowflag[NR] = false;
+            force[rec].prec[NR] = average(force[rec].prec, NF) * NF;
+            force[rec].shortwave[NR] = average(force[rec].shortwave, NF);
+            force[rec].longwave[NR] = average(force[rec].longwave, NF);
+            force[rec].pressure[NR] = average(force[rec].pressure, NF);
+            force[rec].vp[NR] = average(force[rec].vp, NF);
+            force[rec].vpd[NR] = average(force[rec].vpd, NF);
+            force[rec].density[NR] = average(force[rec].density, NF);
+            force[rec].wind[NR] = average(force[rec].wind, NF);
+            force[rec].snowflag[NR] = false;
             for (i = 0; i < NF; i++) {
-                if (atmos[rec].snowflag[i] == true) {
-                    atmos[rec].snowflag[NR] = true;
+                if (force[rec].snowflag[i] == true) {
+                    force[rec].snowflag[NR] = true;
                 }
             }
             if (options.LAKES) {
-                atmos[rec].channel_in[NR] =
-                    average(atmos[rec].channel_in, NF) * NF;
+                force[rec].channel_in[NR] =
+                    average(force[rec].channel_in, NF) * NF;
             }
             if (options.CARBON) {
-                atmos[rec].Catm[NR] = average(atmos[rec].Catm, NF);
-                atmos[rec].fdir[NR] = average(atmos[rec].fdir, NF);
-                atmos[rec].par[NR] = average(atmos[rec].par, NF);
+                force[rec].Catm[NR] = average(force[rec].Catm, NF);
+                force[rec].fdir[NR] = average(force[rec].fdir, NF);
+                force[rec].par[NR] = average(force[rec].par, NF);
                 // for coszen, use value at noon
-                atmos[rec].coszen[NR] = compute_coszen(soil_con->lat,
+                force[rec].coszen[NR] = compute_coszen(soil_con->lat,
                                                        soil_con->lng,
                                                        soil_con->time_zone_lng,
                                                        dmy[rec].day_in_year,
@@ -259,7 +263,7 @@ vic_force(atmos_data_struct *atmos,
                 // Check on fcanopy
                 if (veg_hist[rec][v].fcanopy[i] < MIN_FCANOPY) {
                     log_warn(
-                        "rec %zu, veg %zu substep %zu fcanopy %f < minimum of %f; setting = %f\n", rec, v, i,
+                        "rec %zu, veg %zu substep %zu fcanopy %f < minimum of %f; setting = %f", rec, v, i,
                         veg_hist[rec][v].fcanopy[i], MIN_FCANOPY,
                         MIN_FCANOPY);
                     veg_hist[rec][v].fcanopy[i] = MIN_FCANOPY;
@@ -305,7 +309,7 @@ vic_force(atmos_data_struct *atmos,
 
     if (options.COMPUTE_TREELINE) {
         if (!(options.JULY_TAVG_SUPPLIED && avgJulyAirTemp == -999)) {
-            compute_treeline(atmos, dmy, avgJulyAirTemp, Tfactor,
+            compute_treeline(force, dmy, avgJulyAirTemp, Tfactor,
                              AboveTreeLine);
         }
     }

@@ -28,7 +28,7 @@ MINOR = 0
 MICRO = 0
 ISRELEASED = True
 VERSION = '%d.%d.%d' % (MAJOR, MINOR, MICRO)
-QUALIFIER = 'rc1'
+QUALIFIER = 'rc2'
 
 FULLVERSION = VERSION
 write_version = False

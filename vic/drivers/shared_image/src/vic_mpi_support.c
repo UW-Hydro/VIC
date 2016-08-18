@@ -256,8 +256,7 @@ create_MPI_global_struct_type(MPI_Datatype *mpi_type)
 
     // make sure that the we have the right number of elements
     if (i != (size_t) nitems) {
-        log_err("Miscount in create_MPI_global_struct_type(): "
-                "%zd not equal to %d\n", i, nitems);
+        log_err("Miscount: %zd not equal to %d.", i, nitems);
     }
 
     status = MPI_Type_create_struct(nitems, blocklengths, offsets, mpi_types,
@@ -358,8 +357,7 @@ create_MPI_filenames_struct_type(MPI_Datatype *mpi_type)
 
     // make sure that the we have the right number of elements
     if (i != (size_t) nitems) {
-        log_err("Miscount in create_MPI_filenames_struct_type(): "
-                "%zd not equal to %d\n", i, nitems);
+        log_err("Miscount: %zd not equal to %d.", i, nitems);
     }
 
     status = MPI_Type_create_struct(nitems, blocklengths, offsets, mpi_types,
@@ -453,8 +451,7 @@ create_MPI_location_struct_type(MPI_Datatype *mpi_type)
 
     // make sure that the we have the right number of elements
     if (i != (size_t) nitems) {
-        log_err("Miscount in create_MPI_location_struct_type(): "
-                "%zd not equal to %d\n", i, nitems);
+        log_err("Miscount: %zd not equal to %d.", i, nitems);
     }
 
     status = MPI_Type_create_struct(nitems, blocklengths, offsets, mpi_types,
@@ -723,8 +720,7 @@ create_MPI_option_struct_type(MPI_Datatype *mpi_type)
 
     // make sure that the we have the right number of elements
     if (i != (size_t) nitems) {
-        log_err("Miscount in create_MPI_option_struct_type(): "
-                "%zd not equal to %d\n", i, nitems);
+        log_err("Miscount: %zd not equal to %d.", i, nitems);
     }
 
     status = MPI_Type_create_struct(nitems, blocklengths, offsets, mpi_types,
@@ -1391,8 +1387,7 @@ create_MPI_param_struct_type(MPI_Datatype *mpi_type)
 
     // make sure that the we have the right number of elements
     if (i != (size_t) nitems) {
-        log_err("Miscount in create_MPI_param_struct_type(): "
-                "%zd not equal to %d\n", i, nitems);
+        log_err("Miscount: %zd not equal to %d.", i, nitems);
     }
 
     status = MPI_Type_create_struct(nitems, blocklengths, offsets, mpi_types,
@@ -1466,7 +1461,7 @@ create_MPI_dmy_struct_type(MPI_Datatype *mpi_type)
 
     // make sure that the we have the right number of elements
     if (i != (size_t) nitems) {
-        log_err("Miscount: %zd not equal to %d\n", i, nitems);
+        log_err("Miscount: %zd not equal to %d.", i, nitems);
     }
 
     status = MPI_Type_create_struct(nitems, blocklengths, offsets, mpi_types,
@@ -1547,7 +1542,7 @@ create_MPI_alarm_struct_type(MPI_Datatype *mpi_type)
 
     // make sure that the we have the right number of elements
     if (i != (size_t) nitems) {
-        log_err("Miscount: %zd not equal to %d\n", i, nitems);
+        log_err("Miscount: %zd not equal to %d.", i, nitems);
     }
 
     status = MPI_Type_create_struct(nitems, blocklengths, offsets, mpi_types,
@@ -1744,7 +1739,7 @@ gather_put_nc_field_double(int     nc_id,
             filter_active_cells, dvar_remapped, dvar);
 
         status = nc_put_vara_double(nc_id, var_id, start, count, dvar);
-        check_nc_status(status, "Error writing values");
+        check_nc_status(status, "Error writing values.");
         // cleanup
         free(dvar);
         free(dvar_gathered);

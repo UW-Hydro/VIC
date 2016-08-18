@@ -468,7 +468,7 @@ func_surf_energy_bal(double  Ts,
         }
 
         if ((int) Error == ERROR) {
-            log_err("func_surf_energy_bal calling solve_T_profile");
+            log_err("Error solving the temperature profile");
         }
         /* Compute temperatures for calculations of ground heat flux, delta_H, and fusion */
         if (!options.EXP_TRANS) {

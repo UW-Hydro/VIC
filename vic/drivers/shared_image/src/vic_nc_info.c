@@ -243,7 +243,7 @@ get_nc_dtype(unsigned short int dtype)
         type = NC_DOUBLE;
         break;
     default:
-        log_err("Unrecognized netCDF variable datatype %hu", dtype);
+        log_err("Unrecognized netCDF variable datatype: %hu", dtype);
     }
     return type;
 }

@@ -277,7 +277,7 @@ main(int   argc,
                                  "so the simulation has not finished.  An "
                                  "incomplete output file has been "
                                  "generated, check your inputs before "
-                                 "rerunning the simulation.\n",
+                                 "rerunning the simulation.",
                                  soil_con.gridcel, rec);
                         break;
                     }
@@ -285,7 +285,7 @@ main(int   argc,
                         // Else exit program on cell solution error as in previous versions
                         log_err("ERROR: Grid cell %i failed in record %zu "
                                 "so the simulation has ended. Check your "
-                                "inputs before rerunning the simulation.\n",
+                                "inputs before rerunning the simulation.",
                                 soil_con.gridcel, rec);
                     }
                 }

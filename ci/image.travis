@@ -83,10 +83,8 @@ function vic_script {
 
     # Run test package
     ./tests/run_tests.py unit examples system \
-        --vic_exe=${DRIVER_EXE} \
-        --driver=${TESTID} \
+        --image=${DRIVER_EXE} \
         --data_dir=${SAMPLES_PATH}/data
-
 }
 
 function vic_after_success {

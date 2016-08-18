@@ -9,9 +9,12 @@ import pandas as pd
 import xarray as xr
 import glob
 import re
+import matplotlib
+matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 import warnings
 import seaborn as sns
+import multiprocessing as mp
 
 from tonic.models.vic.vic import (VICRuntimeError,
                                   default_vic_valgrind_error_code)
@@ -204,6 +207,7 @@ def test_classic_driver_all_complete(fnames):
 def test_classic_driver_no_output_file_nans(fnames):
     '''Test that all VIC classic driver output files in fnames have no nans'''
     for fname in fnames:
+        print(fname)
         df = read_vic_ascii(fname)
         check_for_nans(df)
 
@@ -591,18 +595,16 @@ def read_vic_42_output(lat, lng, science_test_data_dir, items):
     return vic_42
 
 
-def read_vic_5_output(lat, lng, science_test_data_dir, items):
+def read_vic_5_output(lat, lng, result_dir, items):
     ''' Read VIC 5.0.x output. '''
 
     if items['compare_to'] == 'ecflux':
         vic_5_file = 'en_bal_%s_%s.txt' % (lat, lng)
-        vic_5_dir = os.path.join(science_test_data_dir, 'science', 'archive',
-                                 items['archive'], 'ecflux', 'results')
+        vic_5_dir = result_dir
 
     elif items['compare_to'] == 'snotel':
         vic_5_file = 'outfile_%s_%s.txt' % (lat, lng)
-        vic_5_dir = os.path.join(science_test_data_dir, 'science', 'archive',
-                                 items['archive'], 'snotel', 'results')
+        vic_5_dir = result_dir
 
     else:
         raise ValueError("this option (%s) has not yet been implemented"
@@ -631,7 +633,7 @@ def read_vic_5_output(lat, lng, science_test_data_dir, items):
 
 
 def plot_science_tests(driver, test_type, science_test_data_dir, result_dir,
-                       plot_dir, plots_to_make, compare_data):
+                       plot_dir, plots_to_make, compare_data, nproc):
 
     ''' makes science test figures
 
@@ -652,6 +654,8 @@ def plot_science_tests(driver, test_type, science_test_data_dir, result_dir,
     compare_data <Dict>
         Keys that indicate which datasets and model output to use for
         comparison.
+    nproc <int>
+        Number of processors to use
 
     Returns
     ----------
@@ -662,7 +666,8 @@ def plot_science_tests(driver, test_type, science_test_data_dir, result_dir,
                                compare_data,
                                result_dir,
                                plot_dir,
-                               plots_to_make)
+                               plots_to_make,
+                               nproc)
 
     elif test_type == "science_test_fluxnet":
         plot_fluxnet_comparison(driver,
@@ -670,7 +675,8 @@ def plot_science_tests(driver, test_type, science_test_data_dir, result_dir,
                                 compare_data,
                                 result_dir,
                                 plot_dir,
-                                plots_to_make)
+                                plots_to_make,
+                                nproc)
     else:
         raise ValueError("this option %s has not been implemented in the \
                          VIC 5.0 science test suite" % test_type)
@@ -679,7 +685,7 @@ def plot_science_tests(driver, test_type, science_test_data_dir, result_dir,
 def plot_snotel_comparison(driver, science_test_data_dir,
                            compare_data_dict,
                            result_dir, plot_dir,
-                           plots_to_make):
+                           plots_to_make, nproc):
     ''' makes snotel figures '''
 
     # plot settings
@@ -692,16 +698,38 @@ def plot_snotel_comparison(driver, science_test_data_dir,
     context = "paper"
     style = "whitegrid"
 
+    # --- Set up multiprocessing --- #
+    pool = mp.Pool(processes=nproc)
+
     for filename in os.listdir(os.path.join(science_test_data_dir,
                                             'science',
                                             'inputdata',
                                             'snotel',
                                             'observations')):
+        pool.apply_async(plot_snotel_comparison_one_site,
+                         (driver, science_test_data_dir,
+                            compare_data_dict,
+                            result_dir, plot_dir,
+                            plots_to_make,
+                            plot_variables, context, style, filename,))
+
+    # --- Finish multiprocessing --- #
+    pool.close()
+    pool.join()
+
+
+def plot_snotel_comparison_one_site(
+                            driver, science_test_data_dir,
+                            compare_data_dict,
+                            result_dir, plot_dir,
+                            plots_to_make,
+                            plot_variables, context, style, filename):
 
         # get lat/lng from filename
         file_split = re.split('_', filename)
         lng = file_split[3].split('.txt')[0]
         lat = file_split[2]
+        print('Plotting {} {}'.format(lat, lng))
 
         # loop over data to compare
         data = {}
@@ -720,7 +748,7 @@ def plot_snotel_comparison(driver, science_test_data_dir,
 
             else:
                 data[key] = read_vic_5_output(lat, lng,
-                                              science_test_data_dir,
+                                              result_dir,
                                               items)
 
         # loop over variables to plot
@@ -826,8 +854,9 @@ def read_fluxnet_obs(subdir, science_test_data_dir, items):
 def plot_fluxnet_comparison(driver, science_test_data_dir,
                             compare_data_dict,
                             result_dir, plot_dir,
-                            plots_to_make):
-    ''' makes Ameriflux figures '''
+                            plots_to_make, nproc):
+    ''' makes Ameriflux figures
+    '''
 
     context = "paper"
     style = "whitegrid"
@@ -845,157 +874,179 @@ def plot_fluxnet_comparison(driver, science_test_data_dir,
                            'ec_flux_towers',
                            'obs')
 
+    # --- Set up multiprocessing --- #
+    pool = mp.Pool(processes=nproc)
+
     for subdir in os.listdir(obs_dir):
+        pool.apply_async(plot_fluxnet_comparison_one_site,
+                         (driver, science_test_data_dir,
+                          compare_data_dict,
+                          result_dir, plot_dir,
+                          plots_to_make,
+                          context, style, var_names, months, obs_dir, subdir,))
 
-        if check_site_files(obs_dir, subdir):
-            # get CSV file from site directory to get lat/lng for site
-            lat, lng = get_fluxnet_lat_lon(obs_dir, subdir)
+    # --- Finish multiprocessing --- #
+    pool.close()
+    pool.join()
 
-            # loop over data to compare
-            data = {}
-            for key, items in compare_data_dict.items():
 
-                if key == "ecflux":
-                    try:
-                        # load Ameriflux data
-                        data[key] = read_fluxnet_obs(subdir,
-                                                     science_test_data_dir,
-                                                     items)
-                    except OSError:
-                        warnings.warn(
-                            "this %s site does not have data" % subdir)
+def plot_fluxnet_comparison_one_site(
+                            driver, science_test_data_dir,
+                            compare_data_dict,
+                            result_dir, plot_dir,
+                            plots_to_make,
+                            context, style, var_names, months, obs_dir, subdir):
 
-                elif key == "VIC.4.2.d":
-                    try:
-                        # load VIC 4.2 simulations
-                        data[key] = read_vic_42_output(lat, lng,
-                                                       science_test_data_dir,
-                                                       items)
+    if check_site_files(obs_dir, subdir):
+        # get CSV file from site directory to get lat/lng for site
+        lat, lng = get_fluxnet_lat_lon(obs_dir, subdir)
+        print(lat, lng)
 
-                    except OSError:
-                        warnings.warn(
-                            "this site has a lat/lng precision issue")
+        # loop over data to compare
+        data = {}
+        for key, items in compare_data_dict.items():
 
-                else:
-                    try:
-                        # load VIC 5 simulations
-                        data[key] = read_vic_5_output(lat, lng,
-                                                      science_test_data_dir,
-                                                      items)
-                    except OSError:
-                        warnings.warn(
-                            "this site has a lat/lng precision issue")
+            if key == "ecflux":
+                try:
+                    # load Ameriflux data
+                    data[key] = read_fluxnet_obs(subdir,
+                                                 science_test_data_dir,
+                                                 items)
+                except OSError:
+                    warnings.warn(
+                        "this %s site does not have data" % subdir)
 
-            # make figures
+            elif key == "VIC.4.2.d":
+                try:
+                    # load VIC 4.2 simulations
+                    data[key] = read_vic_42_output(lat, lng,
+                                                   science_test_data_dir,
+                                                   items)
 
-            # plot preferences
-            fs = 15
-            dpi = 150
+                except OSError:
+                    warnings.warn(
+                        "this site has a lat/lng precision issue")
 
-            if 'annual_mean_diurnal_cycle' in plots_to_make:
+            else:
+                try:
+                    # load VIC 5 simulations
+                    data[key] = read_vic_5_output(lat, lng,
+                                                  result_dir,
+                                                  items)
+                except OSError:
+                    warnings.warn(
+                        "this site has a lat/lng precision issue")
 
-                # make annual mean diurnal cycle plots
-                with plt.rc_context(dict(sns.axes_style(style),
-                                    **sns.plotting_context(context))):
-                    f, axarr = plt.subplots(4, 1, figsize=(8, 8), sharex=True)
+        # make figures
 
-                    for i, (vic_var, variable_name) in enumerate(
-                            var_names.items()):
+        # plot preferences
+        fs = 15
+        dpi = 150
 
-                        # calculate annual mean diurnal cycle for each
-                        # DataFrame
-                        annual_mean = {}
-                        for key, df in data.items():
-                            annual_mean[key] = pd.DataFrame(
-                                df[vic_var].groupby(df.index.hour).mean())
+        if 'annual_mean_diurnal_cycle' in plots_to_make:
 
-                        df = pd.DataFrame(
-                            {key: d[vic_var] for key, d in annual_mean.items()
-                             if vic_var in d})
+            # make annual mean diurnal cycle plots
+            with plt.rc_context(dict(sns.axes_style(style),
+                                **sns.plotting_context(context))):
+                f, axarr = plt.subplots(4, 1, figsize=(8, 8), sharex=True)
+
+                for i, (vic_var, variable_name) in enumerate(
+                        var_names.items()):
+
+                    # calculate annual mean diurnal cycle for each
+                    # DataFrame
+                    annual_mean = {}
+                    for key, df in data.items():
+                        annual_mean[key] = pd.DataFrame(
+                            df[vic_var].groupby(df.index.hour).mean())
+
+                    df = pd.DataFrame(
+                        {key: d[vic_var] for key, d in annual_mean.items()
+                         if vic_var in d})
+
+                    for key, series in df.iteritems():
+                        series.plot(
+                            linewidth=compare_data_dict[key]['linewidth'],
+                            ax=axarr[i],
+                            color=compare_data_dict[key]['color'],
+                            linestyle=compare_data_dict[key]['linestyle'],
+                            zorder=compare_data_dict[key]['zorder'])
+
+                    axarr[i].legend(loc='upper left')
+                    axarr[i].set_ylabel(
+                        '%s ($W/{m^2}$)' % variable_name,
+                        size=fs)
+                    axarr[i].set_xlabel('Time of Day (Hour)', size=fs)
+                    axarr[i].set_xlim([0, 24])
+                    axarr[i].xaxis.set_ticks(np.arange(0, 24, 3))
+
+                # save plot
+                plotname = '%s_%s.png' % (lat, lng)
+                os.makedirs(os.path.join(plot_dir, 'annual_mean'),
+                            exist_ok=True)
+                savepath = os.path.join(plot_dir, 'annual_mean', plotname)
+                plt.savefig(savepath, bbox_inches='tight', dpi=dpi)
+
+                plt.clf()
+                plt.close()
+
+        if 'monthly_mean_diurnal_cycle' in plots_to_make:
+
+            # make monthly mean diurnal cycle plots
+            with plt.rc_context(dict(sns.axes_style(style),
+                                **sns.plotting_context(context))):
+                f, axarr = plt.subplots(4, 12, figsize=(35, 7),
+                                        sharex=True,
+                                        sharey=True)
+
+                for i, (vic_var, variable_name) in enumerate(
+                        var_names.items()):
+
+                    # calculate monthly mean diurnal cycle
+                    monthly_mean = {}
+                    for (key, df) in data.items():
+                        monthly_mean[key] = pd.DataFrame(
+                            df[vic_var].groupby([df.index.month,
+                                                df.index.hour]).mean())
+
+                    df = pd.DataFrame(
+                        {key: d[vic_var] for key, d in monthly_mean.items()
+                         if vic_var in d})
+
+                    for j, month in enumerate(months):
 
                         for key, series in df.iteritems():
-                            series.plot(
+                            series[j + 1].plot(
                                 linewidth=compare_data_dict[key]['linewidth'],
-                                ax=axarr[i],
+                                ax=axarr[i, j],
                                 color=compare_data_dict[key]['color'],
                                 linestyle=compare_data_dict[key]['linestyle'],
                                 zorder=compare_data_dict[key]['zorder'])
 
-                        axarr[i].legend(loc='upper left')
-                        axarr[i].set_ylabel(
-                            '%s ($W/{m^2}$)' % variable_name,
+                        axarr[i, j].set_ylabel(
+                            '%s \n ($W/{m^2}$)' % variable_name,
                             size=fs)
-                        axarr[i].set_xlabel('Time of Day (Hour)', size=fs)
-                        axarr[i].set_xlim([0, 24])
-                        axarr[i].xaxis.set_ticks(np.arange(0, 24, 3))
+                        axarr[i, j].set_xlabel('', size=fs)
+                        axarr[i, j].set_xlim([0, 24])
+                        axarr[i, j].xaxis.set_ticks(np.arange(0, 24, 3))
+                        if i == 0:
+                            axarr[i, j].set_title(month, size=fs)
 
-                    # save plot
-                    plotname = '%s_%s.png' % (lat, lng)
-                    os.makedirs(os.path.join(plot_dir, 'annual_mean'),
-                                exist_ok=True)
-                    savepath = os.path.join(plot_dir, 'annual_mean', plotname)
-                    plt.savefig(savepath, bbox_inches='tight', dpi=dpi)
+                # add legend
+                axarr[0, -1].legend(loc='center left',
+                                    bbox_to_anchor=(1, 0.5))
 
-                    plt.clf()
-                    plt.close()
+                # add common x label
+                f.text(0.5, 0.04, 'Time of Day (Hour)', ha='center',
+                       size=fs)
 
-            if 'monthly_mean_diurnal_cycle' in plots_to_make:
+                # save plot
+                plotname = '%s_%s.png' % (lat, lng)
+                os.makedirs(os.path.join(plot_dir, 'monthly_mean'),
+                            exist_ok=True)
+                savepath = os.path.join(plot_dir,
+                                        'monthly_mean', plotname)
+                plt.savefig(savepath, bbox_inches='tight', dpi=dpi)
 
-                # make monthly mean diurnal cycle plots
-                with plt.rc_context(dict(sns.axes_style(style),
-                                    **sns.plotting_context(context))):
-                    f, axarr = plt.subplots(4, 12, figsize=(35, 7),
-                                            sharex=True,
-                                            sharey=True)
-
-                    for i, (vic_var, variable_name) in enumerate(
-                            var_names.items()):
-
-                        # calculate monthly mean diurnal cycle
-                        monthly_mean = {}
-                        for (key, df) in data.items():
-                            monthly_mean[key] = pd.DataFrame(
-                                df[vic_var].groupby([df.index.month,
-                                                    df.index.hour]).mean())
-
-                        df = pd.DataFrame(
-                            {key: d[vic_var] for key, d in monthly_mean.items()
-                             if vic_var in d})
-
-                        for j, month in enumerate(months):
-
-                            for key, series in df.iteritems():
-                                series[j + 1].plot(
-                                    linewidth=compare_data_dict[key]['linewidth'],
-                                    ax=axarr[i, j],
-                                    color=compare_data_dict[key]['color'],
-                                    linestyle=compare_data_dict[key]['linestyle'],
-                                    zorder=compare_data_dict[key]['zorder'])
-
-                            axarr[i, j].set_ylabel(
-                                '%s \n ($W/{m^2}$)' % variable_name,
-                                size=fs)
-                            axarr[i, j].set_xlabel('', size=fs)
-                            axarr[i, j].set_xlim([0, 24])
-                            axarr[i, j].xaxis.set_ticks(np.arange(0, 24, 3))
-                            if i == 0:
-                                axarr[i, j].set_title(month, size=fs)
-
-                    # add legend
-                    axarr[0, -1].legend(loc='center left',
-                                        bbox_to_anchor=(1, 0.5))
-
-                    # add common x label
-                    f.text(0.5, 0.04, 'Time of Day (Hour)', ha='center',
-                           size=fs)
-
-                    # save plot
-                    plotname = '%s_%s.png' % (lat, lng)
-                    os.makedirs(os.path.join(plot_dir, 'monthly_mean'),
-                                exist_ok=True)
-                    savepath = os.path.join(plot_dir,
-                                            'monthly_mean', plotname)
-                    plt.savefig(savepath, bbox_inches='tight', dpi=dpi)
-
-                    plt.clf()
-                    plt.close()
+                plt.clf()
+                plt.close()

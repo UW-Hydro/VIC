@@ -16,7 +16,7 @@ FROZEN_SOIL           FALSE
 
 QUICK_FLUX            FALSE
 
-FORCING1              $test_data_dir/datasets/snotel/forcings_vp/snotel_VIC.4.1.2_forcings_
+FORCING1              $test_data_dir/inputdata/snotel/forcings/snotel_VIC.4.1.2_forcings_
 FORCE_FORMAT          ASCII
 FORCE_TYPE            SWDOWN
 FORCE_TYPE            LWDOWN
@@ -31,16 +31,16 @@ FORCEYEAR             2007
 FORCEMONTH            11
 FORCEDAY              01
 GRID_DECIMAL          4
-WIND_H                17.5
+WIND_H                10.0
 
-SOIL                  $test_data_dir/datasets/snotel/parameters/Snotel_VIC.4.1.2_soil.txt
+SOIL                  $test_data_dir/inputdata/snotel/parameters/Snotel_VIC.4.1.2_soil.txt
 BASEFLOW              ARNO
 
 JULY_TAVG_SUPPLIED    FALSE
 ORGANIC_FRACT         FALSE
 
-VEGLIB                $test_data_dir/datasets/snotel/parameters/Snotel_VIC.4.1.2_veglib.txt
-VEGPARAM              $test_data_dir/datasets/snotel/parameters/Snotel_VIC.4.1.2_vegparam.txt
+VEGLIB                $test_data_dir/inputdata/snotel/parameters/Snotel_VIC.4.1.2_veglib.txt
+VEGPARAM              $test_data_dir/inputdata/snotel/parameters/Snotel_VIC.4.1.2_vegparam.txt
 ROOT_ZONES            3
 
 VEGPARAM_LAI          TRUE

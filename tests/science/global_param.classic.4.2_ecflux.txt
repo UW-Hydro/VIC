@@ -1,5 +1,5 @@
 NLAYER      3
-NODES       3
+NODES       10
 TIME_STEP   1
 SNOW_STEP   1
 STARTYEAR   2000
@@ -13,9 +13,8 @@ ENDDAY      31
 FULL_ENERGY     TRUE
 FROZEN_SOIL FALSE
 
-FORCING1    $test_data_dir/datasets/ec_flux_towers/forcing.merge.hourly/full_data_
+FORCING1    $test_data_dir/inputdata/ec_flux_towers/forcing.merge.hourly/full_data_
 FORCE_FORMAT    ASCII
-FORCE_ENDIAN    LITTLE
 N_TYPES     12
 FORCE_TYPE  SKIP
 FORCE_TYPE  SKIP
@@ -37,18 +36,16 @@ FORCEHOUR   00
 GRID_DECIMAL    4
 
 WIND_H          10.0
-MEASURE_H       2.0
-ALMA_INPUT  FALSE
 
-SOIL            $test_data_dir/datasets/ec_flux_towers/params/soil_param.site_test.txt
+SOIL            $test_data_dir/inputdata/ec_flux_towers/params/soil_param.site_test.txt
 BASEFLOW    ARNO
 JULY_TAVG_SUPPLIED  FALSE
 ORGANIC_FRACT   FALSE
 
-VEGLIB          $test_data_dir/datasets/ec_flux_towers/params/veg_lib_IGBP.fv
+VEGLIB          $test_data_dir/inputdata/ec_flux_towers/params/veg_lib_IGBP.fv
 VEGLIB_VEGCOVER TRUE
 
-VEGPARAM        $test_data_dir/datasets/ec_flux_towers/params/veg_param.sites.IGBP.modis
+VEGPARAM        $test_data_dir/inputdata/ec_flux_towers/params/veg_param.sites.IGBP.modis
 ROOT_ZONES      3
 
 VEGPARAM_LAI    TRUE
@@ -57,7 +54,7 @@ VEGPARAM_ALB    TRUE
 
 LAI_SRC         FROM_VEGPARAM
 VEGCOVER_SRC    FROM_VEGPARAM
-ALBEDO_SRC      FROM_VEGPARAM
+# ALBEDO_SRC      FROM_VEGPARAM
 SNOW_BAND   1
 
 

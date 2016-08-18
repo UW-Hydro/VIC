@@ -152,6 +152,9 @@ def main():
     parser.add_argument('--science_test_data_dir', type=str,
                         help='directory to find science test data',
                         default='./samples/VIC_sample_data')
+    parser.add_argument('--nproc', type=int,
+                        help='number of processors to use for science tests',
+                        default=1)
 
     args = parser.parse_args()
 
@@ -208,7 +211,8 @@ def main():
                                         science_test_data_dir,
                                         data_dir,
                                         os.path.join(out_dir, 'science'),
-                                        'classic')
+                                        'classic',
+                                        args.nproc)
     # examples
     if any(i in ['all', 'examples'] for i in args.tests):
         if len(dict_drivers) == 1:  # if only one driver
@@ -671,7 +675,7 @@ def run_system(config_file, dict_drivers, test_data_dir, out_dir):
 
 
 def run_science(config_file, vic_exe, science_test_data_dir,
-                test_data_dir, out_dir, driver):
+                test_data_dir, out_dir, driver, nproc):
     '''Run science tests from config file
 
     Parameters
@@ -688,6 +692,8 @@ def run_science(config_file, vic_exe, science_test_data_dir,
         Path to output location
     driver : {'classic', 'image'}
         Driver to run tests on.
+    nproc : int
+        Number of processors to use for science tests
 
     Returns
     -------
@@ -764,6 +770,7 @@ def run_science(config_file, vic_exe, science_test_data_dir,
             # Run the VIC simulation
             returncode = vic_exe.run(test_global_file, logdir=dirs['logs'],
                                      **run_kwargs)
+
             test_complete = True
 
             # Check return code
@@ -789,9 +796,6 @@ def run_science(config_file, vic_exe, science_test_data_dir,
                     else:
                         raise ValueError('unknown driver')
 
-            # if we got this far, the test passed.
-            test_passed = True
-
             # plot science test results
             plot_science_tests(test_dict['driver'],
                                test_type,
@@ -799,7 +803,11 @@ def run_science(config_file, vic_exe, science_test_data_dir,
                                dirs['results'],
                                dirs['plots'],
                                test_dict['plots'],
-                               test_dict['compare_data'])
+                               test_dict['compare_data'],
+                               nproc=nproc)
+
+            # if we got this far, the test passed.
+            test_passed = True
 
         # Handle errors
         except Exception as e:

@@ -6,7 +6,7 @@ site_url: http://vic.readthedocs.org/
 theme: readthedocs
 theme_dir: 'docs/custom_rtd_theme'
 site_favicon: vic_favicon.jpg
-copyright: 2015
+copyright: 2016
 docs_dir: docs
 site_dir: site
 use_directory_urls: true
@@ -97,6 +97,6 @@ markdown_extensions:
     - admonition:
     - fenced_code:
 
-copyright: 'Copyright &copy; 2015, <a href="http://uw-hydro.github.io/">University of Washington Computational Hydrology Group</a>.'
+copyright: 'Copyright &copy; 2016, <a href="http://uw-hydro.github.io/">University of Washington Computational Hydrology Group</a>.'
 
 google_analytics: ['UA-65965729-1', 'vic.readthedocs.org']

@@ -1,6 +1,7 @@
 # Frozen Soil Model
 
-When running in cold regions, the effects of frozen soil on the hydrologic process can be very important. Ice in the soil reduces the amount of precipitation and snow melt that can infiltrate the surface, a high enough ice content can make the soil nearly impermeable. Frozen soil also stores more soil moisture through the winter. Frozen soil moisture cannot drain, or be evaporated, so spring soil moisture contents will be significantly higher in regions with frozen soil, than in regions without them.
+Frozen soils can affect hydrological processes.
+Ice in the soil reduces the amount of precipitation and snow melt that can infiltrate the surface, a high enough ice content can make the soil nearly impermeable. Frozen soil also stores more soil moisture through the winter. Frozen soil moisture cannot drain, or be evaporated, so spring soil moisture contents will be significantly higher in regions with frozen soil, than in regions without them.
 
 The frozen soil algorithm in VIC supersedes the original soil thermal flux equations ([Liang et al., 1999](../Documentation/References.md#primary-historical-reference)) in favor of a more explicit numerical technique([Cherkauer and Lettenmaier, 1999](../Documentation/References.md#primary-historical-reference)). Soil temperatures are solved for at several "thermal nodes" through the soil column. The number and location of which can be defined by the user.
 

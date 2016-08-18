@@ -211,7 +211,7 @@ def main():
                                         'classic')
     # examples
     if any(i in ['all', 'examples'] for i in args.tests):
-        if len(args.driver) == 1:  # if only one driver
+        if len(dict_drivers) == 1:  # if only one driver
             driver = list(dict_drivers.keys())[0]
             vic_exe = dict_drivers[driver]
             test_results['examples'] = run_examples(args.examples, vic_exe,

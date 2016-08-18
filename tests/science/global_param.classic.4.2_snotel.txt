@@ -13,20 +13,10 @@ ENDDAY      31
 FULL_ENERGY     TRUE
 FROZEN_SOIL FALSE
 
-BLOWING     FALSE
+QUICK_FLUX     FALSE
 
-CORRPREC    FALSE
-MIN_WIND_SPEED  0.1
-MAX_SNOW_TEMP   0.5
-MIN_RAIN_TEMP   -0.5
-
-CONTINUEONERROR TRUE
-
-GRND_FLUX_TYPE  GF_FULL
-
-FORCING1    $test_data_dir/datasets/snotel/forcings_vp/snotel_VIC.4.1.2_forcings_
+FORCING1    $test_data_dir/inputdata/snotel/forcings/snotel_VIC.4.1.2_forcings_
 FORCE_FORMAT    ASCII
-FORCE_ENDIAN    LITTLE
 N_TYPES     7   # Number of variables (columns)
 FORCE_TYPE  SHORTWAVE  UNSIGNED 40
 FORCE_TYPE  LONGWAVE   UNSIGNED 40
@@ -41,16 +31,15 @@ FORCEMONTH  11
 FORCEDAY    01
 FORCEHOUR   00
 GRID_DECIMAL    4
-WIND_H          17.5
-MEASURE_H       17.5
-ALMA_INPUT  FALSE
+# WIND_H          17.5  # WIND_H is not actually used in VIC4.2 (hardcoded)
 
-SOIL            $test_data_dir/datasets/snotel/parameters/Snotel_VIC.4.1.2_soil.txt
+SOIL            $test_data_dir/inputdata/snotel/parameters/Snotel_VIC.4.1.2_soil.txt
 BASEFLOW    ARNO
 
 JULY_TAVG_SUPPLIED  FALSE
-VEGLIB          $test_data_dir/datasets/snotel/parameters/Snotel_VIC.4.1.2_veglib.txt
-VEGPARAM        $test_data_dir/datasets/snotel/parameters/Snotel_VIC.4.1.2_vegparam.txt
+ORGANIC_FRACT       FALSE
+VEGLIB          $test_data_dir/inputdata/snotel/parameters/Snotel_VIC.4.1.2_veglib.txt
+VEGPARAM        $test_data_dir/inputdata/snotel/parameters/Snotel_VIC.4.1.2_vegparam.txt
 ROOT_ZONES      3
 
 VEGPARAM_LAI    TRUE

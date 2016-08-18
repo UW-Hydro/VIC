@@ -210,7 +210,7 @@ error_print_atmos_energy_bal(double  Tcanopy,
              "InSensible = %f\n"
              "*SensibleHeat = %f\n"
              "Try increasing CANOPY_DT to get model to complete cell.\n"
-             "Then check output for instabilities.\n",
+             "Then check output for instabilities.",
              Tcanopy, LatentHeat, NetRadiation, Ra, Tair, atmos_density,
              InSensible, *SensibleHeat);
 

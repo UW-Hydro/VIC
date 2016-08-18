@@ -143,20 +143,6 @@ def main():
                         help='classic driver executable to test')
     parser.add_argument('--image', type=str,
                         help='image driver executable to test')
-    
-#    parser.add_argument('--vic_exe', type=str,
-#                        help='VIC executable to test',
-#                        default=os.path.join(
-#                            test_dir, '../vic/drivers/classic/vic_classic.exe'),
-#                        nargs='+')
-#    parser.add_argument('--driver', type=str,
-#                        help='VIC driver to test. Can be a list of drivers '
-#                             'for cross-driver tests, in which case a list of '
-#                             'corresponding vic_exe in the same order must '
-#                             'also be specified',
-#                        choices=['classic', 'image'],
-#                        default='classic', nargs='+')
-
     parser.add_argument('--output_dir', type=str,
                         help='directory to write test output to',
                         default='$WORKDIR/VIC_tests_{0}'.format(ymd))
@@ -217,23 +203,24 @@ def main():
 
     # science
     if any(i in ['all', 'science'] for i in args.tests):
-        if len(args.driver) == 1:  # if only one driver
-            driver = args.driver[0]
-            test_results['science'] = run_science(
-                                            args.science, vic_exe,
-                                            science_test_data_dir,
-                                            data_dir,
-                                            os.path.join(out_dir, 'science'),
-                                            driver)
+        test_results['science'] = run_science(
+                                        args.science, dict_drivers['classic'],
+                                        science_test_data_dir,
+                                        data_dir,
+                                        os.path.join(out_dir, 'science'),
+                                        'classic')
     # examples
     if any(i in ['all', 'examples'] for i in args.tests):
         if len(args.driver) == 1:  # if only one driver
-            driver = args.driver[0]
+            driver = list(dict_drivers.keys())[0]
+            vic_exe = dict_drivers[driver]
             test_results['examples'] = run_examples(args.examples, vic_exe,
                                                     data_dir,
                                                     os.path.join(
                                                         out_dir, 'examples'),
                                                     driver)
+        else:
+            raise ValueError('example test only supports single driver')
     # release
     if any(i in ['all', 'release'] for i in args.tests):
         test_results['release'] = run_release(args.release)
@@ -402,11 +389,10 @@ def run_system(config_file, dict_drivers, test_data_dir, out_dir):
         elif 'mpi' in test_dict['check']:
             if len(dict_drivers) > 1:
                 raise ValueError('Only support single driver for MPI'
-                                   'tests!')
+                                 'tests!')
             if not isinstance(test_dict['mpi']['n_proc'], list):
-                print('Error: need at least two values in n_proc to run'
-                      'mpi test!')
-                raise
+                raise ValueError('Need at least two values in n_proc to run'
+                                 'mpi test!')
             list_n_proc = test_dict['mpi']['n_proc']
 
         # create template string
@@ -639,8 +625,8 @@ def run_system(config_file, dict_drivers, test_data_dir, out_dir):
                 # check for multistream output
                 if 'multistream' in test_dict['check']:
                     if len(dict_drivers) > 1:
-                        raise RuntimeError('Only support single driver for '
-                                           'multistream check')
+                        raise ValueError('Only support single driver for '
+                                         'multistream check')
                     fnames = glob.glob(os.path.join(dirs['results'], '*'))
                     if driver == 'classic':
                         check_multistream_classic(fnames)

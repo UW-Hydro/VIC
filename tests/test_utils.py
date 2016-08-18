@@ -447,23 +447,29 @@ def check_drivers_match_fluxes(list_drivers, result_basedir):
             fname = glob.glob(os.path.join(result_basedir, driver, '*.nc'))[0]
             ds_image = xr.open_dataset(fname)
            
-            import matplotlib.pyplot as plt
             # loop over each grid cell from classic driver
             for fname in list_fnames_classic:
                 gcell = parse_classic_driver_outfile_name(fname)
                 df_classic = read_vic_ascii(fname)
-                ds_image_cell = ds_image.sel(lat=gcell.lat, lon=gcell.lon)
+                ds_image_cell = ds_image.sel(lat=gcell.lat, lon=gcell.lon,
+                                             method='nearest')
                 # compare each variable
                 for var in ds_image_cell.data_vars:
                     # if one [time] dimension
                     if len(ds_image_cell[var].coords) == 3:
                         # determine precision for comparison
-                        if np.mean(ds_image_cell[var].values) == 0:
+                        # --- if all zeros for this variable, set
+                        # --- decimal = 2 --- #
+                        if np.sum(np.absolute(ds_image_cell[var].values)) == 0:
                             decimal = 2
+                        # --- if not all zeros, set decimal depending on the
+                        # maximum aboslute value of this variable so that the
+                        # comparison has a reasonable precision. Specifically, 
+                        # decimal ~= - log10(max_abs_value) + 1 --- #
                         else:
                             decimal = int(round(- np.log10(np.max(np.absolute(
-                                            ds_image_cell[var].values)))
-                                                + 1))
+                                            ds_image_cell[var].values))) + 1))
+                        # --- keep decimal to be no greater than 4 --- #
                         if decimal > 4:
                             decimal = 4
                         # assert almost equal
@@ -482,8 +488,7 @@ def check_drivers_match_fluxes(list_drivers, result_basedir):
                                 decimal = 2
                             else:
                                 decimal = int(round(- np.log10(np.max(
-                                                np.absolute(s_image.values)))
-                                                    + 1))
+                                            np.absolute(s_image.values))) + 1))
                             if decimal > 4:
                                 decimal = 4
                             # assert almost eqaul

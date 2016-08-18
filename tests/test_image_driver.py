@@ -8,6 +8,7 @@ import pandas as pd
 import numpy as np
 import numpy.testing as npt
 import glob
+import warnings
 
 
 def test_image_driver_no_output_file_nans(fnames, domain_file):
@@ -204,6 +205,7 @@ def check_mpi_fluxes(result_basedir, list_n_proc):
     os
     glob
     numpy
+    warnings
     '''
 
     # Read the first run - as base
@@ -212,8 +214,8 @@ def check_mpi_fluxes(result_basedir, list_n_proc):
         result_basedir,
         'processors_{}'.format(n_proc))
     if len(glob.glob(os.path.join(result_dir, '*.nc'))) > 1:
-        print(
-            'Warning: more than one netCDF file found under directory {}'.
+        warnings.warn(
+            'More than one netCDF file found under directory {}'.
             format(result_dir))
     fname = glob.glob(os.path.join(result_dir, '*.nc'))[0]
     ds_first_run = xr.open_dataset(fname)
@@ -228,9 +230,9 @@ def check_mpi_fluxes(result_basedir, list_n_proc):
             result_basedir,
             'processors_{}'.format(n_proc))
         if len(glob.glob(os.path.join(result_dir, '*.nc'))) > 1:
-            print(
-                'Warning: more than one netCDF file found under directory {}'.
-                format(result_dir))
+            warnings.warn(
+                'More than one netCDF file found under directory {}'.
+                    format(result_dir))
         fname = glob.glob(os.path.join(result_dir, '*.nc'))[0]
         ds_current_run = xr.open_dataset(fname)
         # Compare current run with base run
@@ -258,6 +260,7 @@ def check_mpi_states(state_basedir, list_n_proc):
     os
     glob
     numpy
+    warnings
     '''
 
     # Read the first run - as base
@@ -266,9 +269,9 @@ def check_mpi_states(state_basedir, list_n_proc):
         state_basedir,
         'processors_{}'.format(n_proc))
     if len(glob.glob(os.path.join(state_dir, '*.nc'))) > 1:
-        print(
-            'Warning: more than one netCDF file found under directory {}'.
-            format(state_dir))
+        warnings.warn(
+            'More than one netCDF file found under directory {}'.
+                format(state_dir))
     fname = glob.glob(os.path.join(state_dir, '*.nc'))[0]
     ds_first_run = xr.open_dataset(fname)
 
@@ -282,9 +285,9 @@ def check_mpi_states(state_basedir, list_n_proc):
             state_basedir,
             'processors_{}'.format(n_proc))
         if len(glob.glob(os.path.join(state_dir, '*.nc'))) > 1:
-            print(
-                'Warning: more than one netCDF file found under directory {}'.
-                format(result_dir))
+            warnings.warn(
+                'More than one netCDF file found under directory {}'.
+                    format(result_dir))
         fname = glob.glob(os.path.join(state_dir, '*.nc'))[0]
         ds_current_run = xr.open_dataset(fname)
         # Compare current run with base run

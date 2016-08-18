@@ -100,12 +100,13 @@ def replace_global_values(gp, replace):
     return gpl
 
 
-def drop_tests(config, driver):
+def drop_tests(config, dict_drivers):
     '''helper function to remove tests that should not be run for driver'''
 
     new = {}
 
-    if not isinstance(driver, list):  # if single driver
+    if len(dict_drivers.keys()) == 1:  # if single driver
+        driver = list(dict_drivers.keys())[0]
         for key, test_cfg in config.items():
             try:
                 if not isinstance(test_cfg['driver'], list):
@@ -118,11 +119,12 @@ def drop_tests(config, driver):
             try:
                 if isinstance(test_cfg['driver'], list):
                     # check whether the test has the same number of drivers
-                    if len(test_cfg['driver']) == len(driver):
-                        # check whether the test wants to test the same drivers
+                    if len(test_cfg['driver']) == len(dict_drivers.keys()):
+                        # check whether the test wants to test the same set
+                        # of drivers
                         flag = 1
-                        for d in driver:
-                            if d not in test_cfg['driver']:
+                        for driver in dict_drivers.keys():
+                            if driver not in test_cfg['driver']:
                                 flag = 0
                         if flag == 1:
                             new[key] = test_cfg
@@ -401,7 +403,7 @@ def check_drivers_match_fluxes(list_drivers, result_basedir):
 
     Parameters
     ----------
-    list_drivers: <dict>
+    list_drivers: <list>
         A list of driver names to be compared
         e.g., ['classic'; 'image']
         NOTE: must have classic driver; classic driver will be the base for
@@ -415,6 +417,7 @@ def check_drivers_match_fluxes(list_drivers, result_basedir):
     glob
     xarray
     numpy
+    warnings
     collections.namedtuple
     parse_classic_driver_outfile_name
     VICOutFile
@@ -426,8 +429,8 @@ def check_drivers_match_fluxes(list_drivers, result_basedir):
         list_fnames_classic = glob.glob(os.path.join(
                                     result_basedir, 'classic', '*'))
     except:
-        print('Error: must have classic driver for driver-match test!')
-        raise
+        raise ValueError('incorrect classic driver output for driver-match '
+                         'test')
 
     # Loop over all other drivers and compare with classic driver
     for driver in list_drivers:
@@ -439,28 +442,34 @@ def check_drivers_match_fluxes(list_drivers, result_basedir):
             # load flux file
             if len(glob.glob(os.path.join(
                     result_basedir, driver, '*.nc'))) > 1:
-                print('Warning: more than one netCDF file found under'
-                      'directory {}'.format(result_dir))
+                warnings.warn('More than one netCDF file found under'
+                              'directory {}'.format(result_dir))
             fname = glob.glob(os.path.join(result_basedir, driver, '*.nc'))[0]
             ds_image = xr.open_dataset(fname)
            
-            import matplotlib.pyplot as plt
             # loop over each grid cell from classic driver
             for fname in list_fnames_classic:
                 gcell = parse_classic_driver_outfile_name(fname)
                 df_classic = read_vic_ascii(fname)
-                ds_image_cell = ds_image.sel(lat=gcell.lat, lon=gcell.lon)
+                ds_image_cell = ds_image.sel(lat=gcell.lat, lon=gcell.lon,
+                                             method='nearest')
                 # compare each variable
                 for var in ds_image_cell.data_vars:
                     # if one [time] dimension
                     if len(ds_image_cell[var].coords) == 3:
                         # determine precision for comparison
-                        if np.mean(ds_image_cell[var].values) == 0:
+                        # --- if all zeros for this variable, set
+                        # --- decimal = 2 --- #
+                        if np.sum(np.absolute(ds_image_cell[var].values)) == 0:
                             decimal = 2
+                        # --- if not all zeros, set decimal depending on the
+                        # maximum aboslute value of this variable so that the
+                        # comparison has a reasonable precision. Specifically, 
+                        # decimal ~= - log10(max_abs_value) + 1 --- #
                         else:
                             decimal = int(round(- np.log10(np.max(np.absolute(
-                                            ds_image_cell[var].values)))
-                                                + 1))
+                                            ds_image_cell[var].values))) + 1))
+                        # --- keep decimal to be no greater than 4 --- #
                         if decimal > 4:
                             decimal = 4
                         # assert almost equal
@@ -479,8 +488,7 @@ def check_drivers_match_fluxes(list_drivers, result_basedir):
                                 decimal = 2
                             else:
                                 decimal = int(round(- np.log10(np.max(
-                                                np.absolute(s_image.values)))
-                                                    + 1))
+                                            np.absolute(s_image.values))) + 1))
                             if decimal > 4:
                                 decimal = 4
                             # assert almost eqaul

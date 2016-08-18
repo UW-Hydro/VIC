@@ -263,7 +263,7 @@ vic_force(force_data_struct *force,
                 // Check on fcanopy
                 if (veg_hist[rec][v].fcanopy[i] < MIN_FCANOPY) {
                     log_warn(
-                        "rec %zu, veg %zu substep %zu fcanopy %f < minimum of %f; setting = %f\n", rec, v, i,
+                        "rec %zu, veg %zu substep %zu fcanopy %f < minimum of %f; setting = %f", rec, v, i,
                         veg_hist[rec][v].fcanopy[i], MIN_FCANOPY,
                         MIN_FCANOPY);
                     veg_hist[rec][v].fcanopy[i] = MIN_FCANOPY;

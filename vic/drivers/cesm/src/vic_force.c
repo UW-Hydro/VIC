@@ -194,7 +194,7 @@ vic_force(void)
     }
 
     if (options.SNOW_BAND > 1) {
-        log_err("SNOW_BAND not implemented in vic_force()");
+        log_err("SNOW_BAND not implemented");
     }
     else {
         t_offset = 0;

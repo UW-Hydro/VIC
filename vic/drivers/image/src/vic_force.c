@@ -388,7 +388,7 @@ vic_force(void)
                          (options.FCAN_SRC == FROM_VEGHIST))) {
                         // Only issue this warning once if not using veg hist fractions
                         log_warn(
-                            "cell %zu, veg` %d substep %zu fcanopy %f < minimum of %f; setting = %f\n", i, vidx, j,
+                            "cell %zu, veg` %d substep %zu fcanopy %f < minimum of %f; setting = %f", i, vidx, j,
                             veg_hist[i][vidx].fcanopy[j], MIN_FCANOPY,
                             MIN_FCANOPY);
                         veg_hist[i][vidx].fcanopy[j] = MIN_FCANOPY;

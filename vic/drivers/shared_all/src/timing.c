@@ -34,7 +34,7 @@ get_wall_time()
 {
     struct timeval time;
     if (gettimeofday(&time, NULL)) {
-        log_err("get_wall_time failed")
+        log_err("Unable to get time of day")
     }
     return (double) time.tv_sec + (double) time.tv_usec * 0.000001;
 }

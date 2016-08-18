@@ -209,8 +209,7 @@ ice_melt(double            z2,
                                              snow->surf_temp, 0, 1, 100.,
                                              .067, .0123, &snow->transport);
         if ((int)snow->blowing_flux == ERROR) {
-            log_err("ice_melt.c has an error from the call to "
-                    "CalcBlowingSnow.  Exiting module.");
+            log_err("Error calculating blowing snow flux");
         }
 
         snow->blowing_flux *= delta_t / CONST_RHOFW;

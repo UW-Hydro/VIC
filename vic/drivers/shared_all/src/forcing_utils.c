@@ -37,7 +37,7 @@ average(double *ar,
     double sum = 0.;
 
     if (n <= 0) {
-        log_err("Error in calc_average: divide by zero or negative");
+        log_err("Divide by zero or negative");
     }
     else if (n == 1) {
         return ar[0];

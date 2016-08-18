@@ -158,7 +158,7 @@ main(int    argc,
     // finalize MPI
     status = MPI_Finalize();
     if (status != MPI_SUCCESS) {
-        log_err("MPI error in main(): %d\n", status);
+        log_err("MPI error: %d", status);
     }
 
     log_info("Completed running VIC %s", VIC_DRIVER);

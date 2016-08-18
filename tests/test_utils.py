@@ -1,10 +1,12 @@
 import os
-from collections import OrderedDict
+from collections import OrderedDict, namedtuple
+import glob
 
 import traceback
 
 import numpy as np
 import pandas as pd
+import xarray as xr
 import glob
 import re
 import matplotlib.pyplot as plt
@@ -18,6 +20,8 @@ from tonic.testing import check_completed, check_for_nans, VICTestError
 OUTPUT_WIDTH = 100
 ERROR_TAIL = 20  # lines
 
+VICOutFile = namedtuple('vic_out_file',
+                        ('dirpath', 'prefix', 'lat', 'lon', 'suffix'))
 
 class VICReturnCodeError(Exception):
     pass
@@ -97,15 +101,35 @@ def replace_global_values(gp, replace):
 
 
 def drop_tests(config, driver):
-    '''helper function to remove tests that should not be run for driver'''
-    new = {}
-    for key, test_cfg in config.items():
-        try:
-            if test_cfg['driver'].lower() == driver.lower():
-                new[key] = test_cfg
-        except KeyError:
-            raise KeyError('test configuration must specify driver')
-    return new
+   '''helper function to remove tests that should not be run for driver'''
+
+   new = {}
+
+   if not isinstance(driver, list):  # if single driver
+       for key, test_cfg in config.items():
+           try:
+               if not isinstance(test_cfg['driver'], list):
+                   if test_cfg['driver'].lower() == driver.lower():
+                       new[key] = test_cfg
+           except KeyError:
+               raise KeyError('test configuration must specify driver')
+   else:  # if multiple drivers
+       for key, test_cfg in config.items():
+           try:
+               if isinstance(test_cfg['driver'], list):
+                   # check whether the test has the same number of drivers
+                   if len(test_cfg['driver']) == len(driver):
+                       # check whether the test wants to test the same drivers
+                       flag = 1
+                       for d in driver:
+                           if d not in test_cfg['driver']:
+                               flag = 0
+                       if flag == 1:
+                           new[key] = test_cfg
+           except KeyError:
+               raise KeyError('test configuration must specify driver')
+
+   return new
 
 
 def pop_run_kwargs(config):
@@ -314,6 +338,165 @@ def check_multistream_classic(fnames):
                     actual, expected, decimal=4,
                     err_msg='Variable=%s, freq=%s, how=%s: '
                             'failed comparison' % (key, freq, how))
+
+
+def setup_subdirs_and_fill_in_global_param_driver_match_test(
+        dict_s, result_basedir, state_basedir, test_data_dir):
+    ''' Fill in global parameter output directories for multiple driver runs
+        for driver-match testing
+
+    Parameters
+    ----------
+    dict_s: <dict of string.Template>
+        A dict of template of the global param file to be filled in
+        Keys: driver name
+    result_basedir: <str>
+        Base directory of output fluxes results; runs with different number of
+        processors are output to subdirectories under the base directory
+    state_basedir: <str>
+        Base directory of output state results; runs with different number of
+        processors are output to subdirectories under the base directory
+    test_data_dir: <str>
+        Base directory of test data
+
+    Returns
+    ----------
+    dict_global_param: <dict>
+        A dict of global parameter strings to be run with parameters filled in
+
+    Require
+    ----------
+    os
+    '''
+
+    dict_global_param = {}
+    for driver in dict_s.keys():
+        # Set up subdirectories for results and states
+        result_dir = os.path.join(result_basedir, driver)
+        state_dir = os.path.join(state_basedir, driver)
+        os.makedirs(result_dir, exist_ok=True)
+        os.makedirs(state_dir, exist_ok=True)
+
+        # Fill in global parameter options
+        s = dict_s[driver]
+        dict_global_param[driver] = s.safe_substitute(
+                test_data_dir=test_data_dir,
+                result_dir=result_dir,
+                state_dir=state_dir)
+
+    return(dict_global_param)
+
+
+def parse_classic_driver_outfile_name(fname):
+    '''helper function to parse VIC classic driver output file name'''
+    resultdir, filename = os.path.split(fname)
+    prefix, suffix = os.path.splitext(filename)
+    pieces = prefix.split('_')
+    lat, lon = map(float, pieces[-2:])
+    return VICOutFile(resultdir, prefix, lat, lon, suffix)
+
+
+def check_drivers_match_fluxes(list_drivers, result_basedir):
+    ''' Check whether the flux results are similar cross multiple drivers
+
+    Parameters
+    ----------
+    list_drivers: <list>
+        A list of driver names to be compared
+        e.g., ['classic'; 'image']
+        NOTE: must have classic driver; classic driver will be the base for
+        comparison
+    result_basedir: <str>
+        Base directory of output fluxes results; results for drivers are
+        subdirectories under the base directory
+
+    Require
+    ----------
+    glob
+    xarray
+    numpy
+    warnings
+    collections.namedtuple
+    parse_classic_driver_outfile_name
+    VICOutFile
+    read_vic_ascii
+    '''
+
+    # Identify all classic driver output flux files
+    try:
+        list_fnames_classic = glob.glob(os.path.join(
+                                    result_basedir, 'classic', '*'))
+    except:
+        raise ValueError('incorrect classic driver output for driver-match '
+                         'test')
+
+    # Loop over all other drivers and compare with classic driver
+    for driver in list_drivers:
+        # skip classic driver
+        if driver == 'classic':
+            continue
+        # if image driver
+        if driver == 'image':
+            # load flux file
+            if len(glob.glob(os.path.join(
+                    result_basedir, driver, '*.nc'))) > 1:
+                warnings.warn('More than one netCDF file found under'
+                              'directory {}'.format(result_dir))
+            fname = glob.glob(os.path.join(result_basedir, driver, '*.nc'))[0]
+            ds_image = xr.open_dataset(fname)
+           
+            # loop over each grid cell from classic driver
+            for fname in list_fnames_classic:
+                gcell = parse_classic_driver_outfile_name(fname)
+                df_classic = read_vic_ascii(fname)
+                ds_image_cell = ds_image.sel(lat=gcell.lat, lon=gcell.lon,
+                                             method='nearest')
+                # compare each variable
+                for var in ds_image_cell.data_vars:
+                    # if one [time] dimension
+                    if len(ds_image_cell[var].coords) == 3:
+                        # determine precision for comparison
+                        # --- if all zeros for this variable, set
+                        # --- decimal = 2 --- #
+                        if np.sum(np.absolute(ds_image_cell[var].values)) == 0:
+                            decimal = 2
+                        # --- if not all zeros, set decimal depending on the
+                        # maximum aboslute value of this variable so that the
+                        # comparison has a reasonable precision. Specifically, 
+                        # decimal ~= - log10(max_abs_value) + 1 --- #
+                        else:
+                            decimal = int(round(- np.log10(np.max(np.absolute(
+                                            ds_image_cell[var].values))) + 1))
+                        # --- keep decimal to be no greater than 4 --- #
+                        if decimal > 4:
+                            decimal = 4
+                        # assert almost equal
+                        np.testing.assert_almost_equal(
+                            ds_image_cell[var].values, df_classic[var].values,
+                            decimal=decimal,
+                            err_msg='Variable {} is different in the classic '
+                                    'and image drivers'.format(var))
+                    # if [time, nlayer]
+                    elif len(ds_image_cell[var].coords) == 4:
+                        for l in ds_image['nlayer']:
+                            s_classic = df_classic['{}_{}'.format(var, l.values)]
+                            s_image = ds_image_cell[var].sel(nlayer=l).to_series()
+                            # determine precision for comparison
+                            if np.mean(s_image.values) == 0:
+                                decimal = 2
+                            else:
+                                decimal = int(round(- np.log10(np.max(
+                                            np.absolute(s_image.values))) + 1))
+                            if decimal > 4:
+                                decimal = 4
+                            # assert almost eqaul
+                            np.testing.assert_almost_equal(
+                                s_image.values,
+                                s_classic.values,
+                                decimal=decimal,
+                                err_msg='Variable {} is different in the '
+                                        'classic and image drivers'.
+                                                format(var))
 
 
 def tsplit(string, delimiters):

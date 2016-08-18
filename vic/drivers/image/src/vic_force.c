@@ -143,7 +143,7 @@ vic_force(void)
         }
     }
 
-    // Specific humidity: shum
+    // vapor pressure: vp
     for (j = 0; j < NF; j++) {
         d3start[0] = global_param.forceskip[0] + global_param.forceoffset[0] +
                      j;
@@ -361,14 +361,13 @@ vic_force(void)
             force[i].air_temp[j] -= CONST_TKFRZ;
             // precipitation in mm/period
             force[i].prec[j] *= global_param.snow_dt;
-            // pressure in Pa
-            // vapor pressure in Pa (we read specific humidity in kg/kg)
-            force[i].vp[j] = q_to_vp(force[i].vp[j], force[i].pressure[j]);
+            // vapor pressure in Pa
+            force[i].vp[j] *= PA_PER_KPA;
             // vapor pressure deficit in Pa
             force[i].vpd[j] = svp(force[i].air_temp[j]) - force[i].vp[j];
             if (force[i].vpd[j] < 0) {
-                force[i].vpd[j]  = 0;
-                force[i].vp[j]  = svp(force[i].air_temp[j]);
+                force[i].vpd[j] = 0;
+                force[i].vp[j] = svp(force[i].air_temp[j]);
             }
             // air density in kg/m3
             force[i].density[j] = air_density(force[i].air_temp[j],

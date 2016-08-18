@@ -26,6 +26,8 @@ Cherkauer, K. A., L. C. Bowling, and D. P. Lettenmaier, 2003: Variable infiltrat
 
 Gao, H., Q. Tang, X. Shi, C. Zhu, T. J. Bohn, F. Su, J. Sheffield, M. Pan, D. P. Lettenmaier, and E. F. Wood, 2010: [Water Budget Record from Variable Infiltration Capacity (VIC) Model](http://www.hydro.washington.edu/SurfaceWaterGroup/Publications/Water_Cycle_MEaSUREs_ATBD_VICmodel_submit.doc). In _Algorithm Theoretical Basis Document for Terrestrial Water Cycle Data Records_ (unpublished).
 
+Hamman, J., B. Nijssen, M. Brunke, J. Cassano, A. Craig, A. DuVivier, M. Hughes, D.P. Lettenmaier, W. Maslowski, R. Osinski, A. Roberts, and X. Zeng, 2016: Land surface climate in the Regional Arctic System Model. _Journal of Climate_, [doi:10.1175/JCLI-D-15-0415.1](http://dx.doi.org/10.1175/JCLI-D-15-0415.1).
+
 Liang, X., 1994: A Two-Layer Variable Infiltration Capacity Land Surface Representation for General Circulation Models, _Water Resour. Series_, **TR140**, 208 pp., Univ. of Washington, Seattle.
 
 Liang, X., D. P. Lettenmaier, E. F. Wood, 1996: One-dimensional Statistical Dynamic Representation of Subgrid Spatial Variability of Precipitation in the Two-Layer Variable Infiltration Capacity Model, _J. Geophys. Res._, **101**(D16) 21,403-21,422.

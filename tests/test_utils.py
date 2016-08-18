@@ -100,38 +100,36 @@ def replace_global_values(gp, replace):
     return gpl
 
 
-def drop_tests(config, dict_drivers):
-    '''helper function to remove tests that should not be run for driver'''
+def drop_tests(config, driver):
+   '''helper function to remove tests that should not be run for driver'''
 
-    new = {}
+   new = {}
 
-    if len(dict_drivers.keys()) == 1:  # if single driver
-        driver = list(dict_drivers.keys())[0]
-        for key, test_cfg in config.items():
-            try:
-                if not isinstance(test_cfg['driver'], list):
-                    if test_cfg['driver'].lower() == driver.lower():
-                        new[key] = test_cfg
-            except KeyError:
-                raise KeyError('test configuration must specify driver')
-    else:  # if multiple drivers
-        for key, test_cfg in config.items():
-            try:
-                if isinstance(test_cfg['driver'], list):
-                    # check whether the test has the same number of drivers
-                    if len(test_cfg['driver']) == len(dict_drivers.keys()):
-                        # check whether the test wants to test the same set
-                        # of drivers
-                        flag = 1
-                        for driver in dict_drivers.keys():
-                            if driver not in test_cfg['driver']:
-                                flag = 0
-                        if flag == 1:
-                            new[key] = test_cfg
-            except KeyError:
-                raise KeyError('test configuration must specify driver')
+   if not isinstance(driver, list):  # if single driver
+       for key, test_cfg in config.items():
+           try:
+               if not isinstance(test_cfg['driver'], list):
+                   if test_cfg['driver'].lower() == driver.lower():
+                       new[key] = test_cfg
+           except KeyError:
+               raise KeyError('test configuration must specify driver')
+   else:  # if multiple drivers
+       for key, test_cfg in config.items():
+           try:
+               if isinstance(test_cfg['driver'], list):
+                   # check whether the test has the same number of drivers
+                   if len(test_cfg['driver']) == len(driver):
+                       # check whether the test wants to test the same drivers
+                       flag = 1
+                       for d in driver:
+                           if d not in test_cfg['driver']:
+                               flag = 0
+                       if flag == 1:
+                           new[key] = test_cfg
+           except KeyError:
+               raise KeyError('test configuration must specify driver')
 
-    return new
+   return new
 
 
 def pop_run_kwargs(config):

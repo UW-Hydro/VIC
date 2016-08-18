@@ -211,7 +211,7 @@ def main():
                                         'classic')
     # examples
     if any(i in ['all', 'examples'] for i in args.tests):
-        if len(args.driver) == 1:  # if only one driver
+        if len(dict_drivers) == 1:  # if only one driver
             driver = list(dict_drivers.keys())[0]
             vic_exe = dict_drivers[driver]
             test_results['examples'] = run_examples(args.examples, vic_exe,
@@ -332,13 +332,16 @@ def run_system(config_file, dict_drivers, test_data_dir, out_dir):
     # Get setup
     config = read_configobj(config_file)
 
-    # Drop invalid driver tests
-    config = drop_tests(config, dict_drivers)
-
     # Process driver info
     if len(dict_drivers) == 1:  # if single driver
         driver = list(dict_drivers.keys())[0]
         vic_exe = dict_drivers[driver]
+
+    # Drop invalid driver tests
+    if len(dict_drivers) == 1:  # if single driver
+        config = drop_tests(config, driver)
+    else:  # if multiple drivers
+        config = drop_tests(config, list(dict_drivers))
 
     test_results = OrderedDict()
 

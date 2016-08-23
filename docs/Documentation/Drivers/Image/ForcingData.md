@@ -16,7 +16,7 @@ The VIC Image Driver requires a NetCDF file with gridded subdaily forcings.  The
 
 The forcing data must be chunked by calendar year, with each NetCDF file named by the year, e.g. `prefix.$year.nc`. 
 
-Example output from `ncdump -h prefix.$year.nc` should look like this: 
+Example output from `ncdump -h Stehekin_image_test.forcings_10days.1949` should look like this: 
 
 ```
 netcdf Stehekin_image_test.forcings_10days.1949 {

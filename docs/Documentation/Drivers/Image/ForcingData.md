@@ -1,6 +1,6 @@
 # VIC Forcing File
 
-The VIC Image Driver requires a NetCDF file with gridded subdaily forcings.  The required forcing variables and units are listed below (and must also be specified in the global parameter file):
+The VIC Image Driver requires a NetCDF file with gridded subdaily forcings.  The required forcing variables and units are listed below and must also be specified in the [Global Parameter File](GlobalParam.md):
 
 #### Meteorological Forcings, Required in all simulations:
 
@@ -13,6 +13,8 @@ The VIC Image Driver requires a NetCDF file with gridded subdaily forcings.  The
 | LWDOWN     | Incoming longwave radiation         | W/m<sup>2</sup> |
 | VP         | Vapor pressure                      | kPa             |   
 | WIND       | Wind speed                          | m/s             |   
+
+The forcing data must be chunked by calendar year, with each NetCDF file named by the year, e.g. `prefix.$year.nc`. 
 
 Example output from `ncdump -h forcingfile.nc` should look like this: 
 
@@ -100,4 +102,4 @@ variables:
 
 ```
 
-Using gridded subdaily forcings for vegetation, lake and carbon cycle timeseries is under development.  
+Documentation for vegetation, lake and carbon cycle forcings will be added at a later date. 

@@ -1,6 +1,6 @@
 # VIC documentation README
 
-This directory contains that builds the VIC website (http://vic.readthedocs.org). Below is a bit of information on how to edit, test, and serve the documentation.
+This directory contains that builds the VIC website (http://vic.readthedocs.io). Below is a bit of information on how to edit, test, and serve the documentation.
 
 ## Style
 The VIC documentation source files are written in [Markdown](https://help.github.com/articles/markdown-basics/), and configured with a single YAML configuration file (`mkdocs.yml`). Mardown also supports some html so that is an option if pure markdown can't get the job done.
@@ -31,10 +31,10 @@ For more information on how to interact with the built docs, check out the `mkdo
 
 ## Read The Docs
 
-The VIC documentation is served by [Read the Docs](https://readthedocs.org/) at http://vic.readthedocs.org. This allows us to provide multiple versions of the VIC documentation, served simultaneously from the same location.  
+The VIC documentation is served by [Read the Docs](https://readthedocs.io/) at http://vic.readthedocs.io. This allows us to provide multiple versions of the VIC documentation, served simultaneously from the same location.  
 
 Currently, there are three builds (versions) scheduled for the VIC documentation:
 
-1.  [`master`](http://vic.readthedocs.org/en/master/) - this represents the docs on VIC's `master` branch
-1.  [`develop`](http://vic.readthedocs.org/en/develop/) - this represents the docs on VIC's `develop` branch
+1.  [`master`](http://vic.readthedocs.io/en/master/) - this represents the docs on VIC's `master` branch
+1.  [`develop`](http://vic.readthedocs.io/en/develop/) - this represents the docs on VIC's `develop` branch
 1.  `VIC.${tag}` - this represents the docs for individual tags in VIC's history.

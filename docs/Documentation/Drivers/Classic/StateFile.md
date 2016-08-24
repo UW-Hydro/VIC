@@ -50,7 +50,7 @@ This line is used to define the parameters that are constant for the entire grid
 
 ## Vegetation and Snow Band Information
 
-Each grid cell information line must be followed with lines for all defined vegetation types (plus bare soil) and snow bands ( [Nveg+1]*Nbands = number of lines required ). These lines contain information about the storage of moisture within each fractional coverage type. If the model is being run with distributed precipitation, the wet and dry fractions are averaged before the model state is stored and the model is always initialized with a mu value of 1.
+Each grid cell information line must be followed with lines for all defined vegetation types (plus bare soil) and snow bands ( `[Nveg+1]*Nbands = number of lines required` ). These lines contain information about the storage of moisture within each fractional coverage type. If the model is being run with distributed precipitation, the wet and dry fractions are averaged before the model state is stored and the model is always initialized with a mu value of 1.
 
 | Column                                                                        | Name              | Type      | Description                                                                           |
 |------------------------------------------------------------------------------ |---------------    |--------   |-------------------------------------------------------------------------------------  |

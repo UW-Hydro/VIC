@@ -68,7 +68,6 @@ pages:
     - 'Lake Param': 'Documentation/Drivers/Image/LakeParam.md'
     - 'StateFile': 'Documentation/Drivers/Image/StateFile.md'
     - 'Ascii_to_NetCDF_params.md': 'Documentation/Drivers/Image/Ascii_to_NetCDF_params.md'
-    - 'SoilParam': 'Documentation/Drivers/Image/SoilParam.md'
     - 'OutputFormatting': 'Documentation/Drivers/Image/OutputFormatting.md'
     - 'DefaultOutputs': 'Documentation/Drivers/Image/DefaultOutputs.md'
     - 'FluxOutputFiles': 'Documentation/Drivers/Image/FluxOutputFiles.md'

@@ -44,7 +44,7 @@ In [1]: from vic import lib as vic_lib
 In [2]: vic_lib.print_license()
 
   Variable Infiltration Capacity (VIC) macroscale hydrologic
-  model version 5.0.beta, Copyright (C) 2014 Land Surface
+  model version 5.0.0, Copyright (C) 2016 Computational
   Hydrology Group, Dept. of Civil and Environmental Engineering,
   University of Washington.  VIC comes with ABSOLUTELY NO
   WARRANTY. This is free software, you may redistribute it

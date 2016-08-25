@@ -7,7 +7,7 @@ project(vic)
 
 set(OTHER_INCLUDE_PATH  your_include_path)
 set(OTHER_LIBRARY_PATH  your_library_path)
-set(MPI_COMPILER        gcc)
+set(MPI_COMPILER        mpicc)
 
 # ============================================================================
 
@@ -76,7 +76,7 @@ if(IMAGE)
             /usr/local/lib
             /usr/local/lib64
             /usr/local/openmpi/lib)
-        
+
     find_path(MPI_INCLUDE_DIR NAMES mpi.h PATHS ${MPI_INCLUDE_SEARCH_PATHS})
     find_path(MPI_LIB_DIR NAMES libmpi.so PATHS ${MPI_LIB_SEARCH_PATHS})
 

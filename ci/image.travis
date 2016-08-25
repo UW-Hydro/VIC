@@ -1,7 +1,5 @@
 #!/usr/bin/env bash
 
-set -e
-
 DRIVER_PATH="${TRAVIS_BUILD_DIR}/vic/drivers/image/"
 DRIVER_EXE="${DRIVER_PATH}vic_image.exe"
 SAMPLES_PATH="${TRAVIS_BUILD_DIR}/samples/"
@@ -34,11 +32,13 @@ function vic_before_install {
             brew install homebrew/versions/gcc49
             brew reinstall open-mpi --build-from-source
         fi
-		export TRAVIS_NETCDFPATH=/usr/local
-		export TRAVIS_MPIPATH=/usr/local
+        export TRAVIS_MPIPATH=/usr/local
+        export NC_LIBS=$(/usr/local/bin/nc-config --libs)
+        export NC_CFLAGS=$(/usr/local/bin/nc-config --cflags)
     else
-		export TRAVIS_NETCDFPATH=/usr
 		export TRAVIS_MPIPATH="${HOME}/mpich"
+        export NC_LIBS=$(/usr/bin/nc-config --libs)
+        export NC_CFLAGS=$(/usr/bin/nc-config --cflags)
 
         # Install MPICH
         if [ ! -d ${TRAVIS_MPIPATH} ]; then
@@ -46,11 +46,15 @@ function vic_before_install {
         else
             echo "MPICH installed..."
         fi
-        find ${TRAVIS_MPIPATH} -name mpiexec
-        find ${TRAVIS_MPIPATH} -name mpicc
 	fi
-    export PATH=$TRAVIS_MPIPATH/bin:$PATH
+    export PATH=${TRAVIS_MPIPATH}/bin:${PATH}
+    find ${TRAVIS_MPIPATH} -name mpiexec
     mpiexec --version
+    find ${TRAVIS_MPIPATH} -name mpicc
+    export MPICC="${TRAVIS_MPIPATH}/bin/mpicc"
+    $MPICC --version
+    echo "NETCDF LIB FLAGS ------> ${NC_LIBS}"
+    echo "NETCDF C FLAGS --------> ${NC_CFLAGS}"
 }
 
 function vic_install {
@@ -79,10 +83,8 @@ function vic_script {
 
     # Run test package
     ./tests/run_tests.py unit examples system \
-        --vic_exe=${DRIVER_EXE} \
-        --driver=${TESTID} \
+        --image=${DRIVER_EXE} \
         --data_dir=${SAMPLES_PATH}/data
-
 }
 
 function vic_after_success {

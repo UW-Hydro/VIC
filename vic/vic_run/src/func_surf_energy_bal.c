@@ -468,7 +468,7 @@ func_surf_energy_bal(double  Ts,
         }
 
         if ((int) Error == ERROR) {
-            log_err("func_surf_energy_bal calling solve_T_profile");
+            log_err("Error solving the temperature profile");
         }
         /* Compute temperatures for calculations of ground heat flux, delta_H, and fusion */
         if (!options.EXP_TRANS) {
@@ -642,12 +642,12 @@ func_surf_energy_bal(double  Ts,
     /* if thin snowpack, compute the change in energy stored in the pack */
     if (INCLUDE_SNOW) {
         if (TMean > 0.) {
-            *deltaCC = CONST_CPICE *
-                       (snow_swq - snow_water) * (0. - OldTSurf) / delta_t;
+            *deltaCC = CONST_VCPICE_WQ * (snow_swq - snow_water) *
+                       (0. - OldTSurf) / delta_t;
         }
         else {
-            *deltaCC = CONST_CPICE *
-                       (snow_swq - snow_water) * (TMean - OldTSurf) / delta_t;
+            *deltaCC = CONST_VCPICE_WQ * (snow_swq - snow_water) *
+                       (TMean - OldTSurf) / delta_t;
         }
         *refreeze_energy = (snow_water * CONST_LATICE * snow_density) / delta_t;
         *deltaCC *= snow_coverage; // adjust for snow cover fraction

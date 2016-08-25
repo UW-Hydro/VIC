@@ -1,7 +1,7 @@
 # Running the VIC Image Driver
 
 ## Dependencies:
-The Image Driver's has three dependencies:
+The Image Driver has three dependencies:
 
 1. A C compiler.  We routinely test VIC using the following compilers:
 
@@ -22,9 +22,16 @@ The Image Driver's has three dependencies:
 ## Compiling
 In most cases, you will need to edit the `NETCDF_PATH` and `MPI_PATH` variables in the `Makefile`.
 
-If you want to use a compiler other than `gcc`, either edit the Makefile or set the `CC` environment variable, e.g.
+If you want to use a compiler other than `mpicc`, either edit the Makefile or set the `MPICC` environment variable, e.g.
 
-        export CC=icc
+        MPICC=/path/to/mpi_c_compiler
+
+The flags and libraries required to compile VIC with netCDF are automatically determined in the `Makefile`.  They can be overwritten by setting the following two environment variables.  These variables can be determined by running `nc-config --all`.
+
+        NC_LIBS="-L/path/to/libs ..."
+        NC_CFLAGS="-I/path/to/includes -your_c_flags ..."
+
+In some versions of the MPI library (e.g. OPEN-MPI with Intel), you may also need to set the environment variable `MX_RCACHE=2` prior to compiling.
 
 - Change directory, `cd`, to the "Image Driver" source code directory and type `make`
 
@@ -37,9 +44,15 @@ If you want to use a compiler other than `gcc`, either edit the Makefile or set 
 
 At the command prompt, type:
 
-`vic_image.exe -g global_parameter_filename`
+`vic_image.exe -g global_parameter_filename.txt`
 
 where `global_parameter_filename` = name of the global parameter file corresponding to your project.
+
+To run VIC image driver using multiple processors, type the following instead:
+
+`mpiexec -np n_proc vic_image.exe -g global_parameter_filename.txt`
+
+where `n_proc` = number of processors to be used
 
 ## Other Command Line Options
 

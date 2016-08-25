@@ -18,7 +18,7 @@ The VIC Test Suite includes six main test types:
 
 The **system** and **examples** tests use the [VIC sample data repository](https://github.com/UW-Hydro/VIC_sample_data). This repository includes short (e.g. 10 days) test setups for the VIC image and classic drivers.
 
-The **science** and **release** tests are under development (as of June 2016).
+The **release** tests are under development (as of August 2016).
 
 ## Running the VIC Test Suite
 
@@ -46,8 +46,7 @@ The VIC test suite uses a set of Python utilities and libraries to execute the s
 
     # Run the test suite for the unit and examples cases for the classic driver
     ./tests/run_tests.py unit examples \
-        --vic_exe=vic/drivers/classic/vic_classic.exe \
-        --driver=classic \
+        --classic=vic/drivers/classic/vic_classic.exe \
         --data_dir=${SAMPLES_PATH}/data \
         --examples=./tests/examples/examples.cfg
     ```
@@ -59,4 +58,4 @@ VIC uses the [Travis CI](http://travis-ci.org/) continuous integration system. V
 - *Compilers*: `gcc` and `clang`
 - *Platforms*: `Linux` and `OSX`
 
-The Travis tests also run the **unit**, and **examples** tests described above.
+The Travis tests also run the **unit**, **system**, and **examples** tests described above.

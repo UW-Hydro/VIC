@@ -13,7 +13,12 @@ CALENDAR    PROLEPTIC_GREGORIAN
 FULL_ENERGY TRUE
 FROZEN_SOIL	FALSE
 
-AERO_RESIST_CANSNOW AR_406
+#INIT_STATE
+STATENAME       $state_dir/states
+STATEYEAR       1949
+STATEMONTH      1
+STATEDAY        10
+STATESEC        82800
 
 DOMAIN $test_data_dir/image/Stehekin/parameters/domain.stehekin.20151028.nc
 DOMAIN_TYPE    LAT     lat
@@ -30,12 +35,16 @@ FORCE_TYPE    PREC 	       prcp
 FORCE_TYPE    PRESSURE 	   pres
 FORCE_TYPE    SWDOWN       dswrf
 FORCE_TYPE    LWDOWN 	     dlwrf
-FORCE_TYPE    VP           shum
+FORCE_TYPE    VP           vp
 FORCE_TYPE    WIND         wind
 WIND_H        10.0
 
 PARAMETERS      $test_data_dir/image/Stehekin/parameters/Stehekin_test_params_20160327.nc
+SNOW_BAND       TRUE
 NODES           3
+BASEFLOW             ARNO
+JULY_TAVG_SUPPLIED   FALSE
+ORGANIC_FRACT        FALSE
 
 RESULT_DIR  $result_dir/
 

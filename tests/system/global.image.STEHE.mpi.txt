@@ -2,12 +2,12 @@ NODES                 3
 MODEL_STEPS_PER_DAY   24
 SNOW_STEPS_PER_DAY    24
 RUNOFF_STEPS_PER_DAY  24
-STARTYEAR             $startyear
-STARTMONTH            $startmonth
-STARTDAY              $startday
-ENDYEAR               $endyear
-ENDMONTH              $endmonth
-ENDDAY                $endday
+STARTYEAR             1949
+STARTMONTH            1
+STARTDAY              1
+ENDYEAR               1949
+ENDMONTH              1
+ENDDAY                10
 CALENDAR              PROLEPTIC_GREGORIAN
 FULL_ENERGY           FALSE
 FROZEN_SOIL           FALSE
@@ -21,11 +21,11 @@ DOMAIN_TYPE    FRAC    frac
 DOMAIN_TYPE    YDIM    lat
 DOMAIN_TYPE    XDIM    lon
 
-$init_state
+#INIT_STATE
 STATENAME   $state_dir/states
-STATEYEAR   $stateyear
-STATEMONTH  $statemonth
-STATEDAY    $stateday
+STATEYEAR   1949
+STATEMONTH  1
+STATEDAY    10
 STATESEC    82800
 
 FORCING1      $test_data_dir/image/Stehekin/forcings/Stehekin_image_test.forcings_10days.

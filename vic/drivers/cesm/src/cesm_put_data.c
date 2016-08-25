@@ -313,7 +313,7 @@ vic_cesm_put_data()
         }
 
         if (!assert_close_double(AreaFactorSum, 1., 0., 1e-3)) {
-            log_warn("AreaFactorSum (%f) is not 1 in cesm_put_data.c",
+            log_warn("AreaFactorSum (%f) is not 1",
                      AreaFactorSum);
         }
     }

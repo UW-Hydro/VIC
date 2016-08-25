@@ -238,15 +238,15 @@ SnowPackEnergyBalance(double  TSurf,
        Equation 7.3.12 from H.B.H. for rain falling on melting snowpack */
 
     if (TMean == 0.) {
-        *AdvectedEnergy = (CONST_CPFW * (Tair) * Rain) / (Dt);
+        *AdvectedEnergy = (CONST_CPFW * CONST_RHOFW * (Tair) * Rain) / (Dt);
     }
     else {
         *AdvectedEnergy = 0.;
     }
 
     /* Calculate change in cold content */
-    *DeltaColdContent = CONST_CPICE * SweSurfaceLayer * (TSurf - OldTSurf) /
-                        (Dt);
+    *DeltaColdContent = CONST_VCPICE_WQ * SweSurfaceLayer *
+                        (TSurf - OldTSurf) / (Dt);
 
     /* Calculate Ground Heat Flux */
     if (SnowDepth > 0.) {

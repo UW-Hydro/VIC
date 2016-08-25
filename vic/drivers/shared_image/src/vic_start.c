@@ -150,7 +150,7 @@ vic_start(void)
     local_domain.locations = malloc(local_domain.ncells_active *
                                     sizeof(*local_domain.locations));
     if (local_domain.locations == NULL) {
-        log_err("malloc error in vic_start()\n");
+        log_err("malloc error");
     }
     for (i = 0; i < local_domain.ncells_active; i++) {
         initialize_location(&(local_domain.locations[i]));
@@ -161,7 +161,7 @@ vic_start(void)
         mapped_locations = malloc(global_domain.ncells_active *
                                   sizeof(*mapped_locations));
         if (mapped_locations == NULL) {
-            log_err("malloc error in vic_start()\n");
+            log_err("malloc error");
         }
         for (i = 0; i < global_domain.ncells_active; i++) {
             initialize_location(&(mapped_locations[i]));
@@ -170,7 +170,7 @@ vic_start(void)
         active_locations = (location_struct *) malloc(
             global_domain.ncells_active * sizeof(location_struct));
         if (active_locations == NULL) {
-            log_err("malloc error in vic_start()\n");
+            log_err("malloc error");
         }
         for (i = 0; i < global_domain.ncells_active; i++) {
             initialize_location(&(active_locations[i]));

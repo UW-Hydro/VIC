@@ -138,6 +138,10 @@ vic_force(force_data_struct *force,
             force[rec].vp[i] = forcing_data[VP][uidx] * PA_PER_KPA;
             // vapor pressure deficit in Pa
             force[rec].vpd[i] = svp(force[rec].air_temp[i]) - force[rec].vp[i];
+            if (force[rec].vpd[i] < 0) {
+                force[rec].vpd[i] = 0;
+                force[rec].vp[i] = svp(force[rec].air_temp[i]);
+            }
             // air density in kg/m3
             force[rec].density[i] = air_density(force[rec].air_temp[i],
                                                 force[rec].pressure[i]);
@@ -259,7 +263,7 @@ vic_force(force_data_struct *force,
                 // Check on fcanopy
                 if (veg_hist[rec][v].fcanopy[i] < MIN_FCANOPY) {
                     log_warn(
-                        "rec %zu, veg %zu substep %zu fcanopy %f < minimum of %f; setting = %f\n", rec, v, i,
+                        "rec %zu, veg %zu substep %zu fcanopy %f < minimum of %f; setting = %f", rec, v, i,
                         veg_hist[rec][v].fcanopy[i], MIN_FCANOPY,
                         MIN_FCANOPY);
                     veg_hist[rec][v].fcanopy[i] = MIN_FCANOPY;

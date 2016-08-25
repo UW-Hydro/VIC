@@ -15,9 +15,9 @@ For VIC 5 and later, type `vic _{classic,image}.exe -v`
 
 ------------------------------
 
-## VIC 5.0.0 (Release Candidate 1)
+## VIC 5.0.0 (Unreleased)
 
-**Release date: June 28, 2016**
+**Release date: TBD**
 
 This is a major update from VIC 4. The VIC 5.0.0 release aims to have nearly identical physics as VIC 4.2 while providing a clean, refactored code base supporting multiple drivers. There are a number of new features, bug fixes, and backward incompatible changes. See the VIC Github page for more details on the changes included in this release.
 
@@ -60,7 +60,7 @@ This is a major update from VIC 4. The VIC 5.0.0 release aims to have nearly ide
 
 9. Tests Datasets ([GH#79](https://github.com/UW-Hydro/VIC/issues/79))
 
-	**TODO:** See https://github.com/UW-Hydro/VIC/issues/79 for more information.
+	See https://github.com/UW-Hydro/VIC/issues/79 for more information. A temporary location of the test data is here: ftp://ftp.hydro.washington.edu/pub/gergel/VIC5_test_data/
 
 10. Testing and Continuous Integration ([GH#190](https://github.com/UW-Hydro/VIC/pull/190))
 
@@ -76,7 +76,6 @@ This is a major update from VIC 4. The VIC 5.0.0 release aims to have nearly ide
 
 	The format of ASCII forcing and output files has changed in VIC 5. These changes were motivated by the desire to improve simulation metadata tracking and reproducibility of VIC simulations.
 
-	- Forcing files now require date stamps for each timestep and a header specifies the names of the forcing variables.   
 	- Output files now include a header with simulation metadata and variable names. The `PRT_HEADER` option has been deprecated.
 
 2.  Classic Driver Global Parameter Options
@@ -174,6 +173,10 @@ This is a major update from VIC 4. The VIC 5.0.0 release aims to have nearly ide
 4. Fix for binary state file I/O ([GH#487](https://github.com/UW-Hydro/VIC/pull/487))
 
 	Fixed a bug so that the binary format state file I/O works correctly.
+
+5. Fix for a physical constant (water heat capacity) ([GH#574](https://github.com/UW-Hydro/VIC/pull/574))
+
+	Fixed a bug where volumetric heat capacity of water should be used in `func_canopy_energy_bal` (previously specific heat capacity was used).
 
 ------------------------------
 

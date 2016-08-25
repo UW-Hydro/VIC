@@ -7,6 +7,8 @@ import xarray as xr
 import pandas as pd
 import numpy as np
 import numpy.testing as npt
+import glob
+import warnings
 
 
 def test_image_driver_no_output_file_nans(fnames, domain_file):
@@ -133,3 +135,165 @@ def check_multistream_image(fnames):
                 print('actual=%s\nexpected=%s' % (actual, expected))
                 print(np.abs(actual-expected).max())
                 raise e
+
+
+def setup_subdirs_and_fill_in_global_param_mpi_test(
+        s, list_n_proc, result_basedir, state_basedir, test_data_dir):
+    ''' Fill in global parameter output directories for multiple runs for mpi
+        testing, image driver
+
+    Parameters
+    ----------
+    s: <string.Template>
+        Template of the global param file to be filled in
+    list_n_proc: <list>
+        A list of number of processors to run and compare
+    result_basedir: <str>
+        Base directory of output fluxes results; runs with different number of
+        processors are output to subdirectories under the base directory
+    state_basedir: <str>
+        Base directory of output state results; runs with different number of
+        processors are output to subdirectories under the base directory
+    test_data_dir: <str>
+        Base directory of test data
+
+    Returns
+    ----------
+    list_global_param: <list>
+        A list of global parameter strings to be run with parameters filled in
+
+    Require
+    ----------
+    os
+    '''
+
+    list_global_param = []
+    for j, n_proc in enumerate(list_n_proc):
+        # Set up subdirectories for results and states
+        result_dir = os.path.join(
+                result_basedir,
+                'processors_{}'.format(n_proc))
+        state_dir = os.path.join(
+                state_basedir,
+                'processors_{}'.format(n_proc))
+        os.makedirs(result_dir, exist_ok=True)
+        os.makedirs(state_dir, exist_ok=True)
+
+        # Fill in global parameter options
+        list_global_param.append(s.safe_substitute(
+                test_data_dir=test_data_dir,
+                result_dir=result_dir,
+                state_dir=state_dir))
+
+    return(list_global_param)
+
+
+def check_mpi_fluxes(result_basedir, list_n_proc):
+    ''' Check whether all the fluxes are the same with different number of
+        processors, image driver
+
+    Parameters
+    ----------
+    result_basedir: <str>
+        Base directory of output fluxes results; runs with different number of
+        processors are output to subdirectories under the base directory
+    list_n_proc: <list>
+        A list of number of processors to run and compare
+
+    Require
+    ----------
+    os
+    glob
+    numpy
+    warnings
+    '''
+
+    # Read the first run - as base
+    n_proc = list_n_proc[0]
+    result_dir = os.path.join(
+        result_basedir,
+        'processors_{}'.format(n_proc))
+    if len(glob.glob(os.path.join(result_dir, '*.nc'))) > 1:
+        warnings.warn(
+            'More than one netCDF file found under directory {}'.
+            format(result_dir))
+    fname = glob.glob(os.path.join(result_dir, '*.nc'))[0]
+    ds_first_run = xr.open_dataset(fname)
+
+    # Loop over all rest runs and compare fluxes with the base run
+    for i, n_proc in enumerate(list_n_proc):
+        # Skip the first run
+        if i == 0:
+            continue
+        # Read flux results for this run
+        result_dir = os.path.join(
+            result_basedir,
+            'processors_{}'.format(n_proc))
+        if len(glob.glob(os.path.join(result_dir, '*.nc'))) > 1:
+            warnings.warn(
+                'More than one netCDF file found under directory {}'.
+                    format(result_dir))
+        fname = glob.glob(os.path.join(result_dir, '*.nc'))[0]
+        ds_current_run = xr.open_dataset(fname)
+        # Compare current run with base run
+        for var in ds_first_run.data_vars:
+                npt.assert_array_equal(
+                        ds_current_run[var].values,
+                        ds_first_run[var].values,
+                        err_msg='Fluxes are not an exact match')
+
+
+def check_mpi_states(state_basedir, list_n_proc):
+    ''' Check whether all the output states are the same with different number
+        of processors, image driver
+
+    Parameters
+    ----------
+    state_basedir: <str>
+        Base directory of output states; runs with different number of
+        processors are output to subdirectories under the base directory
+    list_n_proc: <list>
+        A list of number of processors to run and compare
+
+    Require
+    ----------
+    os
+    glob
+    numpy
+    warnings
+    '''
+
+    # Read the first run - as base
+    n_proc = list_n_proc[0]
+    state_dir = os.path.join(
+        state_basedir,
+        'processors_{}'.format(n_proc))
+    if len(glob.glob(os.path.join(state_dir, '*.nc'))) > 1:
+        warnings.warn(
+            'More than one netCDF file found under directory {}'.
+                format(state_dir))
+    fname = glob.glob(os.path.join(state_dir, '*.nc'))[0]
+    ds_first_run = xr.open_dataset(fname)
+
+    # Loop over all rest runs and compare fluxes with the base run
+    for i, n_proc in enumerate(list_n_proc):
+        # Skip the first run
+        if i == 0:
+            continue
+        # Read output states for this run
+        state_dir = os.path.join(
+            state_basedir,
+            'processors_{}'.format(n_proc))
+        if len(glob.glob(os.path.join(state_dir, '*.nc'))) > 1:
+            warnings.warn(
+                'More than one netCDF file found under directory {}'.
+                    format(result_dir))
+        fname = glob.glob(os.path.join(state_dir, '*.nc'))[0]
+        ds_current_run = xr.open_dataset(fname)
+        # Compare current run with base run
+        for var in ds_first_run.data_vars:
+                npt.assert_array_equal(
+                        ds_current_run[var].values,
+                        ds_first_run[var].values,
+                        err_msg='States are not an exact match')
+

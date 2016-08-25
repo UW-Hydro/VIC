@@ -27,6 +27,9 @@
 *   [UW Joint Institute for Study of Atmosphere and Ocean (JISAO): Plots of Retrospective VIC outputs for the Pacific Northwest](http://jisao.washington.edu/data/vic/)
 *   [VIC Global Hydrologic Simulations, 2-degree, 1980-1993](ftp://ftp.hydro.washington.edu/pub/CE/HYDRO/nijssen/vic_global/index.html)
 *   [VIC Continental US Retrospective Simulations, 1/8 degree, 1950-2000](http://www.hydro.washington.edu/Lettenmaier/Data/VIC_retrospective/index.html)
+*   [NASA Land Information System (LIS)](http://lis.gsfc.nasa.gov/)
+*   [NASA Land Data Assimilation System (LDAS)](http://ldas.gsfc.nasa.gov/)
+*   [Regional Arctic System Model (RASM)](http://www.oc.nps.edu/NAME/RASM.htm)
 
 ## Other Hydrologic Models
 

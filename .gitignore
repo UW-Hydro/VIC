@@ -24,10 +24,16 @@ vic_headers.py
 *.mod
 
 vicNl
-vic_classic
-vic_image
+vic_classic.exe
+vic_image.exe
 liblnd.a
 _vic.py
+vic_timing_*txt
+massif.out.*
+vic_call_graph_*
+
+vic_call_graph*
+gmon.out
 
 .DS_Store
 TAGS
@@ -35,6 +41,7 @@ TAGS
 *egg-info*
 
 # Python stuff
+__pycache__
 .ipynb_checkpoints
 .eggs
 

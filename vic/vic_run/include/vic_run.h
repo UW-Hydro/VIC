@@ -78,7 +78,7 @@ double calc_surf_energy_bal(double, double, double, double, double, double,
                             double, double *, double *, double, double *,
                             double *, int, int, size_t, size_t, double, size_t,
                             unsigned short int, int, unsigned short int,
-                            double *, double *, atmos_data_struct *,
+                            double *, double *, force_data_struct *,
                             dmy_struct *, energy_bal_struct *,
                             layer_data_struct *, snow_data_struct *,
                             soil_con_struct *, veg_var_struct *);
@@ -243,7 +243,7 @@ int snow_intercept(double, double, double, double, double, double, double,
                    double *, bool *, unsigned int *, double *, double *,
                    double *, double *, double *, double *, double *, int, int,
                    int, int, int, unsigned short int, double *, double *,
-                   atmos_data_struct *, layer_data_struct *, soil_con_struct *,
+                   force_data_struct *, layer_data_struct *, soil_con_struct *,
                    veg_var_struct *);
 int snow_melt(double, double, double, double, double *, double, double *,
               double, double, double, double, double, double, double, double,
@@ -271,7 +271,7 @@ double solve_snow(char, double, double, double, double, double, double, double,
                   double *, double *, double *, double *, double *, double *,
                   int, size_t, unsigned short int, unsigned short int, double,
                   size_t, int, int *, double *, double *, dmy_struct *,
-                  atmos_data_struct *, energy_bal_struct *, layer_data_struct *,
+                  force_data_struct *, energy_bal_struct *, layer_data_struct *,
                   snow_data_struct *, soil_con_struct *, veg_var_struct *);
 double solve_surf_energy_bal(double Tsurf, ...);
 int solve_T_profile(double *, double *, char *, unsigned int *, double *,
@@ -293,7 +293,7 @@ int surface_fluxes(bool, double, double, double, double, double *, double *,
                    double *, double *, double *, double *, double *, double *,
                    double *, double *, double *, double *, double *, size_t,
                    size_t, unsigned short int, double, unsigned short int,
-                   unsigned short int, atmos_data_struct *, dmy_struct *,
+                   unsigned short int, force_data_struct *, dmy_struct *,
                    energy_bal_struct *, global_param_struct *,
                    cell_data_struct *, snow_data_struct *, soil_con_struct *,
                    veg_var_struct *, double, double, double, double *);
@@ -315,7 +315,7 @@ double trapzd(
     int n);
 void tridia(int, double *, double *, double *, double *, double *);
 void tridiag(double *, double *, double *, double *, unsigned int);
-int vic_run(atmos_data_struct *, all_vars_struct *, dmy_struct *,
+int vic_run(force_data_struct *, all_vars_struct *, dmy_struct *,
             global_param_struct *, lake_con_struct *, soil_con_struct *,
             veg_con_struct *, veg_lib_struct *);
 double volumetric_heat_capacity(double, double, double, double);

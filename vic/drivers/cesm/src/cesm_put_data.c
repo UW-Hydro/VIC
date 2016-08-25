@@ -33,7 +33,7 @@ void
 vic_cesm_put_data()
 {
     extern all_vars_struct    *all_vars;
-    extern atmos_data_struct  *atmos;
+    extern force_data_struct  *force;
     extern dmy_struct          dmy_current;
     extern domain_struct       local_domain;
     extern soil_con_struct    *soil_con;
@@ -140,26 +140,26 @@ vic_cesm_put_data()
 
                 // 2m reference temperature
                 // CESM units: K
-                l2x_vic[i].l2x_Sl_tref += AreaFactor * atmos->air_temp[NR];
+                l2x_vic[i].l2x_Sl_tref += AreaFactor * force->air_temp[NR];
 
                 // 2m reference specific humidity
                 // CESM units: g/g
                 l2x_vic[i].l2x_Sl_qref += AreaFactor * CONST_EPS *
-                                          atmos->vp[NR] / atmos->pressure[NR];
+                                          force->vp[NR] / force->pressure[NR];
 
                 // Albedo Note: VIC does not partition its albedo, all returned
                 // values will be the same
 
                 // albedo: direct, visible
                 // CESM units: unitless
-                // atmos->shortwave is the incoming shortwave (+ down)
-                // atmos->NetShortAtmos net shortwave flux (+ down)
-                // SWup = atmos->shortwave[NR] - energy.NetShortAtmos
+                // force->shortwave is the incoming shortwave (+ down)
+                // force->NetShortAtmos net shortwave flux (+ down)
+                // SWup = force->shortwave[NR] - energy.NetShortAtmos
                 // Set the albedo to zero for the case where there is no shortwave down
-                if (atmos->shortwave[NR] > 0.) {
+                if (force->shortwave[NR] > 0.) {
                     albedo = AreaFactor *
-                             (atmos->shortwave[NR] - energy.NetShortAtmos) /
-                             atmos->shortwave[NR];
+                             (force->shortwave[NR] - energy.NetShortAtmos) /
+                             force->shortwave[NR];
                 }
                 else {
                     albedo = 0.;
@@ -184,7 +184,7 @@ vic_cesm_put_data()
 
                 // 10m wind
                 // CESM units: m/s
-                l2x_vic[i].l2x_Sl_u10 += AreaFactor * atmos->wind[NR];
+                l2x_vic[i].l2x_Sl_u10 += AreaFactor * force->wind[NR];
 
                 // dry deposition velocities (optional)
                 // CESM units: ?
@@ -230,13 +230,13 @@ vic_cesm_put_data()
 
                 // wind stress, zonal
                 // CESM units: N m-2
-                wind_stress_x = -1 * atmos[i].density[NR] *
+                wind_stress_x = -1 * force[i].density[NR] *
                                 x2l_vic[i].x2l_Sa_u / aero_resist;
                 l2x_vic[i].l2x_Fall_taux += AreaFactor * wind_stress_x;
 
                 // wind stress, meridional
                 // CESM units: N m-2
-                wind_stress_y = -1 * atmos[i].density[NR] *
+                wind_stress_y = -1 * force[i].density[NR] *
                                 x2l_vic[i].x2l_Sa_v / aero_resist;
                 l2x_vic[i].l2x_Fall_tauy += AreaFactor * wind_stress_y;
 
@@ -245,7 +245,7 @@ vic_cesm_put_data()
                 wind_stress =
                     sqrt(pow(wind_stress_x, 2) + pow(wind_stress_y, 2));
                 l2x_vic[i].l2x_Sl_fv += AreaFactor *
-                                        (wind_stress / atmos[i].density[NR]);
+                                        (wind_stress / force[i].density[NR]);
 
                 // latent heat flux
                 // CESM units: W m-2
@@ -259,7 +259,7 @@ vic_cesm_put_data()
                 // upward longwave heat flux
                 // CESM units: W m-2
                 l2x_vic[i].l2x_Fall_lwup += AreaFactor *
-                                            (atmos->longwave[NR] -
+                                            (force->longwave[NR] -
                                              energy.NetLongAtmos);
 
                 // evaporation water flux
@@ -278,7 +278,7 @@ vic_cesm_put_data()
 
                 // heat flux shortwave net
                 l2x_vic[i].l2x_Fall_swnet += AreaFactor *
-                                             (atmos->shortwave[NR] -
+                                             (force->shortwave[NR] -
                                               energy.NetShortAtmos);
 
                 // co2 flux **For testing set to 0
@@ -313,7 +313,7 @@ vic_cesm_put_data()
         }
 
         if (!assert_close_double(AreaFactorSum, 1., 0., 1e-3)) {
-            log_warn("AreaFactorSum (%f) is not 1 in cesm_put_data.c",
+            log_warn("AreaFactorSum (%f) is not 1",
                      AreaFactorSum);
         }
     }

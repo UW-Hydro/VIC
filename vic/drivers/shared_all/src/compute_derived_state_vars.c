@@ -209,8 +209,8 @@ compute_derived_state_vars(all_vars_struct *all_vars,
                                 energy[veg][band].T[1],
                                 soil_con->avg_temp);
                         if (ErrorFlag == ERROR) {
-                            log_err("Error in "
-                                    "estimate_layer_temperature_quick_flux");
+                            log_err("Error calculating layer temperature "
+                                    "using QUICK_FLUX option");
                         }
                     }
                     else {
@@ -233,8 +233,7 @@ compute_derived_state_vars(all_vars_struct *all_vars,
                             options.Nnode,
                             options.Nlayer);
                         if (ErrorFlag == ERROR) {
-                            log_err("Error in "
-                                    "estimate_layer_temperature");
+                            log_err("Error calculating layer temperature");
                         }
                     }
 

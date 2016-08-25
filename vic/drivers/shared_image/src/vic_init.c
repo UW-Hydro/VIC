@@ -74,13 +74,11 @@ vic_init(void)
     Cv_sum = malloc(local_domain.ncells_active * sizeof(*Cv_sum));
     check_alloc_status(Cv_sum, "Memory allocation error.");
 
-
     // allocate memory for variables to be read
     dvar = malloc(local_domain.ncells_active * sizeof(*dvar));
     check_alloc_status(dvar, "Memory allocation error.");
     ivar = malloc(local_domain.ncells_active * sizeof(*ivar));
     check_alloc_status(ivar, "Memory allocation error.");
-
 
     // The method used to convert the NetCDF fields to VIC structures for
     // individual grid cells is to read a 2D slice and then loop over the
@@ -125,7 +123,7 @@ vic_init(void)
     // overstory
     for (j = 0; j < options.NVEGTYPES; j++) {
         d3start[0] = j;
-        get_scatter_nc_field_int(filenames.veglib, "overstory",
+        get_scatter_nc_field_int(filenames.params, "overstory",
                                  d3start, d3count, ivar);
         for (i = 0; i < local_domain.ncells_active; i++) {
             veg_lib[i][j].overstory = ivar[i];
@@ -135,7 +133,7 @@ vic_init(void)
     // rarc
     for (j = 0; j < options.NVEGTYPES; j++) {
         d3start[0] = j;
-        get_scatter_nc_field_double(filenames.veglib, "rarc",
+        get_scatter_nc_field_double(filenames.params, "rarc",
                                     d3start, d3count, dvar);
         for (i = 0; i < local_domain.ncells_active; i++) {
             veg_lib[i][j].rarc = (double) dvar[i];
@@ -145,7 +143,7 @@ vic_init(void)
     // rmin
     for (j = 0; j < options.NVEGTYPES; j++) {
         d3start[0] = j;
-        get_scatter_nc_field_double(filenames.veglib, "rmin",
+        get_scatter_nc_field_double(filenames.params, "rmin",
                                     d3start, d3count, dvar);
         for (i = 0; i < local_domain.ncells_active; i++) {
             veg_lib[i][j].rmin = (double) dvar[i];
@@ -155,7 +153,7 @@ vic_init(void)
     // wind height
     for (j = 0; j < options.NVEGTYPES; j++) {
         d3start[0] = j;
-        get_scatter_nc_field_double(filenames.veglib, "wind_h",
+        get_scatter_nc_field_double(filenames.params, "wind_h",
                                     d3start, d3count, dvar);
         for (i = 0; i < local_domain.ncells_active; i++) {
             veg_lib[i][j].wind_h = (double) dvar[i];
@@ -165,7 +163,7 @@ vic_init(void)
     // RGL
     for (j = 0; j < options.NVEGTYPES; j++) {
         d3start[0] = j;
-        get_scatter_nc_field_double(filenames.veglib, "RGL",
+        get_scatter_nc_field_double(filenames.params, "RGL",
                                     d3start, d3count, dvar);
         for (i = 0; i < local_domain.ncells_active; i++) {
             veg_lib[i][j].RGL = (double)dvar[i];
@@ -175,7 +173,7 @@ vic_init(void)
     // rad_atten
     for (j = 0; j < options.NVEGTYPES; j++) {
         d3start[0] = j;
-        get_scatter_nc_field_double(filenames.veglib, "rad_atten",
+        get_scatter_nc_field_double(filenames.params, "rad_atten",
                                     d3start, d3count, dvar);
         for (i = 0; i < local_domain.ncells_active; i++) {
             veg_lib[i][j].rad_atten = (double) dvar[i];
@@ -185,7 +183,7 @@ vic_init(void)
     // wind_atten
     for (j = 0; j < options.NVEGTYPES; j++) {
         d3start[0] = j;
-        get_scatter_nc_field_double(filenames.veglib, "wind_atten",
+        get_scatter_nc_field_double(filenames.params, "wind_atten",
                                     d3start, d3count, dvar);
         for (i = 0; i < local_domain.ncells_active; i++) {
             veg_lib[i][j].wind_atten = (double) dvar[i];
@@ -195,7 +193,7 @@ vic_init(void)
     // trunk_ratio
     for (j = 0; j < options.NVEGTYPES; j++) {
         d3start[0] = j;
-        get_scatter_nc_field_double(filenames.veglib, "trunk_ratio",
+        get_scatter_nc_field_double(filenames.params, "trunk_ratio",
                                     d3start, d3count, dvar);
         for (i = 0; i < local_domain.ncells_active; i++) {
             veg_lib[i][j].trunk_ratio = (double) dvar[i];
@@ -208,7 +206,7 @@ vic_init(void)
             d4start[0] = j;
             for (k = 0; k < MONTHS_PER_YEAR; k++) {
                 d4start[1] = k;
-                get_scatter_nc_field_double(filenames.veglib, "LAI",
+                get_scatter_nc_field_double(filenames.params, "LAI",
                                             d4start, d4count, dvar);
                 for (i = 0; i < local_domain.ncells_active; i++) {
                     veg_lib[i][j].LAI[k] = (double) dvar[i];
@@ -225,7 +223,7 @@ vic_init(void)
             d4start[0] = j;
             for (k = 0; k < MONTHS_PER_YEAR; k++) {
                 d4start[1] = k;
-                get_scatter_nc_field_double(filenames.veglib, "albedo",
+                get_scatter_nc_field_double(filenames.params, "albedo",
                                             d4start, d4count, dvar);
                 for (i = 0; i < local_domain.ncells_active; i++) {
                     veg_lib[i][j].albedo[k] = (double) dvar[i];
@@ -239,7 +237,7 @@ vic_init(void)
         d4start[0] = j;
         for (k = 0; k < MONTHS_PER_YEAR; k++) {
             d4start[1] = k;
-            get_scatter_nc_field_double(filenames.veglib, "veg_rough",
+            get_scatter_nc_field_double(filenames.params, "veg_rough",
                                         d4start, d4count, dvar);
             for (i = 0; i < local_domain.ncells_active; i++) {
                 veg_lib[i][j].roughness[k] = (double) dvar[i];
@@ -252,7 +250,7 @@ vic_init(void)
         d4start[0] = j;
         for (k = 0; k < MONTHS_PER_YEAR; k++) {
             d4start[1] = k;
-            get_scatter_nc_field_double(filenames.veglib, "displacement",
+            get_scatter_nc_field_double(filenames.params, "displacement",
                                         d4start, d4count, dvar);
             for (i = 0; i < local_domain.ncells_active; i++) {
                 veg_lib[i][j].displacement[k] = (double) dvar[i];
@@ -280,7 +278,7 @@ vic_init(void)
             d4start[0] = j;
             for (k = 0; k < MONTHS_PER_YEAR; k++) {
                 d4start[1] = k;
-                get_scatter_nc_field_double(filenames.veglib, "fcanopy",
+                get_scatter_nc_field_double(filenames.params, "fcanopy",
                                             d4start, d4count, dvar);
                 for (i = 0; i < local_domain.ncells_active; i++) {
                     veg_lib[i][j].fcanopy[k] = (double) dvar[i];
@@ -294,7 +292,7 @@ vic_init(void)
         // Ctype
         for (j = 0; j < options.NVEGTYPES; j++) {
             d3start[0] = j;
-            get_scatter_nc_field_int(filenames.veglib, "Ctype",
+            get_scatter_nc_field_int(filenames.params, "Ctype",
                                      d3start, d3count, ivar);
             for (i = 0; i < local_domain.ncells_active; i++) {
                 veg_lib[i][j].Ctype = ivar[i];
@@ -310,7 +308,7 @@ vic_init(void)
         // MaxCarboxRate
         for (j = 0; j < options.NVEGTYPES; j++) {
             d3start[0] = j;
-            get_scatter_nc_field_double(filenames.veglib, "MaxCarboxRate",
+            get_scatter_nc_field_double(filenames.params, "MaxCarboxRate",
                                         d3start, d3count, dvar);
             for (i = 0; i < local_domain.ncells_active; i++) {
                 veg_lib[i][j].MaxCarboxRate = (double) dvar[i];
@@ -324,7 +322,7 @@ vic_init(void)
         // MaxETransport or CO2Specificity
         for (j = 0; j < options.NVEGTYPES; j++) {
             d3start[0] = j;
-            get_scatter_nc_field_double(filenames.veglib, "MaxiE_or_CO2Spec",
+            get_scatter_nc_field_double(filenames.params, "MaxiE_or_CO2Spec",
                                         d3start, d3count, dvar);
             for (i = 0; i < local_domain.ncells_active; i++) {
                 if (dvar[i] < 0) {
@@ -344,7 +342,7 @@ vic_init(void)
         // LightUseEff
         for (j = 0; j < options.NVEGTYPES; j++) {
             d3start[0] = j;
-            get_scatter_nc_field_double(filenames.veglib, "LUE",
+            get_scatter_nc_field_double(filenames.params, "LUE",
                                         d3start, d3count, dvar);
             for (i = 0; i < local_domain.ncells_active; i++) {
                 veg_lib[i][j].LightUseEff = (double) dvar[i];
@@ -359,7 +357,7 @@ vic_init(void)
         // Nscale flag
         for (j = 0; j < options.NVEGTYPES; j++) {
             d3start[0] = j;
-            get_scatter_nc_field_int(filenames.veglib, "Nscale",
+            get_scatter_nc_field_int(filenames.params, "Nscale",
                                      d3start, d3count, ivar);
             for (i = 0; i < local_domain.ncells_active; i++) {
                 veg_lib[i][j].NscaleFlag = ivar[i];
@@ -374,7 +372,7 @@ vic_init(void)
         // Wnpp_inhib
         for (j = 0; j < options.NVEGTYPES; j++) {
             d3start[0] = j;
-            get_scatter_nc_field_double(filenames.veglib, "Wnpp_inhib",
+            get_scatter_nc_field_double(filenames.params, "Wnpp_inhib",
                                         d3start, d3count, dvar);
             for (i = 0; i < local_domain.ncells_active; i++) {
                 veg_lib[i][j].Wnpp_inhib = (double) dvar[i];
@@ -389,7 +387,7 @@ vic_init(void)
         // NPPfactor_sat
         for (j = 0; j < options.NVEGTYPES; j++) {
             d3start[0] = j;
-            get_scatter_nc_field_double(filenames.veglib, "NPPfactor_sat",
+            get_scatter_nc_field_double(filenames.params, "NPPfactor_sat",
                                         d3start, d3count, dvar);
             for (i = 0; i < local_domain.ncells_active; i++) {
                 veg_lib[i][j].NPPfactor_sat = (double) dvar[i];
@@ -404,9 +402,6 @@ vic_init(void)
     }
 
     // read_soilparam()
-
-    // Nlayer
-    options.Nlayer = get_nc_dimension(filenames.soil, "nlayer");
 
     // Validate Nlayer
     if ((options.FULL_ENERGY ||
@@ -434,35 +429,35 @@ vic_init(void)
     }
 
     // b_infilt
-    get_scatter_nc_field_double(filenames.soil, "infilt",
+    get_scatter_nc_field_double(filenames.params, "infilt",
                                 d2start, d2count, dvar);
     for (i = 0; i < local_domain.ncells_active; i++) {
         soil_con[i].b_infilt = (double) dvar[i];
     }
 
     // Ds
-    get_scatter_nc_field_double(filenames.soil, "Ds",
+    get_scatter_nc_field_double(filenames.params, "Ds",
                                 d2start, d2count, dvar);
     for (i = 0; i < local_domain.ncells_active; i++) {
         soil_con[i].Ds = (double) dvar[i];
     }
 
     // Dsmax
-    get_scatter_nc_field_double(filenames.soil, "Dsmax",
+    get_scatter_nc_field_double(filenames.params, "Dsmax",
                                 d2start, d2count, dvar);
     for (i = 0; i < local_domain.ncells_active; i++) {
         soil_con[i].Dsmax = (double) dvar[i];
     }
 
     // Ws
-    get_scatter_nc_field_double(filenames.soil, "Ws",
+    get_scatter_nc_field_double(filenames.params, "Ws",
                                 d2start, d2count, dvar);
     for (i = 0; i < local_domain.ncells_active; i++) {
         soil_con[i].Ws = (double) dvar[i];
     }
 
     // c
-    get_scatter_nc_field_double(filenames.soil, "c",
+    get_scatter_nc_field_double(filenames.params, "c",
                                 d2start, d2count, dvar);
     for (i = 0; i < local_domain.ncells_active; i++) {
         soil_con[i].c = (double) dvar[i];
@@ -471,7 +466,7 @@ vic_init(void)
     // expt: unsaturated hydraulic conductivity exponent for each layer
     for (j = 0; j < options.Nlayer; j++) {
         d3start[0] = j;
-        get_scatter_nc_field_double(filenames.soil, "expt",
+        get_scatter_nc_field_double(filenames.params, "expt",
                                     d3start, d3count, dvar);
         for (i = 0; i < local_domain.ncells_active; i++) {
             soil_con[i].expt[j] = (double) dvar[i];
@@ -481,7 +476,7 @@ vic_init(void)
     // Ksat: saturated hydraulic conductivity for each layer
     for (j = 0; j < options.Nlayer; j++) {
         d3start[0] = j;
-        get_scatter_nc_field_double(filenames.soil, "Ksat",
+        get_scatter_nc_field_double(filenames.params, "Ksat",
                                     d3start, d3count, dvar);
         for (i = 0; i < local_domain.ncells_active; i++) {
             soil_con[i].Ksat[j] = (double) dvar[i];
@@ -491,7 +486,7 @@ vic_init(void)
     // init_moist: initial soil moisture for cold start
     for (j = 0; j < options.Nlayer; j++) {
         d3start[0] = j;
-        get_scatter_nc_field_double(filenames.soil, "init_moist",
+        get_scatter_nc_field_double(filenames.params, "init_moist",
                                     d3start, d3count, dvar);
         for (i = 0; i < local_domain.ncells_active; i++) {
             soil_con[i].init_moist[j] = (double) dvar[i];
@@ -501,7 +496,7 @@ vic_init(void)
     // phi_s
     for (j = 0; j < options.Nlayer; j++) {
         d3start[0] = j;
-        get_scatter_nc_field_double(filenames.soil, "phi_s",
+        get_scatter_nc_field_double(filenames.params, "phi_s",
                                     d3start, d3count, dvar);
         for (i = 0; i < local_domain.ncells_active; i++) {
             soil_con[i].phi_s[j] = (double) dvar[i];
@@ -509,7 +504,7 @@ vic_init(void)
     }
 
     // elevation: mean grid cell elevation
-    get_scatter_nc_field_double(filenames.soil, "elev",
+    get_scatter_nc_field_double(filenames.params, "elev",
                                 d2start, d2count, dvar);
     for (i = 0; i < local_domain.ncells_active; i++) {
         soil_con[i].elevation = (double) dvar[i];
@@ -518,7 +513,7 @@ vic_init(void)
     // depth: thickness for each soil layer
     for (j = 0; j < options.Nlayer; j++) {
         d3start[0] = j;
-        get_scatter_nc_field_double(filenames.soil, "depth",
+        get_scatter_nc_field_double(filenames.params, "depth",
                                     d3start, d3count, dvar);
         for (i = 0; i < local_domain.ncells_active; i++) {
             soil_con[i].depth[j] = (double) dvar[i];
@@ -526,14 +521,14 @@ vic_init(void)
     }
 
     // avg_temp: mean grid temperature
-    get_scatter_nc_field_double(filenames.soil, "avg_T",
+    get_scatter_nc_field_double(filenames.params, "avg_T",
                                 d2start, d2count, dvar);
     for (i = 0; i < local_domain.ncells_active; i++) {
         soil_con[i].avg_temp = (double) dvar[i];
     }
 
     // dp: damping depth
-    get_scatter_nc_field_double(filenames.soil, "dp",
+    get_scatter_nc_field_double(filenames.params, "dp",
                                 d2start, d2count, dvar);
     for (i = 0; i < local_domain.ncells_active; i++) {
         soil_con[i].dp = (double) dvar[i];
@@ -542,7 +537,7 @@ vic_init(void)
     // bubble: bubbling pressure for each soil layer
     for (j = 0; j < options.Nlayer; j++) {
         d3start[0] = j;
-        get_scatter_nc_field_double(filenames.soil, "bubble",
+        get_scatter_nc_field_double(filenames.params, "bubble",
                                     d3start, d3count, dvar);
         for (i = 0; i < local_domain.ncells_active; i++) {
             soil_con[i].bubble[j] = (double) dvar[i];
@@ -552,7 +547,7 @@ vic_init(void)
     // quartz: quartz content for each soil layer
     for (j = 0; j < options.Nlayer; j++) {
         d3start[0] = j;
-        get_scatter_nc_field_double(filenames.soil, "quartz",
+        get_scatter_nc_field_double(filenames.params, "quartz",
                                     d3start, d3count, dvar);
         for (i = 0; i < local_domain.ncells_active; i++) {
             soil_con[i].quartz[j] = (double) dvar[i];
@@ -562,7 +557,7 @@ vic_init(void)
     // bulk_dens_min: mineral bulk density for each soil layer
     for (j = 0; j < options.Nlayer; j++) {
         d3start[0] = j;
-        get_scatter_nc_field_double(filenames.soil, "bulk_density",
+        get_scatter_nc_field_double(filenames.params, "bulk_density",
                                     d3start, d3count, dvar);
         for (i = 0; i < local_domain.ncells_active; i++) {
             soil_con[i].bulk_dens_min[j] = (double) dvar[i];
@@ -572,7 +567,7 @@ vic_init(void)
     // soil_dens_min: mineral soil density for each soil layer
     for (j = 0; j < options.Nlayer; j++) {
         d3start[0] = j;
-        get_scatter_nc_field_double(filenames.soil, "soil_density",
+        get_scatter_nc_field_double(filenames.params, "soil_density",
                                     d3start, d3count, dvar);
         for (i = 0; i < local_domain.ncells_active; i++) {
             soil_con[i].soil_dens_min[j] = (double) dvar[i];
@@ -585,7 +580,7 @@ vic_init(void)
         // organic
         for (j = 0; j < options.Nlayer; j++) {
             d3start[0] = j;
-            get_scatter_nc_field_double(filenames.soil, "organic",
+            get_scatter_nc_field_double(filenames.params, "organic",
                                         d3start, d3count, dvar);
             for (i = 0; i < local_domain.ncells_active; i++) {
                 soil_con[i].organic[j] = (double) dvar[i];
@@ -595,7 +590,7 @@ vic_init(void)
         // bulk_dens_org: organic bulk density for each soil layer
         for (j = 0; j < options.Nlayer; j++) {
             d3start[0] = j;
-            get_scatter_nc_field_double(filenames.soil, "bulk_density_org",
+            get_scatter_nc_field_double(filenames.params, "bulk_density_org",
                                         d3start, d3count, dvar);
             for (i = 0; i < local_domain.ncells_active; i++) {
                 soil_con[i].bulk_dens_org[j] = (double) dvar[i];
@@ -605,7 +600,7 @@ vic_init(void)
         // soil_dens_org: organic soil density for each soil layer
         for (j = 0; j < options.Nlayer; j++) {
             d3start[0] = j;
-            get_scatter_nc_field_double(filenames.soil, "soil_density_org",
+            get_scatter_nc_field_double(filenames.params, "soil_density_org",
                                         d3start, d3count, dvar);
             for (i = 0; i < local_domain.ncells_active; i++) {
                 soil_con[i].soil_dens_org[j] = (double) dvar[i];
@@ -617,7 +612,7 @@ vic_init(void)
     // Note this value is  multiplied with the maximum moisture in each layer
     for (j = 0; j < options.Nlayer; j++) {
         d3start[0] = j;
-        get_scatter_nc_field_double(filenames.soil, "Wcr_FRACT",
+        get_scatter_nc_field_double(filenames.params, "Wcr_FRACT",
                                     d3start, d3count, dvar);
         for (i = 0; i < local_domain.ncells_active; i++) {
             soil_con[i].Wcr[j] = (double) dvar[i];
@@ -628,7 +623,7 @@ vic_init(void)
     // Note this value is  multiplied with the maximum moisture in each layer
     for (j = 0; j < options.Nlayer; j++) {
         d3start[0] = j;
-        get_scatter_nc_field_double(filenames.soil, "Wpwp_FRACT",
+        get_scatter_nc_field_double(filenames.params, "Wpwp_FRACT",
                                     d3start, d3count, dvar);
         for (i = 0; i < local_domain.ncells_active; i++) {
             soil_con[i].Wpwp[j] = (double) dvar[i];
@@ -636,21 +631,21 @@ vic_init(void)
     }
 
     // rough: soil roughness
-    get_scatter_nc_field_double(filenames.soil, "rough",
+    get_scatter_nc_field_double(filenames.params, "rough",
                                 d2start, d2count, dvar);
     for (i = 0; i < local_domain.ncells_active; i++) {
         soil_con[i].rough = (double) dvar[i];
     }
 
     // snow_rough: snow roughness
-    get_scatter_nc_field_double(filenames.soil, "snow_rough",
+    get_scatter_nc_field_double(filenames.params, "snow_rough",
                                 d2start, d2count, dvar);
     for (i = 0; i < local_domain.ncells_active; i++) {
         soil_con[i].snow_rough = (double) dvar[i];
     }
 
     // annual_prec: annual precipitation
-    get_scatter_nc_field_double(filenames.soil, "annual_prec",
+    get_scatter_nc_field_double(filenames.params, "annual_prec",
                                 d2start, d2count, dvar);
     for (i = 0; i < local_domain.ncells_active; i++) {
         soil_con[i].annual_prec = (double) dvar[i];
@@ -659,7 +654,7 @@ vic_init(void)
     // resid_moist: residual moisture content for each layer
     for (j = 0; j < options.Nlayer; j++) {
         d3start[0] = j;
-        get_scatter_nc_field_double(filenames.soil, "resid_moist",
+        get_scatter_nc_field_double(filenames.params, "resid_moist",
                                     d3start, d3count, dvar);
         for (i = 0; i < local_domain.ncells_active; i++) {
             soil_con[i].resid_moist[j] = (double) dvar[i];
@@ -667,7 +662,7 @@ vic_init(void)
     }
 
     // fs_active: frozen soil active flag
-    get_scatter_nc_field_int(filenames.soil, "fs_active",
+    get_scatter_nc_field_int(filenames.params, "fs_active",
                              d2start, d2count, ivar);
     for (i = 0; i < local_domain.ncells_active; i++) {
         soil_con[i].FS_ACTIVE = (char) ivar[i];
@@ -676,7 +671,7 @@ vic_init(void)
     // spatial snow
     if (options.SPATIAL_SNOW) {
         // max_snow_distrib_slope
-        get_scatter_nc_field_double(filenames.soil, "max_snow_distrib_slope",
+        get_scatter_nc_field_double(filenames.params, "max_snow_distrib_slope",
                                     d2start, d2count, dvar);
         for (i = 0; i < local_domain.ncells_active; i++) {
             soil_con[i].max_snow_distrib_slope = (double) dvar[i];
@@ -686,7 +681,7 @@ vic_init(void)
     // spatial frost
     if (options.SPATIAL_FROST) {
         // frost_slope: slope of frozen soil distribution
-        get_scatter_nc_field_double(filenames.soil, "frost_slope",
+        get_scatter_nc_field_double(filenames.params, "frost_slope",
                                     d2start, d2count, dvar);
         for (i = 0; i < local_domain.ncells_active; i++) {
             soil_con[i].frost_slope = (double) dvar[i];
@@ -953,7 +948,7 @@ vic_init(void)
         // AreaFract: fraction of grid cell in each snow band
         for (j = 0; j < options.SNOW_BAND; j++) {
             d3start[0] = j;
-            get_scatter_nc_field_double(filenames.snowband, "AreaFract",
+            get_scatter_nc_field_double(filenames.params, "AreaFract",
                                         d3start, d3count, dvar);
             for (i = 0; i < local_domain.ncells_active; i++) {
                 soil_con[i].AreaFract[j] = (double) dvar[i];
@@ -962,7 +957,7 @@ vic_init(void)
         // elevation: elevation of each snow band
         for (j = 0; j < options.SNOW_BAND; j++) {
             d3start[0] = j;
-            get_scatter_nc_field_double(filenames.snowband, "elevation",
+            get_scatter_nc_field_double(filenames.params, "elevation",
                                         d3start, d3count, dvar);
             for (i = 0; i < local_domain.ncells_active; i++) {
                 soil_con[i].BandElev[j] = (double) dvar[i];
@@ -971,7 +966,7 @@ vic_init(void)
         // Pfactor: precipitation multiplier for each snow band
         for (j = 0; j < options.SNOW_BAND; j++) {
             d3start[0] = j;
-            get_scatter_nc_field_double(filenames.snowband, "Pfactor",
+            get_scatter_nc_field_double(filenames.params, "Pfactor",
                                         d3start, d3count, dvar);
             for (i = 0; i < local_domain.ncells_active; i++) {
                 soil_con[i].Pfactor[j] = (double) dvar[i];
@@ -1090,7 +1085,7 @@ vic_init(void)
 
     for (j = 0; j < options.NVEGTYPES; j++) {
         d3start[0] = j;
-        get_scatter_nc_field_double(filenames.veg, "Cv",
+        get_scatter_nc_field_double(filenames.params, "Cv",
                                     d3start, d3count, dvar);
         for (i = 0; i < local_domain.ncells_active; i++) {
             veg_con_map[i].Cv[j] = (double) dvar[i];
@@ -1140,7 +1135,7 @@ vic_init(void)
         d4start[0] = j;
         for (k = 0; k < options.ROOT_ZONES; k++) {
             d4start[1] = k;
-            get_scatter_nc_field_double(filenames.veg, "root_depth",
+            get_scatter_nc_field_double(filenames.params, "root_depth",
                                         d4start, d4count, dvar);
             for (i = 0; i < local_domain.ncells_active; i++) {
                 vidx = veg_con_map[i].vidx[j];
@@ -1156,7 +1151,7 @@ vic_init(void)
         d4start[0] = j;
         for (k = 0; k < options.ROOT_ZONES; k++) {
             d4start[1] = k;
-            get_scatter_nc_field_double(filenames.veg, "root_fract",
+            get_scatter_nc_field_double(filenames.params, "root_fract",
                                         d4start, d4count, dvar);
             for (i = 0; i < local_domain.ncells_active; i++) {
                 vidx = veg_con_map[i].vidx[j];
@@ -1245,7 +1240,7 @@ vic_init(void)
         // sigma_slope
         for (j = 0; j < options.NVEGTYPES; j++) {
             d3start[0] = j;
-            get_scatter_nc_field_double(filenames.veg, "sigma_slope",
+            get_scatter_nc_field_double(filenames.params, "sigma_slope",
                                         d3start, d3count, dvar);
             for (i = 0; i < local_domain.ncells_active; i++) {
                 vidx = veg_con_map[i].vidx[j];
@@ -1262,7 +1257,7 @@ vic_init(void)
         // lag_one
         for (j = 0; j < options.NVEGTYPES; j++) {
             d3start[0] = j;
-            get_scatter_nc_field_double(filenames.veg, "lag_one",
+            get_scatter_nc_field_double(filenames.params, "lag_one",
                                         d3start, d3count, dvar);
             for (i = 0; i < local_domain.ncells_active; i++) {
                 vidx = veg_con_map[i].vidx[j];
@@ -1279,7 +1274,7 @@ vic_init(void)
         // fetch
         for (j = 0; j < options.NVEGTYPES; j++) {
             d3start[0] = j;
-            get_scatter_nc_field_double(filenames.veg, "fetch",
+            get_scatter_nc_field_double(filenames.params, "fetch",
                                         d3start, d3count, dvar);
             for (i = 0; i < local_domain.ncells_active; i++) {
                 vidx = veg_con_map[i].vidx[j];
@@ -1299,7 +1294,7 @@ vic_init(void)
     // read_lake parameters
     if (options.LAKES) {
         // lake_idx
-        get_scatter_nc_field_int(filenames.lakeparam, "lake_idx",
+        get_scatter_nc_field_int(filenames.params, "lake_idx",
                                  d2start, d2count, ivar);
         for (i = 0; i < local_domain.ncells_active; i++) {
             lake_con[i].lake_idx = ivar[i];
@@ -1307,7 +1302,7 @@ vic_init(void)
                   lake_con[i].lake_idx <
                   (int) veg_con[i][0].vegetat_type_num)) {
                 log_err("cell %zu lake_idx is %d but we must have -1 "
-                        "<= lake_idx < Nveg (%zu).\n", i, lake_con[i].lake_idx,
+                        "<= lake_idx < Nveg (%zu).", i, lake_con[i].lake_idx,
                         veg_con[i][0].vegetat_type_num);
             }
             if (lake_con[i].lake_idx != -1) {
@@ -1316,7 +1311,7 @@ vic_init(void)
         }
 
         // numnod
-        get_scatter_nc_field_int(filenames.lakeparam, "numnod",
+        get_scatter_nc_field_int(filenames.params, "numnod",
                                  d2start, d2count, ivar);
         max_numnod = 0;
         for (i = 0; i < local_domain.ncells_active; i++) {
@@ -1325,19 +1320,19 @@ vic_init(void)
                 if (lake_con[i].numnod != 0) {
                     log_err("cell %zu lake_idx is %d (lake not present) "
                             "which requires numnod to be 0, but numnod is "
-                            "%zu\n", i, lake_con[i].lake_idx,
+                            "%zu.", i, lake_con[i].lake_idx,
                             lake_con[i].numnod);
                 }
             }
             else if (!(lake_con[i].numnod > 0 &&
                        lake_con[i].numnod < MAX_LAKE_NODES)) {
                 log_err("cell %zu numnod is %zu but we must have 1 "
-                        "<= numnod < %d.\n", i, lake_con[i].numnod,
+                        "<= numnod < %d.", i, lake_con[i].numnod,
                         MAX_LAKE_NODES);
             }
             else if (!(lake_con[i].numnod <= options.NLAKENODES)) {
                 log_err("cell %zu numnod is %zu but this exceeds "
-                        "the file lake_node dimension length of %zu.\n",
+                        "the file lake_node dimension length of %zu.",
                         i, lake_con[i].numnod, options.NLAKENODES);
             }
             if (lake_con[i].numnod > max_numnod) {
@@ -1346,7 +1341,7 @@ vic_init(void)
         }
 
         // mindepth (minimum depth for which channel outflow occurs)
-        get_scatter_nc_field_double(filenames.lakeparam, "mindepth",
+        get_scatter_nc_field_double(filenames.params, "mindepth",
                                     d2start, d2count, dvar);
         for (i = 0; i < local_domain.ncells_active; i++) {
             lake_con[i].mindepth = (double) dvar[i];
@@ -1354,19 +1349,19 @@ vic_init(void)
                 if (lake_con[i].mindepth != 0) {
                     log_err("cell %zu lake_idx is %d (lake not present) "
                             "which requires mindepth to be 0, but mindepth "
-                            "is %f\n", i, lake_con[i].lake_idx,
+                            "is %f.", i, lake_con[i].lake_idx,
                             lake_con[i].mindepth);
                 }
             }
             else if (lake_con[i].lake_idx != -1 &&
                      !(lake_con[i].mindepth >= 0)) {
-                log_err("cell %zu mindepth is %f but must be >= 0.\n",
+                log_err("cell %zu mindepth is %f but must be >= 0.",
                         i, lake_con[i].mindepth);
             }
         }
 
         // wfrac
-        get_scatter_nc_field_double(filenames.lakeparam, "wfrac",
+        get_scatter_nc_field_double(filenames.params, "wfrac",
                                     d2start, d2count, dvar);
         for (i = 0; i < local_domain.ncells_active; i++) {
             lake_con[i].wfrac = (double) dvar[i];
@@ -1374,18 +1369,18 @@ vic_init(void)
                 if (lake_con[i].wfrac != 0) {
                     log_err("cell %zu lake_idx is %d (lake not present) "
                             "which requires wfrac to be 0, but wfrac is "
-                            "%f\n", i, lake_con[i].lake_idx, lake_con[i].wfrac);
+                            "%f.", i, lake_con[i].lake_idx, lake_con[i].wfrac);
                 }
             }
             else if (lake_con[i].lake_idx != -1 &&
                      !(lake_con[i].wfrac >= 0 && lake_con[i].wfrac <= 1)) {
                 log_err("cell %zu wfrac is %f but we must have "
-                        "0 <= wfrac <= 1.\n", i, lake_con[i].wfrac);
+                        "0 <= wfrac <= 1.", i, lake_con[i].wfrac);
             }
         }
 
         // depth_in (initial depth for a cold start)
-        get_scatter_nc_field_double(filenames.lakeparam, "depth_in",
+        get_scatter_nc_field_double(filenames.params, "depth_in",
                                     d2start, d2count, dvar);
         for (i = 0; i < local_domain.ncells_active; i++) {
             lake_con[i].depth_in = (double) dvar[i];
@@ -1393,19 +1388,19 @@ vic_init(void)
                 if (lake_con[i].depth_in != 0) {
                     log_err("cell %zu lake_idx is %d (lake not present) "
                             "which requires depth_in to be 0, but depth_in is "
-                            "%f\n", i, lake_con[i].lake_idx,
+                            "%f.", i, lake_con[i].lake_idx,
                             lake_con[i].depth_in);
                 }
             }
             else if (lake_con[i].lake_idx != -1 &&
                      !(lake_con[i].depth_in >= 0)) {
-                log_err("cell %zu depth_in is %f but must be >= 0.\n",
+                log_err("cell %zu depth_in is %f but must be >= 0.",
                         i, lake_con[i].depth_in);
             }
         }
 
         // rpercent
-        get_scatter_nc_field_double(filenames.lakeparam, "rpercent",
+        get_scatter_nc_field_double(filenames.params, "rpercent",
                                     d2start, d2count, dvar);
         for (i = 0; i < local_domain.ncells_active; i++) {
             lake_con[i].rpercent = (double) dvar[i];
@@ -1413,7 +1408,7 @@ vic_init(void)
                 if (lake_con[i].rpercent != 0) {
                     log_err("cell %zu lake_idx is %d (lake not present) "
                             "which requires rpercent to be 0, but rpercent is "
-                            "%f\n", i, lake_con[i].lake_idx,
+                            "%f.", i, lake_con[i].lake_idx,
                             lake_con[i].rpercent);
                 }
             }
@@ -1421,7 +1416,7 @@ vic_init(void)
                      !(lake_con[i].rpercent >= 0 &&
                        lake_con[i].rpercent <= 1)) {
                 log_err("cell %zu rpercent is %f but we must have "
-                        "0 <= rpercent <= 1.\n", i, lake_con[i].rpercent);
+                        "0 <= rpercent <= 1.", i, lake_con[i].rpercent);
             }
         }
 
@@ -1437,14 +1432,14 @@ vic_init(void)
                 d3start[0] = j;
 
                 // basin_depth
-                get_scatter_nc_field_double(filenames.lakeparam, "basin_depth",
+                get_scatter_nc_field_double(filenames.params, "basin_depth",
                                             d3start, d3count, dvar);
                 for (i = 0; i < local_domain.ncells_active; i++) {
                     lake_con[i].z[j] = (double) dvar[i];
                 }
 
                 // basin_area
-                get_scatter_nc_field_double(filenames.lakeparam, "basin_area",
+                get_scatter_nc_field_double(filenames.params, "basin_area",
                                             d3start, d3count, dvar);
                 for (i = 0; i < local_domain.ncells_active; i++) {
                     lake_con[i].Cl[j] = (double) dvar[i];
@@ -1453,14 +1448,14 @@ vic_init(void)
         }
         else {
             // basin_depth
-            get_scatter_nc_field_double(filenames.lakeparam, "basin_depth",
+            get_scatter_nc_field_double(filenames.params, "basin_depth",
                                         d2start, d2count, dvar);
             for (i = 0; i < local_domain.ncells_active; i++) {
                 lake_con[i].z[0] = (double) dvar[i];
             }
 
             // basin_area
-            get_scatter_nc_field_double(filenames.lakeparam, "basin_area",
+            get_scatter_nc_field_double(filenames.params, "basin_area",
                                         d2start, d2count, dvar);
             for (i = 0; i < local_domain.ncells_active; i++) {
                 lake_con[i].Cl[0] = (double) dvar[i];
@@ -1474,36 +1469,36 @@ vic_init(void)
                 if (lake_con[i].z[0] > 0) {
                     log_err("cell %zu lake_idx is %d (lake not present) "
                             "which requires max depth to be 0, but max depth "
-                            "is %f\n", i, lake_con[i].lake_idx,
+                            "is %f.", i, lake_con[i].lake_idx,
                             lake_con[i].z[0]);
                 }
                 if (lake_con[i].Cl[0] > 0) {
                     log_err("cell %zu lake_idx is %d (lake not present) "
                             "which requires max area fraction to be 0, but "
-                            "max area fraction is %f\n", i,
+                            "max area fraction is %f.", i,
                             lake_con[i].lake_idx, lake_con[i].Cl[0]);
                 }
             }
             else {
                 if (!(lake_con[i].z[0] > 0)) {
                     log_err("cell %zu lake basin max depth is %f but must "
-                            "be > 0.\n", i, lake_con[i].z[0]);
+                            "be > 0.", i, lake_con[i].z[0]);
                 }
                 else if (!(lake_con[i].mindepth <= lake_con[i].z[0])) {
                     log_err("cell %zu lake basin mindepth is %f but "
-                            "must be <= max depth of %f\n",
+                            "must be <= max depth of %f.",
                             i, lake_con[i].mindepth, lake_con[i].z[0]);
                 }
                 if (!(lake_con[i].Cl[0] > 0 && lake_con[i].Cl[0] <= 1)) {
                     log_err("cell %zu lake basin max area fraction is %f but "
-                            "we must have 0 < max area fraction < 1\n", i,
+                            "we must have 0 < max area fraction < 1.", i,
                             lake_con[i].Cl[0]);
                 }
                 if (fabs(1 - lake_con[i].Cl[0] /
                          veg_con[i][lake_con[i].lake_idx].Cv) > 0.01) {
                     log_err("cell %zu lake basin max area fraction is %f but "
                             "must == area fraction of veg tile containing "
-                            "lake (%f)\n", i, lake_con[i].Cl[0],
+                            "lake (%f).", i, lake_con[i].Cl[0],
                             veg_con[i][lake_con[i].lake_idx].Cv);
                 }
                 else {
@@ -1517,7 +1512,7 @@ vic_init(void)
                     if (!(lake_con[i].z[j] > 0 &&
                           lake_con[i].z[j] < lake_con[i].z[j - 1])) {
                         log_err("cell %zu lake basin node %zu depth is %f "
-                                "but must be > 0 and < node %zu depth %f\n",
+                                "but must be > 0 and < node %zu depth %f.",
                                 i, j, lake_con[i].z[j], j - 1,
                                 lake_con[i].z[j - 1]);
                     }
@@ -1525,7 +1520,7 @@ vic_init(void)
                           lake_con[i].Cl[j] < lake_con[i].Cl[j - 1])) {
                         log_err("cell %zu lake basin node %zu area fraction "
                                 "is %f but must be > 0 and < node %zu area "
-                                "fraction %f\n", i, j, lake_con[i].Cl[j], j - 1,
+                                "fraction %f.", i, j, lake_con[i].Cl[j], j - 1,
                                 lake_con[i].Cl[j - 1]);
                     }
                 }

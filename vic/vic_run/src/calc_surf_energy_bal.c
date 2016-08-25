@@ -80,7 +80,7 @@ calc_surf_energy_bal(double             Le,
                      unsigned short     veg_class,
                      double            *CanopLayerBnd,
                      double            *dryFrac,
-                     atmos_data_struct *atmos,
+                     force_data_struct *force,
                      dmy_struct        *dmy,
                      energy_bal_struct *energy,
                      layer_data_struct *layer,
@@ -202,11 +202,11 @@ calc_surf_energy_bal(double             Le,
     kappa2 = energy->kappa[1];            // second layer conductivity
     Cs1 = energy->Cs[0];               // top layer heat capacity
     Cs2 = energy->Cs[1];               // second layer heat capacity
-    atmos_density = atmos->density[hidx];     // atmospheric density
-    atmos_pressure = atmos->pressure[hidx];    // atmospheric pressure
-    atmos_shortwave = atmos->shortwave[hidx];   // incoming shortwave radiation
+    atmos_density = force->density[hidx];     // atmospheric density
+    atmos_pressure = force->pressure[hidx];    // atmospheric pressure
+    atmos_shortwave = force->shortwave[hidx];   // incoming shortwave radiation
     if (options.CARBON) {
-        atmos_Catm = atmos->Catm[hidx];        // CO2 mixing ratio
+        atmos_Catm = force->Catm[hidx];        // CO2 mixing ratio
     }
     else {
         atmos_Catm = MISSING;
@@ -690,7 +690,8 @@ calc_surf_energy_bal(double             Le,
         if (snow->swq > 0) {
             // set snow energy terms
             snow->surf_temp = (Tsurf > 0) ? 0 : Tsurf;
-            snow->coldcontent = CONST_CPICE * snow->surf_temp * snow->swq;
+            snow->coldcontent = CONST_VCPICE_WQ * snow->surf_temp *
+                                snow->swq;
 
             // recompute snow depth
             old_depth = snow->depth;

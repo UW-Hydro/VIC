@@ -31,11 +31,11 @@
 #define STR(x) STR_HELPER(x)
 
 #ifndef VERSION
-#define VERSION "5.0.0 Release Candidate 1: June 28, 2016"
+#define VERSION "5.0.0 Release Candidate 2: August 18, 2016"
 #endif
 
 #ifndef SHORT_VERSION
-#define SHORT_VERSION "5.0.0.rc1"
+#define SHORT_VERSION "5.0.0.rc2"
 #endif
 
 #ifndef GIT_VERSION
@@ -62,7 +62,7 @@
 #elif defined(__ICC) || defined(__INTEL_COMPILER)
 /* Intel ICC/ICPC. ------------------------------------------ */
 # define COMPILER "icc"
-# define COMPILER_VERSION __version__
+# define COMPILER_VERSION __VERSION__
 
 #elif defined(__GNUC__) || defined(__GNUG__)
 /* GNU GCC/G++. --------------------------------------------- */

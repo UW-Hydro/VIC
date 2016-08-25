@@ -15,9 +15,9 @@ For VIC 5 and later, type `vic _{classic,image}.exe -v`
 
 ------------------------------
 
-## VIC 5.0.0 (Release Candidate 1)
+## VIC 5.0.0 (Release Candidate 2)
 
-**Release date: June 28, 2016**
+**Release date: August 18, 2016**
 
 This is a major update from VIC 4. The VIC 5.0.0 release aims to have nearly identical physics as VIC 4.2 while providing a clean, refactored code base supporting multiple drivers. There are a number of new features, bug fixes, and backward incompatible changes. See the VIC Github page for more details on the changes included in this release.
 
@@ -60,11 +60,15 @@ This is a major update from VIC 4. The VIC 5.0.0 release aims to have nearly ide
 
 9. Tests Datasets ([GH#79](https://github.com/UW-Hydro/VIC/issues/79))
 
-	**TODO:** See https://github.com/UW-Hydro/VIC/issues/79 for more information.
+	See https://github.com/UW-Hydro/VIC/issues/79 for more information. A temporary location of the test data is here: ftp://ftp.hydro.washington.edu/pub/gergel/VIC5_test_data/
 
 10. Testing and Continuous Integration ([GH#190](https://github.com/UW-Hydro/VIC/pull/190))
 
 	A comprehensive testing platform has been implemented and is available for public use along with the VIC model. A small subset of the test platform is run on [Travis-CI](https://travis-ci.org/UW-Hydro/VIC), which facilitates continuous integration of the VIC test platform. More information on the test platform is [here](Testing.md)
+
+11. Run-time profiling and timing ([GH#442](https://github.com/UW-Hydro/VIC/pull/442))
+
+	A timing module has been added to VIC in order to assess the computational cost and throughput of the VIC model. New output variables (`OUT_TIME_VICRUN_WALL` and `OUT_TIME_VICRUN_CPU`) document the time spent in `vic_run` for each variable. Additionally, a timing table is printed to `LOG_DEST` at the end of each simulation.
 
 #### Backwards Incompatible Changes:
 
@@ -72,7 +76,6 @@ This is a major update from VIC 4. The VIC 5.0.0 release aims to have nearly ide
 
 	The format of ASCII forcing and output files has changed in VIC 5. These changes were motivated by the desire to improve simulation metadata tracking and reproducibility of VIC simulations.
 
-	- Forcing files now require date stamps for each timestep and a header specifies the names of the forcing variables.   
 	- Output files now include a header with simulation metadata and variable names. The `PRT_HEADER` option has been deprecated.
 
 2.  Classic Driver Global Parameter Options
@@ -155,17 +158,25 @@ This is a major update from VIC 4. The VIC 5.0.0 release aims to have nearly ide
 
 3. Fix related to exact restart ([GH#481](https://github.com/UW-Hydro/VIC/pull/481), [GH#507](https://github.com/UW-Hydro/VIC/pull/507), [GH#509](https://github.com/UW-Hydro/VIC/pull/509))
 
-	Previously, VIC did not produce the same results (fluxes and states) if a simulation is separated into multiple shorter-period runs by saving the state variables and restarting. This was due to: 1) the MTCLIM algorithm resulted in slightly different sub-daily meteorological variable values for different length of forcing (MTCLIM is deprecated in the current version); 2) a few bugs resulting in inexact restart. The following bugs have been fixed:
+	Previously, VIC did not produce the same results (fluxes and states) if a simulation was separated into multiple shorter-period runs by saving the state variables and restarting. This was due to:
+		1. The MTCLIM algorithm resulted in slightly different sub-daily meteorological variable values for different lengths of forcings (MTCLIM is deprecated in the current version)
+		2. A few bugs resulting in inexact restart.
+
+	The following bugs have been fixed:
 
 	- The prognostic state variable `energy.Tfoliage` (foliage temperature) is now saved to the state file
 	- Two flux variables `energy.LongUnderOut` and `energy.snow_flux` are now saved to the state file.
 
 		!!!Note
-				This is a temporary solution to ensure exact restart. A better way of handling the two flux variables needs to be done in the future (see [GH#479](https://github.com/UW-Hydro/VIC/issues/479))
+				This is a temporary solution to ensure exact restart. A better way of handling these two flux variables needs to be done in the future (see [GH#479](https://github.com/UW-Hydro/VIC/issues/479))
 
 4. Fix for binary state file I/O ([GH#487](https://github.com/UW-Hydro/VIC/pull/487))
 
 	Fixed a bug so that the binary format state file I/O works correctly.
+
+5. Fix for a physical constant (water heat capacity) ([GH#574](https://github.com/UW-Hydro/VIC/pull/574))
+
+	Fixed a bug where volumetric heat capacity of water should be used in `func_canopy_energy_bal` (previously specific heat capacity was used).
 
 ------------------------------
 

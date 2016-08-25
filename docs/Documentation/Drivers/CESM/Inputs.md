@@ -10,7 +10,7 @@ To run CESM or RASM with VIC, several sets of input data are necessary:
 ```
     [wr50a]
     vic_domain = ${DIN_LOC_ROOT}/share/domains/domain.lnd.wr50a_ar9v4.100920.nc
-    vic_params = ${VIC5TESTDIR}/vic_params_wr50a_vic5.0.dev.nc
+    vic_params = ${DIN_LOC_ROOT}/lnd/vic/vic_params_wr50a_vic5.0.dev.nc
     vic_global_param = vic.globalconfig.txt
     vic_constants = vic.parameters.txt
 ```

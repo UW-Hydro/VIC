@@ -357,10 +357,8 @@ vic_force(void)
     // Convert forcings into what we need and calculate missing ones
     for (i = 0; i < local_domain.ncells_active; i++) {
         for (j = 0; j < NF; j++) {
-            // temperature in Celsius
-            force[i].air_temp[j] -= CONST_TKFRZ;
-            // precipitation in mm/period
-            force[i].prec[j] *= global_param.snow_dt;
+            // pressure in Pa
+            force[i].pressure[j] *= PA_PER_KPA;
             // vapor pressure in Pa
             force[i].vp[j] *= PA_PER_KPA;
             // vapor pressure deficit in Pa

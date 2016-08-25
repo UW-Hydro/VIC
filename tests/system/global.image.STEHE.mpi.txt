@@ -34,7 +34,7 @@ FORCE_TYPE    PREC          prcp
 FORCE_TYPE    PRESSURE      pres
 FORCE_TYPE    SWDOWN        dswrf
 FORCE_TYPE    LWDOWN        dlwrf
-FORCE_TYPE    VP            shum
+FORCE_TYPE    VP            vp
 FORCE_TYPE    WIND          wind
 WIND_H        10.0
 

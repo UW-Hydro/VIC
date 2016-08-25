@@ -7,7 +7,7 @@
 | VIC Users Listserve    | [![VIC Users Listserve](https://img.shields.io/badge/VIC%20Users%20Listserve-Active-blue.svg)](https://mailman.u.washington.edu/mailman/listinfo/vic_users)                                              |
 | Developers Gitter Room | [![Join the chat at https://gitter.im/UW-Hydro/VIC](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/UW-Hydro/VIC?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge) |
 | License                | [![GitHub license](https://img.shields.io/badge/license-GPLv2-blue.svg)](https://raw.githubusercontent.com/UW-Hydro/VIC/master/LICENSE.txt)                                                              |
-| Current Release DOI    | [![DOI](https://zenodo.org/badge/11705/UW-Hydro/VIC.svg)](https://zenodo.org/badge/latestdoi/11705/UW-Hydro/VIC) |
+| Current Release DOI    | [![DOI](https://zenodo.org/badge/doi/10.5281/zenodo.56057.svg)](http://dx.doi.org/10.5281/zenodo.56057) |
 
 ----------
 

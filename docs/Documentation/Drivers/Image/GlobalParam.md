@@ -1,6 +1,6 @@
 # VIC Run-Time Options - Global Parameter File
 
-NOTE: this page is under development, and further details will be added shortly. 
+NOTE: this page is under development, and further details will be added shortly.
 
 The global parameter file serves two main purposes:
 

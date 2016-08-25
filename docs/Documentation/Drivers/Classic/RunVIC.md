@@ -9,6 +9,7 @@
     - Clang (`clang` version 3+)
 
     VIC has also been compiled using these compilers:
+    
     - Intel (`icc`)
     - PGI (`pgcc`)
 

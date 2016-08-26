@@ -14,9 +14,9 @@ The VIC Image Driver requires a NetCDF file with gridded subdaily forcings.  The
 | VP         | Vapor pressure                      | kPa             |   
 | WIND       | Wind speed                          | m/s             |   
 
-The forcing data must be chunked by calendar year, with each NetCDF file named by the year, e.g. `prefix.$year.nc`. 
+The forcing data must be chunked by calendar year, with each NetCDF file named by the year, e.g. `prefix.$year.nc`.
 
-Example output from `ncdump -h Stehekin_image_test.forcings_10days.1949` should look like this: 
+Example output from `ncdump -h Stehekin_image_test.forcings_10days.1949` should look like this:
 
 ```
 netcdf Stehekin_image_test.forcings_10days.1949 {
@@ -102,4 +102,6 @@ variables:
 
 ```
 
-Documentation for vegetation, lake and carbon cycle forcings will be added at a later date. 
+#### Non-meteorological Forcings
+
+Documentation for vegetation, lake and carbon cycle forcings will be added at a later date.

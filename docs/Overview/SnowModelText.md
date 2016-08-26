@@ -4,7 +4,7 @@ VIC uses an energy balance approach to represent snow accumulation and ablation 
 
 ## Ground Snowpack
 
-Ground snow accumulation and melt are simulated using a two-layer energy-balance model at the snow surface, similar to that described by Anderson (1968). The snowpack is divided into two layers (a thin surface layer and the pack layer) and all the important heat and energy fluxes are considered (longwave and shortwave radiation, sensible and latent heat, convective energy). Internal energy of the snowpack is also considered. The ground heat flux is ignored (unless the frozen soil model is used). Water can be added to the snowpack as rain, snow, or drip/throughfall from the canopy. If snow is present it is assumed to completely cover the ground, thereby affecting radiation transfer and the wind profiles via increased albedo and decreased surface roughness (the snow surface roughness is used).
+Ground snow accumulation and melt are simulated using a two-layer energy-balance model at the snow surface, similar to that described by [Anderson (1968)](http://dx.doi.org/10.1029/WR004i001p00019). The snowpack is divided into two layers (a thin surface layer and the pack layer) and all the important heat and energy fluxes are considered (longwave and shortwave radiation, sensible and latent heat, convective energy). Internal energy of the snowpack is also considered. The ground heat flux is ignored (unless the frozen soil model is used). Water can be added to the snowpack as rain, snow, or drip/throughfall from the canopy. If snow is present it is assumed to completely cover the ground, thereby affecting radiation transfer and the wind profiles via increased albedo and decreased surface roughness (the snow surface roughness is used).
 
 In every time step the model calculates the rain or snow fraction that is added to the snowpack. Then all the energy fluxes are calculated and if the energy balance is positive melt occurs. If the liquid water holding capacity of both the surface and pack layers are exceeded then the excess liquid water is immediately released as snowpack outflow. If the energy balance is negative, then the energy balance is solved by iterating on the snow surface temperature.
 
@@ -16,7 +16,7 @@ To reduce computational expense, snowmelt from the canopy is calculated using a 
 
 ## Calibrating the snow model
 
-During calibration three main parameters are adjusted for grid cells without overlying vegetation.<\p>
+During calibration three main parameters are adjusted for grid cells without overlying vegetation.
 
 1.  Maximum air temperature at which snowfall occurs
 2.  Minimum air temperature at which rainfall occurs

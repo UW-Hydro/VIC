@@ -10,8 +10,8 @@ For a list of known issues and their fixes (in bug-fix updates), visit the VIC G
 
 To check which release of VIC you are running:
 
-For VIC 4, type `vicNl -v`
-For VIC 5 and later, type `vic _{classic,image}.exe -v`
+- For VIC 4, type `vicNl -v`
+- For VIC 5 and later, type `vic _{classic,image}.exe -v`
 
 ------------------------------
 

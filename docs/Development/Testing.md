@@ -27,29 +27,25 @@ The VIC test suite uses a set of Python utilities and libraries to execute the s
 1. Download and run the Anaconda installer: http://continuum.io/downloads
 2. Install the required dependencies:
 
-    ```Bash
-    # Create a conda virtual environment including the required dependencies
-    conda env create -n vic_test_env -f ci/requirements.yml
+        # Create a conda virtual environment including the required dependencies
+        conda env create -n vic_test_env -f ci/requirements.yml
 
-    # Active the virtual environment
-    source activate vic_test_env
+        # Active the virtual environment
+        source activate vic_test_env
 
-    # Install the Python driver into the virtual environment
-    python ./vic/drivers/python/setup.py install
-    ```
+        # Install the Python driver into the virtual environment
+        python ./vic/drivers/python/setup.py install
 
 3. Run the test suite:
 
-    ```Bash
-    # Print the run_tests.py usage
-    ./tests/run_tests.py -h
+        # Print the run_tests.py usage
+        ./tests/run_tests.py -h
 
-    # Run the test suite for the unit and examples cases for the classic driver
-    ./tests/run_tests.py unit examples \
-        --classic=vic/drivers/classic/vic_classic.exe \
-        --data_dir=${SAMPLES_PATH}/data \
-        --examples=./tests/examples/examples.cfg
-    ```
+        # Run the test suite for the unit and examples cases for the classic driver
+        ./tests/run_tests.py unit examples \
+            --classic=vic/drivers/classic/vic_classic.exe \
+            --data_dir=${SAMPLES_PATH}/data \
+            --examples=./tests/examples/examples.cfg
 
 ## Travis
 

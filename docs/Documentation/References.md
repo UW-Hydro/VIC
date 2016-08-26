@@ -2,23 +2,23 @@
 
 ## Primary Historical Reference
 
-Liang, X., D. P. Lettenmaier, E. F. Wood, and S. J. Burges, 1994: A Simple hydrologically Based Model of Land Surface Water and Energy Fluxes for GSMs, _J. Geophys. Res._, **99**(D7), 14,415-14,428.
+Liang, X., D. P. Lettenmaier, E. F. Wood, and S. J. Burges, 1994: A Simple hydrologically Based Model of Land Surface Water and Energy Fluxes for GSMs, _J. Geophys. Res._, **99**(D7), 14415-14428, [doi:10.1029/94JD00483](http://dx.doi.org/10.1029/94JD00483).
 
 ### Other Historical References
 
 Adam, J.C., and D.P. Lettenmaier, 2008: Application of new precipitation and reconstructed streamflow products to streamflow trend attribution in Northern Eurasia, _J. Climate_, **21**(8), 1807-1828.
 
-Andreadis, K., P. Storck, and D. P. Lettenmaier, 2009: Modeling snow accumulation and ablation processes in forested environments, _Water Resour. Res._, **45**, W05429, doi:10.1029/2008WR007042.
+Andreadis, K., P. Storck, and D. P. Lettenmaier, 2009: Modeling snow accumulation and ablation processes in forested environments, _Water Resour. Res._, **45**, W05429, [doi:10.1029/2008WR007042](http://dx.doi.org/10.1029/2008WR007042).
 
 Bohn, T. J., B. Livneh, J. W. Oyler, S. W. Running, B. Nijssen, and D. P. Lettenmaier, 2013a: Global evaluation of MTCLIM and related algorithms for forcing of ecological and hydrological models, _Agr. Forest. Meteorol._, **176**, 38-49, [doi:10.1016/j.agrformet.2013.03.003](http://dx.doi.org/10.1016/j.agrformet.2013.03.003).
 
 Bohn, T. J., E. Podest, R. Schroeder, N. Pinto, K. C. McDonald, M. Glagolev, I. Filippov, S. Maksyutov, M. Heimann, X. Chen, and D. P. Lettenmaier, 2013b: Modeling the effects of surface moisture heterogeneity on wetland carbon fluxes in the West Siberian Lowland, _Biogeosciences_, **10**, 6559-6576, [doi:10.5194/bg-10-6559-2013](http://dx.doi.org/10.5194/bg-10-6559-2013).
 
-Bohn, T. J., and E. R. Vivoni, 2016: Process-based characterization of evapotranspiration sources in the North American monsoon region, _Water Resour. Res._, **52**(1), 358-384, doi: 10.1002/2015WR017934.
+Bohn, T. J., and E. R. Vivoni, 2016: Process-based characterization of evapotranspiration sources in the North American monsoon region, _Water Resour. Res._, **52**(1), 358-384, [doi:10.1002/2015WR017934](http://dx.doi.org/10.1002/2015WR017934).
 
-Bowling, L. C., J. W. Pomeroy and D. P. Lettenmaier, 2004: Parameterization of blowing snow sublimation in a macroscale hydrology model, _J. Hydromet._, **5**(5), 745-762, doi: 10.1175/1525-7541.
+Bowling, L. C., J. W. Pomeroy and D. P. Lettenmaier, 2004: Parameterization of blowing snow sublimation in a macroscale hydrology model, _J. Hydromet._, **5**(5), 745-762, [doi:10.1175/1525-7541](http://dx.doi.org/10.1175/1525-7541).
 
-Bowling, L.C. and D.P. Lettenmaier, 2010: Modeling the effects of lakes and wetlands on the water balance of Arctic Environments, _J. Hydromet._, **11**, 276-295, doi: 10.1175/2009JHM1084.1.
+Bowling, L.C. and D.P. Lettenmaier, 2010: Modeling the effects of lakes and wetlands on the water balance of Arctic Environments, _J. Hydromet._, **11**, 276-295, [doi:10.1175/2009JHM1084.1](http://dx.doi.org/10.1175/2009JHM1084.1).
 
 Cherkauer, K. A. and D. P. Lettenmaier, 1999: Hydrologic effects of frozen soils in the upper Mississippi River basin, _J. Geophys. Res._, **104**(D16), 19,599-19,610.
 
@@ -60,15 +60,15 @@ Adam, J.C. and D.P. Lettenmaier, 2003: Adjustment of global gridded precipitatio
 
 Adam, J.C., E.A. Clark, D.P. Lettenmaier, and E.F. Wood, 2006: Correction of Global Precipitation Products for Orographic Effects, _J. Clim._, **19**(1), 15-38, doi: 10.1175/JCLI3604.1.
 
-Beyene, T., D.P. Lettenmaier, and P. Kabat, 2009: Hydrologic impacts of climate change on the Nile River basin: Implications of the 2007 IPCC climate scenarios, Climatic Change, online first, doi:10.1007/s10584-009-9693-0.
+Beyene, T., D.P. Lettenmaier, and P. Kabat, 2009: Hydrologic impacts of climate change on the Nile River basin: Implications of the 2007 IPCC climate scenarios, Climatic Change, online first, [doi:10.1007/s10584-009-9693-0](http://dx.doi.org/10.1007/s10584-009-9693-0).
 
 Cuo, L., D.P. Lettenmaier D.P., M. Alberti, and J.E. Richey, 2009: Effects of a century of land cover and climate change on the hydrology of Puget Sound basin, Hydrological Processes, 23, 907-933.
 
-Gao, H., T. J. Bohn, E. Podest, K. C. McDonald, and D. P. Lettenmaier, 2011: [On the causes of the shrinking of Lake Chad](http://iopscience.iop.org/1748-9326/6/3/034021), _Env. Res. Lett._, **6**, 034021, doi:10.1088/1748-9326/6/3/034021.
+Gao, H., T. J. Bohn, E. Podest, K. C. McDonald, and D. P. Lettenmaier, 2011: On the causes of the shrinking of Lake Chad, _Env. Res. Lett._, **6**, 034021, [doi:10.1088/1748-9326/6/3/034021](http://dx.doi.org/10.1088/1748-9326/6/3/034021).
 
-Haddeland, I., D.P. Lettenmaier, and T. Skaugen, 2006a: Reconciling simulated moisture fluxes resulting from alternate hydrologic model time steps and energy budget closure assumptions, _J. Hydromet._, **7**(3), 355-370, [doi: 10.1175/JHM496.1](http://dx.doi.org/10.1175/JHM496.1).
+Haddeland, I., D.P. Lettenmaier, and T. Skaugen, 2006a: Reconciling simulated moisture fluxes resulting from alternate hydrologic model time steps and energy budget closure assumptions, _J. Hydromet._, **7**(3), 355-370, [doi:10.1175/JHM496.1](http://dx.doi.org/10.1175/JHM496.1).
 
-Haddeland, I., D.P. Lettenmaier, and T. Skaugen, 2006b: Effects of irrigation on the water and energy balances of the Colorado and Mekong river basins, _J. Hydrol._, **324**(1-4), 210-223, [doi: 10.1016/j.jhydrol.2005.09.028](http://dx.doi.org/10.1016/j.jhydrol.2005.09.028).
+Haddeland, I., D.P. Lettenmaier, and T. Skaugen, 2006b: Effects of irrigation on the water and energy balances of the Colorado and Mekong river basins, _J. Hydrol._, **324**(1-4), 210-223, [doi:10.1016/j.jhydrol.2005.09.028](http://dx.doi.org/10.1016/j.jhydrol.2005.09.028).
 
 Hamlet, A.F. and D.P. Lettenmaier, 1999: Effects of Climate Change on Hydrology and Water Resources in the Columbia River Basin, _Am. Water Res. Assoc._, **35**(6), 1597-1623.
 
@@ -82,9 +82,9 @@ Liang, X., E. F. Wood, D. Lohmann, D.P. Lettenmaier, and others, 1998: The Proje
 
 Livneh B, E.A. Rosenberg, C. Lin, B. Nijssen, V. Mishra, K. Andreadis, E.P. Maurer, and D.P. Lettenmaier, 2013: A long-term hydrologically based data set of land surface fluxes and states for the conterminous United States: Updates and extensions, _Journal of Climate_, [doi:10.1175/JCLI-D-12-00508.1](http://dx.doi.org/10.1175/JCLI-D-12-00508.1).
 
-Lohmann, D. E. Raschke, B. Nijssen and D.P. Lettenmaier, 1998: Regional scale hydrology: II. Application of the VIC-2L model to the Weser river, Germany, _ Hydrol. Sci. J._, **43**(1), 143-158.
+Lohmann, D. E. Raschke, B. Nijssen and D.P. Lettenmaier, 1998: Regional scale hydrology: II. Application of the VIC-2L model to the Weser river, Germany, _Hydrol. Sci. J._, **43**(1), 143-158.
 
-Mattheussen, B., R.L. Kirschbaum, I.A. Goodman, G.M. O'Donnell and D.P. Lettenmaier, 2000: Effects of land cover change on streamflow in the interior Columbia river basin (USA and Canada), _ Hydrol. Process._, **14**, 867-885.
+Mattheussen, B., R.L. Kirschbaum, I.A. Goodman, G.M. O'Donnell and D.P. Lettenmaier, 2000: Effects of land cover change on streamflow in the interior Columbia river basin (USA and Canada), _Hydrol. Process._, **14**, 867-885.
 
 Maurer, E.P., G.M. O'Donnell, D.P. Lettenmaier, and J.O. Roads, 2001: Evaluation of the Land Surface Water Budget in NCEP/NCAR and NCEP/DOE Reanalyses using an Off-line Hydrologic Model. _J. Geophys. Res._, **106**(D16), 17,841-17,862.
 
@@ -94,19 +94,19 @@ Mishra, V., K. A. Cherkauer, and L. C. Bowling, 2010: Parameterization of Lakes 
 
 Munoz-Arriola, F., R. Avissar, C. Zhu, and D.P. Lettenmaier, 2009: Sensitivity of the Water resources of Rio Yaqui Basin, Mexico to agriculture extensification under multi-scale climate conditions, Water Resour. Res. 45, W00A20, doi:10.1029/2007WR006783.
 
-Nijssen, B.N., D.P. Lettenmaier, X. Liang, S.W. Wetzel, and E.F. Wood, 1997: Streamflow simulation for continental-scale river basins,_ Water Resour. Res._, **33**(4), 711-724.
+Nijssen, B.N., D.P. Lettenmaier, X. Liang, S.W. Wetzel, and E.F. Wood, 1997: Streamflow simulation for continental-scale river basins, _Water Resour. Res._, **33**(4), 711-724.
 
-Nijssen, B.N., R. Schnur and D.P. Lettenmaier, 2001: Global retrospective estimation of soil moisture using the Variable Infiltration Capacity land surface model, 1980-1993, _J. Clim._, **14**(8), 1790-1808, doi: 10.1175/1520-0442(2001)014<1790:GREOSM>2.0.CO;2.
+Nijssen, B.N., R. Schnur and D.P. Lettenmaier, 2001: Global retrospective estimation of soil moisture using the Variable Infiltration Capacity land surface model, 1980-1993, _J. Clim._, **14**(8), 1790-1808, [doi:10.1175/1520-0442(2001)014<1790:GREOSM>2.0.CO;2](http://dx.doi.org/10.1175/1520-0442(2001)014<1790:GREOSM>2.0.CO;2).
 
-Nijssen, B.N., G.M. O'Donnell, D.P. Lettenmaier and E.F. Wood, 2001: Predicting the discharge of global rivers, _J. Clim._, **14**(15), 3307-3323, doi: 10.1175/1520-0442(2001)014<3307:PTDOGR>2.0.CO;2.
+Nijssen, B.N., G.M. O'Donnell, D.P. Lettenmaier and E.F. Wood, 2001: Predicting the discharge of global rivers, _J. Clim._, **14**(15), 3307-3323, [doi:10.1175/1520-0442(2001)014<3307:PTDOGR>2.0.CO;2](http://dx.doi.org/10.1175/1520-0442(2001)014<3307:PTDOGR>2.0.CO;2).
 
-Nijssen, B.N., G.M. O'Donnell, A.F. Hamlet, and D.P. Lettenmaier, 2001: Hydrologic sensitivity of global rivers to climate change, _Climatic Change_, **50**(1-2), 143-175, doi: 10.1023/A:1010616428763.
+Nijssen, B.N., G.M. O'Donnell, A.F. Hamlet, and D.P. Lettenmaier, 2001: Hydrologic sensitivity of global rivers to climate change, _Climatic Change_, **50**(1-2), 143-175, [doi:10.1023/A:1010616428763](http://dx.doi.org/10.1023/A:1010616428763).
 
-Shi, X., M. Wild, and D. P. Lettenmaier, 2010: Surface radiative fluxes over the pan-Arctic land region: Variability and trends.  J. Geophys. Res., 115, D22104, doi:10.1029/2010JD014402.
+Shi, X., M. Wild, and D. P. Lettenmaier, 2010: Surface radiative fluxes over the pan-Arctic land region: Variability and trends.  J. Geophys. Res., 115, D22104, [doi:10.1029/2010JD014402](http://dx.doi.org/10.1029/2010JD014402).
 
-Shukla, S., A. C. Steinemann, and D. P. Lettenmaier, 2010: Drought Monitoring for Washington State: Indicators and Applications, Journal of Hydrometeorology, EOR, 10.1175/2010JHM1307.1.
+Shukla, S., A. C. Steinemann, and D. P. Lettenmaier, 2010: Drought Monitoring for Washington State: Indicators and Applications, Journal of Hydrometeorology, EOR, [doi:10.1175/2010JHM1307.1](http://dx.doi.org/10.1175/2010JHM1307.1).
 
-Tang, Q., H. Gao, P. Yeh, T. Oki, F. Su, and D.P. Lettenmaier, 2010: Dynamics of terrestrial water storage change from satellite and surface observations and modeling, Journal of Hydrometeorology 11, 156-170. doi:10.1175/2009JHM1152.1.
+Tang, Q., H. Gao, P. Yeh, T. Oki, F. Su, and D.P. Lettenmaier, 2010: Dynamics of terrestrial water storage change from satellite and surface observations and modeling, Journal of Hydrometeorology 11, 156-170. [doi:10.1175/2009JHM1152.1](http://dx.doi.org/10.1175/2009JHM1152.1).
 
 Wood, E. F., Lettenmaier, D., Liang, X., Nijssen, B., & Wetzel, S. W. (1997). Hydrological modeling of continental-scale basins. _Annual Review of Earth and Planetary Sciences_, 25(1), 279-300.
 
@@ -116,7 +116,7 @@ Bras, R. F., 1990: Hydrology, an introduction to hydrologic science, Addison-Wes
 
 Brooks, R., and R. Corey, 1964: Hydraulic properties of porous media, Colorado State University, Fort Collins, CO, USA, 37 pp.
 
-Farouki, O. T., 1981: The thermal properties of soils in cold regions, _Cold Reg. Sci. Technol._, **5**(1), 67-75, doi: 10.1016/0165-232X(81)90041-0.
+Farouki, O. T., 1981: The thermal properties of soils in cold regions, _Cold Reg. Sci. Technol._, **5**(1), 67-75, [doi:10.1016/0165-232X(81)90041-0](http://dx.doi.org/10.1016/0165-232X(81)90041-0).
 
 Francini, M., and M. Pacciani, 1991: Comparative analysis of several conceptual rainfall-runoff models, _J. Hydrol._, **122**, 161-219.
 

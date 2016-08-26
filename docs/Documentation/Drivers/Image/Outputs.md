@@ -6,7 +6,7 @@ The contents of the results files can be controlled by the user, by options/inst
 
 [How to Control the Contents of VIC Output Files](OutputFormatting.md)
 
-[List of possible output variables](../../OutputVarList.md) (given in the file `vicNl_def.h`)
+[List of possible output variables](../../OutputVarList.md) (given in the file `vic_driver_shared_all.h`)
 
 [Default Output Files](DefaultOutputs.md)
 

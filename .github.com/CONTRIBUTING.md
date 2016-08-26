@@ -23,7 +23,7 @@ We expect that the user comes prepared with some understanding of the model and 
 
 The VIC user and developer community is quite large and is spread all around the world.  Depending on the question or issue your facing, there are a number of avenues to get in-touch:
 
-VIC Users Listserv: [![VIC Users Listserv](https://img.shields.io/badge/VIC%20Users%20Listserve-Active-blue.svg)](https://mailman.u.washington.edu/mailman/listinfo/vic_users)
+VIC Users Listserve: [![VIC Users Listserv](https://img.shields.io/badge/VIC%20Users%20Listserve-Active-blue.svg)](https://mailman.u.washington.edu/mailman/listinfo/vic_users)
 
 Developers Gitter Room: [![Join the chat at https://gitter.im/UW-Hydro/VIC](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/UW-Hydro/VIC?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 

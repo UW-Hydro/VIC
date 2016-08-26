@@ -18,9 +18,11 @@ VIC allows the user to specify exactly which output files to create and which va
 ```
 # Output File Contents
 OUTFILE	_prefix_
-OUTVAR	_varname_	[_format_	_type_	_multiplier_]
-OUTVAR	_varname_	[_format_	_type_	_multiplier_]
-OUTVAR	_varname_	[_format_	_type_	_multiplier_]
+OUTFREQ         _freq_          _VALUE_
+COMPRESS        _compress_
+OUTVAR	_varname_	[_format_	[_type_	[_multiplier_ [_aggtype_]]]]
+OUTVAR	_varname_	[_format_	[_type_	[_multiplier_ [_aggtype_]]]]
+OUTVAR	_varname_	[_format_	[_type_	[_multiplier_ [_aggtype_]]]]
 
 OUTFILE	_prefix_
 OUTVAR	_varname_	[_format_	[_type_	[_multiplier_ [_aggtype_]]]]
@@ -55,8 +57,7 @@ where
                   %.7e = scientific notation w/ 7 decimal places
                   *    = use the default format for this variable
 
- _format_, _type_, and _multiplier_ are optional.  For a given
- variable, you can specify either NONE of these, or ALL of
+ _format_, _type_, _multiplier_, and _aggtype_ are optional.
  these.  If these are omitted, the default values will be used.
 
  _type_       = (for binary output files) data type code.
@@ -113,11 +114,15 @@ In the second file, none of the _format_, _type, _multiplier_, or _aggtype_ para
 
 For example, to specify scientific notation with 10 significant digits, you could do the following:
 
-```OUTVAR	OUT_ALBEDO	%.9e```
+```
+OUTVAR	OUT_ALBEDO	%.9e
+```
 
 Note that even if you only want to specify the format, you must supply a value in the type and multiplier columns as well. This can be `*` to indicate the default value. Similarly, if you only want to specify the type (e.g. as a double), you would need to do something like:
 
-```OUTVAR	OUT_ALBEDO	*	OUT_TYPE_DOUBLE	*```
+```
+OUTVAR	OUT_ALBEDO	*	OUT_TYPE_DOUBLE
+```
 
 **Date variables:**
 
@@ -127,7 +132,7 @@ year month day seconds
 
 For daily output timestep, "seconds" is not written.
 
-If OUT_FORMAT is BINARY, these will all be written as type int (OUT_TYPE_INT).
+If `OUT_FORMAT` is `BINARY`, these will all be written as type int (OUT_TYPE_INT).
 
 **Multiple-valued variables:**
 
@@ -144,15 +149,17 @@ OUTVAR	OUT_ALBEDO_BAND
 
 will result in an output file containing:
 
-```year month day (seconds) swe[0] swe[1] albedo[0] albedo[1]```
+```
+year month day (seconds) swe[0] swe[1] albedo[0] albedo[1]
+```
 
 ## Specifying Output Time Step
 
 VIC can now aggregate the output variables to a user-defined output interval, via the `OUTFREQ` setting in the [global parameter file](GlobalParam.md). When  `OUTFREQ` is set, it describes aggregation frequency for an output stream. Valid options for frequency are: NEVER, NSTEPS, NSECONDS, NMINUTES, NHOURS, NDAYS, NMONTHS, NYEARS, DATE, END. Count may be a positive integer or a string with date format YYYY-MM-DD[-SSSSS] in the case of DATE. Default `frequency` is `NDAYS`. Default `count` is 1.
 
-## Optional Output File Headers
+## Output File Headers
 
-Now VIC provides an option to insert descriptive headers into its output files, via the PRT_HEADER option in the [global parameter file](GlobalParam.md). If this is set to TRUE, VIC will insert a short header into its output files, describing the time step, start date/time, variables and units included in the file.
+Now VIC provides descriptive headers into its output files. VIC will insert a short header into its output files, describing the simulation and variables included in the file. See our [Best Practices](../../best_practices.md) page for further information on how to add descriptive metadata to VIC output.
 
 For ascii files, the output header has the following format:
 
@@ -163,8 +170,8 @@ VARNAME    VARNAME   VARNAME   ...
 ```
 where
 
-- SIMULATION: OUTFILE prefix from global parameter file
-- MODEL_VERSION: VIC Version String
+- SIMULATION: OUTFILE prefix is taken from the global parameter file
+- MODEL_VERSION: VIC Version String (e.g VIC version 5.0.0)
 
 For binary files, the output header has the following format:
 

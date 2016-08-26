@@ -10,7 +10,7 @@ Our rationale for moving the VIC model development to the open source community 
 
 There is **no official support** for the VIC model.
 
-While you are more than welcome to use VIC in your own research endeavors, the model code comes with _**no guarantees, expressed or implied, as to suitability, completeness, accuracy, and whatever other claim you would like to make**_. In addition, the model has no graphical user interface, nor does it include a large set of analysis tools, since most people want to use their own set of tools.
+While you are more than welcome to use VIC in your own research endeavors, the model code comes with ***no guarantees, expressed or implied, as to suitability, completeness, accuracy, and whatever other claim you would like to make***. In addition, the model has no graphical user interface, nor does it include a large set of analysis tools, since most people want to use their own set of tools.
 
 While we would like to hear about your particular application (especially a copy of any published paper), we cannot give you individual support in setting up and running the model. The VIC website includes reasonably complete instructions on how to run the model, as well as the opportunity to sign up for the VIC Users Email List.
 

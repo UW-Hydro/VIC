@@ -41,9 +41,6 @@ Figure 2. Schematic of the big leaf (pre-VIC 4.2) and clumped (4.2 and later) ve
 
 - computes potential evapotranspiration as the area-weighted sum of potential transpiration and potential soil evaporation.  Potential transpiration is computed for the current vegetation, using its current architectural resistance and LAI to compute canopy resistance in the absence of limitation from soil moisture, vapor pressure deficit, temperature, or insolation.
 
-!!!Note "Regarding Evapotranspiration and Time Step"
-    In order to compensate for the inaccuracies in simulating canopy interception and evaporation at a 24-hour time step, VIC makes an exception for the 24-hour case: in this case, canopy evaporation is allowed to encompass not only the water in the canopy at the beginning of the time step, but also any precipitation, up to the atmospheric demand for water.  At smaller time steps, canopy evaporation is limited to just the amount of water stored in the canopy at the beginning of the time step.  This can result in a) inaccurate apportioning of total ET between canopy evaporation and transpiration, and b) different behavior between VIC simulations at 24 hour time steps and simulations at smaller time steps (with the biggest differences occurring between 12-hour and 24-hour time steps).  For more information, see [Haddeland et al (2006a)](../Documentation/References.md#selected-application-references).
-
 ### Soil
 
 - arbitrary number of soil layers, but typically 3 (Figure 1)
@@ -61,7 +58,7 @@ Figure 2. Schematic of the big leaf (pre-VIC 4.2) and clumped (4.2 and later) ve
 
 ## Snow Model
 
-VIC considers snow in several forms: ground snow pack, snow in the vegetation canopy, and snow on top of lake ice (Figure 3). Main features:
+VIC considers snow in several forms: ground snow pack, snow in the vegetation canopy, and snow on top of lake ice (Figure 3). The VIC snow model has the following main features:
 
 - ground snow pack is quasi 2-layer; the topmost portion of the pack is considered separately for solving energy balance at pack surface ([Andreadis et al., 2009](../Documentation/References.md#other-historical-references))
 - considers partial snow coverage
@@ -91,7 +88,7 @@ These forcings must be provided at the timestep that the model will be run at (e
 
 ### Non-Meteorological Input Data
 
-Can read daily timeseries of land cover information such as albedo, LAI, and vegetation canopy cover fraction as forcing variables ([Bohn and Vivoni, 2016](../Documentation/References.md#other-historical-references)).
+VIC can read daily timeseries of land cover information such as albedo, LAI, and vegetation canopy cover fraction as forcing variables ([Bohn and Vivoni, 2016](../Documentation/References.md#other-historical-references)).
 
 ### Elevation Bands
 
@@ -131,8 +128,8 @@ Figure 5.  VIC frozen soil formulation.
 
 These apply to the case QUICK_FLUX = FALSE and FROZEN_SOIL = TRUE, i.e. the formulation of [Cherkauer and Lettenmaier (1999)](../Documentation/References.md#other-historical-references).
 
-- global parameter file option: IMPLICIT: uses an implicit scheme to solve the soil thermal profile. This is the default scheme.
-- global parameter file option: EXP_TRANS: uses exponential node spacing (dense node spacing near soil surface; sparse node spacing at depth) (Figure 6)
+- global parameter file option: `IMPLICIT`: uses an implicit scheme to solve the soil thermal profile. This is the default scheme.
+- global parameter file option: `EXP_TRANS`: uses exponential node spacing (dense node spacing near soil surface; sparse node spacing at depth) (Figure 6)
 
 ![VIC Permafrost Enhancements Link](../img/VIC_permafrost_enhancements.gif)
 
@@ -165,8 +162,8 @@ The lake/wetland model ([Bowling and Lettenmaier, 2010](../Documentation/Referen
 - Lakes drain directly into the channel network. Lake outflows consist of:
     - channel flow (modeled as flow over a broad-crested weir)
         subsurface flow (which will flow into the wetland if the wetland is dry)
-- To run the lake model, user must set LAKES to the name of a suitable lake parameter file in the global parameter file. Cells that do not contain lakes can be denoted within the lake parameter file.
-- To turn the lake model off completely, the user must either set LAKES to FALSE or omit any mention of LAKES in the global parameter file.
+- To run the lake model, user must set `LAKES` to the name of a suitable lake parameter file in the global parameter file. Cells that do not contain lakes can be denoted within the lake parameter file.
+- To turn the lake model off completely, the user must either set `LAKES` to `FALSE` or omit any mention of `LAKES` in the global parameter file.
 
 ![VIC Dynamic Lake Model Link](../img/VIC_dynamic_lake_model.jpg)
 

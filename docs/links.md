@@ -2,7 +2,7 @@
 
 ## VIC Developer Community
 
-*   [Computational Hydrology Group, University of Washington](http://www.hydro.washington.edu/)
+*   [Computational Hydrology Group, University of Washington](http://uw-hydro.github.io/)
 *   [Land Surface Hydrology Group, UCLA](http://hydro.ucla.edu/)
 *   [Land Surface Hydrology Group, Princeton University](http://hydrology.princeton.edu/home.php)
 *   [Keith Cherkauer's Lab, Dept. of Agricultural Engineering, Purdue University](http://www.agry.purdue.edu/hydrology/)
@@ -14,6 +14,7 @@
 ## VIC User Community
 
 *   [VIC Users Listserve](https://mailman.u.washington.edu/mailman/listinfo/vic_users)
+*   [VIC Github Page](https://github.com/UW-Hydro/VIC)
 *   [University of Washington Climate Impacts Group](http://cses.washington.edu/cig/)
 *   [University of Washington Joint Institute for Study of Atmosphere and Ocean (JISAO)](http://jisao.washington.edu/)
 *   [University of Victoria Pacific Climate Impacts Consortium](http://pacificclimate.org)

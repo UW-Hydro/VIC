@@ -100,8 +100,6 @@ snow_melt(double            Le,
     double                   advected_sensible_heat;
     double                   melt_energy = 0.;
 
-    char                     ErrorString[MAXSTRING];
-
     SnowFall = snowfall / MM_PER_M; /* convet to m */
     RainFall = rainfall / MM_PER_M; /* convet to m */
 
@@ -269,7 +267,7 @@ snow_melt(double            Le,
                 snow->surf_temp = root_brent(
                     (double) (snow->surf_temp - param.SNOW_DT),
                     (double) (snow->surf_temp + param.SNOW_DT),
-                    ErrorString, SnowPackEnergyBalance,
+                    SnowPackEnergyBalance,
                     delta_t, aero_resist, aero_resist_used, z2, Z0,
                     density, vp, LongSnowIn, Le, pressure,
                     RainFall, NetShortSnow, vpd,
@@ -617,8 +615,6 @@ ErrorPrintSnowPackEnergyBalance(double  TSurf,
     double *SurfaceMassFlux;        /* Mass flux of water vapor to or from the
                                          intercepted snow */
 
-    char   *ErrorString;
-
     /* Read Variable Argument List */
 
     /* General Model Parameters */
@@ -666,13 +662,11 @@ ErrorPrintSnowPackEnergyBalance(double  TSurf,
     VaporMassFlux = (double *) va_arg(ap, double *);
     BlowingMassFlux = (double *) va_arg(ap, double *);
     SurfaceMassFlux = (double *) va_arg(ap, double *);
-    ErrorString = (char *) va_arg(ap, char *);
 
     /* print variables */
-    fprintf(LOG_DEST, "%s", ErrorString);
-    fprintf(LOG_DEST, "ERROR: snow_melt failed to converge to a solution in "
-            "root_brent.  Variable values will be dumped to the "
-            "screen, check for invalid values.\n");
+    log_warn("snow_melt failed to converge to a solution in "
+             "root_brent.  Variable values will be dumped to the "
+             "screen, check for invalid values.");
 
     /* general model terms */
     fprintf(LOG_DEST, "iveg = %i\n", iveg);
@@ -718,9 +712,9 @@ ErrorPrintSnowPackEnergyBalance(double  TSurf,
     fprintf(LOG_DEST, "BlowingMassFlux = %f\n", BlowingMassFlux[0]);
     fprintf(LOG_DEST, "SurfaceMassFlux = %f\n", SurfaceMassFlux[0]);
 
-    fprintf(LOG_DEST, "Finished dumping snow_melt variables.\nTry increasing "
-            "SNOW_DT to get model to complete cell.\nThencheck output "
-            "for instabilities.\n");
+    log_warn("Finished dumping snow_melt variables.\nTry increasing "
+             "SNOW_DT to get model to complete cell.\nThencheck output "
+             "for instabilities.");
 
     return(ERROR);
 }

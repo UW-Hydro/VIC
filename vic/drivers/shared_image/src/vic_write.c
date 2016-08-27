@@ -232,6 +232,10 @@ vic_write(stream_struct  *stream,
         }
         reset_alarm(&(stream->write_alarm), dmy_current);
     }
+    else {
+        // Force sync with disk (GH:#596)
+        nc_sync(nc_hist_file->nc_id);
+    }
 
     // free memory
     if (dvar != NULL) {

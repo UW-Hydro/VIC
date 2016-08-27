@@ -36,6 +36,10 @@ reset_alarm(alarm_struct *alarm,
 {
     extern global_param_struct global_param;
 
+    double                     delta;
+    double                     current;
+    double                     next;
+
     alarm->count = 0;
 
     if ((alarm->freq == FREQ_NEVER) || (alarm->freq == FREQ_NSTEPS) ||
@@ -43,9 +47,13 @@ reset_alarm(alarm_struct *alarm,
         ;  // Do nothing, already set
     }
     else {
-        alarm->next = global_param.model_steps_per_day * time_delta(dmy_current,
-                                                                    alarm->freq,
-                                                                    alarm->n);
+        delta = time_delta(dmy_current, alarm->freq, alarm->n);
+        current = date2num(global_param.time_origin_num, dmy_current, 0,
+                           global_param.calendar, TIME_UNITS_DAYS);
+        next = delta + current;
+        num2date(global_param.time_origin_num, next, 0,
+                 global_param.calendar, TIME_UNITS_DAYS,
+                 &(alarm->next_dmy));
     }
 }
 
@@ -56,11 +64,9 @@ bool
 raise_alarm(alarm_struct *alarm,
             dmy_struct   *dmy_current)
 {
-    if ((int) alarm->count == alarm->next) {
-        return true;
-    }
-    else if ((alarm->freq == FREQ_DATE) &&
-             (dmy_equal(dmy_current, &(alarm->date)))) {
+    if (((alarm->freq == FREQ_NSTEPS) &&
+         (alarm->next_count == (int) alarm->count)) ||
+        (dmy_equal(dmy_current, &(alarm->next_dmy)))) {
         return true;
     }
     else {
@@ -80,13 +86,13 @@ set_alarm(dmy_struct   *dmy_current,
     extern global_param_struct global_param;
 
     alarm->count = 0;
-    alarm->next = MISSING;
     alarm->freq = freq;
     alarm->n = MISSING;
+    alarm->next_count = MISSING;
 
     if (freq == FREQ_NSTEPS) {
         alarm->n = *((int*) value);
-        alarm->next = alarm->n;
+        alarm->next_count = alarm->n;
         if (alarm->n <= 0) {
             log_err("invalid n (%d) provided to set_alarm", alarm->n);
         }
@@ -100,7 +106,7 @@ set_alarm(dmy_struct   *dmy_current,
         }
     }
     else if (freq == FREQ_DATE) {
-        alarm->date = *((dmy_struct*) value);
+        alarm->next_dmy = *((dmy_struct*) value);
     }
     else if ((freq == FREQ_NEVER) || (freq == FREQ_END)) {
         ;  // Do nothing
@@ -113,7 +119,11 @@ set_alarm(dmy_struct   *dmy_current,
     reset_alarm(alarm, dmy_current);
 
     // Set subdaily attribute
-    if (alarm->next < (int) global_param.model_steps_per_day) {
+    if (((freq == FREQ_NSTEPS) &&
+         (alarm->next_count < (int) global_param.model_steps_per_day)) ||
+        ((freq == FREQ_NSECONDS) && (alarm->n < SEC_PER_DAY)) ||
+        ((freq == FREQ_NMINUTES) && (alarm->n < MIN_PER_DAY)) ||
+        ((freq == FREQ_NHOURS) && (alarm->n < HOURS_PER_DAY))) {
         alarm->is_subdaily = true;
     }
     else {

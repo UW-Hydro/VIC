@@ -234,7 +234,11 @@ vic_write(stream_struct  *stream,
     }
     else {
         // Force sync with disk (GH:#596)
-        nc_sync(nc_hist_file->nc_id);
+        if (mpi_rank == VIC_MPI_ROOT) {
+            status = nc_sync(nc_hist_file->nc_id);
+            check_nc_status(status, "Error syncing netCDF file %s",
+                            stream->filename);
+        }
     }
 
     // free memory

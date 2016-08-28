@@ -7,15 +7,15 @@ project(vic)
 
 set(OTHER_INCLUDE_PATH  your_include_path)  # Add other include path you want.
 set(OTHER_LIBRARY_PATH  your_library_path)  # Add other library path you want.
-set(MPI_COMPILER        gcc)              # Compiler of MPI.
+set(MPI_COMPILER        mpicc)              # Compiler of MPI.
 
 # ============================================================================
 
 # Cmake configurations options. ==============================================
-option(CLASSIC      "Compile VIC Classic Driver"    ON)
+option(CLASSIC      "Compile VIC Classic Driver"    OFF)
 option(IMAGE        "Compile VIC Image Driver"      ON)
-option(SHARED_LIB   "With Vic shared library"       ON)
-option(INSTALL      "Install VIC to system path"    ON)
+option(SHARED_LIB   "With Vic shared library"       OFF)
+option(INSTALL      "Install VIC to system path"    OFF)
 # ============================================================================
 
 set(CMAKE_INSTALL_PREFIX /usr/local/vic) # Path to install VIC shared library.
@@ -71,12 +71,16 @@ if(IMAGE)
 
     # Probably include and library paths of MPI.
     set(MPI_INCLUDE_SEARCH_PATHS
+            ${HOME}/mpich/include
+            ${HOME}/openmpi/include
             /usr/include
             /usr/include/openmpi
             /usr/local/include
             /usr/local/include/openmpi
             /usr/local/openmpi/include)
     set(MPI_LIB_SEARCH_PATHS
+            ${HOME}/mpich/lib
+            ${HOME}/openmpi/lib
             /lib/
             /lib/openmpi
             /lib64/
@@ -87,9 +91,9 @@ if(IMAGE)
             /usr/local/lib
             /usr/local/lib64
             /usr/local/openmpi/lib)
-
+    message("home is ${HOME}")
     find_path(MPI_INCLUDE_DIR NAMES mpi.h PATHS ${MPI_INCLUDE_SEARCH_PATHS})
-    find_path(MPI_LIB_DIR NAMES libmpi.so PATHS ${MPI_LIB_SEARCH_PATHS})
+    find_path(MPI_LIB_DIR NAMES libmpich.so libmpi.so PATHS ${MPI_LIB_SEARCH_PATHS})
 
     if(NOT MPI_INCLUDE_DIR)
         message(WARNING "Could not find MPI include. VIC Image Driver would not be built.")
@@ -161,7 +165,7 @@ if(BUILD_IMAGE)
     set(CMAKE_C_COMPILER ${MPI_COMPILER})
 
     add_executable(vic_image ${IMAGE_SRC})
-    target_link_libraries(vic_image m netcdf mpi)
+    target_link_libraries(vic_image m netcdf mpi mpich)
 endif()
 
 # ----------------------------------------------------------------------------

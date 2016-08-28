@@ -87,8 +87,6 @@ matrix:
         - libnetcdf-dev
         - netcdf-bin
         - netcdf-doc
-        - openmpi-bin
-        - libopenmpi-dev
         - gfortran
         - valgrind
 before_install:

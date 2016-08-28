@@ -1,0 +1,94 @@
+#!/usr/bin/env bash
+
+CMAKELISTS_PATH="${TRAVIS_BUILD_DIR}/vic/"
+DRIVER_PATH="${CMAKELISTS_PATH}/build/"
+DRIVER_IMAGE="${DRIVER_PATH}vic_image"
+DRIVER_CLASSIC="${DRIVER_PATH}vic_classic"
+SAMPLES_PATH="${TRAVIS_BUILD_DIR}/samples/"
+
+function vic_before_install {
+    echo vic_before_install
+    echo $PATH
+    if [ ! -z "$USE_CC" ]; then
+        echo "export CC=$USE_CC"
+        export CC=$USE_CC;
+        $CC --version
+    fi
+
+    export TRAVIS_MPIPATH="${HOME}/mpich"
+    export NC_LIBS=$(/usr/bin/nc-config --libs)
+    export NC_CFLAGS=$(/usr/bin/nc-config --cflags)
+
+    # Install MPICH
+    if [ ! -d ${TRAVIS_MPIPATH} ]; then
+            install_mpich
+    else
+            echo "MPICH installed..."
+    fi
+    export PATH=${TRAVIS_MPIPATH}/bin:${PATH}
+    find ${TRAVIS_MPIPATH} -name mpiexec
+    mpiexec --version
+    find ${TRAVIS_MPIPATH} -name mpicc
+    export MPICC="${TRAVIS_MPIPATH}/bin/mpicc"
+    $MPICC --version
+    echo "NETCDF LIB FLAGS ------> ${NC_LIBS}"
+    echo "NETCDF C FLAGS --------> ${NC_CFLAGS}"
+}
+
+function vic_install {
+    echo vic_install
+    cd ${CMAKELISTS_DIR}
+    echo $PWD
+    mkdir build; cd build
+    cmake -D CLASSIC=ON -D IMAGE=ON -D SHARED_LIB=ON ..
+    make
+}
+
+function vic_before_script {
+    echo vic_before_script
+    if [ ! -f $DRIVER_IMAGE ]; then
+        echo "Executable (${DRIVER_IMAGE}) not found!"
+        exit 1
+    fi
+
+    if [ ! -f $DRIVER_CLASSIC ]; then
+        echo "Executable (${DRIVER_CLASSIC}) not found!"
+        exit 1
+    fi
+
+    echo "Getting sample data"
+    bash ${SAMPLES_PATH}/get_sample_data.bash
+
+}
+
+function vic_script {
+    echo vic_script
+
+    # Test VIC Image Driver
+    echo image_driver
+    $DRIVER_IMAGE -v
+    $DRIVER_IMAGE -o
+ 
+    ./tests/run_tests.py unit examples system \
+        --image=${DRIVER_IMAGE} \
+        --data_dir=${SAMPLES_PATH}/data
+
+    # Test VIC Classic Driver
+    echo classic_driver
+    $DRIVER_CLASSIC -v
+    $DRIVER_CLASSIC -o
+ 
+    ./tests/run_tests.py unit examples system \
+        --image=${DRIVER_CLASSIC} \
+        --data_dir=${SAMPLES_PATH}/data
+}
+
+function vic_after_success {
+    echo vic_after_success
+    echo "Success!"
+}
+
+function vic_after_failure {
+    echo vic_after_failure
+    echo "Test failed -- please review the log"
+}

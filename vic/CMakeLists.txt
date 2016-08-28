@@ -7,15 +7,15 @@ project(vic)
 
 set(OTHER_INCLUDE_PATH  your_include_path)  # Add other include path you want.
 set(OTHER_LIBRARY_PATH  your_library_path)  # Add other library path you want.
-set(MPI_COMPILER        mpicc)              # Compiler of MPI.
+set(MPI_COMPILER        gcc)              # Compiler of MPI.
 
 # ============================================================================
 
 # Cmake configurations options. ==============================================
-option(CLASSIC      "Compile VIC Classic Driver"    OFF)
+option(CLASSIC      "Compile VIC Classic Driver"    ON)
 option(IMAGE        "Compile VIC Image Driver"      ON)
-option(SHARED_LIB   "With Vic shared library"       OFF)
-option(INSTALL      "Install VIC to system path"    OFF)
+option(SHARED_LIB   "With Vic shared library"       ON)
+option(INSTALL      "Install VIC to system path"    ON)
 # ============================================================================
 
 set(CMAKE_INSTALL_PREFIX /usr/local/vic) # Path to install VIC shared library.
@@ -23,6 +23,14 @@ set(CMAKE_INSTALL_PREFIX /usr/local/vic) # Path to install VIC shared library.
 set(CMAKE_C_COMPILER gcc)
 set(CMAKE_C_FLAGS_RELEASE ${CMAKE_C_FLAGS_RELEASE} )
 set(CMAKE_C_FLAGS_DEBUG  ${CMAKE_C_FLAGS_DEBUG} )
+
+execute_process(COMMAND git describe --abbrev=4 --dirty --always --tags OUTPUT_VARIABLE GIT_VERSION)
+execute_process(COMMAND uname -s OUTPUT_VARIABLE UNAME_S)
+execute_process(COMMAND uname -n OUTPUT_VARIABLE HOSTNAME)
+
+message(STATUS "GIT_VERSION: ${GIT_VERSION}")
+message(STATUS "UNAME_S: ${UNAME_S}")
+message(STATUS "HOSTNAME: ${HOSTNAME}")
 
 include_directories(./vic_run/include ./drivers/shared_all/include
         ./drivers/image/include ./drivers/shared_image/include
@@ -38,10 +46,10 @@ file(GLOB VIC_CLASSIC_HDR ./drivers/classic/include/*.h)
 file(GLOB VIC_IMAGE_HDR ./drivers/image/include/*.h)
 
 file(GLOB VIC_SHARE_SRC ./drivers/shared_all/src/*.c)
-file(GLOB VIC_SHARE_HDR ./drivers/shared_all/hdr/*.h)
+file(GLOB VIC_SHARE_HDR ./drivers/shared_all/include/*.h)
 
 file(GLOB VIC_SHARE_IMG_SRC ./drivers/shared_image/src/*.c)
-file(GLOB VIC_SHARE_IMG_HDR ./drivers/shared_image/hdr/*.h)
+file(GLOB VIC_SHARE_IMG_HDR ./drivers/shared_image/include/*.h)
 
 # ----------------------------------------------------------------------------
 # VIC Classic Driver
@@ -84,7 +92,7 @@ if(IMAGE)
     find_path(MPI_LIB_DIR NAMES libmpi.so PATHS ${MPI_LIB_SEARCH_PATHS})
 
     if(NOT MPI_INCLUDE_DIR)
-        message(STATUS "Could not find MPI include. VIC Image Driver would not be built.")
+        message(WARNING "Could not find MPI include. VIC Image Driver would not be built.")
         set(BUILD_IMAGE OFF)
     else()
         message(STATUS "MPI include at ${MPI_INCLUDE_DIR}")
@@ -93,7 +101,7 @@ if(IMAGE)
     endif()
 
     if(NOT MPI_LIB_DIR)
-        message(STATUS "Could not find MPI library. VIC Image Driver would not be built.")
+        message(WARNING "Could not find MPI library. VIC Image Driver would not be built.")
         set(BUILD_IMAGE OFF)
     else()
         message(STATUS "MPI library at ${MPI_LIB_DIR}")
@@ -127,7 +135,7 @@ if(IMAGE)
     find_path(NETCDF_LIB_DIR NAMES libnetcdf.so PATHS ${NETCDF_LIB_SEARCH_PATHS})
 
     if(NOT NETCDF_INCLUDE_DIR)
-        message(STATUS "Could not find netCDF include. VIC Image Driver would not be built.")
+        message(WARNING "Could not find netCDF include. VIC Image Driver would not be built.")
         set(BUILD_IMAGE OFF)
     else()
         message(STATUS "NetCDF include at ${NETCDF_LIB_DIR}")
@@ -136,7 +144,7 @@ if(IMAGE)
     endif()
 
     if(NOT NETCDF_LIB_DIR)
-        message(STATUS "Could not find netCDF library. VIC Image Driver would not be built.")
+        message(WARNING "Could not find netCDF library. VIC Image Driver would not be built.")
         set(BUILD_IMAGE OFF)
     else()
         message(STATUS "NetCDF library at ${NETCDF_LIB_DIR}")

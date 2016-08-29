@@ -39,9 +39,6 @@ function vic_install {
     echo vic_install
     echo $PWD
 
-    cd ${CMAKELISTS_DIR}
-    echo $PWD
-
     mkdir ${CMAKELISTS_PATH}build
     cd ${CMAKELISTS_PATH}build
     echo $PWD

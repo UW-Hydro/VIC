@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 CMAKELISTS_PATH="${TRAVIS_BUILD_DIR}/vic/"
-DRIVER_PATH="${CMAKELISTS_PATH}/build/"
+DRIVER_PATH="${CMAKELISTS_PATH}build/"
 DRIVER_IMAGE="${DRIVER_PATH}vic_image"
 DRIVER_CLASSIC="${DRIVER_PATH}vic_classic"
 SAMPLES_PATH="${TRAVIS_BUILD_DIR}/samples/"
@@ -39,13 +39,13 @@ function vic_install {
     echo vic_install
     echo $PWD
 
-    echo ${TRAVIS_BUILD_DIR}
-    echo ${CMAKELISTS_PATH}
-    echo ${DRIVER_PATH}
-    echo ${DRIVER_IMAGE}
-
     cd ${CMAKELISTS_DIR}
-    mkdir build; cd build
+    echo $PWD
+
+    mkdir ${CMAKELISTS_PATH}build
+    cd ${CMAKELISTS_PATH}build
+    echo $PWD
+
     cmake -D CLASSIC=ON -D IMAGE=ON -D SHARED_LIB=ON ..
     make -j2
 }

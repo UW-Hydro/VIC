@@ -70,17 +70,9 @@ endif()
 if(IMAGE)
 
     # Probably include and library paths of MPI.
-    set(MPI_INCLUDE_SEARCH_PATHS
-            ${HOME}/mpich/include
-            ${HOME}/openmpi/include
-            /usr/include
-            /usr/include/openmpi
-            /usr/local/include
-            /usr/local/include/openmpi
-            /usr/local/openmpi/include)
-    set(MPI_LIB_SEARCH_PATHS
-            ${HOME}/mpich/lib
-            ${HOME}/openmpi/lib
+     set(MPI_LIB_SEARCH_PATHS
+            $ENV{HOME}/mpich/lib
+            $ENV{HOME}/openmpi/lib
             /lib/
             /lib/openmpi
             /lib64/
@@ -90,27 +82,58 @@ if(IMAGE)
             /usr/lib64
             /usr/local/lib
             /usr/local/lib64
-            /usr/local/openmpi/lib)
-    message("home is ${HOME}")
+            /usr/local/openmpi/lib
+       )
+    set(MPI_INCLUDE_SEARCH_PATHS
+            /usr/include
+            /usr/local/include
+       )
+    set(MPICH_INCLUDE_SEARCH_PATHS
+            $ENV{HOME}/mpich/include
+            /usr/include/mpich
+            /usr/local/include/mpich
+            /usr/local/mpich/include
+       )
+    set(OPENMPI_INCLUDE_SEARCH_PATHS
+            $ENV{HOME}/openmpi/include
+            /usr/include/openmpi
+            /usr/local/include/openmpi
+            /usr/local/openmpi/include
+       )
+
+    # Find MPI library path.
+    find_path(MPI_LIB_DIR NAMES libmpich.so PATHS ${MPI_LIB_SEARCH_PATHS})
+
+    if(NOT MPI_LIB_DIR)
+        find_path(MPI_LIB_DIR NAMES libmpi.so PATHS ${MPI_LIB_SEARCH_PATHS})
+        if(NOT MPI_LIB_DIR)
+            message(WARNING "Could not find MPI library. VIC Image Driver would not be built.")
+            set(BUILD_IMAGE OFF)
+        else()
+            message(STATUS "OpenMPI library found, at ${MPI_LIB_DIR}")
+            set(BUILD_IMAGE ON)
+            link_directories(${MPI_LIB_DIR})
+            set(MPI_LIB mpi)
+            set(MPI_INCLUDE_SEARCH_PATHS ${MPI_INCLUDE_SEARCH_PATHS} ${OPENMPI_INCLUDE_SEARCH_PATHS})
+        endif()
+    else()
+        message(STATUS "MPICH library found, at ${MPI_LIB_DIR}")
+        set(BUILD_IMAGE ON)
+        link_directories(${MPI_LIB_DIR})
+        set(MPI_LIB mpich)
+        set(MPI_INCLUDE_SEARCH_PATHS ${MPI_INCLUDE_SEARCH_PATHS} ${MPICH_INCLUDE_SEARCH_PATHS})
+    endif()
+
+    # Find MPI include path.
     find_path(MPI_INCLUDE_DIR NAMES mpi.h PATHS ${MPI_INCLUDE_SEARCH_PATHS})
-    find_path(MPI_LIB_DIR NAMES libmpich.so libmpi.so PATHS ${MPI_LIB_SEARCH_PATHS})
 
     if(NOT MPI_INCLUDE_DIR)
         message(WARNING "Could not find MPI include. VIC Image Driver would not be built.")
         set(BUILD_IMAGE OFF)
     else()
-        message(STATUS "MPI include at ${MPI_INCLUDE_DIR}")
+        message(STATUS "MPI include found, at ${MPI_INCLUDE_DIR}")
         set(BUILD_IMAGE ON)
         include_directories(${MPI_INCLUDE_DIR})
-    endif()
-
-    if(NOT MPI_LIB_DIR)
-        message(WARNING "Could not find MPI library. VIC Image Driver would not be built.")
-        set(BUILD_IMAGE OFF)
-    else()
-        message(STATUS "MPI library at ${MPI_LIB_DIR}")
-        set(BUILD_IMAGE ON)
-        link_directories(${MPI_LIB_DIR})
     endif()
 endif()
 
@@ -142,7 +165,7 @@ if(IMAGE)
         message(WARNING "Could not find netCDF include. VIC Image Driver would not be built.")
         set(BUILD_IMAGE OFF)
     else()
-        message(STATUS "NetCDF include at ${NETCDF_LIB_DIR}")
+        message(STATUS "NetCDF include found, at ${NETCDF_LIB_DIR}")
         set(BUILD_IMAGE ON)
         include_directories(${NETCDF_INCLUDE_DIR})
     endif()
@@ -151,7 +174,7 @@ if(IMAGE)
         message(WARNING "Could not find netCDF library. VIC Image Driver would not be built.")
         set(BUILD_IMAGE OFF)
     else()
-        message(STATUS "NetCDF library at ${NETCDF_LIB_DIR}")
+        message(STATUS "NetCDF library found, at ${NETCDF_LIB_DIR}")
         set(BUILD_IMAGE ON)
         link_directories(${NETCDF_LIB_DIR})
     endif()
@@ -165,7 +188,7 @@ if(BUILD_IMAGE)
     set(CMAKE_C_COMPILER ${MPI_COMPILER})
 
     add_executable(vic_image ${IMAGE_SRC})
-    target_link_libraries(vic_image m netcdf mpi mpich)
+    target_link_libraries(vic_image m netcdf ${MPI_LIB})
 endif()
 
 # ----------------------------------------------------------------------------

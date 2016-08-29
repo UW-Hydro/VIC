@@ -79,7 +79,7 @@ function vic_script {
     $DRIVER_CLASSIC -o
  
     ./tests/run_tests.py unit examples system \
-        --image=${DRIVER_CLASSIC} \
+        --classic=${DRIVER_CLASSIC} \
         --data_dir=${SAMPLES_PATH}/data
 }
 

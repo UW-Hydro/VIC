@@ -37,11 +37,17 @@ function vic_before_install {
 
 function vic_install {
     echo vic_install
-    cd ${CMAKELISTS_DIR}
     echo $PWD
+
+    echo ${TRAVIS_BUILD_DIR}
+    echo ${CMAKELISTS_PATH}
+    echo ${DRIVER_PATH}
+    echo ${DRIVER_IMAGE}
+
+    cd ${CMAKELISTS_DIR}
     mkdir build; cd build
     cmake -D CLASSIC=ON -D IMAGE=ON -D SHARED_LIB=ON ..
-    make
+    make -j2
 }
 
 function vic_before_script {

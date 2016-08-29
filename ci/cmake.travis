@@ -67,6 +67,9 @@ function vic_before_script {
 function vic_script {
     echo vic_script
 
+    cd ${TRAVIS_BUILD_DIR}
+    $PWD
+
     # Test VIC Image Driver
     echo image_driver
     $DRIVER_IMAGE -v

@@ -6,6 +6,18 @@ notifications:
 matrix:
   fast_finish: true
   include:
+  # CMake
+  - compiler: gcc
+    os: linux
+    env: TESTID='cmake'
+    addons:
+      apt_packages:
+        - cmake
+        - libnetcdf-dev
+        - netcdf-bin
+        - netcdf-doc
+        - gfortran
+        - valgrind
   # Image Driver
   - compiler: gcc
     os: linux
@@ -77,18 +89,6 @@ matrix:
   - compiler: gcc
     os: osx
     env: TESTID=classic BREW_INSTALLS=valgrind
-  # CMake
-  - compiler: gcc
-    os: linux
-    env: TESTID='cmake'
-    addons:
-      apt_packages:
-        - cmake
-        - libnetcdf-dev
-        - netcdf-bin
-        - netcdf-doc
-        - gfortran
-        - valgrind
 before_install:
   - source ci/vic_install_utils
   - source ci/${TESTID}.travis

@@ -113,7 +113,8 @@ parse_output_info(FILE           *gp,
                     // set the alarm
                     set_alarm(dmy_current, freq, &freq_dmy,
                               (&(*streams)[streamnum].agg_alarm),
-                              -1 / global_param.model_steps_per_day);
+                              - (double) 1 /
+                              (double) global_param.model_steps_per_day);
                 }
                 else {
                     if (found != 2) {
@@ -127,7 +128,8 @@ parse_output_info(FILE           *gp,
                     // set the alarm
                     set_alarm(dmy_current, freq, &freq_n,
                               (&(*streams)[streamnum].agg_alarm),
-                              -1 / global_param.model_steps_per_day);
+                              - (double) 1 /
+                              (double) global_param.model_steps_per_day);
                 }
             }
             else if (strcasecmp("HISTFREQ", optstr) == 0) {
@@ -148,14 +150,15 @@ parse_output_info(FILE           *gp,
                     // Make sure we have a datestring
                     if (found != 2) {
                         log_err(
-                            "AGGFREQ was set to DATE but no date string was found");
+                            "HISTFREQ was set to DATE but no date string was found");
                     }
                     // parse date from freq_value_str
                     strpdmy(freq_value_str, "%Y-%m-%d", &freq_dmy);
                     // set the alarm
                     set_alarm(dmy_current, freq, &freq_dmy,
                               (&(*streams)[streamnum].write_alarm),
-                              -1 / global_param.model_steps_per_day);
+                              - (double) 1 /
+                              (double) global_param.model_steps_per_day);
                 }
                 else {
                     if (found != 2) {
@@ -169,7 +172,8 @@ parse_output_info(FILE           *gp,
                     // set the alarm
                     set_alarm(dmy_current, freq, &freq_n,
                               (&(*streams)[streamnum].write_alarm),
-                               -1 / global_param.model_steps_per_day);
+                               - (double )1 /
+                               (double) global_param.model_steps_per_day);
                 }
             }
             else if (strcasecmp("COMPRESS", optstr) == 0) {

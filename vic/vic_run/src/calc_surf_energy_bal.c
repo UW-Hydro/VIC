@@ -150,7 +150,6 @@ calc_surf_energy_bal(double             Le,
     double                   TmpNetLongSnow;
     double                   TmpNetShortSnow;
     double                   old_swq, old_depth;
-    char                     ErrorString[MAXSTRING];
 
     /**************************************************
        Set All Variables For Use
@@ -299,7 +298,7 @@ calc_surf_energy_bal(double             Le,
             tmpNnodes = Nnodes;
         }
 
-        Tsurf = root_brent(T_lower, T_upper, ErrorString, func_surf_energy_bal,
+        Tsurf = root_brent(T_lower, T_upper, func_surf_energy_bal,
                            VEG, veg_class, delta_t, Cs1, Cs2, D1, D2,
                            T1_old, T2, Ts_old, energy->T, bubble, dp, expt,
                            ice0, kappa1, kappa2, max_moist, moist, root,
@@ -406,7 +405,7 @@ calc_surf_energy_bal(double             Le,
                                                    &energy->latent_sub,
                                                    &energy->sensible,
                                                    &energy->snow_flux,
-                                                   &energy->error, ErrorString);
+                                                   &energy->error);
                 return (ERROR);
             }
         }
@@ -419,7 +418,7 @@ calc_surf_energy_bal(double             Le,
             tmpNnodes = Nnodes;
             FIRST_SOLN[0] = true;
 
-            Tsurf = root_brent(T_lower, T_upper, ErrorString,
+            Tsurf = root_brent(T_lower, T_upper,
                                func_surf_energy_bal, VEG, veg_class,
                                delta_t, Cs1, Cs2, D1, D2, T1_old, T2, Ts_old,
                                energy->T, bubble, dp, expt, ice0, kappa1,
@@ -534,8 +533,7 @@ calc_surf_energy_bal(double             Le,
                                                        &energy->latent_sub,
                                                        &energy->sensible,
                                                        &energy->snow_flux,
-                                                       &energy->error,
-                                                       ErrorString);
+                                                       &energy->error);
                     return (ERROR);
                 }
             }
@@ -934,8 +932,6 @@ error_print_surf_energy_bal(double  Ts,
     double            *snow_flux;
     double            *store_error;
 
-    char              *ErrorString;
-
     /* Define internal routine variables */
     int                i;
 
@@ -1076,17 +1072,13 @@ error_print_surf_energy_bal(double  Ts,
     snow_flux = (double *) va_arg(ap, double *);
     store_error = (double *) va_arg(ap, double *);
 
-    ErrorString = (char *) va_arg(ap, char *);
-
     /***************
        Main Routine
     ***************/
 
-    fprintf(LOG_DEST, "%s", ErrorString);
-    fprintf(LOG_DEST,
-            "ERROR: calc_surf_energy_bal failed to converge to a solution in "
-            "root_brent.  Variable values will be dumped to the screen, check "
-            "for invalid values.\n");
+    log_warn("calc_surf_energy_bal failed to converge to a solution in "
+             "root_brent.  Variable values will be dumped to the screen, check "
+             "for invalid values.");
 
     /* Print Variables */
     /* general model terms */
@@ -1223,12 +1215,9 @@ error_print_surf_energy_bal(double  Ts,
         }
     }
 
-    fprintf(LOG_DEST,
-            "**********\n**********\n"
-            "Finished writing calc_surf_energy_bal variables.\n"
-            "Try increasing param.SURF_DT to get model to complete cell.\n"
-            "Then check output for instabilities."
-            "\n**********\n**********\n");
+    log_warn("Finished writing calc_surf_energy_bal variables.\n"
+             "Try increasing param.SURF_DT to get model to complete cell.\n"
+             "Then check output for instabilities.");
 
     return (ERROR);
 }

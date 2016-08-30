@@ -104,8 +104,6 @@ ice_melt(double            z2,
     double                   Ls;
     double                   melt_energy = 0.;
 
-    char                     ErrorString[MAXSTRING];
-
     SnowFall = snowfall / MM_PER_M; /* convert to m */
     RainFall = rainfall / MM_PER_M; /* convert to m */
     IceMelt = 0.0;
@@ -351,7 +349,6 @@ ice_melt(double            z2,
             snow->surf_temp =
                 root_brent((double) (snow->surf_temp - param.SNOW_DT),
                            (double) (snow->surf_temp + param.SNOW_DT),
-                           ErrorString,
                            IceEnergyBalance, delta_t,
                            aero_resist, aero_resist_used, z2, Z0,
                            wind, net_short, longwave, density,
@@ -391,8 +388,7 @@ ice_melt(double            z2,
                                               param.LAKE_RHOSNOW, surf_atten,
                                               &SnowFlux, &latent_heat,
                                               &latent_heat_sub,
-                                              &sensible_heat, &LWnet,
-                                              ErrorString);
+                                              &sensible_heat, &LWnet);
                     return(ERROR);
                 }
             }
@@ -704,8 +700,6 @@ ErrorPrintIcePackEnergyBalance(double  TSurf,
     double *SensibleHeat;       /* Sensible heat exchange at surface (W/m2) */
     double *LWnet;
 
-    char   *ErrorString;
-
     /* initialize variables */
     Dt = (double) va_arg(ap, double);
     Ra = (double) va_arg(ap, double);
@@ -743,14 +737,11 @@ ErrorPrintIcePackEnergyBalance(double  TSurf,
     LatentHeatSub = (double *) va_arg(ap, double *);
     SensibleHeat = (double *) va_arg(ap, double *);
     LWnet = (double *) va_arg(ap, double *);
-    ErrorString = (char *) va_arg(ap, double *);
 
     /* print variables */
-    fprintf(LOG_DEST, "%s", ErrorString);
-    fprintf(LOG_DEST,
-            "ERROR: ice_melt failed to converge to a solution in root_brent.  "
-            "Variable values will be dumped to the screen, check for invalid "
-            "values.\n");
+    log_warn("ice_melt failed to converge to a solution in root_brent.  "
+             "Variable values will be dumped to the screen, check for invalid "
+             "values.");
 
     fprintf(LOG_DEST, "Dt = %f\n", Dt);
     fprintf(LOG_DEST, "Ra = %f\n", Ra);
@@ -790,10 +781,9 @@ ErrorPrintIcePackEnergyBalance(double  TSurf,
     fprintf(LOG_DEST, "SensibleHeat = %f\n", SensibleHeat[0]);
     fprintf(LOG_DEST, "LWnet = %f\n", *LWnet);
 
-    fprintf(LOG_DEST,
-            "Finished dumping snow_melt variables.\n"
-            "Try increasing SNOW_DT to get model to complete cell.\n"
-            "Then check output for instabilities.\n");
+    log_warn("Finished dumping snow_melt variables.\n"
+             "Try increasing SNOW_DT to get model to complete cell.\n"
+             "Then check output for instabilities.");
 
     return(ERROR);
 }

@@ -59,7 +59,6 @@
 *
 * @param LowerBound Lower bound for root
 * @param UpperBound Upper bound for root
-* @param ErrorString For storing description of errors (if any)
 * @param Function
 * @param ap Variable arguments
 * @return b
@@ -67,7 +66,6 @@
 double
 root_brent(double LowerBound,
            double UpperBound,
-           char *ErrorString,
            double (*Function)(double Estimate, va_list ap),
            ...)
 {

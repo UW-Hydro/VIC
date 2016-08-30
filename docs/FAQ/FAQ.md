@@ -54,3 +54,15 @@ Here are some commonly-asked questions and their answers. Another source of info
 9.  **I want to output a variable, but I don't see it listed in the output variable list. What should I do?**
 
     VIC allows users to select which output variables to write to their output files. Variables that can be selected are listed [here](../Documentation/OutputVarList.md) as well as in the VIC source code file `vic_driver_shared.h` (listed as `OUT_*`). However, not all variables that VIC simulates are available for output. And of course if you are changing VIC's physics, any new variables you add are also not available for output (yet). In either of these cases, please see the [instructions on how to add a new output variable to VIC](../Documentation/HowToAddNewOutputVars.md).
+
+10.  **What is VIC's time-stepping scheme?**
+
+    VIC uses a fixed time-stepping scheme. The global parameter option `MODEL_STEPS_PER_DAY` controls the base timestep of the model. There are two sub-timestep options, `RUNOFF_STEPS_PER_DAY` and `SNOW_STEPS_PER_DAY`, that control the timestep of the runoff and snow routines. When run in water balance mode, the relationship between these parameters must be: `MODEL_STEPS_PER_DAY >= SNOW_STEPS_PER_DAY >= RUNOFF_STEPS_PER_DAY`. When run in full energy mode, the relationship between these parameters must be: `MODEL_STEPS_PER_DAY = SNOW_STEPS_PER_DAY >= RUNOFF_STEPS_PER_DAY`. In all cases, the following constraints are placed on the allowable values for these options:
+
+    - sub-timesteps must be divisible into `MODEL_STEPS_PER_DAY`
+    - `SNOW_STEPS_PER_DAY >= 4`
+    - meteorological forcings must be provided at the snow model timestep (set via `SNOW_STEPS_PER_DAY`)
+
+    Time-stamps in VIC are "period-beginning" and therefore meteorological forcings in VIC should also be period-beginning. For example, for an hourly VIC simulation beginning at 1979-01-01 00:00:00, the first forcings for the timestep should represent the period between 1979-01-01 00:00:00 and 1979-01-01 01:00:00.
+
+    Time-stamps in the VIC history files are also period-beginning, however, when `AGGFREQ` > 1 in the image driver, the time-stamp is the beginning of the last period.

@@ -125,8 +125,6 @@ snow_intercept(double             Dt,
     double                   shortwave; //
     double                   Catm; //
 
-    char                     ErrorString[MAXSTRING];
-
     AirDens = force->density[hidx];
     EactAir = force->vp[hidx];
     Press = force->pressure[hidx];
@@ -339,7 +337,7 @@ snow_intercept(double             Dt,
     }
 
     if (Tupper != MISSING && Tlower != MISSING) {
-        *Tfoliage = root_brent(Tlower, Tupper, ErrorString,
+        *Tfoliage = root_brent(Tlower, Tupper,
                                func_canopy_energy_bal, Dt,
                                soil_con->elevation, soil_con->max_moist,
                                soil_con->Wcr, soil_con->Wpwp,
@@ -393,7 +391,7 @@ snow_intercept(double             Dt,
                                                     &NetRadiation,
                                                     &RefreezeEnergy,
                                                     SensibleHeat,
-                                                    VaporMassFlux, ErrorString);
+                                                    VaporMassFlux);
                 return(ERROR);
             }
         }
@@ -673,7 +671,6 @@ error_print_canopy_energy_bal(double  Tfoliage,
     double              *SensibleHeat;
     double              *VaporMassFlux;
 
-    char                *ErrorString;
     size_t               cidx;
 
     /** Read variables from variable length argument list **/
@@ -743,13 +740,11 @@ error_print_canopy_energy_bal(double  Tfoliage,
     RefreezeEnergy = (double *) va_arg(ap, double *);
     SensibleHeat = (double *) va_arg(ap, double *);
     VaporMassFlux = (double *) va_arg(ap, double *);
-    ErrorString = (char *) va_arg(ap, char *);
 
     /** Print variable info */
-    fprintf(LOG_DEST, "%s", ErrorString);
-    fprintf(LOG_DEST, "ERROR: snow_intercept failed to converge to a solution "
-            "in root_brent.  Variable values will be dumped to the "
-            "screen, check for invalid values.\n");
+    log_warn("snow_intercept failed to converge to a solution "
+             "in root_brent.  Variable values will be dumped to the "
+             "screen, check for invalid values.");
 
     /* General Model Parameters */
     fprintf(LOG_DEST, "band = %i\n", band);
@@ -829,12 +824,9 @@ error_print_canopy_energy_bal(double  Tfoliage,
     fprintf(LOG_DEST, "*SensibleHeat = %f\n", *SensibleHeat);
     fprintf(LOG_DEST, "*VaporMassFlux = %f\n", *VaporMassFlux);
 
-    /* call error handling routine */
-    fprintf(LOG_DEST, "**********\n**********\n"
-            "Finished dumping snow_intercept "
-            "variables.\nTry increasing SNOW_DT to get model to "
-            "complete cell.\nThen check output for instabilities."
-            "\n**********\n**********\n");
+    log_warn("Finished dumping snow_intercept variables.\n"
+             "Try increasing SNOW_DT to get model to complete cell.\n"
+             "Then check output for instabilities.");
 
     return(ERROR);
 }

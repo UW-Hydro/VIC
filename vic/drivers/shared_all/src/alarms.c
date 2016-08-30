@@ -86,8 +86,6 @@ set_alarm(dmy_struct   *dmy_current,
           double        offset)
 {
     extern global_param_struct global_param;
-    double                     delta;
-    double                     next;
 
     alarm->count = 0;
     alarm->freq = freq;

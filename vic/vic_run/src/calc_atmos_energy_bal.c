@@ -282,17 +282,17 @@ error_print_atmos_moist_bal(double  VPcanopy,
 
     // print variable values
     log_err("VPcanopy = %f\n"
-             "InLatent = %f\n"
-             "Lv = %f\n"
-             "Ra = %f\n"
-             "atmos_density = %f\n"
-             "gamma = %f\n"
-             "vp = %f\n"
-             "AtmosLatent = %f\n"
-             "Try increasing CANOPY_VP to get model to complete cell.\n"
-             "Then check output for instabilities.",
-             VPcanopy, InLatent, Lv, Ra, atmos_density, gamma, vp,
-             *AtmosLatent);
+            "InLatent = %f\n"
+            "Lv = %f\n"
+            "Ra = %f\n"
+            "atmos_density = %f\n"
+            "gamma = %f\n"
+            "vp = %f\n"
+            "AtmosLatent = %f\n"
+            "Try increasing CANOPY_VP to get model to complete cell.\n"
+            "Then check output for instabilities.",
+            VPcanopy, InLatent, Lv, Ra, atmos_density, gamma, vp,
+            *AtmosLatent);
 
     return(0.0);
 }

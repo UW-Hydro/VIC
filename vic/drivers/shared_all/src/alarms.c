@@ -84,6 +84,8 @@ set_alarm(dmy_struct   *dmy_current,
           alarm_struct *alarm)
 {
     extern global_param_struct global_param;
+    double                     delta;
+    double                     next;
 
     alarm->count = 0;
     alarm->freq = freq;
@@ -117,6 +119,23 @@ set_alarm(dmy_struct   *dmy_current,
 
     // Set alarm->next via reset_alarm
     reset_alarm(alarm, dmy_current);
+    // Shift alarm->next to one timestep earlier because dmy_current will
+    // still be the beginning of the first time step after running the first
+    // time step
+    if ((alarm->freq == FREQ_NEVER) || (alarm->freq == FREQ_NSTEPS) ||
+        (alarm->freq == FREQ_DATE) || (alarm->freq == FREQ_END)) {
+        ;  // Do nothing, already set
+    }
+    else {
+        delta = time_delta(&(alarm->next_dmy), FREQ_NSECONDS,
+                           (int) global_param.dt);
+        next = date2num(global_param.time_origin_num, &(alarm->next_dmy), 0,
+                        global_param.calendar, TIME_UNITS_DAYS);
+        next -= delta;
+        num2date(global_param.time_origin_num, next, 0,
+                 global_param.calendar, TIME_UNITS_DAYS,
+                 &(alarm->next_dmy));
+    }
 
     // Set subdaily attribute
     if (((freq == FREQ_NSTEPS) &&

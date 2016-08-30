@@ -98,7 +98,8 @@ set_output_defaults(stream_struct **streams,
                     dmy_struct     *dmy_current,
                     unsigned short  default_file_format)
 {
-    extern option_struct options;
+    extern option_struct       options;
+    extern global_param_struct global_param;
 
     size_t               streamnum;
     size_t               varnum;
@@ -106,7 +107,8 @@ set_output_defaults(stream_struct **streams,
     int                  default_freq_n = 1;
 
 
-    set_alarm(dmy_current, FREQ_NDAYS, &default_freq_n, &default_alarm);
+    set_alarm(dmy_current, FREQ_NDAYS, &default_freq_n, &default_alarm,
+              -1 / global_param.model_steps_per_day);
 
     for (streamnum = 0; streamnum < options.Noutstreams; streamnum++) {
         (*streams)[streamnum].agg_alarm = default_alarm;

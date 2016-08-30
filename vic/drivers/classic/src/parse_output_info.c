@@ -36,6 +36,7 @@ parse_output_info(FILE           *gp,
                   dmy_struct     *dmy_current)
 {
     extern option_struct options;
+    extern global_param_struct global_param;
 
     char                 cmdstr[MAXSTRING];
     char                 optstr[MAXSTRING];
@@ -136,7 +137,8 @@ parse_output_info(FILE           *gp,
                         strpdmy(freq_value_str, "%Y-%m-%d", &freq_dmy);
                         // set the alarm
                         set_alarm(dmy_current, freq, &freq_dmy,
-                                  (&(*streams)[streamnum].agg_alarm));
+                                  (&(*streams)[streamnum].agg_alarm),
+                                  -1 / global_param.model_steps_per_day);
                     }
                     else {
                         if (found != 2) {
@@ -149,7 +151,8 @@ parse_output_info(FILE           *gp,
                         }
                         // set the alarm
                         set_alarm(dmy_current, freq, &freq_n,
-                                  (&(*streams)[streamnum].agg_alarm));
+                                  (&(*streams)[streamnum].agg_alarm),
+                                  -1 / global_param.model_steps_per_day);
                     }
                 }
                 else if (strcasecmp("COMPRESS", optstr) == 0) {

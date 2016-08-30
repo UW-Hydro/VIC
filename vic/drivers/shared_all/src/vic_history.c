@@ -78,10 +78,10 @@ setup_stream(stream_struct *stream,
     stream->compress = false;
 
     // Set default agg alarm
-    set_alarm(&dmy_junk, FREQ_NDAYS, &default_n, &(stream->agg_alarm));
+    set_alarm(&dmy_junk, FREQ_NDAYS, &default_n, &(stream->agg_alarm), 0.);
 
     // Set default write alarm
-    set_alarm(&dmy_junk, FREQ_END, &default_n, &(stream->write_alarm));
+    set_alarm(&dmy_junk, FREQ_END, &default_n, &(stream->write_alarm), 0.);
 
     // Allocate stream members of shape [nvars]
     stream->varid = calloc(nvars, sizeof(*(stream->varid)));
@@ -209,8 +209,7 @@ reset_stream(stream_struct *stream,
     size_t                 varid;
 
     // Reset alarm to next agg period
-    reset_alarm(&(stream->agg_alarm),
-                dmy_current);
+    reset_alarm(&(stream->agg_alarm), dmy_current, 0.);
 
     // Set aggdata to zero
     for (i = 0; i < stream->ngridcells; i++) {

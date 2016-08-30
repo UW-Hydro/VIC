@@ -32,7 +32,8 @@
  *****************************************************************************/
 void
 reset_alarm(alarm_struct *alarm,
-            dmy_struct   *dmy_current)
+            dmy_struct   *dmy_current,
+            double        offset)
 {
     extern global_param_struct global_param;
 
@@ -50,7 +51,7 @@ reset_alarm(alarm_struct *alarm,
         delta = time_delta(dmy_current, alarm->freq, alarm->n);
         current = date2num(global_param.time_origin_num, dmy_current, 0,
                            global_param.calendar, TIME_UNITS_DAYS);
-        next = delta + current;
+        next = delta + current + offset;
         num2date(global_param.time_origin_num, next, 0,
                  global_param.calendar, TIME_UNITS_DAYS,
                  &(alarm->next_dmy));
@@ -81,7 +82,8 @@ void
 set_alarm(dmy_struct   *dmy_current,
           unsigned int  freq,
           void         *value,
-          alarm_struct *alarm)
+          alarm_struct *alarm,
+          double        offset)
 {
     extern global_param_struct global_param;
     double                     delta;
@@ -118,24 +120,7 @@ set_alarm(dmy_struct   *dmy_current,
     }
 
     // Set alarm->next via reset_alarm
-    reset_alarm(alarm, dmy_current);
-    // Shift alarm->next to one timestep earlier because dmy_current will
-    // still be the beginning of the first time step after running the first
-    // time step
-    if ((alarm->freq == FREQ_NEVER) || (alarm->freq == FREQ_NSTEPS) ||
-        (alarm->freq == FREQ_DATE) || (alarm->freq == FREQ_END)) {
-        ;  // Do nothing, already set
-    }
-    else {
-        delta = time_delta(&(alarm->next_dmy), FREQ_NSECONDS,
-                           (int) global_param.dt);
-        next = date2num(global_param.time_origin_num, &(alarm->next_dmy), 0,
-                        global_param.calendar, TIME_UNITS_DAYS);
-        next -= delta;
-        num2date(global_param.time_origin_num, next, 0,
-                 global_param.calendar, TIME_UNITS_DAYS,
-                 &(alarm->next_dmy));
-    }
+    reset_alarm(alarm, dmy_current, offset);
 
     // Set subdaily attribute
     if (((freq == FREQ_NSTEPS) &&

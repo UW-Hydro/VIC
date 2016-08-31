@@ -77,6 +77,15 @@ setup_stream(stream_struct *stream,
     stream->file_format = UNSET_FILE_FORMAT;
     stream->compress = false;
 
+    // Initialize dmy_junk - this step is to avoid time-related error caused
+    // by junk dmy; the date set here does not matter and will be overwritten
+    // later
+    dmy_junk.day = 1;
+    dmy_junk.day_in_year = 1;
+    dmy_junk.month = 12;
+    dmy_junk.year = 1900;
+    dmy_junk.dayseconds = 0;
+
     // Set default agg alarm
     set_alarm(&dmy_junk, FREQ_NDAYS, &default_n, &(stream->agg_alarm));
 
@@ -209,8 +218,7 @@ reset_stream(stream_struct *stream,
     size_t                 varid;
 
     // Reset alarm to next agg period
-    reset_alarm(&(stream->agg_alarm),
-                dmy_current);
+    reset_alarm(&(stream->agg_alarm), dmy_current);
 
     // Set aggdata to zero
     for (i = 0; i < stream->ngridcells; i++) {

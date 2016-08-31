@@ -98,7 +98,8 @@ set_output_defaults(stream_struct **streams,
                     dmy_struct     *dmy_current,
                     unsigned short  default_file_format)
 {
-    extern option_struct options;
+    extern option_struct       options;
+    extern global_param_struct global_param;
 
     size_t               streamnum;
     size_t               varnum;

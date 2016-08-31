@@ -562,13 +562,13 @@ print_alarm(alarm_struct *alarm)
 {
     fprintf(LOG_DEST, "alarm_struct:\n");
     fprintf(LOG_DEST, "\tcount: %u\n", alarm->count);
-    fprintf(LOG_DEST, "\tnext: %d\n", alarm->next);
     fprintf(LOG_DEST, "\tfreq: %u\n", alarm->freq);
+    fprintf(LOG_DEST, "\tnext_count: %d\n", alarm->next_count);
+    fprintf(LOG_DEST, "\tnext_dmy: \n    ");
+    print_dmy(&(alarm->next_dmy));
     fprintf(LOG_DEST, "\tn: %d\n", alarm->n);
     fprintf(LOG_DEST, "\tis_subdaily: %s\n",
             alarm->is_subdaily ? "true" : "false");
-    fprintf(LOG_DEST, "\tdate: \n    ");
-    print_dmy(&(alarm->date));
 
     fprintf(LOG_DEST, "\n");
 }

@@ -49,11 +49,11 @@ agg_stream_data(stream_struct *stream,
     alarm_now = raise_alarm(alarm, dmy_current);
 
     if (alarm->count == 1) {
-        stream->bounds[0] = *dmy_current;
+        stream->time_bounds[0] = *dmy_current;
     }
 
     if (alarm_now) {
-        stream->bounds[1] = *dmy_current;
+        stream->time_bounds[1] = *dmy_current;
     }
 
     for (i = 0; i < stream->ngridcells; i++) {

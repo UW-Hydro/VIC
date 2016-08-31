@@ -187,9 +187,9 @@ variables:
                 time:units = "days since 0001-01-01 00:00:00" ;
                 time:calendar = "proleptic_gregorian" ;
         double time_bnds(time, nv) ;
-    		    time_bnds:standard_name = "time_bounds" ;
-    		    time_bnds:units = "days since 0001-01-01 00:00:00" ;
-    		    time_bnds:calendar = "standard" ;
+                time_bnds:standard_name = "time_bounds" ;
+                time_bnds:units = "days since 0001-01-01 00:00:00" ;
+                time:calendar = "proleptic_gregorian" ;
         double lon(lon) ;                                      
                 lon:long_name = "longitude" ;                  
                 lon:units = "degrees_east" ;                   

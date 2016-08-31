@@ -317,7 +317,7 @@ initialize_history_file(nc_file_struct *nc,
     check_nc_status(status, "Error defining time dimenension in %s",
                     stream->filename);
 
-    status = nc_def_dim(nc->nc_id, "nv", 2, &(nc->bounds_dimid));
+    status = nc_def_dim(nc->nc_id, "nv", 2, &(nc->time_bounds_dimid));
     check_nc_status(status, "Error defining time bounds dimenension in %s",
                     stream->filename);
 
@@ -353,18 +353,18 @@ initialize_history_file(nc_file_struct *nc,
 
     // define the netcdf variable time_bnds
     dimids[0] = nc->time_dimid;
-    dimids[1] = nc->bounds_dimid;
+    dimids[1] = nc->time_bounds_dimid;
     status = nc_def_var(nc->nc_id, "time_bnds", NC_DOUBLE, 2,
-                        dimids, &(nc->bounds_varid));
+                        dimids, &(nc->time_bounds_varid));
     check_nc_status(status, "Error defining time bounds variable in %s",
                     stream->filename);
-    status = nc_put_att_text(nc->nc_id, nc->bounds_varid, "standard_name",
+    status = nc_put_att_text(nc->nc_id, nc->time_bounds_varid, "standard_name",
                              strlen("time_bounds"), "time_bounds");
     check_nc_status(status, "Error adding attribute in %s", stream->filename);
-    status = nc_put_att_text(nc->nc_id, nc->bounds_varid, "units",
+    status = nc_put_att_text(nc->nc_id, nc->time_bounds_varid, "units",
                              strlen(str), str);
     check_nc_status(status, "Error adding attribute in %s", stream->filename);
-    status = nc_put_att_text(nc->nc_id, nc->bounds_varid, "calendar",
+    status = nc_put_att_text(nc->nc_id, nc->time_bounds_varid, "calendar",
                              strlen(calendar_str), calendar_str);
     check_nc_status(status, "Error adding attribute in %s", stream->filename);
 

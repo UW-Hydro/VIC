@@ -215,7 +215,8 @@ vic_write(stream_struct  *stream,
         dstart[0] = stream->write_alarm.count;
 
         // timestamp is the beginning of the aggregation window
-        dtime = date2num(global_param.time_origin_num, &(stream->bounds[0]), 0.,
+        dtime = date2num(global_param.time_origin_num,
+                         &(stream->time_bounds[0]), 0.,
                          global_param.calendar, global_param.time_units);
 
         status = nc_put_var1_double(nc_hist_file->nc_id,
@@ -231,12 +232,12 @@ vic_write(stream_struct  *stream,
         dt_seconds_to_time_units(global_param.time_units, global_param.dt,
                                  &offset);
         bounds[1] = offset + date2num(global_param.time_origin_num,
-                                      &(stream->bounds[1]), 0.,
+                                      &(stream->time_bounds[1]), 0.,
                                       global_param.calendar,
                                       global_param.time_units);
 
         status = nc_put_vara_double(nc_hist_file->nc_id,
-                                    nc_hist_file->bounds_varid,
+                                    nc_hist_file->time_bounds_varid,
                                     dstart, dcount, bounds);
         check_nc_status(status, "Error writing time bounds variable");
     }

@@ -40,12 +40,15 @@ def assert_nan_equal(ds_domain, ds_output):
 
     # check that nans are occurring in the same place in the arrays
     # check all variables in the dataset
-    for da in ds_output.data_vars:
+    mask_dims = set(ds_domain['mask'].dims)
+    for var, da in ds_output.data_vars.items():
+        # skip variables that don't have mask_dims (e.g. time_bnds)
+        if not all(d in da.dims for d in mask_dims):
+            continue
         # get dimensions to reduce DataArray on
-        dim_diff = set(ds_domain['mask'].dims).symmetric_difference(
-                                                    set(ds_output[da].dims))
+        dim_diff = mask_dims.symmetric_difference(set(da.dims))
         # reduce DataArray
-        da_null_reduced = ds_output[da].isnull().all(dim=dim_diff)
+        da_null_reduced = da.isnull().all(dim=dim_diff)
         # raise AssertionError if NaNs do not match
         npt.assert_array_equal(da_null_reduced.values,
                                np.isnan(ds_domain['mask']))
@@ -296,4 +299,3 @@ def check_mpi_states(state_basedir, list_n_proc):
                         ds_current_run[var].values,
                         ds_first_run[var].values,
                         err_msg='States are not an exact match')
-

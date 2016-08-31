@@ -42,10 +42,19 @@ agg_stream_data(stream_struct *stream,
     size_t                 k;
     size_t                 nelem;
     unsigned int           varid;
+    bool                   alarm_now;
 
     alarm = &(stream->agg_alarm);
-
     alarm->count++;
+    alarm_now = raise_alarm(alarm, dmy_current);
+
+    if (alarm->count == 1) {
+        stream->time_bounds[0] = *dmy_current;
+    }
+
+    if (alarm_now) {
+        stream->time_bounds[1] = *dmy_current;
+    }
 
     for (i = 0; i < stream->ngridcells; i++) {
         for (j = 0; j < stream->nvars; j++) {
@@ -53,8 +62,7 @@ agg_stream_data(stream_struct *stream,
             nelem = out_metadata[varid].nelem;
 
             // Instantaneous at the beginning of the period
-            if ((stream->aggtype[j] == AGG_TYPE_END) &&
-                (raise_alarm(alarm, dmy_current))) {
+            if ((stream->aggtype[j] == AGG_TYPE_END) && (alarm_now)) {
                 for (k = 0; k < nelem; k++) {
                     stream->aggdata[i][j][k][0] = out_data[i][varid][k];
                 }
@@ -88,8 +96,7 @@ agg_stream_data(stream_struct *stream,
                 }
             }
             // Average over the period if counter is full
-            if ((stream->aggtype[j] == AGG_TYPE_AVG) &&
-                (raise_alarm(alarm, dmy_current))) {
+            if ((stream->aggtype[j] == AGG_TYPE_AVG) && (alarm_now)) {
                 for (k = 0; k < nelem; k++) {
                     stream->aggdata[i][j][k][0] /= (double) alarm->count;
                 }

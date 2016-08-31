@@ -4,7 +4,7 @@ VIC is an [open source](open-source-philosophy.md) research model.  All developm
 
 ## Features Under Development
 
-There are currently a number of active development projects working on VIC. To see which features are slatted for future release, take a look at the issues in our [development milestones page on GitHub](https://github.com/UW-Hydro/VIC/milestones).
+There are currently a number of active development projects working on VIC. To see which features are slated for future release, take a look at the issues in our [development milestones page on GitHub](https://github.com/UW-Hydro/VIC/milestones).
 
 ## Development and Collaboration
 

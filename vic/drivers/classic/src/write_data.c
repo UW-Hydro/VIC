@@ -30,8 +30,7 @@
  * @brief    write all variables to output files.
  *****************************************************************************/
 void
-write_data(stream_struct *stream,
-           dmy_struct    *dmy)
+write_data(stream_struct *stream)
 {
     extern option_struct   options;
     extern metadata_struct out_metadata[N_OUTVAR_TYPES];
@@ -59,10 +58,10 @@ write_data(stream_struct *stream,
         tmp_dptr = calloc(n, sizeof(*tmp_dptr));
 
         // Time
-        tmp_iptr[0] = dmy->year;
-        tmp_iptr[1] = dmy->month;
-        tmp_iptr[2] = dmy->day;
-        tmp_iptr[3] = dmy->dayseconds;
+        tmp_iptr[0] = stream->time_bounds[0].year;
+        tmp_iptr[1] = stream->time_bounds[0].month;
+        tmp_iptr[2] = stream->time_bounds[0].day;
+        tmp_iptr[3] = stream->time_bounds[0].dayseconds;
 
         // Write the date
         if (stream->agg_alarm.is_subdaily) {
@@ -157,13 +156,16 @@ write_data(stream_struct *stream,
             // Write year, month, day, and sec
             fprintf(stream->fh,
                     "%04u\t%02hu\t%02hu\t%05u\t",
-                    dmy->year, dmy->month, dmy->day, dmy->dayseconds);
+                    stream->time_bounds[0].year, stream->time_bounds[0].month,
+                    stream->time_bounds[0].day,
+                    stream->time_bounds[0].dayseconds);
         }
         else {
             // Only write year, month, and day
             fprintf(stream->fh,
                     "%04u\t%02hu\t%02hu\t",
-                    dmy->year, dmy->month, dmy->day);
+                    stream->time_bounds[0].year, stream->time_bounds[0].month,
+                    stream->time_bounds[0].day);
         }
 
         // Loop over this output file's data variables

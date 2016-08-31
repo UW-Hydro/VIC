@@ -122,8 +122,10 @@ typedef struct {
     int node_dimid;
     int root_zone_dimid;
     int time_dimid;
+    int time_bounds_dimid;
     int veg_dimid;
     int time_varid;
+    int time_bounds_varid;
     size_t band_size;
     size_t front_size;
     size_t frost_size;

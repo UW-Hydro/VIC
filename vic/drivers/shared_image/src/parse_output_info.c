@@ -35,7 +35,8 @@ parse_output_info(FILE           *gp,
                   stream_struct **streams,
                   dmy_struct     *dmy_current)
 {
-    extern option_struct options;
+    extern option_struct       options;
+    extern global_param_struct global_param;
 
     char                 cmdstr[MAXSTRING];
     char                 optstr[MAXSTRING];
@@ -145,7 +146,7 @@ parse_output_info(FILE           *gp,
                     // Make sure we have a datestring
                     if (found != 2) {
                         log_err(
-                            "AGGFREQ was set to DATE but no date string was found");
+                            "HISTFREQ was set to DATE but no date string was found");
                     }
                     // parse date from freq_value_str
                     strpdmy(freq_value_str, "%Y-%m-%d", &freq_dmy);

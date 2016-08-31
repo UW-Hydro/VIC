@@ -58,11 +58,11 @@ reset_alarm(alarm_struct *alarm,
         // beginning of the last timestep of a month. This will cause problem
         // because of different number of days in each month. This shift here
         // will avoid this problem.
-        // NOTE: if a simulation starts not from the beginning of a month,
+        // NOTE: if a simulation does not start from the beginning of a month,
         // there might be a problem if startday > 28 !!!
         
         // Shift forward by one time step
-        offset = global_param.dt / 3600 / 24;
+        offset = global_param.dt / (double) SEC_PER_DAY;
         current = date2num(global_param.time_origin_num, dmy_current, 0,
                            global_param.calendar, TIME_UNITS_DAYS);
         current += offset;

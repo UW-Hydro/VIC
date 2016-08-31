@@ -138,7 +138,8 @@ parse_output_info(FILE           *gp,
                         // set the alarm
                         set_alarm(dmy_current, freq, &freq_dmy,
                                   (&(*streams)[streamnum].agg_alarm),
-                                  -1 / global_param.model_steps_per_day);
+                                  - (double) 1 /
+                                  (double) global_param.model_steps_per_day);
                     }
                     else {
                         if (found != 2) {
@@ -152,7 +153,8 @@ parse_output_info(FILE           *gp,
                         // set the alarm
                         set_alarm(dmy_current, freq, &freq_n,
                                   (&(*streams)[streamnum].agg_alarm),
-                                  -1 / global_param.model_steps_per_day);
+                                  - (double) 1 /
+                                  (double) global_param.model_steps_per_day);
                     }
                 }
                 else if (strcasecmp("COMPRESS", optstr) == 0) {

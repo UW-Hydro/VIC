@@ -66,6 +66,7 @@ main(int   argc,
     int                cellnum;
     int                startrec;
     int                ErrorFlag;
+    int                n;
     size_t             streamnum;
     dmy_struct        *dmy;
     force_data_struct *force;
@@ -187,6 +188,18 @@ main(int   argc,
             /** Build Gridded Filenames, and Open **/
             make_in_and_outfiles(&filep, &filenames, &soil_con,
                                  &streams, dmy);
+
+            /** Reset agg_alarm for Each Stream **/
+            for (streamnum = 0;
+                 streamnum < (short int) options.Noutstreams;
+                 streamnum++) {
+                n = streams[streamnum].agg_alarm.n;
+                set_alarm(&(dmy[0]), streams[streamnum].agg_alarm.freq,
+                          &n,
+                          &(streams[streamnum].agg_alarm),
+                          - (double) 1 /
+                          (double) global_param.model_steps_per_day);
+            }
 
             /** Read Elevation Band Data if Used **/
             read_snowband(filep.snowband, &soil_con);

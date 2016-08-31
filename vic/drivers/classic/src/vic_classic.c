@@ -191,8 +191,8 @@ main(int   argc,
 
             /** Reset agg_alarm for Each Stream **/
             for (streamnum = 0;
-                 streamnum < (short int) options.Noutstreams;
-                 streamnum++) {
+                streamnum < (size_t) options.Noutstreams;
+                streamnum++) {
                 n = streams[streamnum].agg_alarm.n;
                 set_alarm(&(dmy[0]), streams[streamnum].agg_alarm.freq,
                           &n,

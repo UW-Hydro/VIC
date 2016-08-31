@@ -74,6 +74,4 @@ Here are some commonly-asked questions and their answers. Another source of info
     - `SNOW_STEPS_PER_DAY >= 4`
     - meteorological forcings must be provided at the snow model timestep (set via `SNOW_STEPS_PER_DAY`)
 
-    Time-stamps in VIC are "period-beginning" and therefore meteorological forcings in VIC should also be period-beginning. For example, for an hourly VIC simulation beginning at 1979-01-01 00:00:00, the first forcings for the timestep should represent the period between 1979-01-01 00:00:00 and 1979-01-01 01:00:00.
-
-    Time-stamps in the VIC history files are also period-beginning, however, when `AGGFREQ` > 1 in the image driver, the time-stamp is the beginning of the last period.
+    Time-stamps in VIC are "period-beginning" and therefore meteorological forcings in VIC should also be period-beginning. For example, for an hourly VIC simulation beginning at 1979-01-01 00:00:00, the first forcings for the timestep should represent the period between 1979-01-01 00:00:00 and 1979-01-01 01:00:00. Time-stamps in the VIC history files are also period-beginning.

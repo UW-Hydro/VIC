@@ -500,6 +500,7 @@ typedef struct {
 typedef struct {
     size_t nvars;                    /**< number of variables to store in the file */
     size_t ngridcells;               /**< number of grid cells in aggdata */
+    dmy_struct time_bounds[2];       /**< timestep bounds of stream */
     char prefix[MAXSTRING];          /**< prefix of the file name, e.g. "fluxes" */
     char filename[MAXSTRING];        /**< complete file name */
     FILE *fh;                        /**< filehandle */

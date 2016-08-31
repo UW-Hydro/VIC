@@ -11,13 +11,15 @@ For a list of known issues and their fixes (in bug-fix updates), visit the VIC G
 To check which release of VIC you are running:
 
 - For VIC 4, type `vicNl -v`
-- For VIC 5 and later, type `vic _{classic,image}.exe -v`
+- For VIC 5 and later, type `vic_{classic,image}.exe -v`
 
 ------------------------------
 
-## VIC 5.0.0 (Unreleased)
+## VIC 5.0.0 [![DOI](https://zenodo.org/badge/7766/UW-Hydro/VIC.svg)](https://zenodo.org/badge/latestdoi/7766/UW-Hydro/VIC)
 
-**Release date: TBD**
+**Release date: (September 1, 2016)**
+
+Source code is available here: [![VIC.5.0.0](https://img.shields.io/badge/VIC-5.0.0-blue.svg)](https://github.com/UW-Hydro/VIC/releases/tag/VIC.5.0.0)
 
 This is a major update from VIC 4. The VIC 5.0.0 release aims to have nearly identical physics as VIC 4.2 while providing a clean, refactored code base supporting multiple drivers. There are a number of new features, bug fixes, and backward incompatible changes. See the VIC Github page for more details on the changes included in this release.
 
@@ -159,16 +161,16 @@ This is a major update from VIC 4. The VIC 5.0.0 release aims to have nearly ide
 3. Fix related to exact restart ([GH#481](https://github.com/UW-Hydro/VIC/pull/481), [GH#507](https://github.com/UW-Hydro/VIC/pull/507), [GH#509](https://github.com/UW-Hydro/VIC/pull/509))
 
 	Previously, VIC did not produce the same results (fluxes and states) if a simulation was separated into multiple shorter-period runs by saving the state variables and restarting. This was due to:
-		1. The MTCLIM algorithm resulted in slightly different sub-daily meteorological variable values for different lengths of forcings (MTCLIM is deprecated in the current version)
-		2. A few bugs resulting in inexact restart.
 
-	The following bugs have been fixed:
+	1. The MTCLIM algorithm resulted in slightly different sub-daily meteorological variable values for different lengths of forcings (MTCLIM is deprecated in the current version)
 
-	- The prognostic state variable `energy.Tfoliage` (foliage temperature) is now saved to the state file
-	- Two flux variables `energy.LongUnderOut` and `energy.snow_flux` are now saved to the state file.
+	2. A few bugs resulting in inexact restart. The following bugs have been fixed:
 
-		!!!Note
-				This is a temporary solution to ensure exact restart. A better way of handling these two flux variables needs to be done in the future (see [GH#479](https://github.com/UW-Hydro/VIC/issues/479))
+		- The prognostic state variable `energy.Tfoliage` (foliage temperature) is now saved to the state file
+		- Two flux variables `energy.LongUnderOut` and `energy.snow_flux` are now saved to the state file.
+
+			!!!Note
+					This is a temporary solution to ensure exact restart. A better way of handling these two flux variables needs to be done in the future (see [GH#479](https://github.com/UW-Hydro/VIC/issues/479))
 
 4. Fix for binary state file I/O ([GH#487](https://github.com/UW-Hydro/VIC/pull/487))
 
@@ -180,6 +182,25 @@ This is a major update from VIC 4. The VIC 5.0.0 release aims to have nearly ide
 
 ------------------------------
 
+## VIC 4.2.d [![DOI](https://zenodo.org/badge/doi/10.5281/zenodo.56058.svg)](http://dx.doi.org/10.5281/zenodo.56058)
+
+!!! Note "Note: Final Release of VIC 4 Development Track"
+	This is the last release of the VIC Version 4 development track.  The next release will be VIC.5.0 and will include backward incompatible changes. Future updates the VIC 4 development track will be made on the `support/VIC.4.2.d`.
+
+Source code is available here: [![VIC.4.2.d](https://img.shields.io/badge/VIC-4.2.d-blue.svg)](https://github.com/UW-Hydro/VIC/releases/tag/VIC.4.2.d)
+
+**Release date: (June 20, 2015)**
+
+This is a bugfix update from 4.2.c.
+
+#### Bug Fixes
+
+1. Fixed uninitialized `dmy_struct` when `OUTPUT_FORCE==TRUE` and `BINARY_OUTPUT==TRUE` ([GH#393](https://github.com/UW-Hydro/VIC/issues/393))
+
+1. Fixed uninitialized vegetation parameters when `VEGPARAM_LAI==FALSE` ([GH#455](https://github.com/UW-Hydro/VIC/issues/455))
+
+------------------------------
+
 ## VIC 4.2.c [![DOI](https://zenodo.org/badge/doi/10.5281/zenodo.35302.svg)](http://dx.doi.org/10.5281/zenodo.35302)
 
 Source code is available here: [![VIC.4.2.c](https://img.shields.io/badge/VIC-4.2.c-blue.svg)](https://github.com/UW-Hydro/VIC/releases/tag/VIC.4.2.c)
@@ -187,9 +208,6 @@ Source code is available here: [![VIC.4.2.c](https://img.shields.io/badge/VIC-4.
 **Release date: (December 12, 2015)**
 
 This is a bugfix update from 4.2.b.
-
-!!! Note "Note: Final Release of VIC 4 Development Track"
-	This is the last release of the VIC Version 4 development track.  The next release will be VIC.5.0 and will include backward incompatible changes.
 
 #### Bug Fixes:
 

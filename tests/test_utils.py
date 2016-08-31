@@ -1,30 +1,35 @@
+# Builtin libs
 import os
-from collections import OrderedDict, namedtuple
+import re
 import glob
-
 import traceback
+import warnings
+from collections import OrderedDict, namedtuple
+import multiprocessing as mp
 
+# Computation libs
 import numpy as np
 import pandas as pd
 import xarray as xr
-import glob
-import re
-import matplotlib
-matplotlib.use('Agg')
-import matplotlib.pyplot as plt
-import warnings
-import seaborn as sns
-import multiprocessing as mp
 
+# Plottling libs
+import matplotlib
+import matplotlib.pyplot as plt
+import seaborn as sns
+
+# Tools from tonic
 from tonic.models.vic.vic import (VICRuntimeError,
                                   default_vic_valgrind_error_code)
 from tonic.testing import check_completed, check_for_nans, VICTestError
+
+matplotlib.use('Agg')
 
 OUTPUT_WIDTH = 100
 ERROR_TAIL = 20  # lines
 
 VICOutFile = namedtuple('vic_out_file',
                         ('dirpath', 'prefix', 'lat', 'lon', 'suffix'))
+
 
 class VICReturnCodeError(Exception):
     pass
@@ -104,35 +109,35 @@ def replace_global_values(gp, replace):
 
 
 def drop_tests(config, driver):
-   '''helper function to remove tests that should not be run for driver'''
+    '''helper function to remove tests that should not be run for driver'''
 
-   new = {}
+    new = {}
 
-   if not isinstance(driver, list):  # if single driver
-       for key, test_cfg in config.items():
-           try:
-               if not isinstance(test_cfg['driver'], list):
-                   if test_cfg['driver'].lower() == driver.lower():
-                       new[key] = test_cfg
-           except KeyError:
-               raise KeyError('test configuration must specify driver')
-   else:  # if multiple drivers
-       for key, test_cfg in config.items():
-           try:
-               if isinstance(test_cfg['driver'], list):
-                   # check whether the test has the same number of drivers
-                   if len(test_cfg['driver']) == len(driver):
-                       # check whether the test wants to test the same drivers
-                       flag = 1
-                       for d in driver:
-                           if d not in test_cfg['driver']:
-                               flag = 0
-                       if flag == 1:
-                           new[key] = test_cfg
-           except KeyError:
-               raise KeyError('test configuration must specify driver')
+    if not isinstance(driver, list):  # if single driver
+        for key, test_cfg in config.items():
+            try:
+                if not isinstance(test_cfg['driver'], list):
+                    if test_cfg['driver'].lower() == driver.lower():
+                        new[key] = test_cfg
+            except KeyError:
+                raise KeyError('test configuration must specify driver')
+    else:  # if multiple drivers
+        for key, test_cfg in config.items():
+            try:
+                if isinstance(test_cfg['driver'], list):
+                    # check whether the test has the same number of drivers
+                    if len(test_cfg['driver']) == len(driver):
+                        # check whether the test wants to test the same drivers
+                        flag = 1
+                        for d in driver:
+                            if d not in test_cfg['driver']:
+                                flag = 0
+                        if flag == 1:
+                            new[key] = test_cfg
+            except KeyError:
+                raise KeyError('test configuration must specify driver')
 
-   return new
+    return new
 
 
 def pop_run_kwargs(config):
@@ -428,8 +433,8 @@ def check_drivers_match_fluxes(list_drivers, result_basedir):
 
     # Identify all classic driver output flux files
     try:
-        list_fnames_classic = glob.glob(os.path.join(
-                                    result_basedir, 'classic', '*'))
+        list_fnames_classic = glob.glob(
+            os.path.join(result_basedir, 'classic', '*'))
     except:
         raise ValueError('incorrect classic driver output for driver-match '
                          'test')
@@ -445,10 +450,10 @@ def check_drivers_match_fluxes(list_drivers, result_basedir):
             if len(glob.glob(os.path.join(
                     result_basedir, driver, '*.nc'))) > 1:
                 warnings.warn('More than one netCDF file found under'
-                              'directory {}'.format(result_dir))
+                              'directory {}'.format(result_basedir))
             fname = glob.glob(os.path.join(result_basedir, driver, '*.nc'))[0]
             ds_image = xr.open_dataset(fname)
-           
+
             # loop over each grid cell from classic driver
             for fname in list_fnames_classic:
                 gcell = parse_classic_driver_outfile_name(fname)
@@ -466,7 +471,7 @@ def check_drivers_match_fluxes(list_drivers, result_basedir):
                             decimal = 2
                         # --- if not all zeros, set decimal depending on the
                         # maximum aboslute value of this variable so that the
-                        # comparison has a reasonable precision. Specifically, 
+                        # comparison has a reasonable precision. Specifically,
                         # decimal ~= - log10(max_abs_value) + 1 --- #
                         else:
                             decimal = int(round(- np.log10(np.max(np.absolute(
@@ -483,8 +488,10 @@ def check_drivers_match_fluxes(list_drivers, result_basedir):
                     # if [time, nlayer]
                     elif len(ds_image_cell[var].coords) == 4:
                         for l in ds_image['nlayer']:
-                            s_classic = df_classic['{}_{}'.format(var, l.values)]
-                            s_image = ds_image_cell[var].sel(nlayer=l).to_series()
+                            s_classic = df_classic['{}_{}'.format(var,
+                                                                  l.values)]
+                            s_image = ds_image_cell[var].sel(
+                                nlayer=l).to_series()
                             # determine precision for comparison
                             if np.mean(s_image.values) == 0:
                                 decimal = 2
@@ -498,9 +505,9 @@ def check_drivers_match_fluxes(list_drivers, result_basedir):
                                 s_image.values,
                                 s_classic.values,
                                 decimal=decimal,
-                                err_msg='Variable {} is different in the '
-                                        'classic and image drivers'.
-                                                format(var))
+                                err_msg='Variable {} is different in '
+                                        'the classic and image '
+                                        'drivers'.format(var))
 
 
 def tsplit(string, delimiters):
@@ -708,10 +715,10 @@ def plot_snotel_comparison(driver, science_test_data_dir,
                                             'observations')):
         pool.apply_async(plot_snotel_comparison_one_site,
                          (driver, science_test_data_dir,
-                            compare_data_dict,
-                            result_dir, plot_dir,
-                            plots_to_make,
-                            plot_variables, context, style, filename,))
+                          compare_data_dict,
+                          result_dir, plot_dir,
+                          plots_to_make,
+                          plot_variables, context, style, filename,))
 
     # --- Finish multiprocessing --- #
     pool.close()
@@ -890,12 +897,10 @@ def plot_fluxnet_comparison(driver, science_test_data_dir,
     pool.join()
 
 
-def plot_fluxnet_comparison_one_site(
-                            driver, science_test_data_dir,
-                            compare_data_dict,
-                            result_dir, plot_dir,
-                            plots_to_make,
-                            context, style, var_names, months, obs_dir, subdir):
+def plot_fluxnet_comparison_one_site(driver, science_test_data_dir,
+                                     compare_data_dict, result_dir, plot_dir,
+                                     plots_to_make, context, style, var_names,
+                                     months, obs_dir, subdir):
 
     if check_site_files(obs_dir, subdir):
         # get CSV file from site directory to get lat/lng for site

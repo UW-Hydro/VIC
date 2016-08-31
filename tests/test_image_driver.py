@@ -79,7 +79,8 @@ def check_multistream_image(fnames):
     def reindex_xr_obj_timedim(obj, freq):
         # Here we're basically rounding the timestamp in the time index to even
         # values.
-        new = pd.date_range(obj.time[0].values, freq=freq, periods=len(obj.time))
+        new = pd.date_range(obj.time[0].values, freq=freq,
+                            periods=len(obj.time))
         return instant_ds.reindex({'time': new}, method='nearest')
 
     streams = {}  # Dictionary to store parsed stream names
@@ -233,9 +234,8 @@ def check_mpi_fluxes(result_basedir, list_n_proc):
             result_basedir,
             'processors_{}'.format(n_proc))
         if len(glob.glob(os.path.join(result_dir, '*.nc'))) > 1:
-            warnings.warn(
-                'More than one netCDF file found under directory {}'.
-                    format(result_dir))
+            warnings.warn('More than one netCDF file found under '
+                          'directory {}'.format(result_dir))
         fname = glob.glob(os.path.join(result_dir, '*.nc'))[0]
         ds_current_run = xr.open_dataset(fname)
         # Compare current run with base run
@@ -272,9 +272,8 @@ def check_mpi_states(state_basedir, list_n_proc):
         state_basedir,
         'processors_{}'.format(n_proc))
     if len(glob.glob(os.path.join(state_dir, '*.nc'))) > 1:
-        warnings.warn(
-            'More than one netCDF file found under directory {}'.
-                format(state_dir))
+        warnings.warn('More than one netCDF file found under '
+                      'directory {}'.format(state_dir))
     fname = glob.glob(os.path.join(state_dir, '*.nc'))[0]
     ds_first_run = xr.open_dataset(fname)
 
@@ -288,9 +287,8 @@ def check_mpi_states(state_basedir, list_n_proc):
             state_basedir,
             'processors_{}'.format(n_proc))
         if len(glob.glob(os.path.join(state_dir, '*.nc'))) > 1:
-            warnings.warn(
-                'More than one netCDF file found under directory {}'.
-                    format(result_dir))
+            warnings.warn('More than one netCDF file found under '
+                          'directory {}'.format(state_dir))
         fname = glob.glob(os.path.join(state_dir, '*.nc'))[0]
         ds_current_run = xr.open_dataset(fname)
         # Compare current run with base run

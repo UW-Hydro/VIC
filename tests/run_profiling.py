@@ -113,7 +113,7 @@ mpiexec_mpt -np ${BC_MPI_TASKS_ALLOC} $vic_exe -g $vic_global
 DIFF=$(echo "$END - $START" | bc)
 printf "%5s | %f" ${BC_MPI_TASKS_ALLOC} $DIFF >> $timing_table_file''')}
 
-OUTPUT_WIDTH = 100
+OUT_WIDTH = 100
 
 description = '''
                             VIC Test Suite
@@ -207,12 +207,12 @@ def run_scaling(args):
         if config.template:
             # run on a cluster of some kind
             # start by printing the template
-            print('-'.ljust(OUTPUT_WIDTH, '-'))
+            print('-'.ljust(OUT_WIDTH, '-'))
             print('{host} template'.format(
-                host=args.host).center(OUTPUT_WIDTH))
-            print('-'.ljust(OUTPUT_WIDTH, '-'))
+                host=args.host).center(OUT_WIDTH))
+            print('-'.ljust(OUT_WIDTH, '-'))
             print(config.template)
-            print('-'.ljust(OUTPUT_WIDTH, '-'))
+            print('-'.ljust(OUT_WIDTH, '-'))
             template = string.Template(config.template)
 
             run_string = template.safe_substitute(
@@ -256,8 +256,11 @@ def get_header_info(vic_exe, vic_global):
          '--dirty', '--always', '--tags']).decode()
     header_kwargs['vic_exe'] = vic_exe
     header_kwargs['vic_global'] = vic_global
-    header_kwargs['vic_version'] = subprocess.check_output(
-        [vic_exe, '-v']).decode()
+    try:
+        header_kwargs['vic_version'] = subprocess.check_output(
+            [vic_exe, '-v']).decode()
+    except:
+        pass
     return header_kwargs
 
 

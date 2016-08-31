@@ -50,6 +50,9 @@ get_global_param(FILE *gp)
     unsigned int               tmpstartdate;
     unsigned int               tmpenddate;
     unsigned short int         lastday[MONTHS_PER_YEAR];
+    double                     dtime;
+    double                     offset;
+    dmy_struct                 state_dmy;
 
     file_num = 0;
 
@@ -1219,13 +1222,25 @@ get_global_param(FILE *gp)
                     global_param.stateyear, global_param.statemonth,
                     global_param.stateday, global_param.statesec);
         }
-    }
-    // Set the statename here to be able to compare with INIT_STATE name
-    if (options.SAVE_STATE) {
+        // Set the statename here to be able to compare with INIT_STATE name
+        // Statefile name should reflect the end of the timestep
+        state_dmy.year = global_param.stateyear;
+        state_dmy.month = global_param.statemonth;
+        state_dmy.day = global_param.stateday;
+        state_dmy.dayseconds = global_param.statesec;
+
+        dtime = date2num(global_param.time_origin_num, &state_dmy, 0.,
+                         global_param.calendar, global_param.time_units);
+        dt_seconds_to_time_units(global_param.time_units, global_param.dt,
+                                 &offset);
+        dtime += offset;
+        num2date(global_param.time_origin_num, dtime, 0,
+                 global_param.calendar, global_param.time_units,
+                 &state_dmy);
+
         sprintf(filenames.statefile, "%s_%04i%02i%02i_%05u",
-                filenames.statefile, global_param.stateyear,
-                global_param.statemonth, global_param.stateday,
-                global_param.statesec);
+                filenames.statefile, state_dmy.year, state_dmy.month,
+                state_dmy.day, state_dmy.dayseconds);
     }
     if (options.INIT_STATE && options.SAVE_STATE &&
         (strcmp(filenames.init_state, filenames.statefile) == 0)) {

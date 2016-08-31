@@ -1,6 +1,6 @@
 # VIC Model Parameters
 
-The Image Driver uses the [NetCDF](http://www.unidata.ucar.edu/software/netcdf/) file format for its input model parameters. It is possible to convert the VIC ASCII style parameters to this format. We have put together an example ([Tutorial](Ascii_to_NetCDF_params.md) and [Ipython Notebook](../../../../samples/notebooks/example_reformat_vic4_parameters_to_vic5image.ipynb)) that provide examples of how to do this conversion. Our example uses the `tonic` [Python](https://www.python.org/) Package.
+The Image Driver uses the [NetCDF](http://www.unidata.ucar.edu/software/netcdf/) file format for its input model parameters. It is possible to convert the VIC ASCII style parameters to this format. We have put together an example ([Tutorial](Ascii_to_NetCDF_params.md) and [Ipython Notebook](https://github.com/UW-Hydro/VIC/blob/develop/samples/notebooks/example_reformat_vic4_parameters_to_vic5image.ipynb)) that provide examples of how to do this conversion. Our example uses the `tonic` [Python](https://www.python.org/) Package.
 
 # Soil Parameters
 

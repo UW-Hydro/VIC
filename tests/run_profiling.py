@@ -19,7 +19,16 @@ import numpy as np
 from tonic.models.vic.vic import VIC
 
 host_config = namedtuple('host_config',
-                         ('max_cores', 'template', 'submit', 'mpiexec'))
+                         ('profile', 'template', 'submit', 'mpiexec'))
+
+
+def log2_range(m):
+    '''
+    make an array of integers that increase by 2^n with maximum value of m
+    '''
+    n = int(np.floor(np.log2(m))) + 1
+    return np.exp2(np.arange(n)).astype(np.int)
+
 
 table_header = '''----------------- START VIC SCALING PROFILE -----------------
 
@@ -29,7 +38,6 @@ User                      : $user
 VIC Test Git Version      : $git_version
 VIC Executable            : $vic_exe
 VIC Global Parameter File : $vic_global
-Test Maximum MPI Cores    : $max_cores
 
 VIC Executable Version Info
 ---------------------------
@@ -40,10 +48,13 @@ Cores | Time (Seconds)
 
 
 hosts = {
-    'local': host_config(max_cores=psutil.cpu_count(), submit=None,
+    'local': host_config(profile=[dict(np=np) for np in
+                                  log2_range(psutil.cpu_count())],
+                         submit=None,
                          template=None,
                          mpiexec=os.getenv('MPIEXEC', 'mpiexec')),
-    'hydra': host_config(max_cores=64, submit='qsub', mpiexec='mpiexec',
+    'hydra': host_config(profile=[dict(np=np) for np in log2_range(64)],
+                         submit='qsub', mpiexec='mpiexec',
                          template='''#!/bin/bash
 #
 #$ -N VIC_scaling_test_$np
@@ -62,11 +73,45 @@ if [ "$np" -gt "64" ]
 fi
 
 START=$(date +%s)
-mpiexec -np $np $vic_exe -g $vic_global
+$mpiexec -np $np $vic_exe -g $vic_global
 END=$(date +%s)
 DIFF=$(echo "$END - $START" | bc)
 printf "%5s | %f" $np $DIFF >> $timing_table_file'''),
-    }
+    'topaz': host_config(profile=[dict(select=1, mpiprocs=1),
+                                  dict(select=1, mpiprocs=3),
+                                  dict(select=1, mpiprocs=9),
+                                  dict(select=1, mpiprocs=18),
+                                  dict(select=1, mpiprocs=36),
+                                  dict(select=2, mpiprocs=36),
+                                  dict(select=3, mpiprocs=36),
+                                  dict(select=4, mpiprocs=36),
+                                  dict(select=5, mpiprocs=36),
+                                  dict(select=6, mpiprocs=36),
+                                  dict(select=8, mpiprocs=36),
+                                  dict(select=10, mpiprocs=36),
+                                  dict(select=12, mpiprocs=36)],
+                         submit='qsub', mpiexec='mpiexec_mpt',
+                         template='''#!/bin/bash
+
+#!/bin/bash
+#PBS -N VIC_scaling_test_$np
+#PBS -q standard
+#PBS -A NPSCA07935242
+#PBS -l application=VIC
+#PBS -l select=$select:ncpus=36:mpiprocs=$mpiprocs
+#PBS -l walltime=04:00:00
+#PBS -j oe
+#PBS -o $WORKDIR
+
+# Qsub template for ERDC TOPAZ
+# Scheduler: PBS
+
+module load usp-netcdf/intel-15.0.3/4.3.3.1
+
+START=$(date +%s)
+mpiexec_mpt -np ${BC_MPI_TASKS_ALLOC} $vic_exe -g $vic_global
+DIFF=$(echo "$END - $START" | bc)
+printf "%5s | %f" ${BC_MPI_TASKS_ALLOC} $DIFF >> $timing_table_file''')}
 
 OUT_WIDTH = 100
 
@@ -153,27 +198,27 @@ def run_scaling(args):
 
     # write timing file header
     header = string.Template(table_header)
-    header_kwargs = get_header_info(args.vic_exe, args.global_param,
-                                    config.max_cores)
+    header_kwargs = get_header_info(args.vic_exe, args.global_param)
     header = header.safe_substitute(**header_kwargs)
     with open(args.timing, 'w') as f:
         f.write(header)
 
-    for n in log2_range(config.max_cores).astype(np.int):
+    for i, kwargs in enumerate(config.profile):
         if config.template:
             # run on a cluster of some kind
             # start by printing the template
             print('-'.ljust(OUT_WIDTH, '-'))
-            print('{host} template'.format(host=args.host).center(OUT_WIDTH))
+            print('{host} template'.format(
+                host=args.host).center(OUT_WIDTH))
             print('-'.ljust(OUT_WIDTH, '-'))
             print(config.template)
             print('-'.ljust(OUT_WIDTH, '-'))
             template = string.Template(config.template)
 
             run_string = template.safe_substitute(
-                np=n, vic_exe=args.vic_exe, vic_global=args.global_param,
-                timing_table_file=args.timing)
-            run_file = 'vic_{host}_{n}.sh'.format(host=args.host, n=n)
+                vic_exe=args.vic_exe, vic_global=args.global_param,
+                timing_table_file=args.timing, **kwargs)
+            run_file = 'vic_{host}_{i}.sh'.format(host=args.host, i=i)
             with open(run_file, 'w') as f:
                 f.write(run_string)
 
@@ -187,6 +232,7 @@ def run_scaling(args):
                 os.remove(run_file)
         else:
             # run locally
+            n = kwargs['np']
             print('Running {} with {} processors'.format(args.vic_exe, n))
             if not args.test:
                 start = time.time()
@@ -199,15 +245,7 @@ def run_scaling(args):
     print('See %s for scaling table' % args.timing)
 
 
-def log2_range(m):
-    '''
-    make an array of integers that increase by 2^n with maximum value of m
-    '''
-    n = int(np.floor(np.log2(m))) + 1
-    return np.exp2(np.arange(n)).astype(np.int)
-
-
-def get_header_info(vic_exe, vic_global, max_cores):
+def get_header_info(vic_exe, vic_global):
     '''get info for timing table headers'''
     header_kwargs = {}
     header_kwargs['date'] = datetime.datetime.now()
@@ -218,9 +256,11 @@ def get_header_info(vic_exe, vic_global, max_cores):
          '--dirty', '--always', '--tags']).decode()
     header_kwargs['vic_exe'] = vic_exe
     header_kwargs['vic_global'] = vic_global
-    header_kwargs['max_cores'] = max_cores
-    header_kwargs['vic_version'] = subprocess.check_output(
-        [vic_exe, '-v']).decode()
+    try:
+        header_kwargs['vic_version'] = subprocess.check_output(
+            [vic_exe, '-v']).decode()
+    except:
+        pass
     return header_kwargs
 
 

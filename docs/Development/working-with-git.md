@@ -20,7 +20,7 @@ In general, if you are only going to be using the model and not working directly
 If you plan on contributing to model development or would like a systematic way to incorporate updates to the VIC source code, we encourage you to use Git.  The following sections are designed to get you started using git and working with the VIC source code repository.
 
 ## Git Resources
-If you are not familiar with [Git](http://git-scm.com/) yet, we encourage you to spend a some time becoming acquainted with the system before you starting working with the VIC source code and Git.  A few minutes of learning about [Git](http://git-scm.com/) will go along way in helping you manage your code development.
+If you are not familiar with [Git](http://git-scm.com/) yet, we encourage you to get acquainted with it before you start working with the VIC source code.  A few minutes of learning about [Git](http://git-scm.com/) will go along way in helping you manage your code development.
 
 There are a number of good [Git](http://git-scm.com/) learning resources that will provide a basic introduction to the version control system.
 
@@ -28,7 +28,7 @@ There are a number of good [Git](http://git-scm.com/) learning resources that wi
 - https://help.github.com/
 
 # Getting the code
-The basic steps to obtain the VIC source code repository are as follows.  This follows the same steps as the following tutorial: https://help.github.com/articles/fork-a-repo
+To obtain the VIC source code repository, follow the steps in this tutorial: https://help.github.com/articles/fork-a-repo
 
 ## Step 0: A few definitions
 Using [Git](http://git-scm.com/) involves a few different copies of the archive:

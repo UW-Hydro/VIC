@@ -53,7 +53,7 @@ This is a major update from VIC 4. The VIC 5.0.0 release aims to have nearly ide
 
 6. Sub-hourly Timestep ([GH#188](https://github.com/UW-Hydro/VIC/pull/188))
 
-	Previous versions of VIC were limited to a minimum timestep of one hour. The units of the VIC timestep have been changed from hours to seconds and the minimum timestep is now one second. If you intend on running VIC at a timestep of less than one hour, we suggest significant testing.
+	Previous versions of VIC were limited to a minimum timestep of one hour. The units of the VIC timestep have been changed from hours to seconds and the minimum timestep is now one second. If you intend on running VIC at a timestep of less than one hour, we suggest extensive testing.
 
 
 7. Calendar Support ([GH#188](https://github.com/UW-Hydro/VIC/pull/188))

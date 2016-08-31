@@ -40,7 +40,8 @@ Cores | Time (Seconds)
 
 
 hosts = {
-    'local': host_config(max_cores=psutil.cpu_count(), submit=None, template=None,
+    'local': host_config(max_cores=psutil.cpu_count(), submit=None,
+                         template=None,
                          mpiexec=os.getenv('MPIEXEC', 'mpiexec')),
     'hydra': host_config(max_cores=64, submit='qsub', mpiexec='mpiexec',
                          template='''#!/bin/bash
@@ -67,7 +68,7 @@ DIFF=$(echo "$END - $START" | bc)
 printf "%5s | %f" $np $DIFF >> $timing_table_file'''),
     }
 
-OUTPUT_WIDTH = 100
+OUT_WIDTH = 100
 
 description = '''
                             VIC Test Suite
@@ -75,7 +76,8 @@ description = '''
 This is the VIC Profiling Test Suite. There are 2 main test types:
 
     1. Gprof Profiling: This test will generate a profiling call graph using
-        gprof. This test requires building your VIC executable with the flags `-pg`.
+        gprof. This test requires building your VIC executable with the
+        flags `-pg`.
     2. Scaling: This test will generate a MPI scaling timing table.
 -------------------------------------------------------------------------------
 '''
@@ -119,7 +121,8 @@ def main():
     parser.add_argument('--timing', '-t', type=str,
                         default='vic_timing_{}.txt'.format(ymd),
                         help='path to timing file')
-    parser.add_argument('--clean', action='store_true', help='Clean up run files')
+    parser.add_argument('--clean', action='store_true',
+                        help='Clean up run files')
     parser.add_argument('--test', action='store_true',
                         help='Test the setup but do not run VIC')
 
@@ -160,16 +163,16 @@ def run_scaling(args):
         if config.template:
             # run on a cluster of some kind
             # start by printing the template
-            print('-'.ljust(OUTPUT_WIDTH, '-'))
-            print('{host} template'.format(host=args.host).center(OUTPUT_WIDTH))
-            print('-'.ljust(OUTPUT_WIDTH, '-'))
+            print('-'.ljust(OUT_WIDTH, '-'))
+            print('{host} template'.format(host=args.host).center(OUT_WIDTH))
+            print('-'.ljust(OUT_WIDTH, '-'))
             print(config.template)
-            print('-'.ljust(OUTPUT_WIDTH, '-'))
+            print('-'.ljust(OUT_WIDTH, '-'))
             template = string.Template(config.template)
 
-            run_string = template.safe_substitute(np=n, vic_exe=args.vic_exe,
-                                                  vic_global=args.global_param,
-                                                  timing_table_file=args.timing)
+            run_string = template.safe_substitute(
+                np=n, vic_exe=args.vic_exe, vic_global=args.global_param,
+                timing_table_file=args.timing)
             run_file = 'vic_{host}_{n}.sh'.format(host=args.host, n=n)
             with open(run_file, 'w') as f:
                 f.write(run_string)
@@ -197,7 +200,9 @@ def run_scaling(args):
 
 
 def log2_range(m):
-    '''make an array of integers that increase by 2^n with maximum value of m'''
+    '''
+    make an array of integers that increase by 2^n with maximum value of m
+    '''
     n = int(np.floor(np.log2(m))) + 1
     return np.exp2(np.arange(n)).astype(np.int)
 
@@ -209,11 +214,13 @@ def get_header_info(vic_exe, vic_global, max_cores):
     header_kwargs['hostname'] = socket.gethostname()
     header_kwargs['user'] = getpass.getuser()
     header_kwargs['git_version'] = subprocess.check_output(
-        ['git', 'describe', '--abbrev=4', '--dirty', '--always', '--tags']).decode()
+        ['git', 'describe', '--abbrev=4',
+         '--dirty', '--always', '--tags']).decode()
     header_kwargs['vic_exe'] = vic_exe
     header_kwargs['vic_global'] = vic_global
     header_kwargs['max_cores'] = max_cores
-    header_kwargs['vic_version'] = subprocess.check_output([vic_exe, '-v']).decode()
+    header_kwargs['vic_version'] = subprocess.check_output(
+        [vic_exe, '-v']).decode()
     return header_kwargs
 
 

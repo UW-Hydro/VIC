@@ -196,9 +196,7 @@ main(int   argc,
                 n = streams[streamnum].agg_alarm.n;
                 set_alarm(&(dmy[0]), streams[streamnum].agg_alarm.freq,
                           &n,
-                          &(streams[streamnum].agg_alarm),
-                          - (double) 1 /
-                          (double) global_param.model_steps_per_day);
+                          &(streams[streamnum].agg_alarm));
             }
 
             /** Read Elevation Band Data if Used **/

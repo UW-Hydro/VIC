@@ -230,7 +230,7 @@ vic_write(stream_struct  *stream,
             check_nc_status(status, "Error closing history file");
             nc_hist_file->open = false;
         }
-        reset_alarm(&(stream->write_alarm), dmy_current, 0);
+        reset_alarm(&(stream->write_alarm), dmy_current);
     }
     else {
         // Force sync with disk (GH:#596)

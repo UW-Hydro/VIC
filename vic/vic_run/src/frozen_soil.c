@@ -374,7 +374,6 @@ calc_soil_thermal_fluxes(int       Nnodes,
     double                   maxdiff;
     double                   diff;
     double                   oldT;
-    char                     ErrorString[MAXSTRING];
     double                   Tlast[MAX_NODES];
 
     Error = 0;
@@ -419,7 +418,7 @@ calc_soil_thermal_fluxes(int       Nnodes,
             else {
                 T[j] =
                     root_brent(T0[j] - (param.SOIL_DT), T0[j] + (param.SOIL_DT),
-                               ErrorString, soil_thermal_eqn,
+                               soil_thermal_eqn,
                                T[j + 1], T[j - 1], T0[j], moist[j],
                                max_moist[j], bubble[j], expt[j], ice[j],
                                A[j], B[j], C[j], D[j], E[j], EXP_TRANS, j);
@@ -436,7 +435,7 @@ calc_soil_thermal_fluxes(int       Nnodes,
                                               ice[j],
                                               gamma[j - 1], A[j], B[j], C[j],
                                               D[j],
-                                              E[j], ErrorString);
+                                              E[j]);
                         return (ERROR);
                     }
                 }
@@ -471,7 +470,7 @@ calc_soil_thermal_fluxes(int       Nnodes,
             else {
                 T[Nnodes - 1] = root_brent(T0[Nnodes - 1] - param.SOIL_DT,
                                            T0[Nnodes - 1] + param.SOIL_DT,
-                                           ErrorString, soil_thermal_eqn,
+                                           soil_thermal_eqn,
                                            T[Nnodes - 1],
                                            T[Nnodes - 2], T0[Nnodes - 1],
                                            moist[Nnodes - 1],
@@ -494,8 +493,7 @@ calc_soil_thermal_fluxes(int       Nnodes,
                                               bubble[Nnodes - 1],
                                               expt[Nnodes - 1], ice[Nnodes - 1],
                                               gamma[Nnodes - 2],
-                                              A[j], B[j], C[j], D[j], E[j],
-                                              ErrorString);
+                                              A[j], B[j], C[j], D[j], E[j]);
                         return (ERROR);
                     }
                 }
@@ -594,7 +592,6 @@ error_print_solve_T_profile(double  T,
     double C;
     double D;
     double E;
-    char  *ErrorString;
 
     TL = (double) va_arg(ap, double);
     TU = (double) va_arg(ap, double);
@@ -610,12 +607,10 @@ error_print_solve_T_profile(double  T,
     C = (double) va_arg(ap, double);
     D = (double) va_arg(ap, double);
     E = (double) va_arg(ap, double);
-    ErrorString = (char *) va_arg(ap, char *);
 
-    fprintf(LOG_DEST, "%s", ErrorString);
-    fprintf(LOG_DEST, "ERROR: solve_T_profile failed to converge to a solution "
-            "in root_brent.  Variable values will be dumped to the "
-            "screen, check for invalid values.\n");
+    log_warn("solve_T_profile failed to converge to a solution "
+             "in root_brent.  Variable values will be dumped to the "
+             "screen, check for invalid values.");
 
     fprintf(LOG_DEST, "T\t%f\n", T);
     fprintf(LOG_DEST, "TL\t%f\n", TL);
@@ -633,9 +628,9 @@ error_print_solve_T_profile(double  T,
     fprintf(LOG_DEST, "D\t%f\n", D);
     fprintf(LOG_DEST, "E\t%f\n", E);
 
-    fprintf(LOG_DEST, "Finished dumping values for solve_T_profile.\n"
-            "Try increasing SOIL_DT to get model to complete cell.\n"
-            "Then check output for instabilities.\n");
+    log_warn("Finished dumping values for solve_T_profile.\n"
+             "Try increasing SOIL_DT to get model to complete cell.\n"
+             "Then check output for instabilities.");
 
     return(ERROR);
 }

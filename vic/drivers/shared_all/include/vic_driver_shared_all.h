@@ -696,14 +696,14 @@ void print_version(char *);
 void print_usage(char *);
 double q_to_vp(double q, double p);
 bool raise_alarm(alarm_struct *alarm, dmy_struct *dmy_current);
-void reset_alarm(alarm_struct *alarm, dmy_struct *dmy_current, double offset);
+void reset_alarm(alarm_struct *alarm, dmy_struct *dmy_current);
 void reset_stream(stream_struct *stream, dmy_struct *dmy_current);
 void set_output_var(stream_struct *stream, char *varname, size_t varnum,
                     char *format, unsigned short int type, double mult,
                     unsigned short int aggtype);
 unsigned int get_default_outvar_aggtype(unsigned int varid);
 void set_alarm(dmy_struct *dmy_current, unsigned int freq, void *value,
-               alarm_struct *alarm, double offset);
+               alarm_struct *alarm);
 void set_output_defaults(stream_struct **output_streams,
                          dmy_struct     *dmy_current,
                          unsigned short  default_file_format);

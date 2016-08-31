@@ -112,9 +112,7 @@ parse_output_info(FILE           *gp,
                     strpdmy(freq_value_str, "%Y-%m-%d", &freq_dmy);
                     // set the alarm
                     set_alarm(dmy_current, freq, &freq_dmy,
-                              (&(*streams)[streamnum].agg_alarm),
-                              - (double) 1 /
-                              (double) global_param.model_steps_per_day);
+                              (&(*streams)[streamnum].agg_alarm));
                 }
                 else {
                     if (found != 2) {
@@ -127,9 +125,7 @@ parse_output_info(FILE           *gp,
                     }
                     // set the alarm
                     set_alarm(dmy_current, freq, &freq_n,
-                              (&(*streams)[streamnum].agg_alarm),
-                              - (double) 1 /
-                              (double) global_param.model_steps_per_day);
+                              (&(*streams)[streamnum].agg_alarm));
                 }
             }
             else if (strcasecmp("HISTFREQ", optstr) == 0) {
@@ -156,9 +152,7 @@ parse_output_info(FILE           *gp,
                     strpdmy(freq_value_str, "%Y-%m-%d", &freq_dmy);
                     // set the alarm
                     set_alarm(dmy_current, freq, &freq_dmy,
-                              (&(*streams)[streamnum].write_alarm),
-                              - (double) 1 /
-                              (double) global_param.model_steps_per_day);
+                              (&(*streams)[streamnum].write_alarm));
                 }
                 else {
                     if (found != 2) {
@@ -171,9 +165,7 @@ parse_output_info(FILE           *gp,
                     }
                     // set the alarm
                     set_alarm(dmy_current, freq, &freq_n,
-                              (&(*streams)[streamnum].write_alarm),
-                               - (double )1 /
-                               (double) global_param.model_steps_per_day);
+                              (&(*streams)[streamnum].write_alarm));
                 }
             }
             else if (strcasecmp("COMPRESS", optstr) == 0) {

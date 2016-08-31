@@ -107,8 +107,7 @@ set_output_defaults(stream_struct **streams,
     int                  default_freq_n = 1;
 
 
-    set_alarm(dmy_current, FREQ_NDAYS, &default_freq_n, &default_alarm,
-              - (double ) 1 / (double) global_param.model_steps_per_day);
+    set_alarm(dmy_current, FREQ_NDAYS, &default_freq_n, &default_alarm);
 
     for (streamnum = 0; streamnum < options.Noutstreams; streamnum++) {
         (*streams)[streamnum].agg_alarm = default_alarm;

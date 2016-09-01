@@ -12,8 +12,9 @@ import numpy as np
 import pandas as pd
 import xarray as xr
 
-# Plottling libs
+# Plotting libs
 import matplotlib
+matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 import seaborn as sns
 
@@ -21,8 +22,6 @@ import seaborn as sns
 from tonic.models.vic.vic import (VICRuntimeError,
                                   default_vic_valgrind_error_code)
 from tonic.testing import check_completed, check_for_nans, VICTestError
-
-matplotlib.use('Agg')
 
 OUTPUT_WIDTH = 100
 ERROR_TAIL = 20  # lines

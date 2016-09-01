@@ -859,14 +859,20 @@ time_delta(dmy_struct        *dmy_current,
             // if dmy_next.year is not leap year but date is Feb 29 !)
             make_lastday(global_param.calendar, dmy_next.year, lastday);
             dmy_next.day_in_year = 0;
-            for ( i = 1; i <= MONTHS_PER_YEAR; i++ ) {
-                if ( i < dmy_next.month ) {
-                    dmy_next.day_in_year += lastday[i-1];
-                }
-                else if ( i == dmy_next.month ) {
+            for ( i = 0; i < MONTHS_PER_YEAR; i++ ) {
+                if ( (i+1) == dmy_next.month ) {
                     dmy_next.day_in_year += dmy_next.day;
                     break;
                 }
+                else {
+                    dmy_next.day_in_year += lastday[i];
+                }
+            }
+            // check if the advanced date is a valid date
+            if (invalid_date(global_param.calendar, &dmy_next)) {
+                log_err("VIC does not support a simulation starting from "
+                        "Feb 29 of a leap year with yearly AGGFREQ or "
+                        "HISTFREQ.");
             }
         }
         else {

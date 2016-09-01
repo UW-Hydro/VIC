@@ -28,7 +28,6 @@ from test_utils import (
             check_drivers_match_fluxes,
             plot_science_tests)
 from test_image_driver import (test_image_driver_no_output_file_nans,
-                               check_multistream_image,
                                setup_subdirs_and_fill_in_global_param_mpi_test,
                                check_mpi_fluxes, check_mpi_states)
 from test_restart import (prepare_restart_run_periods,
@@ -135,7 +134,8 @@ def main():
                         default=os.path.join(test_dir, 'science/science.cfg'))
     parser.add_argument('--examples', type=str,
                         help='examples tests configuration file',
-                        default=os.path.join(test_dir, 'examples/examples.cfg'))
+                        default=os.path.join(test_dir,
+                                             'examples/examples.cfg'))
     parser.add_argument('--release', type=str,
                         help='release tests configuration file',
                         default=os.path.join(test_dir, 'release/release.cfg'))
@@ -166,7 +166,8 @@ def main():
     # check to make sure science test data directory exists
     science_test_data_dir = args.science_test_data_dir
     if 'science' in args.tests and not os.path.exists(science_test_data_dir):
-        raise VICTestError("directory for science test data does not exist or has not been defined")
+        raise VICTestError('directory for science test data does not exist or '
+                           'has not been defined')
 
     # Validate input directories
     if not (len(args.tests) == 1 and args.tests[0] == 'unit'):
@@ -372,7 +373,7 @@ def run_system(config_file, dict_drivers, test_data_dir, out_dir):
         else:
             for j, dr in enumerate(test_dict['driver']):
                 infile = os.path.join(test_dir, 'system',
-                                    test_dict['global_parameter_file'][j])
+                                      test_dict['global_parameter_file'][j])
                 with open(infile, 'r') as global_file:
                     dict_global_param[dr] = global_file.read()
 
@@ -380,10 +381,12 @@ def run_system(config_file, dict_drivers, test_data_dir, out_dir):
         if 'exact_restart' in test_dict['check']:
             if len(dict_drivers) > 1:
                 raise ValueError('Only support single driver for restart'
-                                   'tests!')
+                                 'tests!')
             global_param = dict_global_param[driver]
-            # (1) Find STATESEC option (and STATE_FORMAT option for later use)
-            statesec = find_global_param_value(global_param, 'STATESEC')
+            # () Find STATE_FORMAT option for later use
+            model_steps_per_day = find_global_param_value(
+                                        global_param,
+                                        'MODEL_STEPS_PER_DAY')
             if driver == 'classic':
                 state_format = find_global_param_value(global_param,
                                                        'STATE_FORMAT')
@@ -391,7 +394,8 @@ def run_system(config_file, dict_drivers, test_data_dir, out_dir):
             # restart test
             run_periods = prepare_restart_run_periods(
                                 test_dict['restart'],
-                                dirs['state'], statesec)
+                                dirs['state'])
+
         # If mpi test, prepare a list of number of processors to be run
         elif 'mpi' in test_dict['check']:
             if len(dict_drivers) > 1:
@@ -456,7 +460,6 @@ def run_system(config_file, dict_drivers, test_data_dir, out_dir):
         if 'exact_restart' in test_dict['check']:
             if 'STATE_FORMAT' in replacements:
                 state_format = replacements['STATE_FORMAT']
-
         if 'exact_restart' in test_dict['check'] or\
            'mpi' in test_dict['check']:  # if multiple runs
             for j, gp in enumerate(list_global_param):
@@ -621,11 +624,11 @@ def run_system(config_file, dict_drivers, test_data_dir, out_dir):
                                                run_periods)
                     if driver == 'classic':
                         check_exact_restart_states(dirs['state'], driver,
-                                                   run_periods, statesec,
+                                                   run_periods,
                                                    state_format)
                     elif driver == 'image':
                         check_exact_restart_states(dirs['state'], driver,
-                                                   run_periods, statesec)
+                                                   run_periods)
                     else:
                         raise ValueError('unknown driver')
 
@@ -734,7 +737,7 @@ def run_science(config_file, vic_exe, science_test_data_dir,
 
         # read template global parameter file
         infile = os.path.join(test_dir, 'science',
-                                test_dict['global_parameter_file'])
+                              test_dict['global_parameter_file'])
 
         with open(infile, 'r') as global_file:
             global_param = global_file.read()
@@ -750,8 +753,8 @@ def run_science(config_file, vic_exe, science_test_data_dir,
                                          testname=test_type,
                                          test_root=test_dir)
 
-        test_global_file = os.path.join(dirs['test'],
-                                        '{0}_globalparam.txt'.format(test_type))
+        test_global_file = os.path.join(
+            dirs['test'], '{0}_globalparam.txt'.format(test_type))
 
         # write global parameter file
         with open(test_global_file, 'w') as f:

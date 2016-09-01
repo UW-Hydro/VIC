@@ -191,3 +191,9 @@ Using options within the *global parameter file*, any combination of the variabl
 | OUT_CLITTER    	| carbon density in litter pool                	| g C/m<sup>2</sup>  	|
 | OUT_CINTER     	| carbon density in intermediate pool          	| g C/m<sup>2</sup>  	|
 | OUT_CSLOW      	| carbon density in slow pool                  	| g C/m<sup>2</sup>  	|
+
+## Profiling/Timing Terms
+| Variable             | Description                    | Units   |
+|--------------------- |------------------------------- |-------- |
+| OUT_TIME_VICRUN_WALL | Wall time spent inside vic_run | seconds |
+| OUT_TIME_VICRUN_CPU  | CPU time spent inside vic_run  | seconds |

@@ -17,7 +17,7 @@ STATENAME       $state_dir/states
 STATEYEAR       $stateyear
 STATEMONTH      $statemonth
 STATEDAY        $stateday
-STATESEC        82800
+STATESEC        $statesec
 STATE_FORMAT    ASCII
 
 FORCING1             $test_data_dir/classic/Stehekin/forcings/full_data_

@@ -59,7 +59,6 @@
 *
 * @param LowerBound Lower bound for root
 * @param UpperBound Upper bound for root
-* @param ErrorString For storing description of errors (if any)
 * @param Function
 * @param ap Variable arguments
 * @return b
@@ -67,7 +66,6 @@
 double
 root_brent(double LowerBound,
            double UpperBound,
-           char *ErrorString,
            double (*Function)(double Estimate, va_list ap),
            ...)
 {
@@ -145,9 +143,9 @@ root_brent(double LowerBound,
             /* if we get here, we could not find a bound for which the function
                returns a valid value */
             log_warn("the given function produced "
-                    "undefined values while attempting to "
-                    "bracket the root between %f and %f. Driver info: %s.",
-                    LowerBound, UpperBound, vic_run_ref_str);
+                     "undefined values while attempting to "
+                     "bracket the root between %f and %f. Driver info: %s.",
+                     LowerBound, UpperBound, vic_run_ref_str);
             va_end(ap);
             return(ERROR);
         }

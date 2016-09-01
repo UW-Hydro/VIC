@@ -77,6 +77,8 @@ vic_write(stream_struct  *stream,
     size_t                     dstart[MAXDIMS];
     unsigned int               varid;
     int                        status;
+    double                     offset;
+    double                     bounds[2];
 
     if (mpi_rank == VIC_MPI_ROOT) {
         // If the output file is not open, initialize the history file now.
@@ -209,16 +211,35 @@ vic_write(stream_struct  *stream,
 
     // write to file
     if (mpi_rank == VIC_MPI_ROOT) {
-        // ADD Time variable
+        // Add time variable
         dstart[0] = stream->write_alarm.count;
 
-        dtime = date2num(global_param.time_origin_num, dmy_current, 0.,
+        // timestamp is the beginning of the aggregation window
+        dtime = date2num(global_param.time_origin_num,
+                         &(stream->time_bounds[0]), 0.,
                          global_param.calendar, global_param.time_units);
 
         status = nc_put_var1_double(nc_hist_file->nc_id,
                                     nc_hist_file->time_varid,
                                     dstart, &dtime);
         check_nc_status(status, "Error writing time variable");
+
+        // Add time bounds variable
+        dstart[1] = 0;
+        dcount[0] = 1;
+        dcount[1] = 2;
+        bounds[0] = dtime;
+        dt_seconds_to_time_units(global_param.time_units, global_param.dt,
+                                 &offset);
+        bounds[1] = offset + date2num(global_param.time_origin_num,
+                                      &(stream->time_bounds[1]), 0.,
+                                      global_param.calendar,
+                                      global_param.time_units);
+
+        status = nc_put_vara_double(nc_hist_file->nc_id,
+                                    nc_hist_file->time_bounds_varid,
+                                    dstart, dcount, bounds);
+        check_nc_status(status, "Error writing time bounds variable");
     }
 
     // Advance the position in the history file
@@ -231,6 +252,14 @@ vic_write(stream_struct  *stream,
             nc_hist_file->open = false;
         }
         reset_alarm(&(stream->write_alarm), dmy_current);
+    }
+    else {
+        // Force sync with disk (GH:#596)
+        if (mpi_rank == VIC_MPI_ROOT) {
+            status = nc_sync(nc_hist_file->nc_id);
+            check_nc_status(status, "Error syncing netCDF file %s",
+                            stream->filename);
+        }
     }
 
     // free memory

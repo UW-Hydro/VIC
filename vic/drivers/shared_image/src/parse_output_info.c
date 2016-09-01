@@ -38,25 +38,25 @@ parse_output_info(FILE           *gp,
     extern option_struct       options;
     extern global_param_struct global_param;
 
-    char                 cmdstr[MAXSTRING];
-    char                 optstr[MAXSTRING];
-    char                 flgstr[MAXSTRING];
-    short int            streamnum;
-    char                 varname[MAXSTRING];
-    int                  outvarnum;
-    char                 freq_type_str[MAXSTRING];
-    char                 freq_value_str[MAXSTRING];
-    char                 format[MAXSTRING];
-    char                 typestr[MAXSTRING];
-    int                  type;
-    char                 multstr[MAXSTRING];
-    char                 aggstr[MAXSTRING];
-    double               mult;
-    unsigned short int   freq;
-    int                  freq_n;
-    dmy_struct           freq_dmy;
-    unsigned short int   agg_type;
-    int                  found;
+    char                       cmdstr[MAXSTRING];
+    char                       optstr[MAXSTRING];
+    char                       flgstr[MAXSTRING];
+    short int                  streamnum;
+    char                       varname[MAXSTRING];
+    int                        outvarnum;
+    char                       freq_type_str[MAXSTRING];
+    char                       freq_value_str[MAXSTRING];
+    char                       format[MAXSTRING];
+    char                       typestr[MAXSTRING];
+    int                        type;
+    char                       multstr[MAXSTRING];
+    char                       aggstr[MAXSTRING];
+    double                     mult;
+    unsigned short int         freq;
+    int                        freq_n;
+    dmy_struct                 freq_dmy;
+    unsigned short int         agg_type;
+    int                        found;
 
     streamnum = -1;
 

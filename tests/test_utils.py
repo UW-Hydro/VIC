@@ -243,9 +243,8 @@ def read_vic_ascii(filepath, parse_dates=True, datetime_index=None, sep='\t',
         time_cols = ['YEAR', 'MONTH', 'DAY']
         df.index = pd.to_datetime(df[time_cols])
         if 'SEC' in df:
-            df.index += pd.Series([pd.Timedelta(s, unit='s') for s in
-                                  df['SEC']],
-                                  index=df.index)
+            df.index += pd.Series(
+                [pd.Timedelta(s, unit='s') for s in df['SEC']], index=df.index)
             time_cols.append('SEC')
         df.drop(time_cols, inplace=True, axis=1)
 
@@ -389,9 +388,9 @@ def setup_subdirs_and_fill_in_global_param_driver_match_test(
         # Fill in global parameter options
         s = dict_s[driver]
         dict_global_param[driver] = s.safe_substitute(
-                test_data_dir=test_data_dir,
-                result_dir=result_dir,
-                state_dir=state_dir)
+            test_data_dir=test_data_dir,
+            result_dir=result_dir,
+            state_dir=state_dir)
 
     return(dict_global_param)
 
@@ -475,7 +474,7 @@ def check_drivers_match_fluxes(list_drivers, result_basedir):
                         # decimal ~= - log10(max_abs_value) + 1 --- #
                         else:
                             decimal = int(round(- np.log10(np.max(np.absolute(
-                                            ds_image_cell[var].values))) + 1))
+                                ds_image_cell[var].values))) + 1))
                         # --- keep decimal to be no greater than 4 --- #
                         if decimal > 4:
                             decimal = 4
@@ -497,7 +496,7 @@ def check_drivers_match_fluxes(list_drivers, result_basedir):
                                 decimal = 2
                             else:
                                 decimal = int(round(- np.log10(np.max(
-                                            np.absolute(s_image.values))) + 1))
+                                    np.absolute(s_image.values))) + 1))
                             if decimal > 4:
                                 decimal = 4
                             # assert almost eqaul
@@ -521,7 +520,7 @@ def tsplit(string, delimiters):
             substack = substring.split(delimiter)
             stack.pop(i)
             for j, _substring in enumerate(substack):
-                stack.insert(i+j, _substring)
+                stack.insert(i + j, _substring)
 
     return stack
 
@@ -582,18 +581,18 @@ def read_vic_42_output(lat, lng, science_test_data_dir, items):
     # rename radiation variables to be consistent with VIC 5
     if items['compare_to'] == 'ecflux':
         vic_42 = vic_42.rename(columns=lambda x: x.replace('OUT_NET_SHORT',
-                               'OUT_SWNET'))
+                                                           'OUT_SWNET'))
         vic_42 = vic_42.rename(columns=lambda x: x.replace('OUT_NET_LONG',
-                               'OUT_LWNET'))
+                                                           'OUT_LWNET'))
 
     # add datetime index
     time_cols = ['YEAR', 'MONTH', 'DAY']
     vic_42.index = pd.to_datetime(vic_42[time_cols])
 
     if 'HOUR' in vic_42:
-        vic_42.index += pd.Series([pd.Timedelta(s, unit='h') for s in
-                                  vic_42['HOUR']],
-                                  index=vic_42.index)
+        vic_42.index += pd.Series(
+            [pd.Timedelta(s, unit='h') for s in vic_42['HOUR']],
+            index=vic_42.index)
         time_cols.append('HOUR')
 
     # remove year, day columns of DataFrame
@@ -641,7 +640,6 @@ def read_vic_5_output(lat, lng, result_dir, items):
 
 def plot_science_tests(driver, test_type, science_test_data_dir, result_dir,
                        plot_dir, plots_to_make, compare_data, nproc):
-
     ''' makes science test figures
 
     Parameters
@@ -726,72 +724,72 @@ def plot_snotel_comparison(driver, science_test_data_dir,
 
 
 def plot_snotel_comparison_one_site(
-                            driver, science_test_data_dir,
-                            compare_data_dict,
-                            result_dir, plot_dir,
-                            plots_to_make,
-                            plot_variables, context, style, filename):
+        driver, science_test_data_dir,
+        compare_data_dict,
+        result_dir, plot_dir,
+        plots_to_make,
+        plot_variables, context, style, filename):
 
         # get lat/lng from filename
-        file_split = re.split('_', filename)
-        lng = file_split[3].split('.txt')[0]
-        lat = file_split[2]
-        print('Plotting {} {}'.format(lat, lng))
+    file_split = re.split('_', filename)
+    lng = file_split[3].split('.txt')[0]
+    lat = file_split[2]
+    print('Plotting {} {}'.format(lat, lng))
 
-        # loop over data to compare
-        data = {}
-        for key, items in compare_data_dict.items():
+    # loop over data to compare
+    data = {}
+    for key, items in compare_data_dict.items():
 
             # read in data
-            if key == "snotel":
-                data[key] = read_snotel_swe_obs(filename,
-                                                science_test_data_dir,
-                                                items)
+        if key == "snotel":
+            data[key] = read_snotel_swe_obs(filename,
+                                            science_test_data_dir,
+                                            items)
 
-            elif key == "VIC.4.2.d":
-                data[key] = read_vic_42_output(lat, lng,
-                                               science_test_data_dir,
-                                               items)
+        elif key == "VIC.4.2.d":
+            data[key] = read_vic_42_output(lat, lng,
+                                           science_test_data_dir,
+                                           items)
 
-            else:
-                data[key] = read_vic_5_output(lat, lng,
-                                              result_dir,
-                                              items)
+        else:
+            data[key] = read_vic_5_output(lat, lng,
+                                          result_dir,
+                                          items)
 
-        # loop over variables to plot
-        for plot_variable, units in plot_variables.items():
+    # loop over variables to plot
+    for plot_variable, units in plot_variables.items():
 
-            if 'water_year' in plots_to_make:
+        if 'water_year' in plots_to_make:
 
-                with plt.rc_context(dict(sns.axes_style(style),
-                                    **sns.plotting_context(context))):
-                    fig, ax = plt.subplots(figsize=(10, 10))
+            with plt.rc_context(dict(sns.axes_style(style),
+                                     **sns.plotting_context(context))):
+                fig, ax = plt.subplots(figsize=(10, 10))
 
-                    df = pd.DataFrame({key: d[plot_variable] for key, d in
-                                       data.items() if plot_variable in d})
+                df = pd.DataFrame({key: d[plot_variable] for key, d in
+                                   data.items() if plot_variable in d})
 
-                    for key, series in df.iteritems():
-                        series.plot(
-                            use_index=True,
-                            linewidth=compare_data_dict[key]['linewidth'],
-                            ax=ax,
-                            color=compare_data_dict[key]['color'],
-                            linestyle=compare_data_dict[key]
-                            ['linestyle'],
-                            zorder=compare_data_dict[key]['zorder'])
+                for key, series in df.iteritems():
+                    series.plot(
+                        use_index=True,
+                        linewidth=compare_data_dict[key]['linewidth'],
+                        ax=ax,
+                        color=compare_data_dict[key]['color'],
+                        linestyle=compare_data_dict[key]
+                        ['linestyle'],
+                        zorder=compare_data_dict[key]['zorder'])
 
-                    ax.legend(loc='upper left')
-                    ax.set_ylabel("%s [%s]" % (plot_variable, units))
+                ax.legend(loc='upper left')
+                ax.set_ylabel("%s [%s]" % (plot_variable, units))
 
-                    # save figure
-                    os.makedirs(os.path.join(plot_dir, plot_variable),
-                                exist_ok=True)
-                    plotname = '%s_%s.png' % (lat, lng)
-                    savepath = os.path.join(plot_dir, plot_variable, plotname)
-                    plt.savefig(savepath, bbox_inches='tight')
+                # save figure
+                os.makedirs(os.path.join(plot_dir, plot_variable),
+                            exist_ok=True)
+                plotname = '%s_%s.png' % (lat, lng)
+                savepath = os.path.join(plot_dir, plot_variable, plotname)
+                plt.savefig(savepath, bbox_inches='tight')
 
-                    plt.clf()
-                    plt.close()
+                plt.clf()
+                plt.close()
 
 
 def check_site_files(obs_dir, subdir):
@@ -847,9 +845,9 @@ def read_fluxnet_obs(subdir, science_test_data_dir, items):
     ecflux_df.index = pd.to_datetime(ecflux_df[time_cols])
 
     if 'HOUR' in ecflux_df:
-        ecflux_df.index += pd.Series([pd.Timedelta(s, unit='h') for s in
-                                     ecflux_df['HOUR']],
-                                     index=ecflux_df.index)
+        ecflux_df.index += pd.Series(
+            [pd.Timedelta(s, unit='h') for s in ecflux_df['HOUR']],
+            index=ecflux_df.index)
         time_cols.append('HOUR')
 
     # remove year, day columns of DataFrame
@@ -952,7 +950,7 @@ def plot_fluxnet_comparison_one_site(driver, science_test_data_dir,
 
             # make annual mean diurnal cycle plots
             with plt.rc_context(dict(sns.axes_style(style),
-                                **sns.plotting_context(context))):
+                                     **sns.plotting_context(context))):
                 f, axarr = plt.subplots(4, 1, figsize=(8, 8), sharex=True)
 
                 for i, (vic_var, variable_name) in enumerate(
@@ -999,7 +997,7 @@ def plot_fluxnet_comparison_one_site(driver, science_test_data_dir,
 
             # make monthly mean diurnal cycle plots
             with plt.rc_context(dict(sns.axes_style(style),
-                                **sns.plotting_context(context))):
+                                     **sns.plotting_context(context))):
                 f, axarr = plt.subplots(4, 12, figsize=(35, 7),
                                         sharex=True,
                                         sharey=True)
@@ -1012,7 +1010,7 @@ def plot_fluxnet_comparison_one_site(driver, science_test_data_dir,
                     for (key, df) in data.items():
                         monthly_mean[key] = pd.DataFrame(
                             df[vic_var].groupby([df.index.month,
-                                                df.index.hour]).mean())
+                                                 df.index.hour]).mean())
 
                     df = pd.DataFrame(
                         {key: d[vic_var] for key, d in monthly_mean.items()

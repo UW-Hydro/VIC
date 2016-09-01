@@ -60,7 +60,7 @@ reset_alarm(alarm_struct *alarm,
         // will avoid this problem.
         // NOTE: if a simulation does not start from the beginning of a month,
         // there might be a problem if startday > 28 !!!
-        
+
         // Shift forward by one time step
         offset = global_param.dt / (double) SEC_PER_DAY;
         current = date2num(global_param.time_origin_num, dmy_current, 0,

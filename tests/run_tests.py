@@ -385,13 +385,17 @@ def run_system(config_file, dict_drivers, test_data_dir, out_dir):
                                  'tests!')
             global_param = dict_global_param[driver]
             # () Find STATE_FORMAT option for later use
+            model_steps_per_day = find_global_param_value(
+                global_param,
+                'MODEL_STEPS_PER_DAY')
             if driver == 'classic':
                 state_format = find_global_param_value(global_param,
                                                        'STATE_FORMAT')
             # (2) Prepare running periods and initial state file info for
             # restart test
-            run_periods = prepare_restart_run_periods(test_dict['restart'],
-                                                      dirs['state'])
+            run_periods = prepare_restart_run_periods(
+                test_dict['restart'],
+                dirs['state'])
 
         # If mpi test, prepare a list of number of processors to be run
         elif 'mpi' in test_dict['check']:

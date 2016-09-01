@@ -1554,7 +1554,6 @@ initialize_state_file(char           *filename,
     int                       *ivar = NULL;
     double                     offset;
     double                     time_num;
-    dmy_struct                 dmy_offset;
 
     // open the netcdf file
     status = nc_create(filename, get_nc_mode(options.STATE_FORMAT),

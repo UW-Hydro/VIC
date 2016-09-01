@@ -17,8 +17,8 @@ FROZEN_SOIL	FALSE
 STATENAME       $state_dir/states
 STATEYEAR       1949
 STATEMONTH      1
-STATEDAY        10
-STATESEC        82800
+STATEDAY        11
+STATESEC        0
 
 DOMAIN $test_data_dir/image/Stehekin/parameters/domain.stehekin.20151028.nc
 DOMAIN_TYPE    LAT     lat

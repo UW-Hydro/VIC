@@ -4,6 +4,8 @@ VIC can save the hydrologic state from any point in the simulation (usually the 
 
 The model state file contains all information needed by the VIC model to "warm"-start a simulation (i.e. start from "realistic" conditions, or re-start a simulation exactly where the model previously stopped). To read an initial state file, or to save a "final" state file, the appropriate options should be set in the [global parameter file](GlobalParam.md#DefineStateFiles).
 
+The timestamp of the state file represents the instantaneous time for which the values of the state variables are valid. This corresponds to the end of the time interval after which the state file is written out and the beginning of the time interval for which the model is started. For example, if the MODEL_STEPS_PER_DAY is 24 (hourly) and the last time step for which the model is run is 1999-09-20 23:00:00, the the state file will be stamped 1999-09-21 00:00:00. This state file can then be used to restart a model run whose starting time will be 1999-09-21 00:00:00.
+
 The state file has two header lines used by the VIC model to verify that the model is set-up correctly. Following the header there are repeating blocks of lines which define all variables for each grid cell. Each block starts with a line defining variables held constant across the grid cell and is then followed by lines for all vegetation types (including bare soil) and all snow bands [ `(number of vegetation types) * (number of snow bands) = (number of lines)` ].
 
 *   [File Header](#FileHeader)

@@ -26,7 +26,7 @@ STATENAME   $state_dir/states
 STATEYEAR   $stateyear
 STATEMONTH  $statemonth
 STATEDAY    $stateday
-STATESEC    82800
+STATESEC    $statesec
 
 FORCING1      $test_data_dir/image/Stehekin/forcings/Stehekin_image_test.forcings_10days.
 FORCE_TYPE    AIR_TEMP      tas

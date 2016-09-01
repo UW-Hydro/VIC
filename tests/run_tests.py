@@ -390,8 +390,9 @@ def run_system(config_file, dict_drivers, test_data_dir, out_dir):
                                                        'STATE_FORMAT')
             # (2) Prepare running periods and initial state file info for
             # restart test
-            run_periods = prepare_restart_run_periods(test_dict['restart'],
-                                                      dirs['state'])
+            run_periods = prepare_restart_run_periods(
+                test_dict['restart'],
+                dirs['state'])
 
         # If mpi test, prepare a list of number of processors to be run
         elif 'mpi' in test_dict['check']:

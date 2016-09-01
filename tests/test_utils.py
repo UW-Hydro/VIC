@@ -707,7 +707,6 @@ def plot_snotel_comparison(driver, science_test_data_dir,
     pool = mp.Pool(processes=nproc)
 
     for filename in os.listdir(os.path.join(science_test_data_dir,
-                                            'science',
                                             'inputdata',
                                             'snotel',
                                             'observations')):

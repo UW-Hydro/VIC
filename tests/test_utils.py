@@ -873,7 +873,6 @@ def plot_fluxnet_comparison(driver, science_test_data_dir,
 
     # loop over Ameriflux sites
     obs_dir = os.path.join(science_test_data_dir,
-                           'science',
                            'inputdata',
                            'ec_flux_towers',
                            'obs')

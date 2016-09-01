@@ -16,8 +16,8 @@ FROZEN_SOIL           FALSE
 STATENAME       $state_dir/states
 STATEYEAR       1949
 STATEMONTH      1
-STATEDAY        10
-STATESEC        82800
+STATEDAY        11
+STATESEC        0
 STATE_FORMAT    ASCII
 
 FORCING1             $test_data_dir/classic/Stehekin/forcings/full_data_

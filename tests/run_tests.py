@@ -383,8 +383,10 @@ def run_system(config_file, dict_drivers, test_data_dir, out_dir):
                 raise ValueError('Only support single driver for restart'
                                  'tests!')
             global_param = dict_global_param[driver]
-            # (1) Find STATESEC option (and STATE_FORMAT option for later use)
-            statesec = find_global_param_value(global_param, 'STATESEC')
+            # () Find STATE_FORMAT option for later use
+            model_steps_per_day = find_global_param_value(
+                                        global_param,
+                                        'MODEL_STEPS_PER_DAY')
             if driver == 'classic':
                 state_format = find_global_param_value(global_param,
                                                        'STATE_FORMAT')
@@ -392,7 +394,8 @@ def run_system(config_file, dict_drivers, test_data_dir, out_dir):
             # restart test
             run_periods = prepare_restart_run_periods(
                                 test_dict['restart'],
-                                dirs['state'], statesec)
+                                dirs['state'])
+
         # If mpi test, prepare a list of number of processors to be run
         elif 'mpi' in test_dict['check']:
             if len(dict_drivers) > 1:
@@ -457,7 +460,6 @@ def run_system(config_file, dict_drivers, test_data_dir, out_dir):
         if 'exact_restart' in test_dict['check']:
             if 'STATE_FORMAT' in replacements:
                 state_format = replacements['STATE_FORMAT']
-
         if 'exact_restart' in test_dict['check'] or\
            'mpi' in test_dict['check']:  # if multiple runs
             for j, gp in enumerate(list_global_param):
@@ -622,11 +624,11 @@ def run_system(config_file, dict_drivers, test_data_dir, out_dir):
                                                run_periods)
                     if driver == 'classic':
                         check_exact_restart_states(dirs['state'], driver,
-                                                   run_periods, statesec,
+                                                   run_periods,
                                                    state_format)
                     elif driver == 'image':
                         check_exact_restart_states(dirs['state'], driver,
-                                                   run_periods, statesec)
+                                                   run_periods)
                     else:
                         raise ValueError('unknown driver')
 

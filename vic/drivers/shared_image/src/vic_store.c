@@ -39,6 +39,7 @@ vic_store(dmy_struct *dmy_current,
     extern option_struct       options;
     extern veg_con_map_struct *veg_con_map;
     extern int                 mpi_rank;
+    extern global_param_struct global_param;
 
     int                        status;
     int                        v;
@@ -62,9 +63,10 @@ vic_store(dmy_struct *dmy_current,
     // only open and initialize the netcdf file on the first thread
     if (mpi_rank == VIC_MPI_ROOT) {
         // create netcdf file for storing model state
-        sprintf(filename, "%s.%04d%02d%02d_%05u.nc",
-                filenames.statefile, dmy_current->year, dmy_current->month,
-                dmy_current->day, dmy_current->dayseconds);
+        sprintf(filename, "%s.%04i%02i%02i_%05u.nc",
+                filenames.statefile, global_param.stateyear,
+                global_param.statemonth, global_param.stateday,
+                global_param.statesec);
 
         initialize_state_file(filename, &nc_state_file, dmy_current);
 
@@ -1550,6 +1552,9 @@ initialize_state_file(char           *filename,
     double                     dtime;
     double                    *dvar = NULL;
     int                       *ivar = NULL;
+    double                     offset;
+    double                     time_num;
+    dmy_struct                 dmy_offset;
 
     // open the netcdf file
     status = nc_create(filename, get_nc_mode(options.STATE_FORMAT),
@@ -1878,9 +1883,15 @@ initialize_state_file(char           *filename,
     check_nc_status(status, "Error leaving define mode for %s", filename);
 
     // time variable
-    dtime = date2num(global_param.time_origin_num, dmy_current, 0.,
-                     global_param.calendar, global_param.time_units);
-
+    // advance dmy_current by one timestep because dmy_current is the
+    // "timestep-beginning" timestamp, but we want the time variable to be
+    // the end of the current time step
+    dt_seconds_to_time_units(global_param.time_units, global_param.dt,
+                             &offset);
+    time_num = date2num(global_param.time_origin_num, dmy_current, 0,
+                        global_param.calendar, global_param.time_units);
+    dtime = time_num + offset;
+    // put in netCDF file
     dstart[0] = 0;
     status = nc_put_var1_double(nc_state_file->nc_id,
                                 nc_state_file->time_varid,

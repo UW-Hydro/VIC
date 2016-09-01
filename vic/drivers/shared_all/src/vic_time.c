@@ -868,6 +868,12 @@ time_delta(dmy_struct        *dmy_current,
                     dmy_next.day_in_year += lastday[i];
                 }
             }
+            // check if the advanced date is a valid date
+            if (invalid_date(global_param.calendar, &dmy_next)) {
+                log_err("VIC does not support a simulation starting from "
+                        "Feb 29 of a leap year with yearly AGGFREQ or "
+                        "HISTFREQ.");
+            }
         }
         else {
             log_err("Unknown frequency found during time_delta computation");

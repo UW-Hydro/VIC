@@ -25,8 +25,8 @@ DOMAIN_TYPE    XDIM    lon
 STATENAME   $state_dir/states
 STATEYEAR   1949
 STATEMONTH  1
-STATEDAY    10
-STATESEC    82800
+STATEDAY    11
+STATESEC    0
 
 FORCING1      $test_data_dir/image/Stehekin/forcings/Stehekin_image_test.forcings_10days.
 FORCE_TYPE    AIR_TEMP      tas

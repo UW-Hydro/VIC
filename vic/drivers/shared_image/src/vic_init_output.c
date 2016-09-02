@@ -196,7 +196,7 @@ vic_init_output(dmy_struct *dmy_current)
 void
 initialize_history_file(nc_file_struct *nc,
                         stream_struct  *stream,
-                        dmy_struct     *dmy_current)
+                        dmy_struct     *ref_dmy)
 {
     extern filenames_struct    filenames;
     extern domain_struct       global_domain;
@@ -231,25 +231,25 @@ initialize_history_file(nc_file_struct *nc,
     case FREQ_NDAYS:
         sprintf(stream->filename, "%s/%s.%04d-%02d-%02d.nc",
                 filenames.result_dir,
-                stream->prefix, dmy_current->year, dmy_current->month,
-                dmy_current->day);
+                stream->prefix, ref_dmy->year, ref_dmy->month,
+                ref_dmy->day);
         break;
     case FREQ_NMONTHS:
         // If FREQ_NMONTHS -- filename = result_dir/prefix.YYYY-MM.nc
         sprintf(stream->filename, "%s/%s.%04d-%02d.nc", filenames.result_dir,
-                stream->prefix, dmy_current->year, dmy_current->month);
+                stream->prefix, ref_dmy->year, ref_dmy->month);
         break;
     case FREQ_NYEARS:
         // If FREQ_NYEARS -- filename = result_dir/prefix.YYYY.nc
         sprintf(stream->filename, "%s/%s.%04d.nc", filenames.result_dir,
-                stream->prefix, dmy_current->year);
+                stream->prefix, ref_dmy->year);
         break;
     default:
         // For all other cases -- filename = result_dir/prefix.YYYY-MM-DD-SSSSS.nc
         sprintf(stream->filename, "%s/%s.%04d-%02d-%02d-%05u.nc",
                 filenames.result_dir,
-                stream->prefix, dmy_current->year, dmy_current->month,
-                dmy_current->day, dmy_current->dayseconds);
+                stream->prefix, ref_dmy->year, ref_dmy->month,
+                ref_dmy->day, ref_dmy->dayseconds);
     }
 
     // open the netcdf file
@@ -318,6 +318,10 @@ initialize_history_file(nc_file_struct *nc,
     check_nc_status(status, "Error defining time dimenension in %s",
                     stream->filename);
 
+    status = nc_def_dim(nc->nc_id, "nv", 2, &(nc->time_bounds_dimid));
+    check_nc_status(status, "Error defining time bounds dimenension in %s",
+                    stream->filename);
+
     // define the netcdf variable time
     status = nc_def_var(nc->nc_id, "time", NC_DOUBLE, 1,
                         &(nc->time_dimid), &(nc->time_varid));
@@ -340,6 +344,28 @@ initialize_history_file(nc_file_struct *nc,
     str_from_calendar(global_param.calendar, calendar_str);
 
     status = nc_put_att_text(nc->nc_id, nc->time_varid, "calendar",
+                             strlen(calendar_str), calendar_str);
+    check_nc_status(status, "Error adding attribute in %s", stream->filename);
+
+    // adding bounds attribute to time variable
+    status = nc_put_att_text(nc->nc_id, nc->time_varid, "bounds",
+                             strlen("time_bnds"), "time_bnds");
+    check_nc_status(status, "Error adding attribute in %s", stream->filename);
+
+    // define the netcdf variable time_bnds
+    dimids[0] = nc->time_dimid;
+    dimids[1] = nc->time_bounds_dimid;
+    status = nc_def_var(nc->nc_id, "time_bnds", NC_DOUBLE, 2,
+                        dimids, &(nc->time_bounds_varid));
+    check_nc_status(status, "Error defining time bounds variable in %s",
+                    stream->filename);
+    status = nc_put_att_text(nc->nc_id, nc->time_bounds_varid, "standard_name",
+                             strlen("time_bounds"), "time_bounds");
+    check_nc_status(status, "Error adding attribute in %s", stream->filename);
+    status = nc_put_att_text(nc->nc_id, nc->time_bounds_varid, "units",
+                             strlen(str), str);
+    check_nc_status(status, "Error adding attribute in %s", stream->filename);
+    status = nc_put_att_text(nc->nc_id, nc->time_bounds_varid, "calendar",
                              strlen(calendar_str), calendar_str);
     check_nc_status(status, "Error adding attribute in %s", stream->filename);
 

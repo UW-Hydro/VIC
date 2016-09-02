@@ -514,6 +514,9 @@ get_global_param(FILE *gp)
             else if (strcasecmp("AGGFREQ", optstr) == 0) {
                 ; // do nothing
             }
+            else if (strcasecmp("HISTFREQ", optstr) == 0) {
+                ; // do nothing
+            }
             else if (strcasecmp("COMPRESS", optstr) == 0) {
                 ; // do nothing
             }

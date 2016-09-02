@@ -179,12 +179,17 @@ dimensions:
         node = 3 ;                                  
         root_zone = 3 ;                             
         veg_class = 12 ;                            
-        time = UNLIMITED ; // (5 currently)         
+        time = UNLIMITED ; // (5 currently)
+        nv = 2 ;
 variables:                                          
         double time(time) ;                         
                 time:standard_name = "time" ;       
                 time:units = "days since 0001-01-01 00:00:00" ;
-                time:calendar = "proleptic_gregorian" ;        
+                time:calendar = "proleptic_gregorian" ;
+        double time_bnds(time, nv) ;
+                time_bnds:standard_name = "time_bounds" ;
+                time_bnds:units = "days since 0001-01-01 00:00:00" ;
+                time:calendar = "proleptic_gregorian" ;
         double lon(lon) ;                                      
                 lon:long_name = "longitude" ;                  
                 lon:units = "degrees_east" ;                   

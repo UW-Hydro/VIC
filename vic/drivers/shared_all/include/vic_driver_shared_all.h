@@ -488,10 +488,10 @@ typedef struct {
  *****************************************************************************/
 typedef struct {
     unsigned int count;  /**< current alarm count */
-    int next;            /**< next count to raise alarm at */
+    dmy_struct next_dmy; /**< next dmy to raise alarm at */
+    int next_count;      /**< next count to raise alarm at */
     unsigned int freq;   /**< enum value to describing alarm frequency */
     int n;               /**< variable that provides additional information with respect to alarm_freq */
-    dmy_struct date;     /**< date structure for when alarm_freq == FREQ_DATE */
     bool is_subdaily;    /**< flag denoting if alarm will be raised more than once per day */
 } alarm_struct;
 
@@ -501,6 +501,7 @@ typedef struct {
 typedef struct {
     size_t nvars;                    /**< number of variables to store in the file */
     size_t ngridcells;               /**< number of grid cells in aggdata */
+    dmy_struct time_bounds[2];       /**< timestep bounds of stream */
     char prefix[MAXSTRING];          /**< prefix of the file name, e.g. "fluxes" */
     char filename[MAXSTRING];        /**< complete file name */
     FILE *fh;                        /**< filehandle */

@@ -4,7 +4,7 @@
 
 - track changes over time in the VIC model source code,
 - facilitate parallel development between multiple model developers and research projects,
-- encourage peer code review, and issue and bug tracking, and
+- encourage peer code review as well as issue and bug tracking
 
 [Github](https://github.com/) is a web-based [Git](http://git-scm.com/) repository hosting service.  We use [Github](https://github.com/) for:
 
@@ -20,7 +20,7 @@ In general, if you are only going to be using the model and not working directly
 If you plan on contributing to model development or would like a systematic way to incorporate updates to the VIC source code, we encourage you to use Git.  The following sections are designed to get you started using git and working with the VIC source code repository.
 
 ## Git Resources
-If you are not familiar with [Git](http://git-scm.com/) yet, we encourage you to spend a few minutes getting antiquated with the system before you starting working with the VIC source code and Git.  It's not difficult to use and a few minutes of learning about [Git](http://git-scm.com/) will go along way in helping you manage your code development.
+If you are not familiar with [Git](http://git-scm.com/) yet, we encourage you to get acquainted with it before you start working with the VIC source code.  A few minutes of learning about [Git](http://git-scm.com/) will go along way in helping you manage your code development.
 
 There are a number of good [Git](http://git-scm.com/) learning resources that will provide a basic introduction to the version control system.
 
@@ -28,7 +28,7 @@ There are a number of good [Git](http://git-scm.com/) learning resources that wi
 - https://help.github.com/
 
 # Getting the code
-The basics steps to get the VIC source code repository are as follows.  This is basically a VIC specific rendition of https://help.github.com/articles/fork-a-repo
+To obtain the VIC source code repository, follow the steps in this tutorial: https://help.github.com/articles/fork-a-repo
 
 ## Step 0: A few definitions
 Using [Git](http://git-scm.com/) involves a few different copies of the archive:
@@ -54,7 +54,7 @@ This clones your fork of the repository into the current directory.  The clone w
 ## Step 3: Configure remotes
 When a repository is cloned, it has a default remote called `origin` that points to **your** fork on GitHub, **not** the original repository it was forked from. To keep track of the original repository, you need to add another remote. You can name this anything you want, but the name `upstream` is descriptive and an informal convention.
 
-Changes the active directory in the prompt to the newly cloned "VIC" directory:
+Change the active directory in the prompt to the newly cloned "VIC" directory:
 
 `cd VIC`
 
@@ -141,7 +141,7 @@ where "branchname" is the name of the branch where you made the commits.
 To make your changes visible other users/developers, your changes must be incorporated into the truth repo. To do this, you must [create a pull request on GitHub](https://help.github.com/articles/using-pull-requests/).
 
 !!! note
-    You should run the [VIC test suite](Testing.md) prior to issuing a pull request. Depending on the content of your pull request, you will need to demonstrate that 1) the change didn't introduce any new bugs, and 2) the change works as expected.
+    You should run the [VIC test suite](Testing.md) prior to issuing a pull request. Depending on the content of your pull request, you may need to demonstrate that 1) the change did not introduce any new bugs, 2) the change works as expected, and 3) that the Travis Continuous Integration tests have passed.
 
 The VIC administrator and other developers will examine your pull request and decide if/how they want to incorporate your changes into the code.
 

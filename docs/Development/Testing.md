@@ -9,7 +9,7 @@ The VIC Test Suite includes six main test types:
     * restart:  tests that address model state and restart capability.
     * I/O:  tests that address model input and output functionality.
         *  forcings come out the way they come in
-        *  parameter files are appropriately read in allocated.
+        *  parameter files are appropriately ingested and parameter values are correctly allocated.
 3.  **science**:  tests that aim to assess the model's scientific skill.  Many of these tests are compared to observations of some kind.
 4.  **examples**:  a set of examples that users may download and run.
 5.  **release**:  longer, full domain simulations performed prior to release demonstrating model output for a final release.
@@ -30,7 +30,7 @@ The VIC test suite uses a set of Python utilities and libraries to execute the s
         # Create a conda virtual environment including the required dependencies
         conda env create -n vic_test_env -f ci/requirements.yml
 
-        # Active the virtual environment
+        # Activate the virtual environment
         source activate vic_test_env
 
         # Install the Python driver into the virtual environment

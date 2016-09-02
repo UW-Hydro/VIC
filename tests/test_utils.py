@@ -1,21 +1,24 @@
+# Builtin libs
 import os
-from collections import OrderedDict, namedtuple
+import re
 import glob
-
 import traceback
+import warnings
+from collections import OrderedDict, namedtuple
+import multiprocessing as mp
 
+# Computation libs
 import numpy as np
 import pandas as pd
 import xarray as xr
-import glob
-import re
+
+# Plotting libs
 import matplotlib
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt
-import warnings
 import seaborn as sns
-import multiprocessing as mp
 
+# Tools from tonic
 from tonic.models.vic.vic import (VICRuntimeError,
                                   default_vic_valgrind_error_code)
 from tonic.testing import check_completed, check_for_nans, VICTestError
@@ -25,6 +28,7 @@ ERROR_TAIL = 20  # lines
 
 VICOutFile = namedtuple('vic_out_file',
                         ('dirpath', 'prefix', 'lat', 'lon', 'suffix'))
+
 
 class VICReturnCodeError(Exception):
     pass
@@ -104,35 +108,35 @@ def replace_global_values(gp, replace):
 
 
 def drop_tests(config, driver):
-   '''helper function to remove tests that should not be run for driver'''
+    '''helper function to remove tests that should not be run for driver'''
 
-   new = {}
+    new = {}
 
-   if not isinstance(driver, list):  # if single driver
-       for key, test_cfg in config.items():
-           try:
-               if not isinstance(test_cfg['driver'], list):
-                   if test_cfg['driver'].lower() == driver.lower():
-                       new[key] = test_cfg
-           except KeyError:
-               raise KeyError('test configuration must specify driver')
-   else:  # if multiple drivers
-       for key, test_cfg in config.items():
-           try:
-               if isinstance(test_cfg['driver'], list):
-                   # check whether the test has the same number of drivers
-                   if len(test_cfg['driver']) == len(driver):
-                       # check whether the test wants to test the same drivers
-                       flag = 1
-                       for d in driver:
-                           if d not in test_cfg['driver']:
-                               flag = 0
-                       if flag == 1:
-                           new[key] = test_cfg
-           except KeyError:
-               raise KeyError('test configuration must specify driver')
+    if not isinstance(driver, list):  # if single driver
+        for key, test_cfg in config.items():
+            try:
+                if not isinstance(test_cfg['driver'], list):
+                    if test_cfg['driver'].lower() == driver.lower():
+                        new[key] = test_cfg
+            except KeyError:
+                raise KeyError('test configuration must specify driver')
+    else:  # if multiple drivers
+        for key, test_cfg in config.items():
+            try:
+                if isinstance(test_cfg['driver'], list):
+                    # check whether the test has the same number of drivers
+                    if len(test_cfg['driver']) == len(driver):
+                        # check whether the test wants to test the same drivers
+                        flag = 1
+                        for d in driver:
+                            if d not in test_cfg['driver']:
+                                flag = 0
+                        if flag == 1:
+                            new[key] = test_cfg
+            except KeyError:
+                raise KeyError('test configuration must specify driver')
 
-   return new
+    return new
 
 
 def pop_run_kwargs(config):
@@ -238,9 +242,8 @@ def read_vic_ascii(filepath, parse_dates=True, datetime_index=None, sep='\t',
         time_cols = ['YEAR', 'MONTH', 'DAY']
         df.index = pd.to_datetime(df[time_cols])
         if 'SEC' in df:
-            df.index += pd.Series([pd.Timedelta(s, unit='s') for s in
-                                  df['SEC']],
-                                  index=df.index)
+            df.index += pd.Series(
+                [pd.Timedelta(s, unit='s') for s in df['SEC']], index=df.index)
             time_cols.append('SEC')
         df.drop(time_cols, inplace=True, axis=1)
 
@@ -384,9 +387,9 @@ def setup_subdirs_and_fill_in_global_param_driver_match_test(
         # Fill in global parameter options
         s = dict_s[driver]
         dict_global_param[driver] = s.safe_substitute(
-                test_data_dir=test_data_dir,
-                result_dir=result_dir,
-                state_dir=state_dir)
+            test_data_dir=test_data_dir,
+            result_dir=result_dir,
+            state_dir=state_dir)
 
     return(dict_global_param)
 
@@ -428,8 +431,8 @@ def check_drivers_match_fluxes(list_drivers, result_basedir):
 
     # Identify all classic driver output flux files
     try:
-        list_fnames_classic = glob.glob(os.path.join(
-                                    result_basedir, 'classic', '*'))
+        list_fnames_classic = glob.glob(
+            os.path.join(result_basedir, 'classic', '*'))
     except:
         raise ValueError('incorrect classic driver output for driver-match '
                          'test')
@@ -445,10 +448,10 @@ def check_drivers_match_fluxes(list_drivers, result_basedir):
             if len(glob.glob(os.path.join(
                     result_basedir, driver, '*.nc'))) > 1:
                 warnings.warn('More than one netCDF file found under'
-                              'directory {}'.format(result_dir))
+                              'directory {}'.format(result_basedir))
             fname = glob.glob(os.path.join(result_basedir, driver, '*.nc'))[0]
             ds_image = xr.open_dataset(fname)
-           
+
             # loop over each grid cell from classic driver
             for fname in list_fnames_classic:
                 gcell = parse_classic_driver_outfile_name(fname)
@@ -466,11 +469,11 @@ def check_drivers_match_fluxes(list_drivers, result_basedir):
                             decimal = 2
                         # --- if not all zeros, set decimal depending on the
                         # maximum aboslute value of this variable so that the
-                        # comparison has a reasonable precision. Specifically, 
+                        # comparison has a reasonable precision. Specifically,
                         # decimal ~= - log10(max_abs_value) + 1 --- #
                         else:
                             decimal = int(round(- np.log10(np.max(np.absolute(
-                                            ds_image_cell[var].values))) + 1))
+                                ds_image_cell[var].values))) + 1))
                         # --- keep decimal to be no greater than 4 --- #
                         if decimal > 4:
                             decimal = 4
@@ -483,14 +486,16 @@ def check_drivers_match_fluxes(list_drivers, result_basedir):
                     # if [time, nlayer]
                     elif len(ds_image_cell[var].coords) == 4:
                         for l in ds_image['nlayer']:
-                            s_classic = df_classic['{}_{}'.format(var, l.values)]
-                            s_image = ds_image_cell[var].sel(nlayer=l).to_series()
+                            s_classic = df_classic['{}_{}'.format(var,
+                                                                  l.values)]
+                            s_image = ds_image_cell[var].sel(
+                                nlayer=l).to_series()
                             # determine precision for comparison
                             if np.mean(s_image.values) == 0:
                                 decimal = 2
                             else:
                                 decimal = int(round(- np.log10(np.max(
-                                            np.absolute(s_image.values))) + 1))
+                                    np.absolute(s_image.values))) + 1))
                             if decimal > 4:
                                 decimal = 4
                             # assert almost eqaul
@@ -498,9 +503,9 @@ def check_drivers_match_fluxes(list_drivers, result_basedir):
                                 s_image.values,
                                 s_classic.values,
                                 decimal=decimal,
-                                err_msg='Variable {} is different in the '
-                                        'classic and image drivers'.
-                                                format(var))
+                                err_msg='Variable {} is different in '
+                                        'the classic and image '
+                                        'drivers'.format(var))
 
 
 def tsplit(string, delimiters):
@@ -514,7 +519,7 @@ def tsplit(string, delimiters):
             substack = substring.split(delimiter)
             stack.pop(i)
             for j, _substring in enumerate(substack):
-                stack.insert(i+j, _substring)
+                stack.insert(i + j, _substring)
 
     return stack
 
@@ -523,7 +528,6 @@ def read_snotel_swe_obs(filename, science_test_data_dir, items):
     '''Reads in Snotel SWE obs and returns DataFrame. '''
 
     filename_fullpath = os.path.join(science_test_data_dir,
-                                     'science',
                                      'inputdata',
                                      items['archive'],
                                      'observations',
@@ -550,12 +554,13 @@ def read_vic_42_output(lat, lng, science_test_data_dir, items):
 
     if items['compare_to'] == 'ecflux':
         vic_42_file = 'en_bal_%s_%s' % (lat, lng)
-        vic_42_dir = os.path.join(science_test_data_dir, 'science', 'archive',
+        vic_42_dir = os.path.join(science_test_data_dir, 'archive',
                                   items['archive'], 'ecflux', 'results')
 
     elif items['compare_to'] == 'snotel':
         vic_42_file = 'outfile_%s_%s' % (lat, lng)
-        vic_42_dir = os.path.join(science_test_data_dir, 'science', 'archive',
+
+        vic_42_dir = os.path.join(science_test_data_dir, 'archive',
                                   items['archive'], 'snotel', 'results')
 
     else:
@@ -575,18 +580,18 @@ def read_vic_42_output(lat, lng, science_test_data_dir, items):
     # rename radiation variables to be consistent with VIC 5
     if items['compare_to'] == 'ecflux':
         vic_42 = vic_42.rename(columns=lambda x: x.replace('OUT_NET_SHORT',
-                               'OUT_SWNET'))
+                                                           'OUT_SWNET'))
         vic_42 = vic_42.rename(columns=lambda x: x.replace('OUT_NET_LONG',
-                               'OUT_LWNET'))
+                                                           'OUT_LWNET'))
 
     # add datetime index
     time_cols = ['YEAR', 'MONTH', 'DAY']
     vic_42.index = pd.to_datetime(vic_42[time_cols])
 
     if 'HOUR' in vic_42:
-        vic_42.index += pd.Series([pd.Timedelta(s, unit='h') for s in
-                                  vic_42['HOUR']],
-                                  index=vic_42.index)
+        vic_42.index += pd.Series(
+            [pd.Timedelta(s, unit='h') for s in vic_42['HOUR']],
+            index=vic_42.index)
         time_cols.append('HOUR')
 
     # remove year, day columns of DataFrame
@@ -634,7 +639,6 @@ def read_vic_5_output(lat, lng, result_dir, items):
 
 def plot_science_tests(driver, test_type, science_test_data_dir, result_dir,
                        plot_dir, plots_to_make, compare_data, nproc):
-
     ''' makes science test figures
 
     Parameters
@@ -702,16 +706,15 @@ def plot_snotel_comparison(driver, science_test_data_dir,
     pool = mp.Pool(processes=nproc)
 
     for filename in os.listdir(os.path.join(science_test_data_dir,
-                                            'science',
                                             'inputdata',
                                             'snotel',
                                             'observations')):
         pool.apply_async(plot_snotel_comparison_one_site,
                          (driver, science_test_data_dir,
-                            compare_data_dict,
-                            result_dir, plot_dir,
-                            plots_to_make,
-                            plot_variables, context, style, filename,))
+                          compare_data_dict,
+                          result_dir, plot_dir,
+                          plots_to_make,
+                          plot_variables, context, style, filename,))
 
     # --- Finish multiprocessing --- #
     pool.close()
@@ -719,72 +722,74 @@ def plot_snotel_comparison(driver, science_test_data_dir,
 
 
 def plot_snotel_comparison_one_site(
-                            driver, science_test_data_dir,
-                            compare_data_dict,
-                            result_dir, plot_dir,
-                            plots_to_make,
-                            plot_variables, context, style, filename):
+        driver, science_test_data_dir,
+        compare_data_dict,
+        result_dir, plot_dir,
+        plots_to_make,
+        plot_variables, context, style, filename):
+    
+    print(plots_to_make)
+    
+    # get lat/lng from filename
+    file_split = re.split('_', filename)
+    lng = file_split[3].split('.txt')[0]
+    lat = file_split[2]
+    print('Plotting {} {}'.format(lat, lng))
 
-        # get lat/lng from filename
-        file_split = re.split('_', filename)
-        lng = file_split[3].split('.txt')[0]
-        lat = file_split[2]
-        print('Plotting {} {}'.format(lat, lng))
+    # loop over data to compare
+    data = {}
+    for key, items in compare_data_dict.items():
 
-        # loop over data to compare
-        data = {}
-        for key, items in compare_data_dict.items():
+        # read in data
+        if key == "snotel":
+            data[key] = read_snotel_swe_obs(filename,
+                                            science_test_data_dir,
+                                            items)
 
-            # read in data
-            if key == "snotel":
-                data[key] = read_snotel_swe_obs(filename,
-                                                science_test_data_dir,
-                                                items)
+        elif key == "VIC.4.2.d":
+            data[key] = read_vic_42_output(lat, lng,
+                                           science_test_data_dir,
+                                           items)
 
-            elif key == "VIC.4.2.d":
-                data[key] = read_vic_42_output(lat, lng,
-                                               science_test_data_dir,
-                                               items)
+        else:
+            data[key] = read_vic_5_output(lat, lng,
+                                          result_dir,
+                                          items)
 
-            else:
-                data[key] = read_vic_5_output(lat, lng,
-                                              result_dir,
-                                              items)
+    # loop over variables to plot
+    for plot_variable, units in plot_variables.items():
 
-        # loop over variables to plot
-        for plot_variable, units in plot_variables.items():
+        if 'water_year' in plots_to_make:
 
-            if 'water_year' in plots_to_make:
+            with plt.rc_context(dict(sns.axes_style(style),
+                                     **sns.plotting_context(context))):
+                fig, ax = plt.subplots(figsize=(10, 10))
 
-                with plt.rc_context(dict(sns.axes_style(style),
-                                    **sns.plotting_context(context))):
-                    fig, ax = plt.subplots(figsize=(10, 10))
+                df = pd.DataFrame({key: d[plot_variable] for key, d in
+                                   data.items() if plot_variable in d})
 
-                    df = pd.DataFrame({key: d[plot_variable] for key, d in
-                                       data.items() if plot_variable in d})
+                for key, series in df.iteritems():
+                    series.plot(
+                        use_index=True,
+                        linewidth=compare_data_dict[key]['linewidth'],
+                        ax=ax,
+                        color=compare_data_dict[key]['color'],
+                        linestyle=compare_data_dict[key]
+                        ['linestyle'],
+                        zorder=compare_data_dict[key]['zorder'])
 
-                    for key, series in df.iteritems():
-                        series.plot(
-                            use_index=True,
-                            linewidth=compare_data_dict[key]['linewidth'],
-                            ax=ax,
-                            color=compare_data_dict[key]['color'],
-                            linestyle=compare_data_dict[key]
-                            ['linestyle'],
-                            zorder=compare_data_dict[key]['zorder'])
+                ax.legend(loc='upper left')
+                ax.set_ylabel("%s [%s]" % (plot_variable, units))
 
-                    ax.legend(loc='upper left')
-                    ax.set_ylabel("%s [%s]" % (plot_variable, units))
-
-                    # save figure
-                    os.makedirs(os.path.join(plot_dir, plot_variable),
-                                exist_ok=True)
-                    plotname = '%s_%s.png' % (lat, lng)
-                    savepath = os.path.join(plot_dir, plot_variable, plotname)
-                    plt.savefig(savepath, bbox_inches='tight')
-
-                    plt.clf()
-                    plt.close()
+                # save figure
+                os.makedirs(os.path.join(plot_dir, plot_variable),
+                            exist_ok=True)
+                plotname = '%s_%s.png' % (lat, lng)
+                savepath = os.path.join(plot_dir, plot_variable, plotname)
+                plt.savefig(savepath, bbox_inches='tight')
+                print(savepath)
+                plt.clf()
+                plt.close()
 
 
 def check_site_files(obs_dir, subdir):
@@ -826,7 +831,7 @@ def read_fluxnet_obs(subdir, science_test_data_dir, items):
 
     filename = '%s.stdfmt.hourly.local.txt' % subdir
     # read in data with -9999.0000 as NaNs
-    obs_dir = os.path.join(science_test_data_dir, 'science', 'inputdata',
+    obs_dir = os.path.join(science_test_data_dir, 'inputdata',
                            'ec_flux_towers', 'obs')
     ecflux_df = pd.read_csv(os.path.join(obs_dir, subdir, filename),
                             skiprows=0,
@@ -840,9 +845,9 @@ def read_fluxnet_obs(subdir, science_test_data_dir, items):
     ecflux_df.index = pd.to_datetime(ecflux_df[time_cols])
 
     if 'HOUR' in ecflux_df:
-        ecflux_df.index += pd.Series([pd.Timedelta(s, unit='h') for s in
-                                     ecflux_df['HOUR']],
-                                     index=ecflux_df.index)
+        ecflux_df.index += pd.Series(
+            [pd.Timedelta(s, unit='h') for s in ecflux_df['HOUR']],
+            index=ecflux_df.index)
         time_cols.append('HOUR')
 
     # remove year, day columns of DataFrame
@@ -869,7 +874,6 @@ def plot_fluxnet_comparison(driver, science_test_data_dir,
 
     # loop over Ameriflux sites
     obs_dir = os.path.join(science_test_data_dir,
-                           'science',
                            'inputdata',
                            'ec_flux_towers',
                            'obs')
@@ -890,12 +894,10 @@ def plot_fluxnet_comparison(driver, science_test_data_dir,
     pool.join()
 
 
-def plot_fluxnet_comparison_one_site(
-                            driver, science_test_data_dir,
-                            compare_data_dict,
-                            result_dir, plot_dir,
-                            plots_to_make,
-                            context, style, var_names, months, obs_dir, subdir):
+def plot_fluxnet_comparison_one_site(driver, science_test_data_dir,
+                                     compare_data_dict, result_dir, plot_dir,
+                                     plots_to_make, context, style, var_names,
+                                     months, obs_dir, subdir):
 
     if check_site_files(obs_dir, subdir):
         # get CSV file from site directory to get lat/lng for site
@@ -947,7 +949,7 @@ def plot_fluxnet_comparison_one_site(
 
             # make annual mean diurnal cycle plots
             with plt.rc_context(dict(sns.axes_style(style),
-                                **sns.plotting_context(context))):
+                                     **sns.plotting_context(context))):
                 f, axarr = plt.subplots(4, 1, figsize=(8, 8), sharex=True)
 
                 for i, (vic_var, variable_name) in enumerate(
@@ -994,7 +996,7 @@ def plot_fluxnet_comparison_one_site(
 
             # make monthly mean diurnal cycle plots
             with plt.rc_context(dict(sns.axes_style(style),
-                                **sns.plotting_context(context))):
+                                     **sns.plotting_context(context))):
                 f, axarr = plt.subplots(4, 12, figsize=(35, 7),
                                         sharex=True,
                                         sharey=True)
@@ -1007,7 +1009,7 @@ def plot_fluxnet_comparison_one_site(
                     for (key, df) in data.items():
                         monthly_mean[key] = pd.DataFrame(
                             df[vic_var].groupby([df.index.month,
-                                                df.index.hour]).mean())
+                                                 df.index.hour]).mean())
 
                     df = pd.DataFrame(
                         {key: d[vic_var] for key, d in monthly_mean.items()

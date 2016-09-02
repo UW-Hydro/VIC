@@ -1519,9 +1519,14 @@ create_MPI_alarm_struct_type(MPI_Datatype *mpi_type)
     offsets[i] = offsetof(alarm_struct, count);
     mpi_types[i++] = MPI_UNSIGNED;
 
-    // int next;
-    offsets[i] = offsetof(alarm_struct, next);
+    // int next_count;
+    offsets[i] = offsetof(alarm_struct, next_count);
     mpi_types[i++] = MPI_INT;
+
+    // dmy_struct next_dmy;
+    offsets[i] = offsetof(alarm_struct, next_dmy);
+    create_MPI_dmy_struct_type(&mpi_dmy_type);
+    mpi_types[i++] = mpi_dmy_type;
 
     // unsigned int freq;
     offsets[i] = offsetof(alarm_struct, freq);
@@ -1530,11 +1535,6 @@ create_MPI_alarm_struct_type(MPI_Datatype *mpi_type)
     // int n;
     offsets[i] = offsetof(alarm_struct, n);
     mpi_types[i++] = MPI_INT;
-
-    // dmy_struct date;
-    offsets[i] = offsetof(alarm_struct, date);
-    create_MPI_dmy_struct_type(&mpi_dmy_type);
-    mpi_types[i++] = mpi_dmy_type;
 
     // bool is_subdaily;
     offsets[i] = offsetof(alarm_struct, is_subdaily);

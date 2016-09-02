@@ -82,7 +82,7 @@ VIC requires the following meteorological forcing variables.
 - Longwave radiation
 - Shortwave radiation
 - Atmospheric pressure
-- Specific humidity
+- Vapor pressure
 
 These forcings must be provided at the timestep that the model will be run at (e.g. `SNOW_STEPS_PER_DAY` or `MODEL_STEPS_PER_DAY`). Traditionally, VIC users have used the MTCLIM package to generate and disaggregate forcings variables. See [Bohn et al., 2013a](../Documentation/References.md#other-historical-references) for more information on how this has been done in the past.
 

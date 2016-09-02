@@ -17,18 +17,17 @@ from tonic.models.vic.vic import VIC, default_vic_valgrind_suppressions_path
 from tonic.io import read_config, read_configobj
 from tonic.testing import VICTestError
 from test_utils import (
-            setup_test_dirs, print_test_dict,
-            replace_global_values, drop_tests, pop_run_kwargs,
-            check_returncode, process_error,
-            test_classic_driver_all_complete,
-            test_classic_driver_no_output_file_nans,
-            find_global_param_value,
-            check_multistream_classic,
-            setup_subdirs_and_fill_in_global_param_driver_match_test,
-            check_drivers_match_fluxes,
-            plot_science_tests)
+    setup_test_dirs, print_test_dict,
+    replace_global_values, drop_tests, pop_run_kwargs,
+    check_returncode, process_error,
+    test_classic_driver_all_complete,
+    test_classic_driver_no_output_file_nans,
+    find_global_param_value,
+    check_multistream_classic,
+    setup_subdirs_and_fill_in_global_param_driver_match_test,
+    check_drivers_match_fluxes,
+    plot_science_tests)
 from test_image_driver import (test_image_driver_no_output_file_nans,
-                               check_multistream_image,
                                setup_subdirs_and_fill_in_global_param_mpi_test,
                                check_mpi_fluxes, check_mpi_states)
 from test_restart import (prepare_restart_run_periods,
@@ -82,6 +81,7 @@ class CustomFormatter(argparse.ArgumentDefaultsHelpFormatter,
 
 
 class TestResults(object):
+
     def __init__(self, name, test_complete=False, passed=False,
                  comment='', error_message='', returncode=None):
         self.name = name
@@ -135,7 +135,8 @@ def main():
                         default=os.path.join(test_dir, 'science/science.cfg'))
     parser.add_argument('--examples', type=str,
                         help='examples tests configuration file',
-                        default=os.path.join(test_dir, 'examples/examples.cfg'))
+                        default=os.path.join(test_dir,
+                                             'examples/examples.cfg'))
     parser.add_argument('--release', type=str,
                         help='release tests configuration file',
                         default=os.path.join(test_dir, 'release/release.cfg'))
@@ -166,7 +167,8 @@ def main():
     # check to make sure science test data directory exists
     science_test_data_dir = args.science_test_data_dir
     if 'science' in args.tests and not os.path.exists(science_test_data_dir):
-        raise VICTestError("directory for science test data does not exist or has not been defined")
+        raise VICTestError('directory for science test data does not exist or '
+                           'has not been defined')
 
     # Validate input directories
     if not (len(args.tests) == 1 and args.tests[0] == 'unit'):
@@ -186,11 +188,11 @@ def main():
         if args.classic:
             dict_drivers['classic'] = VIC(args.classic)
             print('VIC classic version information:\n\n{0}'.format(
-                                dict_drivers['classic'].version.decode()))
+                dict_drivers['classic'].version.decode()))
         if args.image:
             dict_drivers['image'] = VIC(args.image)
             print('VIC image version information:\n\n{0}'.format(
-                                dict_drivers['image'].version.decode()))
+                dict_drivers['image'].version.decode()))
 
     # run test sets
     # unit
@@ -207,12 +209,12 @@ def main():
     # science
     if any(i in ['all', 'science'] for i in args.tests):
         test_results['science'] = run_science(
-                                        args.science, dict_drivers['classic'],
-                                        science_test_data_dir,
-                                        data_dir,
-                                        os.path.join(out_dir, 'science'),
-                                        'classic',
-                                        args.nproc)
+            args.science, dict_drivers['classic'],
+            science_test_data_dir,
+            data_dir,
+            os.path.join(out_dir, 'science'),
+            'classic',
+            args.nproc)
     # examples
     if any(i in ['all', 'examples'] for i in args.tests):
         if len(dict_drivers) == 1:  # if only one driver
@@ -288,7 +290,7 @@ def run_unit_tests(test_dir):
     print('Running Unit Tests')
     print('-'.ljust(OUTPUT_WIDTH, '-'))
 
-    retcode = pytest.main(['-x',  os.path.join(test_dir, 'unit'), '--boxed'])
+    retcode = pytest.main(['-x', os.path.join(test_dir, 'unit'), '--boxed'])
     return {'unittests': TestResults('unittests',
                                      test_complete=True,
                                      passed=retcode == 0,
@@ -372,7 +374,7 @@ def run_system(config_file, dict_drivers, test_data_dir, out_dir):
         else:
             for j, dr in enumerate(test_dict['driver']):
                 infile = os.path.join(test_dir, 'system',
-                                    test_dict['global_parameter_file'][j])
+                                      test_dict['global_parameter_file'][j])
                 with open(infile, 'r') as global_file:
                     dict_global_param[dr] = global_file.read()
 
@@ -380,18 +382,18 @@ def run_system(config_file, dict_drivers, test_data_dir, out_dir):
         if 'exact_restart' in test_dict['check']:
             if len(dict_drivers) > 1:
                 raise ValueError('Only support single driver for restart'
-                                   'tests!')
+                                 'tests!')
             global_param = dict_global_param[driver]
-            # (1) Find STATESEC option (and STATE_FORMAT option for later use)
-            statesec = find_global_param_value(global_param, 'STATESEC')
+            # () Find STATE_FORMAT option for later use
             if driver == 'classic':
                 state_format = find_global_param_value(global_param,
                                                        'STATE_FORMAT')
             # (2) Prepare running periods and initial state file info for
             # restart test
             run_periods = prepare_restart_run_periods(
-                                test_dict['restart'],
-                                dirs['state'], statesec)
+                test_dict['restart'],
+                dirs['state'])
+
         # If mpi test, prepare a list of number of processors to be run
         elif 'mpi' in test_dict['check']:
             if len(dict_drivers) > 1:
@@ -456,7 +458,6 @@ def run_system(config_file, dict_drivers, test_data_dir, out_dir):
         if 'exact_restart' in test_dict['check']:
             if 'STATE_FORMAT' in replacements:
                 state_format = replacements['STATE_FORMAT']
-
         if 'exact_restart' in test_dict['check'] or\
            'mpi' in test_dict['check']:  # if multiple runs
             for j, gp in enumerate(list_global_param):
@@ -470,9 +471,8 @@ def run_system(config_file, dict_drivers, test_data_dir, out_dir):
                 # save a copy of replacements for the next global file
                 replacements_cp = replacements.copy()
                 # replace global options for this global file
-                dict_global_param[dr] = replace_global_values(
-                                                        gp,
-                                                        replacements)
+                dict_global_param[dr] = replace_global_values(gp,
+                                                              replacements)
                 replacements = replacements_cp
         else:  # if single run
             global_param = replace_global_values(global_param, replacements)
@@ -482,11 +482,11 @@ def run_system(config_file, dict_drivers, test_data_dir, out_dir):
             list_test_global_file = []
             for j, gp in enumerate(list_global_param):
                 test_global_file = os.path.join(
-                        dirs['test'],
-                        '{}_globalparam_{}_{}.txt'.format(
-                            testname,
-                            run_periods[j]['start_date'].strftime("%Y%m%d"),
-                            run_periods[j]['end_date'].strftime("%Y%m%d")))
+                    dirs['test'],
+                    '{}_globalparam_{}_{}.txt'.format(
+                        testname,
+                        run_periods[j]['start_date'].strftime("%Y%m%d"),
+                        run_periods[j]['end_date'].strftime("%Y%m%d")))
                 list_test_global_file.append(test_global_file)
                 with open(test_global_file, mode='w') as f:
                     for line in gp:
@@ -495,9 +495,9 @@ def run_system(config_file, dict_drivers, test_data_dir, out_dir):
             list_test_global_file = []
             for j, gp in enumerate(list_global_param):
                 test_global_file = os.path.join(
-                        dirs['test'],
-                        '{}_globalparam_processors_{}.txt'.format(
-                            testname, list_n_proc[j]))
+                    dirs['test'],
+                    '{}_globalparam_processors_{}.txt'.format(
+                        testname, list_n_proc[j]))
                 list_test_global_file.append(test_global_file)
                 with open(test_global_file, mode='w') as f:
                     for line in gp:
@@ -506,17 +506,17 @@ def run_system(config_file, dict_drivers, test_data_dir, out_dir):
             dict_test_global_file = {}
             for dr, gp in dict_global_param.items():
                 test_global_file = os.path.join(
-                        dirs['test'],
-                        '{}_globalparam_{}.txt'.format(
-                            testname, dr))
+                    dirs['test'],
+                    '{}_globalparam_{}.txt'.format(
+                        testname, dr))
                 dict_test_global_file[dr] = test_global_file
                 with open(test_global_file, mode='w') as f:
                     for line in gp:
                         f.write(line)
         else:
             test_global_file = os.path.join(
-                                dirs['test'],
-                                '{0}_globalparam.txt'.format(testname))
+                dirs['test'],
+                '{0}_globalparam.txt'.format(testname))
             with open(test_global_file, mode='w') as f:
                 for line in global_param:
                     f.write(line)
@@ -562,14 +562,14 @@ def run_system(config_file, dict_drivers, test_data_dir, out_dir):
                         run_kwargs_classic = run_kwargs
                         run_kwargs_classic['mpi_proc'] = None
                         returncode = dict_drivers[dr].run(
-                                        dict_test_global_file[dr],
-                                        logdir=dirs['logs'],
-                                        **run_kwargs_classic)
+                            dict_test_global_file[dr],
+                            logdir=dirs['logs'],
+                            **run_kwargs_classic)
                     else:
                         returncode = dict_drivers[dr].run(
-                                        dict_test_global_file[dr],
-                                        logdir=dirs['logs'],
-                                        **run_kwargs)
+                            dict_test_global_file[dr],
+                            logdir=dirs['logs'],
+                            **run_kwargs)
                     # Check return code
                     check_returncode(dict_drivers[dr],
                                      test_dict.pop('expected_retval', 0))
@@ -607,11 +607,11 @@ def run_system(config_file, dict_drivers, test_data_dir, out_dir):
                         test_classic_driver_no_output_file_nans(fnames)
                     elif driver == 'image':
                         domain_file = os.path.join(
-                                            test_data_dir,
-                                            test_dict['domain_file'])
+                            test_data_dir,
+                            test_dict['domain_file'])
                         test_image_driver_no_output_file_nans(
-                                                fnames,
-                                                domain_file)
+                            fnames,
+                            domain_file)
                     else:
                         raise ValueError('unknown driver')
 
@@ -621,11 +621,11 @@ def run_system(config_file, dict_drivers, test_data_dir, out_dir):
                                                run_periods)
                     if driver == 'classic':
                         check_exact_restart_states(dirs['state'], driver,
-                                                   run_periods, statesec,
+                                                   run_periods,
                                                    state_format)
                     elif driver == 'image':
                         check_exact_restart_states(dirs['state'], driver,
-                                                   run_periods, statesec)
+                                                   run_periods)
                     else:
                         raise ValueError('unknown driver')
 
@@ -734,7 +734,7 @@ def run_science(config_file, vic_exe, science_test_data_dir,
 
         # read template global parameter file
         infile = os.path.join(test_dir, 'science',
-                                test_dict['global_parameter_file'])
+                              test_dict['global_parameter_file'])
 
         with open(infile, 'r') as global_file:
             global_param = global_file.read()
@@ -750,8 +750,8 @@ def run_science(config_file, vic_exe, science_test_data_dir,
                                          testname=test_type,
                                          test_root=test_dir)
 
-        test_global_file = os.path.join(dirs['test'],
-                                        '{0}_globalparam.txt'.format(test_type))
+        test_global_file = os.path.join(
+            dirs['test'], '{0}_globalparam.txt'.format(test_type))
 
         # write global parameter file
         with open(test_global_file, 'w') as f:

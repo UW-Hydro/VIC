@@ -137,7 +137,7 @@ def check_multistream_image(fnames):
                 print('Variable=%s, freq=%s, how=%s: failed comparison' %
                       (key, freq, how))
                 print('actual=%s\nexpected=%s' % (actual, expected))
-                print(np.abs(actual-expected).max())
+                print(np.abs(actual - expected).max())
                 raise e
 
 
@@ -174,20 +174,17 @@ def setup_subdirs_and_fill_in_global_param_mpi_test(
     list_global_param = []
     for j, n_proc in enumerate(list_n_proc):
         # Set up subdirectories for results and states
-        result_dir = os.path.join(
-                result_basedir,
-                'processors_{}'.format(n_proc))
-        state_dir = os.path.join(
-                state_basedir,
-                'processors_{}'.format(n_proc))
+        result_dir = os.path.join(result_basedir,
+                                  'processors_{}'.format(n_proc))
+        state_dir = os.path.join(state_basedir,
+                                 'processors_{}'.format(n_proc))
         os.makedirs(result_dir, exist_ok=True)
         os.makedirs(state_dir, exist_ok=True)
 
         # Fill in global parameter options
-        list_global_param.append(s.safe_substitute(
-                test_data_dir=test_data_dir,
-                result_dir=result_dir,
-                state_dir=state_dir))
+        list_global_param.append(s.safe_substitute(test_data_dir=test_data_dir,
+                                                   result_dir=result_dir,
+                                                   state_dir=state_dir))
 
     return(list_global_param)
 
@@ -240,10 +237,9 @@ def check_mpi_fluxes(result_basedir, list_n_proc):
         ds_current_run = xr.open_dataset(fname)
         # Compare current run with base run
         for var in ds_first_run.data_vars:
-                npt.assert_array_equal(
-                        ds_current_run[var].values,
-                        ds_first_run[var].values,
-                        err_msg='Fluxes are not an exact match')
+            npt.assert_array_equal(ds_current_run[var].values,
+                                   ds_first_run[var].values,
+                                   err_msg='Fluxes are not an exact match')
 
 
 def check_mpi_states(state_basedir, list_n_proc):
@@ -293,7 +289,6 @@ def check_mpi_states(state_basedir, list_n_proc):
         ds_current_run = xr.open_dataset(fname)
         # Compare current run with base run
         for var in ds_first_run.data_vars:
-                npt.assert_array_equal(
-                        ds_current_run[var].values,
-                        ds_first_run[var].values,
-                        err_msg='States are not an exact match')
+            npt.assert_array_equal(ds_current_run[var].values,
+                                   ds_first_run[var].values,
+                                   err_msg='States are not an exact match')

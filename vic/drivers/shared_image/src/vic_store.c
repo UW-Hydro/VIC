@@ -1554,7 +1554,6 @@ initialize_state_file(char           *filename,
     int                       *ivar = NULL;
     double                     offset;
     double                     time_num;
-    dmy_struct                 dmy_offset;
 
     // open the netcdf file
     status = nc_create(filename, get_nc_mode(options.STATE_FORMAT),
@@ -1717,7 +1716,7 @@ initialize_state_file(char           *filename,
     // veg_class
     dimids[0] = nc_state_file->veg_dimid;
     status = nc_def_var(nc_state_file->nc_id, "veg_class",
-                        NC_INT, ndims, dimids, &(veg_var_id));
+                        NC_INT, 1, dimids, &(veg_var_id));
     check_nc_status(status, "Error defining veg_class variable in %s",
                     filename);
     status = nc_put_att_text(nc_state_file->nc_id, veg_var_id, "long_name",
@@ -1732,7 +1731,7 @@ initialize_state_file(char           *filename,
     // snow_band
     dimids[0] = nc_state_file->band_dimid;
     status = nc_def_var(nc_state_file->nc_id, "snow_band",
-                        NC_INT, ndims, dimids, &(snow_band_var_id));
+                        NC_INT, 1, dimids, &(snow_band_var_id));
     check_nc_status(status, "Error defining snow_band variable in %s",
                     filename);
     status = nc_put_att_text(nc_state_file->nc_id, snow_band_var_id,
@@ -1749,7 +1748,7 @@ initialize_state_file(char           *filename,
     // layer
     dimids[0] = nc_state_file->layer_dimid;
     status =
-        nc_def_var(nc_state_file->nc_id, "layer", NC_INT, ndims, dimids,
+        nc_def_var(nc_state_file->nc_id, "layer", NC_INT, 1, dimids,
                    &(layer_var_id));
     check_nc_status(status, "Error defining layer variable in %s", filename);
     status = nc_put_att_text(nc_state_file->nc_id, layer_var_id, "long_name",
@@ -1763,7 +1762,7 @@ initialize_state_file(char           *filename,
 
     // frost_area
     dimids[0] = nc_state_file->frost_dimid;
-    status = nc_def_var(nc_state_file->nc_id, "frost_area", NC_INT, ndims,
+    status = nc_def_var(nc_state_file->nc_id, "frost_area", NC_INT, 1,
                         dimids, &(frost_area_var_id));
     check_nc_status(status, "Error defining frost_area variable in %s",
                     filename);
@@ -1779,7 +1778,7 @@ initialize_state_file(char           *filename,
 
     // dz_node
     dimids[0] = nc_state_file->node_dimid;
-    status = nc_def_var(nc_state_file->nc_id, "dz_node", NC_DOUBLE, ndims,
+    status = nc_def_var(nc_state_file->nc_id, "dz_node", NC_DOUBLE, 1,
                         dimids, &(dz_node_var_id));
     check_nc_status(status, "Error defining node variable in %s", filename);
     status = nc_put_att_text(nc_state_file->nc_id, dz_node_var_id, "long_name",
@@ -1797,7 +1796,7 @@ initialize_state_file(char           *filename,
 
     // node_depth
     dimids[0] = nc_state_file->node_dimid;
-    status = nc_def_var(nc_state_file->nc_id, "node_depth", NC_DOUBLE, ndims,
+    status = nc_def_var(nc_state_file->nc_id, "node_depth", NC_DOUBLE, 1,
                         dimids, &(node_depth_var_id));
     check_nc_status(status, "Error defining node variable in %s", filename);
     status = nc_put_att_text(nc_state_file->nc_id, node_depth_var_id,
@@ -1816,7 +1815,7 @@ initialize_state_file(char           *filename,
     if (options.LAKES) {
         // lake_node
         dimids[0] = nc_state_file->lake_node_dimid;
-        status = nc_def_var(nc_state_file->nc_id, "lake_node", NC_INT, ndims,
+        status = nc_def_var(nc_state_file->nc_id, "lake_node", NC_INT, 1,
                             dimids, &(lake_node_var_id));
         check_nc_status(status, "Error defining node variable in %s", filename);
         status = nc_put_att_text(nc_state_file->nc_id, lake_node_var_id,

@@ -820,6 +820,8 @@ time_delta(dmy_struct        *dmy_current,
 
     double                     td, a, b;
     dmy_struct                 dmy_next;
+    unsigned short int         lastday[MONTHS_PER_YEAR];
+    int                        i;
 
     // uniform timedeltas
     if (freq == FREQ_NSECONDS) {
@@ -851,7 +853,27 @@ time_delta(dmy_struct        *dmy_current,
             }
         }
         else if (freq == FREQ_NYEARS) {
+            // advance year
             dmy_next.year += n;
+            // re-calculate day_in_year (NOTE: currently will have problem
+            // if dmy_next.year is not leap year but date is Feb 29 !)
+            make_lastday(global_param.calendar, dmy_next.year, lastday);
+            dmy_next.day_in_year = 0;
+            for ( i = 0; i < MONTHS_PER_YEAR; i++ ) {
+                if ( (i+1) == dmy_next.month ) {
+                    dmy_next.day_in_year += dmy_next.day;
+                    break;
+                }
+                else {
+                    dmy_next.day_in_year += lastday[i];
+                }
+            }
+            // check if the advanced date is a valid date
+            if (invalid_date(global_param.calendar, &dmy_next)) {
+                log_err("VIC does not support a simulation starting from "
+                        "Feb 29 of a leap year with yearly AGGFREQ or "
+                        "HISTFREQ.");
+            }
         }
         else {
             log_err("Unknown frequency found during time_delta computation");

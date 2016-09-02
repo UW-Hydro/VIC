@@ -17,7 +17,7 @@ To check which release of VIC you are running:
 
 ## VIC 5.0.0 [![DOI](https://zenodo.org/badge/7766/UW-Hydro/VIC.svg)](https://zenodo.org/badge/latestdoi/7766/UW-Hydro/VIC)
 
-**Release date: (September 1, 2016)**
+**Release date: (September 2, 2016)**
 
 Source code is available here: [![VIC.5.0.0](https://img.shields.io/badge/VIC-5.0.0-blue.svg)](https://github.com/UW-Hydro/VIC/releases/tag/VIC.5.0.0)
 

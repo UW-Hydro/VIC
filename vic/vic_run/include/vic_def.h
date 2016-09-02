@@ -70,7 +70,7 @@
 
 /***** Define minimum values for model parameters *****/
 #define MINSOILDEPTH    0.001  /**< Minimum layer depth with which model can work (m) */
-#define MIN_FCANOPY     1.0  /**< Minimum allowable canopy fraction */
+#define MIN_FCANOPY    0.0001  /**< Minimum allowable canopy fraction */
 #define MIN_SNOW_WETFRAC 0.01  /**< Minimum fraction of snow depth to be considered wet */
 
 /***** Define minimum and maximum values for model timesteps *****/

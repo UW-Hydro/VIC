@@ -256,7 +256,6 @@ initialize_history_file(nc_file_struct *nc,
     status = nc_create(stream->filename,
                        get_nc_mode(stream->file_format),
                        &(nc->nc_id));
-
     check_nc_status(status, "Error creating %s", stream->filename);
     nc->open = true;
 

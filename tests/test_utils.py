@@ -12,9 +12,8 @@ import numpy as np
 import pandas as pd
 import xarray as xr
 
-# Plotting libs
+# Plottling libs
 import matplotlib
-matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 import seaborn as sns
 
@@ -22,6 +21,8 @@ import seaborn as sns
 from tonic.models.vic.vic import (VICRuntimeError,
                                   default_vic_valgrind_error_code)
 from tonic.testing import check_completed, check_for_nans, VICTestError
+
+matplotlib.use('Agg')
 
 OUTPUT_WIDTH = 100
 ERROR_TAIL = 20  # lines
@@ -528,6 +529,7 @@ def read_snotel_swe_obs(filename, science_test_data_dir, items):
     '''Reads in Snotel SWE obs and returns DataFrame. '''
 
     filename_fullpath = os.path.join(science_test_data_dir,
+                                     'science',
                                      'inputdata',
                                      items['archive'],
                                      'observations',
@@ -554,13 +556,12 @@ def read_vic_42_output(lat, lng, science_test_data_dir, items):
 
     if items['compare_to'] == 'ecflux':
         vic_42_file = 'en_bal_%s_%s' % (lat, lng)
-        vic_42_dir = os.path.join(science_test_data_dir, 'archive',
+        vic_42_dir = os.path.join(science_test_data_dir, 'science', 'archive',
                                   items['archive'], 'ecflux', 'results')
 
     elif items['compare_to'] == 'snotel':
         vic_42_file = 'outfile_%s_%s' % (lat, lng)
-
-        vic_42_dir = os.path.join(science_test_data_dir, 'archive',
+        vic_42_dir = os.path.join(science_test_data_dir, 'science', 'archive',
                                   items['archive'], 'snotel', 'results')
 
     else:
@@ -706,6 +707,7 @@ def plot_snotel_comparison(driver, science_test_data_dir,
     pool = mp.Pool(processes=nproc)
 
     for filename in os.listdir(os.path.join(science_test_data_dir,
+                                            'science',
                                             'inputdata',
                                             'snotel',
                                             'observations')):
@@ -727,10 +729,8 @@ def plot_snotel_comparison_one_site(
         result_dir, plot_dir,
         plots_to_make,
         plot_variables, context, style, filename):
-    
-    print(plots_to_make)
-    
-    # get lat/lng from filename
+
+        # get lat/lng from filename
     file_split = re.split('_', filename)
     lng = file_split[3].split('.txt')[0]
     lat = file_split[2]
@@ -740,7 +740,7 @@ def plot_snotel_comparison_one_site(
     data = {}
     for key, items in compare_data_dict.items():
 
-        # read in data
+            # read in data
         if key == "snotel":
             data[key] = read_snotel_swe_obs(filename,
                                             science_test_data_dir,
@@ -787,7 +787,7 @@ def plot_snotel_comparison_one_site(
                 plotname = '%s_%s.png' % (lat, lng)
                 savepath = os.path.join(plot_dir, plot_variable, plotname)
                 plt.savefig(savepath, bbox_inches='tight')
-                print(savepath)
+
                 plt.clf()
                 plt.close()
 
@@ -831,7 +831,7 @@ def read_fluxnet_obs(subdir, science_test_data_dir, items):
 
     filename = '%s.stdfmt.hourly.local.txt' % subdir
     # read in data with -9999.0000 as NaNs
-    obs_dir = os.path.join(science_test_data_dir, 'inputdata',
+    obs_dir = os.path.join(science_test_data_dir, 'science', 'inputdata',
                            'ec_flux_towers', 'obs')
     ecflux_df = pd.read_csv(os.path.join(obs_dir, subdir, filename),
                             skiprows=0,
@@ -874,6 +874,7 @@ def plot_fluxnet_comparison(driver, science_test_data_dir,
 
     # loop over Ameriflux sites
     obs_dir = os.path.join(science_test_data_dir,
+                           'science',
                            'inputdata',
                            'ec_flux_towers',
                            'obs')

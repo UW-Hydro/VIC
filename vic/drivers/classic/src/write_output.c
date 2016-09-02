@@ -40,7 +40,7 @@ write_output(stream_struct **streams,
     // Write data
     for (stream_idx = 0; stream_idx < options.Noutstreams; stream_idx++) {
         if (raise_alarm(&(*streams)[stream_idx].agg_alarm, dmy)) {
-            write_data(&((*streams)[stream_idx]), dmy);
+            write_data(&((*streams)[stream_idx]));
             reset_stream((&(*streams)[stream_idx]), dmy);
         }
     }

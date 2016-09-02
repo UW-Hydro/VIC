@@ -55,7 +55,7 @@ VEGPARAM_ALB          TRUE
 
 LAI_SRC               FROM_VEGPARAM
 FCAN_SRC              FROM_VEGPARAM
-# ALBEDO_SRC            FROM_VEGPARAM
+# ALB_SRC            FROM_VEGPARAM
 
 SNOW_BAND             1
 

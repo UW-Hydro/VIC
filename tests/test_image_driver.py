@@ -40,12 +40,15 @@ def assert_nan_equal(ds_domain, ds_output):
 
     # check that nans are occurring in the same place in the arrays
     # check all variables in the dataset
-    for da in ds_output.data_vars:
+    mask_dims = set(ds_domain['mask'].dims)
+    for var, da in ds_output.data_vars.items():
+        # skip variables that don't have mask_dims (e.g. time_bnds)
+        if not all(d in da.dims for d in mask_dims):
+            continue
         # get dimensions to reduce DataArray on
-        dim_diff = set(ds_domain['mask'].dims).symmetric_difference(
-                                                    set(ds_output[da].dims))
+        dim_diff = mask_dims.symmetric_difference(set(da.dims))
         # reduce DataArray
-        da_null_reduced = ds_output[da].isnull().all(dim=dim_diff)
+        da_null_reduced = da.isnull().all(dim=dim_diff)
         # raise AssertionError if NaNs do not match
         npt.assert_array_equal(da_null_reduced.values,
                                np.isnan(ds_domain['mask']))
@@ -76,7 +79,8 @@ def check_multistream_image(fnames):
     def reindex_xr_obj_timedim(obj, freq):
         # Here we're basically rounding the timestamp in the time index to even
         # values.
-        new = pd.date_range(obj.time[0].values, freq=freq, periods=len(obj.time))
+        new = pd.date_range(obj.time[0].values, freq=freq,
+                            periods=len(obj.time))
         return instant_ds.reindex({'time': new}, method='nearest')
 
     streams = {}  # Dictionary to store parsed stream names
@@ -133,7 +137,7 @@ def check_multistream_image(fnames):
                 print('Variable=%s, freq=%s, how=%s: failed comparison' %
                       (key, freq, how))
                 print('actual=%s\nexpected=%s' % (actual, expected))
-                print(np.abs(actual-expected).max())
+                print(np.abs(actual - expected).max())
                 raise e
 
 
@@ -170,20 +174,17 @@ def setup_subdirs_and_fill_in_global_param_mpi_test(
     list_global_param = []
     for j, n_proc in enumerate(list_n_proc):
         # Set up subdirectories for results and states
-        result_dir = os.path.join(
-                result_basedir,
-                'processors_{}'.format(n_proc))
-        state_dir = os.path.join(
-                state_basedir,
-                'processors_{}'.format(n_proc))
+        result_dir = os.path.join(result_basedir,
+                                  'processors_{}'.format(n_proc))
+        state_dir = os.path.join(state_basedir,
+                                 'processors_{}'.format(n_proc))
         os.makedirs(result_dir, exist_ok=True)
         os.makedirs(state_dir, exist_ok=True)
 
         # Fill in global parameter options
-        list_global_param.append(s.safe_substitute(
-                test_data_dir=test_data_dir,
-                result_dir=result_dir,
-                state_dir=state_dir))
+        list_global_param.append(s.safe_substitute(test_data_dir=test_data_dir,
+                                                   result_dir=result_dir,
+                                                   state_dir=state_dir))
 
     return(list_global_param)
 
@@ -230,17 +231,15 @@ def check_mpi_fluxes(result_basedir, list_n_proc):
             result_basedir,
             'processors_{}'.format(n_proc))
         if len(glob.glob(os.path.join(result_dir, '*.nc'))) > 1:
-            warnings.warn(
-                'More than one netCDF file found under directory {}'.
-                    format(result_dir))
+            warnings.warn('More than one netCDF file found under '
+                          'directory {}'.format(result_dir))
         fname = glob.glob(os.path.join(result_dir, '*.nc'))[0]
         ds_current_run = xr.open_dataset(fname)
         # Compare current run with base run
         for var in ds_first_run.data_vars:
-                npt.assert_array_equal(
-                        ds_current_run[var].values,
-                        ds_first_run[var].values,
-                        err_msg='Fluxes are not an exact match')
+            npt.assert_array_equal(ds_current_run[var].values,
+                                   ds_first_run[var].values,
+                                   err_msg='Fluxes are not an exact match')
 
 
 def check_mpi_states(state_basedir, list_n_proc):
@@ -269,9 +268,8 @@ def check_mpi_states(state_basedir, list_n_proc):
         state_basedir,
         'processors_{}'.format(n_proc))
     if len(glob.glob(os.path.join(state_dir, '*.nc'))) > 1:
-        warnings.warn(
-            'More than one netCDF file found under directory {}'.
-                format(state_dir))
+        warnings.warn('More than one netCDF file found under '
+                      'directory {}'.format(state_dir))
     fname = glob.glob(os.path.join(state_dir, '*.nc'))[0]
     ds_first_run = xr.open_dataset(fname)
 
@@ -285,15 +283,12 @@ def check_mpi_states(state_basedir, list_n_proc):
             state_basedir,
             'processors_{}'.format(n_proc))
         if len(glob.glob(os.path.join(state_dir, '*.nc'))) > 1:
-            warnings.warn(
-                'More than one netCDF file found under directory {}'.
-                    format(result_dir))
+            warnings.warn('More than one netCDF file found under '
+                          'directory {}'.format(state_dir))
         fname = glob.glob(os.path.join(state_dir, '*.nc'))[0]
         ds_current_run = xr.open_dataset(fname)
         # Compare current run with base run
         for var in ds_first_run.data_vars:
-                npt.assert_array_equal(
-                        ds_current_run[var].values,
-                        ds_first_run[var].values,
-                        err_msg='States are not an exact match')
-
+            npt.assert_array_equal(ds_current_run[var].values,
+                                   ds_first_run[var].values,
+                                   err_msg='States are not an exact match')

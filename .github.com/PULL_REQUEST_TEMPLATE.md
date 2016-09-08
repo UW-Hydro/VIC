@@ -1,0 +1,6 @@
+- [ ] closes #xxx
+- [ ] tests passed
+- [ ] new tests added
+- [ ] science test figures
+- [ ] ran uncrustify prior to final commit
+- [ ] ReleaseNotes entry

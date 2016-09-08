@@ -1,0 +1,103 @@
+NLAYER      3
+NODES       10
+TIME_STEP   1
+SNOW_STEP   1
+STARTYEAR   2000
+STARTMONTH  01
+STARTDAY    01
+STARTHOUR   00
+ENDYEAR     2012
+ENDMONTH    12
+ENDDAY      31
+
+FULL_ENERGY     TRUE
+FROZEN_SOIL FALSE
+
+FORCING1    $test_data_dir/inputdata/ec_flux_towers/forcing.merge.hourly/full_data_
+FORCE_FORMAT    ASCII
+N_TYPES     12
+FORCE_TYPE  SKIP
+FORCE_TYPE  SKIP
+FORCE_TYPE  SKIP
+FORCE_TYPE  SKIP
+FORCE_TYPE  PREC       UNSIGNED 40
+FORCE_TYPE  AIR_TEMP   SIGNED   100
+FORCE_TYPE  SHORTWAVE  SIGNED   100
+FORCE_TYPE  LONGWAVE   SIGNED   100
+FORCE_TYPE  SKIP
+FORCE_TYPE  PRESSURE   SIGNED   100
+FORCE_TYPE  VP         SIGNED   100
+FORCE_TYPE  WIND       SIGNED   100
+FORCE_DT    1
+FORCEYEAR   1980
+FORCEMONTH  01
+FORCEDAY    01
+FORCEHOUR   00
+GRID_DECIMAL    4
+
+WIND_H          10.0
+
+SOIL            $test_data_dir/inputdata/ec_flux_towers/params/soil_param.site_test.txt
+BASEFLOW    ARNO
+JULY_TAVG_SUPPLIED  FALSE
+ORGANIC_FRACT   FALSE
+
+VEGLIB          $test_data_dir/inputdata/ec_flux_towers/params/veg_lib_IGBP.fv
+VEGLIB_VEGCOVER TRUE
+
+VEGPARAM        $test_data_dir/inputdata/ec_flux_towers/params/veg_param.sites.IGBP.modis
+ROOT_ZONES      3
+
+VEGPARAM_LAI    TRUE
+VEGPARAM_VEGCOVER TRUE
+VEGPARAM_ALB    TRUE
+
+LAI_SRC         FROM_VEGPARAM
+VEGCOVER_SRC    FROM_VEGPARAM
+# ALB_SRC      FROM_VEGPARAM
+SNOW_BAND   1
+
+
+RESULT_DIR      $result_dir
+OUT_STEP        1
+SKIPYEAR        0
+COMPRESS        FALSE
+BINARY_OUTPUT   FALSE
+ALMA_OUTPUT     FALSE
+MOISTFRACT      FALSE
+PRT_HEADER      TRUE
+PRT_SNOW_BAND   FALSE
+
+N_OUTFILES  2
+
+OUTFILE         snow 16
+OUTVAR          OUT_SWE                 %.6g    *       *
+OUTVAR          OUT_SNOW_DEPTH          %.6g    *       *
+OUTVAR          OUT_SNOW_CANOPY         %.6g    *       *
+OUTVAR          OUT_SNOW_COVER          %.6g    *       *
+OUTVAR          OUT_ADVECTION           %.6g    *       *
+OUTVAR          OUT_DELTACC             %.6g    *       *
+OUTVAR          OUT_SNOW_FLUX           %.6g    *       *
+OUTVAR          OUT_RFRZ_ENERGY         %.6g    *       *
+OUTVAR          OUT_MELT_ENERGY         %.6g    *       *
+OUTVAR          OUT_ADV_SENS            %.6g    *       *
+OUTVAR          OUT_LATENT_SUB          %.6g    *       *
+OUTVAR          OUT_SNOW_SURF_TEMP      %.6g    *       *
+OUTVAR          OUT_SNOW_PACK_TEMP      %.6g    *       *
+OUTVAR          OUT_SNOW_MELT           %.6g    *       *
+OUTVAR          OUT_ALBEDO              %.6g    *       *
+OUTVAR          OUT_SALBEDO             %.6g    *       *
+
+OUTFILE         en_bal 12
+OUTVAR          OUT_ADV_SENS            %.6g    *       *
+OUTVAR          OUT_ADVECTION           %.6g    *       *
+OUTVAR          OUT_DELTAH              %.6g    *       *
+OUTVAR          OUT_GRND_FLUX           %.6g    *       *
+OUTVAR          OUT_IN_LONG             %.6g    *       *
+OUTVAR          OUT_LATENT              %.6g    *       *
+OUTVAR          OUT_LATENT_SUB          %.6g    *       *
+OUTVAR          OUT_R_NET               %.6g    *       *
+OUTVAR          OUT_SENSIBLE            %.6g    *       *
+OUTVAR          OUT_RAD_TEMP            %.6g    *       *
+OUTVAR          OUT_NET_SHORT           %.6g    *       *
+OUTVAR          OUT_NET_LONG           %.6g    *       *

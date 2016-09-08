@@ -1302,7 +1302,7 @@ vic_init(void)
                   lake_con[i].lake_idx <
                   (int) veg_con[i][0].vegetat_type_num)) {
                 log_err("cell %zu lake_idx is %d but we must have -1 "
-                        "<= lake_idx < Nveg (%zu).\n", i, lake_con[i].lake_idx,
+                        "<= lake_idx < Nveg (%zu).", i, lake_con[i].lake_idx,
                         veg_con[i][0].vegetat_type_num);
             }
             if (lake_con[i].lake_idx != -1) {
@@ -1320,19 +1320,19 @@ vic_init(void)
                 if (lake_con[i].numnod != 0) {
                     log_err("cell %zu lake_idx is %d (lake not present) "
                             "which requires numnod to be 0, but numnod is "
-                            "%zu\n", i, lake_con[i].lake_idx,
+                            "%zu.", i, lake_con[i].lake_idx,
                             lake_con[i].numnod);
                 }
             }
             else if (!(lake_con[i].numnod > 0 &&
                        lake_con[i].numnod < MAX_LAKE_NODES)) {
                 log_err("cell %zu numnod is %zu but we must have 1 "
-                        "<= numnod < %d.\n", i, lake_con[i].numnod,
+                        "<= numnod < %d.", i, lake_con[i].numnod,
                         MAX_LAKE_NODES);
             }
             else if (!(lake_con[i].numnod <= options.NLAKENODES)) {
                 log_err("cell %zu numnod is %zu but this exceeds "
-                        "the file lake_node dimension length of %zu.\n",
+                        "the file lake_node dimension length of %zu.",
                         i, lake_con[i].numnod, options.NLAKENODES);
             }
             if (lake_con[i].numnod > max_numnod) {
@@ -1349,13 +1349,13 @@ vic_init(void)
                 if (lake_con[i].mindepth != 0) {
                     log_err("cell %zu lake_idx is %d (lake not present) "
                             "which requires mindepth to be 0, but mindepth "
-                            "is %f\n", i, lake_con[i].lake_idx,
+                            "is %f.", i, lake_con[i].lake_idx,
                             lake_con[i].mindepth);
                 }
             }
             else if (lake_con[i].lake_idx != -1 &&
                      !(lake_con[i].mindepth >= 0)) {
-                log_err("cell %zu mindepth is %f but must be >= 0.\n",
+                log_err("cell %zu mindepth is %f but must be >= 0.",
                         i, lake_con[i].mindepth);
             }
         }
@@ -1369,13 +1369,13 @@ vic_init(void)
                 if (lake_con[i].wfrac != 0) {
                     log_err("cell %zu lake_idx is %d (lake not present) "
                             "which requires wfrac to be 0, but wfrac is "
-                            "%f\n", i, lake_con[i].lake_idx, lake_con[i].wfrac);
+                            "%f.", i, lake_con[i].lake_idx, lake_con[i].wfrac);
                 }
             }
             else if (lake_con[i].lake_idx != -1 &&
                      !(lake_con[i].wfrac >= 0 && lake_con[i].wfrac <= 1)) {
                 log_err("cell %zu wfrac is %f but we must have "
-                        "0 <= wfrac <= 1.\n", i, lake_con[i].wfrac);
+                        "0 <= wfrac <= 1.", i, lake_con[i].wfrac);
             }
         }
 
@@ -1388,13 +1388,13 @@ vic_init(void)
                 if (lake_con[i].depth_in != 0) {
                     log_err("cell %zu lake_idx is %d (lake not present) "
                             "which requires depth_in to be 0, but depth_in is "
-                            "%f\n", i, lake_con[i].lake_idx,
+                            "%f.", i, lake_con[i].lake_idx,
                             lake_con[i].depth_in);
                 }
             }
             else if (lake_con[i].lake_idx != -1 &&
                      !(lake_con[i].depth_in >= 0)) {
-                log_err("cell %zu depth_in is %f but must be >= 0.\n",
+                log_err("cell %zu depth_in is %f but must be >= 0.",
                         i, lake_con[i].depth_in);
             }
         }
@@ -1408,7 +1408,7 @@ vic_init(void)
                 if (lake_con[i].rpercent != 0) {
                     log_err("cell %zu lake_idx is %d (lake not present) "
                             "which requires rpercent to be 0, but rpercent is "
-                            "%f\n", i, lake_con[i].lake_idx,
+                            "%f.", i, lake_con[i].lake_idx,
                             lake_con[i].rpercent);
                 }
             }
@@ -1416,7 +1416,7 @@ vic_init(void)
                      !(lake_con[i].rpercent >= 0 &&
                        lake_con[i].rpercent <= 1)) {
                 log_err("cell %zu rpercent is %f but we must have "
-                        "0 <= rpercent <= 1.\n", i, lake_con[i].rpercent);
+                        "0 <= rpercent <= 1.", i, lake_con[i].rpercent);
             }
         }
 
@@ -1469,36 +1469,36 @@ vic_init(void)
                 if (lake_con[i].z[0] > 0) {
                     log_err("cell %zu lake_idx is %d (lake not present) "
                             "which requires max depth to be 0, but max depth "
-                            "is %f\n", i, lake_con[i].lake_idx,
+                            "is %f.", i, lake_con[i].lake_idx,
                             lake_con[i].z[0]);
                 }
                 if (lake_con[i].Cl[0] > 0) {
                     log_err("cell %zu lake_idx is %d (lake not present) "
                             "which requires max area fraction to be 0, but "
-                            "max area fraction is %f\n", i,
+                            "max area fraction is %f.", i,
                             lake_con[i].lake_idx, lake_con[i].Cl[0]);
                 }
             }
             else {
                 if (!(lake_con[i].z[0] > 0)) {
                     log_err("cell %zu lake basin max depth is %f but must "
-                            "be > 0.\n", i, lake_con[i].z[0]);
+                            "be > 0.", i, lake_con[i].z[0]);
                 }
                 else if (!(lake_con[i].mindepth <= lake_con[i].z[0])) {
                     log_err("cell %zu lake basin mindepth is %f but "
-                            "must be <= max depth of %f\n",
+                            "must be <= max depth of %f.",
                             i, lake_con[i].mindepth, lake_con[i].z[0]);
                 }
                 if (!(lake_con[i].Cl[0] > 0 && lake_con[i].Cl[0] <= 1)) {
                     log_err("cell %zu lake basin max area fraction is %f but "
-                            "we must have 0 < max area fraction < 1\n", i,
+                            "we must have 0 < max area fraction < 1.", i,
                             lake_con[i].Cl[0]);
                 }
                 if (fabs(1 - lake_con[i].Cl[0] /
                          veg_con[i][lake_con[i].lake_idx].Cv) > 0.01) {
                     log_err("cell %zu lake basin max area fraction is %f but "
                             "must == area fraction of veg tile containing "
-                            "lake (%f)\n", i, lake_con[i].Cl[0],
+                            "lake (%f).", i, lake_con[i].Cl[0],
                             veg_con[i][lake_con[i].lake_idx].Cv);
                 }
                 else {
@@ -1512,7 +1512,7 @@ vic_init(void)
                     if (!(lake_con[i].z[j] > 0 &&
                           lake_con[i].z[j] < lake_con[i].z[j - 1])) {
                         log_err("cell %zu lake basin node %zu depth is %f "
-                                "but must be > 0 and < node %zu depth %f\n",
+                                "but must be > 0 and < node %zu depth %f.",
                                 i, j, lake_con[i].z[j], j - 1,
                                 lake_con[i].z[j - 1]);
                     }
@@ -1520,7 +1520,7 @@ vic_init(void)
                           lake_con[i].Cl[j] < lake_con[i].Cl[j - 1])) {
                         log_err("cell %zu lake basin node %zu area fraction "
                                 "is %f but must be > 0 and < node %zu area "
-                                "fraction %f\n", i, j, lake_con[i].Cl[j], j - 1,
+                                "fraction %f.", i, j, lake_con[i].Cl[j], j - 1,
                                 lake_con[i].Cl[j - 1]);
                     }
                 }

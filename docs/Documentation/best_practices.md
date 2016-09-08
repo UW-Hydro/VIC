@@ -19,4 +19,4 @@ For more information on using Git with VIC, see our [Git tutorial](../Developmen
 
 #### References
 
-1. *Wilson, G., Aruliah, D. A., Brown, C. T., Hong, N. P. C., Davis, M., Guy, R. T., ... & Waugh, B. (2014). Best practices for scientific computing. PLoS Biol, 12(1), e1001745.*
+1. Wilson, G., Aruliah, D.A., Brown, C.T., Hong, N.P.C., Davis, M., Guy, R.T., Haddock, S.H., Huff, K.D., Mitchell, I.M., Plumbley, M.D. and Waugh, B., 2014. Best practices for scientific computing. _PLoS Biol_, *12(1)*, p.e1001745, [10.1371/journal.pbio.1001745](http://dx.doi.org/10.1371/journal.pbio.1001745).

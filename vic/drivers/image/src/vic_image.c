@@ -120,7 +120,8 @@ main(int    argc,
     vic_init_output(&(dmy[0]));
 
     // Initialization is complete, print settings
-    log_info("Initialization is complete, print global param and options structures");
+    log_info(
+        "Initialization is complete, print global param and options structures");
     print_global_param(&global_param);
     print_option(&options);
 
@@ -157,7 +158,7 @@ main(int    argc,
     // finalize MPI
     status = MPI_Finalize();
     if (status != MPI_SUCCESS) {
-        log_err("MPI error in main(): %d\n", status);
+        log_err("MPI error: %d", status);
     }
 
     log_info("Completed running VIC %s", VIC_DRIVER);

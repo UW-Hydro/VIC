@@ -108,7 +108,7 @@ read_atmos_data(FILE               *infile,
         // Nbytes is assumed to be the byte offset at which the data records start.
         fseek(infile, 0, SEEK_SET);
         if (feof(infile)) {
-            log_err("No data in the forcing file.  Model stopping...");
+            log_err("No data in the forcing file.");
         }
         for (i = 0; i < 4; i++) {
             fread(&ustmp, sizeof(unsigned short int), 1, infile);
@@ -136,7 +136,7 @@ read_atmos_data(FILE               *infile,
         fseek(infile, skip_recs * Nfields * sizeof(short int), SEEK_CUR);
         if (feof(infile)) {
             log_err("No data for the specified time period in the forcing "
-                    "file.  Model stopping...");
+                    "file.");
         }
 
         /** Read BINARY forcing data **/
@@ -216,7 +216,7 @@ read_atmos_data(FILE               *infile,
         for (i = 0; i < skip_recs; i++) {
             if (fgets(str, MAXSTRING, infile) == NULL) {
                 log_err("No data for the specified time period in the forcing "
-                        "file.  Model stopping...");
+                        "file.");
             }
         }
 

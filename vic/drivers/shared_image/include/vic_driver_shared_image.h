@@ -28,7 +28,7 @@
 #define VIC_DRIVER_SHARED_IMAGE_H
 
 #include <vic_driver_shared_all.h>
-#include <vic_nc_log.h>
+#include <vic_image_log.h>
 #include <vic_mpi.h>
 
 #include <netcdf.h>
@@ -122,8 +122,10 @@ typedef struct {
     int node_dimid;
     int root_zone_dimid;
     int time_dimid;
+    int time_bounds_dimid;
     int veg_dimid;
     int time_varid;
+    int time_bounds_varid;
     size_t band_size;
     size_t front_size;
     size_t frost_size;

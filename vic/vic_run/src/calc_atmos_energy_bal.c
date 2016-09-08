@@ -67,7 +67,6 @@ calc_atmos_energy_bal(double    InOverSensible,
     double                   T_lower;
     double                   T_upper;
     double                   Tcanopy;
-    char                     ErrorString[MAXSTRING];
 
     F = 1;
 
@@ -100,7 +99,7 @@ calc_atmos_energy_bal(double    InOverSensible,
         T_upper = (Tair) + param.CANOPY_DT;
 
         // iterate for canopy air temperature
-        Tcanopy = root_brent(T_lower, T_upper, ErrorString,
+        Tcanopy = root_brent(T_lower, T_upper,
                              func_atmos_energy_bal, Ra, Tair, atmos_density,
                              InSensible, SensibleHeat);
 
@@ -117,8 +116,7 @@ calc_atmos_energy_bal(double    InOverSensible,
                                                        NetRadiation, Ra, Tair,
                                                        atmos_density,
                                                        InSensible,
-                                                       SensibleHeat,
-                                                       ErrorString);
+                                                       SensibleHeat);
                 return (ERROR);
             }
         }
@@ -185,7 +183,6 @@ error_print_atmos_energy_bal(double  Tcanopy,
     double  InSensible;
 
     double *SensibleHeat;
-    char   *ErrorString;
 
     // extract variables from va_arg
     LatentHeat = (double)  va_arg(ap, double);
@@ -196,26 +193,22 @@ error_print_atmos_energy_bal(double  Tcanopy,
     InSensible = (double)  va_arg(ap, double);
 
     SensibleHeat = (double *)va_arg(ap, double *);
-    ErrorString = (char *)va_arg(ap, char *);
 
     // print variable values
-    fprintf(LOG_DEST, "%s", ErrorString);
-    fprintf(LOG_DEST, "ERROR: calc_atmos_energy_bal failed to converge to a "
-            "solution in root_brent.  Variable values will be dumped "
-            "to the screen, check for invalid values.\n");
-    fprintf(LOG_DEST, "Tcanopy = %f\n", Tcanopy);
-    fprintf(LOG_DEST, "LatentHeat = %f\n", LatentHeat);
-    fprintf(LOG_DEST, "NetRadiation = %f\n", NetRadiation);
-    fprintf(LOG_DEST, "Ra = %f\n", Ra);
-    fprintf(LOG_DEST, "Tair = %f\n", Tair);
-    fprintf(LOG_DEST, "atmos_density = %f\n", atmos_density);
-    fprintf(LOG_DEST, "InSensible = %f\n", InSensible);
-
-    fprintf(LOG_DEST, "*SensibleHeat = %f\n", *SensibleHeat);
-
-    fprintf(LOG_DEST, "Finished writing calc_atmos_energy_bal variables.\n"
-            "Try increasing CANOPY_DT to get model to complete cell.\n"
-            "Then check output for instabilities.\n");
+    log_warn("Failure to converge to a solution in root_brent.\n"
+             "Check for invalid values.\n"
+             "Tcanopy = %f\n"
+             "LatentHeat = %f\n"
+             "NetRadiation = %f\n"
+             "Ra = %f\n"
+             "Tair = %f\n"
+             "atmos_density = %f\n"
+             "InSensible = %f\n"
+             "*SensibleHeat = %f\n"
+             "Try increasing CANOPY_DT to get model to complete cell.\n"
+             "Then check output for instabilities.",
+             Tcanopy, LatentHeat, NetRadiation, Ra, Tair, atmos_density,
+             InSensible, *SensibleHeat);
 
     return(ERROR);
 }
@@ -271,7 +264,6 @@ error_print_atmos_moist_bal(double  VPcanopy,
     double  gamma;
     double  vp;
     double *AtmosLatent;
-    char   *ErrorString;
 
     // extract variables from va_arg
     InLatent = (double)  va_arg(ap, double);
@@ -281,22 +273,20 @@ error_print_atmos_moist_bal(double  VPcanopy,
     gamma = (double)  va_arg(ap, double);
     vp = (double)  va_arg(ap, double);
     AtmosLatent = (double *)va_arg(ap, double *);
-    ErrorString = (char *)  va_arg(ap, char *);
 
     // print variable values
-    fprintf(LOG_DEST, "%s", ErrorString);
-    fprintf(LOG_DEST, "VPcanopy = %f\n", VPcanopy);
-    fprintf(LOG_DEST, "InLatent = %f\n", InLatent);
-    fprintf(LOG_DEST, "Lv = %f\n", Lv);
-    fprintf(LOG_DEST, "Ra = %f\n", Ra);
-    fprintf(LOG_DEST, "atmos_density = %f\n", atmos_density);
-    fprintf(LOG_DEST, "gamma = %f\n", gamma);
-    fprintf(LOG_DEST, "vp = %f\n", vp);
-    fprintf(LOG_DEST, "AtmosLatent = %f\n", *AtmosLatent);
-
-    log_err("Finished writing calc_atmos_moist_bal variables.\nTry increasing "
-            "CANOPY_VP to get model to complete cell.\nThen check output for "
-            "instabilities.");
+    log_err("VPcanopy = %f\n"
+            "InLatent = %f\n"
+            "Lv = %f\n"
+            "Ra = %f\n"
+            "atmos_density = %f\n"
+            "gamma = %f\n"
+            "vp = %f\n"
+            "AtmosLatent = %f\n"
+            "Try increasing CANOPY_VP to get model to complete cell.\n"
+            "Then check output for instabilities.",
+            VPcanopy, InLatent, Lv, Ra, atmos_density, gamma, vp,
+            *AtmosLatent);
 
     return(0.0);
 }

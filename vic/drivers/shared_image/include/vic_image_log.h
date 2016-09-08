@@ -38,15 +38,11 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *****************************************************************************/
 
-#ifndef __vic_nc_log_h__
-#define __vic_nc_log_h__
+#ifndef __vic_image_log_h__
+#define __vic_image_log_h__
 
 #include <vic_def.h>
 #include <vic_mpi.h>
-
-void print_mpi_error_str(int error_code);
-
-void print_mpi_error_str(int error_code);
 
 // Macros for logging
 #define clean_ncerrno(e) (e == NC_NOERR ? "None" : nc_strerror(e))

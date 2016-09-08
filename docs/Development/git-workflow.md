@@ -1,8 +1,8 @@
 # Development Workflow
-The basic workflow described here follows a workflow originally outlined by Vincent Driessen.  The workflow is built around the Git version control system.  A basic description of the branching strategy and release management used by our research group is presented here.  We use a central truth repository (https://github.com/UW-Hydro/VIC) that contains our main branches.
+The basic workflow described here follows a workflow originally [outlined](http://nvie.com/posts/a-successful-git-branching-model/) by Vincent Driessen.  The workflow is built around the Git version control system.  A basic description of the branching strategy and release management used by our research group is presented here.  We use a central truth repository (https://github.com/UW-Hydro/VIC) that contains our main branches.
 
 ## Main Branches
-Both of the main branches are published on the Github page and are controlled only by those within the admin group.  The repository is organized into several branches for different purposes.  In general, any new development will wan to start with a branch from the develop branch.
+Both of the main branches are published on the Github page and are controlled only by those within the admin group.  The repository is organized into several branches for different purposes.  In general, any new development will want to start with a branch from the develop branch.
 
 **1. master**– The master branch represents the official release of the code.  This branch is updated by new releases from the develop/release branches and by hotfixes.
 

@@ -524,7 +524,7 @@ get_parameters(FILE *paramfile)
             }
             else {
                 log_warn("Unrecognized option in the parameter file:  %s "
-                         "- check your spelling\n", optstr);
+                         "- check your spelling", optstr);
             }
         }
         fgets(cmdstr, MAXSTRING, paramfile);

@@ -100,8 +100,6 @@ snow_melt(double            Le,
     double                   advected_sensible_heat;
     double                   melt_energy = 0.;
 
-    char                     ErrorString[MAXSTRING];
-
     SnowFall = snowfall / MM_PER_M; /* convet to m */
     RainFall = rainfall / MM_PER_M; /* convet to m */
 
@@ -122,13 +120,13 @@ snow_melt(double            Le,
     PackSwq = Ice - SurfaceSwq;
 
     /* Calculate cold contents */
-    SurfaceCC = CONST_CPFWICE * SurfaceSwq * snow->surf_temp;
-    PackCC = CONST_CPFWICE * PackSwq * snow->pack_temp;
+    SurfaceCC = CONST_VCPICE_WQ * SurfaceSwq * snow->surf_temp;
+    PackCC = CONST_VCPICE_WQ * PackSwq * snow->pack_temp;
     if (air_temp > 0.0) {
         SnowFallCC = 0.0;
     }
     else {
-        SnowFallCC = CONST_CPFWICE * SnowFall * air_temp;
+        SnowFallCC = CONST_VCPICE_WQ * SnowFall * air_temp;
     }
 
     /* Distribute fresh snowfall */
@@ -153,13 +151,13 @@ snow_melt(double            Le,
         SurfaceCC += SnowFallCC;
     }
     if (SurfaceSwq > 0.0) {
-        snow->surf_temp = SurfaceCC / (CONST_CPFWICE * SurfaceSwq);
+        snow->surf_temp = SurfaceCC / (CONST_VCPICE_WQ * SurfaceSwq);
     }
     else {
         snow->surf_temp = 0.0;
     }
     if (PackSwq > 0.0) {
-        snow->pack_temp = PackCC / (CONST_CPFWICE * PackSwq);
+        snow->pack_temp = PackCC / (CONST_VCPICE_WQ * PackSwq);
     }
     else {
         snow->pack_temp = 0.0;
@@ -269,7 +267,7 @@ snow_melt(double            Le,
                 snow->surf_temp = root_brent(
                     (double) (snow->surf_temp - param.SNOW_DT),
                     (double) (snow->surf_temp + param.SNOW_DT),
-                    ErrorString, SnowPackEnergyBalance,
+                    SnowPackEnergyBalance,
                     delta_t, aero_resist, aero_resist_used, z2, Z0,
                     density, vp, LongSnowIn, Le, pressure,
                     RainFall, NetShortSnow, vpd,
@@ -415,9 +413,9 @@ snow_melt(double            Le,
         Ice += snow->pack_water;
         snow->pack_water = 0.0;
         if (PackSwq > 0.0) {
-            PackCC = PackSwq * CONST_CPFWICE * snow->pack_temp +
+            PackCC = PackSwq * CONST_VCPICE_WQ * snow->pack_temp +
                      PackRefreezeEnergy;
-            snow->pack_temp = PackCC / (CONST_CPFWICE * PackSwq);
+            snow->pack_temp = PackCC / (CONST_VCPICE_WQ * PackSwq);
             if (snow->pack_temp > 0.) {
                 snow->pack_temp = 0.;
             }
@@ -456,8 +454,8 @@ snow_melt(double            Le,
     Ice = PackSwq + SurfaceSwq;
 
     if (Ice > param.SNOW_MAX_SURFACE_SWE) {
-        SurfaceCC = CONST_CPFWICE * snow->surf_temp * SurfaceSwq;
-        PackCC = CONST_CPFWICE * snow->pack_temp * PackSwq;
+        SurfaceCC = CONST_VCPICE_WQ * snow->surf_temp * SurfaceSwq;
+        PackCC = CONST_VCPICE_WQ * snow->pack_temp * PackSwq;
         if (SurfaceSwq > param.SNOW_MAX_SURFACE_SWE) {
             PackCC += SurfaceCC *
                       (SurfaceSwq - param.SNOW_MAX_SURFACE_SWE) / SurfaceSwq;
@@ -474,8 +472,8 @@ snow_melt(double            Le,
             PackSwq -= param.SNOW_MAX_SURFACE_SWE - SurfaceSwq;
             SurfaceSwq += param.SNOW_MAX_SURFACE_SWE - SurfaceSwq;
         }
-        snow->pack_temp = PackCC / (CONST_CPFWICE * PackSwq);
-        snow->surf_temp = SurfaceCC / (CONST_CPFWICE * SurfaceSwq);
+        snow->pack_temp = PackCC / (CONST_VCPICE_WQ * PackSwq);
+        snow->surf_temp = SurfaceCC / (CONST_VCPICE_WQ * SurfaceSwq);
     }
     else {
         PackSwq = 0.0;
@@ -617,8 +615,6 @@ ErrorPrintSnowPackEnergyBalance(double  TSurf,
     double *SurfaceMassFlux;        /* Mass flux of water vapor to or from the
                                          intercepted snow */
 
-    char   *ErrorString;
-
     /* Read Variable Argument List */
 
     /* General Model Parameters */
@@ -666,13 +662,11 @@ ErrorPrintSnowPackEnergyBalance(double  TSurf,
     VaporMassFlux = (double *) va_arg(ap, double *);
     BlowingMassFlux = (double *) va_arg(ap, double *);
     SurfaceMassFlux = (double *) va_arg(ap, double *);
-    ErrorString = (char *) va_arg(ap, char *);
 
     /* print variables */
-    fprintf(LOG_DEST, "%s", ErrorString);
-    fprintf(LOG_DEST, "ERROR: snow_melt failed to converge to a solution in "
-            "root_brent.  Variable values will be dumped to the "
-            "screen, check for invalid values.\n");
+    log_warn("snow_melt failed to converge to a solution in "
+             "root_brent.  Variable values will be dumped to the "
+             "screen, check for invalid values.");
 
     /* general model terms */
     fprintf(LOG_DEST, "iveg = %i\n", iveg);
@@ -718,9 +712,9 @@ ErrorPrintSnowPackEnergyBalance(double  TSurf,
     fprintf(LOG_DEST, "BlowingMassFlux = %f\n", BlowingMassFlux[0]);
     fprintf(LOG_DEST, "SurfaceMassFlux = %f\n", SurfaceMassFlux[0]);
 
-    fprintf(LOG_DEST, "Finished dumping snow_melt variables.\nTry increasing "
-            "SNOW_DT to get model to complete cell.\nThencheck output "
-            "for instabilities.\n");
+    log_warn("Finished dumping snow_melt variables.\nTry increasing "
+             "SNOW_DT to get model to complete cell.\nThencheck output "
+             "for instabilities.");
 
     return(ERROR);
 }

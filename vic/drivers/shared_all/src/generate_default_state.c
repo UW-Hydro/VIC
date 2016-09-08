@@ -149,8 +149,8 @@ generate_default_state(all_vars_struct *all_vars,
                                 soil_con->frost_fract, soil_con->frost_slope,
                                 soil_con->FS_ACTIVE);
                         if (ErrorFlag == ERROR) {
-                            log_err("Error in "
-                                    "estimate_layer_ice_content_quick_flux");
+                            log_err("Error calculating layer temperature "
+                                    "using QUICK_FLUX option");
                         }
                     }
                     else {
@@ -177,8 +177,7 @@ generate_default_state(all_vars_struct *all_vars,
                             options.Nlayer,
                             soil_con->FS_ACTIVE);
                         if (ErrorFlag == ERROR) {
-                            log_err("Error in "
-                                    "estimate_layer_ice_content");
+                            log_err("Error calculating layer ice content");
                         }
                     }
                 }

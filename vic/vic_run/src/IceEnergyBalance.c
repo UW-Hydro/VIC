@@ -178,7 +178,7 @@ IceEnergyBalance(double  TSurf,
     /* Calculate advected heat flux from rain */
 
     // Temporary fix for lake model.
-    *AdvectedEnergy = (CONST_CPFW * Tair * Rain) / Dt;
+    *AdvectedEnergy = (CONST_CPFW * CONST_RHOFW * Tair * Rain) / Dt;
 
     /* Calculate change in cold content */
     /* No change in cold content in lake model */

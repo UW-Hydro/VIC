@@ -1,0 +1,89 @@
+NLAYER      3
+NODES       10
+TIME_STEP   1
+SNOW_STEP   1
+STARTYEAR   2007
+STARTMONTH  11
+STARTDAY    01
+STARTHOUR   00
+ENDYEAR     2008
+ENDMONTH    07
+ENDDAY      31
+
+FULL_ENERGY     TRUE
+FROZEN_SOIL FALSE
+
+QUICK_FLUX     FALSE
+
+FORCING1    $test_data_dir/inputdata/snotel/forcings/snotel_VIC.4.1.2_forcings_
+FORCE_FORMAT    ASCII
+N_TYPES     7   # Number of variables (columns)
+FORCE_TYPE  SHORTWAVE  UNSIGNED 40
+FORCE_TYPE  LONGWAVE   UNSIGNED 40
+FORCE_TYPE  AIR_TEMP   SIGNED       100
+FORCE_TYPE  PRESSURE   UNSIGNED 40
+FORCE_TYPE  PREC       UNSIGNED 40
+FORCE_TYPE  VP         UNSIGNED 40
+FORCE_TYPE  WIND       SIGNED   100
+FORCE_DT    1
+FORCEYEAR   2007
+FORCEMONTH  11
+FORCEDAY    01
+FORCEHOUR   00
+GRID_DECIMAL    4
+# WIND_H          17.5  # WIND_H is not actually used in VIC4.2 (hardcoded)
+
+SOIL            $test_data_dir/inputdata/snotel/parameters/Snotel_VIC.4.1.2_soil.txt
+BASEFLOW    ARNO
+
+JULY_TAVG_SUPPLIED  FALSE
+ORGANIC_FRACT       FALSE
+VEGLIB          $test_data_dir/inputdata/snotel/parameters/Snotel_VIC.4.1.2_veglib.txt
+VEGPARAM        $test_data_dir/inputdata/snotel/parameters/Snotel_VIC.4.1.2_vegparam.txt
+ROOT_ZONES      3
+
+VEGPARAM_LAI    TRUE
+LAI_SRC         FROM_VEGPARAM
+
+SNOW_BAND   1
+
+RESULT_DIR      $result_dir
+OUT_STEP        24
+SKIPYEAR        0
+COMPRESS        FALSE
+BINARY_OUTPUT   FALSE
+ALMA_OUTPUT     FALSE
+MOISTFRACT      FALSE
+PRT_HEADER      TRUE
+PRT_SNOW_BAND   FALSE
+
+
+N_OUTFILES  1
+
+OUTFILE         outfile 26
+OUTVAR          OUT_SWE                 %.6g    *       *
+OUTVAR          OUT_SNOW_DEPTH          %.6g    *       *
+OUTVAR          OUT_SNOW_CANOPY         %.6g    *       *
+OUTVAR          OUT_SNOW_COVER          %.6g    *       *
+OUTVAR          OUT_ADVECTION           %.6g    *       *
+OUTVAR          OUT_DELTACC             %.6g    *       *
+OUTVAR          OUT_SNOW_FLUX           %.6g    *       *
+OUTVAR          OUT_RFRZ_ENERGY         %.6g    *       *
+OUTVAR          OUT_MELT_ENERGY         %.6g    *       *
+OUTVAR          OUT_ADV_SENS            %.6g    *       *
+OUTVAR          OUT_LATENT_SUB          %.6g    *       *
+OUTVAR          OUT_SNOW_SURF_TEMP      %.6g    *       *
+OUTVAR          OUT_SNOW_PACK_TEMP      %.6g    *       *
+OUTVAR          OUT_SNOW_MELT           %.6g    *       *
+OUTVAR          OUT_ALBEDO              %.6g    *       *
+OUTVAR          OUT_SALBEDO             %.6g    *       *
+OUTVAR          OUT_ADV_SENS            %.6g    *       *
+OUTVAR          OUT_ADVECTION           %.6g    *       *
+OUTVAR          OUT_DELTAH              %.6g    *       *
+OUTVAR          OUT_GRND_FLUX           %.6g    *       *
+OUTVAR          OUT_IN_LONG             %.6g    *       *
+OUTVAR          OUT_LATENT              %.6g    *       *
+OUTVAR          OUT_LATENT_SUB          %.6g    *       *
+OUTVAR          OUT_R_NET               %.6g    *       *
+OUTVAR          OUT_SENSIBLE            %.6g    *       *
+OUTVAR          OUT_RAD_TEMP            %.6g    *       *

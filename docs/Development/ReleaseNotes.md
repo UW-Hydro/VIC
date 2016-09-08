@@ -10,14 +10,23 @@ For a list of known issues and their fixes (in bug-fix updates), visit the VIC G
 
 To check which release of VIC you are running:
 
-For VIC 4, type `vicNl -v`
-For VIC 5 and later, type `vic _{classic,image}.exe -v`
+- For VIC 4, type `vicNl -v`
+- For VIC 5 and later, type `vic_{classic,image}.exe -v`
 
 ------------------------------
 
-## VIC 5.0.0 (Release Candidate 1)
+## VIC 5.0.1
 
-**Release date: June 28, 2016**
+**Release date: (Unreleased)**
+
+
+------------------------------
+
+## VIC 5.0.0 [![DOI](https://zenodo.org/badge/doi/10.5281/zenodo.61422.svg)](http://dx.doi.org/10.5281/zenodo.61422)
+
+**Release date: (September 2, 2016)**
+
+Source code is available here: [![VIC.5.0.0](https://img.shields.io/badge/VIC-5.0.0-blue.svg)](https://github.com/UW-Hydro/VIC/releases/tag/VIC.5.0.0)
 
 This is a major update from VIC 4. The VIC 5.0.0 release aims to have nearly identical physics as VIC 4.2 while providing a clean, refactored code base supporting multiple drivers. There are a number of new features, bug fixes, and backward incompatible changes. See the VIC Github page for more details on the changes included in this release.
 
@@ -27,6 +36,7 @@ This is a major update from VIC 4. The VIC 5.0.0 release aims to have nearly ide
 
 	Although the physics and model behavior of VIC 5.0.0 should be nearly identical to VIC 4.2, the source code has undergone a major cleanup and reorganization. We have separated the physical core ("vic_run") from the driver source code. This work has improved the extensibility and readability of the model.
 
+
 2. Classic Driver ([GH#7](https://github.com/UW-Hydro/VIC/issues/7))
 
 	The Classic Driver provides similar functionality as VIC 4, including ASCII and binary I/O, and a time-before-space evaluation loop order. The Classic Driver is maintained for two main reasons:
@@ -34,37 +44,46 @@ This is a major update from VIC 4. The VIC 5.0.0 release aims to have nearly ide
 	1. to provide some level of backward compatibility for existing VIC users that wish to continue using VIC using a traditional approach, and,
 	2. to allow VIC to be run at individual grid cells, without requiring the infrastructure needed by the Image Driver. Documentation for the Classic Driver can be found [here](../Documentation/Drivers/Classic/ClassicDriver/).
 
+
 3. Image Driver ([GH#7](https://github.com/UW-Hydro/VIC/issues/7))
 
 	The Image Driver adds a number of features to the user interface of the VIC model. Most notably, it uses a space-before-time evaluation loop order, netCDF I/O, and parallelization using MPI.  Image Driver specific documentation can be found [here](../Documentation/Drivers/Image/ImageDriver/).
+
 
 4. Constants File ([GH#192](https://github.com/UW-Hydro/VIC/pull/173))
 
 	Earlier versions of VIC included many hard-coded parameters and constants.  We have consolidated these constants into a single structure and developed an input file that allows users to modify parameters at run-time.  See [here](../Documentation/Constants/) for more information.
 
+
 5. Logging ([GH#173](https://github.com/UW-Hydro/VIC/pull/173))
 
 	A set of logging Macros have been added to all drivers and `vic_run`. The logging level can be set in the driver `Makefile` via the `LOG_LVL` variable. The logging Macros provide the filename and line number in the source code to aid in debugging.  Additionally, when compiler support is available, a traceback is printed when VIC exits during runtime. When the `LOG_DIR` variable is provided in the global parameter file, VIC will write its log(s) to log files instead of printing to stdout.
 
+
 6. Sub-hourly Timestep ([GH#188](https://github.com/UW-Hydro/VIC/pull/188))
 
-	Previous versions of VIC were limited to a minimum timestep of one hour. The units of the VIC timestep have been changed from hours to seconds and the minimum timestep is now one second. If you intend on running VIC at a timestep less that one hour, we suggest significant testing.
+	Previous versions of VIC were limited to a minimum timestep of one hour. The units of the VIC timestep have been changed from hours to seconds and the minimum timestep is now one second. If you intend on running VIC at a timestep of less than one hour, we suggest extensive testing.
+
 
 7. Calendar Support ([GH#188](https://github.com/UW-Hydro/VIC/pull/188))
 
 	Earlier versions of VIC used the standard Gregorian calendar.  Because many modern climate models use non-standard calendars, we have implemented all [CF compliant calendars](http://www.cgd.ucar.edu/cms/eaton/netcdf/CF-20010629.htm#cal). The standard Gregorian calendar remains the VIC default. See the documentation for individual drivers for how to set the calendar option (e.g. [classic](../Documentation/Drivers/Classic/GlobalParam/#main-simulation-parameters)).
 
+
 8. Sample Datasets ([GH#387](https://github.com/UW-Hydro/VIC/pull/387))
 
 	The [VIC_sample_data](https://github.com/UW-hydro/VIC_sample_data) repository contains the necessary input datasets (forcings and parameters) to run short simulations of the VIC model for both the classic and image driver.
 
+
 9. Tests Datasets ([GH#79](https://github.com/UW-Hydro/VIC/issues/79))
 
-	**TODO:** See https://github.com/UW-Hydro/VIC/issues/79 for more information.
+	See https://github.com/UW-Hydro/VIC/issues/79 for more information. A temporary location of the test data is here: ftp://ftp.hydro.washington.edu/pub/gergel/VIC5_test_data/
+
 
 10. Testing and Continuous Integration ([GH#190](https://github.com/UW-Hydro/VIC/pull/190))
 
-	A comprehensive testing platform has been implemented and is available for public use along with the VIC model. A small subset of the test platform is run on [Travis-CI](https://travis-ci.org/UW-Hydro/VIC), which facilitates continuous integration of the VIC test platform. More information on the test platform is [here](Testing.md)
+	A comprehensive testing platform has been implemented and is available for public use along with the VIC model. A small subset of the test platform is run on [Travis-CI](https://travis-ci.org/UW-Hydro/VIC), which facilitates continuous integration of the VIC test platform. More information on the test platform is [here](Testing.md).
+
 
 11. Run-time profiling and timing ([GH#442](https://github.com/UW-Hydro/VIC/pull/442))
 
@@ -76,7 +95,6 @@ This is a major update from VIC 4. The VIC 5.0.0 release aims to have nearly ide
 
 	The format of ASCII forcing and output files has changed in VIC 5. These changes were motivated by the desire to improve simulation metadata tracking and reproducibility of VIC simulations.
 
-	- Forcing files now require date stamps for each timestep and a header specifies the names of the forcing variables.   
 	- Output files now include a header with simulation metadata and variable names. The `PRT_HEADER` option has been deprecated.
 
 2.  Classic Driver Global Parameter Options
@@ -135,7 +153,7 @@ This is a major update from VIC 4. The VIC 5.0.0 release aims to have nearly ide
 
 3. Removed `LONGWAVE` and `SHORTWAVE` forcing types ([GH#379](https://github.com/UW-Hydro/VIC/pull/379)).
 
-	Previous versions of VIC allowed users to specify either `LONGWAVE` or `LWDOWN` to denote the incoming longwave radiation flux and `SHORTWAVE` or `SWDOWN` to denote the incoming shorwave radiation flux. We have removed these duplicate options, standardizing on the more descriptive `LWDOWN` and `SWDOWN`.
+	Previous versions of VIC allowed users to specify either `LONGWAVE` or `LWDOWN` to denote the incoming longwave radiation flux and `SHORTWAVE` or `SWDOWN` to denote the incoming shortwave radiation flux. We have removed these duplicate options, standardizing on the more descriptive `LWDOWN` and `SWDOWN`.
 
 	Similarly, output variables `OUT_NET_LONG` and `OUT_NET_SHORT` have been replaced with `OUT_LWNET` and `OUT_SWNET`, respectively.
 
@@ -160,20 +178,43 @@ This is a major update from VIC 4. The VIC 5.0.0 release aims to have nearly ide
 3. Fix related to exact restart ([GH#481](https://github.com/UW-Hydro/VIC/pull/481), [GH#507](https://github.com/UW-Hydro/VIC/pull/507), [GH#509](https://github.com/UW-Hydro/VIC/pull/509))
 
 	Previously, VIC did not produce the same results (fluxes and states) if a simulation was separated into multiple shorter-period runs by saving the state variables and restarting. This was due to:
-		1. The MTCLIM algorithm resulted in slightly different sub-daily meteorological variable values for different lengths of forcings (MTCLIM is deprecated in the current version)
-		2. A few bugs resulting in inexact restart.
 
-	The following bugs have been fixed:
+	1. The MTCLIM algorithm resulted in slightly different sub-daily meteorological variable values for different lengths of forcings (MTCLIM is deprecated in the current version)
 
-	- The prognostic state variable `energy.Tfoliage` (foliage temperature) is now saved to the state file
-	- Two flux variables `energy.LongUnderOut` and `energy.snow_flux` are now saved to the state file.
+	2. A few bugs resulting in inexact restart. The following bugs have been fixed:
 
-		!!!Note
-				This is a temporary solution to ensure exact restart. A better way of handling these two flux variables needs to be done in the future (see [GH#479](https://github.com/UW-Hydro/VIC/issues/479))
+		- The prognostic state variable `energy.Tfoliage` (foliage temperature) is now saved to the state file
+		- Two flux variables `energy.LongUnderOut` and `energy.snow_flux` are now saved to the state file.
+
+			!!!Note
+					This is a temporary solution to ensure exact restart. A better way of handling these two flux variables needs to be done in the future (see [GH#479](https://github.com/UW-Hydro/VIC/issues/479))
 
 4. Fix for binary state file I/O ([GH#487](https://github.com/UW-Hydro/VIC/pull/487))
 
 	Fixed a bug so that the binary format state file I/O works correctly.
+
+5. Fix for a physical constant (water heat capacity) ([GH#574](https://github.com/UW-Hydro/VIC/pull/574))
+
+	Fixed a bug where volumetric heat capacity of water should be used in `func_canopy_energy_bal` (previously specific heat capacity was used).
+
+------------------------------
+
+## VIC 4.2.d [![DOI](https://zenodo.org/badge/doi/10.5281/zenodo.56058.svg)](http://dx.doi.org/10.5281/zenodo.56058)
+
+!!! Note "Note: Final Release of VIC 4 Development Track"
+	This is the last release of the VIC Version 4 development track.  The next release will be VIC.5.0 and will include backward incompatible changes. Future updates the VIC 4 development track will be made on the `support/VIC.4.2.d`.
+
+Source code is available here: [![VIC.4.2.d](https://img.shields.io/badge/VIC-4.2.d-blue.svg)](https://github.com/UW-Hydro/VIC/releases/tag/VIC.4.2.d)
+
+**Release date: (June 20, 2015)**
+
+This is a bugfix update from 4.2.c.
+
+#### Bug Fixes
+
+1. Fixed uninitialized `dmy_struct` when `OUTPUT_FORCE==TRUE` and `BINARY_OUTPUT==TRUE` ([GH#393](https://github.com/UW-Hydro/VIC/issues/393))
+
+1. Fixed uninitialized vegetation parameters when `VEGPARAM_LAI==FALSE` ([GH#455](https://github.com/UW-Hydro/VIC/issues/455))
 
 ------------------------------
 
@@ -184,9 +225,6 @@ Source code is available here: [![VIC.4.2.c](https://img.shields.io/badge/VIC-4.
 **Release date: (December 12, 2015)**
 
 This is a bugfix update from 4.2.b.
-
-!!! Note "Note: Final Release of VIC 4 Development Track"
-	This is the last release of the VIC Version 4 development track.  The next release will be VIC.5.0 and will include backward incompatible changes.
 
 #### Bug Fixes:
 

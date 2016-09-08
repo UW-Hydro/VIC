@@ -66,6 +66,7 @@ main(int   argc,
     int                cellnum;
     int                startrec;
     int                ErrorFlag;
+    int                n;
     size_t             streamnum;
     dmy_struct        *dmy;
     force_data_struct *force;
@@ -188,6 +189,16 @@ main(int   argc,
             make_in_and_outfiles(&filep, &filenames, &soil_con,
                                  &streams, dmy);
 
+            /** Reset agg_alarm for Each Stream **/
+            for (streamnum = 0;
+                 streamnum < (size_t) options.Noutstreams;
+                 streamnum++) {
+                n = streams[streamnum].agg_alarm.n;
+                set_alarm(&(dmy[0]), streams[streamnum].agg_alarm.freq,
+                          &n,
+                          &(streams[streamnum].agg_alarm));
+            }
+
             /** Read Elevation Band Data if Used **/
             read_snowband(filep.snowband, &soil_con);
 
@@ -277,7 +288,7 @@ main(int   argc,
                                  "so the simulation has not finished.  An "
                                  "incomplete output file has been "
                                  "generated, check your inputs before "
-                                 "rerunning the simulation.\n",
+                                 "rerunning the simulation.",
                                  soil_con.gridcel, rec);
                         break;
                     }
@@ -285,7 +296,7 @@ main(int   argc,
                         // Else exit program on cell solution error as in previous versions
                         log_err("ERROR: Grid cell %i failed in record %zu "
                                 "so the simulation has ended. Check your "
-                                "inputs before rerunning the simulation.\n",
+                                "inputs before rerunning the simulation.",
                                 soil_con.gridcel, rec);
                     }
                 }

@@ -1,7 +1,5 @@
 #!/usr/bin/env bash
 
-set -e
-
 DRIVER_PATH="${TRAVIS_BUILD_DIR}/vic/drivers/classic/"
 DRIVER_EXE="${DRIVER_PATH}vic_classic.exe"
 SAMPLES_PATH="${TRAVIS_BUILD_DIR}/samples/"
@@ -59,10 +57,8 @@ function vic_script {
 
     # Run test package
     ./tests/run_tests.py unit examples system \
-        --vic_exe=${DRIVER_EXE} \
-        --driver=${TESTID} \
+        --classic=${DRIVER_EXE} \
         --data_dir=${SAMPLES_PATH}/data
-
 }
 
 function vic_after_success {

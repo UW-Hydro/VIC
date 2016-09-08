@@ -85,7 +85,7 @@ compute_derived_lake_dimensions(lake_var_struct *lake,
         }
         status = get_sarea(lake_con, depth, &(lake->surface[k]));
         if (status < 0) {
-            log_err("Error in get_sarea: record = %d, depth = %f, "
+            log_err("record = %d, depth = %f, "
                     "sarea = %e", 0, depth, lake->surface[k]);
         }
     }
@@ -93,11 +93,11 @@ compute_derived_lake_dimensions(lake_var_struct *lake,
     lake->sarea = lake->surface[0];
     status = get_volume(lake_con, lake->ldepth, &tmp_volume);
     if (status < 0) {
-        log_err("Error in get_volume: record = %d, depth = %f, "
+        log_err("record = %d, depth = %f, "
                 "volume = %e", 0, depth, tmp_volume);
     }
     else if (status > 0) {
-        log_err("Warning in get_volume: lake depth exceeds maximum; "
+        log_err("lake depth exceeds maximum; "
                 "setting to maximum; record = %d", 0);
     }
     lake->volume = tmp_volume + lake->ice_water_eq;

@@ -31,11 +31,11 @@
 #define STR(x) STR_HELPER(x)
 
 #ifndef VERSION
-#define VERSION "5.0.0 Release Candidate 1: June 28, 2016"
+#define VERSION "5.0.1 (Unreleased)"
 #endif
 
 #ifndef SHORT_VERSION
-#define SHORT_VERSION "5.0.0.rc1"
+#define SHORT_VERSION "5.0.1"
 #endif
 
 #ifndef GIT_VERSION

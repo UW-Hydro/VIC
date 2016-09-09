@@ -44,13 +44,13 @@ In some versions of the MPI library (e.g. OPEN-MPI with Intel), you may also nee
 
 At the command prompt, type:
 
-`vic_image.exe -g global_parameter_filename.txt`
+        ./vic_image.exe -g global_parameter_filename.txt
 
 where `global_parameter_filename` = name of the global parameter file corresponding to your project.
 
 To run VIC image driver using multiple processors, type the following instead:
 
-`mpiexec -np n_proc vic_image.exe -g global_parameter_filename.txt`
+        mpiexec -np $n_proc ./vic_image.exe -g global_parameter_filename.txt
 
 where `n_proc` = number of processors to be used
 
@@ -58,6 +58,6 @@ where `n_proc` = number of processors to be used
 
 VIC has a few other command line options:
 
-- `vic_image.exe -v`: says which version of VIC this is
-- `vic_image.exe -h`: prints a list of all the VIC command-line options
-- `vic_image.exe -o`: prints a list of all of the current compile-time settings in this executable; to change these settings, you must edit the appropriate header files (e.g. `vic_def.h` or `vic_driver_shared.h`) and recompile using `make full`.
+- `./vic_image.exe -v`: says which version of VIC this is
+- `./vic_image.exe -h`: prints a list of all the VIC command-line options
+- `./vic_image.exe -o`: prints a list of all of the current compile-time settings in this executable; to change these settings, you must edit the appropriate header files (e.g. `vic_def.h` or `vic_driver_shared.h`) and recompile using `make full`.

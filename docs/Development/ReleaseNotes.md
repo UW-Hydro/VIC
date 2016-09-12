@@ -14,6 +14,13 @@ To check which release of VIC you are running:
 - For VIC 5 and later, type `vic_{classic,image}.exe -v`
 
 ------------------------------
+## VIC 5.0.1
+
+**Release date: (Unreleased)**
+
+#### Bug Fixes:
+
+------------------------------
 
 ## VIC 5.0.0 [![DOI](https://zenodo.org/badge/7766/UW-Hydro/VIC.svg)](https://zenodo.org/badge/latestdoi/7766/UW-Hydro/VIC)
 

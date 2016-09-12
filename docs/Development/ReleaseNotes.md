@@ -20,6 +20,10 @@ To check which release of VIC you are running:
 
 #### Bug Fixes:
 
+1. Fixed image driver history file name timestamp ([GH#635](https://github.com/UW-Hydro/VIC/pull/635))
+
+	After the fix, the timestamp appeared in the image driver output history filename is the beginning time of the time period in the file.
+
 ------------------------------
 
 ## VIC 5.0.0 [![DOI](https://zenodo.org/badge/7766/UW-Hydro/VIC.svg)](https://zenodo.org/badge/latestdoi/7766/UW-Hydro/VIC)

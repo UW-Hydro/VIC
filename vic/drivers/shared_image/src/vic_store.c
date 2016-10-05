@@ -25,6 +25,7 @@
  *****************************************************************************/
 
 #include <vic_driver_shared_image.h>
+#include <vic_driver_cesm.h>
 
 /******************************************************************************
  * @brief    Save model state.
@@ -59,6 +60,7 @@ vic_store(dmy_struct *dmy_current,
     size_t                     d4start[4];
     size_t                     d5start[5];
     size_t                     d6start[6];
+    dmy_struct                 end_time_date;
     nc_file_struct             nc_state_file;
     nc_var_struct             *nc_var;
 
@@ -74,8 +76,8 @@ vic_store(dmy_struct *dmy_current,
     end_time_num = time_num + offset; 
 
     // allocate dmy struct for end of current time step 
-    end_time_date = calloc(dmy_current, sizeof(*end_time_date));
-    end_time_date = num2date(global_param.time_origin_num, end_time_num, 0., 
+    // end_time_date = calloc(1, sizeof(*dmy_struct));
+    num2date(global_param.time_origin_num, end_time_num, 0., 
                              global_param.calendar, global_param.time_units, 
                              &end_time_date);
     

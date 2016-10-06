@@ -28,6 +28,10 @@ To check which release of VIC you are running:
 
 	After the fix, the `forceskip` variable in the global parameter structure (i.e., the number of timesteps to skip in the forcing data for the simulatin period) is rounded correctly (before the fix, rounding error might cause 1-timestep offset in the simulation results).
 
+3. Fixed a problem with image restarts when using multiple processors ([GH#638](https://github.com/UW-Hydro/VIC/pull/638))
+	
+	After the fix, only the master node is assigned the task of validating state file dimensions and coordinate variables. Multiprocessing was also added to the VIC testing framework.
+ 
 ------------------------------
 
 ## VIC 5.0.0 [![DOI](https://zenodo.org/badge/7766/UW-Hydro/VIC.svg)](https://zenodo.org/badge/latestdoi/7766/UW-Hydro/VIC)

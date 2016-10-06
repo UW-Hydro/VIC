@@ -398,7 +398,7 @@ vic_store(dmy_struct *dmy_current,
             }
             gather_put_nc_field_int(nc_state_file.nc_id,
                                     nc_var->nc_varid,
-                                    nc_state_file.d_fillvalue,
+                                    nc_state_file.i_fillvalue,
                                     d4start, nc_var->nc_counts, ivar);
             for (i = 0; i < local_domain.ncells_active; i++) {
                 ivar[i] = nc_state_file.i_fillvalue;

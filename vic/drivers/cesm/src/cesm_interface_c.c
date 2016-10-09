@@ -106,7 +106,6 @@ vic_cesm_init(vic_clock     *vclock,
     timer_stop(&(global_timers[TIMER_VIC_INIT]));
     // stop vic all timer
     timer_stop(&(global_timers[TIMER_VIC_ALL]));
-
     return EXIT_SUCCESS;
 }
 
@@ -114,8 +113,10 @@ vic_cesm_init(vic_clock     *vclock,
  * @brief    Run function for CESM driver
  *****************************************************************************/
 int
-vic_cesm_run(vic_clock *vclock)
+vic_cesm_run(vic_clock     *vclock, 
+             case_metadata *cmeta)
 {
+    extern filenames_struct    filenames;
     char state_filename[MAXSTRING];
 
     // continue vic all timer
@@ -140,6 +141,10 @@ vic_cesm_run(vic_clock *vclock)
 
     // if save:
     if (vclock->state_flag) {
+        // assign case name to state file name
+        strncpy(filenames.statefile, trim(cmeta->caseid), 
+                sizeof(filenames.statefile));
+        // write state file        
         vic_store(&dmy_current, state_filename);
         write_rpointer_file(state_filename);
     }

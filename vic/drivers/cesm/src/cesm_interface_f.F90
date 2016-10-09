@@ -77,11 +77,12 @@ MODULE vic_cesm_interface
   !> @brief   Run Interface
   !--------------------------------------------------------------------------
   INTERFACE
-     INTEGER(C_INT) FUNCTION vic_cesm_run(vclock) BIND(C, name='vic_cesm_run')
+     INTEGER(C_INT) FUNCTION vic_cesm_run(vclock, cmeta) BIND(C, name='vic_cesm_run')
        USE, INTRINSIC :: ISO_C_BINDING
        USE vic_cesm_def_mod
        IMPLICIT NONE
        TYPE(vic_clock), INTENT(in) :: vclock
+       TYPE(case_metadata), INTENT(in) :: cmeta
      END FUNCTION vic_cesm_run
   END INTERFACE
 

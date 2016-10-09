@@ -25,14 +25,12 @@
  *****************************************************************************/
 
 #include <vic_driver_shared_image.h>
-#include <vic_driver_cesm.h>
 
 /******************************************************************************
  * @brief    Save model state.
  *****************************************************************************/
 void
 vic_store(dmy_struct *dmy_current,
-          case_metadata *cmeta,
           char       *filename)
 {
     extern filenames_struct    filenames;
@@ -76,20 +74,17 @@ vic_store(dmy_struct *dmy_current,
     end_time_num = time_num + offset; 
 
     // allocate dmy struct for end of current time step 
-    // end_time_date = calloc(1, sizeof(*dmy_struct));
     num2date(global_param.time_origin_num, end_time_num, 0., 
                              global_param.calendar, global_param.time_units, 
                              &end_time_date);
     
-
     // only open and initialize the netcdf file on the first thread
     if (mpi_rank == VIC_MPI_ROOT) {
         // create netcdf file for storing model state
         sprintf(filename, "%s.%04i%02i%02i_%05u.nc",
-                cmeta->caseid, end_time_date.year,
+                filenames.statefile, end_time_date.year,
                 end_time_date.month, end_time_date.day,
                 end_time_date.dayseconds);
-
         initialize_state_file(filename, &nc_state_file, dmy_current);
 
         debug("writing state file: %s", filename);

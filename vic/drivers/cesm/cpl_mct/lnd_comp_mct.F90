@@ -381,7 +381,7 @@ CONTAINS
     CALL lnd_import_mct(x2l)
 
     !--- run vic
-    errno = vic_cesm_run(vclock)
+    errno = vic_cesm_run(vclock, cmeta)
     IF (errno /= 0) THEN
        CALL shr_sys_abort(subname//' ERROR: vic_cesm_run returned a errno /= 0')
     ENDIF

@@ -180,7 +180,7 @@ int vic_cesm_init_mpi(int MPI_COMM_VIC_F);
 int vic_cesm_init(vic_clock *vclock, case_metadata *cmeta);
 int vic_cesm_final(void);
 void vic_cesm_finalize(void);
-int vic_cesm_run(vic_clock *vclock, case_metadata *cmeta);
+int vic_cesm_run(vic_clock *vclock);
 void vic_force(void);
 void vic_cesm_put_data(void);
 void vic_cesm_run_model(void);

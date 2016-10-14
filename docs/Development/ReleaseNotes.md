@@ -33,6 +33,10 @@ To check which release of VIC you are running:
 	After the fix, only the master node is assigned the task of validating state file dimensions and coordinate variables. Multiprocessing was also added to the VIC testing framework.
 
 4. Ensured that the mask variable in the input domain file must be integer type; otherwise an error is raised. ([GH#645](https://github.com/UW-Hydro/VIC/pull/645))
+
+5. Fixed a bug related to `make_lastday` function ([GH#647](https://github.com/UW-Hydro/VIC/pull/647))
+
+	Before the fix, the input arguments to function `make_lastday` are sometimes in a wrong order. The bug caused error when trying to write state file on a leap day.
  
 ------------------------------
 

@@ -31,6 +31,8 @@ To check which release of VIC you are running:
 3. Fixed a problem with image restarts when using multiple processors ([GH#638](https://github.com/UW-Hydro/VIC/pull/638))
 	
 	After the fix, only the master node is assigned the task of validating state file dimensions and coordinate variables. Multiprocessing was also added to the VIC testing framework.
+
+4. Ensured that the mask variable in the input domain file must be integer type; otherwise an error is raised. ([GH#645](https://github.com/UW-Hydro/VIC/pull/645))
  
 ------------------------------
 

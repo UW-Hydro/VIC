@@ -1,7 +1,7 @@
 /******************************************************************************
  * @section DESCRIPTION
  *
- * Get netCDF variable attribute.
+ * Get netCDF variable type.
  *
  * @section LICENSE
  *

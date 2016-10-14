@@ -35,6 +35,7 @@ get_global_domain(char          *nc_name,
                   bool           coords_only)
 {
     int    *run = NULL;
+    int     typeid;
     double *var = NULL;
     double *var_lon = NULL;
     double *var_lat = NULL;
@@ -59,6 +60,17 @@ get_global_domain(char          *nc_name,
     // allocate memory for cells to be run
     run = malloc(global_domain->ncells_total * sizeof(*run));
     check_alloc_status(run, "Memory allocation error.");
+
+    // Check whether mask variable is int type
+    typeid = get_nc_var_type(nc_name, global_domain->info.mask_var);
+
+    log_info("NC_INT: %d", NC_INT);
+    log_info("NC_DOUBLE: %d", NC_DOUBLE);
+    log_info("typeid: %d", typeid);
+
+    if (typeid != NC_INT) {
+        log_err("Mask variable in the domain file must be integer type.");
+    }
 
     get_nc_field_int(nc_name, global_domain->info.mask_var, d2start, d2count,
                      run);

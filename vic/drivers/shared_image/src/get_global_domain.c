@@ -63,11 +63,6 @@ get_global_domain(char          *nc_name,
 
     // Check whether mask variable is int type
     typeid = get_nc_var_type(nc_name, global_domain->info.mask_var);
-
-    log_info("NC_INT: %d", NC_INT);
-    log_info("NC_DOUBLE: %d", NC_DOUBLE);
-    log_info("typeid: %d", typeid);
-
     if (typeid != NC_INT) {
         log_err("Mask variable in the domain file must be integer type.");
     }

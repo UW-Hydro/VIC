@@ -224,8 +224,8 @@ initialize_history_file(nc_file_struct *nc,
     double                    *dvar;
 
 
-    // This could be further refined but for now, I've choosen a file naming
-    // Convention that goes like this:
+    // This could be further refined but for now, I've chosen a file naming
+    // convention that goes like this:
     switch (stream->agg_alarm.freq) {
     // If FREQ_NDAYS -- filename = result_dir/prefix.YYYY-MM-DD.nc
     case FREQ_NDAYS:

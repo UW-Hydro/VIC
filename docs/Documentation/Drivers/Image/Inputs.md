@@ -7,6 +7,7 @@ To run VIC, several sets of input data are necessary:
 *   [Global Parameter File](GlobalParam.md): This is the main input file for VIC. It points VIC to the locations of the other input/output files and sets parameters that govern the simulation (e.g., start/end dates, modes of operation).
 *   [Meteorological Forcing Files](ForcingData.md): Gridded, sub-daily timeseries of meteorological variables as inputs.
 *   [Parameters File](Params.md): Spatially distributed parameters describing the land surface.
+*   [Domain File](Domain.md): Domain information of VIC run.
 
 And a few more are optional:
 

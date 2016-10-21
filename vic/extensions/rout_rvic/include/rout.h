@@ -6,7 +6,7 @@
  * @section LICENSE
  *
  * The Variable Infiltration Capacity (VIC) macroscale hydrological model
- * Copyright (C) 2014 The Land Surface Hydrology Group, Department of Civil
+ * Copyright (C) 2016 The Computational Hydrology Group, Department of Civil
  * and Environmental Engineering, University of Washington.
  *
  * The VIC model is free software; you can redistribute it and/or
@@ -29,15 +29,16 @@
 #define ROUT_EXT "rout_rvic"
 
 #include <vic_def.h>
+#include <vic_driver_image.h>
 
 /******************************************************************************
  * @brief   Routing Structs
  *****************************************************************************/
 typedef struct {
     size_t full_time_length;                  /*scalar - total number of timesteps*/
-    size_t nTimesteps;                        /*scalar - number of timesteps*/
-    size_t nSources;                          /*scalar - number of sources*/
-    size_t nOutlets;                          /*scalar - length of subset*/
+    size_t n_timesteps;                        /*scalar - number of timesteps*/
+    size_t n_sources;                          /*scalar - number of sources*/
+    size_t n_outlets;                          /*scalar - length of subset*/
     size_t *source2outlet_ind;                /*1d array - source to outlet mapping*/
     int *source_y_ind;                        /*1d array - source y location*/
     int *source_x_ind;                        /*1d array - source x location*/
@@ -69,7 +70,6 @@ void rout_start(void);      // read global parameters for routing
 void rout_alloc(void);      // allocate memory
 void rout_init(void);       // initialize model parameters from parameter files
 void rout_run(void);        // run routing over the domain
-void rout_write(void);      // write routine for routing
 void rout_finalize(void);   // clean up routine for routing
 
 /******************************************************************************
@@ -83,6 +83,5 @@ void gather_put_var_double(double *, double *);
  *****************************************************************************/
 void get_global_param_rout(FILE *gp);
 void cshift(double *, int, int, int, int);
-void print_array(double *, int, int, int);
 
 #endif

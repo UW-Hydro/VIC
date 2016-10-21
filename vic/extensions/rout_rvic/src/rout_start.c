@@ -6,7 +6,7 @@
  * @section LICENSE
  *
  * The Variable Infiltration Capacity (VIC) macroscale hydrological model
- * Copyright (C) 2014 The Land Surface Hydrology Group, Department of Civil
+ * Copyright (C) 2016 The Computational Hydrology Group, Department of Civil
  * and Environmental Engineering, University of Washington.
  *
  * The VIC model is free software; you can redistribute it and/or
@@ -24,13 +24,10 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  *****************************************************************************/
 
-#include <vic_def.h>
-#include <vic_run.h>
-#include <vic_driver_image.h>
 #include <rout.h>
 
 /******************************************************************************
- * @brief
+ * @brief    Wrapper function for RVIC startup.
  *****************************************************************************/
 void
 rout_start(void)
@@ -46,6 +43,10 @@ rout_start(void)
     }
 }
 
+/******************************************************************************
+ * @brief    Read the VIC model global control file, getting values for
+ *           global parameters specifically for RVIC.
+ *****************************************************************************/
 void
 get_global_param_rout(FILE *gp)
 {

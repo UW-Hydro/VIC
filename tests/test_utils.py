@@ -12,7 +12,7 @@ import numpy as np
 import pandas as pd
 import xarray as xr
 
-# Plottling libs
+# Plotting libs
 import matplotlib
 import matplotlib.pyplot as plt
 import seaborn as sns
@@ -740,7 +740,7 @@ def plot_snotel_comparison_one_site(
     data = {}
     for key, items in compare_data_dict.items():
 
-            # read in data
+        # read in data
         if key == "snotel":
             data[key] = read_snotel_swe_obs(filename,
                                             science_test_data_dir,

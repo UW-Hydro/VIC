@@ -41,8 +41,11 @@ VICPATH = ../../vic_run
 # VIC EXTENTIONS PATH
 EXTPATH = ../../extensions
 
-# set routing extension here (rout_stub means: no routing)
-#ROUT=rout_stub
+# Set the routing model extension
+# | Level      | Value                              |
+# |----------  |---------------------------------   |
+# | rout_stub  | Stub routing model (no routing)    |
+# | rout_rvic  | Use RVIC routing scheme            |
 ROUT=rout_rvic
 
 include ${EXTPATH}/${ROUT}/rout.mk
@@ -74,7 +77,7 @@ HOSTNAME := $(shell uname -n)
 # | WARNING   | < 30             |
 # | INFO      | < 20             |
 # | DEBUG     | < 10             |
-LOG_LVL = 15
+LOG_LVL = 5
 
 # set includes
 INCLUDES = -I ${DRIVERPATH}/include \

@@ -6,7 +6,7 @@
  * @section LICENSE
  *
  * The Variable Infiltration Capacity (VIC) macroscale hydrological model
- * Copyright (C) 2014 The Land Surface Hydrology Group, Department of Civil
+ * Copyright (C) 2016 The Computational Hydrology Group, Department of Civil
  * and Environmental Engineering, University of Washington.
  *
  * The VIC model is free software; you can redistribute it and/or
@@ -23,6 +23,7 @@
  * this program; if not, write to the Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  *****************************************************************************/
+
 #ifndef ROUT_STUB_H
 #define ROUT_STUB_H
 
@@ -41,6 +42,5 @@ void rout_start(void);      // read global parameters for routing
 void rout_alloc(void);      // allocate memory
 void rout_init(void);       // initialize model parameters from parameter files
 void rout_run(void);        // run routing over the domain
-void rout_write(void);      // write routine for routing
 void rout_finalize(void);   // clean up routine for routing
 #endif

@@ -6,7 +6,7 @@
  * @section LICENSE
  *
  * The Variable Infiltration Capacity (VIC) macroscale hydrological model
- * Copyright (C) 2014 The Land Surface Hydrology Group, Department of Civil
+ * Copyright (C) 2016 The Computational Hydrology Group, Department of Civil
  * and Environmental Engineering, University of Washington.
  *
  * The VIC model is free software; you can redistribute it and/or
@@ -24,10 +24,6 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  *****************************************************************************/
 
-#include <vic_def.h>
-#include <vic_run.h>
-#include <vic_driver_image.h>
-
 #include <rout.h>
 
 /******************************************************************************
@@ -36,46 +32,43 @@
 void
 rout_init(void)
 {
-    extern int mpi_rank;
+    extern int           mpi_rank;
+    extern rout_struct   rout;
+    extern domain_struct global_domain;
+
     if (mpi_rank == VIC_MPI_ROOT) {
-        extern rout_struct   rout;
-        extern domain_struct global_domain;
+        int    *ivar = NULL;
+        double *dvar = NULL;
 
-        int                 *ivar = NULL;
-        double              *dvar = NULL;
-
-        size_t               i, j;
-        size_t               i1start;
-        size_t               d3count[3];
-        size_t               d3start[3];
+        size_t  i;
+        size_t  j;
+        size_t  i1start;
+        size_t  d3count[3];
+        size_t  d3start[3];
 
         i1start = 0;
 
         d3start[0] = 0;
         d3start[1] = 0;
         d3start[2] = 0;
-        d3count[0] = rout.rout_param.nTimesteps;
-        d3count[1] = rout.rout_param.nSources;
+        d3count[0] = rout.rout_param.n_timesteps;
+        d3count[1] = rout.rout_param.n_sources;
         d3count[2] = 1; // tracers dimension
 
         // allocate memory for variables to be read
-        ivar = (int *) malloc(sizeof(int) * rout.rout_param.nSources);
-        if (ivar == NULL) {
-            log_err("Memory allocation error in vic_init().");
-        }
+        ivar = malloc(rout.rout_param.n_sources * sizeof(*ivar));
+        check_alloc_status(ivar, "Memory allocation error.");
 
         // allocate memory for variables to be read
-        dvar = (double *) malloc(
-            rout.rout_param.nTimesteps * rout.rout_param.nSources *
-            sizeof(double));
-        if (dvar == NULL) {
-            log_err("Memory allocation error in vic_init().");
-        }
+        dvar = malloc(
+            rout.rout_param.n_timesteps * rout.rout_param.n_sources *
+            sizeof(*dvar));
+        check_alloc_status(dvar, "Memory allocation error.");
 
         // The Ring
-        for (j = 0; j < rout.rout_param.nOutlets; j++) {
-            for (i = 0; i < rout.rout_param.nTimesteps; i++) {
-                rout.ring[j * rout.rout_param.nTimesteps + i] = 0.0;
+        for (j = 0; j < rout.rout_param.n_outlets; j++) {
+            for (i = 0; i < rout.rout_param.n_timesteps; i++) {
+                rout.ring[j * rout.rout_param.n_timesteps + i] = 0.0;
             }
         }
 
@@ -87,64 +80,64 @@ rout_init(void)
         // source2outlet_ind: source to outlet index mapping
         get_nc_field_int(rout.param_filename,
                          "source2outlet_ind",
-                         &i1start, &rout.rout_param.nSources, ivar);
-        for (i = 0; i < rout.rout_param.nSources; i++) {
+                         &i1start, &rout.rout_param.n_sources, ivar);
+        for (i = 0; i < rout.rout_param.n_sources; i++) {
             rout.rout_param.source2outlet_ind[i] = (int) ivar[i];
         }
 
         // source_time_offset: Number of leading timesteps ommited
         get_nc_field_int(rout.param_filename,
                          "source_time_offset",
-                         &i1start, &rout.rout_param.nSources, ivar);
-        for (i = 0; i < rout.rout_param.nSources; i++) {
+                         &i1start, &rout.rout_param.n_sources, ivar);
+        for (i = 0; i < rout.rout_param.n_sources; i++) {
             rout.rout_param.source_time_offset[i] = (int) ivar[i];
         }
 
         // source_x_ind: x grid coordinate of source grid cell
         get_nc_field_int(rout.param_filename,
                          "source_x_ind",
-                         &i1start, &rout.rout_param.nSources, ivar);
-        for (i = 0; i < rout.rout_param.nSources; i++) {
+                         &i1start, &rout.rout_param.n_sources, ivar);
+        for (i = 0; i < rout.rout_param.n_sources; i++) {
             rout.rout_param.source_x_ind[i] = (int) ivar[i];
         }
 
         // source_y_ind: y grid coordinate of source grid cell
         get_nc_field_int(rout.param_filename,
                          "source_y_ind",
-                         &i1start, &rout.rout_param.nSources, ivar);
-        for (i = 0; i < rout.rout_param.nSources; i++) {
+                         &i1start, &rout.rout_param.n_sources, ivar);
+        for (i = 0; i < rout.rout_param.n_sources; i++) {
             rout.rout_param.source_y_ind[i] = (int) ivar[i];
         }
 
         // source_lat: Latitude coordinate of source grid cell
         get_nc_field_double(rout.param_filename,
                             "source_lat",
-                            &i1start, &rout.rout_param.nSources, dvar);
-        for (i = 0; i < rout.rout_param.nSources; i++) {
+                            &i1start, &rout.rout_param.n_sources, dvar);
+        for (i = 0; i < rout.rout_param.n_sources; i++) {
             rout.rout_param.source_lat[i] = (double) dvar[i];
         }
 
         // source_lon: Longitude coordinate of source grid cell
         get_nc_field_double(rout.param_filename,
                             "source_lon",
-                            &i1start, &rout.rout_param.nSources, dvar);
-        for (i = 0; i < rout.rout_param.nSources; i++) {
+                            &i1start, &rout.rout_param.n_sources, dvar);
+        for (i = 0; i < rout.rout_param.n_sources; i++) {
             rout.rout_param.source_lon[i] = (double) dvar[i];
         }
 
         // outlet_lat: Latitude coordinate of source grid cell
         get_nc_field_double(rout.param_filename,
                             "outlet_lat",
-                            &i1start, &rout.rout_param.nOutlets, dvar);
-        for (i = 0; i < rout.rout_param.nOutlets; i++) {
+                            &i1start, &rout.rout_param.n_outlets, dvar);
+        for (i = 0; i < rout.rout_param.n_outlets; i++) {
             rout.rout_param.outlet_lat[i] = (double) dvar[i];
         }
 
         // outlet_lon: Longitude coordinate of source grid cell
         get_nc_field_double(rout.param_filename,
                             "outlet_lon",
-                            &i1start, &rout.rout_param.nOutlets, dvar);
-        for (i = 0; i < rout.rout_param.nOutlets; i++) {
+                            &i1start, &rout.rout_param.n_outlets, dvar);
+        for (i = 0; i < rout.rout_param.n_outlets; i++) {
             rout.rout_param.outlet_lon[i] = (double) dvar[i];
         }
 
@@ -153,51 +146,51 @@ rout_init(void)
                             "unit_hydrograph",
                             d3start, d3count, dvar);
         for (i = 0;
-             i < (rout.rout_param.nTimesteps * rout.rout_param.nSources);
+             i < (rout.rout_param.n_timesteps * rout.rout_param.n_sources);
              i++) {
             rout.rout_param.unit_hydrograph[i] = (double) dvar[i];
         }
 
-        // TODO: Check inbouwen: wat als er geen VIC gridcell bestaat voor een Rout source?!
+        // TODO: add check: what to do in case no VIC gridcell exists for a rout source?
         // Mapping: Let the routing-source index numbers correspond to the VIC index numbers
-        size_t iSource;
-        for (iSource = 0; iSource < rout.rout_param.nSources; iSource++) {
+        size_t i_source;
+        for (i_source = 0; i_source < rout.rout_param.n_sources; i_source++) {
             for (i = 0; i < global_domain.ncells_total; i++) {
-                if (rout.rout_param.source_lat[iSource] ==
+                if (rout.rout_param.source_lat[i_source] ==
                     global_domain.locations[i].latitude &&
-                    rout.rout_param.source_lon[iSource] ==
+                    rout.rout_param.source_lon[i_source] ==
                     global_domain.locations[i].longitude) {
-                    rout.rout_param.source_VIC_index[iSource] = i;
+                    rout.rout_param.source_VIC_index[i_source] = i;
                 }
             }
         }
 
         // Check source index of VIC gridcell
-        for (iSource = 0; iSource < rout.rout_param.nSources; iSource++) {
-            if ((size_t)rout.rout_param.source_VIC_index[iSource] < 0 ||
-                (size_t)rout.rout_param.source_VIC_index[iSource] >
+        for (i_source = 0; i_source < rout.rout_param.n_sources; i_source++) {
+            if ((size_t)rout.rout_param.source_VIC_index[i_source] < 0 ||
+                (size_t)rout.rout_param.source_VIC_index[i_source] >
                 global_domain.ncells_total) {
                 log_err("invalid source, index of VIC gridcell");
             }
         }
 
-        // Mapping: Let the routing-outlet index numbers correspond to the VIC index numbers
-        size_t iOutlet;
-        for (iOutlet = 0; iOutlet < rout.rout_param.nOutlets; iOutlet++) {
+        // Mapping: Let i_outlet the routing-outlet index numbers correspond to the VIC index numbers
+        size_t i_outlet;
+        for (i_outlet = 0; i_outlet < rout.rout_param.n_outlets; i_outlet++) {
             for (i = 0; i < global_domain.ncells_total; i++) {
-                if (rout.rout_param.outlet_lat[iOutlet] ==
+                if (rout.rout_param.outlet_lat[i_outlet] ==
                     global_domain.locations[i].latitude &&
-                    rout.rout_param.outlet_lon[iOutlet] ==
+                    rout.rout_param.outlet_lon[i_outlet] ==
                     global_domain.locations[i].longitude) {
-                    rout.rout_param.outlet_VIC_index[iOutlet] = i;
+                    rout.rout_param.outlet_VIC_index[i_outlet] = i;
                 }
             }
         }
 
         // Check outlet index of VIC gridcell
-        for (iOutlet = 0; iOutlet < rout.rout_param.nOutlets; iOutlet++) {
-            if ((size_t)rout.rout_param.outlet_VIC_index[iOutlet] < 0 ||
-                (size_t)rout.rout_param.outlet_VIC_index[iOutlet] >
+        for (i_outlet = 0; i_outlet < rout.rout_param.n_outlets; i_outlet++) {
+            if ((size_t)rout.rout_param.outlet_VIC_index[i_outlet] < 0 ||
+                (size_t)rout.rout_param.outlet_VIC_index[i_outlet] >
                 global_domain.ncells_total) {
                 log_err("invalid outlet, index of VIC gridcell");
             }

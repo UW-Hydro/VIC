@@ -65,6 +65,8 @@ save_data_struct   *save_data;  // [ncells]
 double           ***out_data = NULL;  // [ncells, nvars, nelem]
 stream_struct      *output_streams = NULL;  // [nstreams]
 nc_file_struct     *nc_hist_files = NULL;  // [nstreams]
+
+// Extensions
 rout_struct         rout; // Routing routine (extension)
 
 /******************************************************************************
@@ -151,9 +153,6 @@ main(int    argc,
 
         // Write history files
         vic_write_output(&(dmy[current]));
-  
-        // if output (routing)
-        rout_write(); // Routing routine (extension)
 
         // Write state file
         if (check_save_state_flag(current)) {

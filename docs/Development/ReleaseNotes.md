@@ -14,6 +14,31 @@ To check which release of VIC you are running:
 - For VIC 5 and later, type `vic_{classic,image}.exe -v`
 
 ------------------------------
+## VIC 5.0.1
+
+**Release date: (Unreleased)**
+
+#### Bug Fixes:
+
+1. Fixed image driver history file name timestamp ([GH#635](https://github.com/UW-Hydro/VIC/pull/635))
+
+	After the fix, the timestamp appeared in the image driver output history filename is the beginning time of the time period in the file.
+
+2. Fixed forceskip rounding bug ([GH#639](https://github.com/UW-Hydro/VIC/pull/639))
+
+	After the fix, the `forceskip` variable in the global parameter structure (i.e., the number of timesteps to skip in the forcing data for the simulatin period) is rounded correctly (before the fix, rounding error might cause 1-timestep offset in the simulation results).
+
+3. Fixed a problem with image restarts when using multiple processors ([GH#638](https://github.com/UW-Hydro/VIC/pull/638))
+	
+	After the fix, only the master node is assigned the task of validating state file dimensions and coordinate variables. Multiprocessing was also added to the VIC testing framework.
+
+4. Ensured that the mask variable in the input domain file must be integer type; otherwise an error is raised. ([GH#645](https://github.com/UW-Hydro/VIC/pull/645))
+
+5. Fixed a bug related to `make_lastday` function ([GH#647](https://github.com/UW-Hydro/VIC/pull/647))
+
+	Before the fix, the input arguments to function `make_lastday` are sometimes in a wrong order. The bug caused error when trying to write state file on a leap day.
+ 
+------------------------------
 
 ## VIC 5.0.1
 

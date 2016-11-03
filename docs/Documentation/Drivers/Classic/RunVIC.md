@@ -9,7 +9,7 @@
     - Clang (`clang` version 3+)
 
     VIC has also been compiled using these compilers:
-    
+
     - Intel (`icc`)
     - PGI (`pgcc`)
 
@@ -28,7 +28,7 @@
 
 At the command prompt, type:
 
-        vic_classic.exe -g global_parameter_filename
+        ./vic_classic.exe -g global_parameter_filename
 
 where `global_parameter_filename` = name of the global parameter file corresponding to your project.
 

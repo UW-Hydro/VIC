@@ -2,7 +2,7 @@
 
 ## Primary Historical Reference
 
-Liang, X., D. P. Lettenmaier, E. F. Wood, and S. J. Burges, 1994: A Simple hydrologically Based Model of Land Surface Water and Energy Fluxes for GSMs, _J. Geophys. Res._, **99**(D7), 14415-14428, [doi:10.1029/94JD00483](http://dx.doi.org/10.1029/94JD00483).
+Liang, X., D. P. Lettenmaier, E. F. Wood, and S. J. Burges (1994), A simple hydrologically based model of land surface water and energy fluxes for general circulation models, _J. Geophys. Res._, **99**(D7), 14415–14428, [doi:10.1029/94JD00483](http://dx.doi.org/10.1029/94JD00483).
 
 ### Other Historical References
 

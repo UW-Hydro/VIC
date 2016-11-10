@@ -46,12 +46,12 @@ def prepare_restart_run_periods(restart_dict, state_basedir):
     # --- Identify each of the splitted running period --- #
     if not isinstance(restart_dict['split_dates'], list):
         list_split_dates = [datetime.datetime.strptime(
-            restart_dict['split_dates'],
-            '%Y-%m-%d')]
+                                        restart_dict['split_dates'],
+                                        '%Y-%m-%d')]
     else:
         list_split_dates = datetime.datetime.strptime(
-            restart_dict['split_dates'],
-            '%Y-%m-%d')
+                                        restart_dict['split_dates'],
+                                        '%Y-%m-%d')
 
     # --- Prepare running periods --- #
     # run_periods is a list of running periods, including the full-period run,
@@ -71,29 +71,32 @@ def prepare_restart_run_periods(restart_dict, state_basedir):
     d['init_state'] = None
     run_periods.append(d)
     # Loop over each of the rest splitted periods
-    for i in range(len(list_split_dates) - 1):
+    for i in range(len(list_split_dates)-1):
         d = dict(start_date=list_split_dates[i] + datetime.timedelta(days=1),
-                 end_date=list_split_dates[i + 1])
+                 end_date=list_split_dates[i+1])
         d['init_state'] = os.path.join(
+            state_basedir,
+            '{}_{}'.format(
+                    run_periods[-1]['start_date'].strftime("%Y%m%d"),
+                    run_periods[-1]['end_date'].strftime("%Y%m%d")),
+            '{}{}_{:05d}'.format(
+                    'states_',
+                    (run_periods[-1]['end_date'] +
+                    datetime.timedelta(days=1)).strftime("%Y%m%d"),
+                    0))
+        run_periods.append(d)
+    # Last splitted running period - last split date to end_date
+    d = dict(start_date=list_split_dates[len(list_split_dates)-1] +
+             datetime.timedelta(days=1), end_date=end_date)
+    d['init_state'] = os.path.join(
             state_basedir,
             '{}_{}'.format(run_periods[-1]['start_date'].strftime("%Y%m%d"),
                            run_periods[-1]['end_date'].strftime("%Y%m%d")),
             '{}{}_{:05d}'.format(
-                'states_',
-                (run_periods[-1]['end_date'] +
-                 datetime.timedelta(days=1)).strftime("%Y%m%d"), 0))
-        run_periods.append(d)
-    # Last splitted running period - last split date to end_date
-    d = dict(start_date=list_split_dates[len(list_split_dates) - 1] +
-             datetime.timedelta(days=1), end_date=end_date)
-    d['init_state'] = os.path.join(
-        state_basedir,
-        '{}_{}'.format(run_periods[-1]['start_date'].strftime("%Y%m%d"),
-                       run_periods[-1]['end_date'].strftime("%Y%m%d")),
-        '{}{}_{:05d}'.format(
-            'states_',
-            (run_periods[-1]['end_date'] +
-             datetime.timedelta(days=1)).strftime("%Y%m%d"), 0))
+                    'states_',
+                    (run_periods[-1]['end_date'] +
+                    datetime.timedelta(days=1)).strftime("%Y%m%d"),
+                    0))
     run_periods.append(d)
 
     return run_periods
@@ -132,13 +135,13 @@ def setup_subdirs_and_fill_in_global_param_restart_test(
         run_start_date = run_period['start_date']
         run_end_date = run_period['end_date']
         result_dir = os.path.join(
-            result_basedir,
-            '{}_{}'.format(run_start_date.strftime("%Y%m%d"),
-                           run_end_date.strftime("%Y%m%d")))
+                result_basedir,
+                '{}_{}'.format(run_start_date.strftime("%Y%m%d"),
+                               run_end_date.strftime("%Y%m%d")))
         state_dir = os.path.join(
-            state_basedir,
-            '{}_{}'.format(run_start_date.strftime("%Y%m%d"),
-                           run_end_date.strftime("%Y%m%d")))
+                state_basedir,
+                '{}_{}'.format(run_start_date.strftime("%Y%m%d"),
+                               run_end_date.strftime("%Y%m%d")))
         os.makedirs(result_dir, exist_ok=True)
         os.makedirs(state_dir, exist_ok=True)
         # Determine initial state
@@ -155,20 +158,20 @@ def setup_subdirs_and_fill_in_global_param_restart_test(
 
         # Fill in global parameter options
         list_global_param.append(s.safe_substitute(
-            test_data_dir=test_data_dir,
-            result_dir=result_dir,
-            state_dir=state_dir,
-            startyear=run_start_date.year,
-            startmonth=run_start_date.month,
-            startday=run_start_date.day,
-            endyear=run_end_date.year,
-            endmonth=run_end_date.month,
-            endday=run_end_date.day,
-            init_state=init_state,
-            stateyear=state_date.year,
-            statemonth=state_date.month,
-            stateday=state_date.day,
-            statesec=0))
+                test_data_dir=test_data_dir,
+                result_dir=result_dir,
+                state_dir=state_dir,
+                startyear=run_start_date.year,
+                startmonth=run_start_date.month,
+                startday=run_start_date.day,
+                endyear=run_end_date.year,
+                endmonth=run_end_date.month,
+                endday=run_end_date.day,
+                init_state=init_state,
+                stateyear=state_date.year,
+                statemonth=state_date.month,
+                stateday=state_date.day,
+                statesec=0))
     return(list_global_param)
 
 
@@ -254,13 +257,13 @@ def check_exact_restart_fluxes(result_basedir, driver, run_periods):
             ds = xr.open_dataset(fname)
             # Extract the same period from the full run
             ds_full_run_split_period = ds_full_run.sel(time=slice(
-                start_date.strftime('%Y%m%d'),
-                end_date.strftime('%Y%m%d')))
+                        start_date.strftime('%Y%m%d'),
+                        end_date.strftime('%Y%m%d')))
             # Compare split run fluxes with full run
             for var in ds_full_run.data_vars:
                 np.testing.assert_array_equal(
-                    ds[var].values, ds_full_run_split_period[var].values,
-                    err_msg='Fluxes are not an exact match')
+                        ds[var].values, ds_full_run_split_period[var].values,
+                        err_msg='Fluxes are not an exact match')
 
 
 def check_exact_restart_states(state_basedir, driver, run_periods,
@@ -290,14 +293,12 @@ def check_exact_restart_states(state_basedir, driver, run_periods,
     if driver == 'classic':
         state_fname = os.path.join(
             state_basedir,
-            '{}_{}'.format(
-                run_full_start_date.strftime('%Y%m%d'),
-                run_full_end_date.strftime('%Y%m%d')),
-            'states_{}_{:05d}'.format(
-                (run_full_end_date +
-                 datetime.timedelta(
-                     days=1)).strftime('%Y%m%d'),
-                0))
+            '{}_{}'.format(run_full_start_date.strftime('%Y%m%d'),
+                           run_full_end_date.strftime('%Y%m%d')),
+            'states_{}_{:05d}'.format((run_full_end_date +
+                                       datetime.timedelta(days=1)).
+                                                    strftime('%Y%m%d'),
+                                      0))
         if state_format == 'ASCII':
             states_full_run = read_ascii_state(state_fname)
         elif state_format == 'BINARY':
@@ -305,14 +306,12 @@ def check_exact_restart_states(state_basedir, driver, run_periods,
     elif driver == 'image':
         state_fname = os.path.join(
             state_basedir,
-            '{}_{}'.format(
-                run_full_start_date.strftime('%Y%m%d'),
-                run_full_end_date.strftime('%Y%m%d')),
-            'states.{}_{:05d}.nc'.format(
-                (run_full_end_date +
-                 datetime.timedelta(
-                     days=1)).strftime('%Y%m%d'),
-                0))
+            '{}_{}'.format(run_full_start_date.strftime('%Y%m%d'),
+                           run_full_end_date.strftime('%Y%m%d')),
+            'states.{}_{:05d}.nc'.format((run_full_end_date +
+                                          datetime.timedelta(days=1)).
+                                                    strftime('%Y%m%d'),
+                                         0))
         ds_states_full_run = xr.open_dataset(state_fname)
 
     # --- Compare split run states with full run --- #
@@ -324,14 +323,12 @@ def check_exact_restart_states(state_basedir, driver, run_periods,
         # Read the state file at the end of the last period of run
         state_fname = os.path.join(
             state_basedir,
-            '{}_{}'.format(
-                run_last_period_start_date.strftime('%Y%m%d'),
-                run_last_period_end_date.strftime('%Y%m%d')),
-            'states_{}_{:05d}'.format(
-                (run_last_period_end_date +
-                 datetime.timedelta(
-                     days=1)).strftime('%Y%m%d'),
-                0))
+            '{}_{}'.format(run_last_period_start_date.strftime('%Y%m%d'),
+                           run_last_period_end_date.strftime('%Y%m%d')),
+            'states_{}_{:05d}'.format((run_last_period_end_date +
+                                       datetime.timedelta(days=1)).
+                                                strftime('%Y%m%d'),
+                                      0))
         if state_format == 'ASCII':
             states = read_ascii_state(state_fname)
         elif state_format == 'BINARY':
@@ -351,14 +348,12 @@ def check_exact_restart_states(state_basedir, driver, run_periods,
         # Read the state file at the end of the last period of run
         state_fname = os.path.join(
             state_basedir,
-            '{}_{}'.format(
-                run_last_period_start_date.strftime('%Y%m%d'),
-                run_last_period_end_date.strftime('%Y%m%d')),
+            '{}_{}'.format(run_last_period_start_date.strftime('%Y%m%d'),
+                           run_last_period_end_date.strftime('%Y%m%d')),
             'states.{}_{:05d}.nc'.format(
-                (run_last_period_end_date +
-                 datetime.timedelta(
-                     days=1)).strftime('%Y%m%d'),
-                0))
+                    (run_last_period_end_date + datetime.timedelta(days=1)).
+                                            strftime('%Y%m%d'),
+                    0))
         ds_states = xr.open_dataset(state_fname)
         # Compare split run states with full run
         for var in ds_states.data_vars:

@@ -99,11 +99,12 @@ set_output_defaults(stream_struct **streams,
                     unsigned short  default_file_format)
 {
     extern option_struct       options;
+    extern global_param_struct global_param;
 
-    size_t                     streamnum;
-    size_t                     varnum;
-    alarm_struct               default_alarm;
-    int                        default_freq_n = 1;
+    size_t               streamnum;
+    size_t               varnum;
+    alarm_struct         default_alarm;
+    int                  default_freq_n = 1;
 
 
     set_alarm(dmy_current, FREQ_NDAYS, &default_freq_n, &default_alarm);

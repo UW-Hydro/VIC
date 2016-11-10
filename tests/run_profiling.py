@@ -94,13 +94,14 @@ printf "%5s | %f" $np $DIFF >> $timing_table_file'''),
                          template='''#!/bin/bash
 
 #!/bin/bash
-#PBS -N VIC_scaling_test_$i
+#PBS -N VIC_scaling_test_$np
 #PBS -q standard
 #PBS -A NPSCA07935242
 #PBS -l application=VIC
 #PBS -l select=$select:ncpus=36:mpiprocs=$mpiprocs
-#PBS -l walltime=06:00:00
+#PBS -l walltime=04:00:00
 #PBS -j oe
+#PBS -o $WORKDIR
 
 # Qsub template for ERDC TOPAZ
 # Scheduler: PBS
@@ -109,9 +110,8 @@ module load usp-netcdf/intel-15.0.3/4.3.3.1
 
 START=$(date +%s)
 mpiexec_mpt -np ${BC_MPI_TASKS_ALLOC} $vic_exe -g $vic_global
-END=$(date +%s)
 DIFF=$(echo "$END - $START" | bc)
-printf "%5s | %f\n" ${BC_MPI_TASKS_ALLOC} $DIFF >> $timing_table_file''')}
+printf "%5s | %f" ${BC_MPI_TASKS_ALLOC} $DIFF >> $timing_table_file''')}
 
 OUT_WIDTH = 100
 
@@ -217,7 +217,7 @@ def run_scaling(args):
 
             run_string = template.safe_substitute(
                 vic_exe=args.vic_exe, vic_global=args.global_param,
-                timing_table_file=args.timing, i=i, **kwargs)
+                timing_table_file=args.timing, **kwargs)
             run_file = 'vic_{host}_{i}.sh'.format(host=args.host, i=i)
             with open(run_file, 'w') as f:
                 f.write(run_string)
@@ -259,7 +259,7 @@ def get_header_info(vic_exe, vic_global):
     try:
         header_kwargs['vic_version'] = subprocess.check_output(
             [vic_exe, '-v']).decode()
-    except subprocess.CalledProcessError:
+    except:
         pass
     return header_kwargs
 

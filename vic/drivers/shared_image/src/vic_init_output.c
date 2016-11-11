@@ -231,29 +231,25 @@ initialize_history_file(nc_file_struct *nc,
     case FREQ_NDAYS:
         sprintf(stream->filename, "%s/%s.%04d-%02d-%02d.nc",
                 filenames.result_dir,
-                stream->prefix, stream->time_bounds[0].year,
-                stream->time_bounds[0].month,
-                stream->time_bounds[0].day);
+                stream->prefix, ref_dmy->year, ref_dmy->month,
+                ref_dmy->day);
         break;
     case FREQ_NMONTHS:
         // If FREQ_NMONTHS -- filename = result_dir/prefix.YYYY-MM.nc
         sprintf(stream->filename, "%s/%s.%04d-%02d.nc", filenames.result_dir,
-                stream->prefix, stream->time_bounds[0].year,
-                stream->time_bounds[0].month);
+                stream->prefix, ref_dmy->year, ref_dmy->month);
         break;
     case FREQ_NYEARS:
         // If FREQ_NYEARS -- filename = result_dir/prefix.YYYY.nc
         sprintf(stream->filename, "%s/%s.%04d.nc", filenames.result_dir,
-                stream->prefix, stream->time_bounds[0].year);
+                stream->prefix, ref_dmy->year);
         break;
     default:
         // For all other cases -- filename = result_dir/prefix.YYYY-MM-DD-SSSSS.nc
         sprintf(stream->filename, "%s/%s.%04d-%02d-%02d-%05u.nc",
                 filenames.result_dir,
-                stream->prefix, stream->time_bounds[0].year,
-                stream->time_bounds[0].month,
-                stream->time_bounds[0].day,
-                stream->time_bounds[0].dayseconds);
+                stream->prefix, ref_dmy->year, ref_dmy->month,
+                ref_dmy->day, ref_dmy->dayseconds);
     }
 
     // open the netcdf file

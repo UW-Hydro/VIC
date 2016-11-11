@@ -201,7 +201,6 @@ size_t get_global_domain(char *fname, domain_struct *global_domain,
 size_t get_nc_dimension(char *nc_name, char *dim_name);
 void get_nc_var_attr(char *nc_name, char *var_name, char *attr_name,
                      char **attr);
-int get_nc_var_type(char *nc_name, char *var_name);
 int get_nc_varndimensions(char *nc_name, char *var_name);
 int get_nc_field_double(char *nc_name, char *var_name, size_t *start,
                         size_t *count, double *var);

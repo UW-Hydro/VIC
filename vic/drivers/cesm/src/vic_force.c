@@ -127,8 +127,8 @@ vic_force(void)
     for (j = 0; j < NF; j++) {
         for (i = 0; i < local_domain.ncells_active; i++) {
             // CESM units: Pa
-            // VIC units: kPa
-            force[i].pressure[j] = x2l_vic[i].x2l_Sa_pbot / PA_PER_KPA;
+            // VIC units: Pa
+            force[i].pressure[j] = x2l_vic[i].x2l_Sa_pbot;
         }
     }
 

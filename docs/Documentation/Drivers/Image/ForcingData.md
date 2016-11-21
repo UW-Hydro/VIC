@@ -1,6 +1,6 @@
 # VIC Forcing File
 
-The VIC Image Driver requires a NetCDF file with gridded subdaily forcings.  The required forcing variables and units are listed below and must also be specified in the [Global Parameter File](GlobalParam.md):
+The VIC Image Driver requires a NetCDF file with gridded subdaily forcings. Forcing timestep must be the same as snow model timestep, which is specified by the `SNOW_STEPS_PER_DAY` parameter in the [Global Parameter File](GlobalParam.md). The required forcing variables and units are listed below and must also be specified in the [Global Parameter File](GlobalParam.md):
 
 #### Meteorological Forcings, Required in all simulations:
 

@@ -33,6 +33,8 @@ The flags and libraries required to compile VIC with netCDF are automatically de
 
 In some versions of the MPI library (e.g. OPEN-MPI with Intel), you may also need to set the environment variable `MX_RCACHE=2` prior to compiling.
 
+To enable the Routing module you have to set ROUT=rout_rvic if not you have to set ROUT=rout_stub.
+
 - Change directory, `cd`, to the "Image Driver" source code directory and type `make`
 
         cd vic/drivers/image

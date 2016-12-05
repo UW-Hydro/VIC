@@ -1932,6 +1932,8 @@ initialize_state_file(char           *filename,
     else if (global_domain.info.n_coord_dims == 2) {
         dvar = calloc(global_domain.ncells_total, sizeof(*dvar));
         check_alloc_status(dvar, "Memory allocation error");
+        dcount[0] = nc_state_file->nj_size;
+        dcount[1] = nc_state_file->ni_size;
 
         for (i = 0; i < global_domain.ncells_total; i++) {
             dvar[i] = (double) global_domain.locations[i].longitude;

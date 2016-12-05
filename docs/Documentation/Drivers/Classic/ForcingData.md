@@ -1,6 +1,6 @@
 # VIC Forcings Files
 
-The VIC Classic Driver requires subdaily forcings (meteorological or other).  The required forcing variables vary depending options set in the global parameter file.
+The VIC Classic Driver requires subdaily forcings (meteorological or other). Forcing timestep must be the same as snow model timestep, which is specified by the `SNOW_STEPS_PER_DAY` parameter in the [Global Parameter File](GlobalParam.md). The required forcing variables and units are listed below and must also be specified in the [Global Parameter File](GlobalParam.md)
 
 #### Meteorological Forcings, Required in all simulations:
 

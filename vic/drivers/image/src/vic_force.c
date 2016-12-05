@@ -517,10 +517,11 @@ get_forcing_file_info(param_set_struct *param_set,
 
     // check that this forcing file will work
     if (param_set->force_steps_per_day[file_num] !=
-        global_param.model_steps_per_day) {
-        log_err("Forcing file timestep must match the model timestep.  "
-                "Model timesteps per day is set to %zu and the forcing file "
-                "timestep is set to %zu", global_param.model_steps_per_day,
+        global_param.snow_steps_per_day) {
+        log_err("Forcing file timestep must match the snow model timestep.  "
+                "Snow model timesteps per day is set to %zu and the forcing "
+                "file timestep is set to %zu",
+                global_param.snow_steps_per_day,
                 param_set->force_steps_per_day[file_num])
     }
     if (calendar != global_param.calendar) {

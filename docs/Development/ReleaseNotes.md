@@ -23,7 +23,7 @@ To check which release of VIC you are running:
 
 1. Improved calculation of drainage between soil layers ([GH#656](https://github.com/UW-Hydro/VIC/pull/656))
 
-Drainage from upper layer to adjacent lower layer is calculated by Brook & Corey curve (which is a function of upper-layer soil moisture at the beginning of the timestep). In prevous versions, a simple numerical solution is applied which uses the timestep-beginning upper-layer soil moisture to calculate drainage rate, and assume this constant rate over the entire timestep. This can cause unreasonably large drainage if the curve has a steep shape and when soil moisture is high. Now, the current version uses exact integral (instead of numerical solution) for layer drainage calculation.
+	Drainage from upper layer to adjacent lower layer is calculated according to Brook & Corey curve (where drainage rate is a function of upper-layer soil moisture). In previous versions, a simple numerical solution is applied which uses the timestep-beginning upper-layer soil moisture to calculate drainage rate, and assume this constant rate over the entire timestep. This can cause unreasonably large drainage if the curve has a steep shape and when soil moisture is high. Now, the current version uses exact integral (instead of numerical solution) for layer drainage calculation.
 
 
 ------------------------------

@@ -1,4 +1,4 @@
-﻿# RvicParams
+﻿# Routing
 
 The routing process is done in two steps: Generation unit hydrograph (ref) and the convolution (ref)
 *   The unit hydrograph is generated separately with the RVIC streamflow routing model. This RVIC is a stand alone python program see:  http://rvic.readthedocs.io/en/latest/. 

@@ -1677,9 +1677,8 @@ initialize_state_file(char           *filename,
                         NC_DOUBLE, ndims, dimids, &(lon_var_id));
     check_nc_status(status, "Error defining lon variable in %s", filename);
 
-    status =
-        nc_put_att_text(nc_state_file->nc_id, lon_var_id, "long_name", strlen(
-                            "longitude"), "longitude");
+    status = nc_put_att_text(nc_state_file->nc_id, lon_var_id, "long_name", strlen(
+                                 "longitude"), "longitude");
     check_nc_status(status, "Error adding attribute in %s", filename);
     status = nc_put_att_text(nc_state_file->nc_id, lon_var_id, "units", strlen(
                                  "degrees_east"), "degrees_east");
@@ -1699,9 +1698,8 @@ initialize_state_file(char           *filename,
                         NC_DOUBLE, ndims, dimids, &(lat_var_id));
     check_nc_status(status, "Error defining lat variable (%s) in %s",
                     global_domain.info.lat_var, filename);
-    status =
-        nc_put_att_text(nc_state_file->nc_id, lat_var_id, "long_name", strlen(
-                            "latitude"), "latitude");
+    status = nc_put_att_text(nc_state_file->nc_id, lat_var_id, "long_name", strlen(
+                                 "latitude"), "latitude");
     check_nc_status(status, "Error adding attribute in %s", filename);
     status = nc_put_att_text(nc_state_file->nc_id, lat_var_id, "units", strlen(
                                  "degrees_north"), "degrees_north");

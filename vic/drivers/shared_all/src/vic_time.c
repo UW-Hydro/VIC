@@ -859,8 +859,8 @@ time_delta(dmy_struct        *dmy_current,
             // if dmy_next.year is not leap year but date is Feb 29 !)
             make_lastday(global_param.calendar, dmy_next.year, lastday);
             dmy_next.day_in_year = 0;
-            for (i = 0; i < MONTHS_PER_YEAR; i++) {
-                if ((i + 1) == dmy_next.month) {
+            for ( i = 0; i < MONTHS_PER_YEAR; i++ ) {
+                if ( (i+1) == dmy_next.month ) {
                     dmy_next.day_in_year += dmy_next.day;
                     break;
                 }

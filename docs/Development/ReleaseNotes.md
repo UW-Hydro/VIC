@@ -19,6 +19,11 @@ To check which release of VIC you are running:
 
 **Release date: (Unreleased)**
 
+#### New Features:
+
+1.  Added rvic river routing module in the image driver.
+
+	Documentation for the routing module can be found [here](../Documentation/Drivers/Image/Routing.md).
 
 ------------------------------
 

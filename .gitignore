@@ -44,15 +44,3 @@ TAGS
 __pycache__
 .ipynb_checkpoints
 .eggs
-
-# Netbeans stuff
-nbproject
-
-# Test folders
-image_test
-uncrust.sh
-*.exe
-
-# WUR specific
-not4git
-samples_wur

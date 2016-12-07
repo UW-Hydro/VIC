@@ -76,8 +76,8 @@ void convolution(double *, double *);  // convolution over the domain
 /******************************************************************************
  * @brief   MPI Function prototypes for the rout_rvic extension
  *****************************************************************************/
-void get_scatter_var_double(double *, double *);
-void gather_put_var_double(double *, double *);
+void scatter_var_double(double *, double *);
+void gather_var_double(double *, double *);
 
 /******************************************************************************
  * @brief   Convolution function adapted from the RVIC scheme

@@ -31,8 +31,8 @@
  * @details Values are gathered to the master node
  *****************************************************************************/
 void
-gather_put_var_double(double *dvar,
-                      double *var_local)
+gather_var_double(double *dvar,
+                  double *var)
 {
     extern MPI_Comm      MPI_COMM_VIC;
     extern domain_struct global_domain;
@@ -50,7 +50,6 @@ gather_put_var_double(double *dvar,
 
     if (mpi_rank == VIC_MPI_ROOT) {
         grid_size = global_domain.n_nx * global_domain.n_ny;
-
         for (i = 0; i < grid_size; i++) {
             dvar[i] = 0;
         }
@@ -63,13 +62,15 @@ gather_put_var_double(double *dvar,
             malloc(global_domain.ncells_active * sizeof(*dvar_remapped));
         check_alloc_status(dvar_remapped, "Memory allocation error.");
     }
+
     // Gather the results from the nodes, result for the local node is in the
     // array *var (which is a function argument)
-    status = MPI_Gatherv(var_local, local_domain.ncells_active, MPI_DOUBLE,
+    status = MPI_Gatherv(var, local_domain.ncells_active, MPI_DOUBLE,
                          dvar_gathered, mpi_map_local_array_sizes,
                          mpi_map_global_array_offsets, MPI_DOUBLE,
                          VIC_MPI_ROOT, MPI_COMM_VIC);
     check_mpi_status(status, "MPI error.");
+
     if (mpi_rank == VIC_MPI_ROOT) {
         // remap the array
         map(sizeof(double), global_domain.ncells_active, NULL,

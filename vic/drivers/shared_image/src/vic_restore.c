@@ -1035,10 +1035,6 @@ check_init_state_file(void)
         log_err("global_domain.info.n_coord_dims should be 1 or 2");
     }
 
-    // Variables for other dimensions
-    d1start[0] = 0;
-    d1count[0] = options.Nnode;
-
     // initialize dvar for soil thermal node deltas and depths
     dvar = malloc(local_domain.ncells_active * sizeof(*dvar));
     check_alloc_status(dvar, "Memory allocation error");

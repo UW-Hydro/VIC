@@ -1526,6 +1526,7 @@ initialize_state_file(char           *filename,
 {
     extern option_struct       options;
     extern domain_struct       global_domain;
+    extern domain_struct       local_domain;
     extern global_param_struct global_param;
     extern metadata_struct     state_metadata[N_STATE_VARS];
     extern soil_con_struct    *soil_con;
@@ -1776,9 +1777,11 @@ initialize_state_file(char           *filename,
     check_nc_status(status, "Error adding attribute in %s", filename);
     dimids[0] = -1;
 
-    // dz_node
+    // dz_node (dimension: node, lat, lon)
     dimids[0] = nc_state_file->node_dimid;
-    status = nc_def_var(nc_state_file->nc_id, "dz_node", NC_DOUBLE, 1,
+    dimids[1] = nc_state_file->nj_dimid;
+    dimids[2] = nc_state_file->ni_dimid;
+    status = nc_def_var(nc_state_file->nc_id, "dz_node", NC_DOUBLE, 3,
                         dimids, &(dz_node_var_id));
     check_nc_status(status, "Error defining node variable in %s", filename);
     status = nc_put_att_text(nc_state_file->nc_id, dz_node_var_id, "long_name",
@@ -1793,10 +1796,14 @@ initialize_state_file(char           *filename,
                              strlen("m"), "m");
     check_nc_status(status, "Error adding attribute in %s", filename);
     dimids[0] = -1;
+    dimids[1] = -1;
+    dimids[2] = -1;
 
-    // node_depth
+    // node_depth (dimension: node, lat, lon)
     dimids[0] = nc_state_file->node_dimid;
-    status = nc_def_var(nc_state_file->nc_id, "node_depth", NC_DOUBLE, 1,
+    dimids[1] = nc_state_file->nj_dimid;
+    dimids[2] = nc_state_file->ni_dimid;
+    status = nc_def_var(nc_state_file->nc_id, "node_depth", NC_DOUBLE, 3,
                         dimids, &(node_depth_var_id));
     check_nc_status(status, "Error defining node variable in %s", filename);
     status = nc_put_att_text(nc_state_file->nc_id, node_depth_var_id,
@@ -1811,6 +1818,8 @@ initialize_state_file(char           *filename,
                              strlen("m"), "m");
     check_nc_status(status, "Error adding attribute in %s", filename);
     dimids[0] = -1;
+    dimids[1] = -1;
+    dimids[2] = -1;
 
     if (options.LAKES) {
         // lake_node
@@ -2031,26 +2040,54 @@ initialize_state_file(char           *filename,
     }
     free(ivar);
 
-    // soil thermal node deltas
-    dimids[0] = nc_state_file->node_dimid;
-    dcount[0] = nc_state_file->node_size;
-    status = nc_put_vara_double(nc_state_file->nc_id, dz_node_var_id, dstart,
-                                dcount, soil_con[0].dz_node);
-    check_nc_status(status, "Error writing thermal node deltas");
-    for (i = 0; i < ndims; i++) {
-        dimids[i] = -1;
-        dcount[i] = 0;
+    // initialize dvar for soil thermal node deltas and depths
+    dvar = malloc(local_domain.ncells_active * sizeof(*dvar));
+    check_alloc_status(dvar, "Memory allocation error");
+    // set missing values
+    for (i = 0; i < local_domain.ncells_active; i++) {
+        dvar[i] = nc_state_file->d_fillvalue;
     }
 
-    // soil thermal node depths
-    dimids[0] = nc_state_file->node_dimid;
-    dcount[0] = nc_state_file->node_size;
-    status = nc_put_vara_double(nc_state_file->nc_id, node_depth_var_id, dstart,
-                                dcount, soil_con[0].Zsum_node);
-    check_nc_status(status, "Error writing thermal node depths");
-    for (i = 0; i < ndims; i++) {
-        dimids[i] = -1;
-        dcount[i] = 0;
+    // soil thermal node deltas (dimension: node, lat, lon)
+    dstart[0] = 0;
+    dstart[1] = 0;
+    dstart[2] = 0;
+    dcount[0] = 1;
+    dcount[1] = nc_state_file->nj_size;
+    dcount[2] = nc_state_file->ni_size;
+    for (j = 0; j < nc_state_file->node_size; j++) {
+        dstart[0] = j;
+        for (i = 0; i < local_domain.ncells_active; i++) {
+            dvar[i] = soil_con[i].dz_node[j];
+        }
+        gather_put_nc_field_double(nc_state_file->nc_id,
+                                   dz_node_var_id,
+                                   nc_state_file->d_fillvalue,
+                                   dstart, dcount, dvar);
+        for (i = 0; i < local_domain.ncells_active; i++) {
+            dvar[i] = nc_state_file->d_fillvalue;
+        }
+    }
+
+    // soil thermal node depths (dimension: node, lat, lon)
+    dstart[0] = 0;
+    dstart[1] = 0;
+    dstart[2] = 0;
+    dcount[0] = 1;
+    dcount[1] = nc_state_file->nj_size;
+    dcount[2] = nc_state_file->ni_size;
+    for (j = 0; j < nc_state_file->node_size; j++) {
+        dstart[0] = j;
+        for (i = 0; i < local_domain.ncells_active; i++) {
+            dvar[i] = soil_con[i].Zsum_node[j];
+        }
+        gather_put_nc_field_double(nc_state_file->nc_id,
+                                   node_depth_var_id,
+                                   nc_state_file->d_fillvalue,
+                                   dstart, dcount, dvar);
+        for (i = 0; i < local_domain.ncells_active; i++) {
+            dvar[i] = nc_state_file->d_fillvalue;
+        }
     }
 
     if (options.LAKES) {

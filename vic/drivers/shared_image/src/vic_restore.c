@@ -880,6 +880,7 @@ check_init_state_file(void)
 {
     extern filenames_struct filenames;
     extern domain_struct    global_domain;
+    extern domain_struct    local_domain;
     extern option_struct    options;
     extern soil_con_struct *soil_con;
 
@@ -891,6 +892,8 @@ check_init_state_file(void)
     size_t                  d1start[1];
     size_t                  d2count[2];
     size_t                  d2start[2];
+    size_t                  d3count[3];
+    size_t                  d3start[3];
     int                     lon_var_id;
     int                     lat_var_id;
     double                 *dvar;
@@ -1036,30 +1039,47 @@ check_init_state_file(void)
     d1start[0] = 0;
     d1count[0] = options.Nnode;
 
-    // soil thermal node deltas
-    dvar = calloc(options.Nnode, sizeof(*dvar));
+    // initialize dvar for soil thermal node deltas and depths
+    dvar = malloc(local_domain.ncells_active * sizeof(*dvar));
     check_alloc_status(dvar, "Memory allocation error");
 
-    get_nc_field_double(filenames.init_state, "dz_node",
-                        d1start, d1count, dvar);
-    for (i = 0; i < options.Nnode; i++) {
-        if (dvar[i] != soil_con[0].dz_node[i]) {
-            log_err("Soil node intervals in state file do not match "
-                    "those computed by VIC");
+    // soil thermal node deltas (dimension: node, lat, lon)
+    d3start[0] = 0;
+    d3start[1] = 0;
+    d3start[2] = 0;
+    d3count[0] = 1;
+    d3count[1] = global_domain.n_ny;
+    d3count[2] = global_domain.n_nx;
+    for (j = 0; j < options.Nnode; j++) {
+        d3start[0] = j;
+        get_scatter_nc_field_double(filenames.init_state,
+                                    "dz_node",
+                                    d3start, d3count, dvar);
+        for (i = 0; i < local_domain.ncells_active; i++) {
+            if (dvar[i] != soil_con[i].dz_node[j]) {
+                log_err("Soil node intervals in state file do not match "
+                        "those computed by VIC");
+            }
         }
     }
-    free(dvar);
 
     // soil thermal node depths
-    dvar = calloc(options.Nnode, sizeof(*dvar));
-    check_alloc_status(dvar, "Memory allocation error");
-
-    get_nc_field_double(filenames.init_state, "node_depth",
-                        d1start, d1count, dvar);
-    for (i = 0; i < options.Nnode; i++) {
-        if (dvar[i] != soil_con[0].Zsum_node[i]) {
-            log_err("Soil node depths in state file do not match "
-                    "those computed by VIC");
+    d3start[0] = 0;
+    d3start[1] = 0;
+    d3start[2] = 0;
+    d3count[0] = 1;
+    d3count[1] = global_domain.n_ny;
+    d3count[2] = global_domain.n_nx;
+    for (j = 0; j < options.Nnode; j++) {
+        d3start[0] = j;
+        get_scatter_nc_field_double(filenames.init_state,
+                                    "node_depth",
+                                    d3start, d3count, dvar);
+        for (i = 0; i < local_domain.ncells_active; i++) {
+            if (dvar[i] != soil_con[i].Zsum_node[j]) {
+                log_err("Soil node depths in state file do not match "
+                        "those computed by VIC");
+            }
         }
     }
     free(dvar);

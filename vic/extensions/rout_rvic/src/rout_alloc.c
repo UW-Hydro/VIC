@@ -130,7 +130,7 @@ rout_alloc(void)
 
         // Allocate memory for the ring
         rout.ring = malloc(
-            rout.rout_param.full_time_length * rout.rout_param.n_outlets *
+            rout.rout_param.n_timesteps * rout.rout_param.n_outlets *
             sizeof(*rout.ring));
         check_alloc_status(rout.ring, "Memory allocation error.");
     }

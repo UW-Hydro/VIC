@@ -1,7 +1,7 @@
 /******************************************************************************
  * @section DESCRIPTION
  *
- * Allocate memory for Routing structures.
+ * MPI support routines for Routing
  *
  * @section LICENSE
  *

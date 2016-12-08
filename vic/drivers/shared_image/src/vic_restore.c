@@ -61,9 +61,7 @@ vic_restore(void)
     size_t                     d6start[6];
 
     // validate state file dimensions and coordinate variables
-    if (mpi_rank == VIC_MPI_ROOT) {
-        check_init_state_file();
-    }
+    check_init_state_file();
     // read state variables
 
     // allocate memory for variables to be stored
@@ -883,6 +881,7 @@ check_init_state_file(void)
     extern domain_struct    local_domain;
     extern option_struct    options;
     extern soil_con_struct *soil_con;
+    extern int              mpi_rank;
 
     int                     status;
     size_t                  dimlen;
@@ -906,133 +905,137 @@ check_init_state_file(void)
     check_nc_status(status, "Error opening %s", filenames.init_state);
 
     // read and validate dimension lengths
-    dimlen = get_nc_dimension(filenames.init_state, global_domain.info.x_dim);
-    if (dimlen != global_domain.n_nx) {
-        log_err("Number of grid columns in state file does not "
-                "match parameter file");
-    }
-    dimlen = get_nc_dimension(filenames.init_state, global_domain.info.y_dim);
-    if (dimlen != global_domain.n_ny) {
-        log_err("Number of grid rows in state file does not "
-                "match parameter file");
-    }
-    dimlen = get_nc_dimension(filenames.init_state, "veg_class");
-    if (dimlen != options.NVEGTYPES) {
-        log_err("Number of veg classes in state file does not "
-                "match parameter file");
-    }
-    dimlen = get_nc_dimension(filenames.init_state, "snow_band");
-    if (dimlen != options.SNOW_BAND) {
-        log_err("Number of snow bands in state file does not "
-                "match parameter file");
-    }
-    dimlen = get_nc_dimension(filenames.init_state, "nlayer");
-    if (dimlen != options.Nlayer) {
-        log_err("Number of soil layers in state file does not "
-                "match parameter file");
-    }
-    dimlen = get_nc_dimension(filenames.init_state, "frost_area");
-    if (dimlen != options.Nfrost) {
-        log_err("Number of frost areas in state file does not "
-                "match parameter file");
-    }
-    dimlen = get_nc_dimension(filenames.init_state, "soil_node");
-    if (dimlen != options.Nnode) {
-        log_err("Number of soil nodes in state file does not "
-                "match parameter file");
-    }
-    if (options.LAKES) {
-        dimlen = get_nc_dimension(filenames.init_state, "lake_node");
-        if (dimlen != options.NLAKENODES) {
-            log_err("Number of lake nodes in state file does not "
+    if (mpi_rank == VIC_MPI_ROOT) {
+        dimlen = get_nc_dimension(filenames.init_state, global_domain.info.x_dim);
+        if (dimlen != global_domain.n_nx) {
+            log_err("Number of grid columns in state file does not "
                     "match parameter file");
+        }
+        dimlen = get_nc_dimension(filenames.init_state, global_domain.info.y_dim);
+        if (dimlen != global_domain.n_ny) {
+            log_err("Number of grid rows in state file does not "
+                    "match parameter file");
+        }
+        dimlen = get_nc_dimension(filenames.init_state, "veg_class");
+        if (dimlen != options.NVEGTYPES) {
+            log_err("Number of veg classes in state file does not "
+                    "match parameter file");
+        }
+        dimlen = get_nc_dimension(filenames.init_state, "snow_band");
+        if (dimlen != options.SNOW_BAND) {
+            log_err("Number of snow bands in state file does not "
+                    "match parameter file");
+        }
+        dimlen = get_nc_dimension(filenames.init_state, "nlayer");
+        if (dimlen != options.Nlayer) {
+            log_err("Number of soil layers in state file does not "
+                    "match parameter file");
+        }
+        dimlen = get_nc_dimension(filenames.init_state, "frost_area");
+        if (dimlen != options.Nfrost) {
+            log_err("Number of frost areas in state file does not "
+                    "match parameter file");
+        }
+        dimlen = get_nc_dimension(filenames.init_state, "soil_node");
+        if (dimlen != options.Nnode) {
+            log_err("Number of soil nodes in state file does not "
+                    "match parameter file");
+        }
+        if (options.LAKES) {
+            dimlen = get_nc_dimension(filenames.init_state, "lake_node");
+            if (dimlen != options.NLAKENODES) {
+                log_err("Number of lake nodes in state file does not "
+                        "match parameter file");
+            }
         }
     }
 
     // read dimension variables
 
     // lat/lon
-    status = nc_inq_varid(nc.nc_id, global_domain.info.lon_var, &lon_var_id);
-    check_nc_status(status, "Unable to find variable \"%s\" in %s",
-                    global_domain.info.lon_var, filenames.init_state);
-    status = nc_inq_varid(nc.nc_id, global_domain.info.lat_var, &lat_var_id);
-    check_nc_status(status, "Unable to find variable \"%s\" in %s",
-                    global_domain.info.lat_var, filenames.init_state);
-    if (global_domain.info.n_coord_dims == 1) {
-        d1start[0] = 0;
-        dvar = calloc(global_domain.n_nx, sizeof(*dvar));
-        check_alloc_status(dvar, "Memory allocation error");
-
-        d1count[0] = global_domain.n_nx;
-        status = nc_get_vara_double(nc.nc_id, lon_var_id,
-                                    d1start, d1count, dvar);
-        check_nc_status(status, "Error reading data from \"%s\" in %s",
+    if (mpi_rank == VIC_MPI_ROOT) {
+        status = nc_inq_varid(nc.nc_id, global_domain.info.lon_var, &lon_var_id);
+        check_nc_status(status, "Unable to find variable \"%s\" in %s",
                         global_domain.info.lon_var, filenames.init_state);
-        // implicitly nested loop over ni and nj with j set to 0
-        for (i = 0; i < global_domain.n_nx; i++) {
-            if (!assert_close_double(dvar[i],
-                                     global_domain.locations[i].longitude, rtol,
-                                     abs_tol)) {
-                log_err("Longitudes in initial state file do not "
-                        "match parameter file");
-            }
-        }
-        free(dvar);
-
-        dvar = calloc(global_domain.n_ny, sizeof(*dvar));
-        check_alloc_status(dvar, "Memory allocation error");
-
-        d1count[0] = global_domain.n_ny;
-        status = nc_get_vara_double(nc.nc_id, lat_var_id,
-                                    d1start, d1count, dvar);
-        check_nc_status(status, "Error reading data from \"%s\" in %s",
+        status = nc_inq_varid(nc.nc_id, global_domain.info.lat_var, &lat_var_id);
+        check_nc_status(status, "Unable to find variable \"%s\" in %s",
                         global_domain.info.lat_var, filenames.init_state);
-        // implicitly nested loop over ni and nj with i set to 0;
-        // j stride = n_nx
-        for (j = 0; j < global_domain.n_ny; j++) {
-            if (!assert_close_double(dvar[j],
-                                     global_domain.locations[j *
-                                                             global_domain.n_nx]
-                                     .latitude, rtol,
-                                     abs_tol)) {
-                log_err("Latitudes in initial state file do not "
-                        "match parameter file");
+        if (global_domain.info.n_coord_dims == 1) {
+            d1start[0] = 0;
+            dvar = calloc(global_domain.n_nx, sizeof(*dvar));
+            check_alloc_status(dvar, "Memory allocation error");
+    
+            d1count[0] = global_domain.n_nx;
+            status = nc_get_vara_double(nc.nc_id, lon_var_id,
+                                        d1start, d1count, dvar);
+            check_nc_status(status, "Error reading data from \"%s\" in %s",
+                            global_domain.info.lon_var, filenames.init_state);
+            // implicitly nested loop over ni and nj with j set to 0
+            for (i = 0; i < global_domain.n_nx; i++) {
+                if (!assert_close_double(dvar[i],
+                                         global_domain.locations[i].longitude, rtol,
+                                         abs_tol)) {
+                    log_err("Longitudes in initial state file do not "
+                            "match parameter file");
+                }
             }
-        }
-        free(dvar);
-    }
-    else if (global_domain.info.n_coord_dims == 2) {
-        d2start[0] = 0;
-        d2start[1] = 0;
-        dvar = calloc(global_domain.n_ny * global_domain.n_nx, sizeof(*dvar));
-        check_alloc_status(dvar, "Memory allocation error");
-
-        d2count[0] = global_domain.n_ny;
-        d2count[1] = global_domain.n_nx;
-        status = nc_get_vara_double(nc.nc_id, lon_var_id,
-                                    d2start, d2count, dvar);
-        check_nc_status(status, "Error reading data from \"%s\" in %s",
-                        global_domain.info.lon_var, filenames.init_state);
-        for (i = 0; i < global_domain.n_ny * global_domain.n_nx; i++) {
-            if (dvar[i] != (double) global_domain.locations[i].longitude) {
-                log_err("Longitudes in initial state file do not "
-                        "match parameter file");
+            free(dvar);
+    
+            dvar = calloc(global_domain.n_ny, sizeof(*dvar));
+            check_alloc_status(dvar, "Memory allocation error");
+    
+            d1count[0] = global_domain.n_ny;
+            status = nc_get_vara_double(nc.nc_id, lat_var_id,
+                                        d1start, d1count, dvar);
+            check_nc_status(status, "Error reading data from \"%s\" in %s",
+                            global_domain.info.lat_var, filenames.init_state);
+            // implicitly nested loop over ni and nj with i set to 0;
+            // j stride = n_nx
+            for (j = 0; j < global_domain.n_ny; j++) {
+                if (!assert_close_double(dvar[j],
+                                         global_domain.locations[j *
+                                                                 global_domain.n_nx]
+                                         .latitude, rtol,
+                                         abs_tol)) {
+                    log_err("Latitudes in initial state file do not "
+                            "match parameter file");
+                }
             }
+            free(dvar);
         }
-        status = nc_get_vara_double(nc.nc_id, lat_var_id,
-                                    d2start, d2count, dvar);
-        check_nc_status(status, "Error reading data from \"%s\" in %s",
-                        global_domain.info.lat_var, filenames.init_state);
-        for (i = 0; i < global_domain.n_ny * global_domain.n_nx; i++) {
-            if (dvar[i] != (double) global_domain.locations[i].latitude) {
-                log_err("Latitudes in initial state file do not "
-                        "match parameter file");
+        else if (global_domain.info.n_coord_dims == 2) {
+            d2start[0] = 0;
+            d2start[1] = 0;
+            dvar = calloc(global_domain.n_ny * global_domain.n_nx, sizeof(*dvar));
+            check_alloc_status(dvar, "Memory allocation error");
+    
+            d2count[0] = global_domain.n_ny;
+            d2count[1] = global_domain.n_nx;
+            status = nc_get_vara_double(nc.nc_id, lon_var_id,
+                                        d2start, d2count, dvar);
+            check_nc_status(status, "Error reading data from \"%s\" in %s",
+                            global_domain.info.lon_var, filenames.init_state);
+            for (i = 0; i < global_domain.n_ny * global_domain.n_nx; i++) {
+                if (dvar[i] != (double) global_domain.locations[i].longitude) {
+                    log_err("Longitudes in initial state file do not "
+                            "match parameter file");
+                }
             }
+            status = nc_get_vara_double(nc.nc_id, lat_var_id,
+                                        d2start, d2count, dvar);
+            check_nc_status(status, "Error reading data from \"%s\" in %s",
+                            global_domain.info.lat_var, filenames.init_state);
+            for (i = 0; i < global_domain.n_ny * global_domain.n_nx; i++) {
+                if (dvar[i] != (double) global_domain.locations[i].latitude) {
+                    log_err("Latitudes in initial state file do not "
+                            "match parameter file");
+                }
+            }
+            free(dvar);
         }
-        free(dvar);
-    }
-    else {
-        log_err("global_domain.info.n_coord_dims should be 1 or 2");
+        else {
+            log_err("global_domain.info.n_coord_dims should be 1 or 2");
+        }
     }
 
     // initialize dvar for soil thermal node deltas and depths

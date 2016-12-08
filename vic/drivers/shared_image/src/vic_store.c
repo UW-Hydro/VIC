@@ -61,13 +61,11 @@ vic_store(dmy_struct *dmy_current,
     set_nc_state_file_info(&nc_state_file);
 
     // only open and initialize the netcdf file on the first thread
-    if (mpi_rank == VIC_MPI_ROOT) {
-        // create netcdf file for storing model state
-        sprintf(filename, "%s.%04i%02i%02i_%05u.nc",
-                filenames.statefile, global_param.stateyear,
-                global_param.statemonth, global_param.stateday,
-                global_param.statesec);
-    }
+    // create netcdf file for storing model state
+    sprintf(filename, "%s.%04i%02i%02i_%05u.nc",
+            filenames.statefile, global_param.stateyear,
+            global_param.statemonth, global_param.stateday,
+            global_param.statesec);
     initialize_state_file(filename, &nc_state_file, dmy_current);
     if (mpi_rank == VIC_MPI_ROOT) {
         debug("writing state file: %s", filename);

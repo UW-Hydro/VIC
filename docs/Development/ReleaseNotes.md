@@ -38,6 +38,10 @@ To check which release of VIC you are running:
 
 	Before the fix, the input arguments to function `make_lastday` are sometimes in a wrong order. The bug caused error when trying to write state file on a leap day.
  
+6. Fixed a bug related to `dz_node` and `node_depth` variables in image driver output state file ([GH#657](https://github.com/UW-Hydro/VIC/pull/657))
+
+	Before the fix, `dz_node` and `node_depth` in image driver output state file were not spatially distributed, which was wrong. Now these two variables are spatially distributed in the output state file.
+ 
 ------------------------------
 
 ## VIC 5.0.0 [![DOI](https://zenodo.org/badge/7766/UW-Hydro/VIC.svg)](https://zenodo.org/badge/latestdoi/7766/UW-Hydro/VIC)

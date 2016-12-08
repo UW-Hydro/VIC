@@ -1,0 +1,74 @@
+NODES                 3
+MODEL_STEPS_PER_DAY   24
+SNOW_STEPS_PER_DAY    24
+RUNOFF_STEPS_PER_DAY  24
+STARTYEAR             1949
+STARTMONTH            1
+STARTDAY              1
+ENDYEAR               1949
+ENDMONTH              1
+ENDDAY                10
+CALENDAR              PROLEPTIC_GREGORIAN
+FULL_ENERGY           FALSE
+FROZEN_SOIL           FALSE
+
+DOMAIN         $test_data_dir/image/Stehekin/parameters/domain.stehekin.20151028.nc
+DOMAIN_TYPE    LAT     lat
+DOMAIN_TYPE    LON     lon
+DOMAIN_TYPE    MASK    mask
+DOMAIN_TYPE    AREA    area
+DOMAIN_TYPE    FRAC    frac
+DOMAIN_TYPE    YDIM    lat
+DOMAIN_TYPE    XDIM    lon
+
+#INIT_STATE
+STATENAME   $state_dir/states
+STATEYEAR   1949
+STATEMONTH  1
+STATEDAY    11
+STATESEC    0
+
+FORCING1      $test_data_dir/image/Stehekin/forcings/Stehekin_image_test.forcings_10days.
+FORCE_TYPE    AIR_TEMP      tas
+FORCE_TYPE    PREC          prcp
+FORCE_TYPE    PRESSURE      pres
+FORCE_TYPE    SWDOWN        dswrf
+FORCE_TYPE    LWDOWN        dlwrf
+FORCE_TYPE    VP            vp
+FORCE_TYPE    WIND          wind
+WIND_H        10.0
+
+PARAMETERS          $test_data_dir/image/Stehekin/parameters/Stehekin_test_params_20160327.nc
+BASEFLOW            ARNO
+JULY_TAVG_SUPPLIED  FALSE
+ORGANIC_FRACT       FALSE
+LAI_SRC             FROM_VEGPARAM
+SNOW_BAND	          TRUE
+
+ROUT_PARAM          $test_data_dir/image/Stehekin/parameters/stehekin_parameters_01.rvic.prm.Stehekin.20150727.nc
+
+RESULT_DIR              $result_dir
+
+OUTFILE     fluxes
+AGGFREQ     NHOURS   1
+OUTVAR      OUT_PREC
+OUTVAR      OUT_RAINF
+OUTVAR      OUT_SNOWF
+OUTVAR      OUT_AIR_TEMP
+OUTVAR      OUT_SWDOWN
+OUTVAR      OUT_LWDOWN
+OUTVAR      OUT_PRESSURE
+OUTVAR      OUT_WIND
+OUTVAR      OUT_DENSITY
+OUTVAR      OUT_REL_HUMID
+OUTVAR      OUT_QAIR
+OUTVAR      OUT_VP
+OUTVAR      OUT_VPD
+OUTVAR      OUT_RUNOFF
+OUTVAR      OUT_BASEFLOW
+OUTVAR      OUT_EVAP
+OUTVAR      OUT_SWE
+OUTVAR      OUT_SOIL_MOIST
+OUTVAR      OUT_ALBEDO
+OUTVAR      OUT_SOIL_TEMP
+OUTVAR      OUT_DISCHARGE

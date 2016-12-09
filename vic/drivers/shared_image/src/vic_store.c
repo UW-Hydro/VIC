@@ -1556,10 +1556,12 @@ initialize_state_file(char           *filename,
     double                     time_num;
 
     // open the netcdf file
-    status = nc_create(filename, get_nc_mode(options.STATE_FORMAT),
-                       &(nc_state_file->nc_id));
-    check_nc_status(status, "Error creating %s", filename);
-    nc_state_file->open = true;
+    if (mpi_rank == VIC_MPI_ROOT) {
+        status = nc_create(filename, get_nc_mode(options.STATE_FORMAT),
+                           &(nc_state_file->nc_id));
+        check_nc_status(status, "Error creating %s", filename);
+        nc_state_file->open = true;
+    }
 
     if (mpi_rank == VIC_MPI_ROOT) {
         // Set netcdf file global attributes

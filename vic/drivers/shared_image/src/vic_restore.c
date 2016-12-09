@@ -39,7 +39,6 @@ vic_restore(void)
     extern veg_con_map_struct *veg_con_map;
     extern filenames_struct    filenames;
     extern metadata_struct     state_metadata[N_STATE_VARS];
-    extern int                 mpi_rank;
 
     int                        v;
     size_t                     i;

@@ -38,8 +38,8 @@ rout_run(void)
     extern domain_struct global_domain;
     double              *var_local_runoff = NULL;
     double              *var_local_discharge = NULL;
-    double              *dvar_runoff = NULL;
-    double              *dvar_discharge = NULL;
+    double              *var_domain_runoff = NULL;
+    double              *var_domain_discharge = NULL;
     size_t               i;
 
     debug("RVIC");
@@ -56,12 +56,12 @@ rout_run(void)
 
     // Allocate memory for entire global_domain variables on the master node
     if (mpi_rank == VIC_MPI_ROOT) {
-        dvar_runoff = malloc(global_domain.ncells_total * sizeof(*dvar_runoff));
-        check_alloc_status(dvar_runoff, "Memory allocation error.");
+        var_domain_runoff = malloc(global_domain.ncells_total * sizeof(*var_domain_runoff));
+        check_alloc_status(var_domain_runoff, "Memory allocation error.");
 
-        dvar_discharge =
-            malloc(global_domain.ncells_total * sizeof(*dvar_discharge));
-        check_alloc_status(dvar_discharge, "Memory allocation error.");
+        var_domain_discharge =
+            malloc(global_domain.ncells_total * sizeof(*var_domain_discharge));
+        check_alloc_status(var_domain_discharge, "Memory allocation error.");
     }
 
     // Read from runoff and baseflow from out_data and sum to runoff
@@ -71,17 +71,17 @@ rout_run(void)
     }
 
     // Gather the runoff for the local nodes
-    gather_var_double(dvar_runoff, var_local_runoff);
+    gather_var_double(var_domain_runoff, var_local_runoff);
 
     // Run the convolution on the master node
     if (mpi_rank == VIC_MPI_ROOT) {
-        convolution(dvar_runoff, dvar_discharge);
+        convolution(var_domain_runoff, var_domain_discharge);
     }
 
     // Scatter the discharge back to the local nodes
-    scatter_var_double(dvar_discharge, var_local_discharge);
+    scatter_var_double(var_domain_discharge, var_local_discharge);
 
-    // Write to output struct...
+    // Write to output struct
     for (i = 0; i < local_domain.ncells_active; i++) {
         out_data[i][OUT_DISCHARGE][0] = var_local_discharge[i];
     }
@@ -92,7 +92,7 @@ rout_run(void)
 
     // Free variables on the master node
     if (mpi_rank == VIC_MPI_ROOT) {
-        free(dvar_runoff);
-        free(dvar_discharge);
+        free(var_domain_runoff);
+        free(var_domain_discharge);
     }
 }

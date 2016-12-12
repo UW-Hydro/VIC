@@ -32,7 +32,7 @@
  *****************************************************************************/
 void
 gather_var_double(double *dvar,
-                  double *var)
+                  double *local_var)
 {
     extern MPI_Comm      MPI_COMM_VIC;
     extern domain_struct global_domain;
@@ -65,7 +65,7 @@ gather_var_double(double *dvar,
 
     // Gather the results from the nodes, result for the local node is in the
     // array *var (which is a function argument)
-    status = MPI_Gatherv(var, local_domain.ncells_active, MPI_DOUBLE,
+    status = MPI_Gatherv(local_var, local_domain.ncells_active, MPI_DOUBLE,
                          dvar_gathered, mpi_map_local_array_sizes,
                          mpi_map_global_array_offsets, MPI_DOUBLE,
                          VIC_MPI_ROOT, MPI_COMM_VIC);

@@ -52,7 +52,6 @@ convolution(double *runoff,
     // self.ring[tracer] = np.roll(self.ring[tracer], -1, axis=0)
     cshift(rout.ring, rout.rout_param.n_timesteps, rout.rout_param.n_outlets, 0,
            1);
-// cshift(rout.ring, rout.rout_param.full_time_length, rout.rout_param.n_outlets, 0, 1);
 
     /*Loop through all sources*/
     for (i_source = 0; i_source < rout.rout_param.n_sources; i_source++) {

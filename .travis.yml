@@ -18,6 +18,18 @@ matrix:
         - gfortran
         - valgrind
         # open-mpi is built from source in image.travis
+  # Image Driver with rvic-routing
+  - compiler: gcc
+    os: linux
+    env: TESTID='image' EXTENSIONS='ROUT=rout_rvic'
+    addons:
+      apt_packages:
+        - libnetcdf-dev
+        - netcdf-bin
+        - netcdf-doc
+        - gfortran
+        - valgrind
+        # open-mpi is built from source in image.travis
   # CESM Driver
   - compiler: gcc
     os: linux
@@ -83,7 +95,7 @@ before_install:
   - install_miniconda
   - vic_before_install
 install:
-  - vic_install
+  - vic_install ${ROUT}
 before_script:
   - vic_before_script
 script:

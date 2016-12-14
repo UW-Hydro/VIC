@@ -232,6 +232,16 @@ set_state_meta_data_info()
     strcpy(state_metadata[STATE_SNOW_CANOPY].description,
            "snow interception storage in canopy");
 
+    // STATE_ROUT_RING
+    strcpy(state_metadata[STATE_ROUT_RING].varname,
+           "STATE_ROUT_RING");
+    strcpy(state_metadata[STATE_ROUT_RING].long_name, "routing_ring");
+    strcpy(state_metadata[STATE_ROUT_RING].standard_name,
+           "routing_ring");
+    strcpy(state_metadata[STATE_ROUT_RING].units, "-");
+    strcpy(state_metadata[STATE_ROUT_RING].description,
+           "unit hydrographs in the routing ring");
+
     // STATE_SOIL_NODE_TEMP
     strcpy(state_metadata[STATE_SOIL_NODE_TEMP].varname,
            "STATE_SOIL_NODE_TEMP");

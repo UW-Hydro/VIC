@@ -35,9 +35,21 @@ rout_start(void)
 /******************************************************************************
  * @brief    Allocate memory.
  *****************************************************************************/
+#include <rout.h>
+
 void
 rout_alloc(void)
 {
+    extern int mpi_rank;
+    if (mpi_rank == VIC_MPI_ROOT) {
+        extern rout_struct rout;
+
+        // We need to write at least something to the VIC state file (if enabled).
+        // Therefore we make the dimension size 1*1.
+        rout.rout_param.n_outlets = 1;
+        rout.rout_param.n_timesteps = 1;
+        rout.ring[1] = 0;
+    }
 }
 
 /******************************************************************************

@@ -120,6 +120,8 @@ typedef struct {
     int ni_dimid;
     int nj_dimid;
     int node_dimid;
+    int outlet_dimid;
+    int routing_timestep_dimid;
     int root_zone_dimid;
     int time_dimid;
     int time_bounds_dimid;
@@ -134,6 +136,8 @@ typedef struct {
     size_t ni_size;
     size_t nj_size;
     size_t node_size;
+    size_t outlet_size;
+    size_t routing_timestep_size;
     size_t root_zone_size;
     size_t time_size;
     size_t veg_size;

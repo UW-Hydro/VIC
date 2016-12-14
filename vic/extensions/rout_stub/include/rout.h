@@ -29,10 +29,23 @@
 
 #define ROUT_EXT "rout_stub"
 
+#include <vic_def.h>
+#include <vic_driver_image.h>
+
+/******************************************************************************
+ * @brief   Routing Structs
+ *****************************************************************************/
+typedef struct {
+    size_t n_timesteps;                        /*scalar - number of timesteps*/
+    size_t n_outlets;                          /*scalar - length of subset*/
+} rout_param_struct;
+
 /******************************************************************************
  * @brief   main routing Struct
  *****************************************************************************/
 typedef struct {
+    rout_param_struct rout_param;
+    double ring[1];
 } rout_struct;
 
 /******************************************************************************

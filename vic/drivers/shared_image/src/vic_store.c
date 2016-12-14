@@ -25,6 +25,7 @@
  *****************************************************************************/
 
 #include <vic_driver_shared_image.h>
+#include <rout.h>
 
 /******************************************************************************
  * @brief    Save model state.
@@ -40,6 +41,7 @@ vic_store(dmy_struct *dmy_current,
     extern veg_con_map_struct *veg_con_map;
     extern int                 mpi_rank;
     extern global_param_struct global_param;
+    extern rout_struct         rout;
 
     int                        status;
     int                        v;
@@ -114,6 +116,19 @@ vic_store(dmy_struct *dmy_current,
     for (i = 0; i < local_domain.ncells_active; i++) {
         ivar[i] = nc_state_file.i_fillvalue;
         dvar[i] = nc_state_file.d_fillvalue;
+    }
+
+    // routing ring
+    if (mpi_rank == VIC_MPI_ROOT) {
+        d2start[0] = 0;
+        d2start[1] = 0;
+        nc_var = &(nc_state_file.nc_vars[STATE_ROUT_RING]);
+
+        status =
+            nc_put_vara_double(nc_state_file.nc_id, nc_var->nc_varid, d2start,
+                               nc_var->nc_counts,
+                               rout.ring);
+        check_nc_status(status, "Error writing values.");
     }
 
     // total soil moisture
@@ -1278,6 +1293,7 @@ set_nc_state_file_info(nc_file_struct *nc_state_file)
 {
     extern option_struct options;
     extern domain_struct global_domain;
+    extern rout_struct   rout;
 
     // Set fill values
     nc_state_file->c_fillvalue = NC_FILL_CHAR;
@@ -1296,6 +1312,8 @@ set_nc_state_file_info(nc_file_struct *nc_state_file)
     nc_state_file->ni_dimid = MISSING;
     nc_state_file->nj_dimid = MISSING;
     nc_state_file->node_dimid = MISSING;
+    nc_state_file->outlet_dimid = MISSING;
+    nc_state_file->routing_timestep_dimid = MISSING;
     nc_state_file->root_zone_dimid = MISSING;
     nc_state_file->time_dimid = MISSING;
     nc_state_file->veg_dimid = MISSING;
@@ -1308,6 +1326,8 @@ set_nc_state_file_info(nc_file_struct *nc_state_file)
     nc_state_file->ni_size = global_domain.n_nx;
     nc_state_file->nj_size = global_domain.n_ny;
     nc_state_file->node_size = options.Nnode;
+    nc_state_file->outlet_size = rout.rout_param.n_outlets;
+    nc_state_file->routing_timestep_size = rout.rout_param.n_timesteps;
     nc_state_file->root_zone_size = options.ROOT_ZONES;
     nc_state_file->time_size = NC_UNLIMITED;
     nc_state_file->veg_size = options.NVEGTYPES;
@@ -1409,6 +1429,14 @@ set_nc_state_var_info(nc_file_struct *nc)
             nc->nc_vars[i].nc_counts[1] = 1;
             nc->nc_vars[i].nc_counts[2] = nc->nj_size;
             nc->nc_vars[i].nc_counts[3] = nc->ni_size;
+            break;
+        case STATE_ROUT_RING:
+            // 2d vars [routing_timestep, outlet]
+            nc->nc_vars[i].nc_dims = 2;
+            nc->nc_vars[i].nc_dimids[0] = nc->routing_timestep_dimid;
+            nc->nc_vars[i].nc_dimids[1] = nc->outlet_dimid;
+            nc->nc_vars[i].nc_counts[0] = nc->routing_timestep_size;
+            nc->nc_vars[i].nc_counts[1] = nc->outlet_size;
             break;
         case STATE_SOIL_NODE_TEMP:
             // 5d vars [veg, band, node, j, i]
@@ -1634,6 +1662,17 @@ initialize_state_file(char           *filename,
                         nc_state_file->node_size,
                         &(nc_state_file->node_dimid));
     check_nc_status(status, "Error defining soil_node in %s", filename);
+
+    // Add routing dimensions
+    status = nc_def_dim(nc_state_file->nc_id, "outlet",
+                        nc_state_file->outlet_size,
+                        &(nc_state_file->outlet_dimid));
+    check_nc_status(status, "Error defining outlet in %s", filename);
+
+    status = nc_def_dim(nc_state_file->nc_id, "routing_timestep",
+                        nc_state_file->routing_timestep_size,
+                        &(nc_state_file->routing_timestep_dimid));
+    check_nc_status(status, "Error defining routing_timestep in %s", filename);
 
     if (options.LAKES) {
         status = nc_def_dim(nc_state_file->nc_id, "lake_node",

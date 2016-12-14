@@ -25,6 +25,7 @@
  *****************************************************************************/
 
 #include <vic_driver_shared_image.h>
+#include <rout.h>
 
 /******************************************************************************
  * @brief    Read initial model state.
@@ -39,6 +40,8 @@ vic_restore(void)
     extern veg_con_map_struct *veg_con_map;
     extern filenames_struct    filenames;
     extern metadata_struct     state_metadata[N_STATE_VARS];
+    extern int                 mpi_rank;
+    extern rout_struct         rout;
 
     int                        v;
     size_t                     i;
@@ -48,6 +51,7 @@ vic_restore(void)
     size_t                     p;
     int                       *ivar = NULL;
     double                    *dvar = NULL;
+    size_t                     d2count_rout[2];
     size_t                     d2count[2];
     size_t                     d2start[2];
     size_t                     d3count[3];
@@ -116,6 +120,18 @@ vic_restore(void)
     d6count[3] = 1;
     d6count[4] = global_domain.n_ny;
     d6count[5] = global_domain.n_nx;
+
+    // routing ring
+    if (mpi_rank == VIC_MPI_ROOT) {
+        d2start[0] = 0;
+        d2start[1] = 0;
+        d2count_rout[0] = rout.rout_param.n_timesteps;
+        d2count_rout[1] = rout.rout_param.n_outlets;
+
+        get_nc_field_double(filenames.init_state,
+                            state_metadata[STATE_ROUT_RING].varname,
+                            d2start, d2count_rout, rout.ring);
+    }
 
     // total soil moisture
     for (m = 0; m < options.NVEGTYPES; m++) {
@@ -880,6 +896,7 @@ check_init_state_file(void)
     extern domain_struct    global_domain;
     extern option_struct    options;
     extern soil_con_struct *soil_con;
+    extern rout_struct      rout;
 
     int                     status;
     size_t                  dimlen;
@@ -935,6 +952,16 @@ check_init_state_file(void)
     if (dimlen != options.Nnode) {
         log_err("Number of soil nodes in state file does not "
                 "match parameter file");
+    }
+    dimlen = get_nc_dimension(filenames.init_state, "outlet");
+    if (dimlen != rout.rout_param.n_outlets) {
+        log_err("Number of outlets in state file does not "
+                "match routing parameter file");
+    }
+    dimlen = get_nc_dimension(filenames.init_state, "routing_timestep");
+    if (dimlen != rout.rout_param.n_timesteps) {
+        log_err("Number of routing timesteps in state file does not "
+                "match routing parameter file");
     }
     if (options.LAKES) {
         dimlen = get_nc_dimension(filenames.init_state, "lake_node");

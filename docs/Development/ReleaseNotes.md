@@ -37,8 +37,12 @@ To check which release of VIC you are running:
 5. Fixed a bug related to `make_lastday` function ([GH#647](https://github.com/UW-Hydro/VIC/pull/647))
 
 	Before the fix, the input arguments to function `make_lastday` are sometimes in a wrong order. The bug caused error when trying to write state file on a leap day.
+
+6. Fixed a bug related to writing two-dimensional lat/lon variables to a state file ([GH#652](https://github.com/UW-Hydro/VIC/pull/652))
+
+	Before the bug fix, two-dimensional lat/lon variables were not populated correctly and were written as fill values to a state file. Now two-dimensional lat/lon variables are correctly populated and written. 
  
-6. Fixed a bug related to `dz_node` and `node_depth` variables in image driver output state file ([GH#657](https://github.com/UW-Hydro/VIC/pull/657))
+7. Fixed a bug related to `dz_node` and `node_depth` variables in image driver output state file ([GH#657](https://github.com/UW-Hydro/VIC/pull/657))
 
 	Before the fix, `dz_node` and `node_depth` in image driver output state file were not spatially distributed, which was wrong. Now these two variables are spatially distributed in the output state file.
  

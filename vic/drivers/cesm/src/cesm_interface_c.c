@@ -102,10 +102,6 @@ vic_cesm_init(vic_clock     *vclock,
     // initialize output structures
     vic_init_output(&dmy_current);
 
-    // assign case name to state file name
-    strncpy(filenames.statefile, trim(cmeta->caseid),
-            sizeof(filenames.statefile));
-
     // stop init timer
     timer_stop(&(global_timers[TIMER_VIC_INIT]));
     // stop vic all timer

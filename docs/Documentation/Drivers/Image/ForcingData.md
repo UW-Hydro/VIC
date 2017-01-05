@@ -38,11 +38,6 @@ variables:
         lat:long_name = "latitude of grid cell center" ;
         lat:units = "degrees_north" ;
         lat:axis = "Y" ;
-    double mask(lat, lon) ;
-        mask:_FillValue = 0. ;
-        mask:comment = "0 value indicates cell is not active" ;
-        mask:long_name = "fraction of grid cell that is activedomain mask" ;
-        mask:note = "unitlessunitless" ;
     float prcp(time, lat, lon) ;
         prcp:_FillValue = 9.96921e+36f ;
         prcp:long_name = "PREC" ;

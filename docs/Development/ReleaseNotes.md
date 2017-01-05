@@ -41,6 +41,11 @@ To check which release of VIC you are running:
 6. Fixed a bug related to `dz_node` and `node_depth` variables in image driver output state file ([GH#657](https://github.com/UW-Hydro/VIC/pull/657))
 
 	Before the fix, `dz_node` and `node_depth` in image driver output state file were not spatially distributed, which was wrong. Now these two variables are spatially distributed in the output state file.
+
+6. Fixed a bug related to `run_cell` and `mask` variables in image driver inputs ([GH#662]((https://github.com/UW-Hydro/VIC/pull/662)))
+
+	Before the fix, active cell was controlled by `mask` variable in the domain file in image driver, and `run_cell` variable in the parameter file was not actually used. Now `run_cell` variable in the parameter file controls active cells (`run_cell` must be within the mask defined by the domain file).
+
  
 ------------------------------
 

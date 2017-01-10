@@ -33,29 +33,43 @@ size_t
 get_nc_dimension(char *nc_name,
                  char *dim_name)
 {
-    int    nc_id;
-    int    dim_id;
-    size_t dim_size;
-    int    status;
+    int              dim_id;
+    size_t           dim_size;
+    int              status;
 
-    // open the netcdf file
-    status = nc_open(nc_name, NC_NOWRITE, &nc_id);
-    check_nc_status(status, "Error opening %s", nc_name);
+    extern nc_struct netcdf;
+
+    if (!netcdf.name) {
+        netcdf.name = nc_name;
+        status = nc_open(nc_name, NC_NOWRITE, &(netcdf.id));
+        check_nc_status(status, "Error opening %s", netcdf.name);
+    }
+    else {
+        // check if another netcdf has to be opened
+        if (strcmp(netcdf.name, nc_name) != false) {
+            // close the old netcdf file
+            status = nc_close(netcdf.id);
+            check_nc_status(status, "Error closing %s", netcdf.name);
+            netcdf.id = 0;
+            netcdf.name = '\0';
+
+            // open the new netcdf file
+            status = nc_open(nc_name, NC_NOWRITE, &(netcdf.id));
+            check_nc_status(status, "Error opening %s", nc_name);
+            // set name
+            netcdf.name = nc_name;
+        }
+    }
 
     // get dimension id
-    status = nc_inq_dimid(nc_id, dim_name, &dim_id);
+    status = nc_inq_dimid(netcdf.id, dim_name, &dim_id);
     check_nc_status(status, "Error getting dimension id %s in %s", dim_name,
-                    nc_name);
-
+                    netcdf.name);
     // get dimension size
-    status = nc_inq_dimlen(nc_id, dim_id, &dim_size);
+    status = nc_inq_dimlen(netcdf.id, dim_id, &dim_size);
     check_nc_status(status, "Error getting dimension size for dim %s in %s",
                     dim_name,
-                    nc_name);
-
-    // close the netcdf file
-    status = nc_close(nc_id);
-    check_nc_status(status, "Error closing %s", nc_name);
+                    netcdf.name);
 
     return dim_size;
 }

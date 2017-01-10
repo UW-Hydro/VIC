@@ -48,6 +48,7 @@ vic_force(void)
     extern veg_hist_struct   **veg_hist;
     extern parameters_struct   param;
     extern param_set_struct    param_set;
+    extern nc_struct           netcdf;
 
     double                    *t_offset = NULL;
     double                    *dvar = NULL;
@@ -56,6 +57,7 @@ vic_force(void)
     size_t                     v;
     size_t                     band;
     int                        vidx;
+    int                        status;
     size_t                     d3count[3];
     size_t                     d3start[3];
     size_t                     d4count[4];
@@ -448,6 +450,13 @@ vic_force(void)
         }
     }
 
+    // Close last NetCDF if not already closed
+    if (netcdf.id) {
+        status = nc_close(netcdf.id);
+        check_nc_status(status, "Error closing %s", netcdf.name);
+        netcdf.id = 0;
+        netcdf.name = '\0';
+    }
 
     // cleanup
     free(dvar);

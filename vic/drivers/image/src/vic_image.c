@@ -64,6 +64,7 @@ save_data_struct   *save_data;  // [ncells]
 double           ***out_data = NULL;  // [ncells, nvars, nelem]
 stream_struct      *output_streams = NULL;  // [nstreams]
 nc_file_struct     *nc_hist_files = NULL;  // [nstreams]
+nc_struct           netcdf;
 
 /******************************************************************************
  * @brief   Stand-alone image mode driver of the VIC model

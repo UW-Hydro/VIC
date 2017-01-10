@@ -896,10 +896,6 @@ check_init_state_file(void)
     double                  abs_tol = 0.0001; // maybe move this to a .h file
     nc_file_struct          nc;
 
-    // open the netcdf file
-    status = nc_open(filenames.init_state, NC_SHARE, &(nc.nc_id));
-    check_nc_status(status, "Error opening %s", filenames.init_state);
-
     // read and validate dimension lengths
     dimlen = get_nc_dimension(filenames.init_state, global_domain.info.x_dim);
     if (dimlen != global_domain.n_nx) {
@@ -945,6 +941,10 @@ check_init_state_file(void)
     }
 
     // read dimension variables
+
+    // open the netcdf file
+    status = nc_open(filenames.init_state, NC_SHARE, &(nc.nc_id));
+    check_nc_status(status, "Error opening %s", filenames.init_state);
 
     // lat/lon
     status = nc_inq_varid(nc.nc_id, global_domain.info.lon_var, &lon_var_id);
@@ -1029,6 +1029,10 @@ check_init_state_file(void)
     else {
         log_err("global_domain.info.n_coord_dims should be 1 or 2");
     }
+
+    // close NetCDF file
+    status = nc_close(nc.nc_id);
+    check_nc_status(status, "Error closing %s", filenames.init_state);
 
     // Variables for other dimensions
     d1start[0] = 0;

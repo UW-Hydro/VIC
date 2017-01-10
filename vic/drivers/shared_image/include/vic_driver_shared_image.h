@@ -198,8 +198,8 @@ void free_veg_hist(veg_hist_struct *veg_hist);
 void get_domain_type(char *cmdstr);
 size_t get_global_domain(char *domain_nc_name, char *param_nc_name,
                          domain_struct *global_domain);
-void get_nc_latlon(char *nc_name, domain_struct *global_domain,
-                   domain_struct *nc_domain);
+void copy_domain_info(domain_struct *domain_from, domain_struct *domain_to);
+void get_nc_latlon(char *nc_name, domain_struct *nc_domain);
 size_t get_nc_dimension(char *nc_name, char *dim_name);
 void get_nc_var_attr(char *nc_name, char *var_name, char *attr_name,
                      char **attr);

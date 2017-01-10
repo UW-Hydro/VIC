@@ -40,15 +40,14 @@ compare_ncdomain_with_global_domain(char *ncfile)
 
     size_t               i;
 
-    ncfile_domain.info = global_domain.info;
-
     // read the lat lon coordinates info from ncfile
     // (e.g. parameters file or state file)
     ncfile_domain.locations =
         malloc(global_domain.ncells_total *
                sizeof(*(ncfile_domain.locations)));
     check_alloc_status(ncfile_domain.locations, "Memory allocation error.");
-    get_nc_latlon(ncfile, &global_domain, &ncfile_domain);
+    copy_domain_info(&global_domain, &ncfile_domain);
+    get_nc_latlon(ncfile, &ncfile_domain);
 
     // using the ncfile_domain, we can compare the values to the global domain.
 

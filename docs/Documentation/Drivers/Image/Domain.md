@@ -8,7 +8,7 @@ Below is a list of variables in the domain netCDF file. The dimensions of the ne
 |------------|-------------|----------|--------|-------------|
 | LAT        | [lat]       | degree   | double | Latitudes   |
 | LON        | [lon]       | degree   | double | Longitues   |
-| MASK       | [lat, lon]  | N/A      | integer | Mask of VIC run. 1 for active cells for VIC run; 0 indicates inactive grid cells. VIC will not run at grid cells with MASK = 0 or missing value. |
+| MASK       | [lat, lon]  | N/A      | integer | Mask of domain. 1 for grid cells inside considered domain; 0 for grid cells outside of domain. Cells outside of domain will not be run. Use run_cell variable in the parameter file to turn on/off active cells inside domain. |
 | AREA       | [lat, lon]  | m2       | double | Area of grid cells.   |
 | FRAC       | [lat, lon]  | N/A      | double | Fraction of grid cells that is land. |
 
@@ -22,7 +22,7 @@ dimensions:
         lon = 125 ;                                                                          
 variables:                                                                                   
         int mask(lat, lon) ;
-                mask:comment = "0 indicates grid cell is not active" ;
+                mask:comment = "0 indicates grid cell outside of domain" ;
                 mask:long_name = "domain mask" ;
         double lon(lon) ;
                 lon:long_name = "longitude coordinate" ;

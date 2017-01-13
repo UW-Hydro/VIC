@@ -28,8 +28,8 @@
  #include <vic_driver_shared_image.h>
 
 /******************************************************************************
- * @brief    Check that the cooridnates, dimensions, and mask variables in a
-             netcdf file matches the global domain.
+ * @brief    Check that the cooridnates and dimensions in a netcdf file matches
+             the global domain.
  *****************************************************************************/
 void
 compare_ncdomain_with_global_domain(char *ncfile)
@@ -40,10 +40,14 @@ compare_ncdomain_with_global_domain(char *ncfile)
 
     size_t               i;
 
-    ncfile_domain.info = global_domain.info;
-
-    // read the domain info from ncfile (e.g. parameters file or state file)
-    get_global_domain(ncfile, &ncfile_domain, true);
+    // read the lat lon coordinates info from ncfile
+    // (e.g. parameters file or state file)
+    ncfile_domain.locations =
+        malloc(global_domain.ncells_total *
+               sizeof(*(ncfile_domain.locations)));
+    check_alloc_status(ncfile_domain.locations, "Memory allocation error.");
+    copy_domain_info(&global_domain, &ncfile_domain);
+    get_nc_latlon(ncfile, &ncfile_domain);
 
     // using the ncfile_domain, we can compare the values to the global domain.
 
@@ -57,11 +61,6 @@ compare_ncdomain_with_global_domain(char *ncfile)
 
     // loop over all grid cells and check that the two domains are identical
     for (i = 0; i < global_domain.ncells_total; i++) {
-        // mask matches
-        if (ncfile_domain.locations[i].run < global_domain.locations[i].run) {
-            log_err("parameter file mask for gridcell %zu is zero and the "
-                    "domain file specifies that this cell should be run", i);
-        }
         // latitude matches
         if (!assert_close_double(ncfile_domain.locations[i].latitude,
                                  global_domain.locations[i].latitude,

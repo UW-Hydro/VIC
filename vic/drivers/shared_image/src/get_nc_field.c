@@ -109,6 +109,7 @@ get_nc_field_int(char   *nc_name,
     int var_id;
 
     // open the netcdf file
+    log_info("FILENAME: %s\n", nc_name);
     status = nc_open(nc_name, NC_NOWRITE, &nc_id);
     check_nc_status(status, "Error opening %s", nc_name);
 

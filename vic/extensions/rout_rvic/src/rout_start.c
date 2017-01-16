@@ -73,6 +73,7 @@ get_global_param_rout(FILE *gp)
             *************************************/
             if (strcasecmp("ROUT_PARAM", optstr) == 0) {
                 sscanf(cmdstr, "%*s %s", rout.param_filename);
+                log_info("ROUT_PARAM: %s\n", rout.param_filename);
                 break;
             }
         }

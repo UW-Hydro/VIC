@@ -80,7 +80,7 @@ function vic_script {
     echo vic_script
     $DRIVER_EXE -v
     $DRIVER_EXE -o
-    tree $TRAVIS_BUILD_DIR
+    ls -R $TRAVIS_BUILD_DIR
     # Run test package
     ./tests/run_tests.py unit examples system \
         --image=${DRIVER_EXE} \

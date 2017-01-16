@@ -55,7 +55,8 @@ get_global_param_rout(FILE *gp)
     char               optstr[MAXSTRING];
     
     /** Read through global control file to find parameters **/
-    rewind(gp);
+//    rewind(gp);
+    fseek(gp, 0 , SEEK_SET);
     fgets(cmdstr, MAXSTRING, gp);
 
     while (!feof(gp)) {

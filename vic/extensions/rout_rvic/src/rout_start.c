@@ -62,8 +62,8 @@ get_global_param_rout(FILE *gp)
     while (!feof(gp)) {
         if (cmdstr[0] != '#' && cmdstr[0] != '\n' && cmdstr[0] != '\0') {
             sscanf(cmdstr, "%s", optstr);
-//    log_warn("CHECK2...: %s", optstr);
-    printf("%s ** ", optstr);
+    log_warn("CHECK2...: %s", optstr);
+//    printf("%s ** ", optstr);
             /* Handle case of comment line in which '#' is indented */
             if (optstr[0] == '#') {
                 fgets(cmdstr, MAXSTRING, gp);

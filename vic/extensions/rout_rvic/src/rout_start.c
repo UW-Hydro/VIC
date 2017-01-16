@@ -36,9 +36,13 @@ rout_start(void)
     extern filep_struct     filep;
     extern int              mpi_rank;
 
+        log_info("CHECK-1...\n");
+
     if (mpi_rank == VIC_MPI_ROOT) {
         // read global settings
         filep.globalparam = open_file(filenames.global, "r");
+            log_info("CHECK0...\n");
+
         get_global_param_rout(filep.globalparam);
     }
 }
@@ -53,6 +57,8 @@ get_global_param_rout(FILE *gp)
     extern rout_struct rout;
     char               cmdstr[MAXSTRING];
     char               optstr[MAXSTRING];
+    
+    log_info("CHECK1...\n");
 
     /** Read through global control file to find parameters **/
     rewind(gp);
@@ -61,6 +67,7 @@ get_global_param_rout(FILE *gp)
     while (!feof(gp)) {
         if (cmdstr[0] != '#' && cmdstr[0] != '\n' && cmdstr[0] != '\0') {
             sscanf(cmdstr, "%s", optstr);
+    log_info("CHECK2...\n");
 
             /* Handle case of comment line in which '#' is indented */
             if (optstr[0] == '#') {
@@ -72,6 +79,8 @@ get_global_param_rout(FILE *gp)
                Get Model Global Parameters
             *************************************/
             if (strcasecmp("ROUT_PARAM", optstr) == 0) {
+                    log_info("CHECK3...\n");
+
                 sscanf(cmdstr, "%*s %s", rout.param_filename);
                 log_info("ROUT_PARAM: %s\n", rout.param_filename);
                 break;

@@ -65,10 +65,10 @@ get_global_param_rout(FILE *gp)
     log_warn("CHECK2...: %s\n", optstr);
 
             /* Handle case of comment line in which '#' is indented */
-            if (optstr[0] == '#') {
-                fgets(cmdstr, MAXSTRING, gp);
-                continue;
-            }
+//            if (optstr[0] == '#') {
+//                fgets(cmdstr, MAXSTRING, gp);
+//                continue;
+//            }
 
             /*************************************
                Get Model Global Parameters

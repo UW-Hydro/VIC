@@ -44,7 +44,6 @@ rout_alloc(void)
         d1start[0] = 1;
 
         // Get some values and dimensions
-        log_info("FILENAME RVIC: %s\n", rout.param_filename);
         get_nc_field_int(rout.param_filename,
                          "full_time_length",
                          d1start,

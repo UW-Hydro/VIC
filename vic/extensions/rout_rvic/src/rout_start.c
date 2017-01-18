@@ -53,17 +53,15 @@ get_global_param_rout(FILE *gp)
     extern rout_struct rout;
     char               cmdstr[MAXSTRING];
     char               optstr[MAXSTRING];
-    
+
     /** Read through global control file to find parameters **/
-//    rewind(gp);
-    fseek(gp, 0 , SEEK_SET);
+    rewind(gp);
     fgets(cmdstr, MAXSTRING, gp);
 
     while (!feof(gp)) {
         if (cmdstr[0] != '#' && cmdstr[0] != '\n' && cmdstr[0] != '\0') {
             sscanf(cmdstr, "%s", optstr);
-    log_warn("CHECK2...: %s", optstr);
-//    printf("%s ** ", optstr);
+
             /* Handle case of comment line in which '#' is indented */
             if (optstr[0] == '#') {
                 fgets(cmdstr, MAXSTRING, gp);
@@ -74,10 +72,7 @@ get_global_param_rout(FILE *gp)
                Get Model Global Parameters
             *************************************/
             if (strcasecmp("ROUT_PARAM", optstr) == 0) {
-                    log_info("CHECK3...\n");
-
                 sscanf(cmdstr, "%*s %s", rout.param_filename);
-                log_info("ROUT_PARAM: %s\n", rout.param_filename);
                 break;
             }
         }

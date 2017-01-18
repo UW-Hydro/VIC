@@ -80,9 +80,7 @@ function vic_script {
     echo vic_script
     $DRIVER_EXE -v
     $DRIVER_EXE -o
-    #ls -R $SAMPLES_PATH
-    echo "TESTT"
-    ls -ltr $SAMPLES_PATH"/data/image/Stehekin/parameters/stehekin_parameters_01.rvic.prm.Stehekin.20150727.nc"
+
     # Run test package
     ./tests/run_tests.py unit examples system \
         --image=${DRIVER_EXE} \

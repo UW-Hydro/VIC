@@ -54,6 +54,10 @@ To check which release of VIC you are running:
 
 	Before the fix, the timestamps of long VIC runs were incorrect in some cases due to precision issue in timestamp generation. This resulted in incorrect output timestamps after running for a long period of time, or output termination. Please refer to [GH#668](https://github.com/UW-Hydro/VIC/pull/668) for details on this bug fix.
 
+10. Fixed a bug related to forcing and simulation start time ([GH#671](https://github.com/UW-Hydro/VIC/pull/671))
+
+	Before the fix, there would be an error if the simulation start time is later than the forcing start time that year AND the simulation spans multiple years. Fixed this bug.
+
  
 ------------------------------
 

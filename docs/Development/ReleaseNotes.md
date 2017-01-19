@@ -46,11 +46,11 @@ To check which release of VIC you are running:
 
 	Before the fix, `dz_node` and `node_depth` in image driver output state file were not spatially distributed, which was wrong. Now these two variables are spatially distributed in the output state file.
 
-8. Fixed a bug related to `run_cell` and `mask` variables in image driver inputs ([GH#662]((https://github.com/UW-Hydro/VIC/pull/662)))
+8. Fixed a bug related to `run_cell` and `mask` variables in image driver inputs ([GH#662](https://github.com/UW-Hydro/VIC/pull/662))
 
 	Before the fix, active cell was controlled by `mask` variable in the domain file in image driver, and `run_cell` variable in the parameter file was not actually used. Now `run_cell` variable in the parameter file controls active cells (`run_cell` must be within the mask defined by the domain file).
 
-9. Fixed a time precision bug for long simulations ([GH#668]((https://github.com/UW-Hydro/VIC/pull/668)))
+9. Fixed a time precision bug for long simulations ([GH#668](https://github.com/UW-Hydro/VIC/pull/668))
 
 	Before the fix, the timestamps of long VIC runs were incorrect in some cases due to precision issue in timestamp generation. This resulted in incorrect output timestamps after running for a long period of time, or output termination. Please refer to [GH#668](https://github.com/UW-Hydro/VIC/pull/668) for details on this bug fix.
 

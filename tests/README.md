@@ -1,5 +1,5 @@
 VIC Test Suite
-=======
+======= 
 
 This is the VIC Test Suite.  There are six main test types:
 

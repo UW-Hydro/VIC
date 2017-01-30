@@ -21,7 +21,7 @@ matrix:
   # Image Driver with rvic-routing
   - compiler: gcc
     os: linux
-    env: TESTID='image-rvic' EXTENSIONS='ROUT=rout_rvic'
+    env: TESTID='image-rvic'
     addons:
       apt_packages:
         - libnetcdf-dev

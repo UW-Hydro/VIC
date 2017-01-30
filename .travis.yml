@@ -21,7 +21,7 @@ matrix:
   # Image Driver with rvic-routing
   - compiler: gcc
     os: linux
-    env: TESTID='imagervic'
+    env: TESTID='rvic'
     addons:
       apt_packages:
         - libnetcdf-dev
@@ -95,7 +95,7 @@ before_install:
   - install_miniconda
   - vic_before_install
 install:
-  - vic_install ${ROUT}
+  - vic_install
 before_script:
   - vic_before_script
 script:

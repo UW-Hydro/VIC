@@ -1666,6 +1666,17 @@ initialize_state_file(char           *filename,
                             &(nc_state_file->node_dimid));
         check_nc_status(status, "Error defining soil_node in %s", filename);
     
+    // Add routing dimensions
+    status = nc_def_dim(nc_state_file->nc_id, "outlet",
+                        nc_state_file->outlet_size,
+                        &(nc_state_file->outlet_dimid));
+    check_nc_status(status, "Error defining outlet in %s", filename);
+
+    status = nc_def_dim(nc_state_file->nc_id, "routing_timestep",
+                        nc_state_file->routing_timestep_size,
+                        &(nc_state_file->routing_timestep_dimid));
+    check_nc_status(status, "Error defining routing_timestep in %s", filename);
+
         if (options.LAKES) {
             status = nc_def_dim(nc_state_file->nc_id, "lake_node",
                                 nc_state_file->lake_node_size,

@@ -16,7 +16,7 @@ To check which release of VIC you are running:
 ------------------------------
 ## VIC 5.0.1
 
-**Release date: (Unreleased)**
+**Release date: (February 1, 2017)**
 
 #### Bug Fixes:
 

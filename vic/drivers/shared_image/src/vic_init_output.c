@@ -224,32 +224,36 @@ initialize_history_file(nc_file_struct *nc,
     double                    *dvar;
 
 
-    // This could be further refined but for now, I've choosen a file naming
+    // This could be further refined but for now, I've chosen a file naming
     // Convention that goes like this:
     switch (stream->agg_alarm.freq) {
     // If FREQ_NDAYS -- filename = result_dir/prefix.YYYY-MM-DD.nc
     case FREQ_NDAYS:
         sprintf(stream->filename, "%s/%s.%04d-%02d-%02d.nc",
                 filenames.result_dir,
-                stream->prefix, ref_dmy->year, ref_dmy->month,
-                ref_dmy->day);
+                stream->prefix, stream->time_bounds[0].year,
+                stream->time_bounds[0].month,
+                stream->time_bounds[0].day);
         break;
     case FREQ_NMONTHS:
         // If FREQ_NMONTHS -- filename = result_dir/prefix.YYYY-MM.nc
         sprintf(stream->filename, "%s/%s.%04d-%02d.nc", filenames.result_dir,
-                stream->prefix, ref_dmy->year, ref_dmy->month);
+                stream->prefix, stream->time_bounds[0].year,
+                stream->time_bounds[0].month);
         break;
     case FREQ_NYEARS:
         // If FREQ_NYEARS -- filename = result_dir/prefix.YYYY.nc
         sprintf(stream->filename, "%s/%s.%04d.nc", filenames.result_dir,
-                stream->prefix, ref_dmy->year);
+                stream->prefix, stream->time_bounds[0].year);
         break;
     default:
         // For all other cases -- filename = result_dir/prefix.YYYY-MM-DD-SSSSS.nc
         sprintf(stream->filename, "%s/%s.%04d-%02d-%02d-%05u.nc",
                 filenames.result_dir,
-                stream->prefix, ref_dmy->year, ref_dmy->month,
-                ref_dmy->day, ref_dmy->dayseconds);
+                stream->prefix, stream->time_bounds[0].year,
+                stream->time_bounds[0].month,
+                stream->time_bounds[0].day,
+                stream->time_bounds[0].dayseconds);
     }
 
     // open the netcdf file
@@ -269,56 +273,56 @@ initialize_history_file(nc_file_struct *nc,
     // define netcdf dimensions
     status = nc_def_dim(nc->nc_id, "snow_band", nc->band_size,
                         &(nc->band_dimid));
-    check_nc_status(status, "Error defining snow_band dimenension in %s",
+    check_nc_status(status, "Error defining snow_band dimension in %s",
                     stream->filename);
 
     status = nc_def_dim(nc->nc_id, "front", nc->front_size,
                         &(nc->front_dimid));
-    check_nc_status(status, "Error defining front dimenension in %s",
+    check_nc_status(status, "Error defining front dimension in %s",
                     stream->filename);
 
     status = nc_def_dim(nc->nc_id, "frost_area", nc->frost_size,
                         &(nc->frost_dimid));
-    check_nc_status(status, "Error defining frost_area dimenension in %s",
+    check_nc_status(status, "Error defining frost_area dimension in %s",
                     stream->filename);
 
     status = nc_def_dim(nc->nc_id, "nlayer", nc->layer_size,
                         &(nc->layer_dimid));
-    check_nc_status(status, "Error defining nlayer dimenension in %s",
+    check_nc_status(status, "Error defining nlayer dimension in %s",
                     stream->filename);
 
     status = nc_def_dim(nc->nc_id, global_domain.info.x_dim, nc->ni_size,
                         &(nc->ni_dimid));
 
-    check_nc_status(status, "Error defining x dimenension in %s",
+    check_nc_status(status, "Error defining x dimension in %s",
                     stream->filename);
     status = nc_def_dim(nc->nc_id, global_domain.info.y_dim, nc->nj_size,
                         &(nc->nj_dimid));
 
-    check_nc_status(status, "Error defining y dimenension in %s",
+    check_nc_status(status, "Error defining y dimension in %s",
                     stream->filename);
 
     status = nc_def_dim(nc->nc_id, "node", nc->node_size, &(nc->node_dimid));
-    check_nc_status(status, "Error defining node dimenension in %s",
+    check_nc_status(status, "Error defining node dimension in %s",
                     stream->filename);
 
     status = nc_def_dim(nc->nc_id, "root_zone", nc->root_zone_size,
                         &(nc->root_zone_dimid));
-    check_nc_status(status, "Error defining root_zone dimenension in %s",
+    check_nc_status(status, "Error defining root_zone dimension in %s",
                     stream->filename);
 
     status = nc_def_dim(nc->nc_id, "veg_class", nc->veg_size,
                         &(nc->veg_dimid));
-    check_nc_status(status, "Error defining veg_class dimenension in %s",
+    check_nc_status(status, "Error defining veg_class dimension in %s",
                     stream->filename);
 
     status = nc_def_dim(nc->nc_id, "time", nc->time_size,
                         &(nc->time_dimid));
-    check_nc_status(status, "Error defining time dimenension in %s",
+    check_nc_status(status, "Error defining time dimension in %s",
                     stream->filename);
 
     status = nc_def_dim(nc->nc_id, "nv", 2, &(nc->time_bounds_dimid));
-    check_nc_status(status, "Error defining time bounds dimenension in %s",
+    check_nc_status(status, "Error defining time bounds dimension in %s",
                     stream->filename);
 
     // define the netcdf variable time

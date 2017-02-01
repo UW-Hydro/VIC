@@ -38,8 +38,8 @@ The following variables define the basic model information, including grid cell 
 | snow_band       | snow_band  | int    | Snow band indices                                                                                                           |
 | layer           | nlayer     | int    | Soil layer indices                                                                                                          |
 | frost_area      | frost_area | int    | Frost area indices                                                                                                          |
-| dz_node         | soil_node  | double | Distances between soil thermal   nodes [m]                                                                                  |
-| node_depth      | soil_node  | double | Depth   from surface of each soil thermal node (first node should have a depth of 0m   indicating it is at the surface) [m] |
+| dz_node         | [soil_node, lat, lon]  | double | Distances between soil thermal   nodes [m]                                                                                  |
+| node_depth      | [soil_node, lat, lon]  | double | Depth   from surface of each soil thermal node (first node should have a depth of 0m   indicating it is at the surface) [m] |
 
 * * *
 

@@ -64,6 +64,7 @@ pages:
     - 'Inputs': 'Documentation/Drivers/Image/Inputs.md'
     - 'Outputs': 'Documentation/Drivers/Image/Outputs.md'
     - 'Params': 'Documentation/Drivers/Image/Params.md'
+    - 'Domain': 'Documentation/Drivers/Image/Domain.md'
     - 'RunVIC': 'Documentation/Drivers/Image/RunVIC.md'
     - 'Lake Param': 'Documentation/Drivers/Image/LakeParam.md'
     - 'StateFile': 'Documentation/Drivers/Image/StateFile.md'

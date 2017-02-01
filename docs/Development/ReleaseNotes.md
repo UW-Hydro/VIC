@@ -14,6 +14,52 @@ To check which release of VIC you are running:
 - For VIC 5 and later, type `vic_{classic,image}.exe -v`
 
 ------------------------------
+## VIC 5.0.1
+
+**Release date: (February 1, 2017)**
+
+#### Bug Fixes:
+
+1. Fixed image driver history file name timestamp ([GH#635](https://github.com/UW-Hydro/VIC/pull/635))
+
+	After the fix, the timestamp appeared in the image driver output history filename is the beginning time of the time period in the file.
+
+2. Fixed forceskip rounding bug ([GH#639](https://github.com/UW-Hydro/VIC/pull/639))
+
+	After the fix, the `forceskip` variable in the global parameter structure (i.e., the number of timesteps to skip in the forcing data for the simulatin period) is rounded correctly (before the fix, rounding error might cause 1-timestep offset in the simulation results).
+
+3. Fixed a problem with image restarts when using multiple processors ([GH#638](https://github.com/UW-Hydro/VIC/pull/638))
+	
+	After the fix, only the master node is assigned the task of validating state file dimensions and coordinate variables. Multiprocessing was also added to the VIC testing framework.
+
+4. Ensured that the mask variable in the input domain file must be integer type; otherwise an error is raised. ([GH#645](https://github.com/UW-Hydro/VIC/pull/645))
+
+5. Fixed a bug related to `make_lastday` function ([GH#647](https://github.com/UW-Hydro/VIC/pull/647))
+
+	Before the fix, the input arguments to function `make_lastday` are sometimes in a wrong order. The bug caused error when trying to write state file on a leap day.
+
+6. Fixed a bug related to writing two-dimensional lat/lon variables to a state file ([GH#652](https://github.com/UW-Hydro/VIC/pull/652))
+
+	Before the bug fix, two-dimensional lat/lon variables were not populated correctly and were written as fill values to a state file. Now two-dimensional lat/lon variables are correctly populated and written. 
+ 
+7. Fixed a bug related to `dz_node` and `node_depth` variables in image driver output state file ([GH#657](https://github.com/UW-Hydro/VIC/pull/657))
+
+	Before the fix, `dz_node` and `node_depth` in image driver output state file were not spatially distributed, which was wrong. Now these two variables are spatially distributed in the output state file.
+
+8. Fixed a bug related to `run_cell` and `mask` variables in image driver inputs ([GH#662](https://github.com/UW-Hydro/VIC/pull/662))
+
+	Before the fix, active cell was controlled by `mask` variable in the domain file in image driver, and `run_cell` variable in the parameter file was not actually used. Now `run_cell` variable in the parameter file controls active cells (`run_cell` must be within the mask defined by the domain file).
+
+9. Fixed a time precision bug for long simulations ([GH#668](https://github.com/UW-Hydro/VIC/pull/668))
+
+	Before the fix, the timestamps of long VIC runs were incorrect in some cases due to precision issue in timestamp generation. This resulted in incorrect output timestamps after running for a long period of time, or output termination. Please refer to [GH#668](https://github.com/UW-Hydro/VIC/pull/668) for details on this bug fix.
+
+10. Fixed a bug related to forcing and simulation start time ([GH#671](https://github.com/UW-Hydro/VIC/pull/671))
+
+	Before the fix, there would be an error if the simulation start time is later than the forcing start time that year AND the simulation spans multiple years. Fixed this bug.
+
+ 
+------------------------------
 
 ## VIC 5.0.0 [![DOI](https://zenodo.org/badge/7766/UW-Hydro/VIC.svg)](https://zenodo.org/badge/latestdoi/7766/UW-Hydro/VIC)
 

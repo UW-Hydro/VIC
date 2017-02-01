@@ -671,6 +671,16 @@ get_global_param(FILE *gp)
                 log_err("SKIPYEAR has been deprecated. To avoid writing output"
                         "to history files, set AGGFREQ == FREQ_NEVER");
             }
+            else if (strcasecmp("MAX_SNOW_TEMP", optstr) == 0) {
+                log_err("MAX_SNOW_TEMP has been deprecated. To"
+                        "specify a maximum snow temperature, use the option"
+                        "SNOW_MAX_SNOW_TEMP in the vic constants file.")
+            }
+            else if (strcasecmp("MIN_RAIN_TEMP", optstr) == 0) {
+                log_err("MIN_RAIN_TEMP has been deprecated. To"
+                        "specify a minimum rain temperature, use the option"
+                        "SNOW_MIN_RAIN_TEMP in the vic constants file.")
+            }
 
             /***********************************
                Unrecognized Global Parameter Flag
@@ -891,7 +901,7 @@ get_global_param(FILE *gp)
 
 
     // Validate simulation end date and/or number of timesteps
-    make_lastday(global_param.endyear, global_param.calendar, lastday);
+    make_lastday(global_param.calendar, global_param.endyear, lastday);
 
     if (global_param.nrecs == 0 && global_param.endyear == 0 &&
         global_param.endmonth == 0 && global_param.endday == 0) {
@@ -1204,7 +1214,7 @@ get_global_param(FILE *gp)
                     global_param.statesec);
         }
         // Check for month, day in range
-        make_lastday(global_param.stateyear, global_param.calendar,
+        make_lastday(global_param.calendar, global_param.stateyear,
                      lastday);
         if (global_param.stateday > lastday[global_param.statemonth - 1] ||
             global_param.statemonth < 1 ||

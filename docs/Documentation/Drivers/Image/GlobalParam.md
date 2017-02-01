@@ -157,7 +157,7 @@ See the [example file](#example-global-parameter-file) at the end of this page f
 
 # Define Domain file
 
-The folloiwng options describe the input domain file information.
+The folloiwng options describe the input domain file information. See [Domain File](Domain.md) for details about the domain file.
 
 | Name        | Type          | Units    | Description                                                                                                                                  |
 |-------------|---------------|----------|----------------------------------------------------------------------------------------------------------------------------------------------|

@@ -196,11 +196,14 @@ void compare_ncdomain_with_global_domain(char *ncfile);
 void free_force(force_data_struct *force);
 void free_veg_hist(veg_hist_struct *veg_hist);
 void get_domain_type(char *cmdstr);
-size_t get_global_domain(char *fname, domain_struct *global_domain,
-                         bool coords_only);
+size_t get_global_domain(char *domain_nc_name, char *param_nc_name,
+                         domain_struct *global_domain);
+void copy_domain_info(domain_struct *domain_from, domain_struct *domain_to);
+void get_nc_latlon(char *nc_name, domain_struct *nc_domain);
 size_t get_nc_dimension(char *nc_name, char *dim_name);
 void get_nc_var_attr(char *nc_name, char *var_name, char *attr_name,
                      char **attr);
+int get_nc_var_type(char *nc_name, char *var_name);
 int get_nc_varndimensions(char *nc_name, char *var_name);
 int get_nc_field_double(char *nc_name, char *var_name, size_t *start,
                         size_t *count, double *var);

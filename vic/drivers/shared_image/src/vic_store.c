@@ -48,9 +48,6 @@ vic_store(dmy_struct *dmy_current,
     size_t                     k;
     size_t                     m;
     size_t                     p;
-    double                     offset;
-    double                     time_num;
-    double                     end_time_num;
     int                       *ivar = NULL;
     double                    *dvar = NULL;
     size_t                     d2start[2];
@@ -58,34 +55,18 @@ vic_store(dmy_struct *dmy_current,
     size_t                     d4start[4];
     size_t                     d5start[5];
     size_t                     d6start[6];
-    dmy_struct                 end_time_date;
     nc_file_struct             nc_state_file;
     nc_var_struct             *nc_var;
 
     set_nc_state_file_info(&nc_state_file);
 
-    // advance dmy_current by one timestep since dmy_current is the 
-    // timestep-beginning timestamp, and state file date should be 
-    // the end of the current time step 
-    dt_seconds_to_time_units(global_param.time_units, global_param.dt,
-                             &offset);
-    time_num = date2num(global_param.time_origin_num, dmy_current, 0,
-                        global_param.calendar, global_param.time_units);
-    end_time_num = time_num + offset;
-
-    // allocate dmy struct for end of current time step 
-    num2date(global_param.time_origin_num, end_time_num, 0.,
-                             global_param.calendar, global_param.time_units,
-                             &end_time_date);
-
+    // only open and initialize the netcdf file on the first thread
     // create netcdf file for storing model state
     sprintf(filename, "%s.%04i%02i%02i_%05u.nc",
-            filenames.statefile, end_time_date.year,
-            end_time_date.month, end_time_date.day,
-            end_time_date.dayseconds);
-
+            filenames.statefile, global_param.stateyear,
+            global_param.statemonth, global_param.stateday,
+            global_param.statesec);
     initialize_state_file(filename, &nc_state_file, dmy_current);
-
     if (mpi_rank == VIC_MPI_ROOT) {
         debug("writing state file: %s", filename);
     }
@@ -367,7 +348,7 @@ vic_store(dmy_struct *dmy_current,
             }
             gather_put_nc_field_int(nc_state_file.nc_id,
                                     nc_var->nc_varid,
-                                    nc_state_file.i_fillvalue,
+                                    nc_state_file.d_fillvalue,
                                     d4start, nc_var->nc_counts, ivar);
             for (i = 0; i < local_domain.ncells_active; i++) {
                 ivar[i] = nc_state_file.i_fillvalue;
@@ -393,7 +374,7 @@ vic_store(dmy_struct *dmy_current,
             }
             gather_put_nc_field_int(nc_state_file.nc_id,
                                     nc_var->nc_varid,
-                                    nc_state_file.i_fillvalue,
+                                    nc_state_file.d_fillvalue,
                                     d4start, nc_var->nc_counts, ivar);
             for (i = 0; i < local_domain.ncells_active; i++) {
                 ivar[i] = nc_state_file.i_fillvalue;
@@ -830,7 +811,7 @@ vic_store(dmy_struct *dmy_current,
         }
         gather_put_nc_field_int(nc_state_file.nc_id,
                                 nc_var->nc_varid,
-                                nc_state_file.i_fillvalue,
+                                nc_state_file.d_fillvalue,
                                 d2start, nc_var->nc_counts, ivar);
         for (i = 0; i < local_domain.ncells_active; i++) {
             ivar[i] = nc_state_file.i_fillvalue;
@@ -843,7 +824,7 @@ vic_store(dmy_struct *dmy_current,
         }
         gather_put_nc_field_int(nc_state_file.nc_id,
                                 nc_var->nc_varid,
-                                nc_state_file.i_fillvalue,
+                                nc_state_file.d_fillvalue,
                                 d2start, nc_var->nc_counts, ivar);
         for (i = 0; i < local_domain.ncells_active; i++) {
             ivar[i] = nc_state_file.i_fillvalue;
@@ -989,7 +970,7 @@ vic_store(dmy_struct *dmy_current,
         }
         gather_put_nc_field_int(nc_state_file.nc_id,
                                 nc_var->nc_varid,
-                                nc_state_file.i_fillvalue,
+                                nc_state_file.d_fillvalue,
                                 d2start, nc_var->nc_counts, ivar);
         for (i = 0; i < local_domain.ncells_active; i++) {
             ivar[i] = nc_state_file.i_fillvalue;

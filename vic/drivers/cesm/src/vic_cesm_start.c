@@ -46,11 +46,6 @@ vic_cesm_start(vic_clock     *vclock,
     // Driver specific settings
     if (mpi_rank == VIC_MPI_ROOT) {
         strcpy(filenames.global, GLOBALPARAM);
-
-	// assign case name to state file name
-    	strncpy(filenames.statefile, trim(cmeta->caseid),
-                sizeof(filenames.statefile));
-
         // read global settings
         filep.globalparam = open_file(filenames.global, "r");
         get_global_param(filep.globalparam);

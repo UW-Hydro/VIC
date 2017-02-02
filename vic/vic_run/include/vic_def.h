@@ -52,7 +52,7 @@
 /***** Model Constants *****/
 #define MAXSTRING    2048
 #define MISSING      -99999.   /**< missing value */
-#define MISSING_USI  99999    /**< missing value for unsigned ints */
+#define MISSING_USI  99999.    /**< missing value for unsigned ints */
 #define MISSING_S    "MISSING"    /**< missing value for strings */
 #define NODATA_VH    -1        /**< missing value for veg_hist inputs */
 #define NODATA_VEG   -1        /**< flag for veg types not in grid cell */

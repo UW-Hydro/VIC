@@ -122,7 +122,7 @@ To check which release of VIC you are running:
 
 ------------------------------
 
-## VIC 5.0.0 [![DOI](https://zenodo.org/badge/doi/10.5281/zenodo.61422.svg)](http://dx.doi.org/10.5281/zenodo.61422)
+## VIC 5.0.0 [![DOI](https://zenodo.org/badge/7766/UW-Hydro/VIC.svg)](https://zenodo.org/badge/latestdoi/7766/UW-Hydro/VIC)
 
 **Release date: (September 2, 2016)**
 
@@ -296,7 +296,6 @@ This is a major update from VIC 4. The VIC 5.0.0 release aims to have nearly ide
 5. Fix for a physical constant (water heat capacity) ([GH#574](https://github.com/UW-Hydro/VIC/pull/574))
 
 	Fixed a bug where volumetric heat capacity of water should be used in `func_canopy_energy_bal` (previously specific heat capacity was used).
-
 
 ------------------------------
 

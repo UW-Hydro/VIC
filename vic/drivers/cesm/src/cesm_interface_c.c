@@ -96,9 +96,6 @@ vic_cesm_init(vic_clock     *vclock,
     // populate model state, either using a cold start or from a restart file
     vic_populate_model_state(trimstr(cmeta->starttype), &dmy_current);
 
-    // initialize forcings
-    vic_force();
-
     // initialize output structures
     vic_init_output(&dmy_current);
 
@@ -159,7 +156,6 @@ vic_cesm_run(vic_clock *vclock)
 
     // if save:
     if (vclock->state_flag) {
-        // write state file
         vic_store(&dmy_current, state_filename);
         write_rpointer_file(state_filename);
     }

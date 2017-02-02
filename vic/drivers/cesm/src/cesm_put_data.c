@@ -140,12 +140,12 @@ vic_cesm_put_data()
 
                 // 2m reference temperature
                 // CESM units: K
-                l2x_vic[i].l2x_Sl_tref += AreaFactor * (force[i].air_temp[NR] + CONST_TKFRZ);
+                l2x_vic[i].l2x_Sl_tref += AreaFactor * force->air_temp[NR];
 
                 // 2m reference specific humidity
                 // CESM units: g/g
                 l2x_vic[i].l2x_Sl_qref += AreaFactor * CONST_EPS *
-                                          force[i].vp[NR] / force[i].pressure[NR];
+                                          force->vp[NR] / force->pressure[NR];
 
                 // Albedo Note: VIC does not partition its albedo, all returned
                 // values will be the same
@@ -156,10 +156,10 @@ vic_cesm_put_data()
                 // force->NetShortAtmos net shortwave flux (+ down)
                 // SWup = force->shortwave[NR] - energy.NetShortAtmos
                 // Set the albedo to zero for the case where there is no shortwave down
-                if (force[i].shortwave[NR] > 0.) {
+                if (force->shortwave[NR] > 0.) {
                     albedo = AreaFactor *
-                             (force[i].shortwave[NR] - energy.NetShortAtmos) /
-                             force[i].shortwave[NR];
+                             (force->shortwave[NR] - energy.NetShortAtmos) /
+                             force->shortwave[NR];
                 }
                 else {
                     albedo = 0.;
@@ -184,7 +184,7 @@ vic_cesm_put_data()
 
                 // 10m wind
                 // CESM units: m/s
-                l2x_vic[i].l2x_Sl_u10 += AreaFactor * force[i].wind[NR];
+                l2x_vic[i].l2x_Sl_u10 += AreaFactor * force->wind[NR];
 
                 // dry deposition velocities (optional)
                 // CESM units: ?
@@ -259,7 +259,7 @@ vic_cesm_put_data()
                 // upward longwave heat flux
                 // CESM units: W m-2
                 l2x_vic[i].l2x_Fall_lwup += AreaFactor *
-                                            (force[i].longwave[NR] -
+                                            (force->longwave[NR] -
                                              energy.NetLongAtmos);
 
                 // evaporation water flux
@@ -278,7 +278,7 @@ vic_cesm_put_data()
 
                 // heat flux shortwave net
                 l2x_vic[i].l2x_Fall_swnet += AreaFactor *
-                                             (force[i].shortwave[NR] -
+                                             (force->shortwave[NR] -
                                               energy.NetShortAtmos);
 
                 // co2 flux **For testing set to 0

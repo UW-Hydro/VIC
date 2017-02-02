@@ -64,30 +64,29 @@ vic_store(dmy_struct *dmy_current,
 
     set_nc_state_file_info(&nc_state_file);
 
+    // advance dmy_current by one timestep since dmy_current is the 
+    // timestep-beginning timestamp, and state file date should be 
+    // the end of the current time step 
+    dt_seconds_to_time_units(global_param.time_units, global_param.dt,
+                             &offset);
+    time_num = date2num(global_param.time_origin_num, dmy_current, 0,
+                        global_param.calendar, global_param.time_units);
+    end_time_num = time_num + offset;
+
+    // allocate dmy struct for end of current time step 
+    num2date(global_param.time_origin_num, end_time_num, 0.,
+                             global_param.calendar, global_param.time_units,
+                             &end_time_date);
+
+    // create netcdf file for storing model state
+    sprintf(filename, "%s.%04i%02i%02i_%05u.nc",
+            filenames.statefile, end_time_date.year,
+            end_time_date.month, end_time_date.day,
+            end_time_date.dayseconds);
+
+    initialize_state_file(filename, &nc_state_file, dmy_current);
+
     if (mpi_rank == VIC_MPI_ROOT) {
-	// advance dmy_current by one timestep since dmy_current is the 
-    	// timestep-beginning timestamp, and state file date should be 
-    	// the end of the current time step 
-    	dt_seconds_to_time_units(global_param.time_units, global_param.dt,
-                                 &offset);
-    	time_num = date2num(global_param.time_origin_num, dmy_current, 0,
-                            global_param.calendar, global_param.time_units);
-    	end_time_num = time_num + offset;
-
-    	// allocate dmy struct for end of current time step 
-    	num2date(global_param.time_origin_num, end_time_num, 0.,
-                                 global_param.calendar, global_param.time_units,
-                                 &end_time_date);
-	
-
-        // create netcdf file for storing model state
-        sprintf(filename, "%s.%04i%02i%02i_%05u.nc",
-                filenames.statefile, end_time_date.year,
-                end_time_date.month, end_time_date.day,
-                end_time_date.dayseconds);
-
-        initialize_state_file(filename, &nc_state_file, dmy_current);
-
         debug("writing state file: %s", filename);
     }
 

@@ -385,6 +385,12 @@ get_global_param(FILE *gp)
                             "control file.");
                 }
             }
+            else if (strcasecmp("SNOW_BAND", optstr) == 0) {
+	        sscanf(cmdstr, "%*s %s", flgstr);
+		if (str_to_bool(flgstr)) {
+                    options.SNOW_BAND = SNOW_BAND_TRUE_BUT_UNSET;
+                }
+            }
             else if (strcasecmp("LAKES", optstr) == 0) {
                 sscanf(cmdstr, "%*s %s", flgstr);
                 if (strcasecmp("FALSE", flgstr) == 0) {
@@ -414,6 +420,9 @@ get_global_param(FILE *gp)
             }
             else if (strcasecmp("OUTVAR", optstr) == 0) {
                 ; // do nothing
+            }
+            else if (strcasecmp("AGGFREQ", optstr) == 0) {
+		; // do nothing
             }
             else if (strcasecmp("OUTPUT_STEPS_PER_DAY", optstr) == 0) {
                 ; // do nothing

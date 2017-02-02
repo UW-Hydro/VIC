@@ -14,6 +14,30 @@ To check which release of VIC you are running:
 - For VIC 5 and later, type `vic_{classic,image}.exe -v`
 
 ------------------------------
+
+## VIC 5.1.0
+
+**Release date: (Unreleased)**
+
+#### Model enhancement:
+
+1. Improved calculation of drainage between soil layers ([GH#656](https://github.com/UW-Hydro/VIC/pull/656))
+
+	Drainage from upper layer to adjacent lower layer is calculated according to Brook & Corey curve (where drainage rate is a function of upper-layer soil moisture). In previous versions, a simple numerical solution is applied which uses the timestep-beginning upper-layer soil moisture to calculate drainage rate, and assume this constant rate over the entire timestep. This can cause unreasonably large drainage if the curve has a steep shape and when soil moisture is high. Now, the current version uses exact integral (instead of numerical solution) for layer drainage calculation.
+
+2. Fixes for the CESM driver ([GH#642](https://github.com/UW-Hydro/VIC/pull/642))
+
+	1. Using correct fill value datatypes in MPI Gather steps 
+	2. Updated state file name time step to be period-ending rather than period-beginning
+	3. Set the state file name to the RASM case ID
+	4. Removed decimal point for missing values for unsigned integers
+	5. Create dummy forcings when initializing the model (so that there is forcing data for the first time step)
+	6. Changed pressure units from kPa to Pa
+	7. Fixed bug that prevented using the correct local domain grid cells in `cesm_put_data.c`
+	8. Changed reference temperature units from Celsius to Kelvin in `cesm_put_data.c`
+
+------------------------------
+
 ## VIC 5.0.1
 
 **Release date: (February 1, 2017)**
@@ -59,26 +83,6 @@ To check which release of VIC you are running:
 	Before the fix, there would be an error if the simulation start time is later than the forcing start time that year AND the simulation spans multiple years. Fixed this bug.
 
  
-------------------------------
-
-## VIC 5.1.0
-
-**Release date: (Unreleased)**
-
-#### Model enhancement:
-
-1. Improved calculation of drainage between soil layers ([GH#656](https://github.com/UW-Hydro/VIC/pull/656))
-
-	Drainage from upper layer to adjacent lower layer is calculated according to Brook & Corey curve (where drainage rate is a function of upper-layer soil moisture). In previous versions, a simple numerical solution is applied which uses the timestep-beginning upper-layer soil moisture to calculate drainage rate, and assume this constant rate over the entire timestep. This can cause unreasonably large drainage if the curve has a steep shape and when soil moisture is high. Now, the current version uses exact integral (instead of numerical solution) for layer drainage calculation.
-
-
-------------------------------
-
-## VIC 5.0.1
-
-**Release date: (Unreleased)**
-
-
 ------------------------------
 
 ## VIC 5.0.0 [![DOI](https://zenodo.org/badge/doi/10.5281/zenodo.61422.svg)](http://dx.doi.org/10.5281/zenodo.61422)
@@ -256,16 +260,7 @@ This is a major update from VIC 4. The VIC 5.0.0 release aims to have nearly ide
 
 	Fixed a bug where volumetric heat capacity of water should be used in `func_canopy_energy_bal` (previously specific heat capacity was used).
 
-6. Fixes for the CESM driver ([GH#642](https://github.com/UW-Hydro/VIC/pull/642))
 
-	1. Using correct fill value datatypes in MPI Gather steps 
-	2. Updated state file name time step to be period-ending rather than period-beginning
-	3. Set the state file name to the RASM case ID
-	4. Removed decimal point for missing values for unsigned integers
-	5. Create dummy forcings when initializing the model (so that there is forcing data for the first time step)
-	6. Changed pressure units from kPa to Pa
-	7. Fixed bug that prevented using the correct local domain grid cells in `cesm_put_data.c`
-	8. Changed reference temperature units from Celsius to Kelvin in `cesm_put_data.c`
 ------------------------------
 
 ## VIC 4.2.d [![DOI](https://zenodo.org/badge/doi/10.5281/zenodo.56058.svg)](http://dx.doi.org/10.5281/zenodo.56058)

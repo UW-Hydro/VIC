@@ -74,7 +74,8 @@ vic_start(void)
         }
 
         // read domain info
-        get_global_domain(filenames.domain, &global_domain, false);
+        get_global_domain(filenames.domain, filenames.params,
+                          &global_domain);
 
         // add the number of vegetation type to the location info in the
         // global domain struct. This just makes life easier
@@ -109,9 +110,6 @@ vic_start(void)
             options.NLAKENODES = get_nc_dimension(filenames.params,
                                                   "lake_node");
         }
-
-        // Validate the parameters file
-        compare_ncdomain_with_global_domain(filenames.params);
 
         // Check that model parameters are valid
         validate_parameters();

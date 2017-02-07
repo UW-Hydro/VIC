@@ -106,7 +106,6 @@ printf "%5s | %f" $np $DIFF >> $timing_table_file'''),
 # Scheduler: PBS
 
 module load usp-netcdf/intel-15.0.3/4.3.3.1
-export NETCDF_PATH=/app/COST/netcdf-fortran/4.4.2/intel
 
 START=$(date +%s)
 mpiexec_mpt -np ${BC_MPI_TASKS_ALLOC} $vic_exe -g $vic_global
@@ -133,13 +132,14 @@ printf "%5s | %f\n" ${BC_MPI_TASKS_ALLOC} $DIFF >> $timing_table_file'''),
 #PBS -A NPSCA07935242
 #PBS -l application=VIC
 #PBS -l select=$select:ncpus=36:mpiprocs=$mpiprocs
-#PBS -l walltime=40:00:00
+#PBS -l walltime=12:00:00
 #PBS -j oe
 
 # Qsub template for AFRL THUNDER
 # Scheduler: PBS
 
 module load netcdf-fortran/intel/4.4.2
+export NETCDF_PATH=/app/COST/netcdf-fortran/4.4.2/intel
 
 START=$(date +%s)
 mpiexec_mpt -np ${BC_MPI_TASKS_ALLOC} $vic_exe -g $vic_global

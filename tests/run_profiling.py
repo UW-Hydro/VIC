@@ -112,11 +112,7 @@ mpiexec_mpt -np ${BC_MPI_TASKS_ALLOC} $vic_exe -g $vic_global
 END=$(date +%s)
 DIFF=$(echo "$END - $START" | bc)
 printf "%5s | %f\n" ${BC_MPI_TASKS_ALLOC} $DIFF >> $timing_table_file'''),
-    'thunder': host_config(profile=[dict(select=1, mpiprocs=1),
-                                   dict(select=1, mpiprocs=3),
-                                   dict(select=1, mpiprocs=9),
-                                   dict(select=1, mpiprocs=18),
-                                   dict(select=1, mpiprocs=36),
+    'thunder': host_config(profile=[dict(select=1, mpiprocs=36),
                                    dict(select=2, mpiprocs=36),
                                    dict(select=3, mpiprocs=36),
                                    dict(select=4, mpiprocs=36),
@@ -124,22 +120,25 @@ printf "%5s | %f\n" ${BC_MPI_TASKS_ALLOC} $DIFF >> $timing_table_file'''),
                                    dict(select=6, mpiprocs=36),
                                    dict(select=8, mpiprocs=36),
                                    dict(select=10, mpiprocs=36),
-                                   dict(select=12, mpiprocs=36)],
+                                   dict(select=12, mpiprocs=36),
+				   dict(select=24, mpiprocs=36),
+				   dict(select=48, mpiprocs=36),
+				   dict(select=96, mpiprocs=36)],
                           submit='qsub', mpiexec='mpiexec_mpt', 
                           template='''#!/bin/bash
 #!/bin/bash
-#PBS -N VIC_scaling_test_$i
+#PBS -N VIC$i
 #PBS -q standard
 #PBS -A NPSCA07935242
 #PBS -l application=VIC
 #PBS -l select=$select:ncpus=36:mpiprocs=$mpiprocs
-#PBS -l walltime=06:00:00
+#PBS -l walltime=40:00:00
 #PBS -j oe
 
 # Qsub template for AFRL THUNDER
 # Scheduler: PBS
 
-module load module load netcdf-fortran/intel/4.4.2
+module load netcdf-fortran/intel/4.4.2
 
 START=$(date +%s)
 mpiexec_mpt -np ${BC_MPI_TASKS_ALLOC} $vic_exe -g $vic_global

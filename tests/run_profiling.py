@@ -106,6 +106,7 @@ printf "%5s | %f" $np $DIFF >> $timing_table_file'''),
 # Scheduler: PBS
 
 module load usp-netcdf/intel-15.0.3/4.3.3.1
+export NETCDF_PATH=/app/COST/netcdf-fortran/4.4.2/intel
 
 START=$(date +%s)
 mpiexec_mpt -np ${BC_MPI_TASKS_ALLOC} $vic_exe -g $vic_global

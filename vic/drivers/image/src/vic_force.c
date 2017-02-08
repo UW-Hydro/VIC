@@ -72,8 +72,10 @@ vic_force(void)
 
     // global_param.forceoffset[0] resets every year since the met file restarts
     // every year
+    // global_param.forceskip[0] should also reset to 0 after the first year
     if (current > 1 && (dmy[current].year != dmy[current - 1].year)) {
         global_param.forceoffset[0] = 0;
+        global_param.forceskip[0] = 0;
     }
 
     // only the time slice changes for the met file reads. The rest is constant
@@ -517,10 +519,11 @@ get_forcing_file_info(param_set_struct *param_set,
 
     // check that this forcing file will work
     if (param_set->force_steps_per_day[file_num] !=
-        global_param.model_steps_per_day) {
-        log_err("Forcing file timestep must match the model timestep.  "
-                "Model timesteps per day is set to %zu and the forcing file "
-                "timestep is set to %zu", global_param.model_steps_per_day,
+        global_param.snow_steps_per_day) {
+        log_err("Forcing file timestep must match the snow model timestep.  "
+                "Snow model timesteps per day is set to %zu and the forcing "
+                "file timestep is set to %zu",
+                global_param.snow_steps_per_day,
                 param_set->force_steps_per_day[file_num])
     }
     if (calendar != global_param.calendar) {

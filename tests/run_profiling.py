@@ -113,17 +113,17 @@ END=$(date +%s)
 DIFF=$(echo "$END - $START" | bc)
 printf "%5s | %f\n" ${BC_MPI_TASKS_ALLOC} $DIFF >> $timing_table_file'''),
     'thunder': host_config(profile=[dict(select=1, mpiprocs=36),
-                                   dict(select=2, mpiprocs=36),
-                                   dict(select=3, mpiprocs=36),
-                                   dict(select=4, mpiprocs=36),
-                                   dict(select=5, mpiprocs=36),
-                                   dict(select=6, mpiprocs=36),
-                                   dict(select=8, mpiprocs=36),
-                                   dict(select=10, mpiprocs=36),
-                                   dict(select=12, mpiprocs=36),
-				   dict(select=24, mpiprocs=36),
-				   dict(select=48, mpiprocs=36),
-				   dict(select=96, mpiprocs=36)],
+                                    dict(select=2, mpiprocs=36),
+                                    dict(select=3, mpiprocs=36),
+                                    dict(select=4, mpiprocs=36),
+                                    dict(select=5, mpiprocs=36),
+                                    dict(select=6, mpiprocs=36),
+                                    dict(select=8, mpiprocs=36),
+                                    dict(select=10, mpiprocs=36),
+                                    dict(select=12, mpiprocs=36),
+				                    dict(select=24, mpiprocs=36),
+				                    dict(select=48, mpiprocs=36),
+				                    dict(select=96, mpiprocs=36)],
                           submit='qsub', mpiexec='mpiexec_mpt', 
                           template='''#!/bin/bash
 #!/bin/bash
@@ -139,7 +139,6 @@ printf "%5s | %f\n" ${BC_MPI_TASKS_ALLOC} $DIFF >> $timing_table_file'''),
 # Scheduler: PBS
 
 module load netcdf-fortran/intel/4.4.2
-export NETCDF_PATH=/app/COST/netcdf-fortran/4.4.2/intel
 
 START=$(date +%s)
 mpiexec_mpt -np ${BC_MPI_TASKS_ALLOC} $vic_exe -g $vic_global

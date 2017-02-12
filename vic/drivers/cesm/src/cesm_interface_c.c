@@ -140,7 +140,7 @@ vic_cesm_run(vic_clock *vclock)
 
     // advance the clock
     advance_time();
-    assert_time_insync(vlock, &dmy_current);
+    assert_time_insync(vclock, &dmy_current);
 
     // if save:
     if (vclock->state_flag) {

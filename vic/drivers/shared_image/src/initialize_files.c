@@ -61,11 +61,5 @@ initialize_fileps()
 
     filep.globalparam = NULL;
     filep.constants = NULL;
-    filep.init_state = NULL;
-    filep.paramfile = NULL;
-    filep.statefile = NULL;
     filep.logfile = NULL;
-    for (i = 0; i < 2; i++) {
-        filep.forcing[i] = NULL;
-    }
 }

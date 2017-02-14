@@ -160,13 +160,8 @@ typedef struct {
  * @brief   file structures
  *****************************************************************************/
 typedef struct {
-    FILE *forcing[MAX_FORCE_FILES];   /**< forcing data files */
     FILE *globalparam;  /**< global parameters file */
     FILE *constants;    /**< model constants parameter file */
-    FILE *domain;       /**< domain file */
-    FILE *init_state;   /**< initial model state file */
-    FILE *paramfile;    /**< parameter file */
-    FILE *statefile;    /**< output model state file */
     FILE *logfile;      /**< log file */
 } filep_struct;
 

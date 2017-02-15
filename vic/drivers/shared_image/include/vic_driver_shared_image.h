@@ -184,6 +184,7 @@ typedef struct {
     char domain[MAXSTRING];        /**< domain file name */
     char constants[MAXSTRING];     /**< model constants file name */
     char params[MAXSTRING];        /**< model parameters file name */
+    char rout_params[MAXSTRING];   /**< routing parameters file name */
     char init_state[MAXSTRING];    /**< initial model state file name */
     char result_dir[MAXSTRING];    /**< directory where results will be written */
     char statefile[MAXSTRING];     /**< name of file in which to store model state */

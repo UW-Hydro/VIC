@@ -39,23 +39,24 @@ rout_alloc(void)
         int                  ivar;
         size_t               d1count[1];
         size_t               d1start[1];
+        extern filenames_struct    filenames;
 
         d1count[0] = 0;
         d1start[0] = 1;
 
         // Get some values and dimensions
-        get_nc_field_int(rout.param_filename,
+        get_nc_field_int(filenames.rout_params,
                          "full_time_length",
                          d1start,
                          d1count,
                          &ivar);
         rout.rout_param.full_time_length = (int) ivar;
 
-        rout.rout_param.n_timesteps = get_nc_dimension(rout.param_filename,
+        rout.rout_param.n_timesteps = get_nc_dimension(filenames.rout_params,
                                                        "timesteps");
-        rout.rout_param.n_outlets = get_nc_dimension(rout.param_filename,
+        rout.rout_param.n_outlets = get_nc_dimension(filenames.rout_params,
                                                      "outlets");
-        rout.rout_param.n_sources = get_nc_dimension(rout.param_filename,
+        rout.rout_param.n_sources = get_nc_dimension(filenames.rout_params,
                                                      "sources");
 
         // Allocate memory in rout param_struct

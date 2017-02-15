@@ -111,9 +111,6 @@ main(int    argc,
     // read global parameters
     vic_image_start();
 
-    // read global parameters for routing
-    rout_start();   // Routing routine (extension)
-
     // allocate memory
     vic_alloc();
 

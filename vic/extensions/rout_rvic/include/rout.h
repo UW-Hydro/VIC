@@ -57,7 +57,6 @@ typedef struct {
  * @brief   main routing Struct
  *****************************************************************************/
 typedef struct {
-    char param_filename[MAXSTRING];
     rout_param_struct rout_param;
     double *ring;
     double *discharge;
@@ -66,7 +65,6 @@ typedef struct {
 /******************************************************************************
  * @brief   Function prototypes for the rout_rvic extension
  *****************************************************************************/
-void rout_start(void);                 // read global parameters for routing
 void rout_alloc(void);                 // allocate memory
 void rout_init(void);                  // initialize model parameters from parameter files
 void rout_run(void);                   // run routing over the domain

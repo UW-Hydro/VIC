@@ -50,7 +50,6 @@ typedef struct {
 /******************************************************************************
  * @brief   prototypes for dummy functions of the rout_stub extension
  *****************************************************************************/
-void rout_start(void);      // read global parameters for routing
 void rout_alloc(void);      // allocate memory
 void rout_init(void);       // initialize model parameters from parameter files
 void rout_run(void);        // run routing over the domain

@@ -61,7 +61,7 @@ function vic_install {
     echo vic_install
     cd ${TRAVIS_BUILD_DIR}
     echo $PWD
-    make full -C $DRIVER_PATH
+    make full $EXTENSION -C $DRIVER_PATH
 }
 
 function vic_before_script {

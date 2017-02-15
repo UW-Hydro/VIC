@@ -46,6 +46,8 @@ BASEFLOW             ARNO
 JULY_TAVG_SUPPLIED   FALSE
 ORGANIC_FRACT        FALSE
 
+ROUT_PARAM          $test_data_dir/image/Stehekin/parameters/stehekin_parameters_01.rvic.prm.Stehekin.20150727.nc
+
 RESULT_DIR  $result_dir/
 
 OUTFILE     fluxes

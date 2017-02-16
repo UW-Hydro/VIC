@@ -267,7 +267,7 @@ vic_force(void)
         // global_param.forceskip[1] should also reset to 0 after the first year
         if (current > 0 && (dmy[current].year != dmy[current - 1].year)) {
             global_param.forceoffset[1] = 0;
-            global_param.forceskip[0] = 0;
+            global_param.forceskip[1] = 0;
         }
 
         // only the time slice changes for the met file reads. The rest is constant

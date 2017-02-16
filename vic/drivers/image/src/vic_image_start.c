@@ -45,13 +45,17 @@ vic_image_start(void)
         get_global_param(filep.globalparam);
     }
 
-    // Open domain and parameter netCDF files
-    filenames.domain.nc_id = open_nc(filenames.domain.nc_file);
-    filenames.params.nc_id = open_nc(filenames.params.nc_file);
+    if (mpi_rank == VIC_MPI_ROOT) {
+        // Open domain and parameter netCDF files
+        filenames.domain.nc_id = open_nc(filenames.domain.nc_file);
+        filenames.params.nc_id = open_nc(filenames.params.nc_file);
+    }
 
     // initialize image mode structures and settings
     vic_start();
 
-    // Close domain file
-    close_nc(filenames.domain);
+    if (mpi_rank == VIC_MPI_ROOT) {
+        // Close domain file
+        close_nc(filenames.domain);
+    }
 }

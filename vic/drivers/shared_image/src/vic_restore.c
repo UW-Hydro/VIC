@@ -32,6 +32,7 @@
 void
 vic_restore(void)
 {
+    extern int                 mpi_rank;
     extern all_vars_struct    *all_vars;
     extern domain_struct       global_domain;
     extern domain_struct       local_domain;
@@ -59,8 +60,10 @@ vic_restore(void)
     size_t                     d6count[6];
     size_t                     d6start[6];
 
-    // open initial state file
-    filenames.init_state.nc_id = open_nc(filenames.init_state.nc_file);
+    if (mpi_rank == VIC_MPI_ROOT) {
+        // open initial state file
+        filenames.init_state.nc_id = open_nc(filenames.init_state.nc_file);
+    }
 
     // validate state file dimensions and coordinate variables
     check_init_state_file();
@@ -871,7 +874,9 @@ vic_restore(void)
     free(dvar);
 
     // close initial state file
-    close_nc(filenames.init_state);
+    if (mpi_rank == VIC_MPI_ROOT) {
+        close_nc(filenames.init_state);
+    }
 }
 
 /******************************************************************************

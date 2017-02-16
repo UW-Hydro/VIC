@@ -35,6 +35,7 @@ vic_force(void)
     extern size_t              NF;
     extern size_t              NR;
     extern size_t              current;
+    extern int                 mpi_rank;
     extern force_data_struct  *force;
     extern dmy_struct         *dmy;
     extern domain_struct       global_domain;
@@ -76,10 +77,12 @@ vic_force(void)
         // file for the current new year
         // (forcing file for the first year should already be open in
         // get_global_param)
-        close_nc(filenames.forcing[0]);
-        sprintf(filenames.forcing[0].nc_file, "%s%4d.nc", filenames.f_path_pfx[0],
-                dmy[current].year);
-        filenames.forcing[0].nc_id = open_nc(filenames.forcing[0].nc_file);
+        if (mpi_rank == VIC_MPI_ROOT) {
+            close_nc(filenames.forcing[0]);
+            sprintf(filenames.forcing[0].nc_file, "%s%4d.nc", filenames.f_path_pfx[0],
+                    dmy[current].year);
+            filenames.forcing[0].nc_id = open_nc(filenames.forcing[0].nc_file);
+        }
     }
 
     // only the time slice changes for the met file reads. The rest is constant
@@ -232,9 +235,11 @@ vic_force(void)
         }
     }
 
-    // Close forcing file if it is the last time step
-    if (current == global_param.nrecs) {
-        close_nc(filenames.forcing[0]);
+    if (mpi_rank == VIC_MPI_ROOT) {
+        // Close forcing file if it is the last time step
+        if (current == global_param.nrecs) {
+            close_nc(filenames.forcing[0]);
+        }
     }
 
     // Update the offset counter
@@ -278,10 +283,12 @@ vic_force(void)
             // file for the current new year
             // (forcing file for the first year should already be open in
             // get_global_param)
-            close_nc(filenames.forcing[1]);
-            sprintf(filenames.forcing[1].nc_file, "%s%4d.nc", filenames.f_path_pfx[1],
-                    dmy[current].year);
-            filenames.forcing[1].nc_id = open_nc(filenames.forcing[1].nc_file);
+            if (mpi_rank == VIC_MPI_ROOT) {
+                close_nc(filenames.forcing[1]);
+                sprintf(filenames.forcing[1].nc_file, "%s%4d.nc", filenames.f_path_pfx[1],
+                        dmy[current].year);
+                filenames.forcing[1].nc_id = open_nc(filenames.forcing[1].nc_file);
+            }
         }
 
         // only the time slice changes for the met file reads. The rest is constant
@@ -349,9 +356,11 @@ vic_force(void)
             }
         }
 
-        // Close forcing file if it is the last time step
-        if (current == global_param.nrecs) {
-            close_nc(filenames.forcing[1]);
+        if (mpi_rank == VIC_MPI_ROOT) {
+            // Close forcing file if it is the last time step
+            if (current == global_param.nrecs) {
+                close_nc(filenames.forcing[1]);
+            }
         }
 
         // Update the offset counter

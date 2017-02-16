@@ -1,7 +1,7 @@
 /******************************************************************************
  * @section DESCRIPTION
  *
- * This routine handles the startup tasks for the image driver.
+ * Functions related to opening and closing netCDF files.
  *
  * @section LICENSE
  *
@@ -24,34 +24,35 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  *****************************************************************************/
 
-#include <vic_driver_image.h>
+#include <vic_driver_shared_image.h>
 
 /******************************************************************************
- * @brief    Wrapper function for VIC startup tasks.
+ * @brief    Open a netCDF file
  *****************************************************************************/
-void
-vic_image_start(void)
+int
+open_nc(char *nc_name)
 {
-    extern filep_struct        filep;
-    extern filenames_struct    filenames;
-    extern int                 mpi_rank;
+    int    nc_id;
+    int    status;
 
-    // Initialize structures
-    initialize_global_structures();
+    // open the netcdf file
+    status = nc_open(nc_name, NC_NOWRITE, &nc_id);
+    check_nc_status(status, "Error opening %s", nc_name);
 
-    if (mpi_rank == VIC_MPI_ROOT) {
-        // Read the global parameter file
-        filep.globalparam = open_file(filenames.global, "r");
-        get_global_param(filep.globalparam);
-    }
+    return(nc_id);
+}
 
-    // Open domain and parameter netCDF files
-    filenames.domain.nc_id = open_nc(filenames.domain.nc_file);
-    filenames.params.nc_id = open_nc(filenames.params.nc_file);
+/******************************************************************************
+ * @brief    Close a netCDF file
+ *****************************************************************************/
+int
+close_nc(nameid_struct nc_nameid)
+{
+    int status;
 
-    // initialize image mode structures and settings
-    vic_start();
+    // close the netcdf file
+    status = nc_close(nc_nameid.nc_id);
+    check_nc_status(status, "Error closing %s", nc_nameid.nc_file);
 
-    // Close domain file
-    close_nc(filenames.domain);
+    return(status);
 }

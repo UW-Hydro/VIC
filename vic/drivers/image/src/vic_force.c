@@ -66,16 +66,20 @@ vic_force(void)
     dvar = malloc(local_domain.ncells_active * sizeof(*dvar));
     check_alloc_status(dvar, "Memory allocation error.");
 
-    // for now forcing file is determined by the year
-    sprintf(filenames.forcing[0], "%s%4d.nc", filenames.f_path_pfx[0],
-            dmy[current].year);
-
     // global_param.forceoffset[0] resets every year since the met file restarts
     // every year
     // global_param.forceskip[0] should also reset to 0 after the first year
     if (current > 0 && (dmy[current].year != dmy[current - 1].year)) {
         global_param.forceoffset[0] = 0;
         global_param.forceskip[0] = 0;
+        // close the forcing file for the previous year and open the forcing
+        // file for the current new year
+        // (forcing file for the first year should already be open in
+        // get_global_param)
+        close_nc(filenames.forcing[0]);
+        sprintf(filenames.forcing[0].nc_file, "%s%4d.nc", filenames.f_path_pfx[0],
+                dmy[current].year);
+        filenames.forcing[0].nc_id = open_nc(filenames.forcing[0].nc_file);
     }
 
     // only the time slice changes for the met file reads. The rest is constant
@@ -228,6 +232,11 @@ vic_force(void)
         }
     }
 
+    // Close forcing file if it is the last time step
+    if (current == global_param.nrecs) {
+        close_nc(filenames.forcing[0]);
+    }
+
     // Update the offset counter
     global_param.forceoffset[0] += NF;
 
@@ -258,9 +267,6 @@ vic_force(void)
     if (options.LAI_SRC == FROM_VEGHIST ||
         options.FCAN_SRC == FROM_VEGHIST ||
         options.ALB_SRC == FROM_VEGHIST) {
-        // for now forcing file is determined by the year
-        sprintf(filenames.forcing[1], "%s%4d.nc", filenames.f_path_pfx[1],
-                dmy[current].year);
 
         // global_param.forceoffset[1] resets every year since the met file restarts
         // every year
@@ -268,6 +274,14 @@ vic_force(void)
         if (current > 0 && (dmy[current].year != dmy[current - 1].year)) {
             global_param.forceoffset[1] = 0;
             global_param.forceskip[1] = 0;
+            // close the forcing file for the previous year and open the forcing
+            // file for the current new year
+            // (forcing file for the first year should already be open in
+            // get_global_param)
+            close_nc(filenames.forcing[1]);
+            sprintf(filenames.forcing[1].nc_file, "%s%4d.nc", filenames.f_path_pfx[1],
+                    dmy[current].year);
+            filenames.forcing[1].nc_id = open_nc(filenames.forcing[1].nc_file);
         }
 
         // only the time slice changes for the met file reads. The rest is constant
@@ -333,6 +347,11 @@ vic_force(void)
                     }
                 }
             }
+        }
+
+        // Close forcing file if it is the last time step
+        if (current == global_param.nrecs) {
+            close_nc(filenames.forcing[1]);
         }
 
         // Update the offset counter

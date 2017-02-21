@@ -221,7 +221,7 @@ void initialize_global_structures(void);
 void initialize_history_file(nc_file_struct *nc, stream_struct *stream,
                              dmy_struct *dmy_current);
 void initialize_state_file(char *filename, nc_file_struct *nc_state_file,
-                           dmy_struct *dmy_current);
+                           dmy_struct *dmy_state);
 void initialize_location(location_struct *location);
 int initialize_model_state(all_vars_struct *all_vars, size_t Nveg,
                            size_t Nnodes, double surf_temp,
@@ -256,7 +256,7 @@ void vic_init(void);
 void vic_init_output(dmy_struct *dmy_current);
 void vic_restore(void);
 void vic_start(void);
-void vic_store(dmy_struct *dmy_current, char *state_filename);
+void vic_store(dmy_struct *dmy_state, char *state_filename);
 void vic_write(stream_struct *stream, nc_file_struct *nc_hist_file,
                dmy_struct *dmy_current);
 void vic_write_output(dmy_struct *dmy);

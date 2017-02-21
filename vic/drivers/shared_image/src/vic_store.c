@@ -30,7 +30,7 @@
  * @brief    Save model state.
  *****************************************************************************/
 void
-vic_store(dmy_struct *dmy_current,
+vic_store(dmy_struct *dmy_state,
           char       *filename)
 {
     extern filenames_struct    filenames;
@@ -64,27 +64,13 @@ vic_store(dmy_struct *dmy_current,
 
     set_nc_state_file_info(&nc_state_file);
 
-    // advance dmy_current by one timestep since dmy_current is the 
-    // timestep-beginning timestamp, and state file date should be 
-    // the end of the current time step 
-    dt_seconds_to_time_units(global_param.time_units, global_param.dt,
-                             &offset);
-    time_num = date2num(global_param.time_origin_num, dmy_current, 0,
-                        global_param.calendar, global_param.time_units);
-    end_time_num = time_num + offset;
-
-    // allocate dmy struct for end of current time step 
-    num2date(global_param.time_origin_num, end_time_num, 0.,
-                             global_param.calendar, global_param.time_units,
-                             &end_time_date);
-
     // create netcdf file for storing model state
     sprintf(filename, "%s.%04i%02i%02i_%05u.nc",
-            filenames.statefile, end_time_date.year,
-            end_time_date.month, end_time_date.day,
-            end_time_date.dayseconds);
+            filenames.statefile, dmy_state->year,
+            dmy_state->month, dmy_state->day,
+            dmy_state->dayseconds);
 
-    initialize_state_file(filename, &nc_state_file, dmy_current);
+    initialize_state_file(filename, &nc_state_file, dmy_state);
 
     if (mpi_rank == VIC_MPI_ROOT) {
         debug("writing state file: %s", filename);
@@ -1539,7 +1525,7 @@ set_nc_state_var_info(nc_file_struct *nc)
 void
 initialize_state_file(char           *filename,
                       nc_file_struct *nc_state_file,
-                      dmy_struct     *dmy_current)
+                      dmy_struct     *dmy_state)
 {
     extern option_struct       options;
     extern domain_struct       global_domain;
@@ -1572,7 +1558,6 @@ initialize_state_file(char           *filename,
     double                    *dvar = NULL;
     int                       *ivar = NULL;
     double                     offset;
-    double                     time_num;
 
     // open the netcdf file
     if (mpi_rank == VIC_MPI_ROOT) {
@@ -1919,15 +1904,9 @@ initialize_state_file(char           *filename,
     }
 
     // time variable
-    // advance dmy_current by one timestep because dmy_current is the
-    // "timestep-beginning" timestamp, but we want the time variable to be
-    // the end of the current time step
     if (mpi_rank == VIC_MPI_ROOT) {
-        dt_seconds_to_time_units(global_param.time_units, global_param.dt,
-                                 &offset);
-        time_num = date2num(global_param.time_origin_num, dmy_current, 0,
-                            global_param.calendar, global_param.time_units);
-        dtime = time_num + offset;
+        dtime = date2num(global_param.time_origin_num, dmy_state, 0,
+                         global_param.calendar, global_param.time_units);
         // put in netCDF file
         dstart[0] = 0;
         status = nc_put_var1_double(nc_state_file->nc_id,

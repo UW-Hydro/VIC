@@ -73,7 +73,7 @@ vic_force(void)
     // global_param.forceoffset[0] resets every year since the met file restarts
     // every year
     // global_param.forceskip[0] should also reset to 0 after the first year
-    if (current > 1 && (dmy[current].year != dmy[current - 1].year)) {
+    if (current > 0 && (dmy[current].year != dmy[current - 1].year)) {
         global_param.forceoffset[0] = 0;
         global_param.forceskip[0] = 0;
     }
@@ -264,8 +264,10 @@ vic_force(void)
 
         // global_param.forceoffset[1] resets every year since the met file restarts
         // every year
-        if (current > 1 && (dmy[current].year != dmy[current - 1].year)) {
+        // global_param.forceskip[1] should also reset to 0 after the first year
+        if (current > 0 && (dmy[current].year != dmy[current - 1].year)) {
             global_param.forceoffset[1] = 0;
+            global_param.forceskip[1] = 0;
         }
 
         // only the time slice changes for the met file reads. The rest is constant

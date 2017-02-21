@@ -33,6 +33,7 @@ size_t             *mpi_map_mapping_array = NULL;
 all_vars_struct    *all_vars = NULL;
 force_data_struct  *force = NULL;
 dmy_struct         *dmy = NULL;
+dmy_struct          dmy_state;
 filenames_struct    filenames;
 filep_struct        filep;
 domain_struct       global_domain;
@@ -142,9 +143,9 @@ main(int    argc,
         vic_write_output(&(dmy[current]));
 
         // Write state file
-        if (check_save_state_flag(current)) {
+        if (check_save_state_flag(current, &dmy_state)) {
             debug("writing state file for timestep %zu", current);
-            vic_store(&(dmy[current]), state_filename);
+            vic_store(&dmy_state, state_filename);
             debug("finished storing state file: %s", state_filename)
         }
     }

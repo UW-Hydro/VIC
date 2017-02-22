@@ -38,10 +38,11 @@ initialize_filenames()
 
     size_t                  i;
 
-    strcpy(filenames.init_state.nc_file, "MISSING");
+    strcpy(filenames.init_state.nc_filename, "MISSING");
     strcpy(filenames.statefile, "MISSING");
     strcpy(filenames.constants, "MISSING");
-    strcpy(filenames.params.nc_file, "MISSING");
+    strcpy(filenames.params.nc_filename, "MISSING");
+    strcpy(filenames.domain.nc_filename, "MISSING");
     strcpy(filenames.result_dir, "MISSING");
     strcpy(filenames.log_path, "MISSING");
     for (i = 0; i < 2; i++) {

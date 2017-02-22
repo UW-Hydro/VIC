@@ -30,8 +30,8 @@
  * @brief    Get global domain information.
  *****************************************************************************/
 size_t
-get_global_domain(nameid_struct domain_nc_nameid,
-                  nameid_struct param_nc_nameid,
+get_global_domain(nameid_struct *domain_nc_nameid,
+                  nameid_struct *param_nc_nameid,
                   domain_struct *global_domain)
 {
     int    *run = NULL;
@@ -158,7 +158,7 @@ get_global_domain(nameid_struct domain_nc_nameid,
              store in nc_domain structure
  *****************************************************************************/
 void
-get_nc_latlon(nameid_struct  nc_nameid,
+get_nc_latlon(nameid_struct *nc_nameid,
               domain_struct *nc_domain)
 {
     double *var = NULL;
@@ -184,7 +184,7 @@ get_nc_latlon(nameid_struct  nc_nameid,
         (size_t) get_nc_varndimensions(nc_nameid, nc_domain->info.lat_var)) {
         log_err("Un even number of dimensions for %s and %s in: %s",
                 nc_domain->info.lon_var, nc_domain->info.lat_var,
-                nc_nameid.nc_file);
+                nc_nameid->nc_filename);
     }
 
     if (nc_domain->info.n_coord_dims == 1) {
@@ -265,7 +265,7 @@ get_nc_latlon(nameid_struct  nc_nameid,
     else {
         log_err("Number of dimensions for %s and %s should be 1 or 2 in: %s",
                 nc_domain->info.lon_var, nc_domain->info.lat_var,
-                nc_nameid.nc_file);
+                nc_nameid->nc_filename);
     }
 }
 
@@ -331,7 +331,7 @@ initialize_location(location_struct *location)
  * @brief    Read the number of vegetation type per grid cell from file
  *****************************************************************************/
 void
-add_nveg_to_global_domain(nameid_struct  nc_nameid,
+add_nveg_to_global_domain(nameid_struct *nc_nameid,
                           domain_struct *global_domain)
 {
     size_t d2count[2];

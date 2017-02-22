@@ -2042,7 +2042,7 @@ gather_put_nc_field_schar(int     nc_id,
  *          nodes
  *****************************************************************************/
 void
-get_scatter_nc_field_double(nameid_struct nc_nameid,
+get_scatter_nc_field_double(nameid_struct *nc_nameid,
                             char   *var_name,
                             size_t *start,
                             size_t *count,
@@ -2103,7 +2103,7 @@ get_scatter_nc_field_double(nameid_struct nc_nameid,
  *          nodes
  *****************************************************************************/
 void
-get_scatter_nc_field_float(nameid_struct nc_nameid,
+get_scatter_nc_field_float(nameid_struct *nc_nameid,
                            char   *var_name,
                            size_t *start,
                            size_t *count,
@@ -2166,7 +2166,7 @@ get_scatter_nc_field_float(nameid_struct nc_nameid,
  *          nodes
  *****************************************************************************/
 void
-get_scatter_nc_field_int(nameid_struct nc_nameid,
+get_scatter_nc_field_int(nameid_struct *nc_nameid,
                          char   *var_name,
                          size_t *start,
                          size_t *count,

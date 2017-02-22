@@ -32,7 +32,7 @@
              the global domain.
  *****************************************************************************/
 void
-compare_ncdomain_with_global_domain(nameid_struct nc_nameid)
+compare_ncdomain_with_global_domain(nameid_struct *nc_nameid)
 {
     extern domain_struct global_domain;
 

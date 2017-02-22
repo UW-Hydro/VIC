@@ -34,17 +34,10 @@ vic_image_init(void)
 {
     extern dmy_struct         *dmy;
     extern global_param_struct global_param;
-    extern filenames_struct    filenames;
-    extern int                 mpi_rank;
 
     // make_dmy()
     initialize_time();
     dmy = make_dmy(&global_param);
 
     vic_init();
-
-    if (mpi_rank == VIC_MPI_ROOT) {
-        // close parameter netCDF file
-        close_nc(filenames.params);
-    }
 }

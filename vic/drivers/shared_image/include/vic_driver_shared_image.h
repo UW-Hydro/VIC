@@ -181,34 +181,32 @@ typedef struct {
     char log_path[MAXSTRING];      /**< Location to write log file to */
 } filenames_struct;
 
-void add_nveg_to_global_domain(nameid_struct nc_nameid,
+void add_nveg_to_global_domain(nameid_struct *nc_nameid,
                                domain_struct *global_domain);
 void alloc_force(force_data_struct *force);
 void alloc_veg_hist(veg_hist_struct *veg_hist);
 double air_density(double t, double p);
 double average(double *ar, size_t n);
 void check_init_state_file(void);
-void compare_ncdomain_with_global_domain(nameid_struct nc_nameid);
+void compare_ncdomain_with_global_domain(nameid_struct *nc_nameid);
 void free_force(force_data_struct *force);
 void free_veg_hist(veg_hist_struct *veg_hist);
 void get_domain_type(char *cmdstr);
-size_t get_global_domain(nameid_struct domain_nc_nameid,
-                         nameid_struct param_nc_nameid,
+size_t get_global_domain(nameid_struct *domain_nc_nameid,
+                         nameid_struct *param_nc_nameid,
                          domain_struct *global_domain);
 void copy_domain_info(domain_struct *domain_from, domain_struct *domain_to);
-int open_nc(char *nc_name);
-int close_nc(nameid_struct nc_nameid);
-void get_nc_latlon(nameid_struct nc_nameid, domain_struct *nc_domain);
-size_t get_nc_dimension(nameid_struct nc_nameid, char *dim_name);
-void get_nc_var_attr(nameid_struct nc_nameid, char *var_name, char *attr_name,
+void get_nc_latlon(nameid_struct *nc_nameid, domain_struct *nc_domain);
+size_t get_nc_dimension(nameid_struct *nc_nameid, char *dim_name);
+void get_nc_var_attr(nameid_struct *nc_nameid, char *var_name, char *attr_name,
                      char **attr);
-int get_nc_var_type(nameid_struct nc_nameid, char *var_name);
-int get_nc_varndimensions(nameid_struct nc_nameid, char *var_name);
-int get_nc_field_double(nameid_struct nc_nameid, char *var_name, size_t *start,
+int get_nc_var_type(nameid_struct *nc_nameid, char *var_name);
+int get_nc_varndimensions(nameid_struct *nc_nameid, char *var_name);
+int get_nc_field_double(nameid_struct *nc_nameid, char *var_name, size_t *start,
                         size_t *count, double *var);
-int get_nc_field_float(nameid_struct nc_nameid, char *var_name, size_t *start,
+int get_nc_field_float(nameid_struct *nc_nameid, char *var_name, size_t *start,
                        size_t *count, float *var);
-int get_nc_field_int(nameid_struct nc_nameid, char *var_name, size_t *start,
+int get_nc_field_int(nameid_struct *nc_nameid, char *var_name, size_t *start,
                      size_t *count, int *var);
 int get_nc_dtype(unsigned short int dtype);
 int get_nc_mode(unsigned short int format);

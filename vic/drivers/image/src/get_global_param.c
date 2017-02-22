@@ -792,14 +792,14 @@ get_global_param(FILE *gp)
             global_param.startyear);
     filenames.forcing[0].nc_id = open_nc(filenames.forcing[0].nc_file);
     get_forcing_file_info(&param_set, 0);
-    if (param_set.N_TYPES[1] != MISSING) {
+    if (param_set.N_TYPES[1] != 0) {
         sprintf(filenames.forcing[1].nc_file, "%s%4d.nc", filenames.f_path_pfx[1],
                 global_param.startyear);
         filenames.forcing[0].nc_id = open_nc(filenames.forcing[0].nc_file);
         get_forcing_file_info(&param_set, 1);
     }
 
-    if (param_set.N_TYPES[1] != MISSING && global_param.forceyear[1] == 0) {
+    if (param_set.N_TYPES[1] != 0 && global_param.forceyear[1] == 0) {
         global_param.forceyear[1] = global_param.forceyear[0];
         global_param.forcemonth[1] = global_param.forcemonth[0];
         global_param.forceday[1] = global_param.forceday[0];

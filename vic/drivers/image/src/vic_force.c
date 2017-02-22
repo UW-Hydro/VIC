@@ -507,9 +507,9 @@ get_forcing_file_info(param_set_struct *param_set,
     dmy_struct                 nc_start_dmy;
 
     // read time info from netcdf file
-    get_nc_field_double(filenames.forcing[0], "time", &start, &count, nc_times);
-    get_nc_var_attr(filenames.forcing[0], "time", "units", &nc_unit_chars);
-    get_nc_var_attr(filenames.forcing[0], "time", "calendar", &calendar_char);
+    get_nc_field_double(filenames.forcing[file_num], "time", &start, &count, nc_times);
+    get_nc_var_attr(filenames.forcing[file_num], "time", "units", &nc_unit_chars);
+    get_nc_var_attr(filenames.forcing[file_num], "time", "calendar", &calendar_char);
 
     // parse the calendar string and check to make sure it matches the global clock
     calendar = str_to_calendar(calendar_char);

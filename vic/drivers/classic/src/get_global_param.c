@@ -671,6 +671,16 @@ get_global_param(FILE *gp)
                 log_err("SKIPYEAR has been deprecated. To avoid writing output"
                         "to history files, set AGGFREQ == FREQ_NEVER");
             }
+            else if (strcasecmp("MAX_SNOW_TEMP", optstr) == 0) {
+                log_err("MAX_SNOW_TEMP has been deprecated. To"
+                        "specify a maximum snow temperature, use the option"
+                        "SNOW_MAX_SNOW_TEMP in the vic constants file.")
+            }
+            else if (strcasecmp("MIN_RAIN_TEMP", optstr) == 0) {
+                log_err("MIN_RAIN_TEMP has been deprecated. To"
+                        "specify a minimum rain temperature, use the option"
+                        "SNOW_MIN_RAIN_TEMP in the vic constants file.")
+            }
 
             /***********************************
                Unrecognized Global Parameter Flag

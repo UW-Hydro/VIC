@@ -195,8 +195,7 @@ vic_init_output(dmy_struct *dmy_current)
  *****************************************************************************/
 void
 initialize_history_file(nc_file_struct *nc,
-                        stream_struct  *stream,
-                        dmy_struct     *ref_dmy)
+                        stream_struct  *stream)
 {
     extern filenames_struct    filenames;
     extern domain_struct       global_domain;
@@ -269,56 +268,56 @@ initialize_history_file(nc_file_struct *nc,
     // define netcdf dimensions
     status = nc_def_dim(nc->nc_id, "snow_band", nc->band_size,
                         &(nc->band_dimid));
-    check_nc_status(status, "Error defining snow_band dimenension in %s",
+    check_nc_status(status, "Error defining snow_band dimension in %s",
                     stream->filename);
 
     status = nc_def_dim(nc->nc_id, "front", nc->front_size,
                         &(nc->front_dimid));
-    check_nc_status(status, "Error defining front dimenension in %s",
+    check_nc_status(status, "Error defining front dimension in %s",
                     stream->filename);
 
     status = nc_def_dim(nc->nc_id, "frost_area", nc->frost_size,
                         &(nc->frost_dimid));
-    check_nc_status(status, "Error defining frost_area dimenension in %s",
+    check_nc_status(status, "Error defining frost_area dimension in %s",
                     stream->filename);
 
     status = nc_def_dim(nc->nc_id, "nlayer", nc->layer_size,
                         &(nc->layer_dimid));
-    check_nc_status(status, "Error defining nlayer dimenension in %s",
+    check_nc_status(status, "Error defining nlayer dimension in %s",
                     stream->filename);
 
     status = nc_def_dim(nc->nc_id, global_domain.info.x_dim, nc->ni_size,
                         &(nc->ni_dimid));
 
-    check_nc_status(status, "Error defining x dimenension in %s",
+    check_nc_status(status, "Error defining x dimension in %s",
                     stream->filename);
     status = nc_def_dim(nc->nc_id, global_domain.info.y_dim, nc->nj_size,
                         &(nc->nj_dimid));
 
-    check_nc_status(status, "Error defining y dimenension in %s",
+    check_nc_status(status, "Error defining y dimension in %s",
                     stream->filename);
 
     status = nc_def_dim(nc->nc_id, "node", nc->node_size, &(nc->node_dimid));
-    check_nc_status(status, "Error defining node dimenension in %s",
+    check_nc_status(status, "Error defining node dimension in %s",
                     stream->filename);
 
     status = nc_def_dim(nc->nc_id, "root_zone", nc->root_zone_size,
                         &(nc->root_zone_dimid));
-    check_nc_status(status, "Error defining root_zone dimenension in %s",
+    check_nc_status(status, "Error defining root_zone dimension in %s",
                     stream->filename);
 
     status = nc_def_dim(nc->nc_id, "veg_class", nc->veg_size,
                         &(nc->veg_dimid));
-    check_nc_status(status, "Error defining veg_class dimenension in %s",
+    check_nc_status(status, "Error defining veg_class dimension in %s",
                     stream->filename);
 
     status = nc_def_dim(nc->nc_id, "time", nc->time_size,
                         &(nc->time_dimid));
-    check_nc_status(status, "Error defining time dimenension in %s",
+    check_nc_status(status, "Error defining time dimension in %s",
                     stream->filename);
 
     status = nc_def_dim(nc->nc_id, "nv", 2, &(nc->time_bounds_dimid));
-    check_nc_status(status, "Error defining time bounds dimenension in %s",
+    check_nc_status(status, "Error defining time bounds dimension in %s",
                     stream->filename);
 
     // define the netcdf variable time

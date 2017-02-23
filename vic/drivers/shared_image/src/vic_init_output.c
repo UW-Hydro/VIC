@@ -249,8 +249,10 @@ initialize_history_file(nc_file_struct *nc,
         // For all other cases -- filename = result_dir/prefix.YYYY-MM-DD-SSSSS.nc
         sprintf(stream->filename, "%s/%s.%04d-%02d-%02d-%05u.nc",
                 filenames.result_dir,
-                stream->prefix, ref_dmy->year, ref_dmy->month,
-                ref_dmy->day, ref_dmy->dayseconds);
+                stream->prefix, stream->time_bounds[0].year, 
+		stream->time_bounds[0].month,
+                stream->time_bounds[0].day, 
+		stream->time_bounds[0].dayseconds);
     }
 
     // open the netcdf file

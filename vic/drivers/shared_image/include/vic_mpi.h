@@ -33,11 +33,11 @@
 #define VIC_MPI_ROOT 0
 
 /******************************************************************************
- *  * @brief   This structure stores netCDF file name and corresponding nc_id
- *   *****************************************************************************/
+ * @brief   This structure stores netCDF file name and corresponding nc_id
+ *****************************************************************************/
 typedef struct {
-    char    nc_filename[MAXSTRING];
-    int     nc_id;
+    char nc_filename[MAXSTRING];
+    int  nc_id;
 } nameid_struct;
 
 void create_MPI_filenames_struct_type(MPI_Datatype *mpi_type);
@@ -56,12 +56,12 @@ void gather_put_nc_field_short(int nc_id, int var_id, short int fillval,
                                size_t *start, size_t *count, short int *var);
 void gather_put_nc_field_schar(int nc_id, int var_id, char fillval,
                                size_t *start, size_t *count, char *var);
-void get_scatter_nc_field_double(nameid_struct *nc_nameid, char *var_name, size_t *start,
-                                 size_t *count, double *var);
-void get_scatter_nc_field_float(nameid_struct *nc_nameid, char *var_name, size_t *start,
-                                size_t *count, float *var);
-void get_scatter_nc_field_int(nameid_struct *nc_nameid, char *var_name, size_t *start,
-                              size_t *count, int *var);
+void get_scatter_nc_field_double(nameid_struct *nc_nameid, char *var_name,
+                                 size_t *start, size_t *count, double *var);
+void get_scatter_nc_field_float(nameid_struct *nc_nameid, char *var_name,
+                                size_t *start, size_t *count, float *var);
+void get_scatter_nc_field_int(nameid_struct *nc_nameid, char *var_name,
+                              size_t *start, size_t *count, int *var);
 void initialize_mpi(void);
 void map(size_t size, size_t n, size_t *from_map, size_t *to_map, void *from,
          void *to);

@@ -169,16 +169,17 @@ typedef struct {
  * @brief   This structure stores input and output filenames.
  *****************************************************************************/
 typedef struct {
-    nameid_struct forcing[MAX_FORCE_FILES];    /**< atmospheric forcing data file names */
-    char f_path_pfx[MAX_FORCE_FILES][MAXSTRING]; /**< path and prefix for atmospheric forcing data file names */
-    char global[MAXSTRING];        /**< global control file name */
-    nameid_struct domain;        /**< domain file name and nc_id*/
-    char constants[MAXSTRING];     /**< model constants file name */
-    nameid_struct params;        /**< model parameters file name and nc_id */
-    nameid_struct init_state;    /**< initial model state file name and nc_id */
-    char result_dir[MAXSTRING];    /**< directory where results will be written */
-    char statefile[MAXSTRING];     /**< name of file in which to store model state */
-    char log_path[MAXSTRING];      /**< Location to write log file to */
+    nameid_struct forcing[MAX_FORCE_FILES];  /**< atmospheric forcing files */
+    char f_path_pfx[MAX_FORCE_FILES][MAXSTRING]; /**< path and prefix for
+                                                  atmospheric forcing files */
+    char global[MAXSTRING];     /**< global control file name */
+    nameid_struct domain;       /**< domain file name and nc_id*/
+    char constants[MAXSTRING];  /**< model constants file name */
+    nameid_struct params;       /**< model parameters file name and nc_id */
+    nameid_struct init_state;   /**< initial model state file name and nc_id */
+    char result_dir[MAXSTRING]; /**< result directory */
+    char statefile[MAXSTRING];  /**< name of model state file */
+    char log_path[MAXSTRING];   /**< Location to write log file to */
 } filenames_struct;
 
 void add_nveg_to_global_domain(nameid_struct *nc_nameid,

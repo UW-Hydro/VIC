@@ -202,7 +202,7 @@ size_t get_nc_dimension(nameid_struct *nc_nameid, char *dim_name);
 void get_nc_var_attr(nameid_struct *nc_nameid, char *var_name, char *attr_name,
                      char **attr);
 int get_nc_var_type(nameid_struct *nc_nameid, char *var_name);
-int get_nc_varndimensions(char *nc_name, char *var_name);
+int get_nc_varndimensions(nameid_struct *nc_nameid, char *var_name);
 int get_nc_field_double(nameid_struct *nc_nameid, char *var_name, size_t *start,
                         size_t *count, double *var);
 int get_nc_field_float(nameid_struct *nc_nameid, char *var_name, size_t *start,

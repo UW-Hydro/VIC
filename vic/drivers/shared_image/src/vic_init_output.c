@@ -237,12 +237,13 @@ initialize_history_file(nc_file_struct *nc,
     case FREQ_NMONTHS:
         // If FREQ_NMONTHS -- filename = result_dir/prefix.YYYY-MM.nc
         sprintf(stream->filename, "%s/%s.%04d-%02d.nc", filenames.result_dir,
-                stream->prefix, ref_dmy->year, ref_dmy->month);
+                stream->prefix, stream->time_bounds[0].year, 
+		stream->time_bounds[0].month);
         break;
     case FREQ_NYEARS:
         // If FREQ_NYEARS -- filename = result_dir/prefix.YYYY.nc
         sprintf(stream->filename, "%s/%s.%04d.nc", filenames.result_dir,
-                stream->prefix, ref_dmy->year);
+                stream->prefix, stream->time_bounds[0].year);
         break;
     default:
         // For all other cases -- filename = result_dir/prefix.YYYY-MM-DD-SSSSS.nc

@@ -84,7 +84,7 @@ vic_write(stream_struct  *stream,
         // If the output file is not open, initialize the history file now.
         if (nc_hist_file->open == false) {
             // open the netcdf history file
-            initialize_history_file(nc_hist_file, stream, dmy_current);
+            initialize_history_file(nc_hist_file, stream);
         }
     }
 

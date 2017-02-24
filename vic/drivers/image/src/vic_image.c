@@ -131,16 +131,23 @@ main(int    argc,
     // start vic run timer
     timer_start(&(global_timers[TIMER_VIC_RUN]));
 
+    timer_init(&(global_timers[TIMER_VIC_FORCE]));
+    timer_init(&(global_timers[TIMER_VIC_WRITE]));
+
     // loop over all timesteps
     for (current = 0; current < global_param.nrecs; current++) {
         // read forcing data
+        timer_continue(&(global_timers[TIMER_VIC_FORCE]));
         vic_force();
+        timer_stop(&(global_timers[TIMER_VIC_FORCE]));
 
         // run vic over the domain
         vic_image_run(&(dmy[current]));
 
         // Write history files
+        timer_continue(&(global_timers[TIMER_VIC_WRITE]));
         vic_write_output(&(dmy[current]));
+        timer_stop(&(global_timers[TIMER_VIC_WRITE]));
 
         // Write state file
         if (check_save_state_flag(current, &dmy_state)) {

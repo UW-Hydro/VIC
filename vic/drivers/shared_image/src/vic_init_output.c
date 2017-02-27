@@ -195,8 +195,7 @@ vic_init_output(dmy_struct *dmy_current)
  *****************************************************************************/
 void
 initialize_history_file(nc_file_struct *nc,
-                        stream_struct  *stream,
-                        dmy_struct     *ref_dmy)
+                        stream_struct  *stream)
 {
     extern filenames_struct    filenames;
     extern domain_struct       global_domain;

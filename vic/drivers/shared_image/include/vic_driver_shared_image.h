@@ -164,13 +164,8 @@ typedef struct {
  * @brief   file structures
  *****************************************************************************/
 typedef struct {
-    FILE *forcing[MAX_FORCE_FILES];   /**< forcing data files */
     FILE *globalparam;  /**< global parameters file */
     FILE *constants;    /**< model constants parameter file */
-    FILE *domain;       /**< domain file */
-    FILE *init_state;   /**< initial model state file */
-    FILE *paramfile;    /**< parameter file */
-    FILE *statefile;    /**< output model state file */
     FILE *logfile;      /**< log file */
 } filep_struct;
 
@@ -178,43 +173,46 @@ typedef struct {
  * @brief   This structure stores input and output filenames.
  *****************************************************************************/
 typedef struct {
-    char forcing[MAX_FORCE_FILES][MAXSTRING];    /**< atmospheric forcing data file names */
-    char f_path_pfx[MAX_FORCE_FILES][MAXSTRING]; /**< path and prefix for atmospheric forcing data file names */
-    char global[MAXSTRING];        /**< global control file name */
-    char domain[MAXSTRING];        /**< domain file name */
-    char constants[MAXSTRING];     /**< model constants file name */
-    char params[MAXSTRING];        /**< model parameters file name */
-    char rout_params[MAXSTRING];   /**< routing parameters file name */
-    char init_state[MAXSTRING];    /**< initial model state file name */
-    char result_dir[MAXSTRING];    /**< directory where results will be written */
-    char statefile[MAXSTRING];     /**< name of file in which to store model state */
-    char log_path[MAXSTRING];      /**< Location to write log file to */
+    nameid_struct forcing[MAX_FORCE_FILES];  /**< atmospheric forcing files */
+    char f_path_pfx[MAX_FORCE_FILES][MAXSTRING]; /**< path and prefix for
+                                                  atmospheric forcing files */
+    char global[MAXSTRING];     /**< global control file name */
+    nameid_struct domain;       /**< domain file name and nc_id*/
+    char constants[MAXSTRING];  /**< model constants file name */
+    nameid_struct params;       /**< model parameters file name and nc_id */
+    nameid_struct rout_params;  /**< routing parameters file name and nc_id */
+    nameid_struct init_state;   /**< initial model state file name and nc_id */
+    char result_dir[MAXSTRING]; /**< result directory */
+    char statefile[MAXSTRING];  /**< name of model state file */
+    char log_path[MAXSTRING];   /**< Location to write log file to */
 } filenames_struct;
 
-void add_nveg_to_global_domain(char *nc_name, domain_struct *global_domain);
+void add_nveg_to_global_domain(nameid_struct *nc_nameid,
+                               domain_struct *global_domain);
 void alloc_force(force_data_struct *force);
 void alloc_veg_hist(veg_hist_struct *veg_hist);
 double air_density(double t, double p);
 double average(double *ar, size_t n);
 void check_init_state_file(void);
-void compare_ncdomain_with_global_domain(char *ncfile);
+void compare_ncdomain_with_global_domain(nameid_struct *nc_nameid);
 void free_force(force_data_struct *force);
 void free_veg_hist(veg_hist_struct *veg_hist);
 void get_domain_type(char *cmdstr);
-size_t get_global_domain(char *domain_nc_name, char *param_nc_name,
+size_t get_global_domain(nameid_struct *domain_nc_nameid,
+                         nameid_struct *param_nc_nameid,
                          domain_struct *global_domain);
 void copy_domain_info(domain_struct *domain_from, domain_struct *domain_to);
-void get_nc_latlon(char *nc_name, domain_struct *nc_domain);
-size_t get_nc_dimension(char *nc_name, char *dim_name);
-void get_nc_var_attr(char *nc_name, char *var_name, char *attr_name,
+void get_nc_latlon(nameid_struct *nc_nameid, domain_struct *nc_domain);
+size_t get_nc_dimension(nameid_struct *nc_nameid, char *dim_name);
+void get_nc_var_attr(nameid_struct *nc_nameid, char *var_name, char *attr_name,
                      char **attr);
-int get_nc_var_type(char *nc_name, char *var_name);
-int get_nc_varndimensions(char *nc_name, char *var_name);
-int get_nc_field_double(char *nc_name, char *var_name, size_t *start,
+int get_nc_var_type(nameid_struct *nc_nameid, char *var_name);
+int get_nc_varndimensions(nameid_struct *nc_nameid, char *var_name);
+int get_nc_field_double(nameid_struct *nc_nameid, char *var_name, size_t *start,
                         size_t *count, double *var);
-int get_nc_field_float(char *nc_name, char *var_name, size_t *start,
+int get_nc_field_float(nameid_struct *nc_nameid, char *var_name, size_t *start,
                        size_t *count, float *var);
-int get_nc_field_int(char *nc_name, char *var_name, size_t *start,
+int get_nc_field_int(nameid_struct *nc_nameid, char *var_name, size_t *start,
                      size_t *count, int *var);
 int get_nc_dtype(unsigned short int dtype);
 int get_nc_mode(unsigned short int format);
@@ -223,10 +221,9 @@ void initialize_domain_info(domain_info_struct *info);
 void initialize_filenames(void);
 void initialize_fileps(void);
 void initialize_global_structures(void);
-void initialize_history_file(nc_file_struct *nc, stream_struct *stream,
-                             dmy_struct *dmy_current);
+void initialize_history_file(nc_file_struct *nc, stream_struct *stream);
 void initialize_state_file(char *filename, nc_file_struct *nc_state_file,
-                           dmy_struct *dmy_current);
+                           dmy_struct *dmy_state);
 void initialize_location(location_struct *location);
 int initialize_model_state(all_vars_struct *all_vars, size_t Nveg,
                            size_t Nnodes, double surf_temp,
@@ -261,7 +258,7 @@ void vic_init(void);
 void vic_init_output(dmy_struct *dmy_current);
 void vic_restore(void);
 void vic_start(void);
-void vic_store(dmy_struct *dmy_current, char *state_filename);
+void vic_store(dmy_struct *dmy_state, char *state_filename);
 void vic_write(stream_struct *stream, nc_file_struct *nc_hist_file,
                dmy_struct *dmy_current);
 void vic_write_output(dmy_struct *dmy);

@@ -118,7 +118,6 @@ vic_cesm_run(vic_clock *vclock)
 {
     char state_filename[MAXSTRING];
 
-    print_vic_clock(vclock);
     // continue vic all timer
     timer_continue(&(global_timers[TIMER_VIC_ALL]));
 

@@ -118,8 +118,10 @@ vic_cesm_run(vic_clock *vclock)
 {
     char state_filename[MAXSTRING];
 
+    print_vic_clock(vclock);
     // continue vic all timer
     timer_continue(&(global_timers[TIMER_VIC_ALL]));
+
     // start vic run timer
     timer_start(&(global_timers[TIMER_VIC_RUN]));
 
@@ -127,7 +129,7 @@ vic_cesm_run(vic_clock *vclock)
     initialize_l2x_data();
 
     // read forcing data
-    vic_force();
+    vic_force()
 
     // run vic over the domain
     vic_image_run(&dmy_current);
@@ -154,6 +156,7 @@ vic_cesm_run(vic_clock *vclock)
 
     // stop vic run timer
     timer_stop(&(global_timers[TIMER_VIC_RUN]));
+
     // stop vic all timer
     timer_stop(&(global_timers[TIMER_VIC_ALL]));
 
@@ -166,6 +169,7 @@ vic_cesm_run(vic_clock *vclock)
 int
 vic_cesm_final()
 {
+
     // continue vic all timer
     timer_continue(&(global_timers[TIMER_VIC_ALL]));
     // start vic run timer
@@ -178,6 +182,7 @@ vic_cesm_final()
     timer_stop(&(global_timers[TIMER_VIC_FINAL]));
     // stop vic all timer
     timer_stop(&(global_timers[TIMER_VIC_ALL]));
+
     // write timing info
     write_vic_timing_table(global_timers, VIC_DRIVER);
 

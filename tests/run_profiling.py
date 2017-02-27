@@ -120,10 +120,7 @@ printf "%5s | %f\n" ${BC_MPI_TASKS_ALLOC} $DIFF >> $timing_table_file'''),
                                     dict(select=6, mpiprocs=36),
                                     dict(select=8, mpiprocs=36),
                                     dict(select=10, mpiprocs=36),
-                                    dict(select=12, mpiprocs=36),
-				                    dict(select=24, mpiprocs=36),
-				                    dict(select=48, mpiprocs=36),
-				                    dict(select=96, mpiprocs=36)],
+                                    dict(select=12, mpiprocs=36)],
                           submit='qsub', mpiexec='mpiexec_mpt', 
                           template='''#!/bin/bash
 #!/bin/bash
@@ -132,7 +129,7 @@ printf "%5s | %f\n" ${BC_MPI_TASKS_ALLOC} $DIFF >> $timing_table_file'''),
 #PBS -A NPSCA07935242
 #PBS -l application=VIC
 #PBS -l select=$select:ncpus=36:mpiprocs=$mpiprocs
-#PBS -l walltime=12:00:00
+#PBS -l walltime=35:00:00
 #PBS -j oe
 
 # Qsub template for AFRL THUNDER

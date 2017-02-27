@@ -89,7 +89,7 @@ write_vic_timing_table(timer_struct *timers,
     fprintf(LOG_DEST, "  VIC_DRIVER                : %s\n", driver);
     fprintf(LOG_DEST, "\n");
     fprintf(LOG_DEST, "  Global Param File         : %s\n", filenames.global);
-    fprintf(LOG_DEST, "  Domain File               : %s\n", filenames.domain);
+    fprintf(LOG_DEST, "  Domain File               : %s\n", filenames.domain.nc_filename);
     fprintf(LOG_DEST, "  Start Date                : %04hu-%02hu-%02hu-%05u\n",
             global_param.startyear, global_param.startmonth,
             global_param.startday, global_param.startsec);

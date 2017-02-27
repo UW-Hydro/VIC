@@ -196,11 +196,14 @@ void compare_ncdomain_with_global_domain(char *ncfile);
 void free_force(force_data_struct *force);
 void free_veg_hist(veg_hist_struct *veg_hist);
 void get_domain_type(char *cmdstr);
-size_t get_global_domain(char *fname, domain_struct *global_domain,
-                         bool coords_only);
+size_t get_global_domain(char *domain_nc_name, char *param_nc_name,
+                         domain_struct *global_domain);
+void copy_domain_info(domain_struct *domain_from, domain_struct *domain_to);
+void get_nc_latlon(char *nc_name, domain_struct *nc_domain);
 size_t get_nc_dimension(char *nc_name, char *dim_name);
 void get_nc_var_attr(char *nc_name, char *var_name, char *attr_name,
                      char **attr);
+int get_nc_var_type(char *nc_name, char *var_name);
 int get_nc_varndimensions(char *nc_name, char *var_name);
 int get_nc_field_double(char *nc_name, char *var_name, size_t *start,
                         size_t *count, double *var);
@@ -218,7 +221,7 @@ void initialize_global_structures(void);
 void initialize_history_file(nc_file_struct *nc, stream_struct *stream,
                              dmy_struct *dmy_current);
 void initialize_state_file(char *filename, nc_file_struct *nc_state_file,
-                           dmy_struct *dmy_current);
+                           dmy_struct *dmy_state);
 void initialize_location(location_struct *location);
 int initialize_model_state(all_vars_struct *all_vars, size_t Nveg,
                            size_t Nnodes, double surf_temp,
@@ -253,7 +256,7 @@ void vic_init(void);
 void vic_init_output(dmy_struct *dmy_current);
 void vic_restore(void);
 void vic_start(void);
-void vic_store(dmy_struct *dmy_current, char *state_filename);
+void vic_store(dmy_struct *dmy_state, char *state_filename);
 void vic_write(stream_struct *stream, nc_file_struct *nc_hist_file,
                dmy_struct *dmy_current);
 void vic_write_output(dmy_struct *dmy);

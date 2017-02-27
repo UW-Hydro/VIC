@@ -384,7 +384,7 @@ get_global_param(FILE *gp)
                 sscanf(cmdstr, "%*s %s", filenames.params.nc_filename);
             }
             else if (strcasecmp("ROUT_PARAM", optstr) == 0) {
-                sscanf(cmdstr, "%*s %s", filenames.rout_params);
+                sscanf(cmdstr, "%*s %s", filenames.rout_params.nc_filename);
             }
             else if (strcasecmp("ARNO_PARAMS", optstr) == 0) {
                 sscanf(cmdstr, "%*s %s", flgstr);

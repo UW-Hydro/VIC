@@ -138,7 +138,7 @@ vic_restore(void)
         d2count_rout[0] = rout.rout_param.n_timesteps;
         d2count_rout[1] = rout.rout_param.n_outlets;
 
-        get_nc_field_double(filenames.init_state,
+        get_nc_field_double(&(filenames.init_state),
                             state_metadata[STATE_ROUT_RING].varname,
                             d2start, d2count_rout, rout.ring);
     }

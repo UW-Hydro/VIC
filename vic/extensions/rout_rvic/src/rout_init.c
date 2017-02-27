@@ -36,6 +36,7 @@ rout_init(void)
     extern rout_struct   rout;
     extern domain_struct global_domain;
     extern filenames_struct    filenames;
+    int                        status;
         
     if (mpi_rank == VIC_MPI_ROOT) {
         int    *ivar = NULL;
@@ -79,7 +80,7 @@ rout_init(void)
         }
 
         // source2outlet_ind: source to outlet index mapping
-        get_nc_field_int(filenames.rout_params,
+        get_nc_field_int(&(filenames.rout_params),
                          "source2outlet_ind",
                          &i1start, &rout.rout_param.n_sources, ivar);
         for (i = 0; i < rout.rout_param.n_sources; i++) {
@@ -87,7 +88,7 @@ rout_init(void)
         }
 
         // source_time_offset: Number of leading timesteps ommited
-        get_nc_field_int(filenames.rout_params,
+        get_nc_field_int(&(filenames.rout_params),
                          "source_time_offset",
                          &i1start, &rout.rout_param.n_sources, ivar);
         for (i = 0; i < rout.rout_param.n_sources; i++) {
@@ -95,7 +96,7 @@ rout_init(void)
         }
 
         // source_x_ind: x grid coordinate of source grid cell
-        get_nc_field_int(filenames.rout_params,
+        get_nc_field_int(&(filenames.rout_params),
                          "source_x_ind",
                          &i1start, &rout.rout_param.n_sources, ivar);
         for (i = 0; i < rout.rout_param.n_sources; i++) {
@@ -103,7 +104,7 @@ rout_init(void)
         }
 
         // source_y_ind: y grid coordinate of source grid cell
-        get_nc_field_int(filenames.rout_params,
+        get_nc_field_int(&(filenames.rout_params),
                          "source_y_ind",
                          &i1start, &rout.rout_param.n_sources, ivar);
         for (i = 0; i < rout.rout_param.n_sources; i++) {
@@ -111,7 +112,7 @@ rout_init(void)
         }
 
         // source_lat: Latitude coordinate of source grid cell
-        get_nc_field_double(filenames.rout_params,
+        get_nc_field_double(&(filenames.rout_params),
                             "source_lat",
                             &i1start, &rout.rout_param.n_sources, dvar);
         for (i = 0; i < rout.rout_param.n_sources; i++) {
@@ -119,7 +120,7 @@ rout_init(void)
         }
 
         // source_lon: Longitude coordinate of source grid cell
-        get_nc_field_double(filenames.rout_params,
+        get_nc_field_double(&(filenames.rout_params),
                             "source_lon",
                             &i1start, &rout.rout_param.n_sources, dvar);
         for (i = 0; i < rout.rout_param.n_sources; i++) {
@@ -127,7 +128,7 @@ rout_init(void)
         }
 
         // outlet_lat: Latitude coordinate of source grid cell
-        get_nc_field_double(filenames.rout_params,
+        get_nc_field_double(&(filenames.rout_params),
                             "outlet_lat",
                             &i1start, &rout.rout_param.n_outlets, dvar);
         for (i = 0; i < rout.rout_param.n_outlets; i++) {
@@ -135,7 +136,7 @@ rout_init(void)
         }
 
         // outlet_lon: Longitude coordinate of source grid cell
-        get_nc_field_double(filenames.rout_params,
+        get_nc_field_double(&(filenames.rout_params),
                             "outlet_lon",
                             &i1start, &rout.rout_param.n_outlets, dvar);
         for (i = 0; i < rout.rout_param.n_outlets; i++) {
@@ -143,7 +144,7 @@ rout_init(void)
         }
 
         // Unit Hydrograph:
-        get_nc_field_double(filenames.rout_params,
+        get_nc_field_double(&(filenames.rout_params),
                             "unit_hydrograph",
                             d3start, d3count, dvar);
         for (i = 0;
@@ -196,6 +197,11 @@ rout_init(void)
                 log_err("invalid outlet, index of VIC gridcell");
             }
         }
+
+        // close parameter file
+        status = nc_close(filenames.rout_params.nc_id);
+        check_nc_status(status, "Error closing %s",
+                        filenames.rout_params.nc_filename);
 
         // cleanup
         free(ivar);

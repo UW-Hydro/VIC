@@ -40,7 +40,7 @@ vic_store(dmy_struct *dmy_state,
     extern option_struct       options;
     extern veg_con_map_struct *veg_con_map;
     extern int                 mpi_rank;
-    extern global_param_struct global_param;
+    extern rout_struct         rout;
 
     int                        status;
     int                        v;

@@ -96,6 +96,9 @@ vic_cesm_init(vic_clock     *vclock,
     // populate model state, either using a cold start or from a restart file
     vic_populate_model_state(trim(cmeta->starttype));
 
+    // initialize forcings
+    vic_force();
+
     // initialize output structures
     vic_init_output(&dmy_current);
 
@@ -135,18 +138,19 @@ vic_cesm_run(vic_clock *vclock)
     // Write history files
     vic_write_output(&dmy_current);
 
+    // advance the clock
+    advance_time();
+    assert_time_insync(vclock, &dmy_current);
+
     // if save:
     if (vclock->state_flag) {
+        // write state file
         vic_store(&dmy_current, state_filename);
         write_rpointer_file(state_filename);
     }
 
     // reset x2l fields
     initialize_x2l_data();
-
-    // advance the clock
-    advance_time();
-    assert_time_insync(vclock, &dmy_current);
 
     // stop vic run timer
     timer_stop(&(global_timers[TIMER_VIC_RUN]));

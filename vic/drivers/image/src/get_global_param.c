@@ -46,6 +46,7 @@ get_global_param(FILE *gp)
     char                       flgstr2[MAXSTRING];
     size_t                     file_num;
     int                        field;
+    int                        status;
     unsigned int               tmpstartdate;
     unsigned int               tmpenddate;
     unsigned short int         lastday[MONTHS_PER_YEAR];
@@ -296,7 +297,7 @@ get_global_param(FILE *gp)
                 }
                 else {
                     options.INIT_STATE = true;
-                    strcpy(filenames.init_state, flgstr);
+                    strcpy(filenames.init_state.nc_filename, flgstr);
                 }
             }
             else if (strcasecmp("STATENAME", optstr) == 0) {
@@ -374,13 +375,13 @@ get_global_param(FILE *gp)
                 sscanf(cmdstr, "%*s %s", filenames.constants);
             }
             else if (strcasecmp("DOMAIN", optstr) == 0) {
-                sscanf(cmdstr, "%*s %s", filenames.domain);
+                sscanf(cmdstr, "%*s %s", filenames.domain.nc_filename);
             }
             else if (strcasecmp("DOMAIN_TYPE", optstr) == 0) {
                 get_domain_type(cmdstr);
             }
             else if (strcasecmp("PARAMETERS", optstr) == 0) {
-                sscanf(cmdstr, "%*s %s", filenames.params);
+                sscanf(cmdstr, "%*s %s", filenames.params.nc_filename);
             }
             else if (strcasecmp("ARNO_PARAMS", optstr) == 0) {
                 sscanf(cmdstr, "%*s %s", flgstr);
@@ -727,7 +728,7 @@ get_global_param(FILE *gp)
     }
 
     // Validate simulation end date and/or number of timesteps
-    make_lastday(global_param.endyear, global_param.calendar, lastday);
+    make_lastday(global_param.calendar, global_param.endyear, lastday);
 
     if (global_param.nrecs == 0 && global_param.endyear == 0 &&
         global_param.endmonth == 0 && global_param.endday == 0) {
@@ -787,16 +788,25 @@ get_global_param(FILE *gp)
     }
 
     // Get information from the forcing file(s)
-    sprintf(filenames.forcing[0], "%s%4d.nc", filenames.f_path_pfx[0],
-            global_param.startyear);
+    // Open first-year forcing files and get info
+    sprintf(filenames.forcing[0].nc_filename, "%s%4d.nc",
+            filenames.f_path_pfx[0], global_param.startyear);
+    status = nc_open(filenames.forcing[0].nc_filename, NC_NOWRITE,
+                     &(filenames.forcing[0].nc_id));
+    check_nc_status(status, "Error opening %s",
+                    filenames.forcing[0].nc_filename);
     get_forcing_file_info(&param_set, 0);
-    if (param_set.N_TYPES[1] != MISSING) {
-        sprintf(filenames.forcing[1], "%s%4d.nc", filenames.f_path_pfx[1],
-                global_param.startyear);
+    if (param_set.N_TYPES[1] != 0) {
+        sprintf(filenames.forcing[1].nc_filename, "%s%4d.nc",
+                filenames.f_path_pfx[1], global_param.startyear);
+        status = nc_open(filenames.forcing[1].nc_filename, NC_NOWRITE,
+                     &(filenames.forcing[1].nc_id));
+        check_nc_status(status, "Error opening %s",
+                        filenames.forcing[1].nc_filename);
         get_forcing_file_info(&param_set, 1);
     }
 
-    if (param_set.N_TYPES[1] != MISSING && global_param.forceyear[1] == 0) {
+    if (param_set.N_TYPES[1] != 0 && global_param.forceyear[1] == 0) {
         global_param.forceyear[1] = global_param.forceyear[0];
         global_param.forcemonth[1] = global_param.forcemonth[0];
         global_param.forceday[1] = global_param.forceday[0];
@@ -829,7 +839,7 @@ get_global_param(FILE *gp)
     }
 
     // Validate parameter file information
-    if (strcmp(filenames.params, "MISSING") == 0) {
+    if (strcmp(filenames.params.nc_filename, "MISSING") == 0) {
         log_err("A parameters file has not been defined.  Make sure that the "
                 "global file defines the parameters parameter file on the line "
                 "that begins with \"PARAMETERS\".");
@@ -868,7 +878,7 @@ get_global_param(FILE *gp)
 
     // Validate the input state file information
     if (options.INIT_STATE) {
-        if (strcmp(filenames.init_state, "MISSING") == 0) {
+        if (strcmp(filenames.init_state.nc_filename, "MISSING") == 0) {
             log_err("\"INIT_STATE\" was specified, but no input state file "
                     "has been defined.  Make sure that the global file "
                     "defines the inputstate file on the line that begins "
@@ -895,7 +905,7 @@ get_global_param(FILE *gp)
                     global_param.statesec);
         }
         // Check for month, day in range
-        make_lastday(global_param.stateyear, global_param.calendar,
+        make_lastday(global_param.calendar, global_param.stateyear,
                      lastday);
         if (global_param.stateday > lastday[global_param.statemonth - 1] ||
             global_param.statemonth < 1 ||
@@ -919,11 +929,11 @@ get_global_param(FILE *gp)
                 global_param.statesec);
     }
     if (options.INIT_STATE && options.SAVE_STATE &&
-        (strcmp(filenames.init_state, flgstr2) == 0)) {
+        (strcmp(filenames.init_state.nc_filename, flgstr2) == 0)) {
         log_err("The save state file (%s) has the same name as the "
                 "initialize state file (%s).  The initialize state file "
                 "will be destroyed when the save state file is opened.",
-                filenames.statefile, filenames.init_state);
+                filenames.statefile, filenames.init_state.nc_filename);
     }
 
     // Validate soil parameter/simulation mode combinations

@@ -32,9 +32,9 @@
 void
 vic_image_start(void)
 {
-    extern filep_struct     filep;
-    extern filenames_struct filenames;
-    extern int              mpi_rank;
+    extern filep_struct        filep;
+    extern filenames_struct    filenames;
+    extern int                 mpi_rank;
 
     // Initialize structures
     initialize_global_structures();

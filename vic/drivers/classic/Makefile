@@ -42,7 +42,7 @@ SHELL = /bin/bash
 
 # Set CC = your compiler here
 ifndef CC
-CC=gcc
+CC=nvcc
 endif
 
 GIT_VERSION := $(shell git describe --abbrev=4 --dirty --always --tags)

@@ -62,6 +62,11 @@ rout_run(void)
         var_domain_discharge =
             malloc(global_domain.ncells_total * sizeof(*var_domain_discharge));
         check_alloc_status(var_domain_discharge, "Memory allocation error.");
+        
+        // Initialize discharge to zero
+        for (i = 0; i < global_domain.ncells_total; i++) {
+           var_domain_discharge[i] = 0;
+        }
     }
 
     // Read from runoff and baseflow from out_data and sum to runoff

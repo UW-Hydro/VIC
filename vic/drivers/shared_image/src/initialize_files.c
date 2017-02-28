@@ -42,6 +42,7 @@ initialize_filenames()
     strcpy(filenames.statefile, "MISSING");
     strcpy(filenames.constants, "MISSING");
     strcpy(filenames.params.nc_filename, "MISSING");
+    strcpy(filenames.rout_params.nc_filename, "MISSING");
     strcpy(filenames.domain.nc_filename, "MISSING");
     strcpy(filenames.result_dir, "MISSING");
     strcpy(filenames.log_path, "MISSING");

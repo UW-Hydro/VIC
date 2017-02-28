@@ -25,6 +25,7 @@
  *****************************************************************************/
 
 #include <vic_driver_classic.h>
+#include <cuda.h>
 
 // global variables
 int                 flag;

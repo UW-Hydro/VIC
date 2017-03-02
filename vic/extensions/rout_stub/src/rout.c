@@ -37,7 +37,7 @@ rout_alloc(void)
     // We need to write at least something to the VIC state file (if enabled).
     // Therefore we make the dimension size 1*1.
     rout.rout_param.n_outlets = 1;
-    rout.rout_param.n_timesteps = 1;
+    rout.rout_param.full_time_length = 1;
     rout.ring[1] = 0;
 }
 

@@ -35,7 +35,7 @@
  * @brief   Routing Structs
  *****************************************************************************/
 typedef struct {
-    size_t n_timesteps;                        /*scalar - number of timesteps*/
+    size_t full_time_length;                        /*scalar - number of timesteps*/
     size_t n_outlets;                          /*scalar - length of subset*/
 } rout_param_struct;
 

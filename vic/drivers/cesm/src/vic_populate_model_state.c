@@ -51,7 +51,7 @@ vic_populate_model_state(char *runtype_str)
     // read the model state from the netcdf file
     if (runtype == CESM_RUNTYPE_RESTART || runtype == CESM_RUNTYPE_BRANCH) {
         // Get restart file from rpointer file
-        read_rpointer_file(filenames.init_state);
+        read_rpointer_file(filenames.init_state.nc_filename);
 
         // set options.INIT_STATE to true since we have found a state file in
         // the rpointer file.

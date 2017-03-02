@@ -135,7 +135,7 @@ vic_restore(void)
     if (mpi_rank == VIC_MPI_ROOT) {
         d2start[0] = 0;
         d2start[1] = 0;
-        d2count_rout[0] = rout.rout_param.n_timesteps;
+        d2count_rout[0] = rout.rout_param.full_time_length;
         d2count_rout[1] = rout.rout_param.n_outlets;
 
         get_nc_field_double(&(filenames.init_state),

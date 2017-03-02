@@ -1325,7 +1325,7 @@ set_nc_state_file_info(nc_file_struct *nc_state_file)
     nc_state_file->nj_size = global_domain.n_ny;
     nc_state_file->node_size = options.Nnode;
     nc_state_file->outlet_size = rout.rout_param.n_outlets;
-    nc_state_file->routing_timestep_size = rout.rout_param.n_timesteps;
+    nc_state_file->routing_timestep_size = rout.rout_param.full_time_length;
     nc_state_file->root_zone_size = options.ROOT_ZONES;
     nc_state_file->time_size = NC_UNLIMITED;
     nc_state_file->veg_size = options.NVEGTYPES;

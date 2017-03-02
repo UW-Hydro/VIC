@@ -128,7 +128,7 @@ vic_cesm_run(vic_clock *vclock)
     initialize_l2x_data();
 
     // read forcing data
-    vic_force()
+    vic_force();
 
     // run vic over the domain
     vic_image_run(&dmy_current);

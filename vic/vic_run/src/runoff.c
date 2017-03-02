@@ -199,7 +199,8 @@ runoff(cell_data_struct  *cell,
                     tmp_liq = resid_moist[lindex];
                 }
 
-                if (liq[lindex] > resid_moist[lindex]) {
+                //if (liq[lindex] > resid_moist[lindex]) {
+		if (tmp_liq > resid_moist[lindex]) {
                     Q12[lindex] = calc_Q12(Ksat[lindex], tmp_liq,
                                            resid_moist[lindex],
                                            soil_con->max_moist[lindex],

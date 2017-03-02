@@ -48,6 +48,9 @@ vic_store(dmy_struct *dmy_state,
     size_t                     k;
     size_t                     m;
     size_t                     p;
+    double                     offset;
+    double                     time_num;
+    double                     end_time_num;
     int                       *ivar = NULL;
     double                    *dvar = NULL;
     size_t                     d2start[2];
@@ -55,12 +58,12 @@ vic_store(dmy_struct *dmy_state,
     size_t                     d4start[4];
     size_t                     d5start[5];
     size_t                     d6start[6];
+    dmy_struct                 end_time_date;
     nc_file_struct             nc_state_file;
     nc_var_struct             *nc_var;
 
     set_nc_state_file_info(&nc_state_file);
 
-    // create netcdf file for storing model state
     sprintf(filename, "%s.%04i%02i%02i_%05u.nc",
             filenames.statefile, dmy_state->year,
             dmy_state->month, dmy_state->day,
@@ -73,7 +76,6 @@ vic_store(dmy_struct *dmy_state,
     }
 
     // write state variables
-
     // allocate memory for variables to be stored
     ivar = malloc(local_domain.ncells_active * sizeof(*ivar));
     check_alloc_status(ivar, "Memory allocation error");
@@ -357,7 +359,6 @@ vic_store(dmy_struct *dmy_state,
         }
     }
 
-
     // melting state: (int)snow[veg][band].MELTING
     nc_var = &(nc_state_file.nc_vars[STATE_SNOW_MELT_STATE]);
     for (m = 0; m < options.NVEGTYPES; m++) {
@@ -434,7 +435,6 @@ vic_store(dmy_struct *dmy_state,
             }
         }
     }
-
 
     // snow surface temperature: snow[veg][band].surf_temp
     nc_var = &(nc_state_file.nc_vars[STATE_SNOW_SURF_TEMP]);
@@ -513,7 +513,6 @@ vic_store(dmy_struct *dmy_state,
         }
     }
 
-
     // snow pack water: snow[veg][band].pack_water
     nc_var = &(nc_state_file.nc_vars[STATE_SNOW_PACK_WATER]);
     for (m = 0; m < options.NVEGTYPES; m++) {
@@ -538,7 +537,6 @@ vic_store(dmy_struct *dmy_state,
             }
         }
     }
-
 
     // snow density: snow[veg][band].density
     nc_var = &(nc_state_file.nc_vars[STATE_SNOW_DENSITY]);
@@ -565,7 +563,6 @@ vic_store(dmy_struct *dmy_state,
         }
     }
 
-
     // snow cold content: snow[veg][band].coldcontent
     nc_var = &(nc_state_file.nc_vars[STATE_SNOW_COLD_CONTENT]);
     for (m = 0; m < options.NVEGTYPES; m++) {
@@ -590,7 +587,6 @@ vic_store(dmy_struct *dmy_state,
             }
         }
     }
-
 
     // snow canopy storage: snow[veg][band].snow_canopy
     nc_var = &(nc_state_file.nc_vars[STATE_SNOW_CANOPY]);
@@ -617,7 +613,6 @@ vic_store(dmy_struct *dmy_state,
         }
     }
 
-
     // soil node temperatures: energy[veg][band].T[nidx]
     nc_var = &(nc_state_file.nc_vars[STATE_SOIL_NODE_TEMP]);
     for (m = 0; m < options.NVEGTYPES; m++) {
@@ -635,6 +630,7 @@ vic_store(dmy_struct *dmy_state,
                         dvar[i] = nc_state_file.d_fillvalue;
                     }
                 }
+		
                 gather_put_nc_field_double(nc_state_file.nc_id,
                                            nc_var->nc_varid,
                                            nc_state_file.d_fillvalue,
@@ -645,7 +641,6 @@ vic_store(dmy_struct *dmy_state,
             }
         }
     }
-
 
     // Foliage temperature: energy[veg][band].Tfoliage
     nc_var = &(nc_state_file.nc_vars[STATE_FOLIAGE_TEMPERATURE]);
@@ -1255,7 +1250,7 @@ vic_store(dmy_struct *dmy_state,
         for (i = 0; i < local_domain.ncells_active; i++) {
             dvar[i] = nc_state_file.d_fillvalue;
         }
-    }
+    } 
 
     // close the netcdf file if it is still open
     if (mpi_rank == VIC_MPI_ROOT) {
@@ -1267,6 +1262,7 @@ vic_store(dmy_struct *dmy_state,
 
     free(ivar);
     free(dvar);
+
 }
 
 /******************************************************************************

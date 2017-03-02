@@ -224,21 +224,21 @@ initialize_history_file(nc_file_struct *nc,
 
 
     // This could be further refined but for now, I've chosen a file naming
-    // Convention that goes like this:
+    // convention that goes like this:
     switch (stream->agg_alarm.freq) {
     // If FREQ_NDAYS -- filename = result_dir/prefix.YYYY-MM-DD.nc
     case FREQ_NDAYS:
         sprintf(stream->filename, "%s/%s.%04d-%02d-%02d.nc",
                 filenames.result_dir,
                 stream->prefix, stream->time_bounds[0].year,
-                stream->time_bounds[0].month,
-                stream->time_bounds[0].day);
+		stream->time_bounds[0].month,
+		stream->time_bounds[0].day);
         break;
     case FREQ_NMONTHS:
         // If FREQ_NMONTHS -- filename = result_dir/prefix.YYYY-MM.nc
         sprintf(stream->filename, "%s/%s.%04d-%02d.nc", filenames.result_dir,
-                stream->prefix, stream->time_bounds[0].year,
-                stream->time_bounds[0].month);
+                stream->prefix, stream->time_bounds[0].year, 
+		stream->time_bounds[0].month);
         break;
     case FREQ_NYEARS:
         // If FREQ_NYEARS -- filename = result_dir/prefix.YYYY.nc
@@ -249,10 +249,10 @@ initialize_history_file(nc_file_struct *nc,
         // For all other cases -- filename = result_dir/prefix.YYYY-MM-DD-SSSSS.nc
         sprintf(stream->filename, "%s/%s.%04d-%02d-%02d-%05u.nc",
                 filenames.result_dir,
-                stream->prefix, stream->time_bounds[0].year,
-                stream->time_bounds[0].month,
-                stream->time_bounds[0].day,
-                stream->time_bounds[0].dayseconds);
+                stream->prefix, stream->time_bounds[0].year, 
+		stream->time_bounds[0].month,
+                stream->time_bounds[0].day, 
+		stream->time_bounds[0].dayseconds);
     }
 
     // open the netcdf file

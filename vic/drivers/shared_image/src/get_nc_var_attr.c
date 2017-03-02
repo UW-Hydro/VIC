@@ -27,7 +27,7 @@
 #include <vic_driver_shared_image.h>
 
 /******************************************************************************
- * @brief    Get netCDF variable attributes.
+ * @brief    Get netCDF dimension.
  *****************************************************************************/
 void
 get_nc_var_attr(nameid_struct *nc_nameid,

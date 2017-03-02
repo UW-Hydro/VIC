@@ -75,7 +75,6 @@ vic_restore(void)
 
     // validate state file dimensions and coordinate variables
     check_init_state_file();
-
     // read state variables
 
     // allocate memory for variables to be stored

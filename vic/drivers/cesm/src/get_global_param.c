@@ -247,7 +247,7 @@ get_global_param(FILE *gp)
                 }
                 else {
                     options.INIT_STATE = true;
-                    strcpy(filenames.init_state, flgstr);
+                    strcpy(filenames.init_state.nc_filename, flgstr);
                 }
             }
             // Define state file format
@@ -279,13 +279,13 @@ get_global_param(FILE *gp)
                 sscanf(cmdstr, "%*s %s", filenames.constants);
             }
             else if (strcasecmp("DOMAIN", optstr) == 0) {
-                sscanf(cmdstr, "%*s %s", filenames.domain);
+                sscanf(cmdstr, "%*s %s", filenames.domain.nc_filename);
             }
             else if (strcasecmp("DOMAIN_TYPE", optstr) == 0) {
                 get_domain_type(cmdstr);
             }
             else if (strcasecmp("PARAMETERS", optstr) == 0) {
-                sscanf(cmdstr, "%*s %s", filenames.params);
+                sscanf(cmdstr, "%*s %s", filenames.params.nc_filename);
             }
             else if (strcasecmp("ARNO_PARAMS", optstr) == 0) {
                 sscanf(cmdstr, "%*s %s", flgstr);
@@ -482,7 +482,7 @@ validate_filenames(filenames_struct *filenames)
     }
 
     // Validate parameter file information
-    if (strcmp(filenames->params, "MISSING") == 0) {
+    if (strcmp(filenames->params.nc_filename, "MISSING") == 0) {
         log_err("A parameters file has not been defined.  Make sure that the "
                 "global file defines the parameters parameter file on the line "
                 "that begins with \"PARAMETERS\".");

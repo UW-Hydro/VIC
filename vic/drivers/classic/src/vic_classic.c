@@ -1,6 +1,6 @@
 /******************************************************************************
  * @section DESCRIPTION
- *
+ * Sunil
  * Classic driver of the VIC model
  *
  * @section LICENSE
@@ -25,6 +25,7 @@
  *****************************************************************************/
 
 #include <vic_driver_classic.h>
+#include <cuda.h>
 
 // global variables
 int                 flag;

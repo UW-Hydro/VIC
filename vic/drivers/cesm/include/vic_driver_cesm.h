@@ -171,7 +171,7 @@ void print_vic_clock(vic_clock *vclock);
 void print_x2l_data(x2l_data_struct *x2l);
 void read_rpointer_file(char *fname);
 unsigned short int start_type_from_char(char *start_str);
-char *trim(char *str);
+char *trimstr(char *str);
 void validate_filenames(filenames_struct *filenames);
 void validate_global_param(global_param_struct *global_param);
 void validate_options(option_struct *options);

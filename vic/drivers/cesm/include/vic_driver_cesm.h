@@ -157,7 +157,7 @@ typedef struct {
     bool l2x_vars_set; /** l2x set flag */
 } l2x_data_struct;
 
-void advance_time(void);
+void advance_vic_time(void);
 void assert_time_insync(vic_clock *vclock, dmy_struct *dmy);
 void get_global_param(FILE *);
 void initialize_cesm_time(void);

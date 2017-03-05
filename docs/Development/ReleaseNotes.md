@@ -38,7 +38,7 @@ To check which release of VIC you are running:
 	7. Fixed bug that prevented using the correct local domain grid cells in `cesm_put_data.c`
 	8. Changed reference temperature units from Celsius to Kelvin in `cesm_put_data.c`
 
-	([GH#693](https://github.com/UW-Hydro/VIC/pull/693))
+	[GH#695](https://github.com/UW-Hydro/VIC/pull/695)
 
 	1. Fix sign for latent heat fluxes passed from VIC to the coupler
 	2. Fix sign for longwave radiation passed from VIC to the coupler

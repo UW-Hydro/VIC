@@ -66,7 +66,7 @@ initialize_cesm_time(void)
  * @brief    Advance one timestep
  *****************************************************************************/
 void
-advance_time(void)
+advance_vic_time(void)
 {
     extern size_t              current;
     extern dmy_struct          dmy_current;

@@ -36,6 +36,9 @@ To check which release of VIC you are running:
 	7. Fixed bug that prevented using the correct local domain grid cells in `cesm_put_data.c`
 	8. Changed reference temperature units from Celsius to Kelvin in `cesm_put_data.c`
 
+	[GH#696](https://github.com/UW-Hydro/VIC/pull/696)
+
+	1. Changes names of CESM driver functions `trim` and `advance_time` to `trimstr` and `advance_vic_time`, respectively, to avoid conflicts with WRF functions with the same names when compiling RFR case. 
 ------------------------------
 
 ## VIC 5.0.1

@@ -72,6 +72,10 @@ get_global_param(FILE *gp)
                 sscanf(cmdstr, "%*s %s", flgstr);
                 global_param.time_units = str_to_timeunits(flgstr);
             }
+	    else if (strcasecmp("FULL_ENERGY", optstr) == 0) {
+		sscanf(cmdstr, "%*s %s", flgstr);
+		options.FULL_ENERGY = str_to_bool(flgstr);
+	    }
             else if (strcasecmp("FROZEN_SOIL", optstr) == 0) {
                 sscanf(cmdstr, "%*s %s", flgstr);
                 options.FROZEN_SOIL = str_to_bool(flgstr);

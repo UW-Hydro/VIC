@@ -27,7 +27,7 @@ To check which release of VIC you are running:
 
 2. Fixes for the CESM driver 
 
-	([GH#642](https://github.com/UW-Hydro/VIC/pull/642))
+	[GH#642](https://github.com/UW-Hydro/VIC/pull/642)
 
 	1. Using correct fill value datatypes in MPI Gather steps 
 	2. Updated state file name time step to be period-ending rather than period-beginning
@@ -43,7 +43,9 @@ To check which release of VIC you are running:
 	1. Fix sign for latent heat fluxes passed from VIC to the coupler
 	2. Fix sign for longwave radiation passed from VIC to the coupler
 
-------------------------------
+	[GH#696](https://github.com/UW-Hydro/VIC/pull/696)
+
+	1. Changes names of CESM driver functions `trim` and `advance_time` to `trimstr` and `advance_vic_time`, respectively, to avoid conflicts with WRF functions with the same names when compiling RFR case. 
 
 ## VIC 5.0.1
 

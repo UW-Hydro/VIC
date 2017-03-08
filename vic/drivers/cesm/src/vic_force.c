@@ -205,6 +205,10 @@ vic_force(void)
         for (j = 0; j < NF; j++) {
             // vapor pressure deficit
             force[i].vpd[j] = svp(force[i].air_temp[j]) - force[i].vp[j];
+	    if (force[i].vpd[j] < 0) {
+		force[i].vpd[j] = 0;
+		force[i].vp[j] = svp(force[i].air_temp[j]);
+	    }
             // photosynthetically active radiation
             // TODO: Add CARBON_SW2PAR back to the parameters structure
             // force[i].par[j] = param.CARBON_SW2PAR * force[i].shortwave[j];

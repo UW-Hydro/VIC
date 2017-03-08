@@ -249,7 +249,7 @@ vic_cesm_put_data()
 
                 // latent heat flux
                 // CESM units: W m-2
-                l2x_vic[i].l2x_Fall_lat += -1 * AreaFactor * energy.AtmosLatent;
+                l2x_vic[i].l2x_Fall_lat += AreaFactor * energy.AtmosLatent;
 
                 // sensible heat flux
                 // CESM units: W m-2
@@ -258,7 +258,7 @@ vic_cesm_put_data()
 
                 // upward longwave heat flux
                 // CESM units: W m-2
-                l2x_vic[i].l2x_Fall_lwup += AreaFactor *
+                l2x_vic[i].l2x_Fall_lwup += -1 *  AreaFactor *
                                             (force[i].longwave[NR] -
                                              energy.NetLongAtmos);
 

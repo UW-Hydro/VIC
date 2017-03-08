@@ -25,7 +25,9 @@ To check which release of VIC you are running:
 
 	Drainage from upper layer to adjacent lower layer is calculated according to Brook & Corey curve (where drainage rate is a function of upper-layer soil moisture). In previous versions, a simple numerical solution is applied which uses the timestep-beginning upper-layer soil moisture to calculate drainage rate, and assume this constant rate over the entire timestep. This can cause unreasonably large drainage if the curve has a steep shape and when soil moisture is high. Now, the current version uses exact integral (instead of numerical solution) for layer drainage calculation.
 
-2. Fixes for the CESM driver ([GH#642](https://github.com/UW-Hydro/VIC/pull/642))
+2. Fixes for the CESM driver 
+
+	[GH#642](https://github.com/UW-Hydro/VIC/pull/642)
 
 	1. Using correct fill value datatypes in MPI Gather steps 
 	2. Updated state file name time step to be period-ending rather than period-beginning
@@ -36,10 +38,14 @@ To check which release of VIC you are running:
 	7. Fixed bug that prevented using the correct local domain grid cells in `cesm_put_data.c`
 	8. Changed reference temperature units from Celsius to Kelvin in `cesm_put_data.c`
 
+	[GH#695](https://github.com/UW-Hydro/VIC/pull/695)
+
+	1. Fix sign for latent heat fluxes passed from VIC to the coupler
+	2. Fix sign for longwave radiation passed from VIC to the coupler
+
 	[GH#696](https://github.com/UW-Hydro/VIC/pull/696)
 
 	1. Changes names of CESM driver functions `trim` and `advance_time` to `trimstr` and `advance_vic_time`, respectively, to avoid conflicts with WRF functions with the same names when compiling RFR case. 
-------------------------------
 
 ## VIC 5.0.1
 

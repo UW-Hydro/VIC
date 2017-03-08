@@ -76,9 +76,6 @@ int
 vic_cesm_init(vic_clock     *vclock,
               case_metadata *cmeta)
 {
-    global_param_struct global_param; 
-    option_struct       options;
-
     // start vic all timer
     timer_start(&(global_timers[TIMER_VIC_ALL]));
     // start vic init timer

@@ -45,6 +45,7 @@ vic_force(void)
     extern option_struct       options;
     extern soil_con_struct    *soil_con;
     extern veg_con_map_struct *veg_con_map;
+    extern veg_con_struct    **veg_con;
     extern veg_hist_struct   **veg_hist;
     extern veg_lib_struct    **veg_lib;
     extern parameters_struct   param;
@@ -261,15 +262,15 @@ vic_force(void)
             if (vidx != NODATA_VEG) {
                 for (j = 0; j < NF; j++) {
                     veg_hist[i][vidx].albedo[j] =
-                        veg_lib[i][v].albedo[dmy_current.month - 1];
+                        veg_con[i][vidx].albedo[dmy_current.month - 1];
                     veg_hist[i][vidx].displacement[j] =
-                        veg_lib[i][v].displacement[dmy_current.month - 1];
+                        veg_con[i][vidx].displacement[dmy_current.month - 1];
                     veg_hist[i][vidx].fcanopy[j] =
-                        veg_lib[i][v].fcanopy[dmy_current.month - 1];
+                        veg_con[i][vidx].fcanopy[dmy_current.month - 1];
                     veg_hist[i][vidx].LAI[j] =
-                        veg_lib[i][v].LAI[dmy_current.month - 1];
+                        veg_con[i][vidx].LAI[dmy_current.month - 1];
                     veg_hist[i][vidx].roughness[j] =
-                        veg_lib[i][v].roughness[dmy_current.month - 1];
+                        veg_con[i][vidx].roughness[dmy_current.month - 1];
                 }
                 // not the correct way to calculate average albedo, but leave
                 // for now

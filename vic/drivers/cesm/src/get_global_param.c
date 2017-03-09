@@ -75,7 +75,7 @@ get_global_param(FILE *gp)
 	    else if (strcasecmp("FULL_ENERGY", optstr) == 0) {
 		sscanf(cmdstr, "%*s %s", flgstr);
 		options.FULL_ENERGY = str_to_bool(flgstr);
-		if (options.FULL_ENERGY == FALSE) {
+		if (options.FULL_ENERGY == false) {
 		    log_warn("FULL_ENERGY is set to FALSE. Please double check "
 			      "that this is the setting you intended.");
 		}

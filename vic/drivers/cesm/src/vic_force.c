@@ -206,6 +206,10 @@ vic_force(void)
             // vapor pressure deficit
             force[i].vpd[j] = svp(force[i].air_temp[j]) - force[i].vp[j];
 	    if (force[i].vpd[j] < 0) {
+		log_warn("Vapor pressure deficit is %f which is < 0, "
+			 "setting vapor pressure deficit to 0 and calculating "
+			 "saturated vapor pressure using air temperature %f.",
+			  force[i].vpd[j], force[i].air_temp[j]);
 		force[i].vpd[j] = 0;
 		force[i].vp[j] = svp(force[i].air_temp[j]);
 	    }

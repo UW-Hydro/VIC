@@ -111,6 +111,36 @@ START=$(date +%s)
 mpiexec_mpt -np ${BC_MPI_TASKS_ALLOC} $vic_exe -g $vic_global
 END=$(date +%s)
 DIFF=$(echo "$END - $START" | bc)
+printf "%5s | %f\n" ${BC_MPI_TASKS_ALLOC} $DIFF >> $timing_table_file'''),
+    'thunder': host_config(profile=[dict(select=1, mpiprocs=36),
+                                    dict(select=2, mpiprocs=36),
+                                    dict(select=3, mpiprocs=36),
+                                    dict(select=4, mpiprocs=36),
+                                    dict(select=5, mpiprocs=36),
+                                    dict(select=6, mpiprocs=36),
+                                    dict(select=8, mpiprocs=36),
+                                    dict(select=10, mpiprocs=36),
+                                    dict(select=12, mpiprocs=36)],
+                          submit='qsub', mpiexec='mpiexec_mpt', 
+                          template='''#!/bin/bash
+#!/bin/bash
+#PBS -N VIC$i
+#PBS -q standard
+#PBS -A NPSCA07935242
+#PBS -l application=VIC
+#PBS -l select=$select:ncpus=36:mpiprocs=$mpiprocs
+#PBS -l walltime=35:00:00
+#PBS -j oe
+
+# Qsub template for AFRL THUNDER
+# Scheduler: PBS
+
+module load netcdf-fortran/intel/4.4.2
+
+START=$(date +%s)
+mpiexec_mpt -np ${BC_MPI_TASKS_ALLOC} $vic_exe -g $vic_global
+END=$(date +%s)
+DIFF=$(echo "$END - $START" | bc)
 printf "%5s | %f\n" ${BC_MPI_TASKS_ALLOC} $DIFF >> $timing_table_file''')}
 
 OUT_WIDTH = 100

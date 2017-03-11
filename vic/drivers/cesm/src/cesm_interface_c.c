@@ -94,13 +94,19 @@ vic_cesm_init(vic_clock     *vclock,
     vic_init();
 
     // populate model state, either using a cold start or from a restart file
-    vic_populate_model_state(trim(cmeta->starttype));
+    vic_populate_model_state(trimstr(cmeta->starttype));
 
     // initialize forcings
     vic_force();
 
     // initialize output structures
     vic_init_output(&dmy_current);
+
+    // initialization is complete, print settings
+    log_info(
+	"Initialization is complete, print global param and options structures");
+    print_global_param(&global_param);
+    print_option(&options);
 
     // stop init timer
     timer_stop(&(global_timers[TIMER_VIC_INIT]));
@@ -139,7 +145,7 @@ vic_cesm_run(vic_clock *vclock)
     vic_write_output(&dmy_current);
 
     // advance the clock
-    advance_time();
+    advance_vic_time();
     assert_time_insync(vclock, &dmy_current);
 
     // if save:

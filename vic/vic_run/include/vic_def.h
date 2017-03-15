@@ -268,7 +268,7 @@ typedef struct {
                             Default = TRUE */
 
     // input options
-    bool BASEFLOW;       /**< ARNO: read Ds, Dm, Ws, c; NIJSSEN2001: read d1, d2, d3, d4 */
+    unsigned short int BASEFLOW;     /**< ARNO: read Ds, Dm, Ws, c; NIJSSEN2001: read d1, d2, d3, d4 */
     unsigned short int GRID_DECIMAL; /**< Number of decimal places in grid file extensions */
     bool VEGLIB_FCAN;    /**< TRUE = veg library file contains monthly fcanopy values */
     bool VEGLIB_PHOTO;   /**< TRUE = veg library contains photosynthesis parameters */

@@ -54,7 +54,7 @@ initialize_global()
     global_param.endyear = 0;
     global_param.endmonth = 0;
     global_param.endday = 0;
-    global_param.resolution = 0;
+    global_param.resolution = MISSING;
     global_param.wind_h = 10.0;
     for (i = 0; i < 2; i++) {
         global_param.forceyear[i] = 0;

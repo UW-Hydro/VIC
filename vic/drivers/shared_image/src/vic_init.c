@@ -987,8 +987,7 @@ vic_init(void)
                 }
                 sum += soil_con[i].AreaFract[j];
             }
-            // TBD: Need better check for equal to 1.
-            if (sum != 1.) {
+            if (!assert_close_double(sum, 1.0, 0., 0.001)) {
                 sprint_location(locstr, &(local_domain.locations[i]));
                 log_warn("Sum of the snow band area fractions does not equal "
                          "1 (%f), dividing each fraction by the sum\n%s",
@@ -1003,7 +1002,7 @@ vic_init(void)
             for (j = 0; j < options.SNOW_BAND; j++) {
                 mean += soil_con[i].BandElev[j] * soil_con[i].AreaFract[j];
             }
-            if (fabs(soil_con[i].elevation - soil_con[i].BandElev[j]) > 1.0) {
+            if (!assert_close_double(soil_con[i].elevation, mean, 0., 0.001)) {
                 sprint_location(locstr, &(local_domain.locations[i]));
                 log_warn("average band elevation %f not equal to grid_cell "
                          "average elevation %f; setting grid cell elevation "
@@ -1041,8 +1040,7 @@ vic_init(void)
                 }
                 sum += soil_con[i].Pfactor[j];
             }
-            // TBD: Need better check for equal to 1.
-            if (sum != 1.) {
+            if (!assert_close_double(sum, 1.0, 0., 0.001)) {
                 sprint_location(locstr, &(local_domain.locations[i]));
                 log_warn("Sum of the snow band precipitation fractions does "
                          "not equal 1 (%f), dividing each fraction by the "
@@ -1192,7 +1190,7 @@ vic_init(void)
                     sum += veg_con[i][vidx].zone_fract[k];
                 }
                 // TBD: Need better test for not equal to 1.
-                if (sum != 1.) {
+                if (!assert_close_double(sum, 1.0, 0., 0.001)) {
                     sprint_location(locstr, &(local_domain.locations[i]));
                     log_warn("Root zone fractions sum to more than 1 (%f), "
                              "normalizing fractions.  If the sum is large, "

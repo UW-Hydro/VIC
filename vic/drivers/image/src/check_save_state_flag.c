@@ -32,7 +32,8 @@
  *          current time step
  *****************************************************************************/
 bool
-check_save_state_flag(size_t current, dmy_struct *dmy_offset)
+check_save_state_flag(size_t      current,
+                      dmy_struct *dmy_offset)
 {
     extern global_param_struct global_param;
     extern dmy_struct         *dmy;

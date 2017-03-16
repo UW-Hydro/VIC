@@ -72,14 +72,14 @@ get_global_param(FILE *gp)
                 sscanf(cmdstr, "%*s %s", flgstr);
                 global_param.time_units = str_to_timeunits(flgstr);
             }
-	    else if (strcasecmp("FULL_ENERGY", optstr) == 0) {
-		sscanf(cmdstr, "%*s %s", flgstr);
-		options.FULL_ENERGY = str_to_bool(flgstr);
-		if (options.FULL_ENERGY == false) {
-		    log_warn("FULL_ENERGY is set to FALSE. Please double check "
-			      "that this is the setting you intended.");
-		}
-	    }
+            else if (strcasecmp("FULL_ENERGY", optstr) == 0) {
+                sscanf(cmdstr, "%*s %s", flgstr);
+                options.FULL_ENERGY = str_to_bool(flgstr);
+                if (options.FULL_ENERGY == false) {
+                    log_warn("FULL_ENERGY is set to FALSE. Please double check "
+                             "that this is the setting you intended.");
+                }
+            }
             else if (strcasecmp("FROZEN_SOIL", optstr) == 0) {
                 sscanf(cmdstr, "%*s %s", flgstr);
                 options.FROZEN_SOIL = str_to_bool(flgstr);
@@ -394,8 +394,8 @@ get_global_param(FILE *gp)
                 }
             }
             else if (strcasecmp("SNOW_BAND", optstr) == 0) {
-	        sscanf(cmdstr, "%*s %s", flgstr);
-		if (str_to_bool(flgstr)) {
+                sscanf(cmdstr, "%*s %s", flgstr);
+                if (str_to_bool(flgstr)) {
                     options.SNOW_BAND = SNOW_BAND_TRUE_BUT_UNSET;
                 }
             }
@@ -430,7 +430,7 @@ get_global_param(FILE *gp)
                 ; // do nothing
             }
             else if (strcasecmp("AGGFREQ", optstr) == 0) {
-		; // do nothing
+                ; // do nothing
             }
             else if (strcasecmp("OUTPUT_STEPS_PER_DAY", optstr) == 0) {
                 ; // do nothing

@@ -37,7 +37,7 @@
  *****************************************************************************/
 typedef struct {
     char nc_filename[MAXSTRING];
-    int  nc_id;
+    int nc_id;
 } nameid_struct;
 
 void create_MPI_filenames_struct_type(MPI_Datatype *mpi_type);

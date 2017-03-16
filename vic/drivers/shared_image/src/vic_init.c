@@ -576,7 +576,6 @@ vic_init(void)
         }
     }
 
-
     // organic soils
     if (options.ORGANIC_FRACT) {
         // organic
@@ -1189,7 +1188,6 @@ vic_init(void)
                 for (k = 0; k < options.ROOT_ZONES; k++) {
                     sum += veg_con[i][vidx].zone_fract[k];
                 }
-                // TBD: Need better test for not equal to 1.
                 if (!assert_close_double(sum, 1.0, 0., 0.001)) {
                     sprint_location(locstr, &(local_domain.locations[i]));
                     log_warn("Root zone fractions sum to more than 1 (%f), "
@@ -1290,7 +1288,6 @@ vic_init(void)
             }
         }
     }
-
 
     // read_lake parameters
     if (options.LAKES) {

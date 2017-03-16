@@ -49,7 +49,7 @@ To check which release of VIC you are running:
 
     [GH#702] (https://github.com/UW-Hydro/VIC/pull/702)
 
-    1. Fixes Julian day in the CESM driver in the dmy struct. 
+    1. Fixes Julian day for the first timestep in the dmy struct for the CESM driver. 
 ## VIC 5.0.1
 
 **Release date: (February 1, 2017)**

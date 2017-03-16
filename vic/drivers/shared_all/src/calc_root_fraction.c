@@ -65,10 +65,11 @@ calc_root_fractions(veg_con_struct  *veg_con,
 
         max_itter = -1;
         while (zone < options.ROOT_ZONES) {
-            max_itter ++;
+            max_itter++;
             if (max_itter > 9999) {
                 log_warn("veg=%d of Nveg=%d", veg, Nveg);
-                log_warn("zone %zu of %zu ROOT_ZONES", zone, options.ROOT_ZONES);
+                log_warn("zone %zu of %zu ROOT_ZONES", zone,
+                         options.ROOT_ZONES);
                 log_err("stuck in an infinite loop");
             }
 
@@ -133,7 +134,7 @@ calc_root_fractions(veg_con_struct  *veg_con,
                 }
             }
             else if (Zsum + Zstep > Lsum) {
-                zone ++;  // should this be here?
+                zone++;   // should this be here?
                 if (layer < options.Nlayer) {
                     veg_con[veg].root[layer] = sum_fract;
                     sum_fract = 0.;

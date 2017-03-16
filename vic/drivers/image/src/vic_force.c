@@ -282,7 +282,6 @@ vic_force(void)
     if (options.LAI_SRC == FROM_VEGHIST ||
         options.FCAN_SRC == FROM_VEGHIST ||
         options.ALB_SRC == FROM_VEGHIST) {
-
         // global_param.forceoffset[1] resets every year since the met file restarts
         // every year
         // global_param.forceskip[1] should also reset to 0 after the first year
@@ -527,9 +526,12 @@ get_forcing_file_info(param_set_struct *param_set,
     dmy_struct                 nc_start_dmy;
 
     // read time info from netcdf file
-    get_nc_field_double(&(filenames.forcing[file_num]), "time", &start, &count, nc_times);
-    get_nc_var_attr(&(filenames.forcing[file_num]), "time", "units", &nc_unit_chars);
-    get_nc_var_attr(&(filenames.forcing[file_num]), "time", "calendar", &calendar_char);
+    get_nc_field_double(&(filenames.forcing[file_num]), "time", &start, &count,
+                        nc_times);
+    get_nc_var_attr(&(filenames.forcing[file_num]), "time", "units",
+                    &nc_unit_chars);
+    get_nc_var_attr(&(filenames.forcing[file_num]), "time", "calendar",
+                    &calendar_char);
 
     // parse the calendar string and check to make sure it matches the global clock
     calendar = str_to_calendar(calendar_char);

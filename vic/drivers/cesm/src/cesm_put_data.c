@@ -140,12 +140,14 @@ vic_cesm_put_data()
 
                 // 2m reference temperature
                 // CESM units: K
-                l2x_vic[i].l2x_Sl_tref += AreaFactor * (force[i].air_temp[NR] + CONST_TKFRZ);
+                l2x_vic[i].l2x_Sl_tref += AreaFactor *
+                                          (force[i].air_temp[NR] + CONST_TKFRZ);
 
                 // 2m reference specific humidity
                 // CESM units: g/g
                 l2x_vic[i].l2x_Sl_qref += AreaFactor * CONST_EPS *
-                                          force[i].vp[NR] / force[i].pressure[NR];
+                                          force[i].vp[NR] /
+                                          force[i].pressure[NR];
 
                 // Albedo Note: VIC does not partition its albedo, all returned
                 // values will be the same
@@ -258,7 +260,7 @@ vic_cesm_put_data()
 
                 // upward longwave heat flux
                 // CESM units: W m-2
-                l2x_vic[i].l2x_Fall_lwup += -1 *  AreaFactor *
+                l2x_vic[i].l2x_Fall_lwup += -1 * AreaFactor *
                                             (force[i].longwave[NR] -
                                              energy.NetLongAtmos);
 

@@ -171,7 +171,7 @@ typedef struct {
 typedef struct {
     nameid_struct forcing[MAX_FORCE_FILES];  /**< atmospheric forcing files */
     char f_path_pfx[MAX_FORCE_FILES][MAXSTRING]; /**< path and prefix for
-                                                  atmospheric forcing files */
+                                                    atmospheric forcing files */
     char global[MAXSTRING];     /**< global control file name */
     nameid_struct domain;       /**< domain file name and nc_id*/
     char constants[MAXSTRING];  /**< model constants file name */

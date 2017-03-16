@@ -31,9 +31,9 @@
  *****************************************************************************/
 void
 get_nc_var_attr(nameid_struct *nc_nameid,
-                char  *var_name,
-                char  *attr_name,
-                char **attr)
+                char          *var_name,
+                char          *attr_name,
+                char         **attr)
 {
     int    var_id;
     int    status;

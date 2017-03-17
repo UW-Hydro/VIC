@@ -142,22 +142,21 @@ mpiexec_mpt -np ${BC_MPI_TASKS_ALLOC} $vic_exe -g $vic_global
 END=$(date +%s)
 DIFF=$(echo "$END - $START" | bc)
 printf "%5s | %f\n" ${BC_MPI_TASKS_ALLOC} $DIFF >> $timing_table_file'''),
-    'cheyenne': host_config(profile=[dict(select=1, mpiprocs=36),
-                                     dict(select=2, mpiprocs=36),
-                                     dict(select=3, mpiprocs=36),
-                                     dict(select=4, mpiprocs=36),
-                                     dict(select=5, mpiprocs=36),
-                                     dict(select=6, mpiprocs=36),
-                                     dict(select=8, mpiprocs=36),
-                                     dict(select=10, mpiprocs=36),
-                                     dict(select=12, mpiprocs=36)],
+    'cheyenne': host_config(profile=[dict(select=1, mpiprocs=1, nprocs=1*1),
+                                     dict(select=1, mpiprocs=18, nprocs=1*18),
+                                     dict(select=1, mpiprocs=36, nprocs=1*36),
+                                     dict(select=2, mpiprocs=36, nprocs=2*36),
+                                     dict(select=4, mpiprocs=36, nprocs=4*36),
+                                     dict(select=6, mpiprocs=36, nprocs=6*36),
+                                     dict(select=8, mpiprocs=36, nprocs=8*36),
+                                     dict(select=12, mpiprocs=36, nprocs=12*36)
+                                     ],
                             submit='qsub', mpiexec='mpiexec_mpt',
                             template='''#!/bin/bash
 #!/bin/bash
 #PBS -N VIC$i
 #PBS -q regular
 #PBS -A P48500028
-#PBS -l application=VIC
 #PBS -l select=$select:ncpus=36:mpiprocs=$mpiprocs
 #PBS -l walltime=12:00:00
 #PBS -j oe
@@ -166,15 +165,12 @@ printf "%5s | %f\n" ${BC_MPI_TASKS_ALLOC} $DIFF >> $timing_table_file'''),
 # Qsub template for UCAR CHEYENNE
 # Scheduler: PBS
 
-module load netcdf/4.4.1.1
-module load intel/16.0.3
-module load impi/5.1.3.210
-
 START=$(date +%s)
-mpiexec_mpt -np ${BC_MPI_TASKS_ALLOC} $vic_exe -g $vic_global
+
+$mpiexec $vic_exe -g $vic_global
 END=$(date +%s)
 DIFF=$(echo "$END - $START" | bc)
-printf "%5s | %f\n" ${BC_MPI_TASKS_ALLOC} $DIFF >> $timing_table_file''')
+printf "%5s | %f\\n" $nprocs $DIFF >> $timing_table_file''')
 }
 
 OUT_WIDTH = 100
@@ -281,7 +277,8 @@ def run_scaling(args):
 
             run_string = template.safe_substitute(
                 vic_exe=args.vic_exe, vic_global=args.global_param,
-                timing_table_file=args.timing, i=i, **kwargs)
+                timing_table_file=args.timing, i=i,
+                mpiexec=config.mpiexec, **kwargs)
             run_file = 'vic_{host}_{i}.sh'.format(host=args.host, i=i)
             with open(run_file, 'w') as f:
                 f.write(run_string)

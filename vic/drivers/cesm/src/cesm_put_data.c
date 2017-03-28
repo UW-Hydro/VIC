@@ -68,6 +68,7 @@ vic_cesm_put_data()
     energy_bal_struct          energy;
     snow_data_struct           snow;
     veg_var_struct             veg_var;
+    extern double           ***out_data;
 
     for (i = 0; i < local_domain.ncells_active; i++) {
         // Zero l2x vars (leave unused fields as MISSING values)
@@ -100,6 +101,88 @@ vic_cesm_put_data()
         l2x_vic[i].l2x_Flrl_rofliq = 0;
         // l2x_vic[i].l2x_Flrl_rofice = 0;
 
+	// reference values 
+
+	// 10m wind, VIC: m/s, CESM: m/s
+        l2x_vic[i].l2x_Sl_u10 = out_data[i][OUT_WIND][0];
+
+	// 2m reference temperature, VIC: C, CESM: K
+        l2x_vic[i].l2x_Sl_tref = out_data[i][OUT_AIR_TEMP][0] + CONST_TKFRZ;
+
+	// 2m reference specific humidity, VIC: kg/kg, CESM: g/g
+        l2x_vic[i].l2x_Sl_qref = CONST_EPS * 
+					out_data[i][OUT_VP][0] / out_data[i][OUT_PRESSURE][0];
+
+	// band-specific quantities
+
+	// temperature, VIC: C, CESM: K
+	// OUT_RAD_TEMP includes AreaFactor 
+        l2x_vic[i].l2x_Sl_t = out_data[i][OUT_RAD_TEMP][0] + CONST_TKFRZ;
+
+        // albedo, VIC: fraction, CESM: fraction 
+	// Note: VIC does not partition its albedo, thus all types are
+	// the same value 
+        // force->NetShortAtmos net shortwave flux (+ down)
+        // SWup = force->shortwave[NR] - energy.NetShortAtmos
+        albedo = out_data[i][OUT_ALBEDO][0]
+                
+	// albedo: direct, visible
+	l2x_vic[i].l2x_Sl_avsdr = albedo;
+
+        // albedo: direct , near-ir
+        l2x_vic[i].l2x_Sl_anidr = albedo;
+
+        // albedo: diffuse, visible
+        l2x_vic[i].l2x_Sl_avsdf = albedo;
+
+        // albedo: diffuse, near-ir
+        l2x_vic[i].l2x_Sl_anidf = albedo;
+
+        // snow height, VIC: cm, CESM: m
+        l2x_vic[i].l2x_Sl_snowh = out_data[i][OUT_SNOW_DEPTH][0] / CM_PER_M; 
+
+        // net shortwave, VIC: W/m2, CESM: W/m2
+        l2x_vic[i].l2x_Fall_swnet = out_data[i][OUT_SWNET][0];
+
+        // longwave up, VIC: W/m2, CESM: W/m2
+	// adjust sign for CESM sign convention
+        l2x_vic[i].l2x_Fall_lwup = -1 * 
+                                        (out_data[i][OUT_LWDOWN][0] -
+                                             out_data[i][OUT_LWNET][0]);
+
+	// turbulent heat fluxes
+        // latent heat, VIC: W/m2, CESM: W/m2
+        l2x_vic[i].l2x_Fall_lat = out_data[i][OUT_LATENT][0];
+
+        // sensible heat, VIC: W/m2, CESM: W/m2
+	// TO-DO: check sign in VIC 4, this is inconsistent with 
+	// the history file output sign 
+        l2x_vic[i].l2x_Fall_sen += -1 * out_data[i][OUT_SENSIBLE][0];
+
+        // evaporation, VIC: mm, CESM: kg m-2 s-1
+	// TO-DO should we incorporate bare soil evap?
+	// canopy corrections applied already 
+	// so not repeated here
+	evap = out_data[i][OUT_EVAP][0] * MM_PER_M;
+        l2x_vic[i].l2x_Fall_evap += -1 * evap /
+                                            global_param.dt;
+
+	// aerodynamical resistance, VIC: s/m, CESM: s/m
+                if (overstory) {
+                    aero_resist = cell.aero_resist[1];
+                }
+                else {
+                    aero_resist = cell.aero_resist[0];
+                }
+
+                if (aero_resist < DBL_EPSILON) {
+                    log_warn("aero_resist (%f) is < %f", aero_resist,
+                             DBL_EPSILON);
+                    aero_resist = param.HUGE_RESIST;
+                }
+
+                l2x_vic[i].l2x_Sl_ram1 += AreaFactor * aero_resist;
+
         // running sum to make sure we get the full grid cell
         AreaFactorSum = 0;
 
@@ -127,85 +210,10 @@ vic_cesm_put_data()
                     continue;
                 }
                 AreaFactorSum += AreaFactor;
-
-                // temperature
-                // CESM units: K
-                if (overstory && snow.snow && !(options.LAKES && IsWet)) {
-                    rad_temp = energy.Tfoliage + CONST_TKFRZ;
-                }
-                else {
-                    rad_temp = energy.Tsurf + CONST_TKFRZ;
-                }
-                l2x_vic[i].l2x_Sl_t += AreaFactor * rad_temp;
-
-                // 2m reference temperature
-                // CESM units: K
-                l2x_vic[i].l2x_Sl_tref += AreaFactor * (force[i].air_temp[NR] + CONST_TKFRZ);
-
-                // 2m reference specific humidity
-                // CESM units: g/g
-                l2x_vic[i].l2x_Sl_qref += AreaFactor * CONST_EPS *
-                                          force[i].vp[NR] / force[i].pressure[NR];
-
-                // Albedo Note: VIC does not partition its albedo, all returned
-                // values will be the same
-
-                // albedo: direct, visible
-                // CESM units: unitless
-                // force->shortwave is the incoming shortwave (+ down)
-                // force->NetShortAtmos net shortwave flux (+ down)
-                // SWup = force->shortwave[NR] - energy.NetShortAtmos
-                // Set the albedo to zero for the case where there is no shortwave down
-                if (force[i].shortwave[NR] > 0.) {
-                    albedo = AreaFactor *
-                             (force[i].shortwave[NR] - energy.NetShortAtmos) /
-                             force[i].shortwave[NR];
-                }
-                else {
-                    albedo = 0.;
-                }
-                l2x_vic[i].l2x_Sl_avsdr += albedo;
-
-                // albedo: direct , near-ir
-                // CESM units: unitless
-                l2x_vic[i].l2x_Sl_anidr += albedo;
-
-                // albedo: diffuse, visible
-                // CESM units: unitless
-                l2x_vic[i].l2x_Sl_avsdf += albedo;
-
-                // albedo: diffuse, near-ir
-                // CESM units: unitless
-                l2x_vic[i].l2x_Sl_anidf += albedo;
-
-                // snow height
-                // CESM units: m
-                l2x_vic[i].l2x_Sl_snowh += AreaFactor * snow.depth;
-
-                // 10m wind
-                // CESM units: m/s
-                l2x_vic[i].l2x_Sl_u10 += AreaFactor * force[i].wind[NR];
-
-                // dry deposition velocities (optional)
+                
+		// dry deposition velocities (optional)
                 // CESM units: ?
                 // l2x_vic[i].l2x_Sl_ddvel;
-
-                // aerodynamical resistance
-                // CESM units: s/m
-                if (overstory) {
-                    aero_resist = cell.aero_resist[1];
-                }
-                else {
-                    aero_resist = cell.aero_resist[0];
-                }
-
-                if (aero_resist < DBL_EPSILON) {
-                    log_warn("aero_resist (%f) is < %f", aero_resist,
-                             DBL_EPSILON);
-                    aero_resist = param.HUGE_RESIST;
-                }
-
-                l2x_vic[i].l2x_Sl_ram1 += AreaFactor * aero_resist;
 
                 // log z0
                 // CESM units: m
@@ -246,40 +254,6 @@ vic_cesm_put_data()
                     sqrt(pow(wind_stress_x, 2) + pow(wind_stress_y, 2));
                 l2x_vic[i].l2x_Sl_fv += AreaFactor *
                                         (wind_stress / force[i].density[NR]);
-
-                // latent heat flux
-                // CESM units: W m-2
-                l2x_vic[i].l2x_Fall_lat += AreaFactor * energy.AtmosLatent;
-
-                // sensible heat flux
-                // CESM units: W m-2
-                l2x_vic[i].l2x_Fall_sen += -1 * AreaFactor *
-                                           energy.AtmosSensible;
-
-                // upward longwave heat flux
-                // CESM units: W m-2
-                l2x_vic[i].l2x_Fall_lwup += -1 *  AreaFactor *
-                                            (force[i].longwave[NR] -
-                                             energy.NetLongAtmos);
-
-                // evaporation water flux
-                // CESM units: kg m-2 s-1
-                evap = 0.0;
-                for (index = 0; index < options.Nlayer; index++) {
-                    evap += cell.layer[index].evap;
-                }
-                evap += snow.vapor_flux * MM_PER_M;
-                if (HasVeg) {
-                    evap += snow.canopy_vapor_flux * MM_PER_M;
-                    evap += veg_var.canopyevap;
-                }
-                l2x_vic[i].l2x_Fall_evap += -1 * AreaFactor * evap /
-                                            global_param.dt;
-
-                // heat flux shortwave net
-                l2x_vic[i].l2x_Fall_swnet += AreaFactor *
-                                             (force[i].shortwave[NR] -
-                                              energy.NetShortAtmos);
 
                 // co2 flux **For testing set to 0
                 // l2x_vic[i].l2x_Fall_fco2_lnd;

@@ -72,6 +72,8 @@ vic_cesm_put_data()
 
     for (i = 0; i < local_domain.ncells_active; i++) {
         // Zero l2x vars (leave unused fields as MISSING values)
+	// NOTE: I think actually we want unused fields to be 
+	// filled in with zeros, that's what we did previously
         l2x_vic[i].l2x_Sl_t = 0;
         l2x_vic[i].l2x_Sl_tref = 0;
         l2x_vic[i].l2x_Sl_qref = 0;
@@ -81,7 +83,7 @@ vic_cesm_put_data()
         l2x_vic[i].l2x_Sl_anidf = 0;
         l2x_vic[i].l2x_Sl_snowh = 0;
         l2x_vic[i].l2x_Sl_u10 = 0;
-        // l2x_vic[i].l2x_Sl_ddvel = 0;
+        l2x_vic[i].l2x_Sl_ddvel = 0;
         l2x_vic[i].l2x_Sl_fv = 0;
         l2x_vic[i].l2x_Sl_ram1 = 0;
         l2x_vic[i].l2x_Sl_logz0 = 0;
@@ -92,16 +94,20 @@ vic_cesm_put_data()
         l2x_vic[i].l2x_Fall_lwup = 0;
         l2x_vic[i].l2x_Fall_evap = 0;
         l2x_vic[i].l2x_Fall_swnet = 0;
-        // l2x_vic[i].l2x_Fall_fco2_lnd = 0;
-        // l2x_vic[i].l2x_Fall_flxdst1 = 0;
-        // l2x_vic[i].l2x_Fall_flxdst2 = 0;
-        // l2x_vic[i].l2x_Fall_flxdst3 = 0;
-        // l2x_vic[i].l2x_Fall_flxdst4 = 0;
-        // l2x_vic[i].l2x_Fall_flxvoc = 0;
+        l2x_vic[i].l2x_Fall_fco2_lnd = 0;
+	// for now, uncommenting these out 
+	// because this might have been the source 
+	// of the floating point error in RFR runs
+        l2x_vic[i].l2x_Fall_flxdst1 = 0;
+        l2x_vic[i].l2x_Fall_flxdst2 = 0;
+        l2x_vic[i].l2x_Fall_flxdst3 = 0;
+        l2x_vic[i].l2x_Fall_flxdst4 = 0;
+        l2x_vic[i].l2x_Fall_flxvoc = 0;
         l2x_vic[i].l2x_Flrl_rofliq = 0;
-        // l2x_vic[i].l2x_Flrl_rofice = 0;
+        l2x_vic[i].l2x_Flrl_rofice = 0;
+	l2x_vars_set = false;
 
-	// reference values 
+	// populate reference values 
 
 	// 10m wind, VIC: m/s, CESM: m/s
         l2x_vic[i].l2x_Sl_u10 = out_data[i][OUT_WIND][0];
@@ -114,9 +120,10 @@ vic_cesm_put_data()
 					out_data[i][OUT_VP][0] / out_data[i][OUT_PRESSURE][0];
 
 	// band-specific quantities
+	// note that these include a veg correction (AreaFactor)
+	// that is already in the put_data routine
 
 	// temperature, VIC: C, CESM: K
-	// OUT_RAD_TEMP includes AreaFactor 
         l2x_vic[i].l2x_Sl_t = out_data[i][OUT_RAD_TEMP][0] + CONST_TKFRZ;
 
         // albedo, VIC: fraction, CESM: fraction 
@@ -139,6 +146,7 @@ vic_cesm_put_data()
         l2x_vic[i].l2x_Sl_anidf = albedo;
 
         // snow height, VIC: cm, CESM: m
+	// convert to VIC units
         l2x_vic[i].l2x_Sl_snowh = out_data[i][OUT_SNOW_DEPTH][0] / CM_PER_M; 
 
         // net shortwave, VIC: W/m2, CESM: W/m2
@@ -155,7 +163,7 @@ vic_cesm_put_data()
         l2x_vic[i].l2x_Fall_lat = out_data[i][OUT_LATENT][0];
 
         // sensible heat, VIC: W/m2, CESM: W/m2
-	// TO-DO: check sign in VIC 4, this is inconsistent with 
+	// TO-DO: check sign in VIC 4 coupling, this is inconsistent with 
 	// the history file output sign 
         l2x_vic[i].l2x_Fall_sen += -1 * out_data[i][OUT_SENSIBLE][0];
 
@@ -167,23 +175,11 @@ vic_cesm_put_data()
         l2x_vic[i].l2x_Fall_evap += -1 * evap /
                                             global_param.dt;
 
-	// aerodynamical resistance, VIC: s/m, CESM: s/m
-                if (overstory) {
-                    aero_resist = cell.aero_resist[1];
-                }
-                else {
-                    aero_resist = cell.aero_resist[0];
-                }
-
-                if (aero_resist < DBL_EPSILON) {
-                    log_warn("aero_resist (%f) is < %f", aero_resist,
-                             DBL_EPSILON);
-                    aero_resist = param.HUGE_RESIST;
-                }
-
-                l2x_vic[i].l2x_Sl_ram1 += AreaFactor * aero_resist;
 
         // running sum to make sure we get the full grid cell
+	// TO-DO: once we update the aerodynamical resistances
+	// and figure out what to do about the roughnesses
+	// this loop will be eliminated 
         AreaFactorSum = 0;
 
         for (veg = 0; veg <= local_domain.locations[i].nveg; veg++) {
@@ -210,10 +206,23 @@ vic_cesm_put_data()
                     continue;
                 }
                 AreaFactorSum += AreaFactor;
-                
-		// dry deposition velocities (optional)
-                // CESM units: ?
-                // l2x_vic[i].l2x_Sl_ddvel;
+
+        	// aerodynamical resistance, VIC: s/m, CESM: s/m
+		// TO-DO: update to back-calculate WRF effective resistances
+                if (overstory) {
+                    aero_resist = cell.aero_resist[1];
+                }
+                else {
+                    aero_resist = cell.aero_resist[0];
+                }
+
+                if (aero_resist < DBL_EPSILON) {
+                    log_warn("aero_resist (%f) is < %f", aero_resist,
+                             DBL_EPSILON);
+                    aero_resist = param.HUGE_RESIST;
+                }
+
+                l2x_vic[i].l2x_Sl_ram1 += AreaFactor * aero_resist;
 
                 // log z0
                 // CESM units: m
@@ -237,14 +246,16 @@ vic_cesm_put_data()
                 l2x_vic[i].l2x_Sl_logz0 += AreaFactor * log(roughness);
 
                 // wind stress, zonal
+		// TO-DO: use updated aerodynamical resistances for 
+		// calculating the wind stresses and friction velocity
                 // CESM units: N m-2
-                wind_stress_x = -1 * force[i].density[NR] *
+                wind_stress_x = -1 * out_data[i][OUT_DENSITY][0] *
                                 x2l_vic[i].x2l_Sa_u / aero_resist;
                 l2x_vic[i].l2x_Fall_taux += AreaFactor * wind_stress_x;
 
                 // wind stress, meridional
                 // CESM units: N m-2
-                wind_stress_y = -1 * force[i].density[NR] *
+                wind_stress_y = -1 * out_data[i][OUT_DENSITY][0] *
                                 x2l_vic[i].x2l_Sa_v / aero_resist;
                 l2x_vic[i].l2x_Fall_tauy += AreaFactor * wind_stress_y;
 
@@ -253,38 +264,17 @@ vic_cesm_put_data()
                 wind_stress =
                     sqrt(pow(wind_stress_x, 2) + pow(wind_stress_y, 2));
                 l2x_vic[i].l2x_Sl_fv += AreaFactor *
-                                        (wind_stress / force[i].density[NR]);
-
-                // co2 flux **For testing set to 0
-                // l2x_vic[i].l2x_Fall_fco2_lnd;
-
-                // dust flux size bin 1
-                // l2x_vic[i].l2x_Fall_flxdst1;
-
-                // dust flux size bin 2
-                // l2x_vic[i].l2x_Fall_flxdst2;
-
-                // dust flux size bin 3
-                // l2x_vic[i].l2x_Fall_flxdst3;
-
-                // dust flux size bin 4
-                // l2x_vic[i].l2x_Fall_flxdst4;
-
-                // MEGAN fluxes
-                // l2x_vic[i].l2x_Fall_flxvoc;
+                                        (wind_stress / out_data[i][OUT_DENSITY][0]);
 
                 // lnd->rtm input fluxes
                 l2x_vic[i].l2x_Flrl_rofliq += AreaFactor *
                                               (cell.runoff +
                                                cell.baseflow) / global_param.dt;
-
-                // lnd->rtm input fluxes
-                // l2x_vic[i].l2x_Flrl_rofice;
-
-                // vars set flag
-                l2x_vic[i].l2x_vars_set = true;
             }
         }
+
+	// set variables-set flag 
+	l2x_vic[i].l2x_vars_set = true;
 
         if (!assert_close_double(AreaFactorSum, 1., 0., 1e-3)) {
             log_warn("AreaFactorSum (%f) is not 1",

@@ -105,7 +105,6 @@ vic_cesm_put_data()
         l2x_vic[i].l2x_Fall_flxvoc = 0;
         l2x_vic[i].l2x_Flrl_rofliq = 0;
         l2x_vic[i].l2x_Flrl_rofice = 0;
-	l2x_vars_set = false;
 
 	// populate reference values 
 
@@ -131,7 +130,7 @@ vic_cesm_put_data()
 	// the same value 
         // force->NetShortAtmos net shortwave flux (+ down)
         // SWup = force->shortwave[NR] - energy.NetShortAtmos
-        albedo = out_data[i][OUT_ALBEDO][0]
+        albedo = out_data[i][OUT_ALBEDO][0];
                 
 	// albedo: direct, visible
 	l2x_vic[i].l2x_Sl_avsdr = albedo;

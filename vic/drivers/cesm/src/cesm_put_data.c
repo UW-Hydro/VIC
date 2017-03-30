@@ -122,8 +122,8 @@ vic_cesm_put_data()
 	// note that these include a veg correction (AreaFactor)
 	// that is already in the put_data routine
 
-	// temperature, VIC: C, CESM: K
-        l2x_vic[i].l2x_Sl_t = out_data[i][OUT_RAD_TEMP][0] + CONST_TKFRZ;
+	// temperature, VIC: K, CESM: K
+        l2x_vic[i].l2x_Sl_t = out_data[i][OUT_RAD_TEMP][0];
 
         // albedo, VIC: fraction, CESM: fraction 
 	// Note: VIC does not partition its albedo, thus all types are

@@ -121,8 +121,8 @@ printf "%5s | %f\n" ${BC_MPI_TASKS_ALLOC} $DIFF >> $timing_table_file'''),
                                     dict(select=8, mpiprocs=36),
                                     dict(select=10, mpiprocs=36),
                                     dict(select=12, mpiprocs=36)],
-                          submit='qsub', mpiexec='mpiexec_mpt', 
-                          template='''#!/bin/bash
+                           submit='qsub', mpiexec='mpiexec_mpt',
+                           template='''#!/bin/bash
 #!/bin/bash
 #PBS -N VIC$i
 #PBS -q standard
@@ -170,7 +170,37 @@ START=$(date +%s)
 aprun -n ${BC_MPI_TASKS_ALLOC} $vic_exe -g $vic_global
 END=$(date +%s)
 DIFF=$(echo "$END - $START" | bc)
-printf "%5s | %f\n" ${BC_MPI_TASKS_ALLOC} $DIFF >> $timing_table_file''')}
+printf "%5s | %f\n" ${BC_MPI_TASKS_ALLOC} $DIFF >> $timing_table_file'''),
+    'cheyenne': host_config(profile=[dict(select=1, mpiprocs=36),
+                                     dict(select=2, mpiprocs=36),
+                                     dict(select=3, mpiprocs=36),
+                                     dict(select=4, mpiprocs=36),
+                                     dict(select=5, mpiprocs=36),
+                                     dict(select=6, mpiprocs=36),
+                                     dict(select=8, mpiprocs=36),
+                                     dict(select=10, mpiprocs=36),
+                                     dict(select=12, mpiprocs=36)],
+                            submit='qsub', mpiexec='mpiexec_mpt',
+                            template='''#!/bin/bash
+#!/bin/bash
+#PBS -N VIC$i
+#PBS -q regular
+#PBS -A P48500028
+#PBS -l select=$select:ncpus=36:mpiprocs=$mpiprocs
+#PBS -l walltime=12:00:00
+#PBS -j oe
+#PBS -m abe
+
+# Qsub template for UCAR CHEYENNE
+# Scheduler: PBS
+
+START=$(date +%s)
+
+$mpiexec $vic_exe -g $vic_global
+END=$(date +%s)
+DIFF=$(echo "$END - $START" | bc)
+printf "%5s | %f\n" ${BC_MPI_TASKS_ALLOC} $DIFF >> $timing_table_file''')
+}
 
 OUT_WIDTH = 100
 
@@ -276,7 +306,8 @@ def run_scaling(args):
 
             run_string = template.safe_substitute(
                 vic_exe=args.vic_exe, vic_global=args.global_param,
-                timing_table_file=args.timing, i=i, **kwargs)
+                timing_table_file=args.timing, i=i,
+                mpiexec=config.mpiexec, **kwargs)
             run_file = 'vic_{host}_{i}.sh'.format(host=args.host, i=i)
             with open(run_file, 'w') as f:
                 f.write(run_string)

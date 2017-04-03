@@ -25,11 +25,11 @@ To check which release of VIC you are running:
 
 	Drainage from upper layer to adjacent lower layer is calculated according to Brook & Corey curve (where drainage rate is a function of upper-layer soil moisture). In previous versions, a simple numerical solution is applied which uses the timestep-beginning upper-layer soil moisture to calculate drainage rate, and assume this constant rate over the entire timestep. This can cause unreasonably large drainage if the curve has a steep shape and when soil moisture is high. Now, the current version uses exact integral (instead of numerical solution) for layer drainage calculation.
 
-2. Fixes for the CESM driver 
+2. Fixes for the CESM driver
 
 	[GH#642](https://github.com/UW-Hydro/VIC/pull/642)
 
-	1. Using correct fill value datatypes in MPI Gather steps 
+	1. Using correct fill value datatypes in MPI Gather steps
 	2. Updated state file name time step to be period-ending rather than period-beginning
 	3. Set the state file name to the RASM case ID
 	4. Removed decimal point for missing values for unsigned integers
@@ -45,11 +45,20 @@ To check which release of VIC you are running:
 
 	[GH#696](https://github.com/UW-Hydro/VIC/pull/696)
 
-	1. Changes names of CESM driver functions `trim` and `advance_time` to `trimstr` and `advance_vic_time`, respectively, to avoid conflicts with WRF functions with the same names when compiling RFR case. 
+	1. Changes names of CESM driver functions `trim` and `advance_time` to `trimstr` and `advance_vic_time`, respectively, to avoid conflicts with WRF functions with the same names when compiling RFR case.
 
     [GH#702] (https://github.com/UW-Hydro/VIC/pull/702)
 
-    1. Fixes Julian day for the first timestep in the dmy struct for the CESM driver. 
+    1. Fixes Julian day for the first timestep in the dmy struct for the CESM driver.
+
+3. Speed up NetCDF operations in the image/CESM drivers ([GH#684](https://github.com/UW-Hydro/VIC/pull/684))
+
+	These changes speed up image driver initialization, forcing reads, and history writes by only opening and closing each input netCDF file once.
+
+4. Added two new timers to measure time in I/O operations ([GH#703](https://github.com/UW-Hydro/VIC/pull/703))
+
+    These two timers count the CPU and WALL time spent in ``vic_force`` and ``vic_write``. The accumulated time from these timers is printed out at the end of each simulation in the timing table. See also [GH#442](https://github.com/UW-Hydro/VIC/pull/442).
+
 ## VIC 5.0.1
 
 **Release date: (February 1, 2017)**
@@ -65,7 +74,7 @@ To check which release of VIC you are running:
 	After the fix, the `forceskip` variable in the global parameter structure (i.e., the number of timesteps to skip in the forcing data for the simulatin period) is rounded correctly (before the fix, rounding error might cause 1-timestep offset in the simulation results).
 
 3. Fixed a problem with image restarts when using multiple processors ([GH#638](https://github.com/UW-Hydro/VIC/pull/638))
-	
+
 	After the fix, only the master node is assigned the task of validating state file dimensions and coordinate variables. Multiprocessing was also added to the VIC testing framework.
 
 4. Ensured that the mask variable in the input domain file must be integer type; otherwise an error is raised. ([GH#645](https://github.com/UW-Hydro/VIC/pull/645))
@@ -76,8 +85,8 @@ To check which release of VIC you are running:
 
 6. Fixed a bug related to writing two-dimensional lat/lon variables to a state file ([GH#652](https://github.com/UW-Hydro/VIC/pull/652))
 
-	Before the bug fix, two-dimensional lat/lon variables were not populated correctly and were written as fill values to a state file. Now two-dimensional lat/lon variables are correctly populated and written. 
- 
+	Before the bug fix, two-dimensional lat/lon variables were not populated correctly and were written as fill values to a state file. Now two-dimensional lat/lon variables are correctly populated and written.
+
 7. Fixed a bug related to `dz_node` and `node_depth` variables in image driver output state file ([GH#657](https://github.com/UW-Hydro/VIC/pull/657))
 
 	Before the fix, `dz_node` and `node_depth` in image driver output state file were not spatially distributed, which was wrong. Now these two variables are spatially distributed in the output state file.
@@ -94,7 +103,6 @@ To check which release of VIC you are running:
 
 	Before the fix, there would be an error if the simulation start time is later than the forcing start time that year AND the simulation spans multiple years. Fixed this bug.
 
- 
 ------------------------------
 
 ## VIC 5.0.0 [![DOI](https://zenodo.org/badge/doi/10.5281/zenodo.61422.svg)](http://dx.doi.org/10.5281/zenodo.61422)

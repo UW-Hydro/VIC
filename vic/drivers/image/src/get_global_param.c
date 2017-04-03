@@ -800,7 +800,7 @@ get_global_param(FILE *gp)
         sprintf(filenames.forcing[1].nc_filename, "%s%4d.nc",
                 filenames.f_path_pfx[1], global_param.startyear);
         status = nc_open(filenames.forcing[1].nc_filename, NC_NOWRITE,
-                     &(filenames.forcing[1].nc_id));
+                         &(filenames.forcing[1].nc_id));
         check_nc_status(status, "Error opening %s",
                         filenames.forcing[1].nc_filename);
         get_forcing_file_info(&param_set, 1);

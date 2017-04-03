@@ -36,7 +36,7 @@ get_global_domain(nameid_struct *domain_nc_nameid,
 {
     int    *run = NULL;
     int    *mask = NULL;
-    int     typeid;
+    int typeid;
     double *var = NULL;
     size_t  i;
     size_t  j;
@@ -68,7 +68,8 @@ get_global_domain(nameid_struct *domain_nc_nameid,
     if (typeid != NC_INT) {
         log_err("Mask variable in the domain file must be integer type.");
     }
-    get_nc_field_int(domain_nc_nameid, global_domain->info.mask_var, d2start, d2count,
+    get_nc_field_int(domain_nc_nameid, global_domain->info.mask_var, d2start,
+                     d2count,
                      mask);
 
     // Get run_cell variable from the parameter file
@@ -151,7 +152,6 @@ get_global_domain(nameid_struct *domain_nc_nameid,
 
     return global_domain->ncells_active;
 }
-
 
 /******************************************************************************
  * @brief    Get lat and lon coordinates information from a netCDF file and
@@ -273,7 +273,8 @@ get_nc_latlon(nameid_struct *nc_nameid,
  * @brief    Copy domain info from one domain structure to another
  *****************************************************************************/
 void
-copy_domain_info(domain_struct *domain_from, domain_struct *domain_to)
+copy_domain_info(domain_struct *domain_from,
+                 domain_struct *domain_to)
 {
     strcpy(domain_to->info.x_dim, domain_from->info.x_dim);
     strcpy(domain_to->info.y_dim, domain_from->info.y_dim);

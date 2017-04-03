@@ -60,6 +60,9 @@ initialize_cesm_time(void)
     // initialize numdate
     numdate = date2num(global_param.time_origin_num, &dmy_current, 0.,
                        global_param.calendar, global_param.time_units);
+
+    num2date(global_param.time_origin_num, numdate, 0., global_param.calendar,
+             global_param.time_units, &dmy_current);
 }
 
 /******************************************************************************

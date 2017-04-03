@@ -142,6 +142,35 @@ mpiexec_mpt -np ${BC_MPI_TASKS_ALLOC} $vic_exe -g $vic_global
 END=$(date +%s)
 DIFF=$(echo "$END - $START" | bc)
 printf "%5s | %f\n" ${BC_MPI_TASKS_ALLOC} $DIFF >> $timing_table_file'''),
+    'gordon': host_config(profile=[dict(select=1, mpiprocs=32),
+                                   dict(select=2, mpiprocs=32),
+                                   dict(select=3, mpiprocs=32),
+                                   dict(select=4, mpiprocs=32),
+                                   dict(select=5, mpiprocs=32),
+                                   dict(select=6, mpiprocs=32),
+                                   dict(select=8, mpiprocs=32),
+                                   dict(select=10, mpiprocs=32),
+                                   dict(select=12, mpiprocs=32)],
+                          submit='qsub', mpiexec='aprun',
+                          template='''#!/bin/bash
+#PBS -N VIC$i
+#PBS -q frontier
+#PBS -A NPSCA07935YF5
+#PBS -l application=VIC
+#PBS -l select=$select:ncpus=32:mpiprocs=$mpiprocs
+#PBS -l walltime=35:00:00
+#PBS -j oe
+
+# Qsub template for DSRC GORDON
+# Scheduler: PBS
+
+module load cray-netcdf/4.3.2
+
+START=$(date +%s)
+aprun -n ${BC_MPI_TASKS_ALLOC} $vic_exe -g $vic_global
+END=$(date +%s)
+DIFF=$(echo "$END - $START" | bc)
+printf "%5s | %f\n" ${BC_MPI_TASKS_ALLOC} $DIFF >> $timing_table_file'''),
     'cheyenne': host_config(profile=[dict(select=1, mpiprocs=36),
                                      dict(select=2, mpiprocs=36),
                                      dict(select=3, mpiprocs=36),
@@ -174,8 +203,7 @@ START=$(date +%s)
 mpiexec_mpt -np ${BC_MPI_TASKS_ALLOC} $vic_exe -g $vic_global
 END=$(date +%s)
 DIFF=$(echo "$END - $START" | bc)
-printf "%5s | %f\n" ${BC_MPI_TASKS_ALLOC} $DIFF >> $timing_table_file''')
-}
+printf "%5s | %f\n" ${BC_MPI_TASKS_ALLOC} $DIFF >> $timing_table_file''')}
 
 OUT_WIDTH = 100
 

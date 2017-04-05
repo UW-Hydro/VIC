@@ -1423,6 +1423,16 @@ set_nc_state_var_info(nc_file_struct *nc)
             nc->nc_vars[i].nc_counts[3] = nc->nj_size;
             nc->nc_vars[i].nc_counts[4] = nc->ni_size;
             break;
+        case STATE_AVG_ALBEDO:
+            // 3d vars[band, j, i]
+            nc->nc_vars[i].nc_dims = 3;
+            nc->nc_vars[i].nc_dimids[0] = nc->band_dimid;
+            nc->nc_vars[i].nc_dimids[1] = nc->nj_dimid;
+            nc->nc_vars[i].nc_dimids[2] = nc->ni_dimid;
+            nc->nc_vars[i].nc_counts[0] = 1;
+            nc->nc_vars[i].nc_counts[1] = nc->nj_size;
+            nc->nc_vars[i].nc_counts[2] = nc->ni_size;
+            break;
         case STATE_LAKE_SOIL_MOISTURE:
             // 3d vars [layer, j, i]
             nc->nc_vars[i].nc_dims = 3;

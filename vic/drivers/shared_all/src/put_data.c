@@ -455,6 +455,10 @@ put_data(all_vars_struct   *all_vars,
     // Radiative temperature
     out_data[OUT_RAD_TEMP][0] = pow(out_data[OUT_RAD_TEMP][0], 0.25);
 
+    // Gridcell-averaged albedo
+    out_data[OUT_AVG_ALBEDO][0] = (out_data[OUT_SWDOWN][0] - out_data[OUT_SWNET][0]) /
+					out_data[OUT_SWDOWN][0];
+
     // Aerodynamic conductance and resistance
     if (out_data[OUT_AERO_COND1][0] > DBL_EPSILON) {
         out_data[OUT_AERO_RESIST1][0] = 1 / out_data[OUT_AERO_COND1][0];

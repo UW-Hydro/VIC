@@ -726,6 +726,21 @@ vic_store(dmy_struct *dmy_state,
         }
     }
 
+    // Grid cell averaged albedo
+    nc_var = &(nc_state_file.nc_vars[STATE_AVG_ALBEDO]);
+    for (k = 0; k < options.SNOW_BAND; k++) {
+        d3start[0] = k;
+            for (i = 0; i < local_domain.ncells_active; i++) {
+                dvar[i] = (double) all_vars[i].energy[k].avg_albedo;
+            }
+            gather_put_nc_field_double(nc_state_file.nc_id,
+                                       nc_var->nc_varid,
+                                       nc_state_file.d_fillvalue,
+                                       d3start, nc_var->nc_counts, dvar);
+            for (i = 0; i < local_domain.ncells_active; i++) {
+                dvar[i] = nc_state_file.d_fillvalue;
+            }
+    }
 
     if (options.LAKES) {
         // total soil moisture

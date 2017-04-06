@@ -461,6 +461,17 @@ vic_restore(void)
         }
     }
 
+    // grid cell-averaged albedo: force->avg_albedo
+    for (k = 0; k < options.SNOW_BAND; k++) {
+        d3start[0] = k;
+        get_scatter_nc_field_double(&(filenames.init_state),
+                                    state_metadata[STATE_AVG_ALBEDO].varname,
+                                    d3start, d3count, dvar);
+        for (i = 0; i < local_domain.ncells_active; i++) {
+            force[i]->avg_albedo[0] = dvar[i];
+        }
+    }
+
     // soil node temperatures: energy[veg][band].T[nidx]
     for (m = 0; m < options.NVEGTYPES; m++) {
         d5start[0] = m;

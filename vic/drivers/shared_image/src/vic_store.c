@@ -40,6 +40,7 @@ vic_store(dmy_struct *dmy_state,
     extern veg_con_map_struct *veg_con_map;
     extern int                 mpi_rank;
     extern global_param_struct global_param;
+    extern double           ***out_data;
 
     int                        status;
     int                        v;
@@ -731,7 +732,7 @@ vic_store(dmy_struct *dmy_state,
     for (k = 0; k < options.SNOW_BAND; k++) {
         d3start[0] = k;
             for (i = 0; i < local_domain.ncells_active; i++) {
-                dvar[i] = (double) all_vars[i].energy[k].avg_albedo;
+                dvar[i] = (double) out_data[i][OUT_AVG_ALBEDO][0];
             }
             gather_put_nc_field_double(nc_state_file.nc_id,
                                        nc_var->nc_varid,

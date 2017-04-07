@@ -34,11 +34,11 @@
 void
 generate_default_state(all_vars_struct *all_vars,
                        soil_con_struct *soil_con,
-                       veg_con_struct  *veg_con)
+                       veg_con_struct  *veg_con,
+                       force_data_struct *force)
 {
     extern option_struct     options;
     extern parameters_struct param;
-    extern force_data_struct *force;
 
     size_t                   Nveg;
     size_t                   veg;
@@ -154,7 +154,7 @@ generate_default_state(all_vars_struct *all_vars,
             }
         }
     }
-        
+    force.avg_albedo[0] = (double) albedo_sum;
 
     /************************************************************************
        Initialize soil layer ice content

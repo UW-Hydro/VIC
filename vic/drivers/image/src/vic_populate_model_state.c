@@ -44,6 +44,7 @@ vic_populate_model_state(void)
     extern option_struct    options;
     extern soil_con_struct *soil_con;
     extern veg_con_struct **veg_con;
+    extern force_data_struct *force;
 
     size_t                  i;
 
@@ -54,7 +55,7 @@ vic_populate_model_state(void)
     else {
         // else generate a default state
         for (i = 0; i < local_domain.ncells_active; i++) {
-            generate_default_state(&(all_vars[i]), &(soil_con[i]), veg_con[i]);
+            generate_default_state(&(all_vars[i]), &(soil_con[i]), veg_con[i], &(force[i]));
             if (options.LAKES) {
                 generate_default_lake_state(&(all_vars[i]), &(soil_con[i]),
                                             lake_con[i]);

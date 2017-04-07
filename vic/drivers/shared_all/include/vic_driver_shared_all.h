@@ -186,7 +186,7 @@ enum
     OUT_WATER_ERROR,      /**< water budget error [mm] */
     // Energy Balance Terms - state variables
     OUT_ALBEDO,           /**< average surface albedo [fraction] */
-    OUT_AVG_ALBEDO        /**< gridcell averaged albedo [fraction] */
+    OUT_AVG_ALBEDO,       /**< gridcell averaged albedo [fraction] */
     OUT_BARESOILT,        /**< bare soil surface temperature [C] */
     OUT_FDEPTH,           /**< depth of freezing fronts [cm] */
     OUT_LAKE_ICE_TEMP,    /**< temperature of lake ice [C] */

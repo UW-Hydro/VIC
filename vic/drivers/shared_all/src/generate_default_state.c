@@ -38,6 +38,7 @@ generate_default_state(all_vars_struct *all_vars,
 {
     extern option_struct     options;
     extern parameters_struct param;
+    extern force_data_struct *force;
 
     size_t                   Nveg;
     size_t                   veg;
@@ -53,12 +54,17 @@ generate_default_state(all_vars_struct *all_vars,
     };
     double                   Cv;
     double                   tmp;
+    double                   AreaFactor;
+    double                   TreeAdjustFactor = 1.;
+    double                   lakefactor = 1.;
+    double                   albedo_sum;
     double                ***tmpT;
     double                 **tmpZ;
     int                      ErrorFlag;
 
     cell_data_struct       **cell;
     energy_bal_struct      **energy;
+    veg_var_struct         **veg_var;    
 
     cell = all_vars->cell;
     energy = all_vars->energy;
@@ -124,6 +130,31 @@ generate_default_state(all_vars_struct *all_vars,
             }
         }
     }
+
+    /************************************************************************
+       Initialize gridcell-averaged albedo 
+    ************************************************************************/
+    // vegetation class-weighted albedo over gridcell
+    albedo_sum = 0;
+    for (veg = 0; veg <= Nveg; veg++) {
+        Cv = veg_con[veg].Cv;
+        if (Cv > 0) {
+            for (band = 0; band < options.SNOW_BAND; band++) {
+                // TO-DO: account for treeline and lake factors 
+                AreaFactor = (Cv * soil_con.AreaFract[band] * 
+                                   TreeAdjustFactor * lakefactor);
+                // cold start, so assuming bare (free of snow) albedo
+                if (veg != Nveg) {
+                    albedo_sum += AreaFactor * veg_var[veg][0].albedo;
+                } 
+                else {
+                    // this is the bare soil class, so use bare soil albedo parameter
+                    albedo_sum += AreaFactor * param.ALBEDO_BARE_SOIL;
+                }
+            }
+        }
+    }
+        
 
     /************************************************************************
        Initialize soil layer ice content

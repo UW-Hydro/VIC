@@ -469,7 +469,7 @@ vic_restore(void)
                                     state_metadata[STATE_AVG_ALBEDO].varname,
                                     d3start, d3count, dvar);
         for (i = 0; i < local_domain.ncells_active; i++) {
-            force[i].avg_albedo = dvar[i];
+            force[i].avg_albedo[0] = dvar[i];
         }
     }
 

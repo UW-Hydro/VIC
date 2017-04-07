@@ -141,7 +141,7 @@ generate_default_state(all_vars_struct *all_vars,
         if (Cv > 0) {
             for (band = 0; band < options.SNOW_BAND; band++) {
                 // TO-DO: account for treeline and lake factors 
-                AreaFactor = (Cv * soil_con.AreaFract[band] * 
+                AreaFactor = (Cv * soil_con->AreaFract[band] * 
                                    TreeAdjustFactor * lakefactor);
                 // cold start, so assuming bare (free of snow) albedo
                 if (veg != Nveg) {

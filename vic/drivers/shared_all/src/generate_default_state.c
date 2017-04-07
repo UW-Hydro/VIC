@@ -154,7 +154,7 @@ generate_default_state(all_vars_struct *all_vars,
             }
         }
     }
-    force.avg_albedo[0] = (double) albedo_sum;
+    force->avg_albedo[0] = (double) albedo_sum;
 
     /************************************************************************
        Initialize soil layer ice content

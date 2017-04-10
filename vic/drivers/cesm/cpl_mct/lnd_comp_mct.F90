@@ -438,7 +438,7 @@ CONTAINS
     l2x%rAttr(:, :) = 0.0_r8
 
     !--- Copy values to attribute vector
-    ! Sign convension and units handeld in VIC driver
+    ! Sign convention and units handled in VIC driver
     DO i = 1, lsize
        l2x%rAttr(index_l2x_Sl_t, i) = l2x_vic_ptr(i)%l2x_Sl_t
        l2x%rAttr(index_l2x_Sl_tref, i) = l2x_vic_ptr(i)%l2x_Sl_tref

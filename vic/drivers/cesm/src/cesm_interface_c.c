@@ -99,6 +99,9 @@ vic_cesm_init(vic_clock     *vclock,
     // initialize forcings
     vic_force();
 
+    // initialize albedo
+    vic_initialize_albedo();
+
     // initialize output structures
     vic_init_output(&dmy_current);
 

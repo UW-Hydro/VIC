@@ -122,3 +122,25 @@ initialize_l2x_data(void)
         l2x_vic[i].l2x_vars_set = true;
     }
 }
+
+/******************************************************************************
+ * @brief      Initialize albedo values in l2x_data_struct.
+ *****************************************************************************/
+void
+vic_initialize_albedo(void)
+{
+    extern l2x_data_struct *l2x_vic;
+    extern domain_struct    local_domain;
+    extern force_data_struct *force;
+
+    size_t                  i;
+
+    log_info("Initializing albedo values");
+
+    for (i = 0; i < local_domain.ncells_active; i++) {
+	l2x_vic[i].l2x_Sl_avsdr = force[i].avg_albedo[0];
+	l2x_vic[i].l2x_Sl_anidr = force[i].avg_albedo[0];
+	l2x_vic[i].l2x_Sl_avsdf = force[i].avg_albedo[0];
+	l2x_vic[i].l2x_Sl_anidf = force[i].avg_albedo[0];
+    }
+}  

@@ -502,8 +502,6 @@ put_data(all_vars_struct   *all_vars,
                               out_data[OUT_SNOW_CANOPY][0] -
                               save_data->swe;
     out_data[OUT_DELINTERCEPT][0] = out_data[OUT_WDEW][0] - save_data->wdew;
-    debug("out data surfstor is %f", out_data[OUT_SURFSTOR][0]);
-    debug("save data surfstor is %f", save_data->surfstor);
     out_data[OUT_DELSURFSTOR][0] = out_data[OUT_SURFSTOR][0] -
                                    save_data->surfstor;
 

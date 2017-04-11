@@ -455,10 +455,6 @@ put_data(all_vars_struct   *all_vars,
     // Radiative temperature
     out_data[OUT_RAD_TEMP][0] = pow(out_data[OUT_RAD_TEMP][0], 0.25);
 
-    // Gridcell-averaged albedo
-    out_data[OUT_AVG_ALBEDO][0] = (out_data[OUT_SWDOWN][0] - out_data[OUT_SWNET][0]) /
-					out_data[OUT_SWDOWN][0];
-
     // Aerodynamic conductance and resistance
     if (out_data[OUT_AERO_COND1][0] > DBL_EPSILON) {
         out_data[OUT_AERO_RESIST1][0] = 1 / out_data[OUT_AERO_COND1][0];
@@ -506,6 +502,8 @@ put_data(all_vars_struct   *all_vars,
                               out_data[OUT_SNOW_CANOPY][0] -
                               save_data->swe;
     out_data[OUT_DELINTERCEPT][0] = out_data[OUT_WDEW][0] - save_data->wdew;
+    debug("out data surfstor is %f", out_data[OUT_SURFSTOR][0]);
+    debug("save data surfstor is %f", save_data->surfstor);
     out_data[OUT_DELSURFSTOR][0] = out_data[OUT_SURFSTOR][0] -
                                    save_data->surfstor;
 
@@ -522,6 +520,10 @@ put_data(all_vars_struct   *all_vars,
     save_data->surfstor = out_data[OUT_SURFSTOR][0];
     save_data->swe = out_data[OUT_SWE][0] + out_data[OUT_SNOW_CANOPY][0];
     save_data->wdew = out_data[OUT_WDEW][0];
+
+    // Gridcell-averaged albedo
+    out_data[OUT_AVG_ALBEDO][0] = out_data[OUT_SWDOWN][0] - out_data[OUT_SWNET][0] /
+                                  out_data[OUT_SWDOWN][0];
 
     // Carbon Terms
     if (options.CARBON) {

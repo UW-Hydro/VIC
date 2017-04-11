@@ -39,13 +39,11 @@ vic_populate_model_state(char *runtype_str)
     extern soil_con_struct *soil_con;
     extern veg_con_struct **veg_con;
     extern filenames_struct filenames;
-    extern force_data_struct*force;
+    extern force_data_struct *force;
 
 
     size_t                  i;
     unsigned short int      runtype;
-
-    debug("In vic_populate_model_state");
 
     runtype = start_type_from_char(runtype_str);
 

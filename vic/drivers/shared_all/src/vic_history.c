@@ -273,6 +273,7 @@ get_default_outvar_aggtype(unsigned int varid)
     case OUT_SNOW_COVER_BAND:
     case OUT_SNOW_DEPTH_BAND:
     case OUT_SWE_BAND:
+    case OUT_AVG_ALBEDO:
         agg_type = AGG_TYPE_END;
         break;
     // AGG_TYPE_SUM

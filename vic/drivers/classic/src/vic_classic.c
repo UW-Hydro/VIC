@@ -221,7 +221,7 @@ main(int   argc,
             **************************************************/
 
             vic_populate_model_state(&all_vars, filep, soil_con.gridcel,
-                                     &soil_con, veg_con, lake_con, force);
+                                     &soil_con, veg_con, lake_con);
 
             /** Initialize the storage terms in the water and energy balances **/
             initialize_save_data(&all_vars, &force[0], &soil_con, veg_con,

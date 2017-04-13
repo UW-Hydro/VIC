@@ -628,7 +628,7 @@ void free_out_data(size_t ngridcells, double ***out_data);
 void free_streams(stream_struct **streams);
 void free_vegcon(veg_con_struct **veg_con);
 void generate_default_state(all_vars_struct *, soil_con_struct *,
-                            veg_con_struct *, force_data_struct *);
+                            veg_con_struct *);
 void generate_default_lake_state(all_vars_struct *, soil_con_struct *,
                                  lake_con_struct);
 void get_default_nstreams_nvars(size_t *nstreams, size_t nvars[]);

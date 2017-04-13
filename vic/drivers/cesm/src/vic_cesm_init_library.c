@@ -131,16 +131,16 @@ vic_initialize_albedo(void)
 {
     extern l2x_data_struct *l2x_vic;
     extern domain_struct    local_domain;
-    extern force_data_struct *force;
+    extern all_vars_struct *all_vars;
 
     size_t                  i;
 
     log_info("Initializing albedo values");
 
     for (i = 0; i < local_domain.ncells_active; i++) {
-	l2x_vic[i].l2x_Sl_avsdr = force[i].avg_albedo[0];
-	l2x_vic[i].l2x_Sl_anidr = force[i].avg_albedo[0];
-	l2x_vic[i].l2x_Sl_avsdf = force[i].avg_albedo[0];
-	l2x_vic[i].l2x_Sl_anidf = force[i].avg_albedo[0];
+	l2x_vic[i].l2x_Sl_avsdr = all_vars[i].cell.avg_albedo;
+	l2x_vic[i].l2x_Sl_anidr = all_vars[i].cell.avg_albedo;
+	l2x_vic[i].l2x_Sl_avsdf = all_vars[i].cell.avg_albedo;
+	l2x_vic[i].l2x_Sl_anidf = all_vars[i].cell.avg_albedo;
     }
 }  

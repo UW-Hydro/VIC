@@ -736,7 +736,6 @@ typedef struct {
     double *prec;    /**< average precipitation in grid cell (mm) */
     double *pressure; /**< atmospheric pressure (kPa) */
     double *shortwave; /**< incoming shortwave radiation (W/m^2) */
-    double *avg_albedo; /**< gridcell-averaged albedo (fraction) */
     bool *snowflag;    /**< TRUE if there is snowfall in any of the snow
                           bands during the timestep, FALSE otherwise*/
     double *vp;      /**< atmospheric vapor pressure (kPa) */

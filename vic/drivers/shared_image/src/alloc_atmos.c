@@ -64,9 +64,6 @@ alloc_force(force_data_struct *force)
     force->wind = calloc(NR + 1, sizeof(*(force->wind)));
     check_alloc_status(force->wind, "Memory allocation error.");
 
-    force->avg_albedo = calloc(NR + 1, sizeof(*(force->avg_albedo)));
-    check_alloc_status(force->avg_albedo, "Memory allocation error.");
-
     if (options.LAKES) {
         force->channel_in = calloc(NR + 1, sizeof(*(force->channel_in)));
         check_alloc_status(force->channel_in, "Memory allocation error.");

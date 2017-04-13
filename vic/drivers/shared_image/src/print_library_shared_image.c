@@ -48,7 +48,6 @@ print_force_data(force_data_struct *force)
     fprintf(LOG_DEST, "\tvp        : %.4f\n", force->vp[0]);
     fprintf(LOG_DEST, "\tvpd       : %.4f\n", force->vpd[0]);
     fprintf(LOG_DEST, "\twind      : %.4f\n", force->wind[0]);
-    fprintf(LOG_DEST, "\tavg_albedo: %.4f\n", force->avg_albedo[0]);
     if (options.LAKES) {
         fprintf(LOG_DEST, "\tchannel_in: %.4f\n", force->channel_in[0]);
     }

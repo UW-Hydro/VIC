@@ -40,7 +40,6 @@ vic_store(dmy_struct *dmy_state,
     extern veg_con_map_struct *veg_con_map;
     extern int                 mpi_rank;
     extern global_param_struct global_param;
-    extern double           ***out_data;
 
     int                        status;
     int                        v;
@@ -729,18 +728,15 @@ vic_store(dmy_struct *dmy_state,
 
     // Grid cell averaged albedo
     nc_var = &(nc_state_file.nc_vars[STATE_AVG_ALBEDO]);
-    for (k = 0; k < options.SNOW_BAND; k++) {
-        d3start[0] = k;
-            for (i = 0; i < local_domain.ncells_active; i++) {
-                dvar[i] = (double) out_data[i][OUT_AVG_ALBEDO][0];
-            }
-            gather_put_nc_field_double(nc_state_file.nc_id,
-                                       nc_var->nc_varid,
-                                       nc_state_file.d_fillvalue,
-                                       d3start, nc_var->nc_counts, dvar);
-            for (i = 0; i < local_domain.ncells_active; i++) {
-                dvar[i] = nc_state_file.d_fillvalue;
-            }
+    for (i = 0; i < local_domain.ncells_active; i++) {
+    	dvar[i] = (double) all_vars[i].cell.avg_albedo;
+    }
+    gather_put_nc_field_double(nc_state_file.nc_id,
+                               nc_var->nc_varid,
+                               nc_state_file.d_fillvalue,
+                               d2start, nc_var->nc_counts, dvar);
+    for (i = 0; i < local_domain.ncells_active; i++) {
+    	dvar[i] = nc_state_file.d_fillvalue;
     }
 
     if (options.LAKES) {
@@ -1440,14 +1436,12 @@ set_nc_state_var_info(nc_file_struct *nc)
             nc->nc_vars[i].nc_counts[4] = nc->ni_size;
             break;
         case STATE_AVG_ALBEDO:
-            // 3d vars[band, j, i]
-            nc->nc_vars[i].nc_dims = 3;
-            nc->nc_vars[i].nc_dimids[0] = nc->band_dimid;
-            nc->nc_vars[i].nc_dimids[1] = nc->nj_dimid;
-            nc->nc_vars[i].nc_dimids[2] = nc->ni_dimid;
-            nc->nc_vars[i].nc_counts[0] = 1;
-            nc->nc_vars[i].nc_counts[1] = nc->nj_size;
-            nc->nc_vars[i].nc_counts[2] = nc->ni_size;
+            // 2d vars [j, i]
+            nc->nc_vars[i].nc_dims = 2;
+            nc->nc_vars[i].nc_dimids[0] = nc->nj_dimid;
+            nc->nc_vars[i].nc_dimids[1] = nc->ni_dimid;
+            nc->nc_vars[i].nc_counts[0] = nc->nj_size;
+            nc->nc_vars[i].nc_counts[1] = nc->ni_size;
             break;
         case STATE_LAKE_SOIL_MOISTURE:
             // 3d vars [layer, j, i]

@@ -802,6 +802,7 @@ typedef struct {
                                           over all layers (fraction) */
     double zwt;                        /**< average water table position [cm] - using lowest unsaturated layer */
     double zwt_lumped;                 /**< average water table position [cm] - lumping all layers' moisture together */
+    double avg_albedo;                 /**< gridcell-averaged albedo [fraction] */
 
     // Fluxes
     double pot_evap;                   /**< potential evaporation (mm) */

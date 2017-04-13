@@ -461,7 +461,7 @@ vic_restore(void)
         }
     }
 
-    // grid cell-averaged albedo: force->avg_albedo
+    // grid cell-averaged albedo: cell.avg_albedo
     get_scatter_nc_field_double(&(filenames.init_state),
                                 state_metadata[STATE_AVG_ALBEDO].varname,
                                 d2start, d2count, dvar);

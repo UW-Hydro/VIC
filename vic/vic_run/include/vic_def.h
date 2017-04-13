@@ -801,7 +801,6 @@ typedef struct {
                                           over all layers (fraction) */
     double zwt;                        /**< average water table position [cm] - using lowest unsaturated layer */
     double zwt_lumped;                 /**< average water table position [cm] - lumping all layers' moisture together */
-    double avg_albedo;                 /**< gridcell-averaged albedo [fraction] */
 
     // Fluxes
     double pot_evap;                   /**< potential evaporation (mm) */
@@ -1001,6 +1000,14 @@ typedef struct {
 } snow_data_struct;
 
 /******************************************************************************
+ * @brief   This structures stores average values over a grid cell 
+ *****************************************************************************/
+typedef struct {
+    // energy balance variables
+    double avg_albedo             /**< gridcell-averaged albedo [fraction] */
+} gridcell_avg_struct;
+
+/******************************************************************************
  * @brief   This structure stores the lake/wetland parameters for a grid cell
  *****************************************************************************/
 typedef struct {
@@ -1086,6 +1093,7 @@ typedef struct {
     lake_var_struct lake_var;     /**< Stores lake/wetland variables */
     snow_data_struct **snow;      /**< Stores snow variables */
     veg_var_struct **veg_var;     /**< Stores vegetation variables */
+    gridcell_avg_struct gc_avg;   /**< Stores average gridcell variables */
 } all_vars_struct;
 
 #endif

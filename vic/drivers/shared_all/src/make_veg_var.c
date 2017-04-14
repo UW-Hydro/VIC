@@ -1,7 +1,7 @@
 /******************************************************************************
  * @section DESCRIPTION
  *
- * This routine makes an array of vegitation variables for each vegitation type.
+ * This routine makes an array of vegetation variables for each vegetation type.
  *
  * @section LICENSE
  *

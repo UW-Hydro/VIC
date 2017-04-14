@@ -1,8 +1,7 @@
 /******************************************************************************
  * @section DESCRIPTION
  *
- * This routine creates an array of structures that contain information about a
- * cell's states and fluxes.
+ * This routine makes an array of values that are averaged over each grid cell.
  *
  * @section LICENSE
  *
@@ -28,22 +27,18 @@
 #include <vic_driver_shared_all.h>
 
 /******************************************************************************
- * @brief    Creates an array of structures that contain information about a
- *           cell's states and fluxes.
+ * @brief    Make an array of values that are averaged over each gridcell.
  *****************************************************************************/
-all_vars_struct
-make_all_vars(size_t nveg)
+gridcell_avg_struct
+make_gridcell_avg() 
 {
-    all_vars_struct temp;
-    size_t          Nitems;
+    gridcell_avg_struct    temp = NULL;
+    double                 n;
 
-    Nitems = nveg + 1;
+    //temp = calloc(double, sizeof(temp));
+    temp = calloc(n, sizeof(*temp));
 
-    temp.snow = make_snow_data(Nitems);
-    temp.energy = make_energy_bal(Nitems);
-    temp.veg_var = make_veg_var(Nitems);
-    temp.cell = make_cell_data(Nitems);
-    temp.gc_avg = make_gridcell_avg();
+    check_alloc_status(temp, "Memory allocation error");
 
-    return (temp);
+    return temp;
 }

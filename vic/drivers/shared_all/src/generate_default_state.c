@@ -150,7 +150,7 @@ generate_default_state(all_vars_struct *all_vars,
                     	albedo_sum += AreaFactor * param.ALBEDO_BARE_SOIL;
                 }
     }
-    cell.avg_albedo = albedo_sum;
+    all_vars[i].gc_avg.avg_albedo = albedo_sum;
 
     /************************************************************************
        Initialize soil layer ice content

@@ -138,9 +138,9 @@ vic_initialize_albedo(void)
     log_info("Initializing albedo values");
 
     for (i = 0; i < local_domain.ncells_active; i++) {
-	l2x_vic[i].l2x_Sl_avsdr = all_vars[i].cell.avg_albedo;
-	l2x_vic[i].l2x_Sl_anidr = all_vars[i].cell.avg_albedo;
-	l2x_vic[i].l2x_Sl_avsdf = all_vars[i].cell.avg_albedo;
-	l2x_vic[i].l2x_Sl_anidf = all_vars[i].cell.avg_albedo;
+	l2x_vic[i].l2x_Sl_avsdr = all_vars[i].gc_avg.avg_albedo;
+	l2x_vic[i].l2x_Sl_anidr = all_vars[i].gc_avg.avg_albedo;
+	l2x_vic[i].l2x_Sl_avsdf = all_vars[i].gc_avg.avg_albedo;
+	l2x_vic[i].l2x_Sl_anidf = all_vars[i].gc_avg.avg_albedo;
     }
 }  

@@ -312,7 +312,7 @@ enum
     STATE_SNOW_DENSITY,                /**<  snow density: snow[veg][band].density */
     STATE_SNOW_COLD_CONTENT,           /**<  snow cold content: snow[veg][band].coldcontent */
     STATE_SNOW_CANOPY,                 /**<  snow canopy storage: snow[veg][band].snow_canopy */
-    STATE_AVG_ALBEDO,                  /**<  gridcell-averaged albedo: force.avg_albedo */
+    STATE_AVG_ALBEDO,                  /**<  gridcell-averaged albedo: gc_avg.avg_albedo */
     STATE_SOIL_NODE_TEMP,              /**<  soil node temperatures: energy[veg][band].T[nidx] */
     STATE_FOLIAGE_TEMPERATURE,         /**<  Foliage temperature: energy[veg][band].Tfoliage */
     STATE_ENERGY_LONGUNDEROUT,         /**<  Outgoing longwave from understory: energy[veg][band].LongUnderOut */
@@ -658,6 +658,7 @@ void make_lastday(unsigned short int calendar, unsigned short int year,
                   unsigned short int lastday[]);
 snow_data_struct **make_snow_data(size_t nveg);
 veg_var_struct **make_veg_var(size_t veg_type_num);
+gridcell_avg_struct make_gridcell_avg(void)
 double no_leap_day_from_dmy(dmy_struct *dmy);
 void num2date(double origin, double time_value, double tzoffset,
               unsigned short int calendar, unsigned short int time_units,

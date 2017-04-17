@@ -1000,11 +1000,11 @@ typedef struct {
 } snow_data_struct;
 
 /******************************************************************************
- * @brief   This structures stores average values over a grid cell 
+ * @brief   This structures stores variables averaged over a grid cell 
  *****************************************************************************/
 typedef struct {
-    // energy balance variables
-    double avg_albedo             /**< gridcell-averaged albedo [fraction] */
+    // Grid cell averaged variables 
+    double avg_albedo;            /**< Average albedo over a grid cell */
 } gridcell_avg_struct;
 
 /******************************************************************************
@@ -1093,7 +1093,7 @@ typedef struct {
     lake_var_struct lake_var;     /**< Stores lake/wetland variables */
     snow_data_struct **snow;      /**< Stores snow variables */
     veg_var_struct **veg_var;     /**< Stores vegetation variables */
-    gridcell_avg_struct gc_avg;   /**< Stores average gridcell variables */
+    gridcell_avg_struct gc_avg;   /**< Stores gridcell average variables */
 } all_vars_struct;
 
 #endif

@@ -35,6 +35,7 @@ all_vars_struct
 make_all_vars(size_t nveg)
 {
     all_vars_struct temp;
+    double          avg_albedo;
     size_t          Nitems;
 
     Nitems = nveg + 1;
@@ -43,7 +44,6 @@ make_all_vars(size_t nveg)
     temp.energy = make_energy_bal(Nitems);
     temp.veg_var = make_veg_var(Nitems);
     temp.cell = make_cell_data(Nitems);
-    temp.gc_avg = make_gridcell_avg();
 
     return (temp);
 }

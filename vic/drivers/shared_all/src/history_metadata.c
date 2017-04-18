@@ -669,13 +669,6 @@ set_output_met_data_info()
     strcpy(out_metadata[OUT_ALBEDO].units, "1");
     strcpy(out_metadata[OUT_ALBEDO].description, "albedo");
 
-    /* gridcell-averaged albedo [fraction] */ 
-    strcpy(out_metadata[OUT_AVG_ALBEDO].varname, "OUT_AVG_ALBEDO");
-    strcpy(out_metadata[OUT_AVG_ALBEDO].long_name, "average albedo");
-    strcpy(out_metadata[OUT_AVG_ALBEDO].standard_name, "average albedo");
-    strcpy(out_metadata[OUT_AVG_ALBEDO].units, "1");
-    strcpy(out_metadata[OUT_AVG_ALBEDO].description, "gridcell averaged albedo");
-
     /* bare soil surface temperature [C] */
     strcpy(out_metadata[OUT_BARESOILT].varname, "OUT_BARESOILT");
     strcpy(out_metadata[OUT_BARESOILT].long_name, "baresoilt");

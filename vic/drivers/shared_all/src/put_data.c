@@ -497,6 +497,7 @@ put_data(all_vars_struct   *all_vars,
                                              (depth[index] *
                                               MM_PER_M);
     }
+
     out_data[OUT_DELSOILMOIST][0] -= save_data->total_soil_moist;
     out_data[OUT_DELSWE][0] = out_data[OUT_SWE][0] +
                               out_data[OUT_SNOW_CANOPY][0] -
@@ -518,10 +519,6 @@ put_data(all_vars_struct   *all_vars,
     save_data->surfstor = out_data[OUT_SURFSTOR][0];
     save_data->swe = out_data[OUT_SWE][0] + out_data[OUT_SNOW_CANOPY][0];
     save_data->wdew = out_data[OUT_WDEW][0];
-
-    // Gridcell-averaged albedo
-    out_data[OUT_AVG_ALBEDO][0] = out_data[OUT_SWDOWN][0] - out_data[OUT_SWNET][0] /
-                                  out_data[OUT_SWDOWN][0];
 
     // Carbon Terms
     if (options.CARBON) {

@@ -497,7 +497,6 @@ put_data(all_vars_struct   *all_vars,
                                              (depth[index] *
                                               MM_PER_M);
     }
-
     out_data[OUT_DELSOILMOIST][0] -= save_data->total_soil_moist;
     out_data[OUT_DELSWE][0] = out_data[OUT_SWE][0] +
                               out_data[OUT_SNOW_CANOPY][0] -

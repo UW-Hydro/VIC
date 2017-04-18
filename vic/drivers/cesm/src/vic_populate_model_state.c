@@ -44,8 +44,6 @@ vic_populate_model_state(char *runtype_str)
     size_t                  i;
     unsigned short int      runtype;
 
-    debug("In vic_populate_model_state");
-
     runtype = start_type_from_char(runtype_str);
 
     // read the model state from the netcdf file
@@ -58,18 +56,21 @@ vic_populate_model_state(char *runtype_str)
         options.INIT_STATE = true;
 
         // read initial state file -- specified in rpointer file
+        debug("reading state file");
         vic_restore();
     }
     else if (runtype == CESM_RUNTYPE_CLEANSTART) {
         if (options.INIT_STATE) {
             // read initial state file -- specified in global param file
+            debug("reading state file");
             vic_restore();
         }
         else {
             // no initial state file specified - generate default state
+	    debug("generating default state");
             for (i = 0; i < local_domain.ncells_active; i++) {
-                generate_default_state(&(all_vars[i]), &(soil_con[i]),
-                                       veg_con[i]);
+                generate_default_state(&(all_vars[i]), &(soil_con[i]), 
+				       veg_con[i]);
                 if (options.LAKES) {
                     generate_default_lake_state(&(all_vars[i]), &(soil_con[i]),
                                                 lake_con[i]);

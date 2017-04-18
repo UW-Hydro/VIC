@@ -1000,6 +1000,14 @@ typedef struct {
 } snow_data_struct;
 
 /******************************************************************************
+ * @brief   This structures stores variables averaged over a grid cell 
+ *****************************************************************************/
+typedef struct {
+    // Grid cell averaged variables 
+    double avg_albedo;            /**< Average albedo over a grid cell */
+} gridcell_avg_struct;
+
+/******************************************************************************
  * @brief   This structure stores the lake/wetland parameters for a grid cell
  *****************************************************************************/
 typedef struct {
@@ -1085,6 +1093,7 @@ typedef struct {
     lake_var_struct lake_var;     /**< Stores lake/wetland variables */
     snow_data_struct **snow;      /**< Stores snow variables */
     veg_var_struct **veg_var;     /**< Stores vegetation variables */
+    gridcell_avg_struct gc_avg;   /**< Stores gridcell average variables */
 } all_vars_struct;
 
 #endif

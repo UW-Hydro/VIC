@@ -102,6 +102,9 @@ vic_cesm_init(vic_clock     *vclock,
     // initialize output structures
     vic_init_output(&dmy_current);
 
+    // initialize albedo
+    vic_initialize_albedo();
+
     // initialization is complete, print settings
     log_info(
         "Initialization is complete, print global param and options structures");

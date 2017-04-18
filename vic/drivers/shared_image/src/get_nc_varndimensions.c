@@ -31,7 +31,7 @@
  *****************************************************************************/
 int
 get_nc_varndimensions(nameid_struct *nc_nameid,
-                      char *var_name)
+                      char          *var_name)
 {
     int var_id;
     int ndims;

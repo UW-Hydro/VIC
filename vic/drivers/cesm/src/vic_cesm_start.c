@@ -47,8 +47,8 @@ vic_cesm_start(vic_clock     *vclock,
     if (mpi_rank == VIC_MPI_ROOT) {
         strcpy(filenames.global, GLOBALPARAM);
 
-	// assign case name to state file name
-    	strncpy(filenames.statefile, trimstr(cmeta->caseid),
+        // assign case name to state file name
+        strncpy(filenames.statefile, trimstr(cmeta->caseid),
                 sizeof(filenames.statefile));
 
         // read global settings

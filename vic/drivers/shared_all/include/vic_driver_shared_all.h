@@ -452,6 +452,8 @@ enum timers
     TIMER_VIC_INIT,
     TIMER_VIC_RUN,
     TIMER_VIC_FINAL,
+    TIMER_VIC_FORCE,
+    TIMER_VIC_WRITE,
     N_TIMERS
 };
 

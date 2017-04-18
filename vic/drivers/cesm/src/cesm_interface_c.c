@@ -107,7 +107,7 @@ vic_cesm_init(vic_clock     *vclock,
 
     // initialization is complete, print settings
     log_info(
-	"Initialization is complete, print global param and options structures");
+        "Initialization is complete, print global param and options structures");
     print_global_param(&global_param);
     print_option(&options);
 

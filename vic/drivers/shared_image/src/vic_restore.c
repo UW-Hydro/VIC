@@ -466,7 +466,7 @@ vic_restore(void)
                                 state_metadata[STATE_AVG_ALBEDO].varname,
                                 d2start, d2count, dvar);
     for (i = 0; i < local_domain.ncells_active; i++) {
-    	all_vars[i].gc_avg.avg_albedo = dvar[i];
+        all_vars[i].gc_avg.avg_albedo = dvar[i];
     }
 
     // soil node temperatures: energy[veg][band].T[nidx]

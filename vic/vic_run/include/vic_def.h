@@ -1000,10 +1000,10 @@ typedef struct {
 } snow_data_struct;
 
 /******************************************************************************
- * @brief   This structures stores variables averaged over a grid cell 
+ * @brief   This structures stores variables averaged over a grid cell
  *****************************************************************************/
 typedef struct {
-    // Grid cell averaged variables 
+    // Grid cell averaged variables
     double avg_albedo;            /**< Average albedo over a grid cell */
 } gridcell_avg_struct;
 

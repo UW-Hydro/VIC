@@ -277,11 +277,11 @@ set_state_meta_data_info()
 
     // STATE_GRIDCELL_AVG_ALBEDO
     strcpy(state_metadata[STATE_AVG_ALBEDO].varname,
-	   "STATE_AVG_ALBEDO");
+           "STATE_AVG_ALBEDO");
     strcpy(state_metadata[STATE_AVG_ALBEDO].long_name,
-	   "state_avg_albedo");
+           "state_avg_albedo");
     strcpy(state_metadata[STATE_AVG_ALBEDO].standard_name,
-	   "state_gridcell_avg_albedo");
+           "state_gridcell_avg_albedo");
     strcpy(state_metadata[STATE_AVG_ALBEDO].units, "fraction");
     strcpy(state_metadata[STATE_AVG_ALBEDO].description,
            "gridcell averaged albedo");

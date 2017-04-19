@@ -6,6 +6,18 @@ notifications:
 matrix:
   fast_finish: true
   include:
+  # CMake
+  - compiler: gcc
+    os: linux
+    env: TESTID='cmake'
+    addons:
+      apt_packages:
+        - cmake
+        - libnetcdf-dev
+        - netcdf-bin
+        - netcdf-doc
+        - gfortran
+        - valgrind
   # Image Driver
   - compiler: gcc
     os: linux

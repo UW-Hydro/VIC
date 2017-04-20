@@ -1435,6 +1435,15 @@ set_nc_state_var_info(nc_file_struct *nc)
             nc->nc_vars[i].nc_counts[3] = nc->nj_size;
             nc->nc_vars[i].nc_counts[4] = nc->ni_size;
             break;
+        case STATE_AVG_ALBEDO:
+            // 2d vars [j, i]
+            nc->nc_vars[i].nc_dims = 2;
+            nc->nc_vars[i].nc_dimids[0] = nc->nj_dimid;
+            nc->nc_vars[i].nc_dimids[1] = nc->ni_dimid;
+            nc->nc_vars[i].nc_counts[0] = nc->nj_size;
+            nc->nc_vars[i].nc_counts[1] = nc->ni_size;
+            break;
+
         case STATE_LAKE_SOIL_MOISTURE:
             // 3d vars [layer, j, i]
             nc->nc_vars[i].nc_dims = 3;
@@ -1488,7 +1497,6 @@ set_nc_state_var_info(nc_file_struct *nc)
         case STATE_LAKE_ICE_SNOW_PACK_WATER:
         case STATE_LAKE_ICE_SNOW_ALBEDO:
         case STATE_LAKE_ICE_SNOW_DEPTH:
-        case STATE_AVG_ALBEDO:
             // 2d vars [j, i]
             nc->nc_vars[i].nc_dims = 2;
             nc->nc_vars[i].nc_dimids[0] = nc->nj_dimid;

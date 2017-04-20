@@ -142,16 +142,21 @@ generate_default_state(all_vars_struct *all_vars,
     for (veg = 0; veg <= Nveg; veg++) {
         Cv = veg_con[veg].Cv;
         if (Cv > 0) {
-            // TO-DO: account for treeline and lake factors
-            AreaFactor = Cv * TreeAdjustFactor * lakefactor;
-            // cold start, so assuming bare (free of snow) albedo
-            if (veg != Nveg) {
-                albedo_sum += AreaFactor * veg_var[veg][band].albedo;
-            }
-            else {
-                // this is the bare soil class, so use bare soil albedo parameter
-                albedo_sum += AreaFactor * param.ALBEDO_BARE_SOIL;
-            }
+            for (band = 0; band < options.SNOW_BAND; band++) {
+                if (soil_con->AreaFract[band] > 0.) {
+                    // TO-DO: account for treeline and lake factors
+                    AreaFactor = (Cv * soil_con->AreaFract[band] * 
+                                  TreeAdjustFactor * lakefactor);
+                    // cold start, so assuming bare (free of snow) albedo
+                    if (veg != Nveg) {
+                        albedo_sum += AreaFactor * veg_var[veg][band].albedo;
+                    }       
+                    else {
+                        // this is the bare soil class, so use bare soil albedo parameter
+                        albedo_sum += AreaFactor * param.ALBEDO_BARE_SOIL;
+                    }
+                }
+            }   
         }
     }
     gc_avg.avg_albedo = albedo_sum;

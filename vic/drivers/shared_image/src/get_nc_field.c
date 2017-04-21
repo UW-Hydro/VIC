@@ -31,10 +31,10 @@
  *****************************************************************************/
 int
 get_nc_field_double(nameid_struct *nc_nameid,
-                    char   *var_name,
-                    size_t *start,
-                    size_t *count,
-                    double *var)
+                    char          *var_name,
+                    size_t        *start,
+                    size_t        *count,
+                    double        *var)
 {
     int status;
     int var_id;
@@ -56,10 +56,10 @@ get_nc_field_double(nameid_struct *nc_nameid,
  *****************************************************************************/
 int
 get_nc_field_float(nameid_struct *nc_nameid,
-                   char   *var_name,
-                   size_t *start,
-                   size_t *count,
-                   float  *var)
+                   char          *var_name,
+                   size_t        *start,
+                   size_t        *count,
+                   float         *var)
 {
     int status;
     int var_id;
@@ -81,10 +81,10 @@ get_nc_field_float(nameid_struct *nc_nameid,
  *****************************************************************************/
 int
 get_nc_field_int(nameid_struct *nc_nameid,
-                 char   *var_name,
-                 size_t *start,
-                 size_t *count,
-                 int    *var)
+                 char          *var_name,
+                 size_t        *start,
+                 size_t        *count,
+                 int           *var)
 {
     int status;
     int var_id;

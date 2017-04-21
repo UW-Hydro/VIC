@@ -97,7 +97,7 @@ make_dmy(global_param_struct *global)
 
             global->forceskip[i] =
                 (unsigned int) round((start_num - force_num) *
-                                    (double) param_set.force_steps_per_day[i]);
+                                     (double) param_set.force_steps_per_day[i]);
         }
     }
 

@@ -118,7 +118,8 @@ vic_start(void)
         options.Nlayer = get_nc_dimension(&(filenames.params), "nlayer");
         options.NVEGTYPES = get_nc_dimension(&(filenames.params), "veg_class");
         if (options.SNOW_BAND == SNOW_BAND_TRUE_BUT_UNSET) {
-            options.SNOW_BAND = get_nc_dimension(&(filenames.params), "snow_band");
+            options.SNOW_BAND = get_nc_dimension(&(filenames.params),
+                                                 "snow_band");
         }
         if (options.LAKES) {
             options.NLAKENODES = get_nc_dimension(&(filenames.params),

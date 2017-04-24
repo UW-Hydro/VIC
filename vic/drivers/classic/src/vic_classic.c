@@ -76,7 +76,7 @@ main(int   argc,
     all_vars_struct    all_vars;
     lake_con_struct    lake_con;
     stream_struct     *streams = NULL;
-    double          ***out_data = NULL;   // [1, nvars, nelem]
+    double          ***out_data;   // [1, nvars, nelem]
     save_data_struct   save_data;
     timer_struct       global_timers[N_TIMERS];
     timer_struct       cell_timer;
@@ -120,6 +120,10 @@ main(int   argc,
     /** Make Date Data Structure **/
     initialize_time();
     dmy = make_dmy(&global_param);
+
+    // Allocate memory for out_data
+    out_data = malloc(1 * sizeof(*out_data));
+    check_alloc_status(out_data, "Memory allocation error.");
 
     /** Set up output data structures **/
     set_output_met_data_info();

@@ -70,7 +70,7 @@ vic_cesm_put_data()
     veg_var_struct             veg_var;
 
     for (i = 0; i < local_domain.ncells_active; i++) {
-        // Zero l2x vars 
+        // Zero l2x vars
         l2x_vic[i].l2x_Sl_t = 0;
         l2x_vic[i].l2x_Sl_tref = 0;
         l2x_vic[i].l2x_Sl_qref = 0;
@@ -100,33 +100,34 @@ vic_cesm_put_data()
         l2x_vic[i].l2x_Flrl_rofliq = 0;
         l2x_vic[i].l2x_Flrl_rofice = 0;
 
-	// populate reference values 
+        // populate reference values
 
-	// 10m wind, VIC: m/s, CESM: m/s
+        // 10m wind, VIC: m/s, CESM: m/s
         l2x_vic[i].l2x_Sl_u10 = out_data[i][OUT_WIND][0];
 
-	// 2m reference temperature, VIC: C, CESM: K
+        // 2m reference temperature, VIC: C, CESM: K
         l2x_vic[i].l2x_Sl_tref = out_data[i][OUT_AIR_TEMP][0] + CONST_TKFRZ;
 
-	// 2m reference specific humidity, VIC: kg/kg, CESM: g/g
-        l2x_vic[i].l2x_Sl_qref = CONST_EPS * 
-					out_data[i][OUT_VP][0] / out_data[i][OUT_PRESSURE][0];
+        // 2m reference specific humidity, VIC: kg/kg, CESM: g/g
+        l2x_vic[i].l2x_Sl_qref = CONST_EPS *
+                                 out_data[i][OUT_VP][0] /
+                                 out_data[i][OUT_PRESSURE][0];
 
-	// band-specific quantities
-	// note that these include a veg correction (AreaFactor)
-	// that is already in the put_data routine
+        // band-specific quantities
+        // note that these include a veg correction (AreaFactor)
+        // that is already in the put_data routine
 
-	// temperature, VIC: K, CESM: K
+        // temperature, VIC: K, CESM: K
         l2x_vic[i].l2x_Sl_t = out_data[i][OUT_RAD_TEMP][0];
 
-        // albedo, VIC: fraction, CESM: fraction 
-	// Note: VIC does not partition its albedo, thus all types are
-	// the same value 
+        // albedo, VIC: fraction, CESM: fraction
+        // Note: VIC does not partition its albedo, thus all types are
+        // the same value
         // TBD: this will be fixed in a subsequent PR
         albedo = out_data[i][OUT_ALBEDO][0];
-                
-	// albedo: direct, visible
-	l2x_vic[i].l2x_Sl_avsdr = albedo;
+
+        // albedo: direct, visible
+        l2x_vic[i].l2x_Sl_avsdr = albedo;
 
         // albedo: direct , near-ir
         l2x_vic[i].l2x_Sl_anidr = albedo;
@@ -138,40 +139,40 @@ vic_cesm_put_data()
         l2x_vic[i].l2x_Sl_anidf = albedo;
 
         // snow height, VIC: mm, CESM: m
-	// convert to VIC units
-        l2x_vic[i].l2x_Sl_snowh = out_data[i][OUT_SWE][0] / MM_PER_M; 
+        // convert to VIC units
+        l2x_vic[i].l2x_Sl_snowh = out_data[i][OUT_SWE][0] / MM_PER_M;
 
         // net shortwave, VIC: W/m2, CESM: W/m2
         l2x_vic[i].l2x_Fall_swnet = out_data[i][OUT_SWNET][0];
 
         // longwave up, VIC: W/m2, CESM: W/m2
-	// adjust sign for CESM sign convention
-        l2x_vic[i].l2x_Fall_lwup = -1 * 
-                                        (out_data[i][OUT_LWDOWN][0] -
-                                             out_data[i][OUT_LWNET][0]);
+        // adjust sign for CESM sign convention
+        l2x_vic[i].l2x_Fall_lwup = -1 *
+                                   (out_data[i][OUT_LWDOWN][0] -
+                                    out_data[i][OUT_LWNET][0]);
 
-	// turbulent heat fluxes
+        // turbulent heat fluxes
         // latent heat, VIC: W/m2, CESM: W/m2
         l2x_vic[i].l2x_Fall_lat = out_data[i][OUT_LATENT][0];
 
         // sensible heat, VIC: W/m2, CESM: W/m2
-	// TO-DO: check sign in VIC 4 coupling, this is inconsistent with 
-	// the history file output sign 
+        // TO-DO: check sign in VIC 4 coupling, this is inconsistent with
+        // the history file output sign
         l2x_vic[i].l2x_Fall_sen += -1 * out_data[i][OUT_SENSIBLE][0];
 
         // evaporation, VIC: mm, CESM: kg m-2 s-1
-	// TO-DO should we incorporate bare soil evap?
-	// canopy corrections applied already 
-	// so not repeated here
-        l2x_vic[i].l2x_Fall_evap += -1 * 
-				    (out_data[i][OUT_EVAP][0] * MM_PER_M /
-                                    global_param.dt);
+        // TO-DO should we incorporate bare soil evap?
+        // canopy corrections applied already
+        // so not repeated here
+        l2x_vic[i].l2x_Fall_evap += -1 *
+                                    (out_data[i][OUT_EVAP][0] * MM_PER_M /
+                                     global_param.dt);
 
         // lnd->rtm input fluxes
         l2x_vic[i].l2x_Flrl_rofliq += AreaFactor *
-                                              (out_data[i][OUT_RUNOFF] +
-                                               out_data[i][OUT_BASEFLOW] / global_param.dt);
-
+                                      (out_data[i][OUT_RUNOFF] +
+                                       out_data[i][OUT_BASEFLOW] /
+                                       global_param.dt);
 
 
         // running sum to make sure we get the full grid cell
@@ -202,8 +203,8 @@ vic_cesm_put_data()
                 }
                 AreaFactorSum += AreaFactor;
 
-        	// aerodynamical resistance, VIC: s/m, CESM: s/m
-		// TO-DO: update in future PR
+                // aerodynamical resistance, VIC: s/m, CESM: s/m
+                // TO-DO: update in future PR
                 if (overstory) {
                     aero_resist = cell.aero_resist[1];
                 }
@@ -257,12 +258,13 @@ vic_cesm_put_data()
                 wind_stress =
                     sqrt(pow(wind_stress_x, 2) + pow(wind_stress_y, 2));
                 l2x_vic[i].l2x_Sl_fv += AreaFactor *
-                                        (wind_stress / out_data[i][OUT_DENSITY][0]);
+                                        (wind_stress /
+                                         out_data[i][OUT_DENSITY][0]);
             }
         }
 
-	// set variables-set flag 
-	l2x_vic[i].l2x_vars_set = true;
+        // set variables-set flag
+        l2x_vic[i].l2x_vars_set = true;
 
         if (!assert_close_double(AreaFactorSum, 1., 0., 1e-3)) {
             log_warn("AreaFactorSum (%f) is not 1",

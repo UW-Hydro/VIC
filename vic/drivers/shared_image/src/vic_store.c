@@ -1266,8 +1266,6 @@ vic_store(dmy_struct *dmy_state,
 
     free(ivar);
     free(dvar);
-
-    // free memory
     free(nc_state_file.nc_vars);
 }
 

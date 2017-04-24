@@ -39,7 +39,7 @@ alloc_out_data(size_t     ngridcells,
     size_t                 j;
 
     for (i = 0; i < ngridcells; i++) {
-        out_data[i] = calloc(N_OUTVAR_TYPES, sizeof(*(out_data)[i]));
+        out_data[i] = calloc(N_OUTVAR_TYPES, sizeof(*(out_data[i])));
         check_alloc_status(out_data[i], "Memory allocation error.");
         // Allocate space for data
         for (j = 0; j < N_OUTVAR_TYPES; j++) {

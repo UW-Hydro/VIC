@@ -80,5 +80,4 @@ compare_ncdomain_with_global_domain(nameid_struct *nc_nameid)
                     global_domain.locations[i].longitude, i);
         }
     }
-    free(ncfile_domain.locations);
 }

@@ -149,7 +149,6 @@ get_global_domain(nameid_struct *domain_nc_nameid,
     // free memory
     free(var);
     free(run);
-    free(mask);
 
     return global_domain->ncells_active;
 }

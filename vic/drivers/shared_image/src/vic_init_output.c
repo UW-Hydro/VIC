@@ -61,7 +61,7 @@ vic_init_output(dmy_struct *dmy_current)
     set_output_met_data_info();
 
     // allocate out_data
-    alloc_out_data(local_domain.ncells_active, out_data);
+    alloc_out_data(local_domain.ncells_active, &out_data);
 
     // initialize the save data structures
     for (i = 0; i < local_domain.ncells_active; i++) {

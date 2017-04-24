@@ -156,8 +156,6 @@ vic_cesm_put_data()
         l2x_vic[i].l2x_Fall_lat = out_data[i][OUT_LATENT][0];
 
         // sensible heat, VIC: W/m2, CESM: W/m2
-        // TO-DO: check sign in VIC 4 coupling, this is inconsistent with
-        // the history file output sign
         l2x_vic[i].l2x_Fall_sen += -1 * out_data[i][OUT_SENSIBLE][0];
 
         // evaporation, VIC: mm, CESM: kg m-2 s-1

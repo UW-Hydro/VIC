@@ -44,6 +44,7 @@ vic_cesm_put_data()
     extern global_param_struct global_param;
     extern option_struct       options;
     extern parameters_struct   param;
+    extern double           ***out_data;
 
     bool                       IsWet = false; // TODO: add lake fraction
     bool                       overstory;
@@ -63,12 +64,10 @@ vic_cesm_put_data()
     double                     wind_stress;
     double                     wind_stress_x;
     double                     wind_stress_y;
-    double                     evap;
     cell_data_struct           cell;
     energy_bal_struct          energy;
     snow_data_struct           snow;
     veg_var_struct             veg_var;
-    extern double           ***out_data;
 
     for (i = 0; i < local_domain.ncells_active; i++) {
         // Zero l2x vars 
@@ -101,33 +100,33 @@ vic_cesm_put_data()
         l2x_vic[i].l2x_Flrl_rofliq = 0;
         l2x_vic[i].l2x_Flrl_rofice = 0;
 
-	    // populate reference values 
+	// populate reference values 
 
-	    // 10m wind, VIC: m/s, CESM: m/s
+	// 10m wind, VIC: m/s, CESM: m/s
         l2x_vic[i].l2x_Sl_u10 = out_data[i][OUT_WIND][0];
 
-	    // 2m reference temperature, VIC: C, CESM: K
+	// 2m reference temperature, VIC: C, CESM: K
         l2x_vic[i].l2x_Sl_tref = out_data[i][OUT_AIR_TEMP][0] + CONST_TKFRZ;
 
-	    // 2m reference specific humidity, VIC: kg/kg, CESM: g/g
+	// 2m reference specific humidity, VIC: kg/kg, CESM: g/g
         l2x_vic[i].l2x_Sl_qref = CONST_EPS * 
 					out_data[i][OUT_VP][0] / out_data[i][OUT_PRESSURE][0];
 
-	    // band-specific quantities
-	    // note that these include a veg correction (AreaFactor)
-	    // that is already in the put_data routine
+	// band-specific quantities
+	// note that these include a veg correction (AreaFactor)
+	// that is already in the put_data routine
 
-	    // temperature, VIC: K, CESM: K
+	// temperature, VIC: K, CESM: K
         l2x_vic[i].l2x_Sl_t = out_data[i][OUT_RAD_TEMP][0];
 
         // albedo, VIC: fraction, CESM: fraction 
-	    // Note: VIC does not partition its albedo, thus all types are
-	    // the same value 
+	// Note: VIC does not partition its albedo, thus all types are
+	// the same value 
         // TBD: this will be fixed in a subsequent PR
         albedo = out_data[i][OUT_ALBEDO][0];
                 
-	    // albedo: direct, visible
-	    l2x_vic[i].l2x_Sl_avsdr = albedo;
+	// albedo: direct, visible
+	l2x_vic[i].l2x_Sl_avsdr = albedo;
 
         // albedo: direct , near-ir
         l2x_vic[i].l2x_Sl_anidr = albedo;
@@ -138,41 +137,44 @@ vic_cesm_put_data()
         // albedo: diffuse, near-ir
         l2x_vic[i].l2x_Sl_anidf = albedo;
 
-        // snow height, VIC: cm, CESM: m
-	    // convert to VIC units
-        l2x_vic[i].l2x_Sl_snowh = out_data[i][OUT_SNOW_DEPTH][0] / CM_PER_M; 
+        // snow height, VIC: mm, CESM: m
+	// convert to VIC units
+        l2x_vic[i].l2x_Sl_snowh = out_data[i][OUT_SWE][0] / MM_PER_M; 
 
         // net shortwave, VIC: W/m2, CESM: W/m2
         l2x_vic[i].l2x_Fall_swnet = out_data[i][OUT_SWNET][0];
 
         // longwave up, VIC: W/m2, CESM: W/m2
-	    // adjust sign for CESM sign convention
+	// adjust sign for CESM sign convention
         l2x_vic[i].l2x_Fall_lwup = -1 * 
                                         (out_data[i][OUT_LWDOWN][0] -
                                              out_data[i][OUT_LWNET][0]);
 
-	    // turbulent heat fluxes
+	// turbulent heat fluxes
         // latent heat, VIC: W/m2, CESM: W/m2
         l2x_vic[i].l2x_Fall_lat = out_data[i][OUT_LATENT][0];
 
         // sensible heat, VIC: W/m2, CESM: W/m2
-	    // TO-DO: check sign in VIC 4 coupling, this is inconsistent with 
-	    // the history file output sign 
+	// TO-DO: check sign in VIC 4 coupling, this is inconsistent with 
+	// the history file output sign 
         l2x_vic[i].l2x_Fall_sen += -1 * out_data[i][OUT_SENSIBLE][0];
 
         // evaporation, VIC: mm, CESM: kg m-2 s-1
-	    // TO-DO should we incorporate bare soil evap?
-	    // canopy corrections applied already 
-	    // so not repeated here
-	    evap = out_data[i][OUT_EVAP][0] * MM_PER_M;
-        l2x_vic[i].l2x_Fall_evap += -1 * evap /
-                                            global_param.dt;
+	// TO-DO should we incorporate bare soil evap?
+	// canopy corrections applied already 
+	// so not repeated here
+        l2x_vic[i].l2x_Fall_evap += -1 * 
+				    (out_data[i][OUT_EVAP][0] * MM_PER_M /
+                                    global_param.dt);
+
+        // lnd->rtm input fluxes
+        l2x_vic[i].l2x_Flrl_rofliq += AreaFactor *
+                                              (out_data[i][OUT_RUNOFF] +
+                                               out_data[i][OUT_BASEFLOW] / global_param.dt);
+
 
 
         // running sum to make sure we get the full grid cell
-	    // TO-DO: once we update the aerodynamical resistances
-	    // and figure out what to do about the roughnesses
-	    // this loop will be eliminated 
         AreaFactorSum = 0;
 
         for (veg = 0; veg <= local_domain.locations[i].nveg; veg++) {
@@ -200,18 +202,8 @@ vic_cesm_put_data()
                 }
                 AreaFactorSum += AreaFactor;
 
-        	    // aerodynamical resistance, VIC: s/m, CESM: s/m
-		        // TO-DO: update to back-calculate WRF effective resistances
-                // temperature
-                // CESM units: K
-                if (overstory && snow.snow && !(options.LAKES && IsWet)) {
-                    rad_temp = energy.Tfoliage + CONST_TKFRZ;
-                }
-                else {
-                    rad_temp = energy.Tsurf + CONST_TKFRZ;
-                }
-                l2x_vic[i].l2x_Sl_t += AreaFactor * rad_temp;
-
+        	// aerodynamical resistance, VIC: s/m, CESM: s/m
+		// TO-DO: update in future PR
                 if (overstory) {
                     aero_resist = cell.aero_resist[1];
                 }
@@ -249,8 +241,6 @@ vic_cesm_put_data()
                 l2x_vic[i].l2x_Sl_logz0 += AreaFactor * log(roughness);
 
                 // wind stress, zonal
-        		// TO-DO: use updated aerodynamical resistances for 
-		        // calculating the wind stresses and friction velocity
                 // CESM units: N m-2
                 wind_stress_x = -1 * out_data[i][OUT_DENSITY][0] *
                                 x2l_vic[i].x2l_Sa_u / aero_resist;
@@ -268,11 +258,6 @@ vic_cesm_put_data()
                     sqrt(pow(wind_stress_x, 2) + pow(wind_stress_y, 2));
                 l2x_vic[i].l2x_Sl_fv += AreaFactor *
                                         (wind_stress / out_data[i][OUT_DENSITY][0]);
-
-                // lnd->rtm input fluxes
-                l2x_vic[i].l2x_Flrl_rofliq += AreaFactor *
-                                              (cell.runoff +
-                                               cell.baseflow) / global_param.dt;
             }
         }
 

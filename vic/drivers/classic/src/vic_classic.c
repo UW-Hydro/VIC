@@ -76,7 +76,7 @@ main(int   argc,
     all_vars_struct    all_vars;
     lake_con_struct    lake_con;
     stream_struct     *streams = NULL;
-    double          ***out_data;   // [1, nvars, nelem]
+    double          ***out_data = NULL;   // [1, nvars, nelem]
     save_data_struct   save_data;
     timer_struct       global_timers[N_TIMERS];
     timer_struct       cell_timer;

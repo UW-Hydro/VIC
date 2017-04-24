@@ -2122,6 +2122,7 @@ initialize_state_file(char           *filename,
             dvar[i] = nc_state_file->d_fillvalue;
         }
     }
+    free(dvar);
 
     if (options.LAKES) {
         // lake nodes

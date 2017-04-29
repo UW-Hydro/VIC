@@ -728,7 +728,7 @@ vic_store(dmy_struct *dmy_state,
     // Grid cell averaged albedo
     nc_var = &(nc_state_file.nc_vars[STATE_AVG_ALBEDO]);
     for (i = 0; i < local_domain.ncells_active; i++) {
-        dvar[i] = (double) all_vars[i].gc_avg.avg_albedo;
+        dvar[i] = (double) all_vars[i].gridcell_avg.avg_albedo;
     }
     gather_put_nc_field_double(nc_state_file.nc_id,
                                nc_var->nc_varid,

@@ -64,12 +64,12 @@ generate_default_state(all_vars_struct *all_vars,
     cell_data_struct       **cell;
     energy_bal_struct      **energy;
     veg_var_struct         **veg_var;
-    gridcell_avg_struct      gc_avg;
+    gridcell_avg_struct      gridcell_avg;
 
     cell = all_vars->cell;
     energy = all_vars->energy;
     veg_var = all_vars->veg_var;
-    gc_avg = all_vars->gc_avg;
+    gridcell_avg = all_vars->gridcell_avg;
     Nveg = veg_con[0].vegetat_type_num;
 
     // allocate memory for tmpT and tmpZ
@@ -159,7 +159,7 @@ generate_default_state(all_vars_struct *all_vars,
             }   
         }
     }
-    gc_avg.avg_albedo = albedo_sum;
+    gridcell_avg.avg_albedo = albedo_sum;
 
     /************************************************************************
        Initialize soil layer ice content

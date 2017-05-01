@@ -71,7 +71,7 @@ calc_gridcell_avg_albedo(double             *albedo,
         *albedo = 1.0 - (swnet / shortwave);
     }
     else {
-        *albedo = 0.00001;
+        *albedo = 0.0;
     }
 
 }

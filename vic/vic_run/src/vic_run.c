@@ -93,6 +93,7 @@ vic_run(force_data_struct   *force,
     veg_var_struct         **veg_var;
     energy_bal_struct      **energy;
     snow_data_struct       **snow;
+    gridcell_avg_struct    gridcell_avg;
 
     // assign vic_run_veg_lib to veg_lib, so that the veg_lib for the correct
     // grid cell is used within vic_run. For simplicity sake, use vic_run_veg_lib
@@ -105,6 +106,7 @@ vic_run(force_data_struct   *force,
     lake_var = &all_vars->lake_var;
     snow = all_vars->snow;
     veg_var = all_vars->veg_var;
+    gridcell_avg = all_vars->gridcell_avg;
 
     Nbands = options.SNOW_BAND;
 
@@ -381,6 +383,11 @@ vic_run(force_data_struct   *force,
             veg_var[iveg][band].Wdmax *= veg_var[iveg][band].fcanopy;
         }
     }
+
+   // Compute gridcell-averaged albedo
+   calc_gridcell_avg_albedo(&gridcell_avg.avg_albedo, 
+                            force->shortwave[NR], Nveg, energy, 
+                            veg_con, soil_con);
 
     /****************************
        Run Lake Model

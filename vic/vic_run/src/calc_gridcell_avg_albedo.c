@@ -59,7 +59,7 @@ calc_gridcell_avg_albedo(double             *albedo,
                     // TO-DO: account for treeline and lake factors
                     AreaFactor = (Cv * soil_con->AreaFract[band] * 
                                   TreeAdjustFactor * lakefactor);
-                    swnet += energy[veg][band].NetShortAtmos;
+                    swnet += energy[veg][band].NetShortAtmos * AreaFactor;
                 }
             }
         }
@@ -67,11 +67,11 @@ calc_gridcell_avg_albedo(double             *albedo,
 
     // compute gridcell-averaged albedo using average longwave 
     // and shortwave over gridcell
+
     if (shortwave > 0) {
-        *albedo = 1.0 - (swnet / shortwave);
+        *albedo = 1. - (swnet / shortwave);
     }
     else {
         *albedo = 0.0;
     }
-
 }

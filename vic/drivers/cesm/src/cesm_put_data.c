@@ -166,7 +166,8 @@ vic_cesm_put_data()
 
         // lnd->rtm input fluxes
         l2x_vic[i].l2x_Flrl_rofliq = out_data[i][OUT_RUNOFF] +
-                                     out_data[i][OUT_BASEFLOW] / global_param.dt;
+                                     out_data[i][OUT_BASEFLOW] /
+                                     global_param.dt;
 
 
         // running sum to make sure we get the full grid cell

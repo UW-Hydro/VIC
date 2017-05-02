@@ -57,7 +57,9 @@ To check which release of VIC you are running:
 
     These two timers count the CPU and WALL time spent in ``vic_force`` and ``vic_write``. The accumulated time from these timers is printed out at the end of each simulation in the timing table. See also [GH#442](https://github.com/UW-Hydro/VIC/pull/442).
 
-5. Added gridcell-averaged albedo as a state file variable (STATE_AVG_ALBEDO). This is for use in the CESM driver for VIC to pass to WRF, but has been implemented in the core structure of VIC (in vic_run) for consistency with the classic and image drivers. Running VIC from a cold start now also includes calculation of gridcell-averaged albedo.
+5. Added gridcell-averaged albedo (STATE_AVG_ALBEDO) as a state file variable ([GH#712](https://github.com/UW-Hydro/VIC/pull/712))
+
+    This is for use in the CESM driver for VIC to pass to WRF, but has been implemented in the core structure of VIC (in vic_run) for consistency with the classic and image drivers. Running VIC from a cold start now also includes calculation of gridcell-averaged albedo.
 
 ## VIC 5.0.1
 

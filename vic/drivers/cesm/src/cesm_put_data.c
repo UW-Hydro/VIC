@@ -160,16 +160,13 @@ vic_cesm_put_data()
 
         // evaporation, VIC: mm, CESM: kg m-2 s-1
         // TO-DO should we incorporate bare soil evap?
-        // canopy corrections applied already
-        // so not repeated here
         l2x_vic[i].l2x_Fall_evap += -1 *
                                     (out_data[i][OUT_EVAP][0] * MM_PER_M /
                                      global_param.dt);
 
         // lnd->rtm input fluxes
-        l2x_vic[i].l2x_Flrl_rofliq += AreaFactor *
-				      out_data[i][OUT_RUNOFF] +
-                                      out_data[i][OUT_BASEFLOW] / global_param.dt;
+        l2x_vic[i].l2x_Flrl_rofliq = out_data[i][OUT_RUNOFF] +
+                                     out_data[i][OUT_BASEFLOW] / global_param.dt;
 
 
         // running sum to make sure we get the full grid cell

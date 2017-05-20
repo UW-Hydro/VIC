@@ -42,10 +42,12 @@ The CESM driver for VIC can be built in two ways.
   git checkout develop
 
   # follow typical steps to build RASM
+  # NOTE: only set DEBUG flag to TRUE if running RI compset
+  # (it does not work with WRF)
   cd $HOME/rasm_vic5/scripts
   today=$(date +'%Y%m%d')
-  compset=RI
-  mach=spirit_intel
+  compset=RI # adjust for compset
+  mach=spirit_intel # adjust for machine
   case_name=vic5.${compset}.test.${today}a
   create_newcase -case ${case_name} -res w5a_a94 -compset ${compset} -mach ${mach}
   cd ${case_name}
@@ -56,7 +58,7 @@ The CESM driver for VIC can be built in two ways.
   ```
 
   ** Supported Machines **
-  - [x] Spirit
+  - [x] Thunder
   - [x] Lightning
   - [x] Garnet
   - [ ] Copper *(Not currently supported by RASM)*

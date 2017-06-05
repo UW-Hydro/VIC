@@ -65,9 +65,7 @@ calc_gridcell_avg_albedo(double             *albedo,
         }
     }
 
-    // compute gridcell-averaged albedo using average longwave
-    // and shortwave over gridcell
-
+    // compute gridcell-averaged albedo using average longwave shortwave
     if (shortwave > 0) {
         *albedo = 1. - (swnet / shortwave);
     }

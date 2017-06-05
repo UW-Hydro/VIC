@@ -29,29 +29,31 @@ To check which release of VIC you are running:
 
 	[GH#642](https://github.com/UW-Hydro/VIC/pull/642)
 
-	1. Using correct fill value datatypes in MPI Gather steps
-	2. Updated state file name time step to be period-ending rather than period-beginning
-	3. Set the state file name to the RASM case ID
-	4. Removed decimal point for missing values for unsigned integers
-	5. Create dummy forcings when initializing the model (so that there is forcing data for the first time step)
-	6. Changed pressure units from kPa to Pa
-	7. Fixed bug that prevented using the correct local domain grid cells in `cesm_put_data.c`
-	8. Changed reference temperature units from Celsius to Kelvin in `cesm_put_data.c`
+	    1. Using correct fill value datatypes in MPI Gather steps
+	    2. Updated state file name time step to be period-ending rather than period-beginning
+	    3. Set the state file name to the RASM case ID
+	    4. Removed decimal point for missing values for unsigned integers
+	    5. Create dummy forcings when initializing the model (so that there is forcing data for the first time step)
+	    6. Changed pressure units from kPa to Pa
+	    7. Fixed bug that prevented using the correct local domain grid cells in `cesm_put_data.c`
+	    8. Changed reference temperature units from Celsius to Kelvin in `cesm_put_data.c`
 
 	[GH#695](https://github.com/UW-Hydro/VIC/pull/695)
 
-	1. Fix sign for latent heat fluxes passed from VIC to the coupler
-	2. Fix sign for longwave radiation passed from VIC to the coupler
+	    1. Fix sign for latent heat fluxes passed from VIC to the coupler
+	    2. Fix sign for longwave radiation passed from VIC to the coupler
 
 	[GH#696](https://github.com/UW-Hydro/VIC/pull/696)
 
-	1. Changes names of CESM driver functions `trim` and `advance_time` to `trimstr` and `advance_vic_time`, respectively, to avoid conflicts with WRF functions with the same names when compiling RFR case.
+	    Changes names of CESM driver functions `trim` and `advance_time` to `trimstr` and `advance_vic_time`, respectively, to avoid conflicts with WRF functions with the same names when compiling RFR case.
 
-    [GH#702] (https://github.com/UW-Hydro/VIC/pull/702)
+        [GH#702] (https://github.com/UW-Hydro/VIC/pull/702)
 
-    1. Fixes Julian day for the first timestep in the dmy struct for the CESM driver.
+	    Fixes Julian day for the first timestep in the dmy struct for the CESM driver.
 
-	These changes speed up image driver initialization, forcing reads, and history writes by only opening and closing each input netCDF file once.
+3. Speed up NetCDF operations in the image/CESM drivers ([GH#684](https://github.com/UW-Hydro/VIC/pull/684))
+
+    These changes speed up image driver initialization, forcing reads, and history writes by only opening and closing each input netCDF file once.
 
 4. Added two new timers to measure time in I/O operations ([GH#703](https://github.com/UW-Hydro/VIC/pull/703))
 

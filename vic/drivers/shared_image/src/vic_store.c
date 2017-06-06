@@ -725,6 +725,19 @@ vic_store(dmy_struct *dmy_state,
         }
     }
 
+    // Grid cell averaged albedo
+    nc_var = &(nc_state_file.nc_vars[STATE_AVG_ALBEDO]);
+    for (i = 0; i < local_domain.ncells_active; i++) {
+        dvar[i] = (double) all_vars[i].gridcell_avg.avg_albedo;
+    }
+    gather_put_nc_field_double(nc_state_file.nc_id,
+                               nc_var->nc_varid,
+                               nc_state_file.d_fillvalue,
+                               d2start, nc_var->nc_counts, dvar);
+    for (i = 0; i < local_domain.ncells_active; i++) {
+        dvar[i] = nc_state_file.d_fillvalue;
+    }
+
 
     if (options.LAKES) {
         // total soil moisture
@@ -1423,6 +1436,15 @@ set_nc_state_var_info(nc_file_struct *nc)
             nc->nc_vars[i].nc_counts[3] = nc->nj_size;
             nc->nc_vars[i].nc_counts[4] = nc->ni_size;
             break;
+        case STATE_AVG_ALBEDO:
+            // 2d vars [j, i]
+            nc->nc_vars[i].nc_dims = 2;
+            nc->nc_vars[i].nc_dimids[0] = nc->nj_dimid;
+            nc->nc_vars[i].nc_dimids[1] = nc->ni_dimid;
+            nc->nc_vars[i].nc_counts[0] = nc->nj_size;
+            nc->nc_vars[i].nc_counts[1] = nc->ni_size;
+            break;
+
         case STATE_LAKE_SOIL_MOISTURE:
             // 3d vars [layer, j, i]
             nc->nc_vars[i].nc_dims = 3;

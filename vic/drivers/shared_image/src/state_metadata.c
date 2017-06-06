@@ -275,6 +275,17 @@ set_state_meta_data_info()
     strcpy(state_metadata[STATE_ENERGY_SNOW_FLUX].description,
            "thermal flux through snowpack");
 
+    // STATE_GRIDCELL_AVG_ALBEDO
+    strcpy(state_metadata[STATE_AVG_ALBEDO].varname,
+           "STATE_AVG_ALBEDO");
+    strcpy(state_metadata[STATE_AVG_ALBEDO].long_name,
+           "state_avg_albedo");
+    strcpy(state_metadata[STATE_AVG_ALBEDO].standard_name,
+           "state_gridcell_avg_albedo");
+    strcpy(state_metadata[STATE_AVG_ALBEDO].units, "fraction");
+    strcpy(state_metadata[STATE_AVG_ALBEDO].description,
+           "gridcell averaged albedo");
+
     if (options.LAKES) {
         // STATE_LAKE_SOIL_MOISTURE
         strcpy(state_metadata[STATE_LAKE_SOIL_MOISTURE].varname,

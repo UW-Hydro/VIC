@@ -49,7 +49,11 @@ To check which release of VIC you are running:
 
     [GH#702] (https://github.com/UW-Hydro/VIC/pull/702)
 
-	    Fixes Julian day for the first timestep in the dmy struct for the CESM driver.
+        Fixes Julian day for the first timestep in the dmy struct for the CESM driver.
+
+	[GH#710] (https://github.com/UW-Hydro/VIC/pull/710)
+
+	    Refactor the cesm_put_data.c routine in the CESM driver to use values from out_data directly, rather than computing them separately in cesm_put_data.c. 
 
     [GH#716] (https://github.com/UW-Hydro/VIC/pull/716)
 

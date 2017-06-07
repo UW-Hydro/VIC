@@ -105,6 +105,12 @@ vic_cesm_init(vic_clock     *vclock,
     // initialize albedo
     vic_initialize_albedo();
 
+    // initialize temperature
+    vic_initialize_temperature();
+
+    // initialize upwelling longwave
+    vic_initialize_lwup();
+
     // initialization is complete, print settings
     log_info(
         "Initialization is complete, print global param and options structures");

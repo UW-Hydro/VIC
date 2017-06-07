@@ -36,6 +36,7 @@
 #define GLOBALPARAM "vic.globalconfig.txt"
 #define RPOINTER "rpointer.lnd"
 #define SHR_CONST_SPVAL 1.0e30   /**< CESM missing value */
+#define SHR_CONST_STEBOL 5.67e-8 /**< Stefan-Boltzmann constant ~ W/m^2/K^4 */
 
 /******************************************************************************
  * @brief   CESM run types
@@ -185,8 +186,10 @@ void vic_force(void);
 void vic_cesm_put_data(void);
 void vic_cesm_run_model(void);
 void vic_cesm_start(vic_clock *vclock, case_metadata *cmeta);
+void vic_initialize_albedo(void);
+void vic_initialize_lwup(void);
+void vic_initialize_temperature(void);
 void vic_populate_model_state(char *runtype_str);
 void write_rpointer_file(char *fname);
-void vic_initialize_albedo(void);
 
 #endif

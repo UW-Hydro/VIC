@@ -47,9 +47,13 @@ To check which release of VIC you are running:
 
 	    Changes names of CESM driver functions `trim` and `advance_time` to `trimstr` and `advance_vic_time`, respectively, to avoid conflicts with WRF functions with the same names when compiling RFR case.
 
-        [GH#702] (https://github.com/UW-Hydro/VIC/pull/702)
+    [GH#702] (https://github.com/UW-Hydro/VIC/pull/702)
 
 	    Fixes Julian day for the first timestep in the dmy struct for the CESM driver.
+
+    [GH#716] (https://github.com/UW-Hydro/VIC/pull/716)
+
+        Fixes initialization of coupler fields and calculates temperature and upwelling longwave to pass to WRF during initialization. 
 
 3. Speed up NetCDF operations in the image/CESM drivers ([GH#684](https://github.com/UW-Hydro/VIC/pull/684))
 

@@ -172,12 +172,13 @@ vic_initialize_lwup(void)
 {
     extern l2x_data_struct *l2x_vic;
     extern domain_struct    local_domain;
+    extern parameters_struct param;
 
     size_t                  i;
 
     log_info("Initializing upwelling longwave");
 
     for (i = 0; i < local_domain.ncells_active; i++) {
-	l2x_vic[i].l2x_Fall_lwup = SHR_CONST_STEBOL * pow(l2x_vic[i].l2x_Sl_t, 4);
+	l2x_vic[i].l2x_Fall_lwup = param.EMISS_GRND * SHR_CONST_STEBOL * pow(l2x_vic[i].l2x_Sl_t, 4);
     }
 }

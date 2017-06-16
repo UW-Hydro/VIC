@@ -179,7 +179,7 @@ vic_initialize_lwup(void)
     log_info("Initializing upwelling longwave");
 
     for (i = 0; i < local_domain.ncells_active; i++) {
-        l2x_vic[i].l2x_Fall_lwup = param.EMISS_GRND * SHR_CONST_STEBOL * pow(
-            l2x_vic[i].l2x_Sl_t, 4);
+	// adjust sign for CESM sign convention
+        l2x_vic[i].l2x_Fall_lwup = -1 * param.EMISS_GRND * CONST_STEBOL * pow(l2x_vic[i].l2x_Sl_t, 4);
     }
 }

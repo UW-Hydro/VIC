@@ -123,8 +123,7 @@ vic_cesm_put_data()
         // albedo, VIC: fraction, CESM: fraction
         // Note: VIC does not partition its albedo, thus all types are
         // the same value
-        // TBD: this will be fixed in a subsequent PR
-        albedo = out_data[i][OUT_ALBEDO][0];
+        albedo = all_vars[i].gridcell_avg.avg_albedo;
 
         // albedo: direct, visible
         l2x_vic[i].l2x_Sl_avsdr = albedo;

@@ -55,6 +55,10 @@ To check which release of VIC you are running:
 
 	    Refactor the cesm_put_data.c routine in the CESM driver to use values from out_data directly, rather than computing them separately in cesm_put_data.c. 
 
+    [GH#718] (https://github.com/UW-Hydro/VIC/pull/718)
+
+        Updates the cesm_put_data.c routine in the CESM driver to pass gridcell-averaged albedo to the coupler. 
+
 3. Speed up NetCDF operations in the image/CESM drivers ([GH#684](https://github.com/UW-Hydro/VIC/pull/684))
 
     These changes speed up image driver initialization, forcing reads, and history writes by only opening and closing each input netCDF file once.

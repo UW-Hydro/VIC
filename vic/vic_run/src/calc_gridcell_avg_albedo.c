@@ -40,15 +40,14 @@ calc_gridcell_avg_albedo(double             *albedo,
                          veg_con_struct     *veg_con,
                          soil_con_struct    *soil_con)
 {
-    extern option_struct     options;
-    extern parameters_struct param;
-    size_t                   veg;
-    size_t                   band;
-    double                   Cv;
-    double                   AreaFactor;
-    double                   TreeAdjustFactor = 1.;
-    double                   lakefactor = 1;
-    double                   swnet;
+    extern option_struct options;
+    size_t               veg;
+    size_t               band;
+    double               Cv;
+    double               AreaFactor;
+    double               TreeAdjustFactor = 1.;
+    double               lakefactor = 1;
+    double               swnet;
 
     swnet = 0;
 
@@ -71,7 +70,6 @@ calc_gridcell_avg_albedo(double             *albedo,
         *albedo = 1. - (swnet / shortwave);
     }
     else {
-	// use bare soil albedo
-        *albedo = param.ALBEDO_BARE_SOIL;
+        *albedo = 0.0;
     }
 }

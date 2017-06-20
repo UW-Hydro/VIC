@@ -36,7 +36,6 @@
 #define GLOBALPARAM "vic.globalconfig.txt"
 #define RPOINTER "rpointer.lnd"
 #define SHR_CONST_SPVAL 1.0e30   /**< CESM missing value */
-#define SHR_CONST_STEBOL 5.67e-8 /**< Stefan-Boltzmann constant ~ W/m^2/K^4 */
 
 /******************************************************************************
  * @brief   CESM run types

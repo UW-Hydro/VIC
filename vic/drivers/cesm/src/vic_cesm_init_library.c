@@ -93,7 +93,7 @@ initialize_l2x_data(void)
     for (i = 0; i < local_domain.ncells_active; i++) {
         l2x_vic[i].l2x_Sl_t = SHR_CONST_SPVAL;
         l2x_vic[i].l2x_Sl_tref = SHR_CONST_SPVAL;
-        l2x_vic[i].l2x_Sl_qref = 0SHR_CONST_SPVAL;
+        l2x_vic[i].l2x_Sl_qref = SHR_CONST_SPVAL;
         l2x_vic[i].l2x_Sl_avsdr = SHR_CONST_SPVAL;
         l2x_vic[i].l2x_Sl_anidr = SHR_CONST_SPVAL;
         l2x_vic[i].l2x_Sl_avsdf = SHR_CONST_SPVAL;

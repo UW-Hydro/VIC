@@ -47,7 +47,6 @@ vic_run(force_data_struct   *force,
     extern parameters_struct param;
 
     char                     overstory;
-    int                      j;
     size_t                   lidx;
     unsigned short           iveg;
     size_t                   Nveg;
@@ -55,9 +54,9 @@ vic_run(force_data_struct   *force,
     unsigned short           band;
     size_t                   Nbands;
     int                      ErrorFlag;
-    double                   out_prec[2 * MAX_BANDS];
-    double                   out_rain[2 * MAX_BANDS];
-    double                   out_snow[2 * MAX_BANDS];
+    double                   out_prec[MAX_BANDS];
+    double                   out_rain[MAX_BANDS];
+    double                   out_snow[MAX_BANDS];
     double                   dp;
     double                   ice0[MAX_BANDS];
     double                   moist0[MAX_BANDS];
@@ -70,7 +69,7 @@ vic_run(force_data_struct   *force,
     double                   aero_resist[3];
     double                   Cv;
     double                   Le;
-    double                   Melt[2 * MAX_BANDS];
+    double                   Melt[MAX_BANDS];
     double                   bare_albedo;
     double                   snow_inflow[MAX_BANDS];
     double                   rainonly;
@@ -108,7 +107,7 @@ vic_run(force_data_struct   *force,
 
     Nbands = options.SNOW_BAND;
 
-    /* Set number of vegetation types */
+    /* Set number of vegetation tiles */
     Nveg = veg_con[0].vegetat_type_num;
 
     /** Set Damping Depth **/
@@ -129,27 +128,22 @@ vic_run(force_data_struct   *force,
     force->out_rain = 0;
     force->out_snow = 0;
 
-    // Convert LAI from global to local
-    for (iveg = 0; iveg < Nveg; iveg++) {
-        veg_class = veg_con[iveg].veg_class;
-        for (band = 0; band < Nbands; band++) {
-            veg_var[iveg][band].LAI /= veg_var[iveg][band].fcanopy;
-            veg_var[iveg][band].Wdew /= veg_var[iveg][band].fcanopy;
-            veg_var[iveg][band].Wdmax = veg_var[iveg][band].LAI *
-                                        param.VEG_LAI_WATER_FACTOR;
-            snow[iveg][band].snow_canopy /= veg_var[iveg][band].fcanopy;
-        }
-    }
-
     /**************************************************
        Solve Energy and/or Water Balance for Each
-       Vegetation Type
+       Vegetation Tile
     **************************************************/
     for (iveg = 0; iveg <= Nveg; iveg++) {
-        /** Solve Veg Type only if Coverage Greater than 0% **/
+        /** Solve Veg Tile only if Coverage Greater than 0% **/
         if (veg_con[iveg].Cv > 0.0) {
             Cv = veg_con[iveg].Cv;
             Nbands = options.SNOW_BAND;
+
+            /** Define vegetation class number **/
+            veg_class = veg_con[iveg].veg_class;
+
+            /**************************************************
+               Initialize Model Parameters
+            **************************************************/
 
             /** Lake-specific processing **/
             if (veg_con[iveg].LAKE) {
@@ -179,65 +173,9 @@ vic_run(force_data_struct   *force,
                 }
             }
 
-            /**************************************************
-               Initialize Model Parameters
-            **************************************************/
-
-            for (band = 0; band < Nbands; band++) {
-                if (soil_con->AreaFract[band] > 0) {
-                    /* Initialize energy balance variables */
-                    energy[iveg][band].shortwave = 0;
-                    energy[iveg][band].longwave = 0.;
-
-                    /* Initialize snow variables */
-                    snow[iveg][band].vapor_flux = 0.;
-                    snow[iveg][band].canopy_vapor_flux = 0.;
-                    snow_inflow[band] = 0.;
-                    Melt[band * 2] = 0.;
-                }
-            }
-
-            /* Initialize precipitation storage */
-            for (j = 0; j < 2 * MAX_BANDS; j++) {
-                out_prec[j] = 0;
-                out_rain[j] = 0;
-                out_snow[j] = 0;
-            }
-
-            /** Define vegetation class number **/
-            veg_class = veg_con[iveg].veg_class;
-
-            /** Initialize other veg vars **/
-            if (iveg < Nveg) {
-                for (band = 0; band < Nbands; band++) {
-                    veg_var[iveg][band].rc = param.HUGE_RESIST;
-                }
-            }
-
             /** Assign wind_h **/
             /** Note: this is ignored below **/
             wind_h = vic_run_veg_lib[veg_class].wind_h;
-
-            /** Compute Surface Attenuation due to Vegetation Coverage **/
-            surf_atten = (1 - veg_var[iveg][0].fcanopy) * 1.0 +
-                         veg_var[iveg][0].fcanopy *
-                         exp(-vic_run_veg_lib[veg_class].rad_atten *
-                             veg_var[iveg][0].LAI);
-
-            /* Initialize soil thermal properties for the top two layers */
-            prepare_full_energy(iveg, all_vars, soil_con, moist0, ice0);
-
-            /** Compute Bare (free of snow) Albedo **/
-            if (iveg != Nveg) {
-                bare_albedo = veg_var[iveg][0].albedo;
-            }
-            else {
-                bare_albedo = param.ALBEDO_BARE_SOIL;
-            }
-
-            /*************************************
-               Compute the aerodynamic resistance
-            *************************************/
 
             /* Initialize wind speeds */
             tmp_wind[0] = force->wind[NR];
@@ -275,60 +213,113 @@ vic_run(force_data_struct   *force,
                 return (ERROR);
             }
 
-            /* Initialize final aerodynamic resistance values */
+            /** Compute Surface Attenuation due to Vegetation Coverage **/
+            surf_atten = (1 - veg_var[iveg][0].fcanopy) * 1.0 +
+                         veg_var[iveg][0].fcanopy *
+                         exp(-vic_run_veg_lib[veg_class].rad_atten *
+                             veg_var[iveg][0].LAI);
+
+            /* Initialize soil thermal properties for the top two layers */
+            prepare_full_energy(iveg, all_vars, soil_con, moist0, ice0);
+
+            /** Compute Bare (free of snow) Albedo **/
+            if (iveg != Nveg) {
+                bare_albedo = veg_var[iveg][0].albedo;
+            }
+            else {
+                bare_albedo = param.ALBEDO_BARE_SOIL;
+            }
+
+            /**************************************************
+               Loop over elevation bands
+            **************************************************/
             for (band = 0; band < Nbands; band++) {
+                /** Solve band only if coverage greater than 0% **/
                 if (soil_con->AreaFract[band] > 0) {
+
+                    /******************************************
+                       Initialize Band-dependent Model Parameters
+                    ******************************************/
+
+                    /* Initialize final aerodynamic resistance values */
                     cell[iveg][band].aero_resist[0] =
                         aero_resist[0];
                     cell[iveg][band].aero_resist[1] =
                         aero_resist[1];
-                }
-            }
-
-            // Compute nitrogen scaling factors and initialize other veg vars
-            if (options.CARBON && iveg < Nveg) {
-                for (band = 0; band < Nbands; band++) {
-                    for (cidx = 0; cidx < options.Ncanopy; cidx++) {
-                        veg_var[iveg][band].rsLayer[cidx] = param.HUGE_RESIST;
-                    }
-                    veg_var[iveg][band].aPAR = 0;
-                    calc_Nscale_factors(
-                        vic_run_veg_lib[veg_class].NscaleFlag,
-                        veg_con[iveg].CanopLayerBnd,
-                        veg_var[iveg][band].LAI,
-                        force->coszen[NR],
-                        veg_var[iveg][band].NscaleFactor);
-                    // TBD: move this outside of vic_run()
-                    if (dmy->day_in_year == 1) {
-                        veg_var[iveg][band].AnnualNPPPrev =
-                            veg_var[iveg][band].AnnualNPP;
-                        veg_var[iveg][band].AnnualNPP = 0;
-                    }
-                }
-            }
-
-            /******************************
-               Solve ground surface fluxes
-            ******************************/
-
-            for (band = 0; band < Nbands; band++) {
-                if (soil_con->AreaFract[band] > 0) {
-                    lag_one = veg_con[iveg].lag_one;
-                    sigma_slope = veg_con[iveg].sigma_slope;
-                    fetch = veg_con[iveg].fetch;
 
                     /* Initialize pot_evap */
                     cell[iveg][band].pot_evap = 0;
 
+                    // Convert LAI from global to local
+                    veg_var[iveg][band].LAI /= veg_var[iveg][band].fcanopy;
+                    veg_var[iveg][band].Wdew /= veg_var[iveg][band].fcanopy;
+                    veg_var[iveg][band].Wdmax = veg_var[iveg][band].LAI *
+                                                param.VEG_LAI_WATER_FACTOR;
+                    snow[iveg][band].snow_canopy /= veg_var[iveg][band].fcanopy;
+
+                    /** Initialize other veg vars **/
+                    if (iveg < Nveg) {
+
+                        veg_var[iveg][band].rc = param.HUGE_RESIST;
+
+                        /* Carbon-related variables */
+                        if (options.CARBON) {
+
+                            for (cidx = 0; cidx < options.Ncanopy; cidx++) {
+                                veg_var[iveg][band].rsLayer[cidx] = param.HUGE_RESIST;
+                            }
+                            veg_var[iveg][band].aPAR = 0;
+
+                            calc_Nscale_factors(
+                                vic_run_veg_lib[veg_class].NscaleFlag,
+                                veg_con[iveg].CanopLayerBnd,
+                                veg_var[iveg][band].LAI,
+                                force->coszen[NR],
+                                veg_var[iveg][band].NscaleFactor);
+
+                            // TBD: move this outside of vic_run()
+                            if (dmy->day_in_year == 1) {
+                                veg_var[iveg][band].AnnualNPPPrev =
+                                    veg_var[iveg][band].AnnualNPP;
+                                veg_var[iveg][band].AnnualNPP = 0;
+                            }
+
+                        } // if options.CARBON
+
+                    } // if iveg < Nveg
+
+                    /* Initialize energy balance variables */
+                    energy[iveg][band].shortwave = 0;
+                    energy[iveg][band].longwave = 0.;
+
+                    /* Initialize snow variables */
+                    snow[iveg][band].vapor_flux = 0.;
+                    snow[iveg][band].canopy_vapor_flux = 0.;
+                    snow_inflow[band] = 0.;
+                    Melt[band] = 0.;
+
+                    /* Initialize precipitation storage */
+                    out_prec[band] = 0;
+                    out_rain[band] = 0;
+                    out_snow[band] = 0;
+
+                    /******************************
+                       Solve ground surface fluxes
+                    ******************************/
+
+                    lag_one = veg_con[iveg].lag_one;
+                    sigma_slope = veg_con[iveg].sigma_slope;
+                    fetch = veg_con[iveg].fetch;
+
                     ErrorFlag = surface_fluxes(overstory, bare_albedo,
                                                ice0[band], moist0[band],
-                                               surf_atten, &(Melt[band * 2]),
+                                               surf_atten, &(Melt[band]),
                                                &Le,
                                                aero_resist,
                                                displacement, gauge_correction,
-                                               &out_prec[band * 2],
-                                               &out_rain[band * 2],
-                                               &out_snow[band * 2],
+                                               &out_prec[band],
+                                               &out_rain[band],
+                                               &out_snow[band],
                                                ref_height, roughness,
                                                &snow_inflow[band],
                                                tmp_wind, veg_con[iveg].root,
@@ -346,11 +337,11 @@ vic_run(force_data_struct   *force,
                     }
 
                     force->out_prec +=
-                        out_prec[band * 2] * Cv * soil_con->AreaFract[band];
+                        out_prec[band] * Cv * soil_con->AreaFract[band];
                     force->out_rain +=
-                        out_rain[band * 2] * Cv * soil_con->AreaFract[band];
+                        out_rain[band] * Cv * soil_con->AreaFract[band];
                     force->out_snow +=
-                        out_snow[band * 2] * Cv * soil_con->AreaFract[band];
+                        out_snow[band] * Cv * soil_con->AreaFract[band];
 
                     /********************************************************
                        Compute soil wetness and root zone soil moisture
@@ -369,18 +360,15 @@ vic_run(force_data_struct   *force,
                              MM_PER_M - soil_con->Wpwp[lidx]);
                     }
                     cell[iveg][band].wetness /= options.Nlayer;
+
+                    /* Convert LAI back to global */
+                    veg_var[iveg][band].LAI *= veg_var[iveg][band].fcanopy;
+                    veg_var[iveg][band].Wdmax *= veg_var[iveg][band].fcanopy;
+
                 } /** End non-zero area band **/
             } /** End Loop Through Elevation Bands **/
         } /** end non-zero area veg tile **/
     } /** end of vegetation loop **/
-
-    /* Convert LAI back to global */
-    for (iveg = 0; iveg < Nveg; iveg++) {
-        for (band = 0; band < Nbands; band++) {
-            veg_var[iveg][band].LAI *= veg_var[iveg][band].fcanopy;
-            veg_var[iveg][band].Wdmax *= veg_var[iveg][band].fcanopy;
-        }
-    }
 
     // Compute gridcell-averaged albedo
     calc_gridcell_avg_albedo(&all_vars->gridcell_avg.avg_albedo,

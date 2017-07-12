@@ -128,6 +128,13 @@ vic_run(force_data_struct   *force,
     force->out_rain = 0;
     force->out_snow = 0;
 
+    /** initialize moist0 and ice0 **/
+    // this could be removed if we make them scalars
+    for (band = 0; band < options.SNOW_BAND; band++) {
+        moist0[band] = 0;
+        ice0[band] = 0;
+    }
+
     /**************************************************
        Solve Energy and/or Water Balance for Each
        Vegetation Tile
@@ -219,9 +226,6 @@ vic_run(force_data_struct   *force,
                          exp(-vic_run_veg_lib[veg_class].rad_atten *
                              veg_var[iveg][0].LAI);
 
-            /* Initialize soil thermal properties for the top two layers */
-            prepare_full_energy(iveg, all_vars, soil_con, moist0, ice0);
-
             /** Compute Bare (free of snow) Albedo **/
             if (iveg != Nveg) {
                 bare_albedo = veg_var[iveg][0].albedo;
@@ -236,10 +240,15 @@ vic_run(force_data_struct   *force,
             for (band = 0; band < Nbands; band++) {
                 /** Solve band only if coverage greater than 0% **/
                 if (soil_con->AreaFract[band] > 0) {
-
                     /******************************************
                        Initialize Band-dependent Model Parameters
                     ******************************************/
+
+                    /* Initialize soil thermal properties for the top two layers */
+                    prepare_full_energy(&(cell[iveg][band]),
+                                        &(energy[iveg][band]),
+                                        soil_con, &(moist0[band]),
+                                        &(ice0[band]));
 
                     /* Initialize final aerodynamic resistance values */
                     cell[iveg][band].aero_resist[0] =
@@ -259,14 +268,13 @@ vic_run(force_data_struct   *force,
 
                     /** Initialize other veg vars **/
                     if (iveg < Nveg) {
-
                         veg_var[iveg][band].rc = param.HUGE_RESIST;
 
                         /* Carbon-related variables */
                         if (options.CARBON) {
-
                             for (cidx = 0; cidx < options.Ncanopy; cidx++) {
-                                veg_var[iveg][band].rsLayer[cidx] = param.HUGE_RESIST;
+                                veg_var[iveg][band].rsLayer[cidx] =
+                                    param.HUGE_RESIST;
                             }
                             veg_var[iveg][band].aPAR = 0;
 
@@ -283,9 +291,7 @@ vic_run(force_data_struct   *force,
                                     veg_var[iveg][band].AnnualNPP;
                                 veg_var[iveg][band].AnnualNPP = 0;
                             }
-
                         } // if options.CARBON
-
                     } // if iveg < Nveg
 
                     /* Initialize energy balance variables */
@@ -364,7 +370,6 @@ vic_run(force_data_struct   *force,
                     /* Convert LAI back to global */
                     veg_var[iveg][band].LAI *= veg_var[iveg][band].fcanopy;
                     veg_var[iveg][band].Wdmax *= veg_var[iveg][band].fcanopy;
-
                 } /** End non-zero area band **/
             } /** End Loop Through Elevation Bands **/
         } /** end non-zero area veg tile **/

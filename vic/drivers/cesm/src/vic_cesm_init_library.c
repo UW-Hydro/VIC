@@ -88,7 +88,7 @@ initialize_l2x_data(void)
 
     size_t                  i;
 
-    log_info("Setting all l2x fields to %f", SHR_CONST_SPVAL);
+    log_info("Initializing l2x_data_struct");
 
     for (i = 0; i < local_domain.ncells_active; i++) {
         l2x_vic[i].l2x_Sl_t = SHR_CONST_SPVAL;
@@ -142,5 +142,45 @@ vic_initialize_albedo(void)
         l2x_vic[i].l2x_Sl_anidr = all_vars[i].gridcell_avg.avg_albedo;
         l2x_vic[i].l2x_Sl_avsdf = all_vars[i].gridcell_avg.avg_albedo;
         l2x_vic[i].l2x_Sl_anidf = all_vars[i].gridcell_avg.avg_albedo;
+    }
+}
+
+/*****************************************************************************
+ * @brief     Initialize temperature in l2x_data_struct.
+ ****************************************************************************/
+void
+vic_initialize_temperature(void)
+{
+    extern l2x_data_struct *l2x_vic;
+    extern domain_struct    local_domain;
+    extern soil_con_struct *soil_con;
+
+    size_t                  i;
+
+    log_info("Initializing temperature");
+
+    for (i = 0; i < local_domain.ncells_active; i++) {
+        l2x_vic[i].l2x_Sl_t = soil_con[i].avg_temp + CONST_TKFRZ;
+    }
+}
+
+/*****************************************************************************
+ * @brief     Initialize upwelling longwave in l2x_data_struct.
+ ****************************************************************************/
+void
+vic_initialize_lwup(void)
+{
+    extern l2x_data_struct  *l2x_vic;
+    extern domain_struct     local_domain;
+    extern parameters_struct param;
+
+    size_t                   i;
+
+    log_info("Initializing upwelling longwave");
+
+    for (i = 0; i < local_domain.ncells_active; i++) {
+        // adjust sign for CESM sign convention
+        l2x_vic[i].l2x_Fall_lwup = -1 * param.EMISS_GRND * CONST_STEBOL * pow(
+            l2x_vic[i].l2x_Sl_t, 4);
     }
 }

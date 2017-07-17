@@ -185,8 +185,10 @@ void vic_force(void);
 void vic_cesm_put_data(void);
 void vic_cesm_run_model(void);
 void vic_cesm_start(vic_clock *vclock, case_metadata *cmeta);
+void vic_initialize_albedo(void);
+void vic_initialize_lwup(void);
+void vic_initialize_temperature(void);
 void vic_populate_model_state(char *runtype_str);
 void write_rpointer_file(char *fname);
-void vic_initialize_albedo(void);
 
 #endif

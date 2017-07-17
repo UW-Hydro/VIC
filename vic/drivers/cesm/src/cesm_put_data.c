@@ -222,12 +222,13 @@ vic_cesm_put_data()
                     roughness = soil_con[i].snow_rough;
                 }
                 else if (HasVeg) {
-                    // bare soil roughness
+                    // vegetation roughness
                     roughness =
                         veg_lib[i][veg_con[i][veg].veg_class].roughness[
                             dmy_current.month - 1];
                 }
                 else {
+                    // bare soil roughness
                     roughness = soil_con[i].rough;
                 }
                 if (roughness < DBL_EPSILON) {

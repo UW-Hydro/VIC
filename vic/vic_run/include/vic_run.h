@@ -49,9 +49,10 @@ double calc_atmos_energy_bal(double, double, double, double, double, double,
                              double, double *, double *, double *, double *,
                              double *, double *, bool *, unsigned int*);
 double calc_density(double);
-void calc_gridcell_avg_albedo(double *, double, size_t, bool, energy_bal_struct **,
-			      veg_var_struct **, snow_data_struct **,
-                              veg_con_struct *, soil_con_struct *);
+void calc_gridcell_avg_albedo(double *, double, size_t, bool,
+                              energy_bal_struct **, veg_var_struct **,
+                              snow_data_struct **, veg_con_struct *,
+                              soil_con_struct *);
 double calc_latent_heat_of_sublimation(double temp);
 double calc_latent_heat_of_vaporization(double temp);
 int calc_layer_average_thermal_props(energy_bal_struct *, layer_data_struct *,

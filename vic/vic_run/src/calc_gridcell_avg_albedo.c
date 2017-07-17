@@ -36,23 +36,23 @@ void
 calc_gridcell_avg_albedo(double             *albedo,
                          double              shortwave,
                          size_t              Nveg,
-			 bool                overstory,
+                         bool                overstory,
                          energy_bal_struct **energy,
-			 veg_var_struct    **veg_var,
-			 snow_data_struct  **snow,
+                         veg_var_struct    **veg_var,
+                         snow_data_struct  **snow,
                          veg_con_struct     *veg_con,
                          soil_con_struct    *soil_con)
 {
-    extern option_struct options;
+    extern option_struct     options;
     extern parameters_struct param;
-    size_t               veg;
-    size_t               band;
-    double               Cv;
-    double               AreaFactor;
-    double               TreeAdjustFactor = 1.;
-    double               lakefactor = 1;
-    double               swnet;
-    bool                 HasVeg;
+    size_t                   veg;
+    size_t                   band;
+    double                   Cv;
+    double                   AreaFactor;
+    double                   TreeAdjustFactor = 1.;
+    double                   lakefactor = 1;
+    double                   swnet;
+    bool                     HasVeg;
 
     swnet = 0;
 
@@ -72,30 +72,32 @@ calc_gridcell_avg_albedo(double             *albedo,
 
     // compute gridcell-averaged albedo using average shortwave
     if (shortwave > 0) {
-    	// use average shortwave for albedo calculation
-    	*albedo = 1. - (swnet / shortwave);
+        // use average shortwave for albedo calculation
+        *albedo = 1. - (swnet / shortwave);
     }
     else {
-    	// use vegetation, snow or bare soil albedo
-    	for (veg = 0; veg <= Nveg; veg++) { 
-	    Cv = veg_con[veg].Cv;
-	    if (Cv > 0) {
-	        for (band = 0; band < options.SNOW_BAND; band++) {
-	            if (soil_con->AreaFract[band] > 0.) {
-		        // TO-DO: account for treeline and lake factors 
-		        AreaFactor = (Cv * soil_con->AreaFract[band] * 
-				      TreeAdjustFactor * lakefactor);
-		        if (snow[veg][band].snow && overstory) {
-		            // use snow canopy albedo
-			    *albedo += AreaFactor * energy[veg][band].AlbedoOver;
-		        }
-			else {
-			    // use surface albedo
-			    *albedo += AreaFactor * energy[veg][band].AlbedoUnder;
-			}
-		    }
-		}
-	    }
-	}
+        // use vegetation, snow or bare soil albedo
+        for (veg = 0; veg <= Nveg; veg++) {
+            Cv = veg_con[veg].Cv;
+            if (Cv > 0) {
+                for (band = 0; band < options.SNOW_BAND; band++) {
+                    if (soil_con->AreaFract[band] > 0.) {
+                        // TO-DO: account for treeline and lake factors
+                        AreaFactor = (Cv * soil_con->AreaFract[band] *
+                                      TreeAdjustFactor * lakefactor);
+                        if (snow[veg][band].snow && overstory) {
+                            // use snow canopy albedo
+                            *albedo += AreaFactor *
+                                       energy[veg][band].AlbedoOver;
+                        }
+                        else {
+                            // use surface albedo
+                            *albedo += AreaFactor *
+                                       energy[veg][band].AlbedoUnder;
+                        }
+                    }
+                }
+            }
+        }
     }
 }

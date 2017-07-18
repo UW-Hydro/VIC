@@ -38,7 +38,6 @@ calc_gridcell_avg_albedo(double             *albedo,
                          size_t              Nveg,
                          bool                overstory,
                          energy_bal_struct **energy,
-                         veg_var_struct    **veg_var,
                          snow_data_struct  **snow,
                          veg_con_struct     *veg_con,
                          soil_con_struct    *soil_con)
@@ -52,9 +51,9 @@ calc_gridcell_avg_albedo(double             *albedo,
     double                   TreeAdjustFactor = 1.;
     double                   lakefactor = 1;
     double                   swnet;
-    bool                     HasVeg;
 
     swnet = 0;
+    *albedo = 0;
 
     for (veg = 0; veg <= Nveg; veg++) {
         Cv = veg_con[veg].Cv;

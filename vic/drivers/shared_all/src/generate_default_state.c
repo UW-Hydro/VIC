@@ -143,11 +143,12 @@ generate_default_state(all_vars_struct *all_vars,
         if (Cv > 0) {
             // TO-DO: account for treeline and lake factors
             AreaFactor = (Cv * TreeAdjustFactor * lakefactor);
-            
-	    if (veg != Nveg) {
-	        // cold start, so using climatological albedo for all veg classes 
-		// except for bare soil
-                albedo_sum += AreaFactor * veg_con[veg].albedo[dmy_current.month - 1];
+
+            if (veg != Nveg) {
+                // cold start, so using climatological albedo for all veg classes
+                // except for bare soil
+                albedo_sum += (AreaFactor *
+                              veg_con[veg].albedo[dmy_current.month - 1]);
             }
             else {
 		// bare soil class, use bare soil albedo

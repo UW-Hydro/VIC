@@ -36,9 +36,10 @@ generate_default_state(all_vars_struct *all_vars,
                        soil_con_struct *soil_con,
                        veg_con_struct  *veg_con)
 {
+    extern size_t            current;
     extern option_struct     options;
     extern parameters_struct param;
-    extern dmy_struct        dmy_current;
+    extern dmy_struct       *dmy;
 
     size_t                   Nveg;
     size_t                   veg;
@@ -148,7 +149,7 @@ generate_default_state(all_vars_struct *all_vars,
                 // cold start, so using climatological albedo for all veg classes
                 // except for bare soil
                 albedo_sum += (AreaFactor *
-                               veg_con[veg].albedo[dmy_current.month - 1]);
+                               veg_con[veg].albedo[dmy[current].month - 1]);
             }
             else {
                 // bare soil class, use bare soil albedo

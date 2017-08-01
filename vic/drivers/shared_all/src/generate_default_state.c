@@ -151,7 +151,6 @@ generate_default_state(all_vars_struct *all_vars,
             }
             else {
 		// bare soil class, use bare soil albedo
-		debug("param.ALBEDO_BARE_SOIL is %f", param.ALBEDO_BARE_SOIL);
 		albedo_sum += AreaFactor * param.ALBEDO_BARE_SOIL;    
 	    }
         }

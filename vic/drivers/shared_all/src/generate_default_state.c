@@ -148,12 +148,12 @@ generate_default_state(all_vars_struct *all_vars,
                 // cold start, so using climatological albedo for all veg classes
                 // except for bare soil
                 albedo_sum += (AreaFactor *
-                              veg_con[veg].albedo[dmy_current.month - 1]);
+                               veg_con[veg].albedo[dmy_current.month - 1]);
             }
             else {
-		// bare soil class, use bare soil albedo
-		albedo_sum += AreaFactor * param.ALBEDO_BARE_SOIL;    
-	    }
+                // bare soil class, use bare soil albedo
+                albedo_sum += AreaFactor * param.ALBEDO_BARE_SOIL;
+            }
         }
     }
     all_vars->gridcell_avg.avg_albedo = albedo_sum;

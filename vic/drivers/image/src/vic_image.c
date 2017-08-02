@@ -115,7 +115,7 @@ main(int    argc,
     vic_image_init();
 
     // populate model state, either using a cold start or from a restart file
-    vic_populate_model_state();
+    vic_populate_model_state(&(dmy[0]);
 
     // initialize output structures
     vic_init_output(&(dmy[0]));

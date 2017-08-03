@@ -39,6 +39,6 @@ void vic_force(void);
 void vic_image_init(void);
 void vic_image_finalize();
 void vic_image_start(void);
-void vic_populate_model_state(void);
+void vic_populate_model_state(dmy_struct *dmy_current);
 
 #endif

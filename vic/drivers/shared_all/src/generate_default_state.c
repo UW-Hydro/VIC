@@ -34,7 +34,8 @@
 void
 generate_default_state(all_vars_struct *all_vars,
                        soil_con_struct *soil_con,
-                       veg_con_struct  *veg_con)
+                       veg_con_struct  *veg_con,
+                       dmy_struct      *dmy_current)
 {
     extern option_struct     options;
     extern parameters_struct param;
@@ -140,20 +141,18 @@ generate_default_state(all_vars_struct *all_vars,
     for (veg = 0; veg <= Nveg; veg++) {
         Cv = veg_con[veg].Cv;
         if (Cv > 0) {
-            for (band = 0; band < options.SNOW_BAND; band++) {
-                if (soil_con->AreaFract[band] > 0.) {
-                    // TO-DO: account for treeline and lake factors
-                    AreaFactor = (Cv * soil_con->AreaFract[band] *
-                                  TreeAdjustFactor * lakefactor);
-                    // cold start, so assuming bare (free of snow) albedo
-                    if (veg != Nveg) {
-                        albedo_sum += AreaFactor * veg_var[veg][band].albedo;
-                    }
-                    else {
-                        // this is the bare soil class, so use bare soil albedo parameter
-                        albedo_sum += AreaFactor * param.ALBEDO_BARE_SOIL;
-                    }
-                }
+            // TO-DO: account for treeline and lake factors
+            AreaFactor = (Cv * TreeAdjustFactor * lakefactor);
+
+            if (veg != Nveg) {
+                // cold start, so using climatological albedo for all veg classes
+                // except for bare soil
+                albedo_sum += (AreaFactor *
+                               veg_con[veg].albedo[dmy_current->month - 1]);
+            }
+            else {
+                // bare soil class, use bare soil albedo
+                albedo_sum += AreaFactor * param.ALBEDO_BARE_SOIL;
             }
         }
     }

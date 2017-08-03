@@ -188,7 +188,7 @@ void vic_cesm_start(vic_clock *vclock, case_metadata *cmeta);
 void vic_initialize_albedo(void);
 void vic_initialize_lwup(void);
 void vic_initialize_temperature(void);
-void vic_populate_model_state(char *runtype_str);
+void vic_populate_model_state(char *runtype_str, dmy_struct *dmy_current);
 void write_rpointer_file(char *fname);
 
 #endif

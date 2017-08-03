@@ -94,7 +94,7 @@ vic_cesm_init(vic_clock     *vclock,
     vic_init();
 
     // populate model state, either using a cold start or from a restart file
-    vic_populate_model_state(trimstr(cmeta->starttype));
+    vic_populate_model_state(trimstr(cmeta->starttype), &dmy_current);
 
     // initialize forcings
     vic_force();

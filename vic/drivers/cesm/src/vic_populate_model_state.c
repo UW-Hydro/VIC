@@ -30,8 +30,8 @@
  * @brief    This function handles tasks related to populating model state.
  *****************************************************************************/
 void
-vic_populate_model_state(char *runtype_str,
-			 dmy_struct *dmy_current)
+vic_populate_model_state(char       *runtype_str,
+                         dmy_struct *dmy_current)
 {
     extern all_vars_struct *all_vars;
     extern lake_con_struct *lake_con;

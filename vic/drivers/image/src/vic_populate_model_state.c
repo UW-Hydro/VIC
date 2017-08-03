@@ -54,7 +54,8 @@ vic_populate_model_state(dmy_struct *dmy_current)
     else {
         // else generate a default state
         for (i = 0; i < local_domain.ncells_active; i++) {
-            generate_default_state(&(all_vars[i]), &(soil_con[i]), veg_con[i], dmy_current);
+            generate_default_state(&(all_vars[i]), &(soil_con[i]), veg_con[i],
+                                   dmy_current);
             if (options.LAKES) {
                 generate_default_lake_state(&(all_vars[i]), &(soil_con[i]),
                                             lake_con[i]);

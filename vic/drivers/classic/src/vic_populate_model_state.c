@@ -45,7 +45,7 @@ vic_populate_model_state(all_vars_struct *all_vars,
                          soil_con_struct *soil_con,
                          veg_con_struct  *veg_con,
                          lake_con_struct  lake_con,
-			 dmy_struct      *dmy_current)
+                         dmy_struct      *dmy_current)
 {
     extern option_struct options;
 

@@ -76,6 +76,10 @@ To check which release of VIC you are running:
 
     This is for use in the CESM driver for VIC to pass to WRF, but has been implemented in the core structure of VIC (in vic_run) for consistency with the classic and image drivers. Running VIC from a cold start now also includes calculation of gridcell-averaged albedo.
 
+6. Cleanup of the initialization sections of the ``image`` and ``cesm`` drivers ([GH#701](https://github.com/UW-Hydro/VIC/pull/701))
+
+	Codified behavior in the initialization of the ``image`` and `cesm` drivers that requires the parameter variables `AreaFract`, `Pfactor`, `zone_fract`, and `Cv` must sum exactly to 1.0. If using the `SNOW_BAND` option, the area weighted `elevation` must match the mean grid cell elevation (`elev`). VIC will print *warnings* if any of these criteria are violated.  
+
 ## VIC 5.0.1
 
 **Release date: (February 1, 2017)**

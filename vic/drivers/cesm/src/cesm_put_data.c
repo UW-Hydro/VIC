@@ -159,9 +159,8 @@ vic_cesm_put_data()
 
         // evaporation, VIC: mm, CESM: kg m-2 s-1
         // TO-DO should we incorporate bare soil evap?
-        l2x_vic[i].l2x_Fall_evap += -1 *
-                                    (out_data[i][OUT_EVAP][0] * MM_PER_M /
-                                     global_param.dt);
+        l2x_vic[i].l2x_Fall_evap += out_data[i][OUT_EVAP][0] /
+                                    global_param.dt;
 
         // lnd->rtm input fluxes
         l2x_vic[i].l2x_Flrl_rofliq = out_data[i][OUT_RUNOFF][0] +

@@ -53,15 +53,15 @@ To check which release of VIC you are running:
 
     [GH#710] (https://github.com/UW-Hydro/VIC/pull/710)
 
-	    Refactor the cesm_put_data.c routine in the CESM driver to use values from out_data directly, rather than computing them separately in cesm_put_data.c. 
+	    Refactor the cesm_put_data.c routine in the CESM driver to use values from out_data directly, rather than computing them separately in cesm_put_data.c.
 
     [GH#716] (https://github.com/UW-Hydro/VIC/pull/716)
 
-        Fixes initialization of coupler fields and calculates temperature and upwelling longwave to pass to WRF during initialization. 
+        Fixes initialization of coupler fields and calculates temperature and upwelling longwave to pass to WRF during initialization.
 
     [GH#718] (https://github.com/UW-Hydro/VIC/pull/718)
 
-        Updates the cesm_put_data.c routine in the CESM driver to pass gridcell-averaged albedo to the coupler. 
+        Updates the cesm_put_data.c routine in the CESM driver to pass gridcell-averaged albedo to the coupler.
 
 
 3. Speed up NetCDF operations in the image/CESM drivers ([GH#684](https://github.com/UW-Hydro/VIC/pull/684))
@@ -88,7 +88,7 @@ To check which release of VIC you are running:
 
 2. Fixed forceskip rounding bug ([GH#639](https://github.com/UW-Hydro/VIC/pull/639))
 
-	After the fix, the `forceskip` variable in the global parameter structure (i.e., the number of timesteps to skip in the forcing data for the simulatin period) is rounded correctly (before the fix, rounding error might cause 1-timestep offset in the simulation results).
+	After the fix, the `forceskip` variable in the global parameter structure (i.e., the number of timesteps to skip in the forcing data for the simulation period) is rounded correctly (before the fix, rounding error might cause 1-timestep offset in the simulation results).
 
 3. Fixed a problem with image restarts when using multiple processors ([GH#638](https://github.com/UW-Hydro/VIC/pull/638))
 
@@ -122,7 +122,7 @@ To check which release of VIC you are running:
 
 ------------------------------
 
-## VIC 5.0.0 [![DOI](https://zenodo.org/badge/7766/UW-Hydro/VIC.svg)](https://zenodo.org/badge/latestdoi/7766/UW-Hydro/VIC)
+## VIC 5.0.0 [![DOI](https://zenodo.org/badge/doi/10.5281/zenodo.61422.svg)](http://dx.doi.org/10.5281/zenodo.61422)
 
 **Release date: (September 2, 2016)**
 

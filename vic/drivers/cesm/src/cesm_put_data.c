@@ -258,41 +258,8 @@ vic_cesm_put_data()
             }
         }
 
-                // heat flux shortwave net
-                l2x_vic[i].l2x_Fall_swnet += AreaFactor *
-                                             (force[i].shortwave[NR] -
-                                              energy.NetShortAtmos);
-
-                // co2 flux **For testing set to 0
-                // l2x_vic[i].l2x_Fall_fco2_lnd;
-
-                // dust flux size bin 1
-                // l2x_vic[i].l2x_Fall_flxdst1;
-
-                // dust flux size bin 2
-                // l2x_vic[i].l2x_Fall_flxdst2;
-
-                // dust flux size bin 3
-                // l2x_vic[i].l2x_Fall_flxdst3;
-
-                // dust flux size bin 4
-                // l2x_vic[i].l2x_Fall_flxdst4;
-
-                // MEGAN fluxes
-                // l2x_vic[i].l2x_Fall_flxvoc;
-
-                // lnd->rtm input fluxes
-                l2x_vic[i].l2x_Flrl_rofliq += AreaFactor *
-                                              (cell.runoff +
-                                               cell.baseflow) / global_param.dt;
-
-                // lnd->rtm input fluxes
-                // l2x_vic[i].l2x_Flrl_rofice;
-
-                // vars set flag
-                l2x_vic[i].l2x_vars_set = true;
-            }
-        }
+        // set variables-set flag
+        l2x_vic[i].l2x_vars_set = true;
 
         if (!assert_close_double(AreaFactorSum, 1., 0., 1e-3)) {
             log_warn("AreaFactorSum (%f) is not 1",

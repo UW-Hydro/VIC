@@ -80,10 +80,10 @@ CFLAGS  =  ${INCLUDES} ${NC_CFLAGS}  -ggdb -O0 -Wall -Wextra -std=c99 \
 					 -DUSERNAME=\"$(USER)\" \
 					 -DHOSTNAME=\"$(HOSTNAME)\"
 
-# ifeq (true, ${TRAVIS})
+ifeq (true, ${TRAVIS})
 # Add extra debugging for builds on travis
 CFLAGS += -rdynamic -Wl,-export-dynamic
-# endif
+endif
 
 LIBRARY = -lm ${NC_LIBS}
 

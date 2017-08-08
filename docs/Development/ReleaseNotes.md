@@ -63,6 +63,9 @@ To check which release of VIC you are running:
 
         Updates the cesm_put_data.c routine in the CESM driver to pass gridcell-averaged albedo to the coupler.
 
+    [GH#726] (https://github.com/UW-Hydro/VIC/pull/726)
+
+        Updates the cesm_put_data.c routine in the CESM driver to include the correct units for evap passed to the coupler. 
 
 3. Speed up NetCDF operations in the image/CESM drivers ([GH#684](https://github.com/UW-Hydro/VIC/pull/684))
 

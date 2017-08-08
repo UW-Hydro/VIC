@@ -42,7 +42,7 @@ calc_root_fractions(veg_con_struct  *veg_con,
     size_t               layer;
     size_t               zone;
     size_t               i;
-    size_t               max_itter;
+    size_t               n_iter;
     double               sum_fract;
     double               dum;
     double               Zstep;
@@ -63,10 +63,10 @@ calc_root_fractions(veg_con_struct  *veg_con,
         Zsum = 0;
         zone = 0;
 
-        max_itter = -1;
+        n_iter = 0;
         while (zone < options.ROOT_ZONES) {
-            max_itter++;
-            if (max_itter > 9999) {
+            n_iter++;
+            if (n_iter > MAX_ROOT_ITER) {
                 log_warn("veg=%d of Nveg=%d", veg, Nveg);
                 log_warn("zone %zu of %zu ROOT_ZONES", zone,
                          options.ROOT_ZONES);
@@ -134,7 +134,7 @@ calc_root_fractions(veg_con_struct  *veg_con,
                 }
             }
             else if (Zsum + Zstep > Lsum) {
-                zone++;   // should this be here?
+                zone++;
                 if (layer < options.Nlayer) {
                     veg_con[veg].root[layer] = sum_fract;
                     sum_fract = 0.;

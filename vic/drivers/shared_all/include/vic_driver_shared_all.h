@@ -45,6 +45,8 @@
 // Default snow band setting
 #define SNOW_BAND_TRUE_BUT_UNSET 99999
 
+// Max counter for root distribution iteration
+#define MAX_ROOT_ITER 9999
 /******************************************************************************
  * @brief   File formats
  *****************************************************************************/

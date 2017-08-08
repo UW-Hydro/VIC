@@ -42,6 +42,7 @@ calc_root_fractions(veg_con_struct  *veg_con,
     size_t               layer;
     size_t               zone;
     size_t               i;
+    size_t               n_iter;
     double               sum_fract;
     double               dum;
     double               Zstep;
@@ -62,7 +63,16 @@ calc_root_fractions(veg_con_struct  *veg_con,
         Zsum = 0;
         zone = 0;
 
+        n_iter = 0;
         while (zone < options.ROOT_ZONES) {
+            n_iter++;
+            if (n_iter > MAX_ROOT_ITER) {
+                log_warn("veg=%d of Nveg=%d", veg, Nveg);
+                log_warn("zone %zu of %zu ROOT_ZONES", zone,
+                         options.ROOT_ZONES);
+                log_err("stuck in an infinite loop");
+            }
+
             Zstep = veg_con[veg].zone_depth[zone];
             if ((Zsum + Zstep) <= Lsum && Zsum >= Lsum - Lstep) {
                 /** CASE 1: Root Zone Completely in Soil Layer **/
@@ -124,6 +134,7 @@ calc_root_fractions(veg_con_struct  *veg_con,
                 }
             }
             else if (Zsum + Zstep > Lsum) {
+                zone++;
                 if (layer < options.Nlayer) {
                     veg_con[veg].root[layer] = sum_fract;
                     sum_fract = 0.;

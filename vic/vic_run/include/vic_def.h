@@ -52,7 +52,7 @@
 /***** Model Constants *****/
 #define MAXSTRING    2048
 #define MISSING      -99999.   /**< missing value */
-#define MISSING_USI  99999    /**< missing value for unsigned ints */
+#define MISSING_USI  99999.    /**< missing value for unsigned ints */
 #define MISSING_S    "MISSING"    /**< missing value for strings */
 #define NODATA_VH    -1        /**< missing value for veg_hist inputs */
 #define NODATA_VEG   -1        /**< flag for veg types not in grid cell */
@@ -268,7 +268,7 @@ typedef struct {
                             Default = TRUE */
 
     // input options
-    bool BASEFLOW;       /**< ARNO: read Ds, Dm, Ws, c; NIJSSEN2001: read d1, d2, d3, d4 */
+    unsigned short int BASEFLOW;     /**< ARNO: read Ds, Dm, Ws, c; NIJSSEN2001: read d1, d2, d3, d4 */
     unsigned short int GRID_DECIMAL; /**< Number of decimal places in grid file extensions */
     bool VEGLIB_FCAN;    /**< TRUE = veg library file contains monthly fcanopy values */
     bool VEGLIB_PHOTO;   /**< TRUE = veg library contains photosynthesis parameters */

@@ -129,7 +129,7 @@ vic_force(void)
         for (i = 0; i < local_domain.ncells_active; i++) {
             // CESM units: Pa
             // VIC units: Pa
-            // Note: Image Driver uses kPa inputs and 
+            // Note: Image Driver uses kPa inputs and
             // converts to Pa
             force[i].pressure[j] = x2l_vic[i].x2l_Sa_pbot;
         }

@@ -155,15 +155,15 @@ vic_cesm_put_data()
         l2x_vic[i].l2x_Fall_lat = out_data[i][OUT_LATENT][0];
 
         // sensible heat, VIC: W/m2, CESM: W/m2
-        l2x_vic[i].l2x_Fall_sen += -1 * out_data[i][OUT_SENSIBLE][0];
+        l2x_vic[i].l2x_Fall_sen += out_data[i][OUT_SENSIBLE][0];
 
         // evaporation, VIC: mm, CESM: kg m-2 s-1
         l2x_vic[i].l2x_Fall_evap += out_data[i][OUT_EVAP][0] /
                                     global_param.dt;
 
         // lnd->rtm input fluxes
-        l2x_vic[i].l2x_Flrl_rofliq = out_data[i][OUT_RUNOFF][0] +
-                                     out_data[i][OUT_BASEFLOW][0] /
+        l2x_vic[i].l2x_Flrl_rofliq = (out_data[i][OUT_RUNOFF][0] +
+                                     out_data[i][OUT_BASEFLOW][0]) /
                                      global_param.dt;
 
 

@@ -129,6 +129,8 @@ vic_force(void)
         for (i = 0; i < local_domain.ncells_active; i++) {
             // CESM units: Pa
             // VIC units: Pa
+            // Note: Image Driver uses kPa inputs and 
+            // converts to Pa
             force[i].pressure[j] = x2l_vic[i].x2l_Sa_pbot;
         }
     }
@@ -137,7 +139,7 @@ vic_force(void)
     for (j = 0; j < NF; j++) {
         for (i = 0; i < local_domain.ncells_active; i++) {
             // CESM units: shum is specific humidity (g/g)
-            // VIC units: kPa inputs, uses Pa
+            // VIC units: Pa
             force[i].vp[j] = q_to_vp(x2l_vic[i].x2l_Sa_shum,
                                      force[i].pressure[j]);
         }

@@ -137,7 +137,7 @@ vic_force(void)
     for (j = 0; j < NF; j++) {
         for (i = 0; i < local_domain.ncells_active; i++) {
             // CESM units: shum is specific humidity (g/g)
-            // VIC units: kPa
+            // VIC units: kPa inputs, uses Pa
             force[i].vp[j] = q_to_vp(x2l_vic[i].x2l_Sa_shum,
                                      force[i].pressure[j]);
         }

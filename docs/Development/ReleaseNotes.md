@@ -65,7 +65,11 @@ To check which release of VIC you are running:
 
     [GH#726] (https://github.com/UW-Hydro/VIC/pull/726)
 
-        Updates the cesm_put_data.c routine in the CESM driver to include the correct units for evap passed to the coupler. 
+        Updates the cesm_put_data.c routine in the CESM driver to include the correct units for evap passed to the coupler.
+
+    [GH#732] (https://github.com/UW-Hydro/VIC/pull/732)
+ 
+        Updates theh cesm_put_data.c routine in the CESM driver to include the correct units for sensible heat flux and updates the rofliq calculation to be correct (previously only OUT_BASEFLOW was being divided by global_param.dt).  
 
 3. Speed up NetCDF operations in the image/CESM drivers ([GH#684](https://github.com/UW-Hydro/VIC/pull/684))
 

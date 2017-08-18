@@ -210,7 +210,7 @@ vic_cesm_put_data()
                     log_warn("aero_resist (%f) is < %f", aero_resist,
                              DBL_EPSILON);
                     aero_resist = param.HUGE_RESIST;
-              
+                }
 
                 // log z0
                 // CESM units: m

@@ -151,7 +151,7 @@ vic_cesm_put_data()
                                     out_data[i][OUT_LWNET][0]);
 
         // turbulent heat fluxes
-        // Note: both are the opposite sign from image driver 
+        // Note: both are the opposite sign from image driver
         // in accordance with the sign convention for coupled models
         // latent heat, VIC: W/m2, CESM: W/m2
         l2x_vic[i].l2x_Fall_lat = -1 * out_data[i][OUT_LATENT][0];
@@ -210,58 +210,59 @@ vic_cesm_put_data()
                     log_warn("aero_resist (%f) is < %f", aero_resist,
                              DBL_EPSILON);
                     aero_resist = param.HUGE_RESIST;
-              
 
-                // log z0
-                // CESM units: m
-                if (snow.snow) {
-                    // snow roughness
-                    roughness = soil_con[i].snow_rough;
-                }
-                else if (HasVeg) {
-                    // vegetation roughness
-                    roughness =
-                        veg_lib[i][veg_con[i][veg].veg_class].roughness[
-                            dmy_current.month - 1];
-                }
-                else {
-                    // bare soil roughness
-                    roughness = soil_con[i].rough;
-                }
-                if (roughness < DBL_EPSILON) {
-                    log_warn("roughness (%f) is < %f", roughness, DBL_EPSILON);
-                    roughness = DBL_EPSILON;
-                }
-                l2x_vic[i].l2x_Sl_logz0 += AreaFactor * log(roughness);
 
-                // wind stress, zonal
-                // CESM units: N m-2
-                wind_stress_x = -1 * out_data[i][OUT_DENSITY][0] *
-                                x2l_vic[i].x2l_Sa_u / aero_resist;
-                l2x_vic[i].l2x_Fall_taux += AreaFactor * wind_stress_x;
+                    // log z0
+                    // CESM units: m
+                    if (snow.snow) {
+                        // snow roughness
+                        roughness = soil_con[i].snow_rough;
+                    }
+                    else if (HasVeg) {
+                        // vegetation roughness
+                        roughness =
+                            veg_lib[i][veg_con[i][veg].veg_class].roughness[
+                                dmy_current.month - 1];
+                    }
+                    else {
+                        // bare soil roughness
+                        roughness = soil_con[i].rough;
+                    }
+                    if (roughness < DBL_EPSILON) {
+                        log_warn("roughness (%f) is < %f", roughness,
+                                 DBL_EPSILON);
+                        roughness = DBL_EPSILON;
+                    }
+                    l2x_vic[i].l2x_Sl_logz0 += AreaFactor * log(roughness);
 
-                // wind stress, meridional
-                // CESM units: N m-2
-                wind_stress_y = -1 * out_data[i][OUT_DENSITY][0] *
-                                x2l_vic[i].x2l_Sa_v / aero_resist;
-                l2x_vic[i].l2x_Fall_tauy += AreaFactor * wind_stress_y;
+                    // wind stress, zonal
+                    // CESM units: N m-2
+                    wind_stress_x = -1 * out_data[i][OUT_DENSITY][0] *
+                                    x2l_vic[i].x2l_Sa_u / aero_resist;
+                    l2x_vic[i].l2x_Fall_taux += AreaFactor * wind_stress_x;
 
-                // friction velocity
-                // CESM units: m s-1
-                wind_stress =
-                    sqrt(pow(wind_stress_x, 2) + pow(wind_stress_y, 2));
-                l2x_vic[i].l2x_Sl_fv += AreaFactor *
-                                        (wind_stress /
-                                         out_data[i][OUT_DENSITY][0]);
+                    // wind stress, meridional
+                    // CESM units: N m-2
+                    wind_stress_y = -1 * out_data[i][OUT_DENSITY][0] *
+                                    x2l_vic[i].x2l_Sa_v / aero_resist;
+                    l2x_vic[i].l2x_Fall_tauy += AreaFactor * wind_stress_y;
+
+                    // friction velocity
+                    // CESM units: m s-1
+                    wind_stress =
+                        sqrt(pow(wind_stress_x, 2) + pow(wind_stress_y, 2));
+                    l2x_vic[i].l2x_Sl_fv += AreaFactor *
+                                            (wind_stress /
+                                             out_data[i][OUT_DENSITY][0]);
+                }
+            }
+
+            // set variables-set flag
+            l2x_vic[i].l2x_vars_set = true;
+
+            if (!assert_close_double(AreaFactorSum, 1., 0., 1e-3)) {
+                log_warn("AreaFactorSum (%f) is not 1",
+                         AreaFactorSum);
             }
         }
-
-        // set variables-set flag
-        l2x_vic[i].l2x_vars_set = true;
-
-        if (!assert_close_double(AreaFactorSum, 1., 0., 1e-3)) {
-            log_warn("AreaFactorSum (%f) is not 1",
-                     AreaFactorSum);
-        }
     }
-}

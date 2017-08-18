@@ -151,7 +151,7 @@ vic_cesm_put_data()
                                     out_data[i][OUT_LWNET][0]);
 
         // turbulent heat fluxes
-        // Note: both are the opposite sign from image driver 
+        // Note: both are the opposite sign from image driver
         // in accordance with the sign convention for coupled models
         // latent heat, VIC: W/m2, CESM: W/m2
         l2x_vic[i].l2x_Fall_lat = -1 * out_data[i][OUT_LATENT][0];

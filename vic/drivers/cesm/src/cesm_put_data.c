@@ -151,14 +151,16 @@ vic_cesm_put_data()
                                     out_data[i][OUT_LWNET][0]);
 
         // turbulent heat fluxes
+        // Note: both are the opposite sign from image driver
+        // in accordance with the sign convention for coupled models
         // latent heat, VIC: W/m2, CESM: W/m2
-        l2x_vic[i].l2x_Fall_lat = out_data[i][OUT_LATENT][0];
+        l2x_vic[i].l2x_Fall_lat = -1 * out_data[i][OUT_LATENT][0];
 
         // sensible heat, VIC: W/m2, CESM: W/m2
-        l2x_vic[i].l2x_Fall_sen += out_data[i][OUT_SENSIBLE][0];
+        l2x_vic[i].l2x_Fall_sen += -1 * out_data[i][OUT_SENSIBLE][0];
 
         // evaporation, VIC: mm, CESM: kg m-2 s-1
-        l2x_vic[i].l2x_Fall_evap += out_data[i][OUT_EVAP][0] /
+        l2x_vic[i].l2x_Fall_evap += -1 * out_data[i][OUT_EVAP][0] /
                                     global_param.dt;
 
         // lnd->rtm input fluxes
@@ -209,8 +211,6 @@ vic_cesm_put_data()
                              DBL_EPSILON);
                     aero_resist = param.HUGE_RESIST;
                 }
-
-                l2x_vic[i].l2x_Sl_ram1 += AreaFactor * aero_resist;
 
                 // log z0
                 // CESM units: m

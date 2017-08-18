@@ -86,7 +86,7 @@ vic_alloc(void)
     check_alloc_status(out_data, "Memory allocation error.");
 
     // save_data allocation
-    save_data = malloc(local_domain.ncells_active * sizeof(*save_data));
+    save_data = calloc(local_domain.ncells_active, sizeof(*save_data));
     check_alloc_status(save_data, "Memory allocation error.");
 
     // allocate memory for individual grid cells

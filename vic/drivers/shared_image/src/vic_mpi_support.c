@@ -2042,11 +2042,11 @@ gather_put_nc_field_schar(int     nc_id,
  *          nodes
  *****************************************************************************/
 void
-get_scatter_nc_field_double(char   *nc_name,
-                            char   *var_name,
-                            size_t *start,
-                            size_t *count,
-                            double *var)
+get_scatter_nc_field_double(nameid_struct *nc_nameid,
+                            char          *var_name,
+                            size_t        *start,
+                            size_t        *count,
+                            double        *var)
 {
     extern MPI_Comm      MPI_COMM_VIC;
     extern domain_struct global_domain;
@@ -2073,7 +2073,7 @@ get_scatter_nc_field_double(char   *nc_name,
             malloc(global_domain.ncells_active * sizeof(*dvar_mapped));
         check_alloc_status(dvar_mapped, "Memory allocation error.");
 
-        get_nc_field_double(nc_name, var_name, start, count, dvar);
+        get_nc_field_double(nc_nameid, var_name, start, count, dvar);
         // filter the active cells only
         map(sizeof(double), global_domain.ncells_active, filter_active_cells,
             NULL, dvar, dvar_filtered);
@@ -2103,11 +2103,11 @@ get_scatter_nc_field_double(char   *nc_name,
  *          nodes
  *****************************************************************************/
 void
-get_scatter_nc_field_float(char   *nc_name,
-                           char   *var_name,
-                           size_t *start,
-                           size_t *count,
-                           float  *var)
+get_scatter_nc_field_float(nameid_struct *nc_nameid,
+                           char          *var_name,
+                           size_t        *start,
+                           size_t        *count,
+                           float         *var)
 {
     extern MPI_Comm      MPI_COMM_VIC;
     extern domain_struct global_domain;
@@ -2134,7 +2134,7 @@ get_scatter_nc_field_float(char   *nc_name,
             malloc(global_domain.ncells_active * sizeof(*fvar_mapped));
         check_alloc_status(fvar_mapped, "Memory allocation error.");
 
-        get_nc_field_float(nc_name, var_name, start, count, fvar);
+        get_nc_field_float(nc_nameid, var_name, start, count, fvar);
         // filter the active cells only
         map(sizeof(float), global_domain.ncells_active, filter_active_cells,
             NULL,
@@ -2166,11 +2166,11 @@ get_scatter_nc_field_float(char   *nc_name,
  *          nodes
  *****************************************************************************/
 void
-get_scatter_nc_field_int(char   *nc_name,
-                         char   *var_name,
-                         size_t *start,
-                         size_t *count,
-                         int    *var)
+get_scatter_nc_field_int(nameid_struct *nc_nameid,
+                         char          *var_name,
+                         size_t        *start,
+                         size_t        *count,
+                         int           *var)
 {
     extern MPI_Comm      MPI_COMM_VIC;
     extern domain_struct global_domain;
@@ -2196,7 +2196,7 @@ get_scatter_nc_field_int(char   *nc_name,
             malloc(global_domain.ncells_active * sizeof(*ivar_mapped));
         check_alloc_status(ivar_mapped, "Memory allocation error.");
 
-        get_nc_field_int(nc_name, var_name, start, count, ivar);
+        get_nc_field_int(nc_nameid, var_name, start, count, ivar);
         // filter the active cells only
         map(sizeof(int), global_domain.ncells_active, filter_active_cells, NULL,
             ivar, ivar_filtered);

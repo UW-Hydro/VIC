@@ -43,8 +43,6 @@ make_dmy(global_param_struct *global)
     double                  dt_time_units, start_num, end_num, force_num,
                             numdate;
 
-    dt_seconds_to_time_units(global->time_units, global->dt, &dt_time_units);
-
     start_dmy.dayseconds = global->startsec;
     start_dmy.year = global->startyear;
     start_dmy.day = global->startday;
@@ -98,8 +96,8 @@ make_dmy(global_param_struct *global)
                                  global->calendar, global->time_units);
 
             global->forceskip[i] =
-                (unsigned int) ((start_num - force_num) *
-                                (double) param_set.force_steps_per_day[i]);
+                (unsigned int) round((start_num - force_num) *
+                                     (double) param_set.force_steps_per_day[i]);
         }
     }
 
@@ -107,9 +105,10 @@ make_dmy(global_param_struct *global)
     temp = calloc(global->nrecs, sizeof(*temp));
 
     /** Create Date Structure for each Model Time Step **/
-    for (i = 0, numdate = start_num;
-         i < global->nrecs;
-         i++, numdate += dt_time_units) {
+    for (i = 0; i < global->nrecs; i++) {
+        dt_seconds_to_time_units(global->time_units, i * global->dt,
+                                 &dt_time_units);
+        numdate = start_num + dt_time_units;
         num2date(global->time_origin_num, numdate, 0., global->calendar,
                  global->time_units, &temp[i]);
     }

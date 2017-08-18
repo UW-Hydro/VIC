@@ -89,7 +89,8 @@ write_vic_timing_table(timer_struct *timers,
     fprintf(LOG_DEST, "  VIC_DRIVER                : %s\n", driver);
     fprintf(LOG_DEST, "\n");
     fprintf(LOG_DEST, "  Global Param File         : %s\n", filenames.global);
-    fprintf(LOG_DEST, "  Domain File               : %s\n", filenames.domain);
+    fprintf(LOG_DEST, "  Domain File               : %s\n",
+            filenames.domain.nc_filename);
     fprintf(LOG_DEST, "  Start Date                : %04hu-%02hu-%02hu-%05u\n",
             global_param.startyear, global_param.startmonth,
             global_param.startday, global_param.startsec);
@@ -144,6 +145,18 @@ write_vic_timing_table(timer_struct *timers,
             timers[TIMER_VIC_ALL].delta_wall, timers[TIMER_VIC_ALL].delta_cpu,
             timers[TIMER_VIC_ALL].delta_wall / ndays,
             timers[TIMER_VIC_ALL].delta_cpu / ndays);
+    fprintf(LOG_DEST,
+            "|------------|----------------------|----------------------|----------------------|----------------------|\n");
+    fprintf(LOG_DEST, "| Force Time | %20g | %20g | %20g | %20g |\n",
+            timers[TIMER_VIC_FORCE].delta_wall,
+            timers[TIMER_VIC_FORCE].delta_cpu,
+            timers[TIMER_VIC_FORCE].delta_wall / ndays,
+            timers[TIMER_VIC_FORCE].delta_cpu / ndays);
+    fprintf(LOG_DEST, "| Write Time | %20g | %20g | %20g | %20g |\n",
+            timers[TIMER_VIC_WRITE].delta_wall,
+            timers[TIMER_VIC_WRITE].delta_cpu,
+            timers[TIMER_VIC_WRITE].delta_wall / ndays,
+            timers[TIMER_VIC_WRITE].delta_cpu / ndays);
     fprintf(LOG_DEST,
             "|------------|----------------------|----------------------|----------------------|----------------------|\n");
     fprintf(LOG_DEST, "\n");

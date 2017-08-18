@@ -121,10 +121,14 @@ main(int   argc,
     initialize_time();
     dmy = make_dmy(&global_param);
 
+    // Allocate memory for out_data
+    out_data = malloc(1 * sizeof(*out_data));
+    check_alloc_status(out_data, "Memory allocation error.");
+
     /** Set up output data structures **/
     set_output_met_data_info();
     // out_data is shape [ngridcells (1), N_OUTVAR_TYPES]
-    alloc_out_data(1, &out_data);
+    alloc_out_data(1, out_data);
     filep.globalparam = open_file(filenames.global, "r");
     parse_output_info(filep.globalparam, &streams, &(dmy[0]));
     validate_streams(&streams);
@@ -221,7 +225,7 @@ main(int   argc,
             **************************************************/
 
             vic_populate_model_state(&all_vars, filep, soil_con.gridcel,
-                                     &soil_con, veg_con, lake_con);
+                                     &soil_con, veg_con, lake_con, &(dmy[0]));
 
             /** Initialize the storage terms in the water and energy balances **/
             initialize_save_data(&all_vars, &force[0], &soil_con, veg_con,

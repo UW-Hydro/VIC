@@ -94,13 +94,28 @@ vic_cesm_init(vic_clock     *vclock,
     vic_init();
 
     // populate model state, either using a cold start or from a restart file
-    vic_populate_model_state(trim(cmeta->starttype));
+    vic_populate_model_state(trimstr(cmeta->starttype), &dmy_current);
 
     // initialize forcings
     vic_force();
 
     // initialize output structures
     vic_init_output(&dmy_current);
+
+    // initialize albedo
+    vic_initialize_albedo();
+
+    // initialize temperature
+    vic_initialize_temperature();
+
+    // initialize upwelling longwave
+    vic_initialize_lwup();
+
+    // initialization is complete, print settings
+    log_info(
+        "Initialization is complete, print global param and options structures");
+    print_global_param(&global_param);
+    print_option(&options);
 
     // stop init timer
     timer_stop(&(global_timers[TIMER_VIC_INIT]));
@@ -138,6 +153,10 @@ vic_cesm_run(vic_clock *vclock)
     // Write history files
     vic_write_output(&dmy_current);
 
+    // advance the clock
+    advance_vic_time();
+    assert_time_insync(vclock, &dmy_current);
+
     // if save:
     if (vclock->state_flag) {
         // write state file
@@ -147,10 +166,6 @@ vic_cesm_run(vic_clock *vclock)
 
     // reset x2l fields
     initialize_x2l_data();
-
-    // advance the clock
-    advance_time();
-    assert_time_insync(vclock, &dmy_current);
 
     // stop vic run timer
     timer_stop(&(global_timers[TIMER_VIC_RUN]));

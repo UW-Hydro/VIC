@@ -30,23 +30,23 @@
  * @brief    Get global domain information.
  *****************************************************************************/
 size_t
-get_global_domain(char          *nc_name,
-                  domain_struct *global_domain,
-                  bool           coords_only)
+get_global_domain(nameid_struct *domain_nc_nameid,
+                  nameid_struct *param_nc_nameid,
+                  domain_struct *global_domain)
 {
     int    *run = NULL;
+    int    *mask = NULL;
+    int typeid;
     double *var = NULL;
-    double *var_lon = NULL;
-    double *var_lat = NULL;
     size_t  i;
     size_t  j;
     size_t  d2count[2];
     size_t  d2start[2];
-    size_t  d1count[1];
-    size_t  d1start[1];
 
-    global_domain->n_nx = get_nc_dimension(nc_name, global_domain->info.x_dim);
-    global_domain->n_ny = get_nc_dimension(nc_name, global_domain->info.y_dim);
+    global_domain->n_nx = get_nc_dimension(domain_nc_nameid,
+                                           global_domain->info.x_dim);
+    global_domain->n_ny = get_nc_dimension(domain_nc_nameid,
+                                           global_domain->info.y_dim);
 
     d2start[0] = 0;
     d2start[1] = 0;
@@ -56,19 +56,46 @@ get_global_domain(char          *nc_name,
     // get total number of gridcells in domain
     global_domain->ncells_total = global_domain->n_ny * global_domain->n_nx;
 
-    // allocate memory for cells to be run
+    // allocate memory for mask and cells to be run
+    mask = malloc(global_domain->ncells_total * sizeof(*mask));
+    check_alloc_status(mask, "Memory allocation error.");
     run = malloc(global_domain->ncells_total * sizeof(*run));
     check_alloc_status(run, "Memory allocation error.");
 
-    get_nc_field_int(nc_name, global_domain->info.mask_var, d2start, d2count,
+    // Get mask variable from the domain file
+    // (check whether mask variable is int type)
+    typeid = get_nc_var_type(domain_nc_nameid, global_domain->info.mask_var);
+    if (typeid != NC_INT) {
+        log_err("Mask variable in the domain file must be integer type.");
+    }
+    get_nc_field_int(domain_nc_nameid, global_domain->info.mask_var, d2start,
+                     d2count,
+                     mask);
+
+    // Get run_cell variable from the parameter file
+    // (check whether run_cell variable is int type)
+    typeid = get_nc_var_type(param_nc_nameid, "run_cell");
+    if (typeid != NC_INT) {
+        log_err("Run_cell variable in the parameter file must be integer type.");
+    }
+    get_nc_field_int(param_nc_nameid, "run_cell", d2start, d2count,
                      run);
 
+    // Check whether cells with run_cell == 1 are all within the mask domain
+    for (i = 0; i < global_domain->ncells_total; i++) {
+        if (run[i] == 1 && mask[i] != 1) {
+            log_err("Run_cell = 1 should only appear within the mask of the "
+                    "domain file.");
+        }
+    }
+
+    // Store active cell information into variables
     for (i = 0; i < global_domain->ncells_total; i++) {
         if (run[i] == 1) {
             global_domain->ncells_active++;
         }
     }
-    debug("%zu active grid cells found in domain mask",
+    debug("%zu active grid cells found in run_cell in the parameter file.",
           global_domain->ncells_active);
 
     global_domain->locations =
@@ -77,10 +104,6 @@ get_global_domain(char          *nc_name,
     for (i = 0; i < global_domain->ncells_total; i++) {
         initialize_location(&(global_domain->locations[i]));
     }
-
-    // allocate memory for variables
-    var = malloc(global_domain->ncells_total * sizeof(*var));
-    check_alloc_status(var, "Memory allocation error.");
 
     for (i = 0; i < global_domain->ncells_total; i++) {
         if (run[i] == 1) {
@@ -96,109 +119,174 @@ get_global_domain(char          *nc_name,
         }
     }
 
-    // Get number of lat/lon dimensions.
-    global_domain->info.n_coord_dims = get_nc_varndimensions(nc_name,
-                                                             global_domain->info.lon_var);
-    if (global_domain->info.n_coord_dims !=
-        (size_t) get_nc_varndimensions(nc_name, global_domain->info.lat_var)) {
-        log_err("Un even number of dimensions for %s and %s in: %s",
-                global_domain->info.lon_var, global_domain->info.lat_var,
-                nc_name);
+    // allocate memory for variables
+    var = malloc(global_domain->ncells_total * sizeof(*var));
+    check_alloc_status(var, "Memory allocation error.");
+
+    // get area
+    // TBD: read var id from file
+    get_nc_field_double(domain_nc_nameid, global_domain->info.area_var,
+                        d2start, d2count, var);
+    for (i = 0; i < global_domain->ncells_total; i++) {
+        global_domain->locations[i].area = var[i];
     }
 
-    if (global_domain->info.n_coord_dims == 1) {
+    // get fraction
+    // TBD: read var id from file
+    get_nc_field_double(domain_nc_nameid, global_domain->info.frac_var,
+                        d2start, d2count, var);
+    for (i = 0; i < global_domain->ncells_total; i++) {
+        global_domain->locations[i].frac = var[i];
+    }
+
+    // get lat and lon coordinates
+    get_nc_latlon(domain_nc_nameid, global_domain);
+
+    // check whether lat and lon coordinates in the parameter file match those
+    // in the domain file
+    compare_ncdomain_with_global_domain(param_nc_nameid);
+
+    // free memory
+    free(var);
+    free(run);
+    free(mask);
+
+    return global_domain->ncells_active;
+}
+
+/******************************************************************************
+ * @brief    Get lat and lon coordinates information from a netCDF file and
+             store in nc_domain structure
+ *****************************************************************************/
+void
+get_nc_latlon(nameid_struct *nc_nameid,
+              domain_struct *nc_domain)
+{
+    double *var = NULL;
+    double *var_lon = NULL;
+    double *var_lat = NULL;
+    size_t  i;
+    size_t  j;
+    size_t  d2count[2];
+    size_t  d2start[2];
+    size_t  d1count[1];
+    size_t  d1start[1];
+
+
+    nc_domain->n_nx = get_nc_dimension(nc_nameid,
+                                       nc_domain->info.x_dim);
+    nc_domain->n_ny = get_nc_dimension(nc_nameid,
+                                       nc_domain->info.y_dim);
+
+    // Get number of lat/lon dimensions.
+    nc_domain->info.n_coord_dims = get_nc_varndimensions(nc_nameid,
+                                                         nc_domain->info.lon_var);
+    if (nc_domain->info.n_coord_dims !=
+        (size_t) get_nc_varndimensions(nc_nameid, nc_domain->info.lat_var)) {
+        log_err("Un even number of dimensions for %s and %s in: %s",
+                nc_domain->info.lon_var, nc_domain->info.lat_var,
+                nc_nameid->nc_filename);
+    }
+
+    if (nc_domain->info.n_coord_dims == 1) {
         // allocate memory for variables
-        var_lon = malloc(global_domain->n_nx * sizeof(*var_lon));
+        var_lon = malloc(nc_domain->n_nx * sizeof(*var_lon));
         check_alloc_status(var_lon, "Memory allocation error.");
-        var_lat = malloc(global_domain->n_ny * sizeof(*var_lat));
+        var_lat = malloc(nc_domain->n_ny * sizeof(*var_lat));
         check_alloc_status(var_lat, "Memory allocation error.");
 
 
         d1start[0] = 0;
-        d1count[0] = global_domain->n_nx;
+        d1count[0] = nc_domain->n_nx;
 
         // get longitude for unmasked grid
-        get_nc_field_double(nc_name, global_domain->info.lon_var,
+        get_nc_field_double(nc_nameid, nc_domain->info.lon_var,
                             d1start, d1count, var_lon);
-        for (j = 0; j < global_domain->n_ny; j++) {
-            for (i = 0; i < global_domain->n_nx; i++) {
+        for (j = 0; j < nc_domain->n_ny; j++) {
+            for (i = 0; i < nc_domain->n_nx; i++) {
                 // rescale to [-180., 180]. Note that the if statement is not strictly
                 // needed, but it prevents -180 from turning into 180 and vice versa
                 if (var_lon[i] < -180.f || var_lon[i] > 180.f) {
                     var_lon[i] -= round(var_lon[i] / 360.f) * 360.f;
                 }
-                global_domain->locations[j * global_domain->n_nx +
-                                         i].longitude = (double) var_lon[i];
+                nc_domain->locations[j * nc_domain->n_nx + i].longitude =
+                    (double) var_lon[i];
             }
         }
 
         d1start[0] = 0;
-        d1count[0] = global_domain->n_ny;
+        d1count[0] = nc_domain->n_ny;
 
         // get latitude for unmasked grid
-        get_nc_field_double(nc_name, global_domain->info.lat_var,
+        get_nc_field_double(nc_nameid, nc_domain->info.lat_var,
                             d1start, d1count, var_lat);
-        for (i = 0; i < global_domain->n_ny; i++) {
-            for (j = 0; j < global_domain->n_nx; j++) {
-                global_domain->locations[i *
-                                         global_domain->n_nx + j].latitude =
+        for (i = 0; i < nc_domain->n_ny; i++) {
+            for (j = 0; j < nc_domain->n_nx; j++) {
+                nc_domain->locations[i * nc_domain->n_nx + j].latitude =
                     (double) var_lat[i];
             }
         }
 
+        // free memory
         free(var_lon);
         free(var_lat);
     }
-    else if (global_domain->info.n_coord_dims == 2) {
+    else if (nc_domain->info.n_coord_dims == 2) {
+        // allocate memory for variables
+        var = malloc(nc_domain->ncells_total * sizeof(*var));
+        check_alloc_status(var, "Memory allocation error.");
+
+
+        d2start[0] = 0;
+        d2start[1] = 0;
+        d2count[0] = nc_domain->n_ny;
+        d2count[1] = nc_domain->n_nx;
+
         // get longitude for unmasked grid
-        get_nc_field_double(nc_name, global_domain->info.lon_var,
+        get_nc_field_double(nc_nameid, nc_domain->info.lon_var,
                             d2start, d2count, var);
-        for (i = 0; i < global_domain->ncells_total; i++) {
+        for (i = 0; i < nc_domain->ncells_total; i++) {
             // rescale to [-180., 180]. Note that the if statement is not strictly
             // needed, but it prevents -180 from turning into 180 and vice versa
             if (var[i] < -180.f || var[i] > 180.f) {
                 var[i] -= round(var[i] / 360.f) * 360.f;
             }
-            global_domain->locations[i].longitude = var[i];
+            nc_domain->locations[i].longitude = var[i];
         }
 
         // get latitude for unmasked grid
-        get_nc_field_double(nc_name, global_domain->info.lat_var,
+        get_nc_field_double(nc_nameid, nc_domain->info.lat_var,
                             d2start, d2count, var);
-        for (i = 0; i < global_domain->ncells_total; i++) {
-            global_domain->locations[i].latitude = var[i];
+        for (i = 0; i < nc_domain->ncells_total; i++) {
+            nc_domain->locations[i].latitude = var[i];
         }
+        // free memory
+        free(var);
     }
     else {
         log_err("Number of dimensions for %s and %s should be 1 or 2 in: %s",
-                global_domain->info.lon_var, global_domain->info.lat_var,
-                nc_name);
+                nc_domain->info.lon_var, nc_domain->info.lat_var,
+                nc_nameid->nc_filename);
     }
+}
 
-    if (!coords_only) {
-        // get area
-        // TBD: read var id from file
-        get_nc_field_double(nc_name, global_domain->info.area_var,
-                            d2start, d2count, var);
-        for (i = 0; i < global_domain->ncells_total; i++) {
-            global_domain->locations[i].area = var[i];
-        }
+/******************************************************************************
+ * @brief    Copy domain info from one domain structure to another
+ *****************************************************************************/
+void
+copy_domain_info(domain_struct *domain_from,
+                 domain_struct *domain_to)
+{
+    strcpy(domain_to->info.x_dim, domain_from->info.x_dim);
+    strcpy(domain_to->info.y_dim, domain_from->info.y_dim);
 
-        // get fraction
-        // TBD: read var id from file
-        get_nc_field_double(nc_name, global_domain->info.frac_var,
-                            d2start, d2count, var);
-        for (i = 0; i < global_domain->ncells_total; i++) {
-            global_domain->locations[i].frac = var[i];
-        }
-    }
+    strcpy(domain_to->info.lon_var, domain_from->info.lon_var);
+    strcpy(domain_to->info.lat_var, domain_from->info.lat_var);
 
+    domain_to->n_nx = domain_from->n_nx;
+    domain_to->n_ny = domain_from->n_ny;
 
-    // free memory
-    free(var);
-    free(run);
-
-    return global_domain->ncells_active;
+    domain_to->ncells_total = domain_from->ncells_total;
 }
 
 /******************************************************************************
@@ -245,7 +333,7 @@ initialize_location(location_struct *location)
  * @brief    Read the number of vegetation type per grid cell from file
  *****************************************************************************/
 void
-add_nveg_to_global_domain(char          *nc_name,
+add_nveg_to_global_domain(nameid_struct *nc_nameid,
                           domain_struct *global_domain)
 {
     size_t d2count[2];
@@ -260,7 +348,7 @@ add_nveg_to_global_domain(char          *nc_name,
     d2start[1] = 0;
     d2count[0] = global_domain->n_ny;
     d2count[1] = global_domain->n_nx;
-    get_nc_field_int(nc_name, "Nveg", d2start, d2count, ivar);
+    get_nc_field_int(nc_nameid, "Nveg", d2start, d2count, ivar);
 
     for (i = 0; i < global_domain->ncells_total; i++) {
         global_domain->locations[i].nveg = (size_t) ivar[i];

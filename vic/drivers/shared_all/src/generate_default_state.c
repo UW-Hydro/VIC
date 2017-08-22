@@ -64,11 +64,9 @@ generate_default_state(all_vars_struct *all_vars,
 
     cell_data_struct       **cell;
     energy_bal_struct      **energy;
-    veg_var_struct         **veg_var;
 
     cell = all_vars->cell;
     energy = all_vars->energy;
-    veg_var = all_vars->veg_var;
     Nveg = veg_con[0].vegetat_type_num;
 
     // allocate memory for tmpT and tmpZ

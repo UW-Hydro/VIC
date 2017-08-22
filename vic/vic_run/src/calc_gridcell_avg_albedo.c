@@ -43,7 +43,6 @@ calc_gridcell_avg_albedo(double             *albedo,
                          soil_con_struct    *soil_con)
 {
     extern option_struct     options;
-    extern parameters_struct param;
     size_t                   veg;
     size_t                   band;
     double                   Cv;

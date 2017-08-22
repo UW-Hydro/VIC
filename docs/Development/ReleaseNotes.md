@@ -53,16 +53,15 @@ To check which release of VIC you are running:
 
     [GH#710] (https://github.com/UW-Hydro/VIC/pull/710)
 
-	    Refactor the cesm_put_data.c routine in the CESM driver to use values from out_data directly, rather than computing them separately in cesm_put_data.c. 
+	    Refactor the cesm_put_data.c routine in the CESM driver to use values from out_data directly, rather than computing them separately in cesm_put_data.c.
 
     [GH#716] (https://github.com/UW-Hydro/VIC/pull/716)
 
-        Fixes initialization of coupler fields and calculates temperature and upwelling longwave to pass to WRF during initialization. 
+        Fixes initialization of coupler fields and calculates temperature and upwelling longwave to pass to WRF during initialization.
 
     [GH#718] (https://github.com/UW-Hydro/VIC/pull/718)
 
-        Updates the cesm_put_data.c routine in the CESM driver to pass gridcell-averaged albedo to the coupler. 
-
+        Updates the cesm_put_data.c routine in the CESM driver to pass gridcell-averaged albedo to the coupler.
 
 3. Speed up NetCDF operations in the image/CESM drivers ([GH#684](https://github.com/UW-Hydro/VIC/pull/684))
 
@@ -75,6 +74,10 @@ To check which release of VIC you are running:
 5. Added gridcell-averaged albedo (STATE_AVG_ALBEDO) as a state file variable ([GH#712](https://github.com/UW-Hydro/VIC/pull/712))
 
     This is for use in the CESM driver for VIC to pass to WRF, but has been implemented in the core structure of VIC (in vic_run) for consistency with the classic and image drivers. Running VIC from a cold start now also includes calculation of gridcell-averaged albedo.
+
+6. Added thread parallelization using OPENMP ([GH#712](https://github.com/UW-Hydro/VIC/pull/712))
+
+	The VIC image and CESM drivers now may be optionally compiled with OPENMP to enable shared memory thread parallelization. This option should improve the parallel scaling of these drivers by reducing the number of MPI messages and increasing message size.		
 
 ## VIC 5.0.1
 

@@ -683,21 +683,21 @@ fda_heat_eqn(double T_2[],
     static double Dkappa[MAX_NODES];
     static double Bexp;
     #pragma omp threadprivate(deltat, NOFLUX, EXP_TRANS, T0, moist, ice, \
-                              kappa, Cs, max_moist, bubble, expt, alpha, beta, \
-                              gamma, Zsum, Dp, bulk_dens_min, soil_dens_min, \
-                              quartz, bulk_density, soil_density, organic, \
-                              depth, Nlayers, Ts, Tb, ice_new, Cs_new, \
-                              kappa_new, DT, DT_down, DT_up, Dkappa, Bexp)
+    kappa, Cs, max_moist, bubble, expt, alpha, beta, \
+    gamma, Zsum, Dp, bulk_dens_min, soil_dens_min, \
+    quartz, bulk_density, soil_density, organic, \
+    depth, Nlayers, Ts, Tb, ice_new, Cs_new, \
+    kappa_new, DT, DT_down, DT_up, Dkappa, Bexp)
 
-    char          PAST_BOTTOM;
-    double        storage_term, flux_term, phase_term, flux_term1, flux_term2;
-    double        Lsum;
-    int           i;
-    size_t        lidx;
-    int           focus, left, right;
+    char    PAST_BOTTOM;
+    double  storage_term, flux_term, phase_term, flux_term1, flux_term2;
+    double  Lsum;
+    int     i;
+    size_t  lidx;
+    int     focus, left, right;
 
     // argument list handling
-    va_list       arg_addr;
+    va_list arg_addr;
 
     // initialize variables if init==1
     if (init == 1) {

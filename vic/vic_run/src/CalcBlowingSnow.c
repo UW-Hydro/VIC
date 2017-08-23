@@ -379,8 +379,12 @@ trapzd(double (*funcd)(),
 {
     double        x, tnm, sum, del;
     static double s;
-    #pragma omp threadprivate(s)
+
     int           it, j;
+
+    // TODO: remove use of static variables (see GH #735), for now:
+    // make static variables thread safe
+    #pragma omp threadprivate(s)
 
     if (n == 1) {
         return (s = 0.5 *

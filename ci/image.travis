@@ -81,6 +81,8 @@ function vic_script {
     $DRIVER_EXE -v
     $DRIVER_EXE -o
 
+    export OMP_NUM_THREADS=4
+
     # Run test package
     ./tests/run_tests.py unit examples system \
         --image=${DRIVER_EXE} \

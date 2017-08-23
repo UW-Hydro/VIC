@@ -251,7 +251,7 @@ vic_cesm_put_data()
                     sqrt(pow(wind_stress_x, 2) + pow(wind_stress_y, 2));
                 l2x_vic[i].l2x_Sl_fv += AreaFactor *
                                         sqrt(wind_stress /
-                                         out_data[i][OUT_DENSITY][0]);
+                                             out_data[i][OUT_DENSITY][0]);
             }
         }
 

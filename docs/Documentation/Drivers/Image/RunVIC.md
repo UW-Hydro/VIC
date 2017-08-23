@@ -48,11 +48,23 @@ At the command prompt, type:
 
 where `global_parameter_filename` = name of the global parameter file corresponding to your project.
 
-To run VIC image driver using multiple processors, type the following instead:
+The VIC image driver can be run using parallel processing using MPI and/or OpenMP.
+
+!!! Note
+    Users are encouraged to consult their system administrator for assistance in configuring the VIC image driver for parallel processing applications.
+
+To run VIC image driver using multiple processors using MPI, type the following instead:
 
         mpiexec -np $n_proc ./vic_image.exe -g global_parameter_filename.txt
 
-where `n_proc` = number of processors to be used
+where `n_proc` = number of processors to be used. *Note that different MPI implementations may use different names for the MPI executable such as: `mpirun`, `mpiexec_mpt`, or `mpiexec.hydra`*.
+
+To run the VIC image driver using multiple processors using OpenMP (threads), set the environment variable `OMP_NUM_THREADS`:
+
+        export OMP_NUM_THREADS=8
+        ./vic_image.exe -g global_parameter_filename.txt
+
+These two parallelization methods may also be combined using a Hybrid OpenMP/MPI approach. However, that configuration is usually machine, compiler, or scheduler dependent.
 
 ## Other Command Line Options
 

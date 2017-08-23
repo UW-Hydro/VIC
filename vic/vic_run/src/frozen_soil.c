@@ -175,6 +175,7 @@ solve_T_profile(double   *T,
     static double C[MAX_NODES];
     static double D[MAX_NODES];
     static double E[MAX_NODES];
+    #pragma omp threadprivate(A,B,C,D,E)
 
     double       *aa, *bb, *cc, *dd, *ee, Bexp;
 
@@ -681,6 +682,13 @@ fda_heat_eqn(double T_2[],
     static double DT[MAX_NODES], DT_down[MAX_NODES], DT_up[MAX_NODES];
     static double Dkappa[MAX_NODES];
     static double Bexp;
+    #pragma omp threadprivate(deltat, NOFLUX, EXP_TRANS, T0, moist, ice, \
+                              kappa, Cs, max_moist, bubble, expt, alpha, beta, \
+                              gamma, Zsum, Dp, bulk_dens_min, soil_dens_min, \
+                              quartz, bulk_density, soil_density, organic, \
+                              depth, Nlayers, Ts, Tb, ice_new, Cs_new, \
+                              kappa_new, DT, DT_down, DT_up, Dkappa, Bexp)
+
     char          PAST_BOTTOM;
     double        storage_term, flux_term, phase_term, flux_term1, flux_term2;
     double        Lsum;

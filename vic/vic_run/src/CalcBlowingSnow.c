@@ -379,6 +379,7 @@ trapzd(double (*funcd)(),
 {
     double        x, tnm, sum, del;
     static double s;
+    #pragma omp threadprivate(s)
     int           it, j;
 
     if (n == 1) {

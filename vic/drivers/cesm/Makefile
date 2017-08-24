@@ -88,6 +88,7 @@ LIBRARY = -lm -L${NETCDFPATH}/lib -lnetcdf
 
 # Set compiler flags
 CFLAGS  =  ${INCLUDES} -ggdb -O0 -Wall -Wextra -fPIC \
+					 -fopenmp \
 					 -DLOG_LVL=$(LOG_LVL) \
 					 -DGIT_VERSION=\"$(GIT_VERSION)\" \
 					 -DUSERNAME=\"$(USER)\" \

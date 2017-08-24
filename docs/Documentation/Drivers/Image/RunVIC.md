@@ -19,6 +19,9 @@ The Image Driver has three dependencies:
 
 3.  [netCDF4](http://www.unidata.ucar.edu/software/netcdf/)
 
+!!! Note
+    Compiling the Image Driver may also be done with [OpenMP](http://www.openmp.org/). Nearly all [modern C compilers include the OpenMP standard](http://www.openmp.org/resources/openmp-compilers/) and users will need to ensure that the makefile has the appropriate compiler flag (usually `-openmp`). See the discussion below for how to control OpenMP parallelization.
+
 ## Compiling
 In most cases, you will need to edit the `NETCDF_PATH` and `MPI_PATH` variables in the `Makefile`.
 

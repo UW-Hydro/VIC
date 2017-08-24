@@ -260,7 +260,7 @@ def check_exact_restart_fluxes(result_basedir, driver, run_periods):
             for var in ds_full_run.data_vars:
                 np.testing.assert_array_equal(
                     ds[var].values, ds_full_run_split_period[var].values,
-                    err_msg='Fluxes are not an exact match %s' % var)
+                    err_msg='Fluxes are not an exact match for %s' % var)
 
 
 def check_exact_restart_states(state_basedir, driver, run_periods,

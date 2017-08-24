@@ -55,6 +55,7 @@ vic_image_run(dmy_struct *dmy_current)
     sprint_dmy(dmy_str, dmy_current);
     debug("Running timestep %zu: %s", current, dmy_str);
 
+    // If running with OpenMP, run this for loop using multiple threads
     #pragma omp parallel for default(shared) private(i, timer, vic_run_ref_str)
     for (i = 0; i < local_domain.ncells_active; i++) {
         // Set global reference string (for debugging inside vic_run)

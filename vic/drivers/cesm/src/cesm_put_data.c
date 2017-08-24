@@ -198,7 +198,6 @@ vic_cesm_put_data()
                 AreaFactorSum += AreaFactor;
 
                 // aerodynamical resistance, VIC: s/m, CESM: s/m
-                // TO-DO: update in future PR
                 if (overstory) {
                     aero_resist = cell.aero_resist[1];
                 }
@@ -236,13 +235,13 @@ vic_cesm_put_data()
 
                 // wind stress, zonal
                 // CESM units: N m-2
-                wind_stress_x = -1 * out_data[i][OUT_DENSITY][0] *
+                wind_stress_x = out_data[i][OUT_DENSITY][0] *
                                 x2l_vic[i].x2l_Sa_u / aero_resist;
                 l2x_vic[i].l2x_Fall_taux += AreaFactor * wind_stress_x;
 
                 // wind stress, meridional
                 // CESM units: N m-2
-                wind_stress_y = -1 * out_data[i][OUT_DENSITY][0] *
+                wind_stress_y = out_data[i][OUT_DENSITY][0] *
                                 x2l_vic[i].x2l_Sa_v / aero_resist;
                 l2x_vic[i].l2x_Fall_tauy += AreaFactor * wind_stress_y;
 
@@ -251,8 +250,8 @@ vic_cesm_put_data()
                 wind_stress =
                     sqrt(pow(wind_stress_x, 2) + pow(wind_stress_y, 2));
                 l2x_vic[i].l2x_Sl_fv += AreaFactor *
-                                        (wind_stress /
-                                         out_data[i][OUT_DENSITY][0]);
+                                        sqrt(wind_stress /
+                                             out_data[i][OUT_DENSITY][0]);
             }
         }
 

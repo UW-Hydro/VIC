@@ -271,18 +271,18 @@ CalcBlowingSnow(double   Dt,
  *****************************************************************************/
 double
 qromb(double (*funcd)(),
-      double es,
-      double Wind,
-      double AirDens,
-      double ZO,
-      double EactAir,
-      double F,
-      double hsalt,
-      double phi_r,
-      double ushear,
-      double Zrh,
-      double a,
-      double b)
+      double   es,
+      double   Wind,
+      double   AirDens,
+      double   ZO,
+      double   EactAir,
+      double   F,
+      double   hsalt,
+      double   phi_r,
+      double   ushear,
+      double   Zrh,
+      double   a,
+      double   b)
 {
     extern parameters_struct param;
 
@@ -363,23 +363,27 @@ polint(double  xa[],
  *****************************************************************************/
 double
 trapzd(double (*funcd)(),
-       double es,
-       double Wind,
-       double AirDens,
-       double ZO,
-       double EactAir,
-       double F,
-       double hsalt,
-       double phi_r,
-       double ushear,
-       double Zrh,
-       double a,
-       double b,
-       int    n)
+       double   es,
+       double   Wind,
+       double   AirDens,
+       double   ZO,
+       double   EactAir,
+       double   F,
+       double   hsalt,
+       double   phi_r,
+       double   ushear,
+       double   Zrh,
+       double   a,
+       double   b,
+       int      n)
 {
-    double        x, tnm, sum, del;
+    double x, tnm, sum, del;
+    int    it, j;
+
+    // TODO: remove use of static variables (see GH #735), for now:
+    // make static variables thread safe
     static double s;
-    int           it, j;
+    #pragma omp threadprivate(s)
 
     if (n == 1) {
         return (s = 0.5 *

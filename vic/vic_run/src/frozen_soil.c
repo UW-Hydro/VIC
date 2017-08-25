@@ -170,16 +170,18 @@ solve_T_profile(double   *T,
                 int       NOFLUX,
                 int       EXP_TRANS)
 {
+    double *aa, *bb, *cc, *dd, *ee, Bexp;
+    int     Error;
+    int     j;
+
+    // TODO: remove use of static variables (see GH #735), for now:
+    // make static variables thread safe
     static double A[MAX_NODES];
     static double B[MAX_NODES];
     static double C[MAX_NODES];
     static double D[MAX_NODES];
     static double E[MAX_NODES];
-
-    double       *aa, *bb, *cc, *dd, *ee, Bexp;
-
-    int           Error;
-    int           j;
+    #pragma omp threadprivate(A, B, C, D, E)
 
     if (FIRST_SOLN[0]) {
         if (EXP_TRANS) {
@@ -646,6 +648,18 @@ fda_heat_eqn(double T_2[],
              int    init,
              ...)
 {
+    char    PAST_BOTTOM;
+    double  storage_term, flux_term, phase_term, flux_term1, flux_term2;
+    double  Lsum;
+    int     i;
+    size_t  lidx;
+    int     focus, left, right;
+
+    // argument list handling
+    va_list arg_addr;
+
+    // TODO: remove use of static variables (see GH #735), for now:
+    // make static variables thread safe
     static double  deltat;
     static int     NOFLUX;
     static int     EXP_TRANS;
@@ -681,15 +695,12 @@ fda_heat_eqn(double T_2[],
     static double DT[MAX_NODES], DT_down[MAX_NODES], DT_up[MAX_NODES];
     static double Dkappa[MAX_NODES];
     static double Bexp;
-    char          PAST_BOTTOM;
-    double        storage_term, flux_term, phase_term, flux_term1, flux_term2;
-    double        Lsum;
-    int           i;
-    size_t        lidx;
-    int           focus, left, right;
 
-    // argument list handling
-    va_list       arg_addr;
+    #pragma omp threadprivate(deltat, NOFLUX, EXP_TRANS, T0, moist, ice, \
+    kappa, Cs, max_moist, bubble, expt, alpha, beta, gamma, Zsum, Dp, \
+    bulk_dens_min, soil_dens_min, quartz, bulk_density, soil_density, organic, \
+    depth, Nlayers, Ts, Tb, ice_new, Cs_new, kappa_new, DT, DT_down, DT_up, \
+    Dkappa, Bexp)
 
     // initialize variables if init==1
     if (init == 1) {

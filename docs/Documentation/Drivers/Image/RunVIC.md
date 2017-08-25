@@ -20,7 +20,7 @@ The Image Driver has three dependencies:
 3.  [netCDF4](http://www.unidata.ucar.edu/software/netcdf/)
 
 !!! Note
-    Compiling the Image Driver may also be done with [OpenMP](http://www.openmp.org/). Nearly all [modern C compilers include the OpenMP standard](http://www.openmp.org/resources/openmp-compilers/) and users will need to ensure that the makefile has the appropriate compiler flag (usually `-openmp`). See the discussion below for how to control OpenMP parallelization.
+    Compiling the Image Driver may also be done with [OpenMP](http://www.openmp.org/). Nearly all modern C compilers include the [OpenMP standard](http://www.openmp.org/resources/openmp-compilers/) and users will need to ensure that the makefile has the appropriate compiler flag (usually `-openmp`). See the discussion below for how to control OpenMP parallelization.
 
 ## Compiling
 In most cases, you will need to edit the `NETCDF_PATH` and `MPI_PATH` variables in the `Makefile`.
@@ -51,7 +51,7 @@ At the command prompt, type:
 
 where `global_parameter_filename` = name of the global parameter file corresponding to your project.
 
-The VIC image driver can be run using parallel processing using MPI and/or OpenMP.
+The VIC image driver can be run using parallel processing with MPI and/or OpenMP.
 
 !!! Note
     Users are encouraged to consult their system administrator for assistance in configuring the VIC image driver for parallel processing applications.
@@ -62,7 +62,7 @@ To run VIC image driver using multiple processors using MPI, type the following 
 
 where `n_proc` = number of processors to be used. *Note that different MPI implementations may use different names for the MPI executable such as: `mpirun`, `mpiexec_mpt`, or `mpiexec.hydra`*.
 
-To run the VIC image driver using multiple processors using OpenMP (threads), set the environment variable `OMP_NUM_THREADS`:
+To run the VIC image driver using multiple processors with OpenMP (threads), set the environment variable `OMP_NUM_THREADS`:
 
         export OMP_NUM_THREADS=8
         ./vic_image.exe -g global_parameter_filename.txt

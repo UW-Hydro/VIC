@@ -99,9 +99,11 @@ To check which release of VIC you are running:
 
 	The VIC image and CESM drivers now may be optionally compiled with OPENMP to enable shared memory thread parallelization. This option should improve the parallel scaling of these drivers by reducing the number of MPI messages and increasing message size.
 
-	8. Cleanup
+#### Bug Fixes:
 
-	([GH#673](https://github.com/UW-Hydro/VIC/pull/673)) Renamed "fcov" to "fcan" in image driver to better match variable code name.
+1.	Renamed "fcov" to "fcan" in image driver to better match variable code name ([GH#673](https://github.com/UW-Hydro/VIC/pull/673))
+
+------------------------------
 
 ## VIC 5.0.1
 

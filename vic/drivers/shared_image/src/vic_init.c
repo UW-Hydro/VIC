@@ -1232,7 +1232,7 @@ vic_init(void)
         if (!assert_close_double(Cv_sum[i], 1., 0., AREA_SUM_ERROR_THRESH)) {
             sprint_location(locstr, &(local_domain.locations[i]));
             log_warn("Cv !=  1.0 (%f) at grid cell %zd. Exiting ...\n%s",
-                    Cv_sum[i], i, locstr);
+                     Cv_sum[i], i, locstr);
             for (j = 0; j < options.NVEGTYPES; j++) {
                 vidx = veg_con_map[i].vidx[j];
                 veg_con[i][vidx].Cv /= Cv_sum[i];

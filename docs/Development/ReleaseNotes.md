@@ -68,16 +68,16 @@ To check which release of VIC you are running:
         Updates the cesm_put_data.c routine in the CESM driver to include the correct units for evap passed to the coupler.
 
     [GH#732] (https://github.com/UW-Hydro/VIC/pull/732)
- 
-        Updates the cesm_put_data.c routine in the CESM driver to include the correct units for sensible heat flux and updates the rofliq calculation to be correct (previously only OUT_BASEFLOW was being divided by global_param.dt). 
 
-    [GH#734] (https://github.com/UW-Hydro/VIC/pull/734) 
+        Updates the cesm_put_data.c routine in the CESM driver to include the correct units for sensible heat flux and updates the rofliq calculation to be correct (previously only OUT_BASEFLOW was being divided by global_param.dt).
 
-        Updates the cesm_put_data.c routine in the CESM driver to include the correct signs for turbulent heat fluxes and evaporation. Previously we had switched the signs to agree with the image driver and they should instead be in accordance with the sign conventions for coupled models, which differ from those of land surface models. Also, eliminate populating the `l2x_Sl_ram1` field with aero_resist to agree with the VIC 4 implementation in RASM. 
+    [GH#734] (https://github.com/UW-Hydro/VIC/pull/734)
+
+        Updates the cesm_put_data.c routine in the CESM driver to include the correct signs for turbulent heat fluxes and evaporation. Previously we had switched the signs to agree with the image driver and they should instead be in accordance with the sign conventions for coupled models, which differ from those of land surface models. Also, eliminate populating the `l2x_Sl_ram1` field with aero_resist to agree with the VIC 4 implementation in RASM.
 
     [GH#739] (https://github.com/UW-Hydro/VIC/pull/739)
 
-        Updates the cesm_put_data.c routine in the CESM driver to include the correct signs for the wind stresses and fixes a bug in calculating friction velocity (previously it was missing a square root). 
+        Updates the cesm_put_data.c routine in the CESM driver to include the correct signs for the wind stresses and fixes a bug in calculating friction velocity (previously it was missing a square root).
 
 3. Speed up NetCDF operations in the image/CESM drivers ([GH#684](https://github.com/UW-Hydro/VIC/pull/684))
 
@@ -98,6 +98,12 @@ To check which release of VIC you are running:
 7. Added thread parallelization using OPENMP ([GH#712](https://github.com/UW-Hydro/VIC/pull/712))
 
 	The VIC image and CESM drivers now may be optionally compiled with OPENMP to enable shared memory thread parallelization. This option should improve the parallel scaling of these drivers by reducing the number of MPI messages and increasing message size.
+
+#### Bug Fixes:
+
+1.	Renamed "fcov" to "fcan" in image driver to better match variable code name ([GH#673](https://github.com/UW-Hydro/VIC/pull/673))
+
+------------------------------
 
 ## VIC 5.0.1
 

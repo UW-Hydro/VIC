@@ -201,8 +201,10 @@ vic_cesm_final()
     timer_stop(&(global_timers[TIMER_VIC_FINAL]));
     // stop vic all timer
     timer_stop(&(global_timers[TIMER_VIC_ALL]));
-    // write timing info
-    write_vic_timing_table(global_timers, VIC_DRIVER);
 
+    if (mpi_rank == VIC_MPI_ROOT) {
+        // write timing info
+        write_vic_timing_table(global_timers, VIC_DRIVER);
+    }
     return EXIT_SUCCESS;
 }

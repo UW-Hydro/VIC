@@ -123,6 +123,8 @@ vic_cesm_init(vic_clock     *vclock,
     timer_stop(&(global_timers[TIMER_VIC_INIT]));
     // stop vic all timer
     timer_stop(&(global_timers[TIMER_VIC_ALL]));
+    // init vic run timer
+    timer_init(&(global_timers[TIMER_VIC_RUN]));
 
     return EXIT_SUCCESS;
 }
@@ -137,8 +139,8 @@ vic_cesm_run(vic_clock *vclock)
 
     // continue vic all timer
     timer_continue(&(global_timers[TIMER_VIC_ALL]));
-    // start vic run timer
-    timer_start(&(global_timers[TIMER_VIC_RUN]));
+    // continue vic run timer
+    timer_continue(&(global_timers[TIMER_VIC_RUN]));
 
     // reset l2x fields
     initialize_l2x_data();

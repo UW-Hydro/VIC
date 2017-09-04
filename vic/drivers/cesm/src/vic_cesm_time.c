@@ -66,6 +66,23 @@ initialize_cesm_time(void)
 }
 
 /******************************************************************************
+ * @brief    Finalize cesm time
+ *****************************************************************************/
+void
+finalize_cesm_time(vic_clock  *vclock)
+{
+    extern size_t              current;
+    extern global_param_struct global_param;
+
+    // populate fields in global_param needed for timing tables
+    global_param.nrecs = current;
+    global_param.endyear = vclock->current_year;
+    global_param.endmonth = vclock->current_month;
+    global_param.endday = vclock->current_day;
+
+}
+
+/******************************************************************************
  * @brief    Advance one timestep
  *****************************************************************************/
 void

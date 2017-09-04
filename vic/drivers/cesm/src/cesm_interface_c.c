@@ -179,12 +179,15 @@ vic_cesm_run(vic_clock *vclock)
  * @brief    Finalize function for CESM driver
  *****************************************************************************/
 int
-vic_cesm_final()
+vic_cesm_final(vic_clock *vclock)
 {
     // continue vic all timer
     timer_continue(&(global_timers[TIMER_VIC_ALL]));
     // start vic run timer
     timer_start(&(global_timers[TIMER_VIC_RUN]));
+
+    // finalize time
+    finalize_cesm_time(vclock);
 
     // clean up
     vic_cesm_finalize();

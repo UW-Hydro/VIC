@@ -69,7 +69,7 @@ initialize_cesm_time(void)
  * @brief    Finalize cesm time
  *****************************************************************************/
 void
-finalize_cesm_time(vic_clock  *vclock)
+finalize_cesm_time(vic_clock *vclock)
 {
     extern size_t              current;
     extern global_param_struct global_param;
@@ -79,7 +79,6 @@ finalize_cesm_time(vic_clock  *vclock)
     global_param.endyear = vclock->current_year;
     global_param.endmonth = vclock->current_month;
     global_param.endday = vclock->current_day;
-
 }
 
 /******************************************************************************

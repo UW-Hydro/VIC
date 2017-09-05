@@ -159,6 +159,7 @@ typedef struct {
 
 void advance_vic_time(void);
 void assert_time_insync(vic_clock *vclock, dmy_struct *dmy);
+void finalize_cesm_time(vic_clock *vclock);
 void get_global_param(FILE *);
 void initialize_cesm_time(void);
 void initialize_l2x_data(void);
@@ -178,7 +179,7 @@ void validate_options(option_struct *options);
 void vic_cesm_alloc(void);
 int vic_cesm_init_mpi(int MPI_COMM_VIC_F);
 int vic_cesm_init(vic_clock *vclock, case_metadata *cmeta);
-int vic_cesm_final(void);
+int vic_cesm_final(vic_clock *vclock);
 void vic_cesm_finalize(void);
 int vic_cesm_run(vic_clock *vclock);
 void vic_force(void);

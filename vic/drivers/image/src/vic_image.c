@@ -131,9 +131,6 @@ main(int    argc,
     // start vic run timer
     timer_start(&(global_timers[TIMER_VIC_RUN]));
 
-    timer_init(&(global_timers[TIMER_VIC_FORCE]));
-    timer_init(&(global_timers[TIMER_VIC_WRITE]));
-
     // loop over all timesteps
     for (current = 0; current < global_param.nrecs; current++) {
         // read forcing data

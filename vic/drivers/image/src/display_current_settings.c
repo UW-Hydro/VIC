@@ -384,7 +384,8 @@ display_current_settings(int mode)
     fprintf(LOG_DEST, "\n");
     fprintf(LOG_DEST, "Input State File:\n");
     if (options.INIT_STATE) {
-        fprintf(LOG_DEST, "INIT_STATE\t\tTRUE\t%s\n", filenames.init_state.nc_filename);
+        fprintf(LOG_DEST, "INIT_STATE\t\tTRUE\t%s\n",
+                filenames.init_state.nc_filename);
         if (options.STATE_FORMAT == NETCDF3_CLASSIC) {
             fprintf(LOG_DEST, "STATE_FORMAT\t\tNETCDF3_CLASSIC\n");
         }

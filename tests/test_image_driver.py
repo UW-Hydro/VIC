@@ -291,4 +291,5 @@ def check_mpi_states(state_basedir, list_n_proc):
         for var in ds_first_run.data_vars:
             npt.assert_array_equal(ds_current_run[var].values,
                                    ds_first_run[var].values,
-                                   err_msg='States are not an exact match')
+                                   err_msg='States are not an exact match '
+                                   'for variable: {}'.format(var))

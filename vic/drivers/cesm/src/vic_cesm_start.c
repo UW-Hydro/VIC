@@ -47,8 +47,8 @@ vic_cesm_start(vic_clock     *vclock,
     if (mpi_rank == VIC_MPI_ROOT) {
         strcpy(filenames.global, GLOBALPARAM);
 
-	// assign case name to state file name
-    	strncpy(filenames.statefile, trim(cmeta->caseid),
+        // assign case name to state file name
+        strncpy(filenames.statefile, trimstr(cmeta->caseid),
                 sizeof(filenames.statefile));
 
         // read global settings
@@ -76,7 +76,7 @@ vic_cesm_start(vic_clock     *vclock,
         global_param.nrecs = 1;
 
         // Calendar
-        global_param.calendar = str_to_calendar(trim(vclock->calendar));
+        global_param.calendar = str_to_calendar(trimstr(vclock->calendar));
         // set NR and NF
         NF = global_param.snow_steps_per_day / global_param.model_steps_per_day;
         if (NF == 1) {
@@ -107,7 +107,7 @@ vic_cesm_start(vic_clock     *vclock,
  *           using free() etc.
  *****************************************************************************/
 char *
-trim(char *str)
+trimstr(char *str)
 {
     char *end;
 

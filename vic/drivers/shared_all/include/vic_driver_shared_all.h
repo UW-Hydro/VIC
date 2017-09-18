@@ -45,6 +45,9 @@
 // Default snow band setting
 #define SNOW_BAND_TRUE_BUT_UNSET 99999
 
+// Max counter for root distribution iteration
+#define MAX_ROOT_ITER 9999
+
 /******************************************************************************
  * @brief   File formats
  *****************************************************************************/
@@ -356,6 +359,7 @@ enum
     STATE_LAKE_ICE_SNOW_PACK_WATER,    /**<  lake ice snow pack water: lake_var.pack_water */
     STATE_LAKE_ICE_SNOW_ALBEDO,        /**<  lake ice snow albedo: lake_var.SAlbedo */
     STATE_LAKE_ICE_SNOW_DEPTH,         /**<  lake ice snow depth: lake_var.sdepth */
+    STATE_AVG_ALBEDO,                  /**<  gridcell-averaged albedo: gridcell_avg.avg_albedo */
     // Last value of enum - DO NOT ADD ANYTHING BELOW THIS LINE!!
     // used as a loop counter and must be >= the largest value in this enum
     N_STATE_VARS                       /**< used as a loop counter*/
@@ -453,6 +457,8 @@ enum timers
     TIMER_VIC_INIT,
     TIMER_VIC_RUN,
     TIMER_VIC_FINAL,
+    TIMER_VIC_FORCE,
+    TIMER_VIC_WRITE,
     N_TIMERS
 };
 
@@ -584,7 +590,7 @@ void agg_stream_data(stream_struct *stream, dmy_struct *dmy_current,
 double all_30_day_from_dmy(dmy_struct *dmy);
 double all_leap_from_dmy(dmy_struct *dmy);
 void alloc_aggdata(stream_struct *stream);
-void alloc_out_data(size_t ngridcells, double ****out_data);
+void alloc_out_data(size_t ngridcells, double ***out_data);
 double average(double *ar, size_t n);
 double calc_energy_balance_error(double, double, double, double, double);
 void calc_root_fractions(veg_con_struct *veg_con, soil_con_struct *soil_con);
@@ -628,7 +634,7 @@ void free_out_data(size_t ngridcells, double ***out_data);
 void free_streams(stream_struct **streams);
 void free_vegcon(veg_con_struct **veg_con);
 void generate_default_state(all_vars_struct *, soil_con_struct *,
-                            veg_con_struct *);
+                            veg_con_struct *, dmy_struct *);
 void generate_default_lake_state(all_vars_struct *, soil_con_struct *,
                                  lake_con_struct);
 void get_default_nstreams_nvars(size_t *nstreams, size_t nvars[]);

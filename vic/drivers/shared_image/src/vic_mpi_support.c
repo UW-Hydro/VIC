@@ -2043,10 +2043,10 @@ gather_put_nc_field_schar(int     nc_id,
  *****************************************************************************/
 void
 get_scatter_nc_field_double(nameid_struct *nc_nameid,
-                            char   *var_name,
-                            size_t *start,
-                            size_t *count,
-                            double *var)
+                            char          *var_name,
+                            size_t        *start,
+                            size_t        *count,
+                            double        *var)
 {
     extern MPI_Comm      MPI_COMM_VIC;
     extern domain_struct global_domain;
@@ -2104,10 +2104,10 @@ get_scatter_nc_field_double(nameid_struct *nc_nameid,
  *****************************************************************************/
 void
 get_scatter_nc_field_float(nameid_struct *nc_nameid,
-                           char   *var_name,
-                           size_t *start,
-                           size_t *count,
-                           float  *var)
+                           char          *var_name,
+                           size_t        *start,
+                           size_t        *count,
+                           float         *var)
 {
     extern MPI_Comm      MPI_COMM_VIC;
     extern domain_struct global_domain;
@@ -2167,10 +2167,10 @@ get_scatter_nc_field_float(nameid_struct *nc_nameid,
  *****************************************************************************/
 void
 get_scatter_nc_field_int(nameid_struct *nc_nameid,
-                         char   *var_name,
-                         size_t *start,
-                         size_t *count,
-                         int    *var)
+                         char          *var_name,
+                         size_t        *start,
+                         size_t        *count,
+                         int           *var)
 {
     extern MPI_Comm      MPI_COMM_VIC;
     extern domain_struct global_domain;

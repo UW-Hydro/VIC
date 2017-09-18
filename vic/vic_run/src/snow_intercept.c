@@ -518,7 +518,7 @@ snow_intercept(double             Dt,
             /* Energy released by freezing of intercepted water is added to the
                MeltEnergy */
 
-            *MeltEnergy += (CONST_LATICE * *IntRain * CONST_RHOFW) / (Dt);
+            *MeltEnergy += (CONST_LATICE * (*IntRain) * CONST_RHOFW) / (Dt);
             *IntRain = 0.0;
         }
 

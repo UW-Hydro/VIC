@@ -262,11 +262,11 @@ display_current_settings(int mode)
 
     fprintf(LOG_DEST, "\n");
     fprintf(LOG_DEST, "Input Domain Data:\n");
-    fprintf(LOG_DEST, "Domain file\t\t%s\n", filenames.domain);
+    fprintf(LOG_DEST, "Domain file\t\t%s\n", filenames.domain.nc_filename);
 
     fprintf(LOG_DEST, "\n");
     fprintf(LOG_DEST, "Constants File\t\t%s\n", filenames.constants);
-    fprintf(LOG_DEST, "Parameters file\t\t%s\n", filenames.params);
+    fprintf(LOG_DEST, "Parameters file\t\t%s\n", filenames.params.nc_filename);
     if (options.BASEFLOW == ARNO) {
         fprintf(LOG_DEST, "BASEFLOW\t\tARNO\n");
     }
@@ -361,7 +361,8 @@ display_current_settings(int mode)
     fprintf(LOG_DEST, "\n");
     fprintf(LOG_DEST, "Input State File:\n");
     if (options.INIT_STATE) {
-        fprintf(LOG_DEST, "INIT_STATE\t\tTRUE\t%s\n", filenames.init_state);
+        fprintf(LOG_DEST, "INIT_STATE\t\tTRUE\t%s\n",
+                filenames.init_state.nc_filename);
         if (options.STATE_FORMAT == NETCDF3_CLASSIC) {
             fprintf(LOG_DEST, "STATE_FORMAT\t\tNETCDF3_CLASSIC\n");
         }

@@ -29,6 +29,11 @@
 
 #include <vic_def.h>
 #include <mpi.h>
+#ifdef _OPENMP
+    #include <omp.h>
+#else
+    #define omp_get_max_threads() 1
+#endif
 
 #define VIC_MPI_ROOT 0
 
@@ -37,7 +42,7 @@
  *****************************************************************************/
 typedef struct {
     char nc_filename[MAXSTRING];
-    int  nc_id;
+    int nc_id;
 } nameid_struct;
 
 void create_MPI_filenames_struct_type(MPI_Datatype *mpi_type);

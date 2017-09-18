@@ -282,7 +282,6 @@ vic_force(void)
     if (options.LAI_SRC == FROM_VEGHIST ||
         options.FCAN_SRC == FROM_VEGHIST ||
         options.ALB_SRC == FROM_VEGHIST) {
-
         // global_param.forceoffset[1] resets every year since the met file restarts
         // every year
         // global_param.forceskip[1] should also reset to 0 after the first year
@@ -336,14 +335,14 @@ vic_force(void)
             }
         }
 
-        // Partial veg cover fraction: fcov
+        // Partial veg cover fraction: fcan
         if (options.FCAN_SRC == FROM_VEGHIST) {
             for (j = 0; j < NF; j++) {
                 d4start[0] = global_param.forceskip[1] +
                              global_param.forceoffset[1] + j;
                 for (v = 0; v < options.NVEGTYPES; v++) {
                     d4start[1] = v;
-                    get_scatter_nc_field_double(&(filenames.forcing[1]), "fcov",
+                    get_scatter_nc_field_double(&(filenames.forcing[1]), "fcan",
                                                 d4start, d4count, dvar);
                     for (i = 0; i < local_domain.ncells_active; i++) {
                         vidx = veg_con_map[i].vidx[v];
@@ -503,6 +502,7 @@ vic_force(void)
 
     // cleanup
     free(dvar);
+    free(t_offset);
 }
 
 /******************************************************************************
@@ -527,9 +527,12 @@ get_forcing_file_info(param_set_struct *param_set,
     dmy_struct                 nc_start_dmy;
 
     // read time info from netcdf file
-    get_nc_field_double(&(filenames.forcing[file_num]), "time", &start, &count, nc_times);
-    get_nc_var_attr(&(filenames.forcing[file_num]), "time", "units", &nc_unit_chars);
-    get_nc_var_attr(&(filenames.forcing[file_num]), "time", "calendar", &calendar_char);
+    get_nc_field_double(&(filenames.forcing[file_num]), "time", &start, &count,
+                        nc_times);
+    get_nc_var_attr(&(filenames.forcing[file_num]), "time", "units",
+                    &nc_unit_chars);
+    get_nc_var_attr(&(filenames.forcing[file_num]), "time", "calendar",
+                    &calendar_char);
 
     // parse the calendar string and check to make sure it matches the global clock
     calendar = str_to_calendar(calendar_char);

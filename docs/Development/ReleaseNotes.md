@@ -79,6 +79,14 @@ To check which release of VIC you are running:
 
         Updates the cesm_put_data.c routine in the CESM driver to include the correct signs for the wind stresses and fixes a bug in calculating friction velocity (previously it was missing a square root).
 
+    [GH#744](https://github.com/UW-Hydro/VIC/pull/744)
+
+        Updates the cesm_interface_c.c routine to include missing timers and the VIC RUN timer in the CESM driver.
+
+    [GH#746](https://github.com/UW-Hydro/VIC/pull/746)
+
+        Updates the cesm_interface_c.c routine in the CESM driver to populate the nrecs, endyear, endmonth and endday fields in the global_param struct to make them available to vic_finalize for timing tables (specifically the secs/day columns).  
+
 3. Speed up NetCDF operations in the image/CESM drivers ([GH#684](https://github.com/UW-Hydro/VIC/pull/684))
 
     These changes speed up image driver initialization, forcing reads, and history writes by only opening and closing each input netCDF file once.

@@ -82,5 +82,20 @@ void gather_var_double(double *, double *);
  *****************************************************************************/
 void get_global_param_rout(FILE *gp);
 void cshift(double *, int, int, int, int);
+void vic_store_extension(dmy_struct *, char *);
+void set_nc_state_file_info_extension(nc_file_struct *);
+void set_nc_state_var_info_extension(nc_file_struct *);
+void initialize_state_file_extension(char *, nc_file_struct *);
+
+/******************************************************************************
+ * @brief   Output state variable.
+ *****************************************************************************/
+enum
+{
+    STATE_ROUT_RING,                   /**<  routing ring: rout_ring[routing_timestep, outlet] */
+    // Last value of enum - DO NOT ADD ANYTHING BELOW THIS LINE!!
+    // used as a loop counter and must be >= the largest value in this enum
+    N_STATE_VARS_EXT                       /**< used as a loop counter*/
+};
 
 #endif

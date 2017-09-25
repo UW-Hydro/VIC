@@ -315,9 +315,6 @@ enum
     STATE_SNOW_DENSITY,                /**<  snow density: snow[veg][band].density */
     STATE_SNOW_COLD_CONTENT,           /**<  snow cold content: snow[veg][band].coldcontent */
     STATE_SNOW_CANOPY,                 /**<  snow canopy storage: snow[veg][band].snow_canopy */
-#ifdef EXTENSION_RVIC
-    STATE_ROUT_RING,                   /**<  routing ring: rout_ring[routing_timestep, outlet] */
-#endif
     STATE_SOIL_NODE_TEMP,              /**<  soil node temperatures: energy[veg][band].T[nidx] */
     STATE_FOLIAGE_TEMPERATURE,         /**<  Foliage temperature: energy[veg][band].Tfoliage */
     STATE_ENERGY_LONGUNDEROUT,         /**<  Outgoing longwave from understory: energy[veg][band].LongUnderOut */

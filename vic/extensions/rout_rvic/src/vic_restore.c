@@ -40,7 +40,7 @@ vic_restore(void)
     extern option_struct       options;
     extern veg_con_map_struct *veg_con_map;
     extern filenames_struct    filenames;
-    extern metadata_struct     state_metadata[N_STATE_VARS];
+    extern metadata_struct     state_metadata[N_STATE_VARS + N_STATE_VARS_EXT];
     extern int                 mpi_rank;
     extern rout_struct         rout;
 

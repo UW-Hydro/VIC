@@ -60,7 +60,7 @@ veg_con_map_struct *veg_con_map = NULL;
 veg_con_struct    **veg_con = NULL;
 veg_hist_struct   **veg_hist = NULL;
 veg_lib_struct    **veg_lib = NULL;
-metadata_struct     state_metadata[N_STATE_VARS];
+metadata_struct     state_metadata[N_STATE_VARS + N_STATE_VARS_EXT];
 metadata_struct     out_metadata[N_OUTVAR_TYPES];
 save_data_struct   *save_data;  // [ncells]
 double           ***out_data = NULL;  // [ncells, nvars, nelem]

@@ -115,9 +115,6 @@ vic_store(dmy_struct *dmy_state,
         dvar[i] = nc_state_file.d_fillvalue;
     }
 
-    // store extension variables
-    vic_store_extension(dmy_state, filename);
-
     // total soil moisture
     nc_var = &(nc_state_file.nc_vars[STATE_SOIL_MOISTURE]);
     for (m = 0; m < options.NVEGTYPES; m++) {
@@ -1272,6 +1269,10 @@ vic_store(dmy_struct *dmy_state,
             dvar[i] = nc_state_file.d_fillvalue;
         }
     }
+
+    // store extension variables
+    vic_store_extension(&nc_state_file);
+
 
     // close the netcdf file if it is still open
     if (mpi_rank == VIC_MPI_ROOT) {

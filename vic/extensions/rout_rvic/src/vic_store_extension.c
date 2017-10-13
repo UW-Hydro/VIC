@@ -31,37 +31,14 @@
  * @brief    Save model state.
  *****************************************************************************/
 void
-vic_store_extension(dmy_struct *dmy_state,
-        char *filename)
+vic_store_extension(nc_file_struct *nc_state_file)
 {
-    extern filenames_struct    filenames;
     extern int                 mpi_rank;
     extern rout_struct         rout;
 
     int                        status;
     size_t                     d2start[2];
-    nc_file_struct             nc_state_file;
     nc_var_struct             *nc_var;
-
-    set_nc_state_file_info(&nc_state_file);
-
-    // create netcdf file for storing model state
-    sprintf(filename, "%s.%04i%02i%02i_%05u.nc",
-            filenames.statefile, dmy_state->year,
-            dmy_state->month, dmy_state->day,
-            dmy_state->dayseconds);
-
-    initialize_state_file(filename, &nc_state_file, dmy_state);
-
-    // open the netcdf file if it is closed
-    if (mpi_rank == VIC_MPI_ROOT) {
-        if (nc_state_file.open == false) {
-            status = nc_open(filename, NC_WRITE,
-                              &(nc_state_file.nc_id));
-            check_nc_status(status, "Error opening %s",
-                            filename);
-        }
-    }
 
     // write state variables
 
@@ -69,24 +46,14 @@ vic_store_extension(dmy_struct *dmy_state,
     if (mpi_rank == VIC_MPI_ROOT) {
         d2start[0] = 0;
         d2start[1] = 0;
-        nc_var = &(nc_state_file.nc_vars[N_STATE_VARS + STATE_ROUT_RING]);
+        nc_var = &(nc_state_file->nc_vars[N_STATE_VARS + STATE_ROUT_RING]);
 
         status =
-            nc_put_vara_double(nc_state_file.nc_id, nc_var->nc_varid, d2start,
+            nc_put_vara_double(nc_state_file->nc_id, nc_var->nc_varid, d2start,
                                nc_var->nc_counts,
                                rout.ring);
         check_nc_status(status, "Error writing values.");
     }
-
-    // close the netcdf file if it is still open
-    if (mpi_rank == VIC_MPI_ROOT) {
-        if (nc_state_file.open == true) {
-            status = nc_close(nc_state_file.nc_id);
-            check_nc_status(status, "Error closing %s", filename);
-        }
-    }
-
-    free(nc_state_file.nc_vars);
 }
 
 /******************************************************************************

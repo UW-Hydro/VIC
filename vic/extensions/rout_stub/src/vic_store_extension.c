@@ -31,8 +31,7 @@
  * @brief    Save model state.
  *****************************************************************************/
 void
-vic_store_extension(dmy_struct *dmy_state,
-        char *filename)
+vic_store_extension(nc_file_struct *nc_state_file)
 {
 }
 

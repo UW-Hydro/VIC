@@ -56,6 +56,7 @@ void rout_init(void);       // initialize model parameters from parameter files
 void rout_run(void);        // run routing over the domain
 void rout_finalize(void);   // clean up routine for routing
 void vic_store_extension(nc_file_struct *);
+void vic_restore_extension(nameid_struct *, metadata_struct *);
 void set_nc_state_file_info_extension(nc_file_struct *);
 void set_nc_state_var_info_extension(nc_file_struct *);
 void initialize_state_file_extension(char *, nc_file_struct *);

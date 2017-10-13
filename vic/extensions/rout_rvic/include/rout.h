@@ -83,6 +83,7 @@ void gather_var_double(double *, double *);
 void get_global_param_rout(FILE *gp);
 void cshift(double *, int, int, int, int);
 void vic_store_extension(nc_file_struct *);
+void vic_restore_extension(nameid_struct *, metadata_struct *);
 void set_nc_state_file_info_extension(nc_file_struct *);
 void set_nc_state_var_info_extension(nc_file_struct *);
 void initialize_state_file_extension(char *, nc_file_struct *);

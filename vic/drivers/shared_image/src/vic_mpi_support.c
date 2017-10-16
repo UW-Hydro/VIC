@@ -2126,18 +2126,9 @@ get_scatter_nc_field_double(nameid_struct *nc_nameid,
                             size_t        *count,
                             double        *var)
 {
-    extern MPI_Comm      MPI_COMM_VIC;
     extern domain_struct global_domain;
-    extern domain_struct local_domain;
     extern int           mpi_rank;
-    extern int          *mpi_map_global_array_offsets;
-    extern int          *mpi_map_local_array_sizes;
-    extern size_t       *filter_active_cells;
-    extern size_t       *mpi_map_mapping_array;
-    int                  status;
     double              *dvar = NULL;
-    double              *dvar_filtered = NULL;
-    double              *dvar_mapped = NULL;
 
     // Read variable from netcdf
     if (mpi_rank == VIC_MPI_ROOT) {

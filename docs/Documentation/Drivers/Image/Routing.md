@@ -7,13 +7,18 @@ To run routing in VIC, an extra parameter file that defines unit hydrograph info
 
 ## 2. Specify the routing-specific information in the VIC global file
 The path of the routing-specific parameter file must be set in the [Global Parameter File](GlobalParam.md). For example:
-`ROUT_PARAM                     ./RVIC_params.nc                   # Routing parameter path/file`
+```
+ROUT_PARAM                     ./RVIC_params.nc                   # Routing parameter path/file
+```
 
 To output routed discharge results, an extra output variable has to be set in the [Global Parameter File](GlobalParam.md):
-`OUTVAR                  OUT_DISCHARGE`
+```
+
+OUTVAR                  OUT_DISCHARGE
+```
 
 ## 3. Turn on the routing option when compiling VIC
-There are two ways to turn on the routing option when compiling VIC:
+You must turn on the routing option when you compile VIC. There are two ways to turn on the routing option when compiling VIC:
 
 1) Add the following command line option to the `make` command when compiling VIC:
 `make ROUT=rout_rvic`

@@ -57,6 +57,6 @@ set_nc_state_var_info_extension(nc_file_struct *nc)
  *****************************************************************************/
 void
 initialize_state_file_extension(char           *filename,
-                      nc_file_struct *nc_state_file)
+                                nc_file_struct *nc_state_file)
 {
 }

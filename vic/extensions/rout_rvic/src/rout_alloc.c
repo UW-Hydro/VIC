@@ -34,20 +34,20 @@ rout_alloc(void)
 {
     extern int mpi_rank;
     if (mpi_rank == VIC_MPI_ROOT) {
-        extern domain_struct global_domain;
-        extern rout_struct   rout;
-        int                  ivar;
-        size_t               d1count[1];
-        size_t               d1start[1];
-        extern filenames_struct    filenames;
-        int                        status;   
+        extern domain_struct    global_domain;
+        extern rout_struct      rout;
+        int                     ivar;
+        size_t                  d1count[1];
+        size_t                  d1start[1];
+        extern filenames_struct filenames;
+        int                     status;
 
         // open parameter file
         status = nc_open(filenames.rout_params.nc_filename, NC_NOWRITE,
                          &(filenames.rout_params.nc_id));
         check_nc_status(status, "Error opening %s",
                         filenames.rout_params.nc_filename);
- 
+
         d1count[0] = 0;
         d1start[0] = 1;
 
@@ -130,7 +130,8 @@ rout_alloc(void)
         rout.rout_param.aggrunin =
             malloc(
                 global_domain.ncells_total * sizeof(*rout.rout_param.aggrunin));
-        check_alloc_status(rout.rout_param.aggrunin, "Memory allocation error.");
+        check_alloc_status(rout.rout_param.aggrunin,
+                           "Memory allocation error.");
 
         rout.discharge =
             malloc(global_domain.ncells_total * sizeof(*rout.discharge));

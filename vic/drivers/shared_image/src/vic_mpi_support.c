@@ -2067,7 +2067,8 @@ gather_put_nc_field_schar(int     nc_id,
  * @details values from master node are scattered to the local nodes
  *****************************************************************************/
 void
-scatter_field_double(double *dvar, double *var)
+scatter_field_double(double *dvar,
+                     double *var)
 {
     extern MPI_Comm      MPI_COMM_VIC;
     extern domain_struct global_domain;

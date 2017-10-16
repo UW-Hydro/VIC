@@ -56,16 +56,17 @@ rout_run(void)
 
     // Allocate memory for entire global_domain variables on the master node
     if (mpi_rank == VIC_MPI_ROOT) {
-        var_domain_runoff = malloc(global_domain.ncells_total * sizeof(*var_domain_runoff));
+        var_domain_runoff =
+            malloc(global_domain.ncells_total * sizeof(*var_domain_runoff));
         check_alloc_status(var_domain_runoff, "Memory allocation error.");
 
         var_domain_discharge =
             malloc(global_domain.ncells_total * sizeof(*var_domain_discharge));
         check_alloc_status(var_domain_discharge, "Memory allocation error.");
-        
+
         // Initialize discharge to zero
         for (i = 0; i < global_domain.ncells_total; i++) {
-           var_domain_discharge[i] = 0;
+            var_domain_discharge[i] = 0;
         }
     }
 

@@ -61,6 +61,7 @@ void state_metadata_extension();
 void set_nc_state_file_info_extension(nc_file_struct *);
 void set_nc_state_var_info_extension(nc_file_struct *);
 void initialize_state_file_extension(char *, nc_file_struct *);
+
 /******************************************************************************
  * @brief   Output state variable.
  *****************************************************************************/

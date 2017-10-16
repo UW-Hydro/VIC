@@ -34,11 +34,11 @@ void
 vic_restore_extension(nameid_struct   *init_state_file,
                       metadata_struct *state_metadata)
 {
-    extern int                 mpi_rank;
-    extern rout_struct         rout;
+    extern int         mpi_rank;
+    extern rout_struct rout;
 
-    size_t                     d2start[2];
-    size_t                     d2count[2];
+    size_t             d2start[2];
+    size_t             d2count[2];
 
     // write state variables
 
@@ -55,4 +55,3 @@ vic_restore_extension(nameid_struct   *init_state_file,
             d2start, d2count, rout.ring);
     }
 }
-

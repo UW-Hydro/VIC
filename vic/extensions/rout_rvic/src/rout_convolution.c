@@ -78,7 +78,7 @@ convolution(double *runoff,
         discharge[rout.rout_param.outlet_VIC_index[i_outlet]] =
             rout.ring[i_outlet] *
             global_domain.locations[rout.rout_param.outlet_VIC_index[i_outlet]]
-            .area
-            / (MM_PER_M * global_param.dt);
+            .area /
+            (MM_PER_M * global_param.dt);
     }
 }

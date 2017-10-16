@@ -34,4 +34,3 @@ void
 state_metadata_extension(nc_file_struct *nc_state_file)
 {
 }
-

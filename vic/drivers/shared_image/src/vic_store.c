@@ -1334,7 +1334,8 @@ set_nc_state_file_info(nc_file_struct *nc_state_file)
 
     // allocate memory for nc_vars
     nc_state_file->nc_vars =
-        calloc(N_STATE_VARS + N_STATE_VARS_EXT, sizeof(*(nc_state_file->nc_vars)));
+        calloc(N_STATE_VARS + N_STATE_VARS_EXT,
+               sizeof(*(nc_state_file->nc_vars)));
     check_alloc_status(nc_state_file->nc_vars, "Memory allocation error");
 }
 
@@ -1674,7 +1675,7 @@ initialize_state_file(char           *filename,
                             nc_state_file->node_size,
                             &(nc_state_file->node_dimid));
         check_nc_status(status, "Error defining soil_node in %s", filename);
-        
+
 
         if (options.LAKES) {
             status = nc_def_dim(nc_state_file->nc_id, "lake_node",
@@ -1685,7 +1686,7 @@ initialize_state_file(char           *filename,
 
         // add extension dimensions
         initialize_state_file_extension(filename, nc_state_file);
-        
+
         set_nc_state_var_info(nc_state_file);
     }
 

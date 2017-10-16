@@ -46,4 +46,3 @@ state_metadata_extension()
     strcpy(state_metadata[N_STATE_VARS + STATE_ROUT_RING].description,
            "unit hydrographs in the routing ring");
 }
-

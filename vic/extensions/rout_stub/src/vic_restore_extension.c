@@ -35,4 +35,3 @@ vic_restore_extension(nameid_struct   *init_state_file,
                       metadata_struct *state_metadata)
 {
 }
-

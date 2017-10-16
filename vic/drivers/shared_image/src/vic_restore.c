@@ -884,7 +884,7 @@ vic_restore(void)
     }
 
     // routing ring
-    vic_restore_extension(&(filenames.init_state), &state_metadata);
+    vic_restore_extension(&(filenames.init_state), state_metadata);
 
     free(ivar);
     free(dvar);
@@ -910,7 +910,6 @@ check_init_state_file(void)
     extern option_struct    options;
     extern soil_con_struct *soil_con;
     extern int              mpi_rank;
-    extern rout_struct      rout;
 
     int                     status;
     size_t                  dimlen;

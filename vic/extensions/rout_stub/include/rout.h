@@ -30,7 +30,7 @@
 #define ROUT_EXT "rout_stub"
 
 #include <vic_def.h>
-#include <vic_driver_image.h>
+#include <vic_driver_shared_image.h>
 
 /******************************************************************************
  * @brief   Routing Structs

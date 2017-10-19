@@ -31,32 +31,27 @@
  * @brief    Save model state.
  *****************************************************************************/
 void
-vic_store_extension(nc_file_struct *nc_state_file)
+vic_restore_extension(nameid_struct   *init_state_file,
+                      metadata_struct *state_metadata)
 {
-}
+    extern int         mpi_rank;
+    extern rout_struct rout;
 
-/******************************************************************************
- * @brief   Setup state file netcdf structure
- *****************************************************************************/
-void
-set_nc_state_file_info_extension(nc_file_struct *nc_state_file)
-{
-}
+    size_t             d2start[2];
+    size_t             d2count[2];
 
-/******************************************************************************
- * @brief   Setup state variable dimensions, types, etc.
- *****************************************************************************/
-void
-set_nc_state_var_info_extension(nc_file_struct *nc)
-{
-}
+    // write state variables
 
-/******************************************************************************
- * @brief   Initialize state file by creating dimensions, variables,
-            and adding metadata.
- *****************************************************************************/
-void
-initialize_state_file_extension(char           *filename,
-                                nc_file_struct *nc_state_file)
-{
+    // routing ring
+    if (mpi_rank == VIC_MPI_ROOT) {
+        d2start[0] = 0;
+        d2start[1] = 0;
+        d2count[0] = rout.rout_param.full_time_length;
+        d2count[1] = rout.rout_param.n_outlets;
+
+        get_nc_field_double(
+            init_state_file,
+            state_metadata[N_STATE_VARS + STATE_ROUT_RING].varname,
+            d2start, d2count, rout.ring);
+    }
 }

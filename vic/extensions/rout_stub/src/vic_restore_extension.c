@@ -31,32 +31,7 @@
  * @brief    Save model state.
  *****************************************************************************/
 void
-vic_store_extension(nc_file_struct *nc_state_file)
-{
-}
-
-/******************************************************************************
- * @brief   Setup state file netcdf structure
- *****************************************************************************/
-void
-set_nc_state_file_info_extension(nc_file_struct *nc_state_file)
-{
-}
-
-/******************************************************************************
- * @brief   Setup state variable dimensions, types, etc.
- *****************************************************************************/
-void
-set_nc_state_var_info_extension(nc_file_struct *nc)
-{
-}
-
-/******************************************************************************
- * @brief   Initialize state file by creating dimensions, variables,
-            and adding metadata.
- *****************************************************************************/
-void
-initialize_state_file_extension(char           *filename,
-                                nc_file_struct *nc_state_file)
+vic_restore_extension(nameid_struct   *init_state_file,
+                      metadata_struct *state_metadata)
 {
 }

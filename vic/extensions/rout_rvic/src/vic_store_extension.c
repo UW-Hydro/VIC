@@ -31,37 +31,14 @@
  * @brief    Save model state.
  *****************************************************************************/
 void
-vic_store_extension(dmy_struct *dmy_state,
-        char *filename)
+vic_store_extension(nc_file_struct *nc_state_file)
 {
-    extern filenames_struct    filenames;
-    extern int                 mpi_rank;
-    extern rout_struct         rout;
+    extern int         mpi_rank;
+    extern rout_struct rout;
 
-    int                        status;
-    size_t                     d2start[2];
-    nc_file_struct             nc_state_file;
-    nc_var_struct             *nc_var;
-
-    set_nc_state_file_info(&nc_state_file);
-
-    // create netcdf file for storing model state
-    sprintf(filename, "%s.%04i%02i%02i_%05u.nc",
-            filenames.statefile, dmy_state->year,
-            dmy_state->month, dmy_state->day,
-            dmy_state->dayseconds);
-
-    initialize_state_file(filename, &nc_state_file, dmy_state);
-
-    // open the netcdf file if it is closed
-    if (mpi_rank == VIC_MPI_ROOT) {
-        if (nc_state_file.open == false) {
-            status = nc_open(filename, NC_WRITE,
-                              &(nc_state_file.nc_id));
-            check_nc_status(status, "Error opening %s",
-                            filename);
-        }
-    }
+    int                status;
+    size_t             d2start[2];
+    nc_var_struct     *nc_var;
 
     // write state variables
 
@@ -69,24 +46,14 @@ vic_store_extension(dmy_struct *dmy_state,
     if (mpi_rank == VIC_MPI_ROOT) {
         d2start[0] = 0;
         d2start[1] = 0;
-        nc_var = &(nc_state_file.nc_vars[N_STATE_VARS + STATE_ROUT_RING]);
+        nc_var = &(nc_state_file->nc_vars[N_STATE_VARS + STATE_ROUT_RING]);
 
         status =
-            nc_put_vara_double(nc_state_file.nc_id, nc_var->nc_varid, d2start,
+            nc_put_vara_double(nc_state_file->nc_id, nc_var->nc_varid, d2start,
                                nc_var->nc_counts,
                                rout.ring);
         check_nc_status(status, "Error writing values.");
     }
-
-    // close the netcdf file if it is still open
-    if (mpi_rank == VIC_MPI_ROOT) {
-        if (nc_state_file.open == true) {
-            status = nc_close(nc_state_file.nc_id);
-            check_nc_status(status, "Error closing %s", filename);
-        }
-    }
-
-    free(nc_state_file.nc_vars);
 }
 
 /******************************************************************************
@@ -95,7 +62,7 @@ vic_store_extension(dmy_struct *dmy_state,
 void
 set_nc_state_file_info_extension(nc_file_struct *nc_state_file)
 {
-    extern rout_struct   rout;
+    extern rout_struct rout;
 
     // set ids to MISSING
     nc_state_file->outlet_dimid = MISSING;
@@ -104,7 +71,6 @@ set_nc_state_file_info_extension(nc_file_struct *nc_state_file)
     // set dimension sizes
     nc_state_file->outlet_size = rout.rout_param.n_outlets;
     nc_state_file->routing_timestep_size = rout.rout_param.full_time_length;
-
 }
 
 /******************************************************************************
@@ -115,7 +81,7 @@ set_nc_state_var_info_extension(nc_file_struct *nc)
 {
     size_t i;
     size_t j;
-    
+
     for (i = N_STATE_VARS; i < (N_STATE_VARS + N_STATE_VARS_EXT); i++) {
         nc->nc_vars[i].nc_varid = i;
         for (j = 0; j < MAXDIMS; j++) {
@@ -127,7 +93,6 @@ set_nc_state_var_info_extension(nc_file_struct *nc)
 
         // Set the number of dimensions and dimids for each state variable
         switch (i) {
-            
         case (N_STATE_VARS + STATE_ROUT_RING):
             // 2d vars [routing_timestep, outlet]
             nc->nc_vars[i].nc_dims = 2;
@@ -152,19 +117,18 @@ set_nc_state_var_info_extension(nc_file_struct *nc)
  *****************************************************************************/
 void
 initialize_state_file_extension(char           *filename,
-                      nc_file_struct *nc_state_file)
+                                nc_file_struct *nc_state_file)
 {
     int status;
 
     // Add routing dimensions
     status = nc_def_dim(nc_state_file->nc_id, "outlet",
-            nc_state_file->outlet_size,
-            &(nc_state_file->outlet_dimid));
+                        nc_state_file->outlet_size,
+                        &(nc_state_file->outlet_dimid));
     check_nc_status(status, "Error defining outlet in %s", filename);
 
     status = nc_def_dim(nc_state_file->nc_id, "routing_timestep",
-            nc_state_file->routing_timestep_size,
-            &(nc_state_file->routing_timestep_dimid));
+                        nc_state_file->routing_timestep_size,
+                        &(nc_state_file->routing_timestep_dimid));
     check_nc_status(status, "Error defining routing_timestep in %s", filename);
-
 }

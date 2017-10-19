@@ -31,32 +31,18 @@
  * @brief    Save model state.
  *****************************************************************************/
 void
-vic_store_extension(nc_file_struct *nc_state_file)
+state_metadata_extension()
 {
-}
+    extern metadata_struct state_metadata[N_STATE_VARS + N_STATE_VARS_EXT];
 
-/******************************************************************************
- * @brief   Setup state file netcdf structure
- *****************************************************************************/
-void
-set_nc_state_file_info_extension(nc_file_struct *nc_state_file)
-{
-}
-
-/******************************************************************************
- * @brief   Setup state variable dimensions, types, etc.
- *****************************************************************************/
-void
-set_nc_state_var_info_extension(nc_file_struct *nc)
-{
-}
-
-/******************************************************************************
- * @brief   Initialize state file by creating dimensions, variables,
-            and adding metadata.
- *****************************************************************************/
-void
-initialize_state_file_extension(char           *filename,
-                                nc_file_struct *nc_state_file)
-{
+    // STATE_ROUT_RING
+    strcpy(state_metadata[N_STATE_VARS + STATE_ROUT_RING].varname,
+           "STATE_ROUT_RING");
+    strcpy(state_metadata[N_STATE_VARS + STATE_ROUT_RING].long_name,
+           "routing_ring");
+    strcpy(state_metadata[N_STATE_VARS + STATE_ROUT_RING].standard_name,
+           "routing_ring");
+    strcpy(state_metadata[N_STATE_VARS + STATE_ROUT_RING].units, "-");
+    strcpy(state_metadata[N_STATE_VARS + STATE_ROUT_RING].description,
+           "unit hydrographs in the routing ring");
 }

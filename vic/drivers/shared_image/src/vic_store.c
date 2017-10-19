@@ -115,9 +115,6 @@ vic_store(dmy_struct *dmy_state,
         dvar[i] = nc_state_file.d_fillvalue;
     }
 
-    // store extension variables
-    vic_store_extension(dmy_state, filename);
-
     // total soil moisture
     nc_var = &(nc_state_file.nc_vars[STATE_SOIL_MOISTURE]);
     for (m = 0; m < options.NVEGTYPES; m++) {
@@ -1273,6 +1270,10 @@ vic_store(dmy_struct *dmy_state,
         }
     }
 
+    // store extension variables
+    vic_store_extension(&nc_state_file);
+
+
     // close the netcdf file if it is still open
     if (mpi_rank == VIC_MPI_ROOT) {
         if (nc_state_file.open == true) {
@@ -1333,7 +1334,8 @@ set_nc_state_file_info(nc_file_struct *nc_state_file)
 
     // allocate memory for nc_vars
     nc_state_file->nc_vars =
-        calloc(N_STATE_VARS + N_STATE_VARS_EXT, sizeof(*(nc_state_file->nc_vars)));
+        calloc(N_STATE_VARS + N_STATE_VARS_EXT,
+               sizeof(*(nc_state_file->nc_vars)));
     check_alloc_status(nc_state_file->nc_vars, "Memory allocation error");
 }
 
@@ -1673,7 +1675,7 @@ initialize_state_file(char           *filename,
                             nc_state_file->node_size,
                             &(nc_state_file->node_dimid));
         check_nc_status(status, "Error defining soil_node in %s", filename);
-        
+
 
         if (options.LAKES) {
             status = nc_def_dim(nc_state_file->nc_id, "lake_node",
@@ -1684,7 +1686,7 @@ initialize_state_file(char           *filename,
 
         // add extension dimensions
         initialize_state_file_extension(filename, nc_state_file);
-        
+
         set_nc_state_var_info(nc_state_file);
     }
 

@@ -32,12 +32,12 @@
 void
 rout_init(void)
 {
-    extern int           mpi_rank;
-    extern rout_struct   rout;
-    extern domain_struct global_domain;
-    extern filenames_struct    filenames;
-    int                        status;
-        
+    extern int              mpi_rank;
+    extern rout_struct      rout;
+    extern domain_struct    global_domain;
+    extern filenames_struct filenames;
+    int                     status;
+
     if (mpi_rank == VIC_MPI_ROOT) {
         int    *ivar = NULL;
         double *dvar = NULL;

@@ -40,9 +40,8 @@ vic_restore(void)
     extern option_struct       options;
     extern veg_con_map_struct *veg_con_map;
     extern filenames_struct    filenames;
-    extern metadata_struct     state_metadata[N_STATE_VARS];
-    extern int                 mpi_rank;
- 
+    extern metadata_struct     state_metadata[N_STATE_VARS + N_STATE_VARS_EXT];
+
     int                        v;
     size_t                     i;
     size_t                     j;
@@ -884,6 +883,9 @@ vic_restore(void)
         }
     }
 
+    // routing ring
+    vic_restore_extension(&(filenames.init_state), state_metadata);
+
     free(ivar);
     free(dvar);
 
@@ -908,7 +910,7 @@ check_init_state_file(void)
     extern option_struct    options;
     extern soil_con_struct *soil_con;
     extern int              mpi_rank;
- 
+
     int                     status;
     size_t                  dimlen;
     size_t                  i;

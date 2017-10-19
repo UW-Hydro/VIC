@@ -109,7 +109,7 @@ To check which release of VIC you are running:
 
 8. Added routing extensions ROUT_STUB and ROUT_RVIC for the VIC image driver ([GH#231](https://github.com/UW-Hydro/VIC/pull/231))
 
-    The VIC image driver can be optionally compiled with ROUT_RVIC to enable routing in image mode (ROUT_STUB is the default extension which means no routing). With ROUT_RVIC enabled, the output variable ``OUT_DISCHARGE`` is available.
+    The VIC image driver can be optionally compiled with ROUT_RVIC to enable routing in image mode (ROUT_STUB is the default extension which means no routing). With ROUT_RVIC enabled, the output variable ``OUT_DISCHARGE`` is available, and there will also be an extra state variable ``STATE_ROUT_RING`` stored in the state file.
 
 #### Bug Fixes:
 

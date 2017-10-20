@@ -38,6 +38,8 @@ PARAMETERS      $test_data_dir/image/Stehekin/parameters/Stehekin_test_params_20
 NODES           3
 SNOW_BAND       TRUE
 
+ROUT_PARAM          $test_data_dir/image/Stehekin/parameters/stehekin_parameters_01.rvic.prm.Stehekin.20150727.nc
+
 RESULT_DIR  $result_dir/
 
 OUTFILE     allvars
@@ -206,3 +208,4 @@ OUTVAR      OUT_SNOW_SURFT_BAND
 OUTVAR      OUT_SWE_BAND
 OUTVAR      OUT_TIME_VICRUN_WALL
 OUTVAR      OUT_TIME_VICRUN_CPU
+OUTVAR      OUT_DISCHARGE

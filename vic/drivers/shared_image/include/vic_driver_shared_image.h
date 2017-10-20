@@ -27,6 +27,7 @@
 #ifndef VIC_DRIVER_SHARED_IMAGE_H
 #define VIC_DRIVER_SHARED_IMAGE_H
 
+#include <image_extension_name.h>
 #include <vic_driver_shared_all.h>
 #include <vic_image_log.h>
 #include <vic_mpi.h>
@@ -121,6 +122,8 @@ typedef struct {
     int ni_dimid;
     int nj_dimid;
     int node_dimid;
+    int outlet_dimid;
+    int routing_timestep_dimid;
     int root_zone_dimid;
     int time_dimid;
     int time_bounds_dimid;
@@ -135,6 +138,8 @@ typedef struct {
     size_t ni_size;
     size_t nj_size;
     size_t node_size;
+    size_t outlet_size;
+    size_t routing_timestep_size;
     size_t root_zone_size;
     size_t time_size;
     size_t veg_size;
@@ -177,6 +182,7 @@ typedef struct {
     nameid_struct domain;       /**< domain file name and nc_id*/
     char constants[MAXSTRING];  /**< model constants file name */
     nameid_struct params;       /**< model parameters file name and nc_id */
+    nameid_struct rout_params;  /**< routing parameters file name and nc_id */
     nameid_struct init_state;   /**< initial model state file name and nc_id */
     char result_dir[MAXSTRING]; /**< result directory */
     char statefile[MAXSTRING];  /**< name of model state file */

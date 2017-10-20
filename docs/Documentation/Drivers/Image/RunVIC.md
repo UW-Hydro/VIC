@@ -36,6 +36,8 @@ The flags and libraries required to compile VIC with netCDF are automatically de
 
 In some versions of the MPI library (e.g. OPEN-MPI with Intel), you may also need to set the environment variable `MX_RCACHE=2` prior to compiling.
 
+To enable the river routing extension, you must set the ROUT option. This includes setting extension in the Makefile and adding routing-specific input parameter file. For more information on how to enable the routing extension, see the [routing extension documentation](Routing.md).
+
 - Change directory, `cd`, to the "Image Driver" source code directory and type `make`
 
         cd vic/drivers/image

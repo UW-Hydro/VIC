@@ -1,8 +1,7 @@
 /******************************************************************************
  * @section DESCRIPTION
  *
- * This subroutine initalizes all filefilenames before they are called by
- * the model.
+ * clean up functions for routing extension
  *
  * @section LICENSE
  *
@@ -25,41 +24,28 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  *****************************************************************************/
 
-#include <vic_driver_shared_image.h>
+#include <rout.h>
 
 /******************************************************************************
- * @brief    Initialize all filenames before they are called by the
- *           model.
+ * @brief    Finalize RVIC by freeing memory.
  *****************************************************************************/
 void
-initialize_filenames()
+rout_finalize(void)
 {
-    extern filenames_struct filenames;
+    extern rout_struct rout;
 
-    size_t                  i;
-
-    strcpy(filenames.init_state.nc_filename, "MISSING");
-    strcpy(filenames.statefile, "MISSING");
-    strcpy(filenames.constants, "MISSING");
-    strcpy(filenames.params.nc_filename, "MISSING");
-    strcpy(filenames.rout_params.nc_filename, "MISSING");
-    strcpy(filenames.domain.nc_filename, "MISSING");
-    strcpy(filenames.result_dir, "MISSING");
-    strcpy(filenames.log_path, "MISSING");
-    for (i = 0; i < 2; i++) {
-        strcpy(filenames.f_path_pfx[i], "MISSING");
-    }
-}
-
-/******************************************************************************
- * @brief    Initialize all file pointers
- *****************************************************************************/
-void
-initialize_fileps()
-{
-    extern filep_struct filep;
-
-    filep.globalparam = NULL;
-    filep.constants = NULL;
-    filep.logfile = NULL;
+    free(rout.rout_param.source2outlet_ind);
+    free(rout.rout_param.source_time_offset);
+    free(rout.rout_param.source_x_ind);
+    free(rout.rout_param.source_y_ind);
+    free(rout.rout_param.source_lat);
+    free(rout.rout_param.source_lon);
+    free(rout.rout_param.source_VIC_index);
+    free(rout.rout_param.outlet_lat);
+    free(rout.rout_param.outlet_lon);
+    free(rout.rout_param.outlet_VIC_index);
+    free(rout.rout_param.unit_hydrograph);
+    free(rout.rout_param.aggrunin);
+    free(rout.discharge);
+    free(rout.ring);
 }

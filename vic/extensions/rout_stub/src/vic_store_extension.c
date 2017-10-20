@@ -1,8 +1,7 @@
 /******************************************************************************
  * @section DESCRIPTION
  *
- * This subroutine initalizes all filefilenames before they are called by
- * the model.
+ * Save model state.
  *
  * @section LICENSE
  *
@@ -26,40 +25,38 @@
  *****************************************************************************/
 
 #include <vic_driver_shared_image.h>
+#include <rout.h>
 
 /******************************************************************************
- * @brief    Initialize all filenames before they are called by the
- *           model.
+ * @brief    Save model state.
  *****************************************************************************/
 void
-initialize_filenames()
+vic_store_extension(nc_file_struct *nc_state_file)
 {
-    extern filenames_struct filenames;
-
-    size_t                  i;
-
-    strcpy(filenames.init_state.nc_filename, "MISSING");
-    strcpy(filenames.statefile, "MISSING");
-    strcpy(filenames.constants, "MISSING");
-    strcpy(filenames.params.nc_filename, "MISSING");
-    strcpy(filenames.rout_params.nc_filename, "MISSING");
-    strcpy(filenames.domain.nc_filename, "MISSING");
-    strcpy(filenames.result_dir, "MISSING");
-    strcpy(filenames.log_path, "MISSING");
-    for (i = 0; i < 2; i++) {
-        strcpy(filenames.f_path_pfx[i], "MISSING");
-    }
 }
 
 /******************************************************************************
- * @brief    Initialize all file pointers
+ * @brief   Setup state file netcdf structure
  *****************************************************************************/
 void
-initialize_fileps()
+set_nc_state_file_info_extension(nc_file_struct *nc_state_file)
 {
-    extern filep_struct filep;
+}
 
-    filep.globalparam = NULL;
-    filep.constants = NULL;
-    filep.logfile = NULL;
+/******************************************************************************
+ * @brief   Setup state variable dimensions, types, etc.
+ *****************************************************************************/
+void
+set_nc_state_var_info_extension(nc_file_struct *nc)
+{
+}
+
+/******************************************************************************
+ * @brief   Initialize state file by creating dimensions, variables,
+            and adding metadata.
+ *****************************************************************************/
+void
+initialize_state_file_extension(char           *filename,
+                                nc_file_struct *nc_state_file)
+{
 }

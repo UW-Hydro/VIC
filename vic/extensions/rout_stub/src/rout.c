@@ -1,8 +1,7 @@
 /******************************************************************************
  * @section DESCRIPTION
  *
- * This subroutine initalizes all filefilenames before they are called by
- * the model.
+ * dummy functions for the rout_stub extension
  *
  * @section LICENSE
  *
@@ -25,41 +24,43 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  *****************************************************************************/
 
-#include <vic_driver_shared_image.h>
+#include <rout.h>
 
 /******************************************************************************
- * @brief    Initialize all filenames before they are called by the
- *           model.
+ * @brief    Allocate memory.
  *****************************************************************************/
 void
-initialize_filenames()
+rout_alloc(void)
 {
-    extern filenames_struct filenames;
+    extern rout_struct rout;
 
-    size_t                  i;
-
-    strcpy(filenames.init_state.nc_filename, "MISSING");
-    strcpy(filenames.statefile, "MISSING");
-    strcpy(filenames.constants, "MISSING");
-    strcpy(filenames.params.nc_filename, "MISSING");
-    strcpy(filenames.rout_params.nc_filename, "MISSING");
-    strcpy(filenames.domain.nc_filename, "MISSING");
-    strcpy(filenames.result_dir, "MISSING");
-    strcpy(filenames.log_path, "MISSING");
-    for (i = 0; i < 2; i++) {
-        strcpy(filenames.f_path_pfx[i], "MISSING");
-    }
+    // We need to write at least something to the VIC state file (if enabled).
+    // Therefore we make the dimension size 1*1.
+    rout.rout_param.n_outlets = 1;
+    rout.rout_param.full_time_length = 1;
+    rout.ring[1] = 0;
 }
 
 /******************************************************************************
- * @brief    Initialize all file pointers
+ * @brief    Initialize model parameters from parameter files.
  *****************************************************************************/
 void
-initialize_fileps()
+rout_init(void)
 {
-    extern filep_struct filep;
+}
 
-    filep.globalparam = NULL;
-    filep.constants = NULL;
-    filep.logfile = NULL;
+/******************************************************************************
+ * @brief    Run routing over the domain.
+ *****************************************************************************/
+void
+rout_run(void)
+{
+}
+
+/******************************************************************************
+ * @brief    Clean up routine for routing.
+ *****************************************************************************/
+void
+rout_finalize(void)
+{
 }

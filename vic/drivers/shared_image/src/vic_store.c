@@ -1271,7 +1271,7 @@ vic_store(dmy_struct *dmy_state,
     }
 
     // store extension variables
-    vic_store_extension(&nc_state_file);
+    vic_store_rout_extension(&nc_state_file);
 
 
     // close the netcdf file if it is still open
@@ -1330,7 +1330,7 @@ set_nc_state_file_info(nc_file_struct *nc_state_file)
     nc_state_file->veg_size = options.NVEGTYPES;
 
     // set ids and dimension sizes of the extension variables
-    set_nc_state_file_info_extension(nc_state_file);
+    set_nc_state_file_info_rout_extension(nc_state_file);
 
     // allocate memory for nc_vars
     nc_state_file->nc_vars =
@@ -1543,7 +1543,7 @@ set_nc_state_var_info(nc_file_struct *nc)
             log_err("Too many dimensions specified in variable %zu", i);
         }
     }
-    set_nc_state_var_info_extension(nc);
+    set_nc_state_var_info_rout_extension(nc);
 }
 
 /******************************************************************************
@@ -1685,7 +1685,7 @@ initialize_state_file(char           *filename,
         }
 
         // add extension dimensions
-        initialize_state_file_extension(filename, nc_state_file);
+        initialize_state_file_rout_extension(filename, nc_state_file);
 
         set_nc_state_var_info(nc_state_file);
     }

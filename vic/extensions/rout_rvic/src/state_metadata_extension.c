@@ -31,7 +31,7 @@
  * @brief    Save model state.
  *****************************************************************************/
 void
-state_metadata_extension()
+state_metadata_rout_extension()
 {
     extern metadata_struct state_metadata[N_STATE_VARS + N_STATE_VARS_EXT];
 

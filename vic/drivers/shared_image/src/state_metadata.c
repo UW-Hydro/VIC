@@ -710,5 +710,5 @@ set_state_meta_data_info()
     }
 
     // STATE_ROUT_RING
-    state_metadata_extension();
+    state_metadata_rout_extension();
 }

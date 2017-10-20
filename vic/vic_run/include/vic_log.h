@@ -126,17 +126,17 @@ void setup_logging(int id, char log_path[], FILE **logfile);
 // here means that it just doesn't print a message, it still does the
 // check.  MKAY?
 #define check_debug(A, M, ...) if (!(A)) {debug(M, ## __VA_ARGS__); errno = 0; \
-                                          exit(EXIT_FAILURE);}
+                                          exit(EXIT_FAILURE); }
 
 #define check(A, M, ...) if (!(A)) {log_err(M, ## __VA_ARGS__); errno = 0; exit( \
-                                        EXIT_FAILURE);}
+                                        EXIT_FAILURE); }
 #define check_alloc_status(A, M, \
                            ...) if (A == NULL) {log_err(M, ## __VA_ARGS__); \
                                                 errno = 0; exit( \
-                                                    EXIT_FAILURE);}
+                                                    EXIT_FAILURE); }
 
 #define sentinel(M, ...)  {log_err(M, ## __VA_ARGS__); errno = 0; exit( \
-                               EXIT_FAILURE);}
+                               EXIT_FAILURE); }
 
 #define check_mem(A) check((A), "Out of memory.")
 
@@ -144,7 +144,7 @@ void setup_logging(int id, char log_path[], FILE **logfile);
                               E), E, __FUNCTION__, __LINE__)
 
 #define error_response(F, C, M, ...)  {Response_send_status(F, &HTTP_ ## C); \
-                                       sentinel(M, ## __VA_ARGS__);}
+                                       sentinel(M, ## __VA_ARGS__); }
 
 #define error_unless(T, F, C, M, ...) if (!(T)) \
         error_response(F, C, M, ## __VA_ARGS__)

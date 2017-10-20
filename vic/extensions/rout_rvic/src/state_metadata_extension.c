@@ -1,8 +1,7 @@
 /******************************************************************************
  * @section DESCRIPTION
  *
- * This subroutine initalizes all filefilenames before they are called by
- * the model.
+ * Save model state.
  *
  * @section LICENSE
  *
@@ -26,40 +25,24 @@
  *****************************************************************************/
 
 #include <vic_driver_shared_image.h>
+#include <rout.h>
 
 /******************************************************************************
- * @brief    Initialize all filenames before they are called by the
- *           model.
+ * @brief    Save model state.
  *****************************************************************************/
 void
-initialize_filenames()
+state_metadata_extension()
 {
-    extern filenames_struct filenames;
+    extern metadata_struct state_metadata[N_STATE_VARS + N_STATE_VARS_EXT];
 
-    size_t                  i;
-
-    strcpy(filenames.init_state.nc_filename, "MISSING");
-    strcpy(filenames.statefile, "MISSING");
-    strcpy(filenames.constants, "MISSING");
-    strcpy(filenames.params.nc_filename, "MISSING");
-    strcpy(filenames.rout_params.nc_filename, "MISSING");
-    strcpy(filenames.domain.nc_filename, "MISSING");
-    strcpy(filenames.result_dir, "MISSING");
-    strcpy(filenames.log_path, "MISSING");
-    for (i = 0; i < 2; i++) {
-        strcpy(filenames.f_path_pfx[i], "MISSING");
-    }
-}
-
-/******************************************************************************
- * @brief    Initialize all file pointers
- *****************************************************************************/
-void
-initialize_fileps()
-{
-    extern filep_struct filep;
-
-    filep.globalparam = NULL;
-    filep.constants = NULL;
-    filep.logfile = NULL;
+    // STATE_ROUT_RING
+    strcpy(state_metadata[N_STATE_VARS + STATE_ROUT_RING].varname,
+           "STATE_ROUT_RING");
+    strcpy(state_metadata[N_STATE_VARS + STATE_ROUT_RING].long_name,
+           "routing_ring");
+    strcpy(state_metadata[N_STATE_VARS + STATE_ROUT_RING].standard_name,
+           "routing_ring");
+    strcpy(state_metadata[N_STATE_VARS + STATE_ROUT_RING].units, "-");
+    strcpy(state_metadata[N_STATE_VARS + STATE_ROUT_RING].description,
+           "unit hydrographs in the routing ring");
 }

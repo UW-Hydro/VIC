@@ -46,7 +46,7 @@ EXTPATH = ../../extensions
 # |----------  |---------------------------------   |
 # | rout_stub  | Stub routing model (no routing)    |
 # | rout_rvic  | Use RVIC routing scheme            |
-ROUT=rout_stub
+ROUT := rout_stub
 
 include ${EXTPATH}/${ROUT}/rout.mk
 

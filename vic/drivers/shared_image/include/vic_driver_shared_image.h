@@ -27,7 +27,7 @@
 #ifndef VIC_DRIVER_SHARED_IMAGE_H
 #define VIC_DRIVER_SHARED_IMAGE_H
 
-#include <image_extension_name.h>
+#include <rout_extension_name.h>
 #include <vic_driver_shared_all.h>
 #include <vic_image_log.h>
 #include <vic_mpi.h>

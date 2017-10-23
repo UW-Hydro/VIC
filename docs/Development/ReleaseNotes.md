@@ -47,35 +47,35 @@ To check which release of VIC you are running:
 
 	    Changes names of CESM driver functions `trim` and `advance_time` to `trimstr` and `advance_vic_time`, respectively, to avoid conflicts with WRF functions with the same names when compiling RFR case.
 
-    [GH#702] (https://github.com/UW-Hydro/VIC/pull/702)
+    [GH#702](https://github.com/UW-Hydro/VIC/pull/702)
 
         Fixes Julian day for the first timestep in the dmy struct for the CESM driver.
 
-    [GH#710] (https://github.com/UW-Hydro/VIC/pull/710)
+    [GH#710](https://github.com/UW-Hydro/VIC/pull/710)
 
 	    Refactor the cesm_put_data.c routine in the CESM driver to use values from out_data directly, rather than computing them separately in cesm_put_data.c.
 
-    [GH#716] (https://github.com/UW-Hydro/VIC/pull/716)
+    [GH#716](https://github.com/UW-Hydro/VIC/pull/716)
 
         Fixes initialization of coupler fields and calculates temperature and upwelling longwave to pass to WRF during initialization.
 
-    [GH#718] (https://github.com/UW-Hydro/VIC/pull/718)
+    [GH#718](https://github.com/UW-Hydro/VIC/pull/718)
 
         Updates the cesm_put_data.c routine in the CESM driver to pass gridcell-averaged albedo to the coupler.
 
-    [GH#726] (https://github.com/UW-Hydro/VIC/pull/726)
+    [GH#726](https://github.com/UW-Hydro/VIC/pull/726)
 
         Updates the cesm_put_data.c routine in the CESM driver to include the correct units for evap passed to the coupler.
 
-    [GH#732] (https://github.com/UW-Hydro/VIC/pull/732)
+    [GH#732](https://github.com/UW-Hydro/VIC/pull/732)
 
         Updates the cesm_put_data.c routine in the CESM driver to include the correct units for sensible heat flux and updates the rofliq calculation to be correct (previously only OUT_BASEFLOW was being divided by global_param.dt).
 
-    [GH#734] (https://github.com/UW-Hydro/VIC/pull/734)
+    [GH#734](https://github.com/UW-Hydro/VIC/pull/734)
 
         Updates the cesm_put_data.c routine in the CESM driver to include the correct signs for turbulent heat fluxes and evaporation. Previously we had switched the signs to agree with the image driver and they should instead be in accordance with the sign conventions for coupled models, which differ from those of land surface models. Also, eliminate populating the `l2x_Sl_ram1` field with aero_resist to agree with the VIC 4 implementation in RASM.
 
-    [GH#739] (https://github.com/UW-Hydro/VIC/pull/739)
+    [GH#739](https://github.com/UW-Hydro/VIC/pull/739)
 
         Updates the cesm_put_data.c routine in the CESM driver to include the correct signs for the wind stresses and fixes a bug in calculating friction velocity (previously it was missing a square root).
 

@@ -227,7 +227,4 @@ initialize_parameters()
     param.ROOT_BRENT_MAXITER = 1000;
     param.ROOT_BRENT_TSTEP = 10;
     param.ROOT_BRENT_T = 1.0e-7;
-
-    // Frozen Soil Parameters
-    param.FROZEN_MAXITER = 1000;
 }

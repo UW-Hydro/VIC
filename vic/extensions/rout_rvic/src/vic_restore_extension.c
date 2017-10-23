@@ -31,7 +31,7 @@
  * @brief    Save model state.
  *****************************************************************************/
 void
-vic_restore_extension(nameid_struct   *init_state_file,
+vic_restore_rout_extension(nameid_struct   *init_state_file,
                       metadata_struct *state_metadata)
 {
     extern int         mpi_rank;

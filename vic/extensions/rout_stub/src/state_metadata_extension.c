@@ -31,6 +31,6 @@
  * @brief    Save model state.
  *****************************************************************************/
 void
-state_metadata_extension(nc_file_struct *nc_state_file)
+state_metadata_rout_extension(nc_file_struct *nc_state_file)
 {
 }

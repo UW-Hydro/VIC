@@ -47,7 +47,7 @@ set_nc_state_file_info_rout_extension(nc_file_struct *nc_state_file)
  * @brief   Setup state variable dimensions, types, etc.
  *****************************************************************************/
 void
-set_nc_state_var_info_extension(nc_file_struct *nc)
+set_nc_state_var_info_rout_extension(nc_file_struct *nc)
 {
 }
 
@@ -57,6 +57,6 @@ set_nc_state_var_info_extension(nc_file_struct *nc)
  *****************************************************************************/
 void
 initialize_state_file_rout_extension(char           *filename,
-                                nc_file_struct *nc_state_file)
+                                     nc_file_struct *nc_state_file)
 {
 }

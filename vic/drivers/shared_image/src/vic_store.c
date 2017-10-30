@@ -1543,7 +1543,7 @@ set_nc_state_var_info(nc_file_struct *nc)
             log_err("Too many dimensions specified in variable %zu", i);
         }
     }
-    set_nc_state_var_info_extension(nc);
+    set_nc_state_var_info_rout_extension(nc);
 }
 
 /******************************************************************************

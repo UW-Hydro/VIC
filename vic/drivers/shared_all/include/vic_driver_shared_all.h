@@ -45,6 +45,9 @@
 // Default snow band setting
 #define SNOW_BAND_TRUE_BUT_UNSET 99999
 
+// Max counter for root distribution iteration
+#define MAX_ROOT_ITER 9999
+
 /******************************************************************************
  * @brief   File formats
  *****************************************************************************/
@@ -146,6 +149,7 @@ enum
     OUT_DELSOILMOIST,     /**< change in soil water content  [mm] */
     OUT_DELSURFSTOR,      /**< change in surface liquid water storage  [mm] */
     OUT_DELSWE,           /**< change in snow water equivalent  [mm] */
+    OUT_DISCHARGE,        /**< river discharge [m3 s-1]) */
     OUT_EVAP,             /**< total net evaporation [mm] */
     OUT_EVAP_BARE,        /**< net evaporation from bare soil [mm] */
     OUT_EVAP_CANOP,       /**< net evaporation from canopy interception [mm] */
@@ -629,7 +633,7 @@ void free_out_data(size_t ngridcells, double ***out_data);
 void free_streams(stream_struct **streams);
 void free_vegcon(veg_con_struct **veg_con);
 void generate_default_state(all_vars_struct *, soil_con_struct *,
-                            veg_con_struct *);
+                            veg_con_struct *, dmy_struct *);
 void generate_default_lake_state(all_vars_struct *, soil_con_struct *,
                                  lake_con_struct);
 void get_default_nstreams_nvars(size_t *nstreams, size_t nvars[]);

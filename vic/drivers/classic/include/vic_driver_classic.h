@@ -111,7 +111,7 @@ void vic_force(force_data_struct *, dmy_struct *, FILE **, veg_con_struct *,
                veg_hist_struct **, soil_con_struct *);
 void vic_populate_model_state(all_vars_struct *, filep_struct, size_t,
                               soil_con_struct *, veg_con_struct *,
-                              lake_con_struct);
+                              lake_con_struct, dmy_struct *);
 void write_data(stream_struct *streams);
 void write_header(stream_struct **streams, dmy_struct *dmy);
 void write_model_state(all_vars_struct *, int, int, filep_struct *,

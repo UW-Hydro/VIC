@@ -25,6 +25,7 @@
  *****************************************************************************/
 
 #include <vic_driver_shared_image.h>
+#include <rout.h>
 
 /******************************************************************************
  * @brief    Read initial model state.
@@ -39,7 +40,7 @@ vic_restore(void)
     extern option_struct       options;
     extern veg_con_map_struct *veg_con_map;
     extern filenames_struct    filenames;
-    extern metadata_struct     state_metadata[N_STATE_VARS];
+    extern metadata_struct     state_metadata[N_STATE_VARS + N_STATE_VARS_EXT];
 
     int                        v;
     size_t                     i;
@@ -881,6 +882,9 @@ vic_restore(void)
             all_vars[i].lake_var.sdepth = dvar[i];
         }
     }
+
+    // routing ring
+    vic_restore_rout_extension(&(filenames.init_state), state_metadata);
 
     free(ivar);
     free(dvar);

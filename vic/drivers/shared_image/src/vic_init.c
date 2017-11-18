@@ -576,7 +576,6 @@ vic_init(void)
         }
     }
 
-
     // organic soils
     if (options.ORGANIC_FRACT) {
         // organic
@@ -987,8 +986,7 @@ vic_init(void)
                 }
                 sum += soil_con[i].AreaFract[j];
             }
-            // TBD: Need better check for equal to 1.
-            if (sum != 1.) {
+            if (!assert_close_double(sum, 1.0, 0., AREA_SUM_ERROR_THRESH)) {
                 sprint_location(locstr, &(local_domain.locations[i]));
                 log_warn("Sum of the snow band area fractions does not equal "
                          "1 (%f), dividing each fraction by the sum\n%s",
@@ -1003,7 +1001,8 @@ vic_init(void)
             for (j = 0; j < options.SNOW_BAND; j++) {
                 mean += soil_con[i].BandElev[j] * soil_con[i].AreaFract[j];
             }
-            if (fabs(soil_con[i].elevation - soil_con[i].BandElev[j]) > 1.0) {
+            if (!assert_close_double(soil_con[i].elevation, mean, 0.,
+                                     AREA_SUM_ERROR_THRESH)) {
                 sprint_location(locstr, &(local_domain.locations[i]));
                 log_warn("average band elevation %f not equal to grid_cell "
                          "average elevation %f; setting grid cell elevation "
@@ -1041,8 +1040,7 @@ vic_init(void)
                 }
                 sum += soil_con[i].Pfactor[j];
             }
-            // TBD: Need better check for equal to 1.
-            if (sum != 1.) {
+            if (!assert_close_double(sum, 1.0, 0., AREA_SUM_ERROR_THRESH)) {
                 sprint_location(locstr, &(local_domain.locations[i]));
                 log_warn("Sum of the snow band precipitation fractions does "
                          "not equal 1 (%f), dividing each fraction by the "
@@ -1191,8 +1189,7 @@ vic_init(void)
                 for (k = 0; k < options.ROOT_ZONES; k++) {
                     sum += veg_con[i][vidx].zone_fract[k];
                 }
-                // TBD: Need better test for not equal to 1.
-                if (sum != 1.) {
+                if (!assert_close_double(sum, 1.0, 0., AREA_SUM_ERROR_THRESH)) {
                     sprint_location(locstr, &(local_domain.locations[i]));
                     log_warn("Root zone fractions sum to more than 1 (%f), "
                              "normalizing fractions.  If the sum is large, "
@@ -1230,11 +1227,16 @@ vic_init(void)
 
         // TODO: handle bare soil adjustment for compute treeline option
 
-        // If the sum of the tile fractions is not within a tolerance, throw an error
-        if (!assert_close_double(Cv_sum[i], 1., 0., 0.001)) {
+        // If the sum of the tile fractions is not within a tolerance,
+        // throw an error
+        if (!assert_close_double(Cv_sum[i], 1., 0., AREA_SUM_ERROR_THRESH)) {
             sprint_location(locstr, &(local_domain.locations[i]));
-            log_err("Cv !=  1.0 (%f) at grid cell %zd. Exiting ...\n%s",
-                    Cv_sum[i], i, locstr);
+            log_warn("Cv !=  1.0 (%f) at grid cell %zd. Exiting ...\n%s",
+                     Cv_sum[i], i, locstr);
+            for (j = 0; j < options.NVEGTYPES; j++) {
+                vidx = veg_con_map[i].vidx[j];
+                veg_con[i][vidx].Cv /= Cv_sum[i];
+            }
         }
     }
 
@@ -1292,7 +1294,6 @@ vic_init(void)
             }
         }
     }
-
 
     // read_lake parameters
     if (options.LAKES) {

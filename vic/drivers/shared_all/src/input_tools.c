@@ -150,6 +150,12 @@ str_to_out_type(char typestr[])
         else if (strcasecmp("OUT_TYPE_SINT", typestr) == 0) {
             return OUT_TYPE_SINT;
         }
+        else if (strcasecmp("OUT_TYPE_INT", typestr) == 0) {
+            return OUT_TYPE_INT;
+        }
+        else if (strcasecmp("OUT_TYPE_CHAR", typestr) == 0) {
+            return OUT_TYPE_CHAR;
+        }
         else if (strcasecmp("OUT_TYPE_FLOAT", typestr) == 0) {
             return OUT_TYPE_FLOAT;
         }

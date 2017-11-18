@@ -110,7 +110,7 @@ sprint_location(char            *str,
             "\tlongitude      : %.4f\n"
             "\tarea           : %.4f\n"
             "\tfrac           : %.4f\n"
-            "\nveg            : %zd\n"
+            "\tnveg           : %zd\n"
             "\tglobal_idx     : %zd\n"
             "\tio_idx         : %zd\n"
             "\tlocal_idx      : %zd\n",

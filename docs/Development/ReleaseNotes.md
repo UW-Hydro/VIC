@@ -47,17 +47,45 @@ To check which release of VIC you are running:
 
 	    Changes names of CESM driver functions `trim` and `advance_time` to `trimstr` and `advance_vic_time`, respectively, to avoid conflicts with WRF functions with the same names when compiling RFR case.
 
-    [GH#702] (https://github.com/UW-Hydro/VIC/pull/702)
+    [GH#702](https://github.com/UW-Hydro/VIC/pull/702)
 
         Fixes Julian day for the first timestep in the dmy struct for the CESM driver.
 
-	[GH#710] (https://github.com/UW-Hydro/VIC/pull/710)
+    [GH#710](https://github.com/UW-Hydro/VIC/pull/710)
 
-	    Refactor the cesm_put_data.c routine in the CESM driver to use values from out_data directly, rather than computing them separately in cesm_put_data.c. 
+	    Refactor the cesm_put_data.c routine in the CESM driver to use values from out_data directly, rather than computing them separately in cesm_put_data.c.
 
-    [GH#716] (https://github.com/UW-Hydro/VIC/pull/716)
+    [GH#716](https://github.com/UW-Hydro/VIC/pull/716)
 
-        Fixes initialization of coupler fields and calculates temperature and upwelling longwave to pass to WRF during initialization. 
+        Fixes initialization of coupler fields and calculates temperature and upwelling longwave to pass to WRF during initialization.
+
+    [GH#718](https://github.com/UW-Hydro/VIC/pull/718)
+
+        Updates the cesm_put_data.c routine in the CESM driver to pass gridcell-averaged albedo to the coupler.
+
+    [GH#726](https://github.com/UW-Hydro/VIC/pull/726)
+
+        Updates the cesm_put_data.c routine in the CESM driver to include the correct units for evap passed to the coupler.
+
+    [GH#732](https://github.com/UW-Hydro/VIC/pull/732)
+
+        Updates the cesm_put_data.c routine in the CESM driver to include the correct units for sensible heat flux and updates the rofliq calculation to be correct (previously only OUT_BASEFLOW was being divided by global_param.dt).
+
+    [GH#734](https://github.com/UW-Hydro/VIC/pull/734)
+
+        Updates the cesm_put_data.c routine in the CESM driver to include the correct signs for turbulent heat fluxes and evaporation. Previously we had switched the signs to agree with the image driver and they should instead be in accordance with the sign conventions for coupled models, which differ from those of land surface models. Also, eliminate populating the `l2x_Sl_ram1` field with aero_resist to agree with the VIC 4 implementation in RASM.
+
+    [GH#739](https://github.com/UW-Hydro/VIC/pull/739)
+
+        Updates the cesm_put_data.c routine in the CESM driver to include the correct signs for the wind stresses and fixes a bug in calculating friction velocity (previously it was missing a square root).
+
+    [GH#744](https://github.com/UW-Hydro/VIC/pull/744)
+
+        Updates the cesm_interface_c.c routine to include missing timers and the VIC RUN timer in the CESM driver.
+
+    [GH#746](https://github.com/UW-Hydro/VIC/pull/746)
+
+        Updates the cesm_interface_c.c routine in the CESM driver to populate the nrecs, endyear, endmonth and endday fields in the global_param struct to make them available to vic_finalize for timing tables (specifically the secs/day columns).  
 
 3. Speed up NetCDF operations in the image/CESM drivers ([GH#684](https://github.com/UW-Hydro/VIC/pull/684))
 
@@ -71,6 +99,24 @@ To check which release of VIC you are running:
 
     This is for use in the CESM driver for VIC to pass to WRF, but has been implemented in the core structure of VIC (in vic_run) for consistency with the classic and image drivers. Running VIC from a cold start now also includes calculation of gridcell-averaged albedo.
 
+6. Cleanup of the initialization sections of the ``image`` and ``cesm`` drivers ([GH#701](https://github.com/UW-Hydro/VIC/pull/701))
+
+	Codified behavior in the initialization of the ``image`` and `cesm` drivers that requires the parameter variables `AreaFract`, `Pfactor`, `zone_fract`, and `Cv` must sum exactly to 1.0. If using the `SNOW_BAND` option, the area weighted `elevation` must match the mean grid cell elevation (`elev`). VIC will print *warnings* if any of these criteria are violated.  
+
+7. Added thread parallelization using OPENMP ([GH#712](https://github.com/UW-Hydro/VIC/pull/712))
+
+	The VIC image and CESM drivers now may be optionally compiled with OPENMP to enable shared memory thread parallelization. This option should improve the parallel scaling of these drivers by reducing the number of MPI messages and increasing message size.
+
+8. Added streamflow routing extensions ROUT_STUB and ROUT_RVIC for the VIC image driver ([GH#231](https://github.com/UW-Hydro/VIC/pull/231))
+
+    The VIC image driver can be optionally compiled with ROUT_RVIC to enable routing in image mode (ROUT_STUB is the default extension which means no routing). With ROUT_RVIC enabled, the output variable ``OUT_DISCHARGE`` is available, and there will also be an extra state variable ``STATE_ROUT_RING`` stored in the state file.
+
+#### Bug Fixes:
+
+1.	Renamed "fcov" to "fcan" in image driver to better match variable code name ([GH#673](https://github.com/UW-Hydro/VIC/pull/673))
+
+------------------------------
+
 ## VIC 5.0.1
 
 **Release date: (February 1, 2017)**
@@ -83,7 +129,7 @@ To check which release of VIC you are running:
 
 2. Fixed forceskip rounding bug ([GH#639](https://github.com/UW-Hydro/VIC/pull/639))
 
-	After the fix, the `forceskip` variable in the global parameter structure (i.e., the number of timesteps to skip in the forcing data for the simulatin period) is rounded correctly (before the fix, rounding error might cause 1-timestep offset in the simulation results).
+	After the fix, the `forceskip` variable in the global parameter structure (i.e., the number of timesteps to skip in the forcing data for the simulation period) is rounded correctly (before the fix, rounding error might cause 1-timestep offset in the simulation results).
 
 3. Fixed a problem with image restarts when using multiple processors ([GH#638](https://github.com/UW-Hydro/VIC/pull/638))
 
@@ -291,7 +337,6 @@ This is a major update from VIC 4. The VIC 5.0.0 release aims to have nearly ide
 5. Fix for a physical constant (water heat capacity) ([GH#574](https://github.com/UW-Hydro/VIC/pull/574))
 
 	Fixed a bug where volumetric heat capacity of water should be used in `func_canopy_energy_bal` (previously specific heat capacity was used).
-
 
 ------------------------------
 

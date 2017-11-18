@@ -25,6 +25,7 @@
  *****************************************************************************/
 
 #include <vic_driver_shared_image.h>
+#include <rout.h>
 
 /******************************************************************************
  * @brief    Set output met data information
@@ -35,12 +36,12 @@ set_state_meta_data_info()
     size_t                 v;
 
     extern option_struct   options;
-    extern metadata_struct state_metadata[N_STATE_VARS];
+    extern metadata_struct state_metadata[N_STATE_VARS + N_STATE_VARS_EXT];
 
     // Build the list of state variables
 
     // Set missing and/or default values
-    for (v = 0; v < N_STATE_VARS; v++) {
+    for (v = 0; v < (N_STATE_VARS + N_STATE_VARS_EXT); v++) {
         // Set default string values
         strcpy(state_metadata[v].varname, MISSING_S);
         strcpy(state_metadata[v].long_name, MISSING_S);
@@ -707,4 +708,7 @@ set_state_meta_data_info()
         strcpy(state_metadata[STATE_LAKE_ICE_SNOW_DEPTH].description,
                "depth of snow on lake ice");
     }
+
+    // STATE_ROUT_RING
+    state_metadata_rout_extension();
 }

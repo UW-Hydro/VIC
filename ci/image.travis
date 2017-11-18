@@ -61,7 +61,7 @@ function vic_install {
     echo vic_install
     cd ${TRAVIS_BUILD_DIR}
     echo $PWD
-    make full -C $DRIVER_PATH
+    make full $EXTENSION -C $DRIVER_PATH
 }
 
 function vic_before_script {
@@ -80,6 +80,10 @@ function vic_script {
     echo vic_script
     $DRIVER_EXE -v
     $DRIVER_EXE -o
+
+    # Set the number of OpenMP threads to use
+    # https://docs.travis-ci.com/user/languages/c/#OpenMP-projects 
+    export OMP_NUM_THREADS=4
 
     # Run test package
     ./tests/run_tests.py unit examples system \

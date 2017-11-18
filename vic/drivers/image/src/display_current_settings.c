@@ -26,6 +26,7 @@
  *****************************************************************************/
 
 #include <vic_driver_image.h>
+#include <rout.h>
 
 /******************************************************************************
  * @brief    Display the current settings of options defined in the header
@@ -75,6 +76,11 @@ display_current_settings(int mode)
             MIN_SUBDAILY_STEPS_PER_DAY);
     fprintf(LOG_DEST, "MAX_SUBDAILY_STEPS_PER_DAY %d\n",
             MAX_SUBDAILY_STEPS_PER_DAY);
+    fprintf(LOG_DEST, "\n");
+
+    fprintf(LOG_DEST, "Extensions:\n");
+    fprintf(LOG_DEST, "-----------\n");
+    fprintf(LOG_DEST, "ROUTING\t\t\t%2s\n", ROUT_EXT);
     fprintf(LOG_DEST, "\n");
 
     if (mode == DISP_COMPILE_TIME) {

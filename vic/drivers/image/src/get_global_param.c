@@ -383,6 +383,9 @@ get_global_param(FILE *gp)
             else if (strcasecmp("PARAMETERS", optstr) == 0) {
                 sscanf(cmdstr, "%*s %s", filenames.params.nc_filename);
             }
+            else if (strcasecmp("ROUT_PARAM", optstr) == 0) {
+                sscanf(cmdstr, "%*s %s", filenames.rout_params.nc_filename);
+            }
             else if (strcasecmp("ARNO_PARAMS", optstr) == 0) {
                 sscanf(cmdstr, "%*s %s", flgstr);
                 if (strcasecmp("TRUE", flgstr) == 0) {

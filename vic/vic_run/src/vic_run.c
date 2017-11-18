@@ -377,8 +377,8 @@ vic_run(force_data_struct   *force,
 
     // Compute gridcell-averaged albedo
     calc_gridcell_avg_albedo(&all_vars->gridcell_avg.avg_albedo,
-                             force->shortwave[NR], Nveg, energy,
-                             veg_con, soil_con);
+                             force->shortwave[NR], Nveg, overstory,
+                             energy, snow, veg_con, soil_con);
 
     /****************************
        Run Lake Model

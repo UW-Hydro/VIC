@@ -66,7 +66,7 @@
 #define check_nc_status(A, M, ...) if (A != NC_NOERR) {log_ncerr(A, M, \
                                                                  ## __VA_ARGS__); \
                                                        errno = 0; exit( \
-                                                           EXIT_FAILURE);}
+                                                           EXIT_FAILURE); }
 
 #define log_mpi_err(e, M, ...) print_trace(); \
     print_mpi_error_str(e); fprintf(LOG_DEST, \

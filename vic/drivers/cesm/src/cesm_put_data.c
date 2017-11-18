@@ -123,8 +123,7 @@ vic_cesm_put_data()
         // albedo, VIC: fraction, CESM: fraction
         // Note: VIC does not partition its albedo, thus all types are
         // the same value
-        // TBD: this will be fixed in a subsequent PR
-        albedo = out_data[i][OUT_ALBEDO][0];
+        albedo = all_vars[i].gridcell_avg.avg_albedo;
 
         // albedo: direct, visible
         l2x_vic[i].l2x_Sl_avsdr = albedo;
@@ -152,21 +151,21 @@ vic_cesm_put_data()
                                     out_data[i][OUT_LWNET][0]);
 
         // turbulent heat fluxes
+        // Note: both are the opposite sign from image driver
+        // in accordance with the sign convention for coupled models
         // latent heat, VIC: W/m2, CESM: W/m2
-        l2x_vic[i].l2x_Fall_lat = out_data[i][OUT_LATENT][0];
+        l2x_vic[i].l2x_Fall_lat = -1 * out_data[i][OUT_LATENT][0];
 
         // sensible heat, VIC: W/m2, CESM: W/m2
         l2x_vic[i].l2x_Fall_sen += -1 * out_data[i][OUT_SENSIBLE][0];
 
         // evaporation, VIC: mm, CESM: kg m-2 s-1
-        // TO-DO should we incorporate bare soil evap?
-        l2x_vic[i].l2x_Fall_evap += -1 *
-                                    (out_data[i][OUT_EVAP][0] * MM_PER_M /
-                                     global_param.dt);
+        l2x_vic[i].l2x_Fall_evap += -1 * out_data[i][OUT_EVAP][0] /
+                                    global_param.dt;
 
         // lnd->rtm input fluxes
-        l2x_vic[i].l2x_Flrl_rofliq = out_data[i][OUT_RUNOFF][0] +
-                                     out_data[i][OUT_BASEFLOW][0] /
+        l2x_vic[i].l2x_Flrl_rofliq = (out_data[i][OUT_RUNOFF][0] +
+                                      out_data[i][OUT_BASEFLOW][0]) /
                                      global_param.dt;
 
 
@@ -199,7 +198,6 @@ vic_cesm_put_data()
                 AreaFactorSum += AreaFactor;
 
                 // aerodynamical resistance, VIC: s/m, CESM: s/m
-                // TO-DO: update in future PR
                 if (overstory) {
                     aero_resist = cell.aero_resist[1];
                 }
@@ -213,8 +211,6 @@ vic_cesm_put_data()
                     aero_resist = param.HUGE_RESIST;
                 }
 
-                l2x_vic[i].l2x_Sl_ram1 += AreaFactor * aero_resist;
-
                 // log z0
                 // CESM units: m
                 if (snow.snow) {
@@ -222,12 +218,13 @@ vic_cesm_put_data()
                     roughness = soil_con[i].snow_rough;
                 }
                 else if (HasVeg) {
-                    // bare soil roughness
+                    // vegetation roughness
                     roughness =
                         veg_lib[i][veg_con[i][veg].veg_class].roughness[
                             dmy_current.month - 1];
                 }
                 else {
+                    // bare soil roughness
                     roughness = soil_con[i].rough;
                 }
                 if (roughness < DBL_EPSILON) {
@@ -238,13 +235,13 @@ vic_cesm_put_data()
 
                 // wind stress, zonal
                 // CESM units: N m-2
-                wind_stress_x = -1 * out_data[i][OUT_DENSITY][0] *
+                wind_stress_x = out_data[i][OUT_DENSITY][0] *
                                 x2l_vic[i].x2l_Sa_u / aero_resist;
                 l2x_vic[i].l2x_Fall_taux += AreaFactor * wind_stress_x;
 
                 // wind stress, meridional
                 // CESM units: N m-2
-                wind_stress_y = -1 * out_data[i][OUT_DENSITY][0] *
+                wind_stress_y = out_data[i][OUT_DENSITY][0] *
                                 x2l_vic[i].x2l_Sa_v / aero_resist;
                 l2x_vic[i].l2x_Fall_tauy += AreaFactor * wind_stress_y;
 
@@ -253,8 +250,8 @@ vic_cesm_put_data()
                 wind_stress =
                     sqrt(pow(wind_stress_x, 2) + pow(wind_stress_y, 2));
                 l2x_vic[i].l2x_Sl_fv += AreaFactor *
-                                        (wind_stress /
-                                         out_data[i][OUT_DENSITY][0]);
+                                        sqrt(wind_stress /
+                                             out_data[i][OUT_DENSITY][0]);
             }
         }
 

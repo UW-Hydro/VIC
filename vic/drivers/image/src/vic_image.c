@@ -25,6 +25,7 @@
  *****************************************************************************/
 
 #include <vic_driver_image.h>
+#include <rout.h>   // Routing routine (extension)
 
 size_t              NF, NR;
 size_t              current;
@@ -59,12 +60,15 @@ veg_con_map_struct *veg_con_map = NULL;
 veg_con_struct    **veg_con = NULL;
 veg_hist_struct   **veg_hist = NULL;
 veg_lib_struct    **veg_lib = NULL;
-metadata_struct     state_metadata[N_STATE_VARS];
+metadata_struct     state_metadata[N_STATE_VARS + N_STATE_VARS_EXT];
 metadata_struct     out_metadata[N_OUTVAR_TYPES];
 save_data_struct   *save_data;  // [ncells]
 double           ***out_data = NULL;  // [ncells, nvars, nelem]
 stream_struct      *output_streams = NULL;  // [nstreams]
 nc_file_struct     *nc_hist_files = NULL;  // [nstreams]
+
+// Extensions
+rout_struct         rout; // Routing routine (extension)
 
 /******************************************************************************
  * @brief   Stand-alone image mode driver of the VIC model
@@ -111,11 +115,17 @@ main(int    argc,
     // allocate memory
     vic_alloc();
 
+    // allocate memory for routing
+    rout_alloc();   // Routing routine (extension)
+
     // initialize model parameters from parameter files
     vic_image_init();
 
+    // initialize routing parameters from parameter files
+    rout_init();    // Routing routine (extension)
+
     // populate model state, either using a cold start or from a restart file
-    vic_populate_model_state();
+    vic_populate_model_state(&(dmy[0]));
 
     // initialize output structures
     vic_init_output(&(dmy[0]));
@@ -130,9 +140,6 @@ main(int    argc,
     timer_stop(&(global_timers[TIMER_VIC_INIT]));
     // start vic run timer
     timer_start(&(global_timers[TIMER_VIC_RUN]));
-
-    timer_init(&(global_timers[TIMER_VIC_FORCE]));
-    timer_init(&(global_timers[TIMER_VIC_WRITE]));
 
     // loop over all timesteps
     for (current = 0; current < global_param.nrecs; current++) {
@@ -162,6 +169,9 @@ main(int    argc,
     timer_start(&(global_timers[TIMER_VIC_FINAL]));
     // clean up
     vic_image_finalize();
+
+    // clean up routing
+    rout_finalize();    // Routing routine (extension)
 
     // finalize MPI
     status = MPI_Finalize();

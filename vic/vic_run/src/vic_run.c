@@ -58,8 +58,8 @@ vic_run(force_data_struct   *force,
     double                   out_rain[MAX_BANDS];
     double                   out_snow[MAX_BANDS];
     double                   dp;
-    double                   ice0[MAX_BANDS];
-    double                   moist0[MAX_BANDS];
+    double                   ice0;
+    double                   moist0;
     double                   surf_atten;
     double                   wind_h;
     double                   height;
@@ -127,13 +127,6 @@ vic_run(force_data_struct   *force,
     force->out_prec = 0;
     force->out_rain = 0;
     force->out_snow = 0;
-
-    /** initialize moist0 and ice0 **/
-    // this could be removed if we make them scalars
-    for (band = 0; band < options.SNOW_BAND; band++) {
-        moist0[band] = 0;
-        ice0[band] = 0;
-    }
 
     /**************************************************
        Solve Energy and/or Water Balance for Each

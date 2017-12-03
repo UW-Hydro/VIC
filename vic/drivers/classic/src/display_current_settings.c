@@ -65,7 +65,6 @@ display_current_settings(int mode)
     fprintf(LOG_DEST, "MAX_ZWTVMOIST\t\t%2d\n", MAX_ZWTVMOIST);
     fprintf(LOG_DEST, "MAX_LAYERS\t\t%2d\n", MAX_LAYERS);
     fprintf(LOG_DEST, "MAX_NODES\t\t%2d\n", MAX_NODES);
-    fprintf(LOG_DEST, "MAX_VEG\t\t\t%2d\n", MAX_VEG);
     fprintf(LOG_DEST, "\n");
     fprintf(LOG_DEST, "MINSOILDEPTH\t\t%f\n", MINSOILDEPTH);
     fprintf(LOG_DEST, "MIN_FCANOPY\t\t%f\n", MIN_FCANOPY);

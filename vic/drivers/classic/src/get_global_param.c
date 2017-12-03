@@ -1170,12 +1170,6 @@ get_global_param(FILE *gp)
                     "file on the line that begins with \"SNOW_BAND\" "
                     "(after the number of bands).", options.SNOW_BAND);
         }
-        if (options.SNOW_BAND > MAX_BANDS) {
-            log_err("Global file wants more snow bands (%zu) than are "
-                    "defined by MAX_BANDS (%d).  Edit vic_run/include/vic_def.h "
-                    "and recompile.", options.SNOW_BAND,
-                    MAX_BANDS);
-        }
     }
     else if (options.SNOW_BAND <= 0) {
         log_err("Invalid number of elevation bands specified in global "

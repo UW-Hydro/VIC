@@ -60,7 +60,6 @@ display_current_settings(int mode)
     fprintf(LOG_DEST, "LOG_LEVEL:\t\t%d\n", LOG_LVL);
     fprintf(LOG_DEST, "\n");
     fprintf(LOG_DEST, "Maximum Array Sizes:\n");
-    fprintf(LOG_DEST, "MAX_BANDS\t\t%2d\n", MAX_BANDS);
     fprintf(LOG_DEST, "MAX_FRONTS\t\t%2d\n", MAX_FRONTS);
     fprintf(LOG_DEST, "MAX_FROST_AREAS\t\t%2d\n", MAX_FROST_AREAS);
     fprintf(LOG_DEST, "MAX_LAKE_NODES\t\t%2d\n", MAX_LAKE_NODES);

@@ -1178,10 +1178,9 @@ vic_init(void)
 
     // Run some checks and corrections for vegetation
     for (i = 0; i < local_domain.ncells_active; i++) {
-//        // Only run to options.NVEGTYPES - 1, assuming bare soil
-//        // is the last type
-//        for (j = 0; j < options.NVEGTYPES - 1; j++) {
-        for (j = 0; j < options.NVEGTYPES; j++) {
+        // Only run to options.NVEGTYPES - 1, assuming bare soil
+        // is the last type
+        for (j = 0; j < options.NVEGTYPES - 1; j++) {
             vidx = veg_con_map[i].vidx[j];
             if (vidx != NODATA_VEG) {
                 sum = 0;
@@ -1228,11 +1227,11 @@ vic_init(void)
             }
         }
 
-//        // handle the bare soil portion of the tile
-//        vidx = veg_con_map[i].vidx[options.NVEGTYPES - 1];
-//        if (vidx != NODATA_VEG) {
-//            Cv_sum[i] += veg_con[i][vidx].Cv;
-//        }
+        // handle the bare soil portion of the tile
+        vidx = veg_con_map[i].vidx[options.NVEGTYPES - 1];
+        if (vidx != NODATA_VEG) {
+            Cv_sum[i] += veg_con[i][vidx].Cv;
+        }
 
         // TODO: handle bare soil adjustment for compute treeline option
 

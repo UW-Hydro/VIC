@@ -82,8 +82,8 @@ get_force_type(char *cmdstr,
         type = FDIR;
     }
     /* type 6: LAI [m2/m2] */
-    else if (strcasecmp("LAI_IN", optstr) == 0) {
-        type = LAI_IN;
+    else if (strcasecmp("LAI", optstr) == 0) {
+        type = LAI;
     }
     /* type 7: incoming longwave radiation [W/m2] */
     else if (strcasecmp("LWDOWN", optstr) == 0) {
@@ -109,15 +109,11 @@ get_force_type(char *cmdstr,
     else if (strcasecmp("SWDOWN", optstr) == 0) {
         type = SWDOWN;
     }
-    /* type 13: vegetation cover fraction */
-    else if (strcasecmp("FCANOPY", optstr) == 0) {
-        type = FCANOPY;
-    }
-    /* type 14: wind speed [m/s] */
+    /* type 13: wind speed [m/s] */
     else if (strcasecmp("WIND", optstr) == 0) {
         type = WIND;
     }
-    /* type 15: unused (blank) data */
+    /* type 14: unused (blank) data */
     else if (strcasecmp("SKIP", optstr) == 0) {
         type = SKIP;
     }

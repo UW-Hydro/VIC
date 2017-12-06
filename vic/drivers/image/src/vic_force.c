@@ -316,14 +316,14 @@ vic_force(void)
         d4count[2] = global_domain.n_ny;
         d4count[3] = global_domain.n_nx;
 
-        // Leaf Area Index: lai
+        // Leaf Area Index: LAI
         if (options.LAI_SRC == FROM_VEGHIST) {
             for (j = 0; j < NF; j++) {
                 d4start[0] = global_param.forceskip[1] +
                              global_param.forceoffset[1] + j;
                 for (v = 0; v < options.NVEGTYPES; v++) {
                     d4start[1] = v;
-                    get_scatter_nc_field_double(&(filenames.forcing[1]), "lai",
+                    get_scatter_nc_field_double(&(filenames.forcing[1]), "LAI",
                                                 d4start, d4count, dvar);
                     for (i = 0; i < local_domain.ncells_active; i++) {
                         vidx = veg_con_map[i].vidx[v];

@@ -1038,13 +1038,13 @@ get_global_param(FILE *gp)
         log_err("ROOT_ZONES must be defined to a positive integer greater "
                 "than 0, in the global control file.");
     }
-    if (options.LAI_SRC == FROM_VEGHIST && !param_set.TYPE[LAI_IN].SUPPLIED) {
+    if (options.LAI_SRC == FROM_VEGHIST && !param_set.TYPE[LAI].SUPPLIED) {
         log_err("\"LAI_SRC\" was specified as \"FROM_VEGHIST\", but "
-                "\"LAI_IN\" was not specified as an input forcing in the "
+                "\"LAI\" was not specified as an input forcing in the "
                 "global parameter file.  If you want VIC to read LAI "
                 "values from the veg_hist file, you MUST make sure the veg "
-                "hist file contains Nveg columns of LAI_IN values, 1 for "
-                "each veg tile in the grid cell, AND specify LAI_IN as a "
+                "hist file contains Nveg columns of LAI values, 1 for "
+                "each veg tile in the grid cell, AND specify LAI as a "
                 "forcing variable in the veg_hist forcing file in the "
                 "global parameter file.");
     }

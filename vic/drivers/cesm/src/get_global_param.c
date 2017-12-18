@@ -448,7 +448,7 @@ get_global_param(FILE *gp)
             // TBD: feature in VIC 4.2 that has been ported to classic
             // mode, but that does not exist in image mode (yet)
             else if (strcasecmp("ALBEDO", optstr) == 0 ||
-                     strcasecmp("LAI_IN", optstr) == 0 ||
+                     strcasecmp("LAI", optstr) == 0 ||
                      strcasecmp("FCANOPY", optstr) == 0) {
                 log_err("Time-varying vegetation parameters not implemented "
                         "in CESM driver");

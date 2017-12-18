@@ -265,13 +265,13 @@ vic_init(void)
         if (options.FCAN_SRC == FROM_DEFAULT) {
             for (k = 0; k < MONTHS_PER_YEAR; k++) {
                 for (i = 0; i < local_domain.ncells_active; i++) {
-//                    if (j < options.NVEGTYPES - 1) {
-//                        veg_lib[i][j].fcanopy[k] = 1.0;
-//                    }
-//                    // Assuming the last type is bare soil
-//                    else {
-//                        veg_lib[i][j].fcanopy[k] = MIN_FCANOPY;
-//                    }
+                    if (j < options.NVEGTYPES - 1) {
+                        veg_lib[i][j].fcanopy[k] = 1.0;
+                    }
+                    // Assuming the last type is bare soil
+                    else {
+                        veg_lib[i][j].fcanopy[k] = MIN_FCANOPY;
+                    }
                     veg_lib[i][j].fcanopy[k] = 1.0;
                 }
             }
@@ -1236,11 +1236,15 @@ vic_init(void)
         // TODO: handle bare soil adjustment for compute treeline option
 
         // If the sum of the tile fractions is not within a tolerance,
-        // throw an error
+        // readjust Cvs to sum to 1.0
         if (!assert_close_double(Cv_sum[i], 1., 0., AREA_SUM_ERROR_THRESH)) {
             sprint_location(locstr, &(local_domain.locations[i]));
-            log_err("Cv !=  1.0 (%f) at grid cell %zd. Exiting ...\n%s",
-                    Cv_sum[i], i, locstr);
+            log_warn("Cv !=  1.0 (%f) at grid cell %zd. Adjusting fractions "
+                     "...\n%s", Cv_sum[i], i, locstr);
+            for (j = 0; j < options.NVEGTYPES; j++) {
+                vidx = veg_con_map[i].vidx[j];
+                veg_con[i][vidx].Cv /= Cv_sum[i];
+            }
         }
     }
 

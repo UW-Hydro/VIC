@@ -998,9 +998,8 @@ vic_init(void)
                     }
                 }
                 else {
-                    log_warn("Sum of the snow band area fractions is 0, "
-                             "setting first fraction to 1\n%s", locstr);
-                    soil_con[i].AreaFract[0] = 1.;
+                    log_err("Sum of the snow band area fractions is 0\n%s",
+                            locstr);
                 }
             }
             // check that the mean elevation from the snow bands matches the

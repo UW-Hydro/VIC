@@ -612,19 +612,11 @@ collect_wb_terms(cell_data_struct cell,
     tmp_evap = 0.0;
     for (index = 0; index < options.Nlayer; index++) {
         tmp_evap += cell.layer[index].evap;
+        out_data[OUT_EVAP_BARE][0] += cell.layer[index].esoil *
+                                      AreaFactor;
         if (HasVeg) {
-            out_data[OUT_EVAP_BARE][0] += cell.layer[index].evap *
-                                          cell.layer[index].bare_evap_frac
-                                          *
-                                          AreaFactor;
-            out_data[OUT_TRANSP_VEG][0] += cell.layer[index].evap *
-                                           (1 -
-                                            cell.layer[index].
-                                            bare_evap_frac) * AreaFactor;
-        }
-        else {
-            out_data[OUT_EVAP_BARE][0] += cell.layer[index].evap *
-                                          AreaFactor;
+            out_data[OUT_TRANSP_VEG][0] += cell.layer[index].transp *
+                                           AreaFactor;
         }
     }
     tmp_evap += snow.vapor_flux * MM_PER_M;

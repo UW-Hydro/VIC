@@ -92,12 +92,6 @@ read_vegparam(FILE  *vegparam,
     if (vegcel != gridcel) {
         log_err("Grid cell %d not found", gridcel);
     }
-    if (vegetat_type_num >= MAX_VEG) {
-        log_err("Vegetation parameter file wants more vegetation tiles in "
-                "grid cell %i (%i) than are allowed by MAX_VEG (%i) [NOTE: "
-                "bare soil class is assumed].  Edit vic_run/vic_def.h and "
-                "recompile.", gridcel, vegetat_type_num + 1, MAX_VEG);
-    }
 
     // Make sure to allocate extra memory for bare soil tile
     // and optionally an above-treeline veg tile

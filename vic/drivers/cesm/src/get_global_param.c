@@ -448,7 +448,7 @@ get_global_param(FILE *gp)
             // TBD: feature in VIC 4.2 that has been ported to classic
             // mode, but that does not exist in image mode (yet)
             else if (strcasecmp("ALBEDO", optstr) == 0 ||
-                     strcasecmp("LAI_IN", optstr) == 0 ||
+                     strcasecmp("LAI", optstr) == 0 ||
                      strcasecmp("FCANOPY", optstr) == 0) {
                 log_err("Time-varying vegetation parameters not implemented "
                         "in CESM driver");
@@ -562,14 +562,7 @@ validate_options(option_struct *options)
     }
 
     // Validate the elevation band file information
-    if (options->SNOW_BAND > 1) {
-        if (options->SNOW_BAND > MAX_BANDS) {
-            log_err("Global file wants more snow bands (%zu) than are "
-                    "defined by MAX_BANDS (%d).  Edit vicNl_def.h and "
-                    "recompile.", options->SNOW_BAND, MAX_BANDS);
-        }
-    }
-    else if (options->SNOW_BAND <= 0) {
+    if (options->SNOW_BAND <= 0) {
         log_err("Invalid number of elevation bands specified in global "
                 "file (%zu).  Number of bands must be >= 1.",
                 options->SNOW_BAND);

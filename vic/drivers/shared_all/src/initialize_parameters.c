@@ -55,7 +55,7 @@ initialize_parameters()
     param.EMISS_H2O = 0.98;
 
     // Soil Constraints
-    param.SOIL_RARC = 100.0;
+    param.SOIL_RARC = 250.0;
     param.SOIL_RESID_MOIST = 0.0;
     param.SOIL_SLAB_MOIST_FRACT = 1.0;
     param.SOIL_WINDH = 10.0;

@@ -158,7 +158,7 @@ vic_alloc(void)
         veg_lib[i] = calloc(options.NVEGTYPES, sizeof(*(veg_lib[i])));
         check_alloc_status(veg_lib[i], "Memory allocation error.");
 
-        all_vars[i] = make_all_vars(veg_con_map[i].nv_active);
+        all_vars[i] = make_all_vars(veg_con_map[i].nv_active - 1);
 
         // allocate memory for veg_hist
         veg_hist[i] = calloc(veg_con_map[i].nv_active, sizeof(*(veg_hist[i])));

@@ -123,6 +123,10 @@ To check which release of VIC you are running:
         6. Updated names of variables and options for LAI and FCANOPY in documentation to match their new names in the code
         7. Removed constants MAX_VEG and MAX_BANDS from code; all arrays that were declared with those lengths were replaced with dynamic allocations.  This allowed for specification of veg libraries containing more classes without recompiling the code, and more efficient memory usage.
 
+    [GH#766](https://github.com/UW-Hydro/VIC/pull/766)
+
+        1. Improved logic in computing soil evaporation (esoil), primarily in func_surf_energy_bal(), by creating explicit terms for transpiration (transp) and esoil in the layer data structure.
+
 #### Bug Fixes:
 
 1. Renamed "fcov" to "fcan" in image driver to better match variable code name ([GH#673](https://github.com/UW-Hydro/VIC/pull/673))

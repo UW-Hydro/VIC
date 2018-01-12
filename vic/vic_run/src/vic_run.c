@@ -180,8 +180,15 @@ vic_run(force_data_struct   *force,
                 }
             }
 
-            /* local pointer to veg_var */
+            /* local pointer to veg_var and snow */
             veg_var = &(all_vars->veg_var[iveg][0]);
+            snow = &(all_vars->snow[iveg][0]);
+
+            // Convert LAI from global to local
+            veg_var->LAI /= veg_var->fcanopy;
+            veg_var->Wdew /= veg_var->fcanopy;
+            veg_var->Wdmax = veg_var->LAI * param.VEG_LAI_WATER_FACTOR;
+            snow->snow_canopy /= veg_var->fcanopy;
 
             /** Assign wind_h **/
             /** Note: this is ignored below **/
@@ -263,12 +270,6 @@ vic_run(force_data_struct   *force,
 
                     /* Initialize pot_evap */
                     cell->pot_evap = 0;
-
-                    // Convert LAI from global to local
-                    veg_var->LAI /= veg_var->fcanopy;
-                    veg_var->Wdew /= veg_var->fcanopy;
-                    veg_var->Wdmax = veg_var->LAI * param.VEG_LAI_WATER_FACTOR;
-                    snow->snow_canopy /= veg_var->fcanopy;
 
                     /** Initialize other veg vars **/
                     if (iveg < Nveg) {

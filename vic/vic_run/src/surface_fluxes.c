@@ -226,7 +226,7 @@ surface_fluxes(bool                 overstory,
 
     if (!options.CLOSE_ENERGY) {
         // if not closing energy balance, don't iterate
-        param.MAX_ITER_CANOPY_GRND = 0;
+        param.MAX_ITER_GRND_CANOPY = 0;
     }
 
     if (options.CARBON) {
@@ -719,11 +719,11 @@ surface_fluxes(bool                 overstory,
                 }
             }
             while ((fabs(tol_under - last_tol_under) > param.TOL_GRND) &&
-                   (tol_under != 0) && (under_iter < param.MAX_ITER_CANOPY_GRND));
+                   (tol_under != 0) && (under_iter < param.MAX_ITER_GRND_CANOPY));
         }
         while ((fabs(tol_over - last_tol_over) > param.TOL_OVER &&
                 overstory) && (tol_over != 0) &&
-               (over_iter < param.MAX_ITER_CANOPY_GRND));
+               (over_iter < param.MAX_ITER_GRND_CANOPY));
 
         /**************************************
            Compute GPP, Raut, and NPP

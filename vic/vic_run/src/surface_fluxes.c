@@ -719,7 +719,8 @@ surface_fluxes(bool                 overstory,
                 }
             }
             while ((fabs(tol_under - last_tol_under) > param.TOL_GRND) &&
-                   (tol_under != 0) && (under_iter < param.MAX_ITER_GRND_CANOPY));
+                   (tol_under != 0) &&
+                   (under_iter < param.MAX_ITER_GRND_CANOPY));
         }
         while ((fabs(tol_over - last_tol_over) > param.TOL_OVER &&
                 overstory) && (tol_over != 0) &&

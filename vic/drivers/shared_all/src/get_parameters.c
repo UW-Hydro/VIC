@@ -884,7 +884,7 @@ validate_parameters()
         log_err(
             "FROZEN_MAXITER must be defined on the interval [0, inf) (iterations");
     }
-    // Canopy Iterations 
+    // Canopy Iterations
     if (!(param.MAX_ITER_GRND_CANOPY >= 0)) {
         log_err(
             "MAX_ITER_GRND_CANOPY  must be defined on the interval [0, inf) (iterations");

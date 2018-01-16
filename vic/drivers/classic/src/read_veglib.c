@@ -62,7 +62,6 @@ read_veglib(FILE   *veglib,
 
     // +1 for bare soil
     temp = calloc(Nveg_type + 1, sizeof(*temp));
-    options.NVEGTYPES = Nveg_type + 1;
 
     fscanf(veglib, "%s", str);
     i = 0;

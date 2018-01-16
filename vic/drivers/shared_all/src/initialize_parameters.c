@@ -211,6 +211,9 @@ initialize_parameters()
     // Frozen Soil Parameters
     param.FROZEN_MAXITER = 1000;
 
+    // Canopy Iterations
+    param.MAX_ITER_GRND_CANOPY = 10;
+
     // Newton-Raphson solver parameters
     param.NEWT_RAPH_MAXTRIAL = 150;
     param.NEWT_RAPH_TOLX = 1.0e-4;

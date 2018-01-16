@@ -73,7 +73,6 @@ surface_fluxes(bool                 overstory,
     extern option_struct     options;
     extern parameters_struct param;
 
-    int                      MAX_ITER_GRND_CANOPY;
     int                      ErrorFlag;
     int                      INCLUDE_SNOW = false;
     int                      UNSTABLE_CNT;
@@ -225,11 +224,9 @@ surface_fluxes(bool                 overstory,
     double            store_Raut;
     double            store_NPP;
 
-    if (options.CLOSE_ENERGY) {
-        MAX_ITER_GRND_CANOPY = 10;
-    }
-    else {
-        MAX_ITER_GRND_CANOPY = 0;
+    if (!options.CLOSE_ENERGY) {
+        // if not closing energy balance, don't iterate
+        param.MAX_ITER_CANOPY_GRND = 0;
     }
 
     if (options.CARBON) {
@@ -722,11 +719,11 @@ surface_fluxes(bool                 overstory,
                 }
             }
             while ((fabs(tol_under - last_tol_under) > param.TOL_GRND) &&
-                   (tol_under != 0) && (under_iter < MAX_ITER_GRND_CANOPY));
+                   (tol_under != 0) && (under_iter < param.MAX_ITER_CANOPY_GRND));
         }
         while ((fabs(tol_over - last_tol_over) > param.TOL_OVER &&
                 overstory) && (tol_over != 0) &&
-               (over_iter < MAX_ITER_GRND_CANOPY));
+               (over_iter < param.MAX_ITER_CANOPY_GRND));
 
         /**************************************
            Compute GPP, Raut, and NPP

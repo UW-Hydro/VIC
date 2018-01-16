@@ -518,6 +518,9 @@ typedef struct {
     // Frozen Soil Parameters
     int FROZEN_MAXITER;
 
+    // Canopy Iterations
+    int MAX_ITER_GRND_CANOPY;
+
     // Newton-Raphson Solver Parameters
     int NEWT_RAPH_MAXTRIAL;
     double NEWT_RAPH_TOLX;

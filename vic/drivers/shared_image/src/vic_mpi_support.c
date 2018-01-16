@@ -1333,6 +1333,10 @@ create_MPI_param_struct_type(MPI_Datatype *mpi_type)
     offsets[i] = offsetof(parameters_struct, FROZEN_MAXITER);
     mpi_types[i++] = MPI_INT;
 
+    // int MAX_ITER_GRND_CANOPY
+    offsets[i] = offsetof(parameters_struct, MAX_ITER_GRND_CANOPY);
+    mpi_types[i++] = MPI_INT;
+
     // int NEWT_RAPH_MAXTRIAL
     offsets[i] = offsetof(parameters_struct, NEWT_RAPH_MAXTRIAL);
     mpi_types[i++] = MPI_INT;

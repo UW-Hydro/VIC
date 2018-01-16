@@ -67,7 +67,7 @@ put_data(all_vars_struct   *all_vars,
     double                     inflow;
     double                     outflow;
     double                     storage;
-    double                     TreeAdjustFactor[MAX_BANDS];
+    double                    *TreeAdjustFactor;
     double                     ThisAreaFract;
     double                     ThisTreeAdjust;
     size_t                     i;
@@ -93,6 +93,8 @@ put_data(all_vars_struct   *all_vars,
     dt_sec = global_param.dt;
 
     // Compute treeline adjustment factors
+    TreeAdjustFactor = calloc(options.SNOW_BAND, sizeof(*TreeAdjustFactor));
+    check_alloc_status(TreeAdjustFactor, "Memory allocation error.");
     for (band = 0; band < options.SNOW_BAND; band++) {
         if (AboveTreeLine[band]) {
             Cv = 0;
@@ -569,6 +571,8 @@ put_data(all_vars_struct   *all_vars,
         out_data[OUT_ENERGY_ERROR][0] = MISSING;
     }
 
+    free((char *) (TreeAdjustFactor));
+
     // vic_run run time
     out_data[OUT_TIME_VICRUN_WALL][0] = timer->delta_wall;
     out_data[OUT_TIME_VICRUN_CPU][0] = timer->delta_cpu;
@@ -608,19 +612,11 @@ collect_wb_terms(cell_data_struct cell,
     tmp_evap = 0.0;
     for (index = 0; index < options.Nlayer; index++) {
         tmp_evap += cell.layer[index].evap;
+        out_data[OUT_EVAP_BARE][0] += cell.layer[index].esoil *
+                                      AreaFactor;
         if (HasVeg) {
-            out_data[OUT_EVAP_BARE][0] += cell.layer[index].evap *
-                                          cell.layer[index].bare_evap_frac
-                                          *
-                                          AreaFactor;
-            out_data[OUT_TRANSP_VEG][0] += cell.layer[index].evap *
-                                           (1 -
-                                            cell.layer[index].
-                                            bare_evap_frac) * AreaFactor;
-        }
-        else {
-            out_data[OUT_EVAP_BARE][0] += cell.layer[index].evap *
-                                          AreaFactor;
+            out_data[OUT_TRANSP_VEG][0] += cell.layer[index].transp *
+                                           AreaFactor;
         }
     }
     tmp_evap += snow.vapor_flux * MM_PER_M;

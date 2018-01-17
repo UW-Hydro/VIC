@@ -84,7 +84,7 @@ vic_write(stream_struct  *stream,
         // If the output file is not open, initialize the history file now.
         if (nc_hist_file->open == false) {
             // open the netcdf history file
-            initialize_history_file(nc_hist_file, stream, dmy_current);
+            initialize_history_file(nc_hist_file, stream);
         }
     }
 
@@ -194,7 +194,7 @@ vic_write(stream_struct  *stream,
                 }
                 gather_put_nc_field_schar(nc_hist_file->nc_id,
                                           nc_hist_file->nc_vars[k].nc_varid,
-                                          nc_hist_file->d_fillvalue,
+                                          nc_hist_file->c_fillvalue,
                                           dstart, dcount, cvar);
             }
             else {

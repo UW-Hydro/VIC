@@ -57,6 +57,12 @@ else
 MPIPATH = /opt/local
 endif
 
+# VIC EXTENTIONS PATH
+EXTPATH = ../../extensions
+
+# Set the routing model extension
+include ${EXTPATH}/rout_stub/rout.mk
+
 # Set SHELL = your shell here
 SHELL = /bin/bash
 
@@ -82,12 +88,14 @@ INCLUDES = -I ${DRIVERPATH}/include \
 		   -I ${SHAREDPATH}/include \
 		   -I ${SHAREDIMAGEPATH}/include \
 		   -I ${NETCDFPATH}/include \
+		   -I ${EXTPATH}/rout_stub/include
 
 # Set libraries
 LIBRARY = -lm -L${NETCDFPATH}/lib -lnetcdf
 
 # Set compiler flags
 CFLAGS  =  ${INCLUDES} -ggdb -O0 -Wall -Wextra -fPIC \
+					 -fopenmp \
 					 -DLOG_LVL=$(LOG_LVL) \
 					 -DGIT_VERSION=\"$(GIT_VERSION)\" \
 					 -DUSERNAME=\"$(USER)\" \
@@ -118,13 +126,15 @@ HDRS = \
 	$(wildcard ${VICPATH}/include/*.h) \
 	$(wildcard ${DRIVERPATH}/include/*.h) \
 	$(wildcard ${SHAREDPATH}/include/*.h) \
-	$(wildcard ${SHAREDIMAGEPATH}/include/*.h)
+	$(wildcard ${SHAREDIMAGEPATH}/include/*.h) \
+	$(wildcard ${EXTPATH}/rout_stub/include/*.h)
 
 CSRCS = \
 	$(wildcard ${VICPATH}/src/*.c) \
 	$(wildcard ${DRIVERPATH}/src/*.c) \
 	$(wildcard ${SHAREDPATH}/src/*.c) \
-	$(wildcard ${SHAREDIMAGEPATH}/src/*.c)
+	$(wildcard ${SHAREDIMAGEPATH}/src/*.c) \
+	$(wildcard ${EXTPATH}/rout_stub/src/*.c)
 
 FSRCS = \
 	$(wildcard ${DRIVERPATH}/src/*.F90)

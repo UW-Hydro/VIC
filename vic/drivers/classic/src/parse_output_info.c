@@ -36,7 +36,6 @@ parse_output_info(FILE           *gp,
                   dmy_struct     *dmy_current)
 {
     extern option_struct       options;
-    extern global_param_struct global_param;
 
     char                       cmdstr[MAXSTRING];
     char                       optstr[MAXSTRING];

@@ -26,6 +26,7 @@
  *****************************************************************************/
 
 #include <vic_driver_image.h>
+#include <rout.h>
 
 /******************************************************************************
  * @brief    Display the current settings of options defined in the header
@@ -59,14 +60,12 @@ display_current_settings(int mode)
     fprintf(LOG_DEST, "LOG_LEVEL:\t\t%d\n", LOG_LVL);
     fprintf(LOG_DEST, "\n");
     fprintf(LOG_DEST, "Maximum Array Sizes:\n");
-    fprintf(LOG_DEST, "MAX_BANDS\t\t%2d\n", MAX_BANDS);
     fprintf(LOG_DEST, "MAX_FRONTS\t\t%2d\n", MAX_FRONTS);
     fprintf(LOG_DEST, "MAX_FROST_AREAS\t\t%2d\n", MAX_FROST_AREAS);
     fprintf(LOG_DEST, "MAX_LAKE_NODES\t\t%2d\n", MAX_LAKE_NODES);
     fprintf(LOG_DEST, "MAX_ZWTVMOIST\t\t%2d\n", MAX_ZWTVMOIST);
     fprintf(LOG_DEST, "MAX_LAYERS\t\t%2d\n", MAX_LAYERS);
     fprintf(LOG_DEST, "MAX_NODES\t\t%2d\n", MAX_NODES);
-    fprintf(LOG_DEST, "MAX_VEG\t\t\t%2d\n", MAX_VEG);
     fprintf(LOG_DEST, "\n");
     fprintf(LOG_DEST, "MINSOILDEPTH\t\t%f\n", MINSOILDEPTH);
     fprintf(LOG_DEST, "MIN_FCANOPY\t\t%f\n", MIN_FCANOPY);
@@ -75,6 +74,11 @@ display_current_settings(int mode)
             MIN_SUBDAILY_STEPS_PER_DAY);
     fprintf(LOG_DEST, "MAX_SUBDAILY_STEPS_PER_DAY %d\n",
             MAX_SUBDAILY_STEPS_PER_DAY);
+    fprintf(LOG_DEST, "\n");
+
+    fprintf(LOG_DEST, "Extensions:\n");
+    fprintf(LOG_DEST, "-----------\n");
+    fprintf(LOG_DEST, "ROUTING\t\t\t%2s\n", ROUT_EXT);
     fprintf(LOG_DEST, "\n");
 
     if (mode == DISP_COMPILE_TIME) {
@@ -265,11 +269,11 @@ display_current_settings(int mode)
 
     fprintf(LOG_DEST, "\n");
     fprintf(LOG_DEST, "Input Domain Data:\n");
-    fprintf(LOG_DEST, "Domain file\t\t%s\n", filenames.domain);
+    fprintf(LOG_DEST, "Domain file\t\t%s\n", filenames.domain.nc_filename);
 
     fprintf(LOG_DEST, "\n");
     fprintf(LOG_DEST, "Constants File\t\t%s\n", filenames.constants);
-    fprintf(LOG_DEST, "Parameters file\t\t%s\n", filenames.params);
+    fprintf(LOG_DEST, "Parameters file\t\t%s\n", filenames.params.nc_filename);
     if (options.BASEFLOW == ARNO) {
         fprintf(LOG_DEST, "BASEFLOW\t\tARNO\n");
     }
@@ -378,7 +382,8 @@ display_current_settings(int mode)
     fprintf(LOG_DEST, "\n");
     fprintf(LOG_DEST, "Input State File:\n");
     if (options.INIT_STATE) {
-        fprintf(LOG_DEST, "INIT_STATE\t\tTRUE\t%s\n", filenames.init_state);
+        fprintf(LOG_DEST, "INIT_STATE\t\tTRUE\t%s\n",
+                filenames.init_state.nc_filename);
         if (options.STATE_FORMAT == NETCDF3_CLASSIC) {
             fprintf(LOG_DEST, "STATE_FORMAT\t\tNETCDF3_CLASSIC\n");
         }

@@ -32,7 +32,7 @@
              the global domain.
  *****************************************************************************/
 void
-compare_ncdomain_with_global_domain(char *ncfile)
+compare_ncdomain_with_global_domain(nameid_struct *nc_nameid)
 {
     extern domain_struct global_domain;
 
@@ -47,7 +47,7 @@ compare_ncdomain_with_global_domain(char *ncfile)
                sizeof(*(ncfile_domain.locations)));
     check_alloc_status(ncfile_domain.locations, "Memory allocation error.");
     copy_domain_info(&global_domain, &ncfile_domain);
-    get_nc_latlon(ncfile, &ncfile_domain);
+    get_nc_latlon(nc_nameid, &ncfile_domain);
 
     // using the ncfile_domain, we can compare the values to the global domain.
 
@@ -80,4 +80,5 @@ compare_ncdomain_with_global_domain(char *ncfile)
                     global_domain.locations[i].longitude, i);
         }
     }
+    free(ncfile_domain.locations);
 }

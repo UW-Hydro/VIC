@@ -30,33 +30,24 @@
  * @brief    Get netCDF dimension.
  *****************************************************************************/
 int
-get_nc_varndimensions(char *nc_name,
-                      char *var_name)
+get_nc_varndimensions(nameid_struct *nc_nameid,
+                      char          *var_name)
 {
-    int nc_id;
     int var_id;
     int ndims;
     int status;
 
-    // open the netcdf file
-    status = nc_open(nc_name, NC_NOWRITE, &nc_id);
-    check_nc_status(status, "Error opening %s", nc_name);
-
     // get variable id
-    status = nc_inq_varid(nc_id, var_name, &var_id);
+    status = nc_inq_varid(nc_nameid->nc_id, var_name, &var_id);
     check_nc_status(status, "Error getting variable id %s in %s", var_name,
-                    nc_name);
+                    nc_nameid->nc_filename);
 
     // get number of dimensions
-    status = nc_inq_varndims(nc_id, var_id, &ndims);
+    status = nc_inq_varndims(nc_nameid->nc_id, var_id, &ndims);
     check_nc_status(status,
                     "Error getting number of dimensions for var %s in %s",
                     var_name,
-                    nc_name);
-
-    // close the netcdf file
-    status = nc_close(nc_id);
-    check_nc_status(status, "Error closing %s", nc_name);
+                    nc_nameid->nc_filename);
 
     return ndims;
 }

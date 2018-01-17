@@ -73,13 +73,27 @@ vic_start(void)
             fclose(filep.constants);
         }
 
+        // open parameter file
+        status = nc_open(filenames.params.nc_filename, NC_NOWRITE,
+                         &(filenames.params.nc_id));
+        check_nc_status(status, "Error opening %s",
+                        filenames.params.nc_filename);
+        // open domain file
+        status = nc_open(filenames.domain.nc_filename, NC_NOWRITE,
+                         &(filenames.domain.nc_id));
+        check_nc_status(status, "Error opening %s",
+                        filenames.domain.nc_filename);
         // read domain info
-        get_global_domain(filenames.domain, filenames.params,
+        get_global_domain(&(filenames.domain), &(filenames.params),
                           &global_domain);
+        // close domain file
+        status = nc_close(filenames.domain.nc_id);
+        check_nc_status(status, "Error closing %s",
+                        filenames.domain.nc_filename);
 
         // add the number of vegetation type to the location info in the
         // global domain struct. This just makes life easier
-        add_nveg_to_global_domain(filenames.params, &global_domain);
+        add_nveg_to_global_domain(&(filenames.params), &global_domain);
 
         // decompose the mask
         mpi_map_decomp_domain(global_domain.ncells_active, mpi_size,
@@ -100,14 +114,15 @@ vic_start(void)
         }
 
         // get dimensions (number of vegetation types, soil zones, etc)
-        options.ROOT_ZONES = get_nc_dimension(filenames.params, "root_zone");
-        options.Nlayer = get_nc_dimension(filenames.params, "nlayer");
-        options.NVEGTYPES = get_nc_dimension(filenames.params, "veg_class");
+        options.ROOT_ZONES = get_nc_dimension(&(filenames.params), "root_zone");
+        options.Nlayer = get_nc_dimension(&(filenames.params), "nlayer");
+        options.NVEGTYPES = get_nc_dimension(&(filenames.params), "veg_class");
         if (options.SNOW_BAND == SNOW_BAND_TRUE_BUT_UNSET) {
-            options.SNOW_BAND = get_nc_dimension(filenames.params, "snow_band");
+            options.SNOW_BAND = get_nc_dimension(&(filenames.params),
+                                                 "snow_band");
         }
         if (options.LAKES) {
-            options.NLAKENODES = get_nc_dimension(filenames.params,
+            options.NLAKENODES = get_nc_dimension(&(filenames.params),
                                                   "lake_node");
         }
 

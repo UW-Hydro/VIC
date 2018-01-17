@@ -217,7 +217,7 @@ func_canopy_energy_bal(double  Tfoliage,
         /* Calculate the latent heat flux */
 
         Ls = calc_latent_heat_of_sublimation(Tfoliage);
-        *LatentHeatSub = Ls * *VaporMassFlux * CONST_RHOFW;
+        *LatentHeatSub = Ls * (*VaporMassFlux) * CONST_RHOFW;
         *LatentHeat = 0;
         *Evap = 0;
         veg_var->throughfall = 0;
@@ -246,7 +246,7 @@ func_canopy_energy_bal(double  Tfoliage,
                             root, dryFrac, shortwave, Catm, CanopLayerBnd);
         *Wdew /= MM_PER_M;
 
-        *LatentHeat = Le * *Evap * CONST_RHOFW;
+        *LatentHeat = Le * (*Evap) * CONST_RHOFW;
         *LatentHeatSub = 0;
     }
 

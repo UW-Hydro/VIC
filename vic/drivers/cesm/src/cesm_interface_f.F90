@@ -89,10 +89,11 @@ MODULE vic_cesm_interface
   !> @brief   Finalize Interface
   !--------------------------------------------------------------------------
   INTERFACE
-     INTEGER(C_INT) FUNCTION vic_cesm_final() BIND(C, name='vic_cesm_final')
+     INTEGER(C_INT) FUNCTION vic_cesm_final(vclock) BIND(C, name='vic_cesm_final')
        USE, INTRINSIC :: ISO_C_BINDING
        USE vic_cesm_def_mod
        IMPLICIT NONE
+       TYPE(vic_clock), INTENT(in) :: vclock
      END FUNCTION vic_cesm_final
   END INTERFACE
 

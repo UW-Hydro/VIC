@@ -391,7 +391,7 @@ set_output_met_data_info()
     strcpy(out_metadata[OUT_LAKE_BF_IN].standard_name, "infiltration_amount");
     strcpy(out_metadata[OUT_LAKE_BF_IN].units, "mm");
     strcpy(out_metadata[OUT_LAKE_BF_IN].description,
-           "oisture that reaches top of soil column");
+           "incoming baseflow from lake catchment");
 
     /* incoming volumetric baseflow from lake catchment [m3] */
     strcpy(out_metadata[OUT_LAKE_BF_IN_V].varname, "OUT_LAKE_BF_IN_V");

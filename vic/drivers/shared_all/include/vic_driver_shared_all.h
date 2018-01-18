@@ -93,7 +93,7 @@ enum
     CHANNEL_IN,  /**< incoming channel flow [m3] */
     FCANOPY,     /**< fractional area covered by plant canopy [fraction] */
     FDIR,        /**< fraction of incoming shortwave that is direct [fraction] */
-    LAI_IN,      /**< leaf area index [m2/m2] */
+    LAI,         /**< leaf area index [m2/m2] */
     LWDOWN,      /**< incoming longwave radiation [W/m2] */
     PAR,         /**< incoming photosynthetically active radiation [W/m2] */
     PREC,        /**< total precipitation (rain and snow) [mm] */

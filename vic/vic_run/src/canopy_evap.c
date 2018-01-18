@@ -70,14 +70,14 @@ canopy_evap(layer_data_struct *layer,
     double                 tmp_Evap;
     double                 canopyevap;
     double                 tmp_Wdew;
-    double                 layertransp[MAX_LAYERS];
+    double                 layerevap[MAX_LAYERS];
     double                 rc;
 
     Evap = 0;
 
     /* Initialize variables */
     for (i = 0; i < options.Nlayer; i++) {
-        layertransp[i] = 0;
+        layerevap[i] = 0;
     }
     canopyevap = 0;
     throughfall = 0;
@@ -144,7 +144,7 @@ canopy_evap(layer_data_struct *layer,
     if (CALC_EVAP) {
         transpiration(layer, veg_var, veg_class, rad, vpd, net_short,
                       air_temp, ra, *dryFrac, delta_t, elevation, Wmax, Wcr,
-                      Wpwp, layertransp, frost_fract, root, shortwave, Catm,
+                      Wpwp, layerevap, frost_fract, root, shortwave, Catm,
                       CanopLayerBnd);
     }
 
@@ -153,8 +153,8 @@ canopy_evap(layer_data_struct *layer,
     veg_var->Wdew = tmp_Wdew;
     tmp_Evap = canopyevap;
     for (i = 0; i < options.Nlayer; i++) {
-        layer[i].transp = layertransp[i];
-        tmp_Evap += layertransp[i];
+        layer[i].evap = layerevap[i];
+        tmp_Evap += layerevap[i];
     }
 
     Evap += tmp_Evap / (MM_PER_M * delta_t);
@@ -180,7 +180,7 @@ transpiration(layer_data_struct *layer,
               double            *Wmax,
               double            *Wcr,
               double            *Wpwp,
-              double            *layertransp,
+              double            *layerevap,
               double            *frost_fract,
               double            *root,
               double             shortwave,
@@ -195,10 +195,10 @@ transpiration(layer_data_struct *layer,
     size_t                   frost_area;
     double                   gsm_inv;   /* soil moisture stress factor */
     double                   moist1, moist2; /* tmp holding of moisture */
-    double                   transp;    /* tmp holding for transp total */
+    double                   evap;      /* tmp holding for evap total */
     double                   Wcr1;      /* tmp holding of critical water for upper layers */
     double                   root_sum;  /* proportion of roots in moist>Wcr zones */
-    double                   spare_transp; /* transp for 2nd distribution */
+    double                   spare_evap; /* evap for 2nd distribution */
     double                   avail_moist[MAX_LAYERS]; /* moisture available for trans */
     double                   ice[MAX_LAYERS];
     double                   gc;
@@ -280,8 +280,8 @@ transpiration(layer_data_struct *layer,
 
        Potential evapotranspiration not hindered by soil dryness.  If
        layer with less than half the roots is dryer than Wcr, extra
-       transpiration is taken from the wetter layer.  Otherwise layers
-       contribute to transipration based on root fraction.
+       evaporation is taken from the wetter layer.  Otherwise layers
+       contribute to evapotransipration based on root fraction.
     ******************************************************************/
 
     if (options.SHARE_LAYER_MOIST &&
@@ -324,17 +324,17 @@ transpiration(layer_data_struct *layer,
         }
 
         /* compute transpiration */
-        transp = penman(air_temp, elevation, rad, vpd, ra, veg_var->rc,
-                        vic_run_veg_lib[veg_class].rarc) *
+        evap = penman(air_temp, elevation, rad, vpd, ra, veg_var->rc,
+                      vic_run_veg_lib[veg_class].rarc) *
                delta_t / CONST_CDAY * dryFrac;
 
-        /** divide up transp based on root distribution **/
+        /** divide up evap based on root distribution **/
         /** Note the indexing of the roots **/
         root_sum = 1.0;
-        spare_transp = 0.0;
+        spare_evap = 0.0;
         for (i = 0; i < options.Nlayer; i++) {
             if (avail_moist[i] >= Wcr[i]) {
-                layertransp[i] = transp * (double) root[i];
+                layerevap[i] = evap * (double) root[i];
             }
             else {
                 if (avail_moist[i] >= Wpwp[i]) {
@@ -345,25 +345,24 @@ transpiration(layer_data_struct *layer,
                     gsm_inv = 0.0;
                 }
 
-                layertransp[i] = transp * gsm_inv * (double) root[i];
+                layerevap[i] = evap * gsm_inv * (double) root[i];
                 root_sum -= root[i];
-                spare_transp = transp * (double) root[i] * (1.0 - gsm_inv);
+                spare_evap = evap * (double) root[i] * (1.0 - gsm_inv);
             }
         }
 
-        /** Assign excess transpiration to wetter layer **/
-        if (spare_transp > 0.0) {
+        /** Assign excess evaporation to wetter layer **/
+        if (spare_evap > 0.0) {
             for (i = 0; i < options.Nlayer; i++) {
                 if (avail_moist[i] >= Wcr[i]) {
-                    layertransp[i] += (double) root[i] *
-                                      spare_transp / root_sum;
+                    layerevap[i] += (double) root[i] * spare_evap / root_sum;
                 }
             }
         }
     }
 
     /*********************************************************************
-       CASE 2: Independent transpirations
+       CASE 2: Independent evapotranspirations
 
        Evapotranspiration is restricted by low soil moisture. Evaporation
        is computed independantly from each soil layer.
@@ -381,7 +380,7 @@ transpiration(layer_data_struct *layer,
         }
 
         for (i = 0; i < options.Nlayer; i++) {
-            /** Set transpiration restriction factor **/
+            /** Set evaporation restriction factor **/
             if (avail_moist[i] >= Wcr[i]) {
                 gsm_inv = 1.0;
             }
@@ -429,7 +428,7 @@ transpiration(layer_data_struct *layer,
                 }
 
                 /* compute transpiration */
-                layertransp[i] = penman(air_temp, elevation, rad, vpd, ra,
+                layerevap[i] = penman(air_temp, elevation, rad, vpd, ra,
                                       veg_var->rc,
                                       vic_run_veg_lib[veg_class].rarc) *
                                delta_t / CONST_CDAY * dryFrac *
@@ -454,7 +453,7 @@ transpiration(layer_data_struct *layer,
                 }
             }
             else {
-                layertransp[i] = 0.0;
+                layerevap[i] = 0.0;
                 gc += 0;
                 if (options.CARBON) {
                     for (cidx = 0; cidx < options.Ncanopy; cidx++) {
@@ -495,32 +494,32 @@ transpiration(layer_data_struct *layer,
     }
 
     /****************************************************************
-       Check that transipration does not cause soil moisture to
+       Check that evapotransipration does not cause soil moisture to
        fall below wilting point.
     ****************************************************************/
     for (i = 0; i < options.Nlayer; i++) {
         if (ice[i] > 0) {
             if (ice[i] >= Wpwp[i]) {
                 // ice content greater than wilting point can use all unfrozen moist
-                if (layertransp[i] > avail_moist[i]) {
-                    layertransp[i] = avail_moist[i];
+                if (layerevap[i] > avail_moist[i]) {
+                    layerevap[i] = avail_moist[i];
                 }
             }
             else {
                 // ice content less than wilting point restrict loss of unfrozen moist
-                if (layertransp[i] > layer[i].moist - Wpwp[i]) {
-                    layertransp[i] = layer[i].moist - Wpwp[i];
+                if (layerevap[i] > layer[i].moist - Wpwp[i]) {
+                    layerevap[i] = layer[i].moist - Wpwp[i];
                 }
             }
         }
         else {
             // No ice restrict loss of unfrozen moist
-            if (layertransp[i] > layer[i].moist - Wpwp[i]) {
-                layertransp[i] = layer[i].moist - Wpwp[i];
+            if (layerevap[i] > layer[i].moist - Wpwp[i]) {
+                layerevap[i] = layer[i].moist - Wpwp[i];
             }
         }
-        if (layertransp[i] < 0.0) {
-            layertransp[i] = 0.0;
+        if (layerevap[i] < 0.0) {
+            layerevap[i] = 0.0;
         }
     }
 }

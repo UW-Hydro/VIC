@@ -420,8 +420,7 @@ void
 print_layer_data_fluxes(layer_data_struct *ldata)
 {
     fprintf(LOG_DEST, "layer_data (fluxes):\n");
-    fprintf(LOG_DEST, "\tesoil: %f\n", ldata->esoil);
-    fprintf(LOG_DEST, "\ttransp: %f\n", ldata->transp);
+    fprintf(LOG_DEST, "\tbare_evap_frac: %f\n", ldata->evap);
     fprintf(LOG_DEST, "\tevap: %f\n", ldata->evap);
 }
 

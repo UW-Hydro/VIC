@@ -19,8 +19,8 @@ The VIC Classic Driver requires subdaily forcings (meteorological or other). For
 | Variable   | Description                                              | Units                       |
 |------------|----------------------------------------------------------|---------------------------- |
 | ALBEDO     | Surface Albedo                                           | fraction (between 0 and 1)  |
-| LAI        | Leaf Area Index                                          | m<sup>2</sup>/m<sup>2</sup> |
-| FCANOPY    | Partial veg cover fraction ( = 1 - canopy gap fraction ) | fraction (between 0 and 1)  |
+| LAI_IN     | Leaf Area Index                                          | m<sup>2</sup>/m<sup>2</sup> |
+| VEGCOVER   | Partial veg cover fraction ( = 1 - canopy gap fraction ) | fraction (between 0 and 1)  |
 
 #### Lake Forcings, Required when LAKES is TRUE:
 

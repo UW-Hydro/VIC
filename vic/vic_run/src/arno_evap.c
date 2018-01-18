@@ -59,7 +59,7 @@ arno_evap(layer_data_struct *layer,
     double                   ratio, as;
     double                   Epot; /* potential bare soil evaporation */
     double                   moist;
-    double                   esoil;
+    double                   evap;
     double                   max_infil;
     double                   Evap;
     double                   tmpsum;
@@ -115,7 +115,7 @@ arno_evap(layer_data_struct *layer,
     /**********************************************************************/
 
     if (tmp >= max_infil) {
-        esoil = Epot;
+        evap = Epot;
     }
     else {
         /********************************************************************/
@@ -159,7 +159,7 @@ arno_evap(layer_data_struct *layer,
         }
 
         beta_asp = as + (1.0 - as) * (1.0 - ratio) * dummy;
-        esoil = Epot * beta_asp;
+        evap = Epot * beta_asp;
     }
 
     /***********************************************************************/
@@ -168,21 +168,21 @@ arno_evap(layer_data_struct *layer,
     /***********************************************************************/
 
     /* only consider positive evaporation; we won't put limits on condensation */
-    if (esoil > 0.0) {
+    if (evap > 0.0) {
         if (moist > moist_resid * depth1 * MM_PER_M) {
-            /* there is liquid moisture available; cap esoil at available liquid moisture */
-            if (esoil > moist - moist_resid * depth1 * MM_PER_M) {
-                esoil = moist - moist_resid * depth1 * MM_PER_M;
+            /* there is liquid moisture available; cap evap at available liquid moisture */
+            if (evap > moist - moist_resid * depth1 * MM_PER_M) {
+                evap = moist - moist_resid * depth1 * MM_PER_M;
             }
         }
         else {
-            /* no moisture available; cap esoil at 0 */
-            esoil = 0.0;
+            /* no moisture available; cap evap at 0 */
+            evap = 0.0;
         }
     }
 
-    layer[0].esoil = esoil;
-    Evap += esoil / MM_PER_M / delta_t;
+    layer[0].evap = evap;
+    Evap += evap / MM_PER_M / delta_t;
 
     return(Evap);
 }

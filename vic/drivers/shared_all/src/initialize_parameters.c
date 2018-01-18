@@ -33,7 +33,7 @@ void
 initialize_parameters()
 {
     extern parameters_struct param;
-    extern option_struct    options;
+    extern option_struct     options;
     // Initialize temporary parameters
 
     // Lapse Rate
@@ -218,7 +218,7 @@ initialize_parameters()
         param.MAX_ITER_GRND_CANOPY = 10;
     }
     else {
-   	param.MAX_ITER_GRND_CANOPY = 0;
+        param.MAX_ITER_GRND_CANOPY = 0;
     }
 
     // Newton-Raphson solver parameters

@@ -33,6 +33,7 @@ void
 initialize_parameters()
 {
     extern parameters_struct param;
+    extern option_struct    options;
     // Initialize temporary parameters
 
     // Lapse Rate
@@ -212,7 +213,13 @@ initialize_parameters()
     param.FROZEN_MAXITER = 1000;
 
     // Canopy Iterations
-    param.MAX_ITER_GRND_CANOPY = 10;
+    if (options.CLOSE_ENERGY) {
+        // iterate to close energy balance
+        param.MAX_ITER_GRND_CANOPY = 10;
+    }
+    else {
+   	param.MAX_ITER_GRND_CANOPY = 0;
+    }
 
     // Newton-Raphson solver parameters
     param.NEWT_RAPH_MAXTRIAL = 150;

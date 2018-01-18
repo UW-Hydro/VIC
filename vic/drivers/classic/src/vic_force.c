@@ -95,8 +95,8 @@ vic_force(force_data_struct *force,
     if (param_set.TYPE[ALBEDO].SUPPLIED) {
         param_set.TYPE[ALBEDO].N_ELEM = veg_con[0].vegetat_type_num;
     }
-    if (param_set.TYPE[LAI].SUPPLIED) {
-        param_set.TYPE[LAI].N_ELEM = veg_con[0].vegetat_type_num;
+    if (param_set.TYPE[LAI_IN].SUPPLIED) {
+        param_set.TYPE[LAI_IN].N_ELEM = veg_con[0].vegetat_type_num;
     }
     if (param_set.TYPE[FCANOPY].SUPPLIED) {
         param_set.TYPE[FCANOPY].N_ELEM = veg_con[0].vegetat_type_num;
@@ -246,11 +246,11 @@ vic_force(force_data_struct *force,
                             veg_hist_data[ALBEDO][v][uidx];
                     }
                 }
-                if (param_set.TYPE[LAI].SUPPLIED &&
+                if (param_set.TYPE[LAI_IN].SUPPLIED &&
                     options.LAI_SRC == FROM_VEGHIST) {
-                    if (veg_hist_data[LAI][v][uidx] != NODATA_VH) {
+                    if (veg_hist_data[LAI_IN][v][uidx] != NODATA_VH) {
                         veg_hist[rec][v].LAI[i] =
-                            veg_hist_data[LAI][v][uidx];
+                            veg_hist_data[LAI_IN][v][uidx];
                     }
                 }
                 if (param_set.TYPE[FCANOPY].SUPPLIED &&
@@ -289,7 +289,7 @@ vic_force(force_data_struct *force,
 
     for (i = 0; i < N_FORCING_TYPES; i++) {
         if (param_set.TYPE[i].SUPPLIED) {
-            if (i != ALBEDO && i != LAI && i != FCANOPY) {
+            if (i != ALBEDO && i != LAI_IN && i != FCANOPY) {
                 free(forcing_data[i]);
             }
             else {

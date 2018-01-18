@@ -316,14 +316,14 @@ vic_force(void)
         d4count[2] = global_domain.n_ny;
         d4count[3] = global_domain.n_nx;
 
-        // Leaf Area Index: LAI
+        // Leaf Area Index: lai
         if (options.LAI_SRC == FROM_VEGHIST) {
             for (j = 0; j < NF; j++) {
                 d4start[0] = global_param.forceskip[1] +
                              global_param.forceoffset[1] + j;
                 for (v = 0; v < options.NVEGTYPES; v++) {
                     d4start[1] = v;
-                    get_scatter_nc_field_double(&(filenames.forcing[1]), "LAI",
+                    get_scatter_nc_field_double(&(filenames.forcing[1]), "lai",
                                                 d4start, d4count, dvar);
                     for (i = 0; i < local_domain.ncells_active; i++) {
                         vidx = veg_con_map[i].vidx[v];
@@ -335,16 +335,15 @@ vic_force(void)
             }
         }
 
-        // Partial veg cover fraction: fcanopy
+        // Partial veg cover fraction: fcan
         if (options.FCAN_SRC == FROM_VEGHIST) {
             for (j = 0; j < NF; j++) {
                 d4start[0] = global_param.forceskip[1] +
                              global_param.forceoffset[1] + j;
                 for (v = 0; v < options.NVEGTYPES; v++) {
                     d4start[1] = v;
-                    get_scatter_nc_field_double(&(filenames.forcing[1]),
-                                                "fcanopy", d4start, d4count,
-                                                dvar);
+                    get_scatter_nc_field_double(&(filenames.forcing[1]), "fcan",
+                                                d4start, d4count, dvar);
                     for (i = 0; i < local_domain.ncells_active; i++) {
                         vidx = veg_con_map[i].vidx[v];
                         if (vidx != NODATA_VEG) {
@@ -355,16 +354,15 @@ vic_force(void)
             }
         }
 
-        // Albedo: albedo
+        // Albedo: alb
         if (options.ALB_SRC == FROM_VEGHIST) {
             for (j = 0; j < NF; j++) {
                 d4start[0] = global_param.forceskip[1] +
                              global_param.forceoffset[1] + j;
                 for (v = 0; v < options.NVEGTYPES; v++) {
                     d4start[1] = v;
-                    get_scatter_nc_field_double(&(filenames.forcing[1]),
-                                                "albedo", d4start, d4count,
-                                                dvar);
+                    get_scatter_nc_field_double(&(filenames.forcing[1]), "alb",
+                                                d4start, d4count, dvar);
                     for (i = 0; i < local_domain.ncells_active; i++) {
                         vidx = veg_con_map[i].vidx[v];
                         if (vidx != NODATA_VEG) {

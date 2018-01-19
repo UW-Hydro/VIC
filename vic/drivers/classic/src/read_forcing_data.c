@@ -50,7 +50,7 @@ read_forcing_data(FILE              **infile,
     check_alloc_status((*veg_hist_data), "Memory allocation error.");
     for (i = 0; i < N_FORCING_TYPES; i++) {
         if (param_set.TYPE[i].SUPPLIED) {
-            if (i != ALBEDO && i != LAI && i != FCANOPY) {
+            if (i != ALBEDO && i != LAI_IN && i != FCANOPY) {
                 forcing_data[i] = calloc(global_param.nrecs * NF,
                                          sizeof(*(forcing_data[i])));
                 check_alloc_status(forcing_data[i], "Memory allocation error.");

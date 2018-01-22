@@ -82,8 +82,8 @@ get_force_type(char *cmdstr,
         type = FDIR;
     }
     /* type 6: LAI [m2/m2] */
-    else if (strcasecmp("LAI", optstr) == 0) {
-        type = LAI;
+    else if (strcasecmp("LAI_IN", optstr) == 0) {
+        type = LAI_IN;
     }
     /* type 7: incoming longwave radiation [W/m2] */
     else if (strcasecmp("LWDOWN", optstr) == 0) {

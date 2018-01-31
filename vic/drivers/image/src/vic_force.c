@@ -245,7 +245,7 @@ vic_force(void)
 
     if (mpi_rank == VIC_MPI_ROOT) {
         // Close forcing file if it is the last time step
-        if (current == global_param.nrecs) {
+        if (current == global_param.nrecs - 1) {
             status = nc_close(filenames.forcing[0].nc_id);
             check_nc_status(status, "Error closing %s",
                             filenames.forcing[0].nc_filename);
@@ -375,7 +375,7 @@ vic_force(void)
 
         if (mpi_rank == VIC_MPI_ROOT) {
             // Close forcing file if it is the last time step
-            if (current == global_param.nrecs) {
+            if (current == global_param.nrecs - 1) {
                 status = nc_close(filenames.forcing[1].nc_id);
                 check_nc_status(status, "Error closing %s",
                                 filenames.forcing[1].nc_filename);

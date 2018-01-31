@@ -135,6 +135,8 @@ To check which release of VIC you are running:
 
 1.	Renamed "fcov" to "fcan" in image driver to better match variable code name ([GH#673](https://github.com/UW-Hydro/VIC/pull/673))
 
+1. NetCDF forcing files are now closed at the last timestep in stead of after the last timestep. ([GH#774](https://github.com/UW-Hydro/VIC/pull/774))
+
 ------------------------------
 
 ## VIC 5.0.1

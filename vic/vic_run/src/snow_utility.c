@@ -237,7 +237,7 @@ new_snow_density(double air_temp)
 
     // cap new snow density to prevent the calculation from 
     // becoming unphysical  
-    if (density_new > param.SNOW_NEW_SNOW_DENS_MAX.) {
+    if (density_new > param.SNOW_NEW_SNOW_DENS_MAX) {
         density_new = param.SNOW_NEW_SNOW_DENS_MAX;
     }
 

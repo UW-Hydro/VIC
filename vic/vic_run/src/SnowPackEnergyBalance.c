@@ -2,6 +2,10 @@
  * @section DESCRIPTION
  *
  * Calculate snow pack energy balance
+ * 
+ * Based on the SnowPackEnergyBalance function in DHSVM
+ * Reference: Bras, R.A., Hydrology, an introduction to hydrologic science, 
+ * Addison Wesley, Inc., Reading, etc., 1990.
  *
  * @section LICENSE
  *

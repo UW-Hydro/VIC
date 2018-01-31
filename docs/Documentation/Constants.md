@@ -111,6 +111,7 @@ The table below lists the constants available for manipulation via the `CONSTANT
 | SNOW_MAX_SURFACE_SWE         |             |
 | SNOW_LIQUID_WATER_CAPACITY   |             |
 | SNOW_NEW_SNOW_DENSITY        |             |
+| SNOW_NEW_SNOW_DENS_MAX       |             |
 | SNOW_DENS_DMLIMIT            |             |
 | SNOW_DENS_DMLIMIT_FACTOR     |             |
 | SNOW_DENS_MAX_CHANGE         |             |

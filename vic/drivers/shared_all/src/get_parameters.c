@@ -326,6 +326,9 @@ get_parameters(FILE *paramfile)
             else if (strcasecmp("SNOW_NEW_SNOW_DENSITY", optstr) == 0) {
                 sscanf(cmdstr, "%*s %lf", &param.SNOW_NEW_SNOW_DENSITY);
             }
+            else if (strcasecmp("SNOW_NEW_SNOW_DENS_MAX", optstr) == 0) {
+                sscanf(cmdstr, "%*s %lf", &param.SNOW_NEW_SNOW_DENS_MAX);
+            }
             else if (strcasecmp("SNOW_DENS_DMLIMIT", optstr) == 0) {
                 sscanf(cmdstr, "%*s %lf", &param.SNOW_DENS_DMLIMIT);
             }
@@ -757,6 +760,10 @@ validate_parameters()
     if (!(param.SNOW_DENS_DMLIMIT >= 0.)) {
         log_err(
             "SNOW_DENS_DMLIMIT must be defined on the interval [0, inf) (kg/m^3)");
+    }
+    if (!(param.SNOW_NEW_SNOW_DENS_MAX >= 700.)) {
+        log_err(
+            "SNOW_NEW_SNOW_DENS_MAX must be defined on the interval [0, 700) (kg/m^3)");
     }
     if (!(param.SNOW_DENS_MAX_CHANGE >= 0 && param.SNOW_DENS_MAX_CHANGE <= 1)) {
         log_err("SNOW_DENS_MAX_CHANGE must be defined on the interval [0,1] (-)")

@@ -236,12 +236,9 @@ new_snow_density(double air_temp)
     }
 
     // cap new snow density to prevent the calculation from 
-    // becoming unphysical 
-    // maximum snow density based on Warren et al. 1999, 
-    // Bormann et al. 2013, and Maidment's Handbook of Hydrology 
-    // Figure 7.2.3 
-    if (density_new > 500.) {
-        density_new = 500.0;
+    // becoming unphysical  
+    if (density_new > param.SNOW_NEW_SNOW_DENS_MAX.) {
+        density_new = param.SNOW_NEW_SNOW_DENS_MAX;
     }
 
     return (density_new);

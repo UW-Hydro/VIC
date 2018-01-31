@@ -797,6 +797,8 @@ print_parameters(parameters_struct *param)
     fprintf(LOG_DEST, "\tTOL_GRND: %.4f\n", param->TOL_GRND);
     fprintf(LOG_DEST, "\tTOL_OVER: %.4f\n", param->TOL_OVER);
     fprintf(LOG_DEST, "\tFROZEN_MAXITER: %d\n", param->FROZEN_MAXITER);
+    fprintf(LOG_DEST, "\tMAX_ITER_GRND_CANOPY: %d\n",
+            param->MAX_ITER_GRND_CANOPY);
     fprintf(LOG_DEST, "\tNEWT_RAPH_MAXTRIAL: %d\n", param->NEWT_RAPH_MAXTRIAL);
     fprintf(LOG_DEST, "\tNEWT_RAPH_TOLX: %.4f\n", param->NEWT_RAPH_TOLX);
     fprintf(LOG_DEST, "\tNEWT_RAPH_TOLF: %.4f\n", param->NEWT_RAPH_TOLF);

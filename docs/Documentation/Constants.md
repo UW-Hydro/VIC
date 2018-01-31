@@ -161,6 +161,7 @@ The table below lists the constants available for manipulation via the `CONSTANT
 | TOL_GRND                     |             |
 | TOL_OVER                     |             |
 | FROZEN_MAXITER               |             |
+| MAX_ITER_GRND_CANOPY         |             |
 | NEWT_RAPH_MAXTRIAL           |             |
 | NEWT_RAPH_TOLX               |             |
 | NEWT_RAPH_TOLF               |             |

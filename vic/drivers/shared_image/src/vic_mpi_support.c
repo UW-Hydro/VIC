@@ -755,7 +755,7 @@ create_MPI_param_struct_type(MPI_Datatype *mpi_type)
     MPI_Datatype   *mpi_types;
 
     // nitems has to equal the number of elements in parameters_struct
-    nitems = 153;
+    nitems = 154;
     blocklengths = malloc(nitems * sizeof(*blocklengths));
     check_alloc_status(blocklengths, "Memory allocation error.");
 
@@ -1331,6 +1331,10 @@ create_MPI_param_struct_type(MPI_Datatype *mpi_type)
 
     // int FROZEN_MAXITER
     offsets[i] = offsetof(parameters_struct, FROZEN_MAXITER);
+    mpi_types[i++] = MPI_INT;
+
+    // int MAX_ITER_GRND_CANOPY
+    offsets[i] = offsetof(parameters_struct, MAX_ITER_GRND_CANOPY);
     mpi_types[i++] = MPI_INT;
 
     // int NEWT_RAPH_MAXTRIAL

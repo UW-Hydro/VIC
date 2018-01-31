@@ -1133,6 +1133,10 @@ create_MPI_param_struct_type(MPI_Datatype *mpi_type)
     offsets[i] = offsetof(parameters_struct, SNOW_NEW_SNOW_DENSITY);
     mpi_types[i++] = MPI_DOUBLE;
 
+    // double SNOW_NEW_SNOW_DENS_MAX
+    offsets[i] = offsetof(parameters_struct, SNOW_NEW_SNOW_DENS_MAX);
+    mpi_types[i++] = MPI_DOUBLE;
+
     // double SNOW_DENS_DMLIMIT
     offsets[i] = offsetof(parameters_struct, SNOW_DENS_DMLIMIT);
     mpi_types[i++] = MPI_DOUBLE;

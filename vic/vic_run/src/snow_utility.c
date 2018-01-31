@@ -235,6 +235,15 @@ new_snow_density(double air_temp)
         log_err("Unknown SNOW_DENSITY option");
     }
 
+    // cap new snow density to prevent the calculation from 
+    // becoming unphysical 
+    // maximum snow density based on Warren et al. 1999, 
+    // Bormann et al. 2013, and Maidment's Handbook of Hydrology 
+    // Figure 7.2.3 
+    if (density_new > 500.) {
+        density_new = 500.0;
+    }
+
     return (density_new);
 }
 

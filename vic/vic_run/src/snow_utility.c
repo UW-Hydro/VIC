@@ -235,8 +235,8 @@ new_snow_density(double air_temp)
         log_err("Unknown SNOW_DENSITY option");
     }
 
-    // cap new snow density to prevent the calculation from 
-    // becoming unphysical 
+    // cap new snow density to prevent the calculation from
+    // becoming unphysical
     if (density_new > param.SNOW_NEW_SNOW_DENS_MAX) {
         density_new = param.SNOW_NEW_SNOW_DENS_MAX;
     }

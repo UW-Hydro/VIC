@@ -2,9 +2,9 @@
  * @section DESCRIPTION
  *
  * Calculate snow pack energy balance
- * 
+ *
  * Based on the SnowPackEnergyBalance function in DHSVM
- * Reference: Bras, R.A., Hydrology, an introduction to hydrologic science, 
+ * Reference: Bras, R.A., Hydrology, an introduction to hydrologic science,
  * Addison Wesley, Inc., Reading, etc., 1990.
  *
  * @section LICENSE
@@ -255,8 +255,8 @@ SnowPackEnergyBalance(double  TSurf,
 
     /* Calculate Ground Heat Flux */
     if (SnowDepth > epsilon_snow) {
-        *GroundFlux = param.SNOW_CONDUCT * pow(SnowDensity, 2.) 
-                    * (TGrnd - TMean) / SnowDepth / Dt;
+        *GroundFlux = param.SNOW_CONDUCT * pow(SnowDensity, 2.) *
+                      (TGrnd - TMean) / SnowDepth / Dt;
     }
     else {
         *GroundFlux = 0;

@@ -237,11 +237,10 @@ new_snow_density(double air_temp)
 
     // cap new snow density to prevent the calculation from 
     // becoming unphysical 
-    fprintf(LOG_DEST, "\tdensity_first = %f\n", density_new); 
     if (density_new > param.SNOW_NEW_SNOW_DENS_MAX) {
         density_new = param.SNOW_NEW_SNOW_DENS_MAX;
     }
-    fprintf(LOG_DEST, "\tdensity_second = %f\n", density_new);
+
     return (density_new);
 }
 

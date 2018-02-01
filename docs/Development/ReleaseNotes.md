@@ -111,7 +111,11 @@ To check which release of VIC you are running:
 
     The VIC image driver can be optionally compiled with ROUT_RVIC to enable routing in image mode (ROUT_STUB is the default extension which means no routing). With ROUT_RVIC enabled, the output variable ``OUT_DISCHARGE`` is available, and there will also be an extra state variable ``STATE_ROUT_RING`` stored in the state file.
 
-9. Miscellaneous clean-up:
+9. Moved MAX_ITER_GRND_CANOPY, which controls the maximum number of ground-canopy iterations in CLOSE_ENERGY mode for vegetation types with an overstory, to the parameters struct ([GH#771](https://github.com/UW-Hydro/VIC/pull/771))
+
+    Previously this was set in the surface_fluxes.c numerics routine for ground-canopy iterations, which meant that that routine had to be altered to change the maximum number of iterations. It has now been moved to the parameters struct so that it can be overriden in the constants file. 
+
+10. Miscellaneous clean-up:
 
     [GH#723](https://github.com/UW-Hydro/VIC/pull/723)
 
@@ -129,7 +133,9 @@ To check which release of VIC you are running:
 
 #### Bug Fixes:
 
-1. Renamed "fcov" to "fcan" in image driver to better match variable code name ([GH#673](https://github.com/UW-Hydro/VIC/pull/673))
+1. NetCDF forcing files are now closed at the last timestep in stead of after the last timestep. ([GH#774](https://github.com/UW-Hydro/VIC/pull/774))
+
+2. Renamed "fcov" to "fcan" in image driver to better match variable code name ([GH#673](https://github.com/UW-Hydro/VIC/pull/673))
 
 ------------------------------
 

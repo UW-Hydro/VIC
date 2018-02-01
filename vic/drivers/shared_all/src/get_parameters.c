@@ -481,6 +481,10 @@ get_parameters(FILE *paramfile)
             else if (strcasecmp("FROZEN_MAXITER", optstr) == 0) {
                 sscanf(cmdstr, "%*s %d", &param.FROZEN_MAXITER);
             }
+            // Canopy Iterations
+            else if (strcasecmp("MAX_ITER_GRND_CANOPY", optstr) == 0) {
+                sscanf(cmdstr, "%*s %d", &param.MAX_ITER_GRND_CANOPY);
+            }
             // Newton-Raphson Solver Parameters
             else if (strcasecmp("NEWT_RAPH_MAXTRIAL", optstr) == 0) {
                 sscanf(cmdstr, "%*s %d", &param.NEWT_RAPH_MAXTRIAL);
@@ -879,6 +883,11 @@ validate_parameters()
     if (!(param.FROZEN_MAXITER >= 0)) {
         log_err(
             "FROZEN_MAXITER must be defined on the interval [0, inf) (iterations");
+    }
+    // Canopy Iterations
+    if (!(param.MAX_ITER_GRND_CANOPY >= 0)) {
+        log_err(
+            "MAX_ITER_GRND_CANOPY  must be defined on the interval [0, inf) (iterations");
     }
     // Newton-Raphson Solver Parameters
     if (!(param.NEWT_RAPH_MAXTRIAL >= 0)) {

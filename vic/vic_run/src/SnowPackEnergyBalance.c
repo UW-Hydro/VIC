@@ -253,9 +253,11 @@ SnowPackEnergyBalance(double  TSurf,
                         (TSurf - OldTSurf) / Dt;
 
     /* Calculate Ground Heat Flux */
+    fprintf(LOG_DEST, "\tSnowDepth = %f\n", SnowDepth);
+    fprintf(LOG_DEST, "\tSnowDensity = %f\n", SnowDensity);
     if (SnowDepth > DBL_EPSILON) {
-        *GroundFlux = param.SNOW_CONDUCT * pow(SnowDensity, 2.) *
-                      (TGrnd - TMean) * Dt / SnowDepth;
+        *GroundFlux = param.SNOW_CONDUCT * pow(SnowDensity, 2.) 
+                    * (TGrnd - TMean) / SnowDepth / Dt;
     }
     else {
         *GroundFlux = 0;

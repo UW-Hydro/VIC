@@ -761,7 +761,7 @@ validate_parameters()
         log_err(
             "SNOW_DENS_DMLIMIT must be defined on the interval [0, inf) (kg/m^3)");
     }
-    if (!(param.SNOW_NEW_SNOW_DENS_MAX >= 700.)) {
+    if (!(param.SNOW_NEW_SNOW_DENS_MAX >= 0. && param.SNOW_NEW_SNOW_DENS_MAX <= 700.)) {
         log_err(
             "SNOW_NEW_SNOW_DENS_MAX must be defined on the interval [0, 700) (kg/m^3)");
     }

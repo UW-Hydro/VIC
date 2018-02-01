@@ -150,7 +150,7 @@ initialize_parameters()
     param.SNOW_MAX_SURFACE_SWE = 0.125;
     param.SNOW_LIQUID_WATER_CAPACITY = 0.035;
     param.SNOW_NEW_SNOW_DENSITY = 50.0;
-    param.SNOW_NEW_SNOW_DENS_MAX = 500.0;
+    param.SNOW_NEW_SNOW_DENS_MAX = 400.0;
     param.SNOW_DENS_DMLIMIT = 100.0;
     param.SNOW_DENS_DMLIMIT_FACTOR = 1.15;
     param.SNOW_DENS_MAX_CHANGE = 0.9;

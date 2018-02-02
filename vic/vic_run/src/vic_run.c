@@ -180,15 +180,8 @@ vic_run(force_data_struct   *force,
                 }
             }
 
-            /* local pointer to veg_var and snow */
+            /* local pointer to veg_var */
             veg_var = &(all_vars->veg_var[iveg][0]);
-            snow = &(all_vars->snow[iveg][0]);
-
-            // Convert LAI from global to local
-            veg_var->LAI /= veg_var->fcanopy;
-            veg_var->Wdew /= veg_var->fcanopy;
-            veg_var->Wdmax = veg_var->LAI * param.VEG_LAI_WATER_FACTOR;
-            snow->snow_canopy /= veg_var->fcanopy;
 
             /** Assign wind_h **/
             /** Note: this is ignored below **/
@@ -230,20 +223,6 @@ vic_run(force_data_struct   *force,
                 return (ERROR);
             }
 
-            /** Compute Surface Attenuation due to Vegetation Coverage **/
-            surf_atten = (1 - veg_var->fcanopy) * 1.0 +
-                         veg_var->fcanopy *
-                         exp(-vic_run_veg_lib[veg_class].rad_atten *
-                             veg_var->LAI);
-
-            /** Compute Bare (free of snow) Albedo **/
-            if (iveg != Nveg) {
-                bare_albedo = veg_var->albedo;
-            }
-            else {
-                bare_albedo = param.ALBEDO_BARE_SOIL;
-            }
-
             /**************************************************
                Loop over elevation bands
             **************************************************/
@@ -257,11 +236,31 @@ vic_run(force_data_struct   *force,
                     snow = &(all_vars->snow[iveg][band]);
                     energy = &(all_vars->energy[iveg][band]);
 
+                    // Convert LAI from global to local
+                    veg_var->LAI /= veg_var->fcanopy;
+                    veg_var->Wdew /= veg_var->fcanopy;
+                    veg_var->Wdmax = veg_var->LAI * param.VEG_LAI_WATER_FACTOR;
+                    snow->snow_canopy /= veg_var->fcanopy;
+
                     /******************************************
                        Initialize Band-dependent Model Parameters
                     ******************************************/
 
-                    /* Initialize soil thermal properties for the top two layers */
+                    /** Surface Attenuation due to Vegetation Coverage **/
+                    surf_atten = (1 - veg_var->fcanopy) * 1.0 +
+                                 veg_var->fcanopy *
+                                 exp(-vic_run_veg_lib[veg_class].rad_atten *
+                                     veg_var->LAI);
+
+                    /** Bare (free of snow) Albedo **/
+                    if (iveg != Nveg) {
+                        bare_albedo = veg_var->albedo;
+                    }
+                    else {
+                        bare_albedo = param.ALBEDO_BARE_SOIL;
+                    }
+
+                    /* Soil thermal properties for the top two layers */
                     prepare_full_energy(cell, energy, soil_con, &moist0, &ice0);
 
                     /* Initialize final aerodynamic resistance values */

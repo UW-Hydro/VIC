@@ -67,7 +67,7 @@ put_data(all_vars_struct   *all_vars,
     double                     inflow;
     double                     outflow;
     double                     storage;
-    double                     TreeAdjustFactor[MAX_BANDS];
+    double                    *TreeAdjustFactor;
     double                     ThisAreaFract;
     double                     ThisTreeAdjust;
     size_t                     i;
@@ -93,6 +93,8 @@ put_data(all_vars_struct   *all_vars,
     dt_sec = global_param.dt;
 
     // Compute treeline adjustment factors
+    TreeAdjustFactor = calloc(options.SNOW_BAND, sizeof(*TreeAdjustFactor));
+    check_alloc_status(TreeAdjustFactor, "Memory allocation error.");
     for (band = 0; band < options.SNOW_BAND; band++) {
         if (AboveTreeLine[band]) {
             Cv = 0;
@@ -568,6 +570,8 @@ put_data(all_vars_struct   *all_vars,
     else {
         out_data[OUT_ENERGY_ERROR][0] = MISSING;
     }
+
+    free((char *) (TreeAdjustFactor));
 
     // vic_run run time
     out_data[OUT_TIME_VICRUN_WALL][0] = timer->delta_wall;

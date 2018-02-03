@@ -37,11 +37,11 @@ OPTIONAL - If VEGPARAM_LAI is TRUE in global parameter file, then for each veget
 |---------------  |---------- |-------------------------------- |
 | LAI             | fraction  | Leaf Area Index, one per month  |
 
-OPTIONAL - If VEGPARAM_VEGCOVER is TRUE in global parameter file, then for each vegetation tile, there must be a line containing the following parameters:
+OPTIONAL - If VEGPARAM_FCAN is TRUE in global parameter file, then for each vegetation tile, there must be a line containing the following parameters:
 
 | Variable Name   | Units     | Description                                       |
 |---------------  |---------- |-------------------------------------------------- |
-| VEGCOVER        | fraction  | Partial vegetation cover fraction, one per month  |
+| FCANOPY         | fraction  | Partial vegetation cover fraction, one per month  |
 
 OPTIONAL - If VEGPARAM_ALBEDO is TRUE in global parameter file, then for each vegetation tile, there must be a line containing the following parameters:
 

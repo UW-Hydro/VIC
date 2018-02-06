@@ -217,8 +217,8 @@ void photosynth(char, double, double, double, double, double, double, double,
                 double, double, char *, double *, double *, double *, double *,
                 double *);
 void polint(double xa[], double ya[], int n, double x, double *y, double *dy);
-void prepare_full_energy(int, all_vars_struct *, soil_con_struct *, double *,
-                         double *);
+void prepare_full_energy(cell_data_struct *, energy_bal_struct *,
+                         soil_con_struct *, double *, double *);
 double qromb(
     double (*sub_with_height)(), double es, double Wind, double AirDens, double ZO, double EactAir, double F, double hsalt, double phi_r, double ushear, double Zrh, double a,
     double b);

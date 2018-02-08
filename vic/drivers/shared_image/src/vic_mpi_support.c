@@ -755,7 +755,7 @@ create_MPI_param_struct_type(MPI_Datatype *mpi_type)
     MPI_Datatype   *mpi_types;
 
     // nitems has to equal the number of elements in parameters_struct
-    nitems = 154;
+    nitems = 156;
     blocklengths = malloc(nitems * sizeof(*blocklengths));
     check_alloc_status(blocklengths, "Memory allocation error.");
 
@@ -1131,6 +1131,14 @@ create_MPI_param_struct_type(MPI_Datatype *mpi_type)
 
     // double SNOW_NEW_SNOW_DENSITY
     offsets[i] = offsetof(parameters_struct, SNOW_NEW_SNOW_DENSITY);
+    mpi_types[i++] = MPI_DOUBLE;
+
+    // double SNOW_NEW_SNOW_DENS_MAX
+    offsets[i] = offsetof(parameters_struct, SNOW_NEW_SNOW_DENS_MAX);
+    mpi_types[i++] = MPI_DOUBLE;
+
+    // double SNOW_DEPTH_THRES
+    offsets[i] = offsetof(parameters_struct, SNOW_DEPTH_THRES);
     mpi_types[i++] = MPI_DOUBLE;
 
     // double SNOW_DENS_DMLIMIT

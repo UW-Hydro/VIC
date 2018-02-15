@@ -229,6 +229,15 @@ surface_fluxes(bool                 overstory,
         check_alloc_status(store_gsLayer, "Memory allocation error.");
     }
 
+    // Canopy Iterations
+    if (options.CLOSE_ENERGY) {
+        // iterate to close energy balance
+        param.MAX_ITER_GRND_CANOPY = 10; 
+    }   
+    else {
+        param.MAX_ITER_GRND_CANOPY = 0;
+    }   
+
     /***********************************************************************
        Set temporary variables for convenience
     ***********************************************************************/

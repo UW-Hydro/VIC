@@ -227,7 +227,7 @@ surface_fluxes(bool                 overstory,
     if (options.CARBON) {
         store_gsLayer = calloc(options.Ncanopy, sizeof(*store_gsLayer));
         check_alloc_status(store_gsLayer, "Memory allocation error.");
-    }   
+    }
 
     /***********************************************************************
        Set temporary variables for convenience

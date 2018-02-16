@@ -213,12 +213,12 @@ initialize_parameters()
     // Frozen Soil Parameters
     param.FROZEN_MAXITER = 1000;
 
-    // Canopy Iterations 
-    // initialized to 10, set to 0 if 
+    // Canopy Iterations
+    // initialized to 10, set to 0 if
     // options.CLOSE_ENERGY is false
-    // this allows for flexibility in 
-    // changing the maximum number of 
-    // iterations 
+    // this allows for flexibility in
+    // changing the maximum number of
+    // iterations
     param.MAX_ITER_GRND_CANOPY = 10;
 
     // Newton-Raphson solver parameters

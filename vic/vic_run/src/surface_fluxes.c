@@ -228,7 +228,7 @@ surface_fluxes(bool                 overstory,
         store_gsLayer = calloc(options.Ncanopy, sizeof(*store_gsLayer));
         check_alloc_status(store_gsLayer, "Memory allocation error.");
     }   
-    fprintf(LOG_DEST, "\tMAX_ITER_GRND_CANOPY: %d\n", param.MAX_ITER_GRND_CANOPY);
+
     /***********************************************************************
        Set temporary variables for convenience
     ***********************************************************************/

@@ -131,6 +131,13 @@ vic_run(force_data_struct   *force,
         gauge_correction[0] = 1;
         gauge_correction[1] = 1;
     }
+
+    // Canopy Iterations
+    if (!options.CLOSE_ENERGY) {
+        // do not iterate to close energy balance
+        param.MAX_ITER_GRND_CANOPY = 0;
+    }
+
     force->out_prec = 0;
     force->out_rain = 0;
     force->out_snow = 0;

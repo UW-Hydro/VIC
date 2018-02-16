@@ -227,15 +227,6 @@ surface_fluxes(bool                 overstory,
     if (options.CARBON) {
         store_gsLayer = calloc(options.Ncanopy, sizeof(*store_gsLayer));
         check_alloc_status(store_gsLayer, "Memory allocation error.");
-    }
-
-    // Canopy Iterations
-    if (options.CLOSE_ENERGY) {
-        // iterate to close energy balance
-        param.MAX_ITER_GRND_CANOPY = 10; 
-    }   
-    else {
-        param.MAX_ITER_GRND_CANOPY = 0;
     }   
 
     /***********************************************************************

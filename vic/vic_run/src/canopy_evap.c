@@ -281,7 +281,7 @@ transpiration(layer_data_struct *layer,
        Potential evapotranspiration not hindered by soil dryness.  If
        layer with less than half the roots is dryer than Wcr, extra
        transpiration is taken from the wetter layer.  Otherwise layers
-       contribute to transipration based on root fraction.
+       contribute to transpiration based on root fraction.
     ******************************************************************/
 
     if (options.SHARE_LAYER_MOIST &&
@@ -495,7 +495,7 @@ transpiration(layer_data_struct *layer,
     }
 
     /****************************************************************
-       Check that transipration does not cause soil moisture to
+       Check that transpiration does not cause soil moisture to
        fall below wilting point.
     ****************************************************************/
     for (i = 0; i < options.Nlayer; i++) {

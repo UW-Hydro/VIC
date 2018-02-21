@@ -229,6 +229,7 @@ vic_run(force_data_struct   *force,
             for (band = 0; band < Nbands; band++) {
                 /** Solve band only if coverage greater than 0% **/
                 if (soil_con->AreaFract[band] > 0) {
+
                     /* Set local pointers */
                     cell = &(all_vars->cell[iveg][band]);
                     veg_var = &(all_vars->veg_var[iveg][band]);

@@ -163,12 +163,6 @@ main(int   argc,
         filep.statefile = NULL;
     }
 
-    // Canopy Iterations
-    if (!options.CLOSE_ENERGY) {
-        // do not iterate to close energy balance
-        param.MAX_ITER_GRND_CANOPY = 0;
-    }
-
     /************************************
        Run Model for all Active Grid Cells
     ************************************/

@@ -131,7 +131,6 @@ vic_run(force_data_struct   *force,
         gauge_correction[0] = 1;
         gauge_correction[1] = 1;
     }
-
     force->out_prec = 0;
     force->out_rain = 0;
     force->out_snow = 0;
@@ -229,6 +228,7 @@ vic_run(force_data_struct   *force,
             **************************************************/
             for (band = 0; band < Nbands; band++) {
                 /** Solve band only if coverage greater than 0% **/
+
                 if (soil_con->AreaFract[band] > 0) {
                     /* Set local pointers */
                     cell = &(all_vars->cell[iveg][band]);

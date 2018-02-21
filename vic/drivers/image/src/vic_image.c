@@ -132,9 +132,10 @@ main(int    argc,
 
     // Initialization is complete, print settings
     log_info(
-        "Initialization is complete, print global param and options structures");
+        "Initialization is complete, print global param, parameters and options structures");
     print_global_param(&global_param);
     print_option(&options);
+    print_parameters(&param);
 
     // stop init timer
     timer_stop(&(global_timers[TIMER_VIC_INIT]));

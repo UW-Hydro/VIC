@@ -326,7 +326,7 @@ transpiration(layer_data_struct *layer,
         /* compute transpiration */
         transp = penman(air_temp, elevation, rad, vpd, ra, veg_var->rc,
                         vic_run_veg_lib[veg_class].rarc) *
-               delta_t / CONST_CDAY * dryFrac;
+                 delta_t / CONST_CDAY * dryFrac;
 
         /** divide up transp based on root distribution **/
         /** Note the indexing of the roots **/
@@ -368,7 +368,6 @@ transpiration(layer_data_struct *layer,
        Evapotranspiration is restricted by low soil moisture. Evaporation
        is computed independantly from each soil layer.
     *********************************************************************/
-
     else {
         /* Initialize conductances for aggregation over soil layers */
         gc = 0;
@@ -430,10 +429,10 @@ transpiration(layer_data_struct *layer,
 
                 /* compute transpiration */
                 layertransp[i] = penman(air_temp, elevation, rad, vpd, ra,
-                                      veg_var->rc,
-                                      vic_run_veg_lib[veg_class].rarc) *
-                               delta_t / CONST_CDAY * dryFrac *
-                               (double) root[i];
+                                        veg_var->rc,
+                                        vic_run_veg_lib[veg_class].rarc) *
+                                 delta_t / CONST_CDAY * dryFrac *
+                                 (double) root[i];
 
                 if (veg_var->rc > 0) {
                     gc += 1 / (veg_var->rc);

@@ -757,7 +757,7 @@ func_surf_energy_bal(double  Ts,
                                Wmax, Wcr, Wpwp, frost_fract, root,
                                dryFrac, shortwave, Catm, CanopLayerBnd);
             Evap *= veg_var->fcanopy;
-            for (i=0; i<options.Nlayer; i++) {
+            for (i = 0; i < options.Nlayer; i++) {
                 layer[i].transp *= veg_var->fcanopy;
             }
             SurfRad = surf_atten * NetBareRad;

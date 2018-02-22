@@ -201,10 +201,11 @@ put_data(all_vars_struct   *all_vars,
                     ThisTreeAdjust = 1;
                 }
 
-                if (ThisAreaFract > 0. && (veg == veg_con[0].vegetat_type_num ||
-                                           (!AboveTreeLine[band] ||
-                                            (AboveTreeLine[band] &&
-                                             !overstory)))) {
+                if (ThisAreaFract > 0. &&
+                    (veg == veg_con[0].vegetat_type_num ||
+                     (!AboveTreeLine[band] ||
+                      (AboveTreeLine[band] &&
+                       !overstory)))) {
                     /** compute running totals of various landcovers **/
                     if (HasVeg) {
                         cv_veg += Cv * ThisAreaFract * ThisTreeAdjust;
@@ -415,7 +416,8 @@ put_data(all_vars_struct   *all_vars,
                             lake_var.runoff_out * MM_PER_M /
                             soil_con->cell_area;  // mm over gridcell
                         // mm over gridcell
-                        out_data[OUT_LAKE_EVAP][0] = lake_var.evapw * MM_PER_M /
+                        out_data[OUT_LAKE_EVAP][0] = lake_var.evapw *
+                                                     MM_PER_M /
                                                      soil_con->cell_area;
                         // mm over gridcell
                         out_data[OUT_LAKE_RCHRG][0] = lake_var.recharge *
@@ -540,10 +542,12 @@ put_data(all_vars_struct   *all_vars,
     }
     storage += out_data[OUT_SWE][0] + out_data[OUT_SNOW_CANOPY][0] +
                out_data[OUT_WDEW][0] + out_data[OUT_SURFSTOR][0];
-    out_data[OUT_WATER_ERROR][0] = calc_water_balance_error(inflow,
-                                                            outflow,
-                                                            storage,
-                                                            save_data->total_moist_storage);
+    out_data[OUT_WATER_ERROR][0] = calc_water_balance_error(
+        inflow,
+        outflow,
+        storage,
+        save_data->
+        total_moist_storage);
 
     // Store total storage for next timestep
     save_data->total_moist_storage = storage;

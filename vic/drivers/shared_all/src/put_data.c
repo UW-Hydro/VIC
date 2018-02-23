@@ -542,12 +542,12 @@ put_data(all_vars_struct   *all_vars,
     }
     storage += out_data[OUT_SWE][0] + out_data[OUT_SNOW_CANOPY][0] +
                out_data[OUT_WDEW][0] + out_data[OUT_SURFSTOR][0];
-    out_data[OUT_WATER_ERROR][0] = calc_water_balance_error(
-        inflow,
-        outflow,
-        storage,
-        save_data->
-        total_moist_storage);
+    out_data[OUT_WATER_ERROR][0] = \
+        calc_water_balance_error(inflow,
+                                 outflow,
+                                 storage,
+                                 save_data->
+                                 total_moist_storage);
 
     // Store total storage for next timestep
     save_data->total_moist_storage = storage;

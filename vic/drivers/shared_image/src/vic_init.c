@@ -1573,6 +1573,12 @@ vic_init(void)
         initialize_energy(all_vars[i].energy, nveg);
     }
 
+    // Canopy Iterations
+    if (!options.CLOSE_ENERGY) {
+        // do not iterate to close energy balance
+        param.MAX_ITER_GRND_CANOPY = 0;
+    }
+
     // set state metadata structure
     set_state_meta_data_info();
 

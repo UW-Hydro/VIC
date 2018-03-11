@@ -1137,9 +1137,15 @@ vic_init(void)
             }
         }
         // check the number of nonzero veg tiles
-        if (k > local_domain.locations[i].nveg) {
+        if (k > local_domain.locations[i].nveg + 1) {
             sprint_location(locstr, &(local_domain.locations[i]));
-            log_err("Number of veg tiles with nonzero area (%zu) > nveg "
+            log_err("Number of veg tiles with nonzero area (%zu) > nveg + 1 "
+                    "(%zu).\n%s", k, local_domain.locations[i].nveg,
+                    locstr);
+        }
+        else if (k < local_domain.locations[i].nveg) {
+            sprint_location(locstr, &(local_domain.locations[i]));
+            log_err("Number of veg tiles with nonzero area (%zu) < nveg "
                     "(%zu).\n%s", k, local_domain.locations[i].nveg,
                     locstr);
         }

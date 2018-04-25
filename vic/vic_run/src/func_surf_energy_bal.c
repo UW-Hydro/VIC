@@ -203,7 +203,7 @@ func_surf_energy_bal(double  Ts,
     double             T1_plus;
     double             D1_minus;
     double             D1_plus;
-    double            *transp = NULL;
+    double             SurfRad;
     double             Ra_bare[3];
     double             tmp_wind[3];
     double             tmp_height;
@@ -365,12 +365,6 @@ func_surf_energy_bal(double  Ts,
     Error = 0;
 
     TMean = Ts;
-
-    transp = calloc(options.Nlayer, sizeof(*transp));
-    check_alloc_status(transp, "Memory allocation error.");
-    for (i = 0; i < options.Nlayer; i++) {
-        transp[i] = 0.;
-    }
 
     /**********************************************
        Compute Surface Temperature at Half Time Step
@@ -749,66 +743,42 @@ func_surf_energy_bal(double  Ts,
 
        Should evapotranspiration be active when the
        ground is only partially covered with snow????
-
-       Use Arno Evap in the exposed soil portion, and/or
-       if LAI is zero.
     *************************************************/
-    if (VEG && !SNOWING && veg_var->fcanopy > 0) {
-        Evap = canopy_evap(layer, veg_var, true,
-                           veg_class, Wdew, delta_t, NetBareRad, vpd,
-                           NetShortBare, Tair, Ra_veg[1], elevation, rainfall,
-                           Wmax, Wcr, Wpwp, frost_fract, root, dryFrac,
-                           shortwave, Catm, CanopLayerBnd);
-        if (veg_var->fcanopy < 1) {
-            for (i = 0; i < options.Nlayer; i++) {
-                transp[i] = layer[i].evap;
-                layer[i].evap = 0.;
-            }
+    for (i = 0; i < options.Nlayer; i++) {
+        layer[i].transp = 0;
+        layer[i].esoil = 0;
+    }
+    Evap = 0.;
+    if (!SNOWING) {
+        if (VEG && veg_var->fcanopy > 0) {
+            Evap = canopy_evap(layer, veg_var, true, veg_class, Wdew,
+                               delta_t, NetBareRad, vpd, NetShortBare,
+                               Tair, Ra_veg[1], elevation, rainfall,
+                               Wmax, Wcr, Wpwp, frost_fract, root,
+                               dryFrac, shortwave, Catm, CanopLayerBnd);
             Evap *= veg_var->fcanopy;
-            Evap += (1 - veg_var->fcanopy) *
-                    arno_evap(layer, surf_atten * NetBareRad, Tair, vpd,
-                              depth[0], max_moist * depth[0] * MM_PER_M,
-                              elevation, b_infilt, Ra_used[0], delta_t,
-                              resid_moist[0], frost_fract);
             for (i = 0; i < options.Nlayer; i++) {
-                layer[i].evap = veg_var->fcanopy * transp[i] +
-                                (1 - veg_var->fcanopy) * layer[i].evap;
-                if (layer[i].evap > 0.) {
-                    layer[i].bare_evap_frac = 1 -
-                                              (veg_var->fcanopy *
-                                               transp[i]) / layer[i].evap;
-                }
-                else {
-                    layer[i].bare_evap_frac = 0.;
-                }
+                layer[i].transp *= veg_var->fcanopy;
             }
-            veg_var->throughfall =
-                (1 -
-                 veg_var->fcanopy) * rainfall + veg_var->fcanopy *
-                veg_var->throughfall;
-            veg_var->canopyevap *= veg_var->fcanopy;
-            veg_var->Wdew *= veg_var->fcanopy;
+            SurfRad = surf_atten * NetBareRad;
         }
         else {
-            for (i = 0; i < options.Nlayer; i++) {
-                layer[i].bare_evap_frac = 0.;
-            }
+            SurfRad = NetBareRad;
         }
-    }
-    else if (!SNOWING) {
-        Evap = arno_evap(layer, NetBareRad, Tair, vpd,
-                         depth[0], max_moist * depth[0] * MM_PER_M,
-                         elevation, b_infilt, Ra_used[0], delta_t,
-                         resid_moist[0], frost_fract);
+        Evap += (1 - veg_var->fcanopy) *
+                arno_evap(layer, SurfRad, Tair, vpd,
+                          depth[0], max_moist * depth[0] * MM_PER_M,
+                          elevation, b_infilt, Ra_used[0], delta_t,
+                          resid_moist[0], frost_fract);
         for (i = 0; i < options.Nlayer; i++) {
-            layer[i].bare_evap_frac = 1;
+            layer[i].esoil *= (1 - veg_var->fcanopy);
+            layer[i].evap = layer[i].transp + layer[i].esoil;
         }
+        veg_var->throughfall = (1 - veg_var->fcanopy) * rainfall +
+                               veg_var->fcanopy * veg_var->throughfall;
+        veg_var->canopyevap *= veg_var->fcanopy;
+        veg_var->Wdew *= veg_var->fcanopy;
     }
-    else {
-        Evap = 0.;
-    }
-
-    free(transp);
 
     /**********************************************************************
        Compute the Latent Heat Flux from the Surface and Covering Vegetation

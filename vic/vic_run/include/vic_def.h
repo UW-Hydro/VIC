@@ -773,8 +773,9 @@ typedef struct {
     double phi;             /**< moisture diffusion parameter */
     double zwt;             /**< water table position relative to soil surface within the layer (cm) */
     // Fluxes
-    double bare_evap_frac;  /**< fraction of evapotranspiration coming from bare soil evap, from soil layer (mm) */
+    double esoil;           /**< soil evaporation from soil layer (mm) */
     double evap;            /**< evapotranspiration from soil layer (mm) */
+    double transp;          /**< transpiration from soil layer (mm) */
 } layer_data_struct;
 
 /******************************************************************************

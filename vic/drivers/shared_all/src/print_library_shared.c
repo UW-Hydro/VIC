@@ -420,7 +420,8 @@ void
 print_layer_data_fluxes(layer_data_struct *ldata)
 {
     fprintf(LOG_DEST, "layer_data (fluxes):\n");
-    fprintf(LOG_DEST, "\tbare_evap_frac: %f\n", ldata->evap);
+    fprintf(LOG_DEST, "\tesoil: %f\n", ldata->esoil);
+    fprintf(LOG_DEST, "\ttransp: %f\n", ldata->transp);
     fprintf(LOG_DEST, "\tevap: %f\n", ldata->evap);
 }
 
@@ -567,8 +568,9 @@ print_stream(stream_struct   *stream,
     fprintf(LOG_DEST, "\tngridcells: %zu\n", stream->ngridcells);
     fprintf(LOG_DEST, "\tagg_alarm:\n    ");
     print_alarm(&(stream->agg_alarm));
-    fprintf(LOG_DEST,
-            "\t# \tVARID        \tVARNAME \tTYPE \tMULT \tFORMAT        \tAGGTYPE\n");
+    fprintf(
+        LOG_DEST,
+        "\t# \tVARID        \tVARNAME \tTYPE \tMULT \tFORMAT        \tAGGTYPE\n");
     for (i = 0; i < stream->nvars; i++) {
         varid = stream->varid[i];
         fprintf(LOG_DEST, "\t%zu \t%u \t%20s \t%hu \t%f \t%10s \t%hu\n",

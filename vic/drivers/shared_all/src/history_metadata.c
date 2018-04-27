@@ -124,6 +124,16 @@ set_output_met_data_info()
     strcpy(out_metadata[OUT_LAKE_SWE].description,
            "liquid water equivalent of snow on top of lake ice");
 
+    /* river discharge [m3 s-1] */
+    strcpy(out_metadata[OUT_DISCHARGE].varname, "OUT_DISCHARGE");
+    strcpy(out_metadata[OUT_DISCHARGE].long_name,
+           "water_volume_transport_in_river_channel");
+    strcpy(out_metadata[OUT_DISCHARGE].standard_name, "river_discharge");
+    strcpy(out_metadata[OUT_DISCHARGE].units, "m3 s-1");
+    strcpy(
+        out_metadata[OUT_DISCHARGE].description,
+        "The water flux or volume transport in rivers is the amount of water flowing in the river channel and flood plain. 'Water' means water in all phases");
+
     /* volumetric liquid water equivalent of snow on top of lake ice [m3] */
     strcpy(out_metadata[OUT_LAKE_SWE_V].varname, "OUT_LAKE_SWE_V");
     strcpy(out_metadata[OUT_LAKE_SWE_V].long_name, "lake_swe_v");
@@ -381,7 +391,7 @@ set_output_met_data_info()
     strcpy(out_metadata[OUT_LAKE_BF_IN].standard_name, "infiltration_amount");
     strcpy(out_metadata[OUT_LAKE_BF_IN].units, "mm");
     strcpy(out_metadata[OUT_LAKE_BF_IN].description,
-           "oisture that reaches top of soil column");
+           "incoming baseflow from lake catchment");
 
     /* incoming volumetric baseflow from lake catchment [m3] */
     strcpy(out_metadata[OUT_LAKE_BF_IN_V].varname, "OUT_LAKE_BF_IN_V");

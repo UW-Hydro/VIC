@@ -61,7 +61,7 @@ vic_init_output(dmy_struct *dmy_current)
     set_output_met_data_info();
 
     // allocate out_data
-    alloc_out_data(local_domain.ncells_active, &out_data);
+    alloc_out_data(local_domain.ncells_active, out_data);
 
     // initialize the save data structures
     for (i = 0; i < local_domain.ncells_active; i++) {
@@ -195,8 +195,7 @@ vic_init_output(dmy_struct *dmy_current)
  *****************************************************************************/
 void
 initialize_history_file(nc_file_struct *nc,
-                        stream_struct  *stream,
-                        dmy_struct     *ref_dmy)
+                        stream_struct  *stream)
 {
     extern filenames_struct    filenames;
     extern domain_struct       global_domain;

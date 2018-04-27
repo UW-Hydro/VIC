@@ -46,6 +46,8 @@ write_vic_timing_table(timer_struct *timers,
     struct passwd             *pw;
     double                     ndays;
     double                     nyears;
+    int                        nprocs;
+    int                        nthreads;
 
     // datestr
     curr_date_time = time(NULL);
@@ -70,6 +72,10 @@ write_vic_timing_table(timer_struct *timers,
         strcpy(user, "unknown");
     }
 
+    // mpi/openmp
+    nthreads = omp_get_max_threads();
+    nprocs = mpi_size * nthreads;
+
     // calculate run length
     ndays = global_param.dt * global_param.nrecs / SEC_PER_DAY;
     nyears = ndays / DAYS_PER_YEAR;
@@ -89,7 +95,8 @@ write_vic_timing_table(timer_struct *timers,
     fprintf(LOG_DEST, "  VIC_DRIVER                : %s\n", driver);
     fprintf(LOG_DEST, "\n");
     fprintf(LOG_DEST, "  Global Param File         : %s\n", filenames.global);
-    fprintf(LOG_DEST, "  Domain File               : %s\n", filenames.domain);
+    fprintf(LOG_DEST, "  Domain File               : %s\n",
+            filenames.domain.nc_filename);
     fprintf(LOG_DEST, "  Start Date                : %04hu-%02hu-%02hu-%05u\n",
             global_param.startyear, global_param.startmonth,
             global_param.startday, global_param.startsec);
@@ -106,7 +113,9 @@ write_vic_timing_table(timer_struct *timers,
             global_param.atmos_dt);
     fprintf(LOG_DEST, "\n");
 
-    fprintf(LOG_DEST, "  Total pes active          : %d\n", mpi_size);
+    fprintf(LOG_DEST, "  MPI Processes             : %d\n", mpi_size);
+    fprintf(LOG_DEST, "  OPENMP Threads            : %d\n", nthreads);
+    fprintf(LOG_DEST, "  Total pes active          : %d\n", nprocs);
     fprintf(LOG_DEST, "  pes per node              : %ld\n",
             sysconf(_SC_NPROCESSORS_ONLN));
 
@@ -115,7 +124,7 @@ write_vic_timing_table(timer_struct *timers,
     fprintf(LOG_DEST, "  Overall Metrics\n");
     fprintf(LOG_DEST, "  ---------------\n");
     fprintf(LOG_DEST, "    Model Cost       : %g pe-hrs/simulated_year\n",
-            mpi_size * timers[TIMER_VIC_ALL].delta_wall / SEC_PER_HOUR /
+            nprocs * timers[TIMER_VIC_ALL].delta_wall / SEC_PER_HOUR /
             nyears);
     fprintf(LOG_DEST, "    Model Throughput : %g simulated_years/day\n",
             nyears / (timers[TIMER_VIC_ALL].delta_wall / SEC_PER_DAY));
@@ -144,6 +153,18 @@ write_vic_timing_table(timer_struct *timers,
             timers[TIMER_VIC_ALL].delta_wall, timers[TIMER_VIC_ALL].delta_cpu,
             timers[TIMER_VIC_ALL].delta_wall / ndays,
             timers[TIMER_VIC_ALL].delta_cpu / ndays);
+    fprintf(LOG_DEST,
+            "|------------|----------------------|----------------------|----------------------|----------------------|\n");
+    fprintf(LOG_DEST, "| Force Time | %20g | %20g | %20g | %20g |\n",
+            timers[TIMER_VIC_FORCE].delta_wall,
+            timers[TIMER_VIC_FORCE].delta_cpu,
+            timers[TIMER_VIC_FORCE].delta_wall / ndays,
+            timers[TIMER_VIC_FORCE].delta_cpu / ndays);
+    fprintf(LOG_DEST, "| Write Time | %20g | %20g | %20g | %20g |\n",
+            timers[TIMER_VIC_WRITE].delta_wall,
+            timers[TIMER_VIC_WRITE].delta_cpu,
+            timers[TIMER_VIC_WRITE].delta_wall / ndays,
+            timers[TIMER_VIC_WRITE].delta_cpu / ndays);
     fprintf(LOG_DEST,
             "|------------|----------------------|----------------------|----------------------|----------------------|\n");
     fprintf(LOG_DEST, "\n");

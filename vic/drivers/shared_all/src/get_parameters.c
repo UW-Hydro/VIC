@@ -326,6 +326,12 @@ get_parameters(FILE *paramfile)
             else if (strcasecmp("SNOW_NEW_SNOW_DENSITY", optstr) == 0) {
                 sscanf(cmdstr, "%*s %lf", &param.SNOW_NEW_SNOW_DENSITY);
             }
+            else if (strcasecmp("SNOW_NEW_SNOW_DENS_MAX", optstr) == 0) {
+                sscanf(cmdstr, "%*s %lf", &param.SNOW_NEW_SNOW_DENS_MAX);
+            }
+            else if (strcasecmp("SNOW_NEW_SNOW_DENS_MAX", optstr) == 0) {
+                sscanf(cmdstr, "%*s %lf", &param.SNOW_NEW_SNOW_DENS_MAX);
+            }
             else if (strcasecmp("SNOW_DENS_DMLIMIT", optstr) == 0) {
                 sscanf(cmdstr, "%*s %lf", &param.SNOW_DENS_DMLIMIT);
             }
@@ -480,6 +486,10 @@ get_parameters(FILE *paramfile)
             // Frozen Soil Parameters
             else if (strcasecmp("FROZEN_MAXITER", optstr) == 0) {
                 sscanf(cmdstr, "%*s %d", &param.FROZEN_MAXITER);
+            }
+            // Canopy Iterations
+            else if (strcasecmp("MAX_ITER_GRND_CANOPY", optstr) == 0) {
+                sscanf(cmdstr, "%*s %d", &param.MAX_ITER_GRND_CANOPY);
             }
             // Newton-Raphson Solver Parameters
             else if (strcasecmp("NEWT_RAPH_MAXTRIAL", optstr) == 0) {
@@ -754,9 +764,18 @@ validate_parameters()
         log_err(
             "SNOW_NEW_SNOW_DENSITY must be defined on the interval [0, inf) (kg/m^3)");
     }
+    if (!(param.SNOW_DEPTH_THRES >= 0.)) {
+        log_err(
+            "SNOW_DEPTH_THRES must be defined on the interval [0, inf) (m)");
+    }
     if (!(param.SNOW_DENS_DMLIMIT >= 0.)) {
         log_err(
             "SNOW_DENS_DMLIMIT must be defined on the interval [0, inf) (kg/m^3)");
+    }
+    if (!(param.SNOW_NEW_SNOW_DENS_MAX >= 0. &&
+          param.SNOW_NEW_SNOW_DENS_MAX <= 700.)) {
+        log_err(
+            "SNOW_NEW_SNOW_DENS_MAX must be defined on the interval [0, 700) (kg/m^3)");
     }
     if (!(param.SNOW_DENS_MAX_CHANGE >= 0 && param.SNOW_DENS_MAX_CHANGE <= 1)) {
         log_err("SNOW_DENS_MAX_CHANGE must be defined on the interval [0,1] (-)")
@@ -879,6 +898,11 @@ validate_parameters()
     if (!(param.FROZEN_MAXITER >= 0)) {
         log_err(
             "FROZEN_MAXITER must be defined on the interval [0, inf) (iterations");
+    }
+    // Canopy Iterations
+    if (!(param.MAX_ITER_GRND_CANOPY >= 0)) {
+        log_err(
+            "MAX_ITER_GRND_CANOPY  must be defined on the interval [0, inf) (iterations");
     }
     // Newton-Raphson Solver Parameters
     if (!(param.NEWT_RAPH_MAXTRIAL >= 0)) {

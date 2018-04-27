@@ -60,13 +60,32 @@ initialize_cesm_time(void)
     // initialize numdate
     numdate = date2num(global_param.time_origin_num, &dmy_current, 0.,
                        global_param.calendar, global_param.time_units);
+
+    num2date(global_param.time_origin_num, numdate, 0., global_param.calendar,
+             global_param.time_units, &dmy_current);
+}
+
+/******************************************************************************
+ * @brief    Finalize cesm time
+ *****************************************************************************/
+void
+finalize_cesm_time(vic_clock *vclock)
+{
+    extern size_t              current;
+    extern global_param_struct global_param;
+
+    // populate fields in global_param needed for timing tables
+    global_param.nrecs = current;
+    global_param.endyear = vclock->current_year;
+    global_param.endmonth = vclock->current_month;
+    global_param.endday = vclock->current_day;
 }
 
 /******************************************************************************
  * @brief    Advance one timestep
  *****************************************************************************/
 void
-advance_time(void)
+advance_vic_time(void)
 {
     extern size_t              current;
     extern dmy_struct          dmy_current;

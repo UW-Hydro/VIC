@@ -44,7 +44,8 @@ vic_populate_model_state(all_vars_struct *all_vars,
                          size_t           cellnum,
                          soil_con_struct *soil_con,
                          veg_con_struct  *veg_con,
-                         lake_con_struct  lake_con)
+                         lake_con_struct  lake_con,
+                         dmy_struct      *dmy_current)
 {
     extern option_struct options;
 
@@ -87,7 +88,7 @@ vic_populate_model_state(all_vars_struct *all_vars,
     }
     else {
         // else generate a default state
-        generate_default_state(all_vars, soil_con, veg_con);
+        generate_default_state(all_vars, soil_con, veg_con, dmy_current);
         if (options.LAKES) {
             generate_default_lake_state(all_vars, soil_con, lake_con);
         }

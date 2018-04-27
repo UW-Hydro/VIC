@@ -14,6 +14,142 @@ To check which release of VIC you are running:
 - For VIC 5 and later, type `vic_{classic,image}.exe -v`
 
 ------------------------------
+
+## VIC 5.1.0 rc1
+
+<!-- TODO -->
+<!-- [![DOI](https://zenodo.org/badge/doi/10.5281/zenodo.61422.svg)](http://dx.doi.org/10.5281/zenodo.61422) -->
+
+**Release date: (April 27, 2018)**
+
+Source code is available here: [![VIC.5.1.0](https://img.shields.io/badge/VIC-5.1.0-blue.svg)](https://github.com/UW-Hydro/VIC/releases/tag/VIC.5.1.0)
+
+This is a minor update from VIC 5.0.1. The VIC 5.1.0 includes new features, such as a new streamflow routing extension and extended parallelization using OpenMP. The release also includes a number of bug fixes for the CESM driver. See the VIC Github page for more details on the changes included in this release.
+
+#### Model enhancement:
+
+1. Improved calculation of drainage between soil layers ([GH#656](https://github.com/UW-Hydro/VIC/pull/656))
+
+   Drainage from upper layer to adjacent lower layer is calculated according to Brook & Corey curve (where drainage rate is a function of upper-layer soil moisture). In previous versions, a simple numerical solution is applied which uses the timestep-beginning upper-layer soil moisture to calculate drainage rate, and assume this constant rate over the entire timestep. This can cause unreasonably large drainage if the curve has a steep shape and when soil moisture is high. Now, the current version uses exact integral (instead of numerical solution) for layer drainage calculation.
+
+2. Fixes for the CESM driver
+
+   1. [GH#642](https://github.com/UW-Hydro/VIC/pull/642)
+
+    - Using correct fill value datatypes in MPI Gather steps
+    - Updated state file name time step to be period-ending rather than period-beginning
+    - Set the state file name to the RASM case ID
+    - Removed decimal point for missing values for unsigned integers
+    - Create dummy forcings when initializing the model (so that there is forcing data for the first time step)
+    - Changed pressure units from kPa to Pa
+    - Fixed bug that prevented using the correct local domain grid cells in `cesm_put_data.c`
+    - Changed reference temperature units from Celsius to Kelvin in `cesm_put_data.c`
+
+   1. [GH#695](https://github.com/UW-Hydro/VIC/pull/695)
+
+    - Fix sign for latent heat fluxes passed from VIC to the coupler
+    - Fix sign for longwave radiation passed from VIC to the coupler
+
+   1. [GH#696](https://github.com/UW-Hydro/VIC/pull/696)
+
+    - Changes names of CESM driver functions `trim` and `advance_time` to `trimstr` and `advance_vic_time`, respectively, to avoid conflicts with WRF functions with the same names when compiling RFR case.
+
+   1. [GH#702](https://github.com/UW-Hydro/VIC/pull/702)
+
+    - Fixes Julian day for the first timestep in the dmy struct for the CESM driver.
+
+   1. [GH#710](https://github.com/UW-Hydro/VIC/pull/710)
+
+    - Refactor the cesm_put_data.c routine in the CESM driver to use values from out_data directly, rather than computing them separately in cesm_put_data.c.
+
+   1. [GH#716](https://github.com/UW-Hydro/VIC/pull/716)
+
+    - Fixes initialization of coupler fields and calculates temperature and upwelling longwave to pass to WRF during initialization.
+
+   1. [GH#718](https://github.com/UW-Hydro/VIC/pull/718)
+
+    - Updates the cesm_put_data.c routine in the CESM driver to pass gridcell-averaged albedo to the coupler.
+
+   1. [GH#726](https://github.com/UW-Hydro/VIC/pull/726)
+
+    - Updates the cesm_put_data.c routine in the CESM driver to include the correct units for evap passed to the coupler.
+
+   1. [GH#732](https://github.com/UW-Hydro/VIC/pull/732)
+
+     - Updates the cesm_put_data.c routine in the CESM driver to include the correct units for sensible heat flux and updates the rofliq calculation to be correct (previously only OUT_BASEFLOW was being divided by global_param.dt).
+
+   1. [GH#734](https://github.com/UW-Hydro/VIC/pull/734)
+
+     - Updates the cesm_put_data.c routine in the CESM driver to include the correct signs for turbulent heat fluxes and evaporation. Previously we had switched the signs to agree with the image driver and they should instead be in accordance with the sign conventions for coupled models, which differ from those of land surface models. Also, eliminate populating the `l2x_Sl_ram1` field with aero_resist to agree with the VIC 4 implementation in RASM.
+
+   1. [GH#739](https://github.com/UW-Hydro/VIC/pull/739)
+
+    - Updates the cesm_put_data.c routine in the CESM driver to include the correct signs for the wind stresses and fixes a bug in calculating friction velocity (previously it was missing a square root).
+
+   1. [GH#744](https://github.com/UW-Hydro/VIC/pull/744)
+
+    - Updates the cesm_interface_c.c routine to include missing timers and the VIC RUN timer in the CESM driver.
+
+   1. [GH#746](https://github.com/UW-Hydro/VIC/pull/746)
+
+    - Updates the cesm_interface_c.c routine in the CESM driver to populate the nrecs, endyear, endmonth and endday fields in the global_param struct to make them available to vic_finalize for timing tables (specifically the secs/day columns).  
+
+3. Speed up NetCDF operations in the image/CESM drivers ([GH#684](https://github.com/UW-Hydro/VIC/pull/684))
+
+    These changes speed up image driver initialization, forcing reads, and history writes by only opening and closing each input netCDF file once.
+
+4. Added two new timers to measure time in I/O operations ([GH#703](https://github.com/UW-Hydro/VIC/pull/703))
+
+    These two timers count the CPU and WALL time spent in ``vic_force`` and ``vic_write``. The accumulated time from these timers is printed out at the end of each simulation in the timing table. See also [GH#442](https://github.com/UW-Hydro/VIC/pull/442).
+
+5. Added gridcell-averaged albedo (STATE_AVG_ALBEDO) as a state file variable ([GH#712](https://github.com/UW-Hydro/VIC/pull/712))
+
+    This is for use in the CESM driver for VIC to pass to WRF, but has been implemented in the core structure of VIC (in vic_run) for consistency with the classic and image drivers. Running VIC from a cold start now also includes calculation of gridcell-averaged albedo.
+
+6. Cleanup of the initialization sections of the ``image`` and ``cesm`` drivers ([GH#701](https://github.com/UW-Hydro/VIC/pull/701))
+
+    Codified behavior in the initialization of the ``image`` and `cesm` drivers that requires the parameter variables `AreaFract`, `Pfactor`, `zone_fract`, and `Cv` must sum exactly to 1.0. If using the `SNOW_BAND` option, the area weighted `elevation` must match the mean grid cell elevation (`elev`). VIC will print *warnings* if any of these criteria are violated.  
+
+7. Added thread parallelization using OPENMP ([GH#712](https://github.com/UW-Hydro/VIC/pull/712))
+
+    The VIC image and CESM drivers now may be optionally compiled with OPENMP to enable shared memory thread parallelization. This option should improve the parallel scaling of these drivers by reducing the number of MPI messages and increasing message size.
+
+8. Added streamflow routing extensions ROUT_STUB and ROUT_RVIC for the VIC image driver ([GH#231](https://github.com/UW-Hydro/VIC/pull/231))
+
+    The VIC image driver can be optionally compiled with ROUT_RVIC to enable routing in image mode (ROUT_STUB is the default extension which means no routing). With ROUT_RVIC enabled, the output variable ``OUT_DISCHARGE`` is available, and there will also be an extra state variable ``STATE_ROUT_RING`` stored in the state file.
+
+9. Moved MAX_ITER_GRND_CANOPY, which controls the maximum number of ground-canopy iterations in CLOSE_ENERGY mode for vegetation types with an overstory, to the parameters struct ([GH#771](https://github.com/UW-Hydro/VIC/pull/771))
+
+    Previously this was set in the surface_fluxes.c numerics routine for ground-canopy iterations, which meant that that routine had to be altered to change the maximum number of iterations. It has now been moved to the parameters struct so that it can be overriden in the constants file.
+
+10. Updated new snow density function by adding a cap to new snow density that is set in the parameters struct by the parameter SNOW_NEW_SNOW_DENS_MAX ([GH#776](https://github.com/UW-Hydro/VIC/pull/776))
+
+    Previously the change in cold content of the snowpack term (deltaCC in the snow_data_struct) would get unreasonably large if the Hedstrom and Pomeroy 1998 equation used to calculate snow density, which depends only on air temperature, was calculated with air temperatures above about 2 deg C. We use this term to calculate the ground flux from the snowpack and snow depth, which resulted in extremely small snow depths and unreasonably large ground fluxes from the snowpack (and thus changes in snowpack cold content). Now there is a cap on new snow density with the new parameter SNOW_NEW_SNOW_DENS_MAX as well as a snow depth below which we disregard the ground flux from the snowpack (1.e-8).
+
+10. Miscellaneous clean-up:
+
+    [GH#723](https://github.com/UW-Hydro/VIC/pull/723)
+
+     - Added support for veg_hist forcings (non-climatological) in image mode
+     - Fixed erroneous allocation of extra veg tile in image mode
+     - Simplified looping over veg tiles and bands in vic_run() and prepare_full_energy()
+     - Replaced lengthy data structures with local pointers in vic_run()
+     - Simplified out_prec, out_rain, and Melt arrays
+     - Updated names of variables and options for LAI and FCANOPY in documentation to match their new names in the code
+     - Removed constants MAX_VEG and MAX_BANDS from code; all arrays that were declared with those lengths were replaced with dynamic allocations.  This allowed for specification of veg libraries containing more classes without recompiling the code, and more efficient memory usage.
+
+    [GH#766](https://github.com/UW-Hydro/VIC/pull/766)
+
+     - Improved logic in computing soil evaporation (esoil), primarily in func_surf_energy_bal(), by creating explicit terms for transpiration (transp) and esoil in the layer data structure.
+
+#### Bug Fixes:
+
+1. NetCDF forcing files are now closed at the last timestep in stead of after the last timestep. ([GH#774](https://github.com/UW-Hydro/VIC/pull/774))
+
+2. Renamed "fcov" to "fcan" in image driver to better match variable code name ([GH#673](https://github.com/UW-Hydro/VIC/pull/673))
+
+------------------------------
+
 ## VIC 5.0.1
 
 **Release date: (February 1, 2017)**
@@ -26,10 +162,10 @@ To check which release of VIC you are running:
 
 2. Fixed forceskip rounding bug ([GH#639](https://github.com/UW-Hydro/VIC/pull/639))
 
-	After the fix, the `forceskip` variable in the global parameter structure (i.e., the number of timesteps to skip in the forcing data for the simulatin period) is rounded correctly (before the fix, rounding error might cause 1-timestep offset in the simulation results).
+	After the fix, the `forceskip` variable in the global parameter structure (i.e., the number of timesteps to skip in the forcing data for the simulation period) is rounded correctly (before the fix, rounding error might cause 1-timestep offset in the simulation results).
 
 3. Fixed a problem with image restarts when using multiple processors ([GH#638](https://github.com/UW-Hydro/VIC/pull/638))
-	
+
 	After the fix, only the master node is assigned the task of validating state file dimensions and coordinate variables. Multiprocessing was also added to the VIC testing framework.
 
 4. Ensured that the mask variable in the input domain file must be integer type; otherwise an error is raised. ([GH#645](https://github.com/UW-Hydro/VIC/pull/645))
@@ -40,8 +176,8 @@ To check which release of VIC you are running:
 
 6. Fixed a bug related to writing two-dimensional lat/lon variables to a state file ([GH#652](https://github.com/UW-Hydro/VIC/pull/652))
 
-	Before the bug fix, two-dimensional lat/lon variables were not populated correctly and were written as fill values to a state file. Now two-dimensional lat/lon variables are correctly populated and written. 
- 
+	Before the bug fix, two-dimensional lat/lon variables were not populated correctly and were written as fill values to a state file. Now two-dimensional lat/lon variables are correctly populated and written.
+
 7. Fixed a bug related to `dz_node` and `node_depth` variables in image driver output state file ([GH#657](https://github.com/UW-Hydro/VIC/pull/657))
 
 	Before the fix, `dz_node` and `node_depth` in image driver output state file were not spatially distributed, which was wrong. Now these two variables are spatially distributed in the output state file.
@@ -58,10 +194,9 @@ To check which release of VIC you are running:
 
 	Before the fix, there would be an error if the simulation start time is later than the forcing start time that year AND the simulation spans multiple years. Fixed this bug.
 
- 
 ------------------------------
 
-## VIC 5.0.0 [![DOI](https://zenodo.org/badge/7766/UW-Hydro/VIC.svg)](https://zenodo.org/badge/latestdoi/7766/UW-Hydro/VIC)
+## VIC 5.0.0 [![DOI](https://zenodo.org/badge/doi/10.5281/zenodo.61422.svg)](http://dx.doi.org/10.5281/zenodo.61422)
 
 **Release date: (September 2, 2016)**
 

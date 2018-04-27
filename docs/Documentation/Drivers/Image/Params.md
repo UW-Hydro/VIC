@@ -2,6 +2,9 @@
 
 The Image Driver uses the [NetCDF](http://www.unidata.ucar.edu/software/netcdf/) file format for its input model parameters. It is possible to convert the VIC ASCII style parameters to this format. We have put together an example ([Tutorial](Ascii_to_NetCDF_params.md) and [Ipython Notebook](https://github.com/UW-Hydro/VIC/blob/develop/samples/notebooks/example_reformat_vic4_parameters_to_vic5image.ipynb)) that provide examples of how to do this conversion. Our example uses the `tonic` [Python](https://www.python.org/) Package.
 
+!!! Note
+	It is the user's responsibility to ensure that parameter files are formatted appropriately. Notably, the variables `AreaFract`, `Pfactor`, `zone_fract`, and `Cv` must sum exactly to 1.0. If using the `SNOW_BAND` option, the area weighted `elevation` must match the mean grid cell elevation (`elev`). VIC will print *** warnings *** if any of these criteria are violated.
+
 # Soil Parameters
 
 The Soil Parameters serve three main purposes:
@@ -91,11 +94,11 @@ OPTIONAL - If VEGPARAM_LAI is TRUE in global parameter file, then for each veget
 |---------------  |---------- |-------------------------------- |
 | LAI             | fraction  | Leaf Area Index, one per month  |
 
-OPTIONAL - If VEGPARAM_VEGCOVER is TRUE in global parameter file, then for each vegetation tile, the following parameters will also be included:
+OPTIONAL - If VEGPARAM_FCAN is TRUE in global parameter file, then for each vegetation tile, the following parameters will also be included:
 
 | Variable Name   | Units     | Description                                       |   
 |---------------  |---------- |-------------------------------------------------- |
-| VEGCOVER        | fraction  | Partial vegetation cover fraction, one per month  |
+| FCANOPY         | fraction  | Partial vegetation cover fraction, one per month  |
 
 OPTIONAL - If VEGPARAM_ALBEDO is TRUE in global parameter file, then for each vegetation tile, there following parameters will also be included in the NetCDF parameter file:
 
@@ -115,7 +118,7 @@ Vegetation parameters are given for different vegetation types. Below are a list
 | rarc                                                              | s/m                   | 1                 | Architectural resistance of vegetation type (~2 s/m)                                                                                                                  |       
 | rmin                                                              | s/m                   | 1                 | Minimum stomatal resistance of vegetation type (~100 s/m)                                                                                                             |       
 | LAI                                                               | fraction              | 12                | Leaf-area index of vegetation type                                                                                                                                    |       
-| VEGCOVER (Only present if VEGLIB_VEGCOVER=TRUE in [global parameter file](GlobalParam.md) | fraction              | 12                | Partial vegetation cover fraction                                                                                                                                     |       
+| FCANOPY  (Only present if VEGLIB_FCAN=TRUE in [global parameter file](GlobalParam.md) | fraction              | 12                | Partial vegetation cover fraction                                                                                                                                     |       
 | albedo                                                            | fraction              | 12                | Shortwave albedo for vegetation type                                                                                                                                  |       
 | rough                                                             | m                     | 12                | Vegetation roughness length (typically `0.123 * vegetation height`)                                                                                                     |       
 | displacement                                                      | m                     | 12                | Vegetation displacement height (typically `0.67 * vegetation height`)                                                                                                   |       

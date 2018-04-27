@@ -111,6 +111,8 @@ The table below lists the constants available for manipulation via the `CONSTANT
 | SNOW_MAX_SURFACE_SWE         |             |
 | SNOW_LIQUID_WATER_CAPACITY   |             |
 | SNOW_NEW_SNOW_DENSITY        |             |
+| SNOW_NEW_SNOW_DENS_MAX       |             |
+| SNOW_DEPTH_THRES             |             |
 | SNOW_DENS_DMLIMIT            |             |
 | SNOW_DENS_DMLIMIT_FACTOR     |             |
 | SNOW_DENS_MAX_CHANGE         |             |
@@ -161,6 +163,7 @@ The table below lists the constants available for manipulation via the `CONSTANT
 | TOL_GRND                     |             |
 | TOL_OVER                     |             |
 | FROZEN_MAXITER               |             |
+| MAX_ITER_GRND_CANOPY         |             |
 | NEWT_RAPH_MAXTRIAL           |             |
 | NEWT_RAPH_TOLX               |             |
 | NEWT_RAPH_TOLF               |             |

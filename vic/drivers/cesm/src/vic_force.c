@@ -45,6 +45,7 @@ vic_force(void)
     extern option_struct       options;
     extern soil_con_struct    *soil_con;
     extern veg_con_map_struct *veg_con_map;
+    extern veg_con_struct    **veg_con;
     extern veg_hist_struct   **veg_hist;
     extern veg_lib_struct    **veg_lib;
     extern parameters_struct   param;
@@ -127,8 +128,10 @@ vic_force(void)
     for (j = 0; j < NF; j++) {
         for (i = 0; i < local_domain.ncells_active; i++) {
             // CESM units: Pa
-            // VIC units: kPa
-            force[i].pressure[j] = x2l_vic[i].x2l_Sa_pbot / PA_PER_KPA;
+            // VIC units: Pa
+            // Note: Image Driver uses kPa inputs and
+            // converts to Pa
+            force[i].pressure[j] = x2l_vic[i].x2l_Sa_pbot;
         }
     }
 
@@ -136,7 +139,7 @@ vic_force(void)
     for (j = 0; j < NF; j++) {
         for (i = 0; i < local_domain.ncells_active; i++) {
             // CESM units: shum is specific humidity (g/g)
-            // VIC units: kPa
+            // VIC units: Pa
             force[i].vp[j] = q_to_vp(x2l_vic[i].x2l_Sa_shum,
                                      force[i].pressure[j]);
         }
@@ -205,6 +208,14 @@ vic_force(void)
         for (j = 0; j < NF; j++) {
             // vapor pressure deficit
             force[i].vpd[j] = svp(force[i].air_temp[j]) - force[i].vp[j];
+            if (force[i].vpd[j] < 0) {
+                log_warn("Vapor pressure deficit is %f which is < 0, "
+                         "setting vapor pressure deficit to 0 and calculating "
+                         "saturated vapor pressure using air temperature %f.",
+                         force[i].vpd[j], force[i].air_temp[j]);
+                force[i].vpd[j] = 0;
+                force[i].vp[j] = svp(force[i].air_temp[j]);
+            }
             // photosynthetically active radiation
             // TODO: Add CARBON_SW2PAR back to the parameters structure
             // force[i].par[j] = param.CARBON_SW2PAR * force[i].shortwave[j];
@@ -261,15 +272,15 @@ vic_force(void)
             if (vidx != NODATA_VEG) {
                 for (j = 0; j < NF; j++) {
                     veg_hist[i][vidx].albedo[j] =
-                        veg_lib[i][v].albedo[dmy_current.month - 1];
+                        veg_con[i][vidx].albedo[dmy_current.month - 1];
                     veg_hist[i][vidx].displacement[j] =
-                        veg_lib[i][v].displacement[dmy_current.month - 1];
+                        veg_con[i][vidx].displacement[dmy_current.month - 1];
                     veg_hist[i][vidx].fcanopy[j] =
-                        veg_lib[i][v].fcanopy[dmy_current.month - 1];
+                        veg_con[i][vidx].fcanopy[dmy_current.month - 1];
                     veg_hist[i][vidx].LAI[j] =
-                        veg_lib[i][v].LAI[dmy_current.month - 1];
+                        veg_con[i][vidx].LAI[dmy_current.month - 1];
                     veg_hist[i][vidx].roughness[j] =
-                        veg_lib[i][v].roughness[dmy_current.month - 1];
+                        veg_con[i][vidx].roughness[dmy_current.month - 1];
                 }
                 // not the correct way to calculate average albedo, but leave
                 // for now

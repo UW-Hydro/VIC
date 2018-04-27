@@ -150,6 +150,8 @@ initialize_parameters()
     param.SNOW_MAX_SURFACE_SWE = 0.125;
     param.SNOW_LIQUID_WATER_CAPACITY = 0.035;
     param.SNOW_NEW_SNOW_DENSITY = 50.0;
+    param.SNOW_NEW_SNOW_DENS_MAX = 400.0;
+    param.SNOW_DEPTH_THRES = 1.e-8;
     param.SNOW_DENS_DMLIMIT = 100.0;
     param.SNOW_DENS_DMLIMIT_FACTOR = 1.15;
     param.SNOW_DENS_MAX_CHANGE = 0.9;
@@ -211,6 +213,14 @@ initialize_parameters()
     // Frozen Soil Parameters
     param.FROZEN_MAXITER = 1000;
 
+    // Canopy Iterations
+    // initialized to 10, set to 0 if
+    // options.CLOSE_ENERGY is false
+    // this allows for flexibility in
+    // changing the maximum number of
+    // iterations
+    param.MAX_ITER_GRND_CANOPY = 10;
+
     // Newton-Raphson solver parameters
     param.NEWT_RAPH_MAXTRIAL = 150;
     param.NEWT_RAPH_TOLX = 1.0e-4;
@@ -227,7 +237,4 @@ initialize_parameters()
     param.ROOT_BRENT_MAXITER = 1000;
     param.ROOT_BRENT_TSTEP = 10;
     param.ROOT_BRENT_T = 1.0e-7;
-
-    // Frozen Soil Parameters
-    param.FROZEN_MAXITER = 1000;
 }

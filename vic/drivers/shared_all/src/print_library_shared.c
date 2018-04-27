@@ -265,14 +265,15 @@ print_global_param(global_param_struct *gp)
     fprintf(LOG_DEST, "\tendmonth            : %hu\n", gp->endmonth);
     fprintf(LOG_DEST, "\tendyear             : %hu\n", gp->endyear);
     for (i = 0; i < 2; i++) {
-        fprintf(LOG_DEST, "\tforceday[%zd]       : %hu\n", i, gp->forceday[i]);
-        fprintf(LOG_DEST, "\tforcesec[%zd]       : %u\n", i, gp->forcesec[i]);
-        fprintf(LOG_DEST, "\tforcemonth[%zd]     : %hu\n", i,
+        fprintf(LOG_DEST, "\tforceday[%zd]        : %hu\n", i, gp->forceday[i]);
+        fprintf(LOG_DEST, "\tforcesec[%zd]        : %u\n", i, gp->forcesec[i]);
+        fprintf(LOG_DEST, "\tforcemonth[%zd]      : %hu\n", i,
                 gp->forcemonth[i]);
-        fprintf(LOG_DEST, "\tforceoffset[%zd]    : %hu\n", i,
+        fprintf(LOG_DEST, "\tforceoffset[%zd]     : %hu\n", i,
                 gp->forceoffset[i]);
-        fprintf(LOG_DEST, "\tforceskip[%zd]      : %u\n", i, gp->forceskip[i]);
-        fprintf(LOG_DEST, "\tforceyear[%zd]      : %hu\n", i, gp->forceyear[i]);
+        fprintf(LOG_DEST, "\tforceskip[%zd]       : %u\n", i, gp->forceskip[i]);
+        fprintf(LOG_DEST, "\tforceyear[%zd]       : %hu\n", i,
+                gp->forceyear[i]);
     }
     fprintf(LOG_DEST, "\tnrecs               : %zu\n", gp->nrecs);
     fprintf(LOG_DEST, "\tstartday            : %hu\n", gp->startday);
@@ -419,7 +420,8 @@ void
 print_layer_data_fluxes(layer_data_struct *ldata)
 {
     fprintf(LOG_DEST, "layer_data (fluxes):\n");
-    fprintf(LOG_DEST, "\tbare_evap_frac: %f\n", ldata->evap);
+    fprintf(LOG_DEST, "\tesoil: %f\n", ldata->esoil);
+    fprintf(LOG_DEST, "\ttransp: %f\n", ldata->transp);
     fprintf(LOG_DEST, "\tevap: %f\n", ldata->evap);
 }
 
@@ -434,64 +436,91 @@ print_option(option_struct *option)
             option->AboveTreelineVeg);
     fprintf(LOG_DEST, "\tAERO_RESIST_CANSNOW  : %d\n",
             option->AERO_RESIST_CANSNOW);
-    fprintf(LOG_DEST, "\tBLOWING              : %d\n", option->BLOWING);
-    fprintf(LOG_DEST, "\tBLOWING_VAR_THRESHOLD: %d\n",
-            option->BLOWING_VAR_THRESHOLD);
-    fprintf(LOG_DEST, "\tBLOWING_CALC_PROB    : %d\n",
-            option->BLOWING_CALC_PROB);
-    fprintf(LOG_DEST, "\tBLOWING_SIMPLE       : %d\n", option->BLOWING_SIMPLE);
-    fprintf(LOG_DEST, "\tBLOWING_FETCH        : %d\n", option->BLOWING_FETCH);
-    fprintf(LOG_DEST, "\tBLOWING_SPATIAL_WIND : %d\n",
-            option->BLOWING_SPATIAL_WIND);
-    fprintf(LOG_DEST, "\tCARBON               : %d\n", option->CARBON);
-    fprintf(LOG_DEST, "\tCLOSE_ENERGY         : %d\n", option->CLOSE_ENERGY);
-    fprintf(LOG_DEST, "\tCOMPUTE_TREELINE     : %d\n",
-            option->COMPUTE_TREELINE);
-    fprintf(LOG_DEST, "\tCONTINUEONERROR      : %d\n", option->CONTINUEONERROR);
-    fprintf(LOG_DEST, "\tCORRPREC             : %d\n", option->CORRPREC);
-    fprintf(LOG_DEST, "\tEQUAL_AREA           : %d\n", option->EQUAL_AREA);
-    fprintf(LOG_DEST, "\tEXP_TRANS            : %d\n", option->EXP_TRANS);
-    fprintf(LOG_DEST, "\tFROZEN_SOIL          : %d\n", option->FROZEN_SOIL);
-    fprintf(LOG_DEST, "\tFULL_ENERGY          : %d\n", option->FULL_ENERGY);
+    fprintf(LOG_DEST, "\tBLOWING              : %s\n",
+            option->BLOWING ? "true" : "false");
+    fprintf(LOG_DEST, "\tBLOWING_VAR_THRESHOLD: %s\n",
+            option->BLOWING_VAR_THRESHOLD ? "true" : "false");
+    fprintf(LOG_DEST, "\tBLOWING_CALC_PROB    : %s\n",
+            option->BLOWING_CALC_PROB ? "true" : "false");
+    fprintf(LOG_DEST, "\tBLOWING_SIMPLE       : %s\n",
+            option->BLOWING_SIMPLE ? "true" : "false");
+    fprintf(LOG_DEST, "\tBLOWING_FETCH        : %s\n",
+            option->BLOWING_FETCH ? "true" : "false");
+    fprintf(LOG_DEST, "\tBLOWING_SPATIAL_WIND : %s\n",
+            option->BLOWING_SPATIAL_WIND ? "true" : "false");
+    fprintf(LOG_DEST, "\tCARBON               : %s\n",
+            option->CARBON ? "true" : "false");
+    fprintf(LOG_DEST, "\tCLOSE_ENERGY         : %s\n",
+            option->CLOSE_ENERGY ? "true" : "false");
+    fprintf(LOG_DEST, "\tCOMPUTE_TREELINE     : %s\n",
+            option->COMPUTE_TREELINE ? "true" : "false");
+    fprintf(LOG_DEST, "\tCONTINUEONERROR      : %s\n",
+            option->CONTINUEONERROR ? "true" : "false");
+    fprintf(LOG_DEST, "\tCORRPREC             : %s\n",
+            option->CORRPREC ? "true" : "false");
+    fprintf(LOG_DEST, "\tEQUAL_AREA           : %s\n",
+            option->EQUAL_AREA ? "true" : "false");
+    fprintf(LOG_DEST, "\tEXP_TRANS            : %s\n",
+            option->EXP_TRANS ? "true" : "false");
+    fprintf(LOG_DEST, "\tFROZEN_SOIL          : %s\n",
+            option->FROZEN_SOIL ? "true" : "false");
+    fprintf(LOG_DEST, "\tFULL_ENERGY          : %s\n",
+            option->FULL_ENERGY ? "true" : "false");
     fprintf(LOG_DEST, "\tGRND_FLUX_TYPE       : %d\n", option->GRND_FLUX_TYPE);
-    fprintf(LOG_DEST, "\tIMPLICIT             : %d\n", option->IMPLICIT);
-    fprintf(LOG_DEST, "\tJULY_TAVG_SUPPLIED   : %d\n",
-            option->JULY_TAVG_SUPPLIED);
-    fprintf(LOG_DEST, "\tLAKES                : %d\n", option->LAKES);
+    fprintf(LOG_DEST, "\tIMPLICIT             : %s\n",
+            option->IMPLICIT ? "true" : "false");
+    fprintf(LOG_DEST, "\tJULY_TAVG_SUPPLIED   : %s\n",
+            option->JULY_TAVG_SUPPLIED ? "true" : "false");
+    fprintf(LOG_DEST, "\tLAKES                : %s\n",
+            option->LAKES ? "true" : "false");
     fprintf(LOG_DEST, "\tNcanopy              : %zu\n", option->Ncanopy);
     fprintf(LOG_DEST, "\tNfrost               : %zu\n", option->Nfrost);
     fprintf(LOG_DEST, "\tNlakenode            : %zu\n", option->Nlakenode);
     fprintf(LOG_DEST, "\tNlayer               : %zu\n", option->Nlayer);
     fprintf(LOG_DEST, "\tNnode                : %zu\n", option->Nnode);
-    fprintf(LOG_DEST, "\tNOFLUX               : %d\n", option->NOFLUX);
+    fprintf(LOG_DEST, "\tNOFLUX               : %s\n",
+            option->NOFLUX ? "true" : "false");
     fprintf(LOG_DEST, "\tNVEGTYPES            : %zu\n", option->NVEGTYPES);
     fprintf(LOG_DEST, "\tRC_MODE              : %d\n", option->RC_MODE);
     fprintf(LOG_DEST, "\tROOT_ZONES           : %zu\n", option->ROOT_ZONES);
-    fprintf(LOG_DEST, "\tQUICK_FLUX           : %d\n", option->QUICK_FLUX);
-    fprintf(LOG_DEST, "\tQUICK_SOLVE          : %d\n", option->QUICK_SOLVE);
-    fprintf(LOG_DEST, "\tSHARE_LAYER_MOIST    : %d\n",
-            option->SHARE_LAYER_MOIST);
+    fprintf(LOG_DEST, "\tQUICK_FLUX           : %s\n",
+            option->QUICK_FLUX ? "true" : "false");
+    fprintf(LOG_DEST, "\tQUICK_SOLVE          : %s\n",
+            option->QUICK_SOLVE ? "true" : "false");
+    fprintf(LOG_DEST, "\tSHARE_LAYER_MOIST    : %s\n",
+            option->SHARE_LAYER_MOIST ? "true" : "false");
     fprintf(LOG_DEST, "\tSNOW_DENSITY         : %d\n", option->SNOW_DENSITY);
     fprintf(LOG_DEST, "\tSNOW_BAND            : %zu\n", option->SNOW_BAND);
-    fprintf(LOG_DEST, "\tSPATIAL_FROST        : %d\n", option->SPATIAL_FROST);
-    fprintf(LOG_DEST, "\tSPATIAL_SNOW         : %d\n", option->SPATIAL_SNOW);
-    fprintf(LOG_DEST, "\tTFALLBACK            : %d\n", option->TFALLBACK);
+    fprintf(LOG_DEST, "\tSPATIAL_FROST        : %s\n",
+            option->SPATIAL_FROST ? "true" : "false");
+    fprintf(LOG_DEST, "\tSPATIAL_SNOW         : %s\n",
+            option->SPATIAL_SNOW ? "true" : "false");
+    fprintf(LOG_DEST, "\tTFALLBACK            : %s\n",
+            option->TFALLBACK ? "true" : "false");
     fprintf(LOG_DEST, "\tBASEFLOW             : %d\n", option->BASEFLOW);
     fprintf(LOG_DEST, "\tGRID_DECIMAL         : %d\n", option->GRID_DECIMAL);
-    fprintf(LOG_DEST, "\tVEGLIB_PHOTO         : %d\n", option->VEGLIB_PHOTO);
-    fprintf(LOG_DEST, "\tVEGLIB_FCAN          : %d\n", option->VEGLIB_FCAN);
-    fprintf(LOG_DEST, "\tVEGPARAM_ALB         : %d\n", option->VEGPARAM_ALB);
-    fprintf(LOG_DEST, "\tVEGPARAM_LAI         : %d\n", option->VEGPARAM_LAI);
-    fprintf(LOG_DEST, "\tVEGPARAM_FCAN        : %d\n",
-            option->VEGPARAM_FCAN);
+    fprintf(LOG_DEST, "\tVEGLIB_PHOTO         : %s\n",
+            option->VEGLIB_PHOTO ? "true" : "false");
+    fprintf(LOG_DEST, "\tVEGLIB_FCAN          : %s\n",
+            option->VEGLIB_FCAN ? "true" : "false");
+    fprintf(LOG_DEST, "\tVEGPARAM_ALB         : %s\n",
+            option->VEGPARAM_ALB ? "true" : "false");
+    fprintf(LOG_DEST, "\tVEGPARAM_LAI         : %s\n",
+            option->VEGPARAM_LAI ? "true" : "false");
+    fprintf(LOG_DEST, "\tVEGPARAM_FCAN        : %s\n",
+            option->VEGPARAM_FCAN ? "true" : "false");
     fprintf(LOG_DEST, "\tALB_SRC              : %d\n", option->ALB_SRC);
     fprintf(LOG_DEST, "\tLAI_SRC              : %d\n", option->LAI_SRC);
     fprintf(LOG_DEST, "\tFCAN_SRC             : %d\n", option->FCAN_SRC);
-    fprintf(LOG_DEST, "\tLAKE_PROFILE         : %d\n", option->LAKE_PROFILE);
-    fprintf(LOG_DEST, "\tORGANIC_FRACT        : %d\n", option->ORGANIC_FRACT);
+    fprintf(LOG_DEST, "\tLAKE_PROFILE         : %s\n",
+            option->LAKE_PROFILE ? "true" : "false");
+    fprintf(LOG_DEST, "\tORGANIC_FRACT        : %s\n",
+            option->ORGANIC_FRACT ? "true" : "false");
     fprintf(LOG_DEST, "\tSTATE_FORMAT         : %d\n", option->STATE_FORMAT);
-    fprintf(LOG_DEST, "\tINIT_STATE           : %d\n", option->INIT_STATE);
-    fprintf(LOG_DEST, "\tSAVE_STATE           : %d\n", option->SAVE_STATE);
+    fprintf(LOG_DEST, "\tINIT_STATE           : %s\n",
+            option->INIT_STATE ? "true" : "false");
+    fprintf(LOG_DEST, "\tSAVE_STATE           : %s\n",
+            option->SAVE_STATE ? "true" : "false");
     fprintf(LOG_DEST, "\tNoutstreams          : %zu\n", option->Noutstreams);
 }
 
@@ -539,8 +568,9 @@ print_stream(stream_struct   *stream,
     fprintf(LOG_DEST, "\tngridcells: %zu\n", stream->ngridcells);
     fprintf(LOG_DEST, "\tagg_alarm:\n    ");
     print_alarm(&(stream->agg_alarm));
-    fprintf(LOG_DEST,
-            "\t# \tVARID        \tVARNAME \tTYPE \tMULT \tFORMAT        \tAGGTYPE\n");
+    fprintf(
+        LOG_DEST,
+        "\t# \tVARID        \tVARNAME \tTYPE \tMULT \tFORMAT        \tAGGTYPE\n");
     for (i = 0; i < stream->nvars; i++) {
         varid = stream->varid[i];
         fprintf(LOG_DEST, "\t%zu \t%u \t%20s \t%hu \t%f \t%10s \t%hu\n",
@@ -725,6 +755,10 @@ print_parameters(parameters_struct *param)
             param->SNOW_LIQUID_WATER_CAPACITY);
     fprintf(LOG_DEST, "\tSNOW_NEW_SNOW_DENSITY: %.4f\n",
             param->SNOW_NEW_SNOW_DENSITY);
+    fprintf(LOG_DEST, "\tSNOW_NEW_SNOW_DENS_MAX: %.4f\n",
+            param->SNOW_NEW_SNOW_DENS_MAX);
+    fprintf(LOG_DEST, "\tSNOW_DEPTH_THRES: %.12f\n",
+            param->SNOW_DEPTH_THRES);
     fprintf(LOG_DEST, "\tSNOW_DENS_DMLIMIT: %.4f\n", param->SNOW_DENS_DMLIMIT);
     fprintf(LOG_DEST, "\tSNOW_DENS_MAX_CHANGE: %.4f\n",
             param->SNOW_DENS_MAX_CHANGE);
@@ -769,6 +803,8 @@ print_parameters(parameters_struct *param)
     fprintf(LOG_DEST, "\tTOL_GRND: %.4f\n", param->TOL_GRND);
     fprintf(LOG_DEST, "\tTOL_OVER: %.4f\n", param->TOL_OVER);
     fprintf(LOG_DEST, "\tFROZEN_MAXITER: %d\n", param->FROZEN_MAXITER);
+    fprintf(LOG_DEST, "\tMAX_ITER_GRND_CANOPY: %d\n",
+            param->MAX_ITER_GRND_CANOPY);
     fprintf(LOG_DEST, "\tNEWT_RAPH_MAXTRIAL: %d\n", param->NEWT_RAPH_MAXTRIAL);
     fprintf(LOG_DEST, "\tNEWT_RAPH_TOLX: %.4f\n", param->NEWT_RAPH_TOLX);
     fprintf(LOG_DEST, "\tNEWT_RAPH_TOLF: %.4f\n", param->NEWT_RAPH_TOLF);
@@ -817,17 +853,21 @@ print_snow_data(snow_data_struct *snow)
     fprintf(LOG_DEST, "\tdepth             : %f\n", snow->depth);
     fprintf(LOG_DEST, "\tlast_snow         : %d\n", snow->last_snow);
     fprintf(LOG_DEST, "\tmax_snow_depth    : %f\n", snow->max_snow_depth);
-    fprintf(LOG_DEST, "\tMELTING           : %d\n", snow->MELTING);
+    fprintf(LOG_DEST, "\tMELTING           : %s\n",
+            snow->MELTING ? "true" : "false");
     fprintf(LOG_DEST, "\tpack_temp         : %f\n", snow->pack_temp);
     fprintf(LOG_DEST, "\tpack_water        : %f\n", snow->pack_water);
-    fprintf(LOG_DEST, "\tsnow              : %d\n", snow->snow);
+    fprintf(LOG_DEST, "\tsnow              : %s\n",
+            snow->snow ? "true" : "false");
     fprintf(LOG_DEST, "\tsnow_canopy       : %f\n", snow->snow_canopy);
     fprintf(LOG_DEST, "\tstore_coverage    : %f\n", snow->store_coverage);
-    fprintf(LOG_DEST, "\tstore_snow        : %d\n", snow->store_snow);
+    fprintf(LOG_DEST, "\tstore_snow        : %s\n",
+            snow->store_snow ? "true" : "false");
     fprintf(LOG_DEST, "\tstore_swq         : %f\n", snow->store_swq);
     fprintf(LOG_DEST, "\tsurf_temp         : %f\n", snow->surf_temp);
     fprintf(LOG_DEST, "\tsurf_temp_fbcount : %u\n", snow->surf_temp_fbcount);
-    fprintf(LOG_DEST, "\tsurf_temp_fbflag  : %d\n", snow->surf_temp_fbflag);
+    fprintf(LOG_DEST, "\tsurf_temp_fbflag  : %s\n",
+            snow->surf_temp_fbflag ? "true" : "false");
     fprintf(LOG_DEST, "\tsurf_water        : %f\n", snow->surf_water);
     fprintf(LOG_DEST, "\tswq               : %f\n", snow->swq);
     fprintf(LOG_DEST, "\tsnow_distrib_slope: %f\n",
@@ -861,7 +901,8 @@ print_soil_con(soil_con_struct *scon,
     size_t j;
 
     fprintf(LOG_DEST, "soil_con:\n");
-    fprintf(LOG_DEST, "\tFS_ACTIVE             : %d\n", scon->FS_ACTIVE);
+    fprintf(LOG_DEST, "\tFS_ACTIVE             : %s\n",
+            scon->FS_ACTIVE ? "true" : "false");
     fprintf(LOG_DEST, "\tDs                    : %f\n", scon->Ds);
     fprintf(LOG_DEST, "\tDsmax                 : %f\n", scon->Dsmax);
     fprintf(LOG_DEST, "\tKsat                  :");
@@ -1041,7 +1082,7 @@ print_soil_con(soil_con_struct *scon,
     fprintf(LOG_DEST, "\n");
     fprintf(LOG_DEST, "AboveTreeLine         :");
     for (i = 0; i < nbands; i++) {
-        fprintf(LOG_DEST, "\t%d", scon->AboveTreeLine[i]);
+        fprintf(LOG_DEST, "\t%s", scon->AboveTreeLine[i] ? "true" : "false");
     }
     fprintf(LOG_DEST, "\n");
     fprintf(LOG_DEST, "\televation             : %f\n", scon->elevation);
@@ -1130,7 +1171,8 @@ print_veg_lib(veg_lib_struct *vlib,
     size_t i;
 
     fprintf(LOG_DEST, "veg_lib:\n");
-    fprintf(LOG_DEST, "\toverstory     : %d\n", vlib->overstory);
+    fprintf(LOG_DEST, "\toverstory     : %s\n",
+            vlib->overstory ? "true" : "false");
     fprintf(LOG_DEST, "\tLAI           :");
     for (i = 0; i < MONTHS_PER_YEAR; i++) {
         fprintf(LOG_DEST, "\t%.2f", vlib->LAI[i]);
@@ -1181,7 +1223,8 @@ print_veg_lib(veg_lib_struct *vlib,
         fprintf(LOG_DEST, "\tMaxETransport : %.4f\n", vlib->MaxETransport);
         fprintf(LOG_DEST, "\tCO2Specificity: %.4f\n", vlib->CO2Specificity);
         fprintf(LOG_DEST, "\tLightUseEff   : %.4f\n", vlib->LightUseEff);
-        fprintf(LOG_DEST, "\tNscaleFlag    : %d\n", vlib->NscaleFlag);
+        fprintf(LOG_DEST, "\tNscaleFlag    : %s\n",
+                vlib->NscaleFlag ? "true" : "false");
         fprintf(LOG_DEST, "\tWnpp_inhib    : %.4f\n", vlib->Wnpp_inhib);
         fprintf(LOG_DEST, "\tNPPfactor_sat : %.4f\n", vlib->NPPfactor_sat);
     }

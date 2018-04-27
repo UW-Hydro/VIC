@@ -44,6 +44,7 @@ vic_cesm_put_data()
     extern global_param_struct global_param;
     extern option_struct       options;
     extern parameters_struct   param;
+    extern double           ***out_data;
 
     bool                       IsWet = false; // TODO: add lake fraction
     bool                       overstory;
@@ -63,14 +64,13 @@ vic_cesm_put_data()
     double                     wind_stress;
     double                     wind_stress_x;
     double                     wind_stress_y;
-    double                     evap;
     cell_data_struct           cell;
     energy_bal_struct          energy;
     snow_data_struct           snow;
     veg_var_struct             veg_var;
 
     for (i = 0; i < local_domain.ncells_active; i++) {
-        // Zero l2x vars (leave unused fields as MISSING values)
+        // Zero l2x vars
         l2x_vic[i].l2x_Sl_t = 0;
         l2x_vic[i].l2x_Sl_tref = 0;
         l2x_vic[i].l2x_Sl_qref = 0;
@@ -80,7 +80,7 @@ vic_cesm_put_data()
         l2x_vic[i].l2x_Sl_anidf = 0;
         l2x_vic[i].l2x_Sl_snowh = 0;
         l2x_vic[i].l2x_Sl_u10 = 0;
-        // l2x_vic[i].l2x_Sl_ddvel = 0;
+        l2x_vic[i].l2x_Sl_ddvel = 0;
         l2x_vic[i].l2x_Sl_fv = 0;
         l2x_vic[i].l2x_Sl_ram1 = 0;
         l2x_vic[i].l2x_Sl_logz0 = 0;
@@ -91,14 +91,83 @@ vic_cesm_put_data()
         l2x_vic[i].l2x_Fall_lwup = 0;
         l2x_vic[i].l2x_Fall_evap = 0;
         l2x_vic[i].l2x_Fall_swnet = 0;
-        // l2x_vic[i].l2x_Fall_fco2_lnd = 0;
-        // l2x_vic[i].l2x_Fall_flxdst1 = 0;
-        // l2x_vic[i].l2x_Fall_flxdst2 = 0;
-        // l2x_vic[i].l2x_Fall_flxdst3 = 0;
-        // l2x_vic[i].l2x_Fall_flxdst4 = 0;
-        // l2x_vic[i].l2x_Fall_flxvoc = 0;
+        l2x_vic[i].l2x_Fall_fco2_lnd = 0;
+        l2x_vic[i].l2x_Fall_flxdst1 = 0;
+        l2x_vic[i].l2x_Fall_flxdst2 = 0;
+        l2x_vic[i].l2x_Fall_flxdst3 = 0;
+        l2x_vic[i].l2x_Fall_flxdst4 = 0;
+        l2x_vic[i].l2x_Fall_flxvoc = 0;
         l2x_vic[i].l2x_Flrl_rofliq = 0;
-        // l2x_vic[i].l2x_Flrl_rofice = 0;
+        l2x_vic[i].l2x_Flrl_rofice = 0;
+
+        // populate reference values
+
+        // 10m wind, VIC: m/s, CESM: m/s
+        l2x_vic[i].l2x_Sl_u10 = out_data[i][OUT_WIND][0];
+
+        // 2m reference temperature, VIC: C, CESM: K
+        l2x_vic[i].l2x_Sl_tref = out_data[i][OUT_AIR_TEMP][0] + CONST_TKFRZ;
+
+        // 2m reference specific humidity, VIC: kg/kg, CESM: g/g
+        l2x_vic[i].l2x_Sl_qref = CONST_EPS *
+                                 out_data[i][OUT_VP][0] /
+                                 out_data[i][OUT_PRESSURE][0];
+
+        // band-specific quantities
+        // note that these include a veg correction (AreaFactor)
+        // that is already in the put_data routine
+
+        // temperature, VIC: K, CESM: K
+        l2x_vic[i].l2x_Sl_t = out_data[i][OUT_RAD_TEMP][0];
+
+        // albedo, VIC: fraction, CESM: fraction
+        // Note: VIC does not partition its albedo, thus all types are
+        // the same value
+        albedo = all_vars[i].gridcell_avg.avg_albedo;
+
+        // albedo: direct, visible
+        l2x_vic[i].l2x_Sl_avsdr = albedo;
+
+        // albedo: direct , near-ir
+        l2x_vic[i].l2x_Sl_anidr = albedo;
+
+        // albedo: diffuse, visible
+        l2x_vic[i].l2x_Sl_avsdf = albedo;
+
+        // albedo: diffuse, near-ir
+        l2x_vic[i].l2x_Sl_anidf = albedo;
+
+        // snow height, VIC: mm, CESM: m
+        // convert to VIC units
+        l2x_vic[i].l2x_Sl_snowh = out_data[i][OUT_SWE][0] / MM_PER_M;
+
+        // net shortwave, VIC: W/m2, CESM: W/m2
+        l2x_vic[i].l2x_Fall_swnet = out_data[i][OUT_SWNET][0];
+
+        // longwave up, VIC: W/m2, CESM: W/m2
+        // adjust sign for CESM sign convention
+        l2x_vic[i].l2x_Fall_lwup = -1 *
+                                   (out_data[i][OUT_LWDOWN][0] -
+                                    out_data[i][OUT_LWNET][0]);
+
+        // turbulent heat fluxes
+        // Note: both are the opposite sign from image driver
+        // in accordance with the sign convention for coupled models
+        // latent heat, VIC: W/m2, CESM: W/m2
+        l2x_vic[i].l2x_Fall_lat = -1 * out_data[i][OUT_LATENT][0];
+
+        // sensible heat, VIC: W/m2, CESM: W/m2
+        l2x_vic[i].l2x_Fall_sen += -1 * out_data[i][OUT_SENSIBLE][0];
+
+        // evaporation, VIC: mm, CESM: kg m-2 s-1
+        l2x_vic[i].l2x_Fall_evap += -1 * out_data[i][OUT_EVAP][0] /
+                                    global_param.dt;
+
+        // lnd->rtm input fluxes
+        l2x_vic[i].l2x_Flrl_rofliq = (out_data[i][OUT_RUNOFF][0] +
+                                      out_data[i][OUT_BASEFLOW][0]) /
+                                     global_param.dt;
+
 
         // running sum to make sure we get the full grid cell
         AreaFactorSum = 0;
@@ -128,70 +197,7 @@ vic_cesm_put_data()
                 }
                 AreaFactorSum += AreaFactor;
 
-                // temperature
-                // CESM units: K
-                if (overstory && snow.snow && !(options.LAKES && IsWet)) {
-                    rad_temp = energy.Tfoliage + CONST_TKFRZ;
-                }
-                else {
-                    rad_temp = energy.Tsurf + CONST_TKFRZ;
-                }
-                l2x_vic[i].l2x_Sl_t += AreaFactor * rad_temp;
-
-                // 2m reference temperature
-                // CESM units: K
-                l2x_vic[i].l2x_Sl_tref += AreaFactor * force->air_temp[NR];
-
-                // 2m reference specific humidity
-                // CESM units: g/g
-                l2x_vic[i].l2x_Sl_qref += AreaFactor * CONST_EPS *
-                                          force->vp[NR] / force->pressure[NR];
-
-                // Albedo Note: VIC does not partition its albedo, all returned
-                // values will be the same
-
-                // albedo: direct, visible
-                // CESM units: unitless
-                // force->shortwave is the incoming shortwave (+ down)
-                // force->NetShortAtmos net shortwave flux (+ down)
-                // SWup = force->shortwave[NR] - energy.NetShortAtmos
-                // Set the albedo to zero for the case where there is no shortwave down
-                if (force->shortwave[NR] > 0.) {
-                    albedo = AreaFactor *
-                             (force->shortwave[NR] - energy.NetShortAtmos) /
-                             force->shortwave[NR];
-                }
-                else {
-                    albedo = 0.;
-                }
-                l2x_vic[i].l2x_Sl_avsdr += albedo;
-
-                // albedo: direct , near-ir
-                // CESM units: unitless
-                l2x_vic[i].l2x_Sl_anidr += albedo;
-
-                // albedo: diffuse, visible
-                // CESM units: unitless
-                l2x_vic[i].l2x_Sl_avsdf += albedo;
-
-                // albedo: diffuse, near-ir
-                // CESM units: unitless
-                l2x_vic[i].l2x_Sl_anidf += albedo;
-
-                // snow height
-                // CESM units: m
-                l2x_vic[i].l2x_Sl_snowh += AreaFactor * snow.depth;
-
-                // 10m wind
-                // CESM units: m/s
-                l2x_vic[i].l2x_Sl_u10 += AreaFactor * force->wind[NR];
-
-                // dry deposition velocities (optional)
-                // CESM units: ?
-                // l2x_vic[i].l2x_Sl_ddvel;
-
-                // aerodynamical resistance
-                // CESM units: s/m
+                // aerodynamical resistance, VIC: s/m, CESM: s/m
                 if (overstory) {
                     aero_resist = cell.aero_resist[1];
                 }
@@ -205,8 +211,6 @@ vic_cesm_put_data()
                     aero_resist = param.HUGE_RESIST;
                 }
 
-                l2x_vic[i].l2x_Sl_ram1 += AreaFactor * aero_resist;
-
                 // log z0
                 // CESM units: m
                 if (snow.snow) {
@@ -214,12 +218,13 @@ vic_cesm_put_data()
                     roughness = soil_con[i].snow_rough;
                 }
                 else if (HasVeg) {
-                    // bare soil roughness
+                    // vegetation roughness
                     roughness =
                         veg_lib[i][veg_con[i][veg].veg_class].roughness[
                             dmy_current.month - 1];
                 }
                 else {
+                    // bare soil roughness
                     roughness = soil_con[i].rough;
                 }
                 if (roughness < DBL_EPSILON) {
@@ -230,13 +235,13 @@ vic_cesm_put_data()
 
                 // wind stress, zonal
                 // CESM units: N m-2
-                wind_stress_x = -1 * force[i].density[NR] *
+                wind_stress_x = out_data[i][OUT_DENSITY][0] *
                                 x2l_vic[i].x2l_Sa_u / aero_resist;
                 l2x_vic[i].l2x_Fall_taux += AreaFactor * wind_stress_x;
 
                 // wind stress, meridional
                 // CESM units: N m-2
-                wind_stress_y = -1 * force[i].density[NR] *
+                wind_stress_y = out_data[i][OUT_DENSITY][0] *
                                 x2l_vic[i].x2l_Sa_v / aero_resist;
                 l2x_vic[i].l2x_Fall_tauy += AreaFactor * wind_stress_y;
 
@@ -245,72 +250,13 @@ vic_cesm_put_data()
                 wind_stress =
                     sqrt(pow(wind_stress_x, 2) + pow(wind_stress_y, 2));
                 l2x_vic[i].l2x_Sl_fv += AreaFactor *
-                                        (wind_stress / force[i].density[NR]);
-
-                // latent heat flux
-                // CESM units: W m-2
-                l2x_vic[i].l2x_Fall_lat += -1 * AreaFactor * energy.AtmosLatent;
-
-                // sensible heat flux
-                // CESM units: W m-2
-                l2x_vic[i].l2x_Fall_sen += -1 * AreaFactor *
-                                           energy.AtmosSensible;
-
-                // upward longwave heat flux
-                // CESM units: W m-2
-                l2x_vic[i].l2x_Fall_lwup += AreaFactor *
-                                            (force->longwave[NR] -
-                                             energy.NetLongAtmos);
-
-                // evaporation water flux
-                // CESM units: kg m-2 s-1
-                evap = 0.0;
-                for (index = 0; index < options.Nlayer; index++) {
-                    evap += cell.layer[index].evap;
-                }
-                evap += snow.vapor_flux * MM_PER_M;
-                if (HasVeg) {
-                    evap += snow.canopy_vapor_flux * MM_PER_M;
-                    evap += veg_var.canopyevap;
-                }
-                l2x_vic[i].l2x_Fall_evap += -1 * AreaFactor * evap /
-                                            global_param.dt;
-
-                // heat flux shortwave net
-                l2x_vic[i].l2x_Fall_swnet += AreaFactor *
-                                             (force->shortwave[NR] -
-                                              energy.NetShortAtmos);
-
-                // co2 flux **For testing set to 0
-                // l2x_vic[i].l2x_Fall_fco2_lnd;
-
-                // dust flux size bin 1
-                // l2x_vic[i].l2x_Fall_flxdst1;
-
-                // dust flux size bin 2
-                // l2x_vic[i].l2x_Fall_flxdst2;
-
-                // dust flux size bin 3
-                // l2x_vic[i].l2x_Fall_flxdst3;
-
-                // dust flux size bin 4
-                // l2x_vic[i].l2x_Fall_flxdst4;
-
-                // MEGAN fluxes
-                // l2x_vic[i].l2x_Fall_flxvoc;
-
-                // lnd->rtm input fluxes
-                l2x_vic[i].l2x_Flrl_rofliq += AreaFactor *
-                                              (cell.runoff +
-                                               cell.baseflow) / global_param.dt;
-
-                // lnd->rtm input fluxes
-                // l2x_vic[i].l2x_Flrl_rofice;
-
-                // vars set flag
-                l2x_vic[i].l2x_vars_set = true;
+                                        sqrt(wind_stress /
+                                             out_data[i][OUT_DENSITY][0]);
             }
         }
+
+        // set variables-set flag
+        l2x_vic[i].l2x_vars_set = true;
 
         if (!assert_close_double(AreaFactorSum, 1., 0., 1e-3)) {
             log_warn("AreaFactorSum (%f) is not 1",

@@ -94,15 +94,38 @@ vic_cesm_init(vic_clock     *vclock,
     vic_init();
 
     // populate model state, either using a cold start or from a restart file
-    vic_populate_model_state(trim(cmeta->starttype));
+    vic_populate_model_state(trimstr(cmeta->starttype), &dmy_current);
+
+    // initialize forcings
+    timer_start(&(global_timers[TIMER_VIC_FORCE]));
+    vic_force();
+    timer_stop(&(global_timers[TIMER_VIC_FORCE]));
 
     // initialize output structures
     vic_init_output(&dmy_current);
+
+    // initialize albedo
+    vic_initialize_albedo();
+
+    // initialize temperature
+    vic_initialize_temperature();
+
+    // initialize upwelling longwave
+    vic_initialize_lwup();
+
+    // initialization is complete, print settings
+    log_info(
+        "Initialization is complete, print global param, parameters and options structures");
+    print_global_param(&global_param);
+    print_option(&options);
+    print_parameters(&param);
 
     // stop init timer
     timer_stop(&(global_timers[TIMER_VIC_INIT]));
     // stop vic all timer
     timer_stop(&(global_timers[TIMER_VIC_ALL]));
+    // init vic run timer
+    timer_init(&(global_timers[TIMER_VIC_RUN]));
 
     return EXIT_SUCCESS;
 }
@@ -117,14 +140,16 @@ vic_cesm_run(vic_clock *vclock)
 
     // continue vic all timer
     timer_continue(&(global_timers[TIMER_VIC_ALL]));
-    // start vic run timer
-    timer_start(&(global_timers[TIMER_VIC_RUN]));
+    // continue vic run timer
+    timer_continue(&(global_timers[TIMER_VIC_RUN]));
 
     // reset l2x fields
     initialize_l2x_data();
 
     // read forcing data
+    timer_continue(&(global_timers[TIMER_VIC_FORCE]));
     vic_force();
+    timer_stop(&(global_timers[TIMER_VIC_FORCE]));
 
     // run vic over the domain
     vic_image_run(&dmy_current);
@@ -133,20 +158,25 @@ vic_cesm_run(vic_clock *vclock)
     vic_cesm_put_data();
 
     // Write history files
+    timer_continue(&(global_timers[TIMER_VIC_WRITE]));
     vic_write_output(&dmy_current);
+    timer_stop(&(global_timers[TIMER_VIC_WRITE]));
+
+    // advance the clock
+    advance_vic_time();
+    assert_time_insync(vclock, &dmy_current);
 
     // if save:
     if (vclock->state_flag) {
+        // write state file
+        debug("writing state file for timestep %zu", current);
         vic_store(&dmy_current, state_filename);
         write_rpointer_file(state_filename);
+        debug("finished storing state file: %s", state_filename)
     }
 
     // reset x2l fields
     initialize_x2l_data();
-
-    // advance the clock
-    advance_time();
-    assert_time_insync(vclock, &dmy_current);
 
     // stop vic run timer
     timer_stop(&(global_timers[TIMER_VIC_RUN]));
@@ -160,12 +190,15 @@ vic_cesm_run(vic_clock *vclock)
  * @brief    Finalize function for CESM driver
  *****************************************************************************/
 int
-vic_cesm_final()
+vic_cesm_final(vic_clock *vclock)
 {
     // continue vic all timer
     timer_continue(&(global_timers[TIMER_VIC_ALL]));
-    // start vic run timer
-    timer_start(&(global_timers[TIMER_VIC_RUN]));
+    // start vic final timer
+    timer_start(&(global_timers[TIMER_VIC_FINAL]));
+
+    // finalize time
+    finalize_cesm_time(vclock);
 
     // clean up
     vic_cesm_finalize();
@@ -174,8 +207,10 @@ vic_cesm_final()
     timer_stop(&(global_timers[TIMER_VIC_FINAL]));
     // stop vic all timer
     timer_stop(&(global_timers[TIMER_VIC_ALL]));
-    // write timing info
-    write_vic_timing_table(global_timers, VIC_DRIVER);
 
+    if (mpi_rank == VIC_MPI_ROOT) {
+        // write timing info
+        write_vic_timing_table(global_timers, VIC_DRIVER);
+    }
     return EXIT_SUCCESS;
 }

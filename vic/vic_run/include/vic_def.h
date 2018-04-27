@@ -59,10 +59,8 @@
 #define ERROR        -999      /**< Error Flag returned by subroutines */
 
 /***** Define maximum array sizes for model source code *****/
-#define MAX_VEG         12     /**< maximum number of vegetation types per cell */
 #define MAX_LAYERS      3      /**< maximum number of soil moisture layers */
 #define MAX_NODES       50     /**< maximum number of soil thermal nodes */
-#define MAX_BANDS       10     /**< maximum number of snow bands */
 #define MAX_FRONTS      3      /**< maximum number of freezing and thawing front depths to store */
 #define MAX_FROST_AREAS 10     /**< maximum number of frost sub-areas */
 #define MAX_LAKE_NODES  20     /**< maximum number of lake thermal nodes */
@@ -235,10 +233,8 @@ typedef struct {
     size_t Nnode;        /**< Number of soil thermal nodes in the model */
     bool NOFLUX;         /**< TRUE = Use no flux lower bondary when computing
                             soil thermal fluxes */
-    size_t NVEGTYPES;    /**< number of vegetation types in veg_param file
-                            (used by image driver) */
-    size_t NLAKENODES;   /**< number of lake layers in lake_param file
-                            (used by image driver) */
+    size_t NVEGTYPES;    /**< number of vegetation types in veg_param file */
+    size_t NLAKENODES;   /**< number of lake layers in lake_param file */
     unsigned short int RC_MODE;        /**< RC_JARVIS = compute canopy resistance via Jarvis formulation (default)
                                           RC_PHOTO = compute canopy resistance based on photosynthetic activity */
     size_t ROOT_ZONES;   /**< Number of root zones used in simulation */
@@ -268,7 +264,7 @@ typedef struct {
                             Default = TRUE */
 
     // input options
-    bool BASEFLOW;       /**< ARNO: read Ds, Dm, Ws, c; NIJSSEN2001: read d1, d2, d3, d4 */
+    unsigned short int BASEFLOW;     /**< ARNO: read Ds, Dm, Ws, c; NIJSSEN2001: read d1, d2, d3, d4 */
     unsigned short int GRID_DECIMAL; /**< Number of decimal places in grid file extensions */
     bool VEGLIB_FCAN;    /**< TRUE = veg library file contains monthly fcanopy values */
     bool VEGLIB_PHOTO;   /**< TRUE = veg library contains photosynthesis parameters */
@@ -457,6 +453,8 @@ typedef struct {
     double SNOW_MAX_SURFACE_SWE;  /**< maximum depth of the surface layer in water equivalent (m) */
     double SNOW_LIQUID_WATER_CAPACITY;  /**< water holding capacity of snow as a fraction of snow-water-equivalent */
     double SNOW_NEW_SNOW_DENSITY;  /**< density of new fallen snow */
+    double SNOW_NEW_SNOW_DENS_MAX; /**< new snow density max for Hedstrom and Pomeroy 1998 equation [Warren et al. 1999, Bormann et al. 2013, Maidment Figure 7.2.3] */
+    double SNOW_DEPTH_THRES;  /**< Snow depth threshold below which we do not consider the ground flux out of the snowpack in calculating change in cold content (m) */
     double SNOW_DENS_DMLIMIT;  /**< Density limit used in calculation of destructive metamorphism (kg/m^3) */
     double SNOW_DENS_DMLIMIT_FACTOR;  /**< Density limit factor used in calculation of destructive metamorphism (kg/m^3) */
     double SNOW_DENS_MAX_CHANGE;  /**< maximum change in snowfall depth (fraction of swe) */
@@ -517,6 +515,9 @@ typedef struct {
 
     // Frozen Soil Parameters
     int FROZEN_MAXITER;
+
+    // Canopy Iterations
+    int MAX_ITER_GRND_CANOPY;
 
     // Newton-Raphson Solver Parameters
     int NEWT_RAPH_MAXTRIAL;
@@ -772,8 +773,9 @@ typedef struct {
     double phi;             /**< moisture diffusion parameter */
     double zwt;             /**< water table position relative to soil surface within the layer (cm) */
     // Fluxes
-    double bare_evap_frac;  /**< fraction of evapotranspiration coming from bare soil evap, from soil layer (mm) */
+    double esoil;           /**< soil evaporation from soil layer (mm) */
     double evap;            /**< evapotranspiration from soil layer (mm) */
+    double transp;          /**< transpiration from soil layer (mm) */
 } layer_data_struct;
 
 /******************************************************************************
@@ -1000,6 +1002,14 @@ typedef struct {
 } snow_data_struct;
 
 /******************************************************************************
+ * @brief   This structures stores variables averaged over a grid cell
+ *****************************************************************************/
+typedef struct {
+    // Grid cell averaged variables
+    double avg_albedo;            /**< Average albedo over a grid cell */
+} gridcell_avg_struct;
+
+/******************************************************************************
  * @brief   This structure stores the lake/wetland parameters for a grid cell
  *****************************************************************************/
 typedef struct {
@@ -1085,6 +1095,7 @@ typedef struct {
     lake_var_struct lake_var;     /**< Stores lake/wetland variables */
     snow_data_struct **snow;      /**< Stores snow variables */
     veg_var_struct **veg_var;     /**< Stores vegetation variables */
+    gridcell_avg_struct gridcell_avg;   /**< Stores gridcell average variables */
 } all_vars_struct;
 
 #endif

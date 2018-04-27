@@ -30,7 +30,8 @@
  * @brief    This function handles tasks related to populating model state.
  *****************************************************************************/
 void
-vic_populate_model_state(char *runtype_str)
+vic_populate_model_state(char       *runtype_str,
+                         dmy_struct *dmy_current)
 {
     extern all_vars_struct *all_vars;
     extern lake_con_struct *lake_con;
@@ -51,7 +52,7 @@ vic_populate_model_state(char *runtype_str)
     // read the model state from the netcdf file
     if (runtype == CESM_RUNTYPE_RESTART || runtype == CESM_RUNTYPE_BRANCH) {
         // Get restart file from rpointer file
-        read_rpointer_file(filenames.init_state);
+        read_rpointer_file(filenames.init_state.nc_filename);
 
         // set options.INIT_STATE to true since we have found a state file in
         // the rpointer file.
@@ -69,7 +70,7 @@ vic_populate_model_state(char *runtype_str)
             // no initial state file specified - generate default state
             for (i = 0; i < local_domain.ncells_active; i++) {
                 generate_default_state(&(all_vars[i]), &(soil_con[i]),
-                                       veg_con[i]);
+                                       veg_con[i], dmy_current);
                 if (options.LAKES) {
                     generate_default_lake_state(&(all_vars[i]), &(soil_con[i]),
                                                 lake_con[i]);

@@ -56,7 +56,7 @@ The following variables contain information about the storage of moisture and th
 | STATE_CANOPY_WATER          | [veg_class, snow_band, nlayer,   lat, lon]            | double          | Amount   of water stored in the vegetation canopy [mm]. Not defined for bare soil                                                                    |
 | STATE_SNOW_AGE              | [veg_class, snow_band, nlayer,   lat, lon]            | model_time_step | Number of   model time steps since the last new snow                                                                                                 |
 | STATE_SNOW_MELT_STATE       | [veg_class, snow_band, nlayer,   lat, lon]            | int             | flag to   indicate whether snowpack is in accumulation or melting phase (1 melting, 0   not melting)                                                 |
-| STATE_SNOW_COVERAGE         | [veg_class, snow_band, nlayer,   lat, lon]            | double          | Fraction   of grid cell area covered by snow [1]                                                                                                        |
+| STATE_SNOW_COVERAGE         | [veg_class, snow_band, nlayer,   lat, lon]            | double          | Fraction   of grid cell area covered by snow [1]                                                                                                     |
 | STATE_SNOW_WATER_EQUIVALENT | [veg_class, snow_band, nlayer,   lat, lon]            | double          | Snow   water equivalent [m]                                                                                                                          |
 | STATE_SNOW_SURF_TEMP        | [veg_class, snow_band, nlayer,   lat, lon]            | double          | Snow   surface layer temperature [C]                                                                                                                 |
 | STATE_SNOW_SURF_WATER       | [veg_class, snow_band, nlayer,   lat, lon]            | double          | Liquid   water content of the snow surface layer [m]                                                                                                 |
@@ -69,6 +69,12 @@ The following variables contain information about the storage of moisture and th
 | STATE_FOLIAGE_TEMPERATURE   | [veg_class, snow_band, nlayer,   lat, lon]            | double          | Overstory vegetaion temperature   [C]                                                                                                                |
 | STATE_ENERGY_LONGUNDEROUT   | [veg_class, snow_band, nlayer,   lat, lon]            | double          | Outgoing longwave flux from   understory vegetation [W/m2] (Note: this is a flux variable temporarily saved   in state file to ensure exact restart) |
 | STATE_ENERGY_SNOW_FLUX      | [veg_class, snow_band, nlayer,   lat, lon]            | double          | Thermal flux through snowpack   [W/m2] (Note: this is a flux variable temporarily saved in state file to   ensure exact restart)                     |
+
+## netCDF State File Variables - RVIC-Routing (only when RVIC extension is activated in the makefile before compiling)
+
+| State   variable name       | Dimension                                             | Type            | Description                                                                                                                                          |
+|-----------------------------|-------------------------------------------------------|-----------------|------------------------------------------------------------------------------------------------------------------------------------------------------|
+| STATE_ROUT_RING             | [routing_timestep, outlet]                            | double          | Routing ring   unit hydrographs in the routing ring                                                                                                  |
 
 * * *
 

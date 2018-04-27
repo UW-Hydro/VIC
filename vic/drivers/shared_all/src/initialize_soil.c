@@ -70,7 +70,8 @@ initialize_soil(cell_data_struct **cell,
             cell[veg][band].RhSlow = 0.0;
             cell[veg][band].RhTot = 0.0;
             for (lindex = 0; lindex < options.Nlayer; lindex++) {
-                cell[veg][band].layer[lindex].bare_evap_frac = 0.0;
+                cell[veg][band].layer[lindex].esoil = 0.0;
+                cell[veg][band].layer[lindex].transp = 0.0;
                 cell[veg][band].layer[lindex].evap = 0.0;
             }
         }

@@ -38,10 +38,12 @@ initialize_filenames()
 
     size_t                  i;
 
-    strcpy(filenames.init_state, "MISSING");
+    strcpy(filenames.init_state.nc_filename, "MISSING");
     strcpy(filenames.statefile, "MISSING");
     strcpy(filenames.constants, "MISSING");
-    strcpy(filenames.params, "MISSING");
+    strcpy(filenames.params.nc_filename, "MISSING");
+    strcpy(filenames.rout_params.nc_filename, "MISSING");
+    strcpy(filenames.domain.nc_filename, "MISSING");
     strcpy(filenames.result_dir, "MISSING");
     strcpy(filenames.log_path, "MISSING");
     for (i = 0; i < 2; i++) {
@@ -57,15 +59,7 @@ initialize_fileps()
 {
     extern filep_struct filep;
 
-    size_t              i;
-
     filep.globalparam = NULL;
     filep.constants = NULL;
-    filep.init_state = NULL;
-    filep.paramfile = NULL;
-    filep.statefile = NULL;
     filep.logfile = NULL;
-    for (i = 0; i < 2; i++) {
-        filep.forcing[i] = NULL;
-    }
 }

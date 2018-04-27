@@ -37,6 +37,8 @@ WIND_H        10.0
 PARAMETERS      $test_data_dir/image/Stehekin/parameters/Stehekin_test_params_20160327.nc
 NODES           3
 
+ROUT_PARAM          $test_data_dir/image/Stehekin/parameters/stehekin_parameters_01.rvic.prm.Stehekin.20150727.nc
+
 RESULT_DIR  $result_dir/
 
 # Instantaneous output

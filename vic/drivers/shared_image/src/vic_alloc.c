@@ -86,7 +86,7 @@ vic_alloc(void)
     check_alloc_status(out_data, "Memory allocation error.");
 
     // save_data allocation
-    save_data = malloc(local_domain.ncells_active * sizeof(*save_data));
+    save_data = calloc(local_domain.ncells_active, sizeof(*save_data));
     check_alloc_status(save_data, "Memory allocation error.");
 
     // allocate memory for individual grid cells
@@ -158,7 +158,7 @@ vic_alloc(void)
         veg_lib[i] = calloc(options.NVEGTYPES, sizeof(*(veg_lib[i])));
         check_alloc_status(veg_lib[i], "Memory allocation error.");
 
-        all_vars[i] = make_all_vars(veg_con_map[i].nv_active);
+        all_vars[i] = make_all_vars(veg_con_map[i].nv_active - 1);
 
         // allocate memory for veg_hist
         veg_hist[i] = calloc(veg_con_map[i].nv_active, sizeof(*(veg_hist[i])));

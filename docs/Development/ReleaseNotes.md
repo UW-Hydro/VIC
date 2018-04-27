@@ -15,77 +15,84 @@ To check which release of VIC you are running:
 
 ------------------------------
 
-## VIC 5.1.0
+## VIC 5.1.0 rc1
 
-**Release date: (Unreleased)**
+<!-- TODO -->
+<!-- [![DOI](https://zenodo.org/badge/doi/10.5281/zenodo.61422.svg)](http://dx.doi.org/10.5281/zenodo.61422) -->
+
+**Release date: (April 27, 2018)**
+
+Source code is available here: [![VIC.5.1.0](https://img.shields.io/badge/VIC-5.1.0-blue.svg)](https://github.com/UW-Hydro/VIC/releases/tag/VIC.5.1.0)
+
+This is a minor update from VIC 5.0.1. The VIC 5.1.0 includes new features, such as a new streamflow routing extension and extended parallelization using OpenMP. The release also includes a number of bug fixes for the CESM driver. See the VIC Github page for more details on the changes included in this release.
 
 #### Model enhancement:
 
 1. Improved calculation of drainage between soil layers ([GH#656](https://github.com/UW-Hydro/VIC/pull/656))
 
-	Drainage from upper layer to adjacent lower layer is calculated according to Brook & Corey curve (where drainage rate is a function of upper-layer soil moisture). In previous versions, a simple numerical solution is applied which uses the timestep-beginning upper-layer soil moisture to calculate drainage rate, and assume this constant rate over the entire timestep. This can cause unreasonably large drainage if the curve has a steep shape and when soil moisture is high. Now, the current version uses exact integral (instead of numerical solution) for layer drainage calculation.
+   Drainage from upper layer to adjacent lower layer is calculated according to Brook & Corey curve (where drainage rate is a function of upper-layer soil moisture). In previous versions, a simple numerical solution is applied which uses the timestep-beginning upper-layer soil moisture to calculate drainage rate, and assume this constant rate over the entire timestep. This can cause unreasonably large drainage if the curve has a steep shape and when soil moisture is high. Now, the current version uses exact integral (instead of numerical solution) for layer drainage calculation.
 
 2. Fixes for the CESM driver
 
-	[GH#642](https://github.com/UW-Hydro/VIC/pull/642)
+   1. [GH#642](https://github.com/UW-Hydro/VIC/pull/642)
 
-	    1. Using correct fill value datatypes in MPI Gather steps
-	    2. Updated state file name time step to be period-ending rather than period-beginning
-	    3. Set the state file name to the RASM case ID
-	    4. Removed decimal point for missing values for unsigned integers
-	    5. Create dummy forcings when initializing the model (so that there is forcing data for the first time step)
-	    6. Changed pressure units from kPa to Pa
-	    7. Fixed bug that prevented using the correct local domain grid cells in `cesm_put_data.c`
-	    8. Changed reference temperature units from Celsius to Kelvin in `cesm_put_data.c`
+    - Using correct fill value datatypes in MPI Gather steps
+    - Updated state file name time step to be period-ending rather than period-beginning
+    - Set the state file name to the RASM case ID
+    - Removed decimal point for missing values for unsigned integers
+    - Create dummy forcings when initializing the model (so that there is forcing data for the first time step)
+    - Changed pressure units from kPa to Pa
+    - Fixed bug that prevented using the correct local domain grid cells in `cesm_put_data.c`
+    - Changed reference temperature units from Celsius to Kelvin in `cesm_put_data.c`
 
-	[GH#695](https://github.com/UW-Hydro/VIC/pull/695)
+   1. [GH#695](https://github.com/UW-Hydro/VIC/pull/695)
 
-	    1. Fix sign for latent heat fluxes passed from VIC to the coupler
-	    2. Fix sign for longwave radiation passed from VIC to the coupler
+    - Fix sign for latent heat fluxes passed from VIC to the coupler
+    - Fix sign for longwave radiation passed from VIC to the coupler
 
-	[GH#696](https://github.com/UW-Hydro/VIC/pull/696)
+   1. [GH#696](https://github.com/UW-Hydro/VIC/pull/696)
 
-	    Changes names of CESM driver functions `trim` and `advance_time` to `trimstr` and `advance_vic_time`, respectively, to avoid conflicts with WRF functions with the same names when compiling RFR case.
+    - Changes names of CESM driver functions `trim` and `advance_time` to `trimstr` and `advance_vic_time`, respectively, to avoid conflicts with WRF functions with the same names when compiling RFR case.
 
-    [GH#702](https://github.com/UW-Hydro/VIC/pull/702)
+   1. [GH#702](https://github.com/UW-Hydro/VIC/pull/702)
 
-        Fixes Julian day for the first timestep in the dmy struct for the CESM driver.
+    - Fixes Julian day for the first timestep in the dmy struct for the CESM driver.
 
-    [GH#710](https://github.com/UW-Hydro/VIC/pull/710)
+   1. [GH#710](https://github.com/UW-Hydro/VIC/pull/710)
 
-	    Refactor the cesm_put_data.c routine in the CESM driver to use values from out_data directly, rather than computing them separately in cesm_put_data.c.
+    - Refactor the cesm_put_data.c routine in the CESM driver to use values from out_data directly, rather than computing them separately in cesm_put_data.c.
 
-    [GH#716](https://github.com/UW-Hydro/VIC/pull/716)
+   1. [GH#716](https://github.com/UW-Hydro/VIC/pull/716)
 
-        Fixes initialization of coupler fields and calculates temperature and upwelling longwave to pass to WRF during initialization.
+    - Fixes initialization of coupler fields and calculates temperature and upwelling longwave to pass to WRF during initialization.
 
-    [GH#718](https://github.com/UW-Hydro/VIC/pull/718)
+   1. [GH#718](https://github.com/UW-Hydro/VIC/pull/718)
 
-        Updates the cesm_put_data.c routine in the CESM driver to pass gridcell-averaged albedo to the coupler.
+    - Updates the cesm_put_data.c routine in the CESM driver to pass gridcell-averaged albedo to the coupler.
 
-    [GH#726](https://github.com/UW-Hydro/VIC/pull/726)
+   1. [GH#726](https://github.com/UW-Hydro/VIC/pull/726)
 
-        Updates the cesm_put_data.c routine in the CESM driver to include the correct units for evap passed to the coupler.
+    - Updates the cesm_put_data.c routine in the CESM driver to include the correct units for evap passed to the coupler.
 
-    [GH#732](https://github.com/UW-Hydro/VIC/pull/732)
+   1. [GH#732](https://github.com/UW-Hydro/VIC/pull/732)
 
-        Updates the cesm_put_data.c routine in the CESM driver to include the correct units for sensible heat flux and updates the rofliq calculation to be correct (previously only OUT_BASEFLOW was being divided by global_param.dt).
+     - Updates the cesm_put_data.c routine in the CESM driver to include the correct units for sensible heat flux and updates the rofliq calculation to be correct (previously only OUT_BASEFLOW was being divided by global_param.dt).
 
-    [GH#734](https://github.com/UW-Hydro/VIC/pull/734)
+   1. [GH#734](https://github.com/UW-Hydro/VIC/pull/734)
 
-        Updates the cesm_put_data.c routine in the CESM driver to include the correct signs for turbulent heat fluxes and evaporation. Previously we had switched the signs to agree with the image driver and they should instead be in accordance with the sign conventions for coupled models, which differ from those of land surface models. Also, eliminate populating the `l2x_Sl_ram1` field with aero_resist to agree with the VIC 4 implementation in RASM.
+     - Updates the cesm_put_data.c routine in the CESM driver to include the correct signs for turbulent heat fluxes and evaporation. Previously we had switched the signs to agree with the image driver and they should instead be in accordance with the sign conventions for coupled models, which differ from those of land surface models. Also, eliminate populating the `l2x_Sl_ram1` field with aero_resist to agree with the VIC 4 implementation in RASM.
 
-    [GH#739](https://github.com/UW-Hydro/VIC/pull/739)
+   1. [GH#739](https://github.com/UW-Hydro/VIC/pull/739)
 
-        Updates the cesm_put_data.c routine in the CESM driver to include the correct signs for the wind stresses and fixes a bug in calculating friction velocity (previously it was missing a square root).
+    - Updates the cesm_put_data.c routine in the CESM driver to include the correct signs for the wind stresses and fixes a bug in calculating friction velocity (previously it was missing a square root).
 
-    [GH#744](https://github.com/UW-Hydro/VIC/pull/744)
+   1. [GH#744](https://github.com/UW-Hydro/VIC/pull/744)
 
-        Updates the cesm_interface_c.c routine to include missing timers and the VIC RUN timer in the CESM driver.
+    - Updates the cesm_interface_c.c routine to include missing timers and the VIC RUN timer in the CESM driver.
 
-    [GH#746](https://github.com/UW-Hydro/VIC/pull/746)
+   1. [GH#746](https://github.com/UW-Hydro/VIC/pull/746)
 
-        Updates the cesm_interface_c.c routine in the CESM driver to populate the nrecs, endyear, endmonth and endday fields in the global_param struct to make them available to vic_finalize for timing tables (specifically the secs/day columns).  
+    - Updates the cesm_interface_c.c routine in the CESM driver to populate the nrecs, endyear, endmonth and endday fields in the global_param struct to make them available to vic_finalize for timing tables (specifically the secs/day columns).  
 
 3. Speed up NetCDF operations in the image/CESM drivers ([GH#684](https://github.com/UW-Hydro/VIC/pull/684))
 
@@ -113,27 +120,27 @@ To check which release of VIC you are running:
 
 9. Moved MAX_ITER_GRND_CANOPY, which controls the maximum number of ground-canopy iterations in CLOSE_ENERGY mode for vegetation types with an overstory, to the parameters struct ([GH#771](https://github.com/UW-Hydro/VIC/pull/771))
 
-    Previously this was set in the surface_fluxes.c numerics routine for ground-canopy iterations, which meant that that routine had to be altered to change the maximum number of iterations. It has now been moved to the parameters struct so that it can be overriden in the constants file. 
+    Previously this was set in the surface_fluxes.c numerics routine for ground-canopy iterations, which meant that that routine had to be altered to change the maximum number of iterations. It has now been moved to the parameters struct so that it can be overriden in the constants file.
 
 10. Updated new snow density function by adding a cap to new snow density that is set in the parameters struct by the parameter SNOW_NEW_SNOW_DENS_MAX ([GH#776](https://github.com/UW-Hydro/VIC/pull/776))
 
-    Previously the change in cold content of the snowpack term (deltaCC in the snow_data_struct) would get unreasonably large if the Hedstrom and Pomeroy 1998 equation used to calculate snow density, which depends only on air temperature, was calculated with air temperatures above about 2 deg C. We use this term to calculate the ground flux from the snowpack and snow depth, which resulted in extremely small snow depths and unreasonably large ground fluxes from the snowpack (and thus changes in snowpack cold content). Now there is a cap on new snow density with the new parameter SNOW_NEW_SNOW_DENS_MAX as well as a snow depth below which we disregard the ground flux from the snowpack (1.e-8). 
+    Previously the change in cold content of the snowpack term (deltaCC in the snow_data_struct) would get unreasonably large if the Hedstrom and Pomeroy 1998 equation used to calculate snow density, which depends only on air temperature, was calculated with air temperatures above about 2 deg C. We use this term to calculate the ground flux from the snowpack and snow depth, which resulted in extremely small snow depths and unreasonably large ground fluxes from the snowpack (and thus changes in snowpack cold content). Now there is a cap on new snow density with the new parameter SNOW_NEW_SNOW_DENS_MAX as well as a snow depth below which we disregard the ground flux from the snowpack (1.e-8).
 
 10. Miscellaneous clean-up:
 
     [GH#723](https://github.com/UW-Hydro/VIC/pull/723)
 
-        1. Added support for veg_hist forcings (non-climatological) in image mode
-        2. Fixed erroneous allocation of extra veg tile in image mode
-        3. Simplified looping over veg tiles and bands in vic_run() and prepare_full_energy()
-        4. Replaced lengthy data structures with local pointers in vic_run()
-        5. Simplified out_prec, out_rain, and Melt arrays
-        6. Updated names of variables and options for LAI and FCANOPY in documentation to match their new names in the code
-        7. Removed constants MAX_VEG and MAX_BANDS from code; all arrays that were declared with those lengths were replaced with dynamic allocations.  This allowed for specification of veg libraries containing more classes without recompiling the code, and more efficient memory usage.
+     - Added support for veg_hist forcings (non-climatological) in image mode
+     - Fixed erroneous allocation of extra veg tile in image mode
+     - Simplified looping over veg tiles and bands in vic_run() and prepare_full_energy()
+     - Replaced lengthy data structures with local pointers in vic_run()
+     - Simplified out_prec, out_rain, and Melt arrays
+     - Updated names of variables and options for LAI and FCANOPY in documentation to match their new names in the code
+     - Removed constants MAX_VEG and MAX_BANDS from code; all arrays that were declared with those lengths were replaced with dynamic allocations.  This allowed for specification of veg libraries containing more classes without recompiling the code, and more efficient memory usage.
 
     [GH#766](https://github.com/UW-Hydro/VIC/pull/766)
 
-        1. Improved logic in computing soil evaporation (esoil), primarily in func_surf_energy_bal(), by creating explicit terms for transpiration (transp) and esoil in the layer data structure.
+     - Improved logic in computing soil evaporation (esoil), primarily in func_surf_energy_bal(), by creating explicit terms for transpiration (transp) and esoil in the layer data structure.
 
 #### Bug Fixes:
 

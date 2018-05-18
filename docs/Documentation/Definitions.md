@@ -7,7 +7,7 @@ VIC uses the regression published by Kimball et. al. to improve the estimation o
 This parameter is the temperature of the soil at the [damping depth](#dp). This temperature is often assumed to be the same as the average annual air temperature. This temperature is used as the bottom boundary of all thermal flux calculations made for the soil column.
 
 ### b_infilt
-The b_infilt parameter is the parameter used to describe the Variable Infiltration Curve. This is typically a value that is adjusted during the calibration of the VIC model. Parameter values range from 10-5 to 0.4. Higher values will produce more runoff. 0.2 is often used as a starting value.
+The b_infilt parameter is the parameter used to describe the Variable Infiltration Curve. This is typically a value that is adjusted during the calibration of the VIC model. Parameter values range from $10^{-5}$ to 0.4. Higher values will produce more runoff. 0.2 is often used as a starting value.
 
 ### bubble
 The bubble parameter is the bubbling pressure, h, for the soil texture type (see, e.g., Table 5.3.2 in Rawls, et al (Handbook of Hydrology)). This parameter is necessary for running the VIC model with `FULL_ENERGY==TRUE` or `FROZEN_SOIL==TRUE`. Values must be > 0.0.
@@ -38,16 +38,16 @@ Cell numbers are assigned to each grid cell beginning with 1 at the upper left c
 Depth is the depth of each layer in meters. Though this can be changed in the calibration process, initially it can be set to the breakdown of layer depths selected by combining the 11 individual soil layers of the Penn State University STATSGO data (for example, the Ksat data).
 
 ### dp
-This is the soil theraml damping depth. It is defined as the depth in the soil column at which the soil temperature remains nearly constant annually. This is the depth to which soil thermal flux calculations will be made, and is often set to 4m. The constant temperature at this boundary is defined with the parameter [avg_T](#avg_t).
+This is the soil thermal damping depth. It is defined as the depth in the soil column at which the soil temperature remains nearly constant annually. This is the depth to which soil thermal flux calculations will be made, and is often set to 4m. The constant temperature at this boundary is defined with the parameter [avg_T](#avg_t).
 
 ### Ds
-The soil parameter `Ds` represents the fraction of the Dsmax parameter at which non-linear base-flow occurs. This is typically a parameter that is adjusted during the calibration of the VIC model. An initial value of 0.001 may be used. Typically this value is small (less than 1).
+The soil parameter `Ds` represents the fraction of the Dsmax parameter at which non-linear baseflow occurs. This is typically a parameter that is adjusted during the calibration of the VIC model. An initial value of 0.001 may be used. Typically this value is small (less than 1).
 
 ### Dsmax
 The parameter Dsmax is the maximum velocity of baseflow for each grid cell. This can be estimated using the saturated hydraulic conductivity, [Ksat](#ksat), for each grid cell multiplied by the slope of the grid cell. The values for [Ksat](#ksat) can be averaged for the layers for which baseflow will be included. When working in decimal degrees, the elevation data for the basin should be projected to an equal area map projection, in order to have horizontal dimensions in the same units as the vertical dimensions so that the slopes computed in Arc/Info are meaningful values.
 
 ### expt
-The Exponent (`expt`) parameter is the exponent, `n`, from the Brooks-Corey relationship (see, e.g., Table 5.1.1 in Rawls, et al). Values can be estimated from the table of soil hydraulic properties indexed by soil texture [(see table here)](soiltext.md). Values should be > 3.0.
+The exponent (`expt`) parameter is the exponent, `n`, from the Brooks-Corey relationship (see, e.g., Table 5.1.1 in Rawls, et al). Values can be estimated from the table of soil hydraulic properties indexed by soil texture [(see table here)](soiltext.md). Values should be > 3.0.
 
 Reference: Rawls et al., Infiltration and Soil Water Movement, In: _Handbook of Hydrology_, D. Maidment (ed.), 1993
 
@@ -69,7 +69,7 @@ The soil texture data is then imported into Arc/Info, where it is indexed to val
 Default value is set to 0 m/s, which works well when the model is forced with daily or monthly winds.
 
 ### NLAYER
-`NLAYER` is the number of soil moisture layers to be used by the model. Typically the number of layers is 2 or 3. The model cannot be run in energy balance mode with fewer than 3 layers (the top layer is thin 5-15cm), but the water balance model used to have only 2 layers. The model has not been tested with more than 3 layers, so problems may develop.
+`NLAYER` is the number of soil moisture layers to be used by the model. Typically the number of layers is 2 or 3. The model cannot be run in energy balance mode with fewer than 3 layers (the top layer is thin, 5-15cm), but the water balance model used to have only 2 layers. The model has not been tested with more than 3 layers, so problems may occur if you run the model with more than three layers. 
 
 ### NODES
 `NODES` defines the number of soil thermal nodes used by the model to explicitly solve soil thermal fluxes. At this time the explicit solution of the soil thermal fluxes occurs only when the model is run with the frozen soil algorithm activated. The model uses a node at the surface, a node at the bottom of the thin (5-15cm) top layer, and a node at the damping depth. If more nodes are defined they are distributed evenly between the bottom of the top layer and the damping depth. More nodes improves the accuracy of the soil heat flux solution, but also increases the computational time. We recommend at least 5 nodes.
@@ -110,7 +110,7 @@ Default value is set to 0 m/s, which works well when the model is forced with da
 \* Table copied from Texas A&M University Institute for Scientific Computation Web Page.
 
 ### phi_s
-The parameter phi_s is the unitless soil moisture diffusion coefficient. This parameter is designed for the future inclusion of soil moisture diffusion in the VIC model moisture trasport equations. Currently this feature has not been implemented so a value of -999 can be used as a placeholder.
+The parameter `phi_s` is the unitless soil moisture diffusion coefficient. This parameter is designed for the future inclusion of soil moisture diffusion in the VIC model moisture trasport equations. Currently this feature has not been implemented so a value of -999 can be used as a placeholder.
 
 ### resid_moist
 Residual moisture content is the amount of soil moisture that cannot be removed from the soil by drainage or evapotranspiration. Values are provided to the model as soil moisture contents (volume of residual soil moisture content / total volume of soil) [mm/mm]. When residual soil moisture is defined as 0 mm/mm the soil hydraulic conductivity relationship collapses to Campbell (1974), otherwise it follows Brooks and Corey (1964).
@@ -119,10 +119,16 @@ Brooks, R. H. and A. T. Corey, Hydraulic Properties of Porous Media, Hydrology P
 
 Campbell, G. S., A Simple Method for Determining Unsaturated Conductivity from Moisture Retention Data, Soil Sci., vol. 117, pp. 311-314, 1974.
 
-### ROOT_ZONES
-ROOT_ZONES is the number of root zones used in the vegetation parameter file to define the root distribution. This allows the rooting distribution to be defined independently of both vegetation type and soil layer depth. When soil moisture layer depths are changed during calibration, the model uses linear distribution based on the defined root zones to redistribute root fractions.
+### root_zone
+The parameter `root_zone` is the number of root zones used in the vegetation parameter file to define the root distribution. This allows the rooting distribution to be defined independently of both vegetation type and soil layer depth. When soil moisture layer depths are changed during calibration, the model uses linear distribution based on the defined root zones to redistribute root fractions.
 
 No default value is set, this parameter must be defined in the global parameter file.
+
+### root_depth
+The parameter `root_depth` describes the thickness of the root zone (the sum of depths is the total depth of root penetration)
+
+### root_fract 
+`root_fract` is the fraction of root in the current root zone. 
 
 ### rough
 Surface roughness of bare soil, expressed in meters, can be set to a value 0.001, and adjusted according to local data.
@@ -131,7 +137,7 @@ Surface roughness of bare soil, expressed in meters, can be set to a value 0.001
 The surface roughness of the snowpack, expressed in meters, can be set to an initial value of 0.0005, and can then be adjusted according to local data.
 
 ### Wcr_FRACT
-The parameter Wcr_FRACT (Wcr) is the fractional soil moisture (expressed as a fraction of the maximum soil moisture; max. soil moisture = porosity * layer depth) at the critical point, which is the water content below which hydraulic conductivity begins to fall below saturated values, as does transpiration. This is set at 70% of the field capacity, in accordance with the different soil textures. Field Capacity is defined as the water content at a tension of -33kPa.
+The parameter `Wcr_FRACT` (Wcr) is the fractional soil moisture (expressed as a fraction of the maximum soil moisture; max. soil moisture = porosity * layer depth) at the critical point, which is the water content below which hydraulic conductivity begins to fall below saturated values, as does transpiration. This is set at 70% of the field capacity, in accordance with the different soil textures. Field Capacity is defined as the water content at a tension of -33kPa.
 
 Soil textures are from the STATSGO database (USDA NRCS), which has been compiled from a state-by-state format into a U.S. database, available through Penn State University at [http://dbwww.essc.psu.edu/geotree/dbtop/amer_n/us_48/data/soilprop/statsgo_geo/soiltext/doc.html](http://dbwww.essc.psu.edu/geotree/dbtop/amer_n/us_48/data/soilprop/statsgo_geo/soiltext/doc.html)
 
@@ -155,3 +161,57 @@ This reports 16 different soil texture classes for 11 layers, which cover a dept
 
 ### Ws
 The parameter Ws is the fraction of maximum soil moisture where non-linear baseflow occurs. As with the [`Ds`](#ds) parameter, this is generally adjusted during the calibration phase of applying the VIC model. Values for Ws are typically greater than 0.5. An initial value of 0.9 can be used.
+
+### quartz
+The parameter `quartz` describes the quartz content of the soil. 
+
+### soil_density
+The parameter `soil_density` describes the soil particle density and a value of 2685 kg/m3 is typically used. 
+
+### fs_active
+The parameter `fs_active` describes whether or not the frozen soil algorithm is activated for a grid cell. A value of 0 indicates that the frozen soil routine is not run for the grid cell even if soil temperatures fall below 0 C. A value of 1 indicates that the frozen soil routine is run. 
+
+### veg_class 
+The parameter `veg_class` refers to the vegetation class identification number. There have typically been 12 vegetation classes in VIC but newer versions of the model allow for more than 12 vegetation classes. 
+
+### veg_descr
+The parameter `veg_descr` describes the vegetation class.
+
+### Nveg
+The parameter `Nveg` describes the number of active vegetation classes (or types) in a grid cell. 
+
+### Cv
+The parameter `Cv` describes the fraction of the grid cell covered by each active vegetation class. 
+
+### LAI 
+LAI is the leaf area index, typically one value per month is used. If `VEGPARAM_LAI` is `TRUE` in the global parameter file, then each vegetation tile must inluce a line for LAI.  
+
+### overstory
+`Overstory` is a flag to indicate if the current vegetation type has an overstory or not. A value of 1 indicates an overstory, a value of 0 indicates no overstory. 
+
+### rarc
+The parameter `rarc` represents the architectural resistance of each vegetation type. It is typically set to ~2 s/m. 
+
+### rmin
+The parameter `rmin` refers to the minimum stomatal resistance of each vegetation type. It is typically set to ~100 s/m. 
+
+### RGL
+`RGL` is the minimum incoming shortwave radiation at which there will be transpiration. It typically has a value of 30 W/m2 for trees and for crops about 100 W/m2. 
+
+### rad_atten
+The parameter `rad_atten` is the radiation attenuation factor. It is normally set to 0.5 but may need to be adjusted for high latitudes. 
+
+### wind_atten
+The paraemeter `wind_atten` is the wind speed attenuation through the overstory. The default value is typically 0.5. 
+
+### trunk_ratio 
+The parameter `trunk_ratio` is the ratio of total tree height that refers to the trunk (does not include branches). The default value is typically 0.2.
+
+### albedo 
+`albedo` refers to the shortwave albedo and is specific to each vegetation type.
+
+### veg_rough 
+The parameter `veg_rough` refers to the roughness length of the vegetation type and is typically 0.123 * vegetation height.
+
+### displacement 
+The parameter `displacement` is the vegetation displacement height and is typically 0.67 * vegetation height.    

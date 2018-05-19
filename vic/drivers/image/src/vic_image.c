@@ -70,6 +70,14 @@ nc_file_struct     *nc_hist_files = NULL;  // [nstreams]
 // Extensions
 rout_struct         rout; // Routing routine (extension)
 
+// Other global parameters
+FILE *LOG_DEST;
+char vic_run_ref_str[MAXSTRING];
+double (*funcd)(double z, double es, double Wind, double AirDens, double ZO,
+                double EactAir, double F, double hsalt, double phi_r,
+                double ushear,
+                double Zrh);
+
 /******************************************************************************
  * @brief   Stand-alone image mode driver of the VIC model
  * @details The image mode driver runs VIC for a single timestep for all grid

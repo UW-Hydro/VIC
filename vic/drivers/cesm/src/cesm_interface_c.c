@@ -69,6 +69,14 @@ stream_struct      *output_streams = NULL;  // [nstreams]
 nc_file_struct     *nc_hist_files = NULL;  // [nstreams]
 timer_struct        global_timers[N_TIMERS];
 
+// Other global parameters
+FILE *LOG_DEST;
+char vic_run_ref_str[MAXSTRING];
+double (*funcd)(double z, double es, double Wind, double AirDens, double ZO,
+                double EactAir, double F, double hsalt, double phi_r,
+                double ushear,
+                double Zrh);
+
 /******************************************************************************
  * @brief    Initialization function for CESM driver
  *****************************************************************************/

@@ -43,7 +43,9 @@
 
 #include <stdio.h>
 #include <errno.h>
+#ifndef _WIN32
 #include <execinfo.h>
+#endif
 #include <string.h>
 
 // Set the log level
@@ -58,7 +60,7 @@
 #define LOG_LVL 25
 #endif
 
-FILE *LOG_DEST;
+extern FILE *LOG_DEST;
 
 void finalize_logging(void);
 void get_logname(const char *path, int id, char *filename);

@@ -42,7 +42,9 @@
 #include <stddef.h>
 #include <unistd.h>
 #include <time.h>
+#ifndef _WIN32
 #include <pwd.h>
+#endif
 #include <sys/time.h>
 #include <sys/types.h>
 
@@ -92,7 +94,7 @@ extern size_t NR;       /**< array index for force struct that indicates
                              the model step avarage or sum */
 extern size_t NF;       /**< array index loop counter limit for force
                              struct that indicates the SNOW_STEP values */
-char          vic_run_ref_str[MAXSTRING];
+extern char          vic_run_ref_str[MAXSTRING];
 
 /******************************************************************************
  * @brief   Snow Density parametrizations

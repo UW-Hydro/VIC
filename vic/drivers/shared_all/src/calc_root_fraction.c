@@ -41,126 +41,121 @@ calc_root_fractions(veg_con_struct  *veg_con,
     int                  veg;
     size_t               layer;
     size_t               zone;
-    size_t               i;
-    size_t               n_iter;
-    double               sum_fract;
-    double               dum;
-    double               Zstep;
-    double               Zsum;
-    double               Lstep;
+    size_t               ltmp;
     double               Lsum;
-    double               Zmin_fract;
-    double               Zmin_depth;
-    double               Zmax;
+    double               Lsumprev;
+    double               dL;
+    double               Zsum;
+    double               Dsum;
+    double               Dsumprev;
+    double               dD;
+    double               sum_depth;
+    double               sum_dens;
+    double              *root_dens;
+    double               dum;
+
+    root_dens = calloc(options.ROOT_ZONES, sizeof(double));
 
     Nveg = veg_con[0].vegetat_type_num;
 
     for (veg = 0; veg < Nveg; veg++) {
-        sum_fract = 0;
-        layer = 0;
-        Lstep = soil_con->depth[layer];
-        Lsum = Lstep;
-        Zsum = 0;
-        zone = 0;
 
-        n_iter = 0;
-        while (zone < options.ROOT_ZONES) {
-            n_iter++;
-            if (n_iter > MAX_ROOT_ITER) {
-                log_warn("veg=%d of Nveg=%d", veg, Nveg);
-                log_warn("zone %zu of %zu ROOT_ZONES", zone,
-                         options.ROOT_ZONES);
-                log_err("stuck in an infinite loop");
-            }
-
-            Zstep = veg_con[veg].zone_depth[zone];
-            if ((Zsum + Zstep) <= Lsum && Zsum >= Lsum - Lstep) {
-                /** CASE 1: Root Zone Completely in Soil Layer **/
-                sum_fract += veg_con[veg].zone_fract[zone];
+        // Compute density of root fractions in each root zone
+        // (for use in weighted averaging)
+        for (zone = 0; zone < options.ROOT_ZONES; zone++) {
+            if (veg_con[veg].zone_depth[zone] > 0) {
+                root_dens[zone] = veg_con[veg].zone_fract[zone] /
+                                  veg_con[veg].zone_depth[zone];
             }
             else {
-                /** CASE 2: Root Zone Partially in Soil Layer **/
-                if (Zsum < Lsum - Lstep) {
-                    /** Root zone starts in previous soil layer **/
-                    Zmin_depth = Lsum - Lstep;
-                    Zmin_fract = linear_interp(Zmin_depth, Zsum, Zsum + Zstep,
-                                               0,
-                                               veg_con[veg].zone_fract[zone]);
-                }
-                else {
-                    /** Root zone starts in current soil layer **/
-                    Zmin_depth = Zsum;
-                    Zmin_fract = 0.;
-                }
-                if (Zsum + Zstep <= Lsum) {
-                    /** Root zone ends in current layer **/
-                    Zmax = Zsum + Zstep;
-                }
-                else {
-                    /** Root zone extends beyond bottom of current layer **/
-                    Zmax = Lsum;
-                }
-                sum_fract += linear_interp(Zmax, Zsum, Zsum + Zstep, 0,
-                                           veg_con[veg].zone_fract[zone]) -
-                             Zmin_fract;
-            }
-
-            /** Update Root Zone and Soil Layer **/
-            if (Zsum + Zstep < Lsum) {
-                Zsum += Zstep;
-                zone++;
-            }
-            else if (Zsum + Zstep == Lsum) {
-                Zsum += Zstep;
-                zone++;
-                if (layer < options.Nlayer) {
-                    veg_con[veg].root[layer] = sum_fract;
-                    sum_fract = 0.;
-                }
-                layer++;
-                if (layer < options.Nlayer) {
-                    Lstep = soil_con->depth[layer];
-                    Lsum += Lstep;
-                }
-                else if (layer == options.Nlayer && zone < options.ROOT_ZONES) {
-                    Zstep = (double) veg_con[veg].zone_depth[zone];
-                    Lstep = Zsum + Zstep - Lsum;
-                    if (zone < options.ROOT_ZONES - 1) {
-                        for (i = zone + 1; i < options.ROOT_ZONES; i++) {
-                            Lstep += veg_con[veg].zone_depth[i];
-                        }
-                    }
-                    Lsum += Lstep;
-                }
-            }
-            else if (Zsum + Zstep > Lsum) {
-                zone++;
-                if (layer < options.Nlayer) {
-                    veg_con[veg].root[layer] = sum_fract;
-                    sum_fract = 0.;
-                }
-                layer++;
-                if (layer < options.Nlayer) {
-                    Lstep = soil_con->depth[layer];
-                    Lsum += Lstep;
-                }
-                else if (layer == options.Nlayer) {
-                    Lstep = Zsum + Zstep - Lsum;
-                    if (zone < options.ROOT_ZONES - 1) {
-                        for (i = zone + 1; i < options.ROOT_ZONES; i++) {
-                            Lstep += veg_con[veg].zone_depth[i];
-                        }
-                    }
-                    Lsum += Lstep;
-                }
+                root_dens[zone] = 1.0;
             }
         }
 
-        if (sum_fract > 0 && layer >= options.Nlayer) {
-            veg_con[veg].root[options.Nlayer - 1] += sum_fract;
-        }
-        else if (sum_fract > 0) {
-            veg_con[veg].root[layer] += sum_fract;
+        layer = 0;
+        zone = 0;
+        Lsum = soil_con->depth[layer];
+        Lsumprev = 0;
+        Zsum = veg_con[veg].zone_depth[zone];
+        Dsum = 0;
+        Dsumprev = 0;
+        sum_depth = 0;
+        sum_dens = 0;
+
+        while (layer < options.Nlayer || zone < options.ROOT_ZONES) {
+
+            // Compute depth interval for consideration
+            if (Lsum <= Zsum && layer < options.Nlayer) {
+                Dsum = Lsum;
+            }
+            else {
+                Dsum = Zsum;
+            }
+            dD = Dsum - Dsumprev;
+            Dsumprev = Dsum;
+
+            // Add to running totals
+            sum_depth += dD;
+            if (zone < options.ROOT_ZONES) {
+                sum_dens += dD * root_dens[zone];
+            }
+
+            dL = Lsum - Lsumprev;
+
+            // Compute weighted integral of root densities over soil layer
+            // Wait to do this until either we've completed a soil layer
+            // or we're at the final layer and we've completed all root zones
+            if ( dL > 0 && Dsum == Lsum &&
+                 ( layer < options.Nlayer - 1 ||
+                   ( layer >= options.Nlayer - 1 &&
+                     zone >= options.ROOT_ZONES - 1 &&
+                     Dsum == Zsum ) ) ) {
+                ltmp = layer;
+                if (layer >= options.Nlayer - 1) {
+                    ltmp = options.Nlayer - 1;
+                }
+                if (sum_depth > 0) {
+                    veg_con[veg].root[ltmp] = dL * sum_dens / sum_depth;
+                }
+                else {
+                    veg_con[veg].root[ltmp] = 0;
+                }
+                sum_depth = 0;
+                sum_dens = 0;
+            }
+
+            // Decide whether to increment layer or zone
+            if (Lsum < Zsum) {
+                layer++;
+                if (layer < options.Nlayer) {
+                    Lsumprev = Lsum;
+                    Lsum += soil_con->depth[layer];
+                }
+                else {
+                    Lsum = Zsum;
+                }
+            }
+            else if (Lsum > Zsum) {
+                zone++;
+                if (zone < options.ROOT_ZONES) {
+                    Zsum += veg_con[veg].zone_depth[zone];
+                }
+                else {
+                    Zsum = Lsum;
+                }
+            }
+            else {
+                layer++;
+                if (layer < options.Nlayer) {
+                    Lsumprev = Lsum;
+                    Lsum += soil_con->depth[layer];
+                }
+                zone++;
+                if (zone < options.ROOT_ZONES) {
+                    Zsum += veg_con[veg].zone_depth[zone];
+                }
+            }
+
         }
 
         dum = 0.;
@@ -178,4 +173,6 @@ calc_root_fractions(veg_con_struct  *veg_con,
             veg_con[veg].root[layer] /= dum;
         }
     }
+
+    free((char *) root_dens);
 }

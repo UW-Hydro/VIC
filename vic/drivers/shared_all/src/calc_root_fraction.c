@@ -44,12 +44,10 @@ calc_root_fractions(veg_con_struct  *veg_con,
     size_t               ltmp;
     double               Lsum;
     double               Lsumprev;
-    double               dL;
     double               Zsum;
     double               Dsum;
     double               Dsumprev;
     double               dD;
-    double               sum_depth;
     double               sum_dens;
     double              *root_dens;
     double               dum;
@@ -79,7 +77,6 @@ calc_root_fractions(veg_con_struct  *veg_con,
         Zsum = veg_con[veg].zone_depth[zone];
         Dsum = 0;
         Dsumprev = 0;
-        sum_depth = 0;
         sum_dens = 0;
 
         while (layer < options.Nlayer || zone < options.ROOT_ZONES) {
@@ -95,17 +92,14 @@ calc_root_fractions(veg_con_struct  *veg_con,
             Dsumprev = Dsum;
 
             // Add to running totals
-            sum_depth += dD;
             if (zone < options.ROOT_ZONES) {
                 sum_dens += dD * root_dens[zone];
             }
 
-            dL = Lsum - Lsumprev;
-
             // Compute weighted integral of root densities over soil layer
             // Wait to do this until either we've completed a soil layer
             // or we're at the final layer and we've completed all root zones
-            if ( dL > 0 && Dsum == Lsum &&
+            if ( Lsum > Lsumprev && Dsum == Lsum &&
                  ( layer < options.Nlayer - 1 ||
                    ( layer >= options.Nlayer - 1 &&
                      zone >= options.ROOT_ZONES - 1 &&
@@ -114,13 +108,7 @@ calc_root_fractions(veg_con_struct  *veg_con,
                 if (layer >= options.Nlayer - 1) {
                     ltmp = options.Nlayer - 1;
                 }
-                if (sum_depth > 0) {
-                    veg_con[veg].root[ltmp] = dL * sum_dens / sum_depth;
-                }
-                else {
-                    veg_con[veg].root[ltmp] = 0;
-                }
-                sum_depth = 0;
+                veg_con[veg].root[ltmp] = sum_dens;
                 sum_dens = 0;
             }
 

@@ -48,7 +48,7 @@ calc_root_fractions(veg_con_struct  *veg_con,
     double               Dsum;
     double               Dsumprev;
     double               dD;
-    double               sum_dens;
+    double               sum_fract;
     double              *root_dens;
     double               dum;
 
@@ -59,7 +59,6 @@ calc_root_fractions(veg_con_struct  *veg_con,
     for (veg = 0; veg < Nveg; veg++) {
 
         // Compute density of root fractions in each root zone
-        // (for use in weighted averaging)
         for (zone = 0; zone < options.ROOT_ZONES; zone++) {
             if (veg_con[veg].zone_depth[zone] > 0) {
                 root_dens[zone] = veg_con[veg].zone_fract[zone] /
@@ -77,11 +76,13 @@ calc_root_fractions(veg_con_struct  *veg_con,
         Zsum = veg_con[veg].zone_depth[zone];
         Dsum = 0;
         Dsumprev = 0;
-        sum_dens = 0;
+        sum_fract = 0;
 
         while (layer < options.Nlayer || zone < options.ROOT_ZONES) {
 
-            // Compute depth interval for consideration
+            // Determine the depth interval for consideration
+            // Depth intervals span from the previous layer or zone boundary
+            // to the next layer or zone boundary.
             if (Lsum <= Zsum && layer < options.Nlayer) {
                 Dsum = Lsum;
             }
@@ -91,29 +92,39 @@ calc_root_fractions(veg_con_struct  *veg_con,
             dD = Dsum - Dsumprev;
             Dsumprev = Dsum;
 
-            // Add to running totals
+            // Add root fraction in this interval to the running total
+            // for this layer
             if (zone < options.ROOT_ZONES) {
-                sum_dens += dD * root_dens[zone];
+                sum_fract += dD * root_dens[zone];
             }
 
-            // Compute weighted integral of root densities over soil layer
+            // Assign the total root fraction for this soil layer
             // Wait to do this until either we've completed a soil layer
+            // (Lsum > Lsumprev && Dsum == Lsum)
             // or we're at the final layer and we've completed all root zones
+            // (layer >= options.Nlayer - 1 &&
+            //  zone >= options.ROOT_ZONES - 1 && Dsum == Zsum)
             if ( Lsum > Lsumprev && Dsum == Lsum &&
                  ( layer < options.Nlayer - 1 ||
                    ( layer >= options.Nlayer - 1 &&
                      zone >= options.ROOT_ZONES - 1 &&
                      Dsum == Zsum ) ) ) {
+
+                // Assign the total root fraction
                 ltmp = layer;
                 if (layer >= options.Nlayer - 1) {
                     ltmp = options.Nlayer - 1;
                 }
-                veg_con[veg].root[ltmp] = sum_dens;
-                sum_dens = 0;
+                veg_con[veg].root[ltmp] = sum_fract;
+
+                // Reset running total for next layer
+                sum_fract = 0;
+
             }
 
             // Decide whether to increment layer or zone
             if (Lsum < Zsum) {
+                // zone extends beyond layer, so increment layer
                 layer++;
                 if (layer < options.Nlayer) {
                     Lsumprev = Lsum;
@@ -124,6 +135,7 @@ calc_root_fractions(veg_con_struct  *veg_con,
                 }
             }
             else if (Lsum > Zsum) {
+                // layer extends beyond zone, so increment zone
                 zone++;
                 if (zone < options.ROOT_ZONES) {
                     Zsum += veg_con[veg].zone_depth[zone];
@@ -133,6 +145,7 @@ calc_root_fractions(veg_con_struct  *veg_con,
                 }
             }
             else {
+                // layer and zone end at the same depth, so increment both
                 layer++;
                 if (layer < options.Nlayer) {
                     Lsumprev = Lsum;
@@ -146,6 +159,8 @@ calc_root_fractions(veg_con_struct  *veg_con,
 
         }
 
+        // Final check on root fractions. If they don't sum to 1, throw error
+        // Otherwise, rescale by sum to eliminate small rounding errors
         dum = 0.;
         for (layer = 0; layer < options.Nlayer; layer++) {
             if (veg_con[veg].root[layer] < 1.e-4) {

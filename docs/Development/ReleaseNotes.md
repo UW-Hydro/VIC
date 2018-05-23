@@ -15,6 +15,15 @@ To check which release of VIC you are running:
 
 ------------------------------
 
+
+## VIC 5.1.0 rc2
+
+#### Bug Fixes:
+
+1. Fixed datetime handling bug in unit test module ([GH#796](https://github.com/UW-Hydro/VIC/pull/796))
+
+------------------------------
+
 ## VIC 5.1.0 rc1
 
 <!-- TODO -->

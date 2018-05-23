@@ -76,7 +76,7 @@ calc_root_fractions(veg_con_struct  *veg_con,
         for (zone = 0; zone < options.ROOT_ZONES; zone++) {
             dum += veg_con[veg].zone_fract[zone];
         }
-        if (fabs(dum - 1.0) > 1.e-4) {
+        if (!assert_close_double(dum, 1, 0, 1e-4)) {
             log_err("Input root fractions do not sum to 1.0: %f, "
                     "veg class: %d", dum, veg_con[veg].veg_class);
         }
@@ -195,7 +195,7 @@ calc_root_fractions(veg_con_struct  *veg_con,
             }
             dum += veg_con[veg].root[layer];
         }
-        if (fabs(dum - 1.0) > 1.e-4) {
+        if (!assert_close_double(dum, 1, 0, 1e-4)) {
             log_err("Soil layer root fractions do not sum to 1.0: %f, "
                     "veg class: %d", dum, veg_con[veg].veg_class);
         }

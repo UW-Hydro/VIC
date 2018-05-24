@@ -55,7 +55,7 @@ DOMAIN_TYPE      FRAC    frac
 DOMAIN_TYPE      YDIM    nj
 DOMAIN_TYPE      XDIM    ni
 
-OUTFILE     {caseroot}.vic.ha
+OUTFILE     {caseid}.vic.ha
 AGGFREQ     NDAYS 1
 HISTFREQ    END
 OUTVAR      OUT_RUNOFF
@@ -63,7 +63,7 @@ OUTVAR      OUT_BASEFLOW
 OUTVAR      OUT_SWE
 OUTVAR      OUT_EVAP
 
-OUTFILE     {caseroot}.vic.hmm
+OUTFILE     {caseid}.vic.hmm
 AGGFREQ     NMONTHS 1
 OUT_FORMAT  NETCDF4_CLASSIC
 HISTFREQ    END 

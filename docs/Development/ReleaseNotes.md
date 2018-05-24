@@ -54,54 +54,58 @@ This is a minor update from VIC 5.0.1. The VIC 5.1.0 includes new features, such
     - Fixed bug that prevented using the correct local domain grid cells in `cesm_put_data.c`
     - Changed reference temperature units from Celsius to Kelvin in `cesm_put_data.c`
 
-   1. [GH#695](https://github.com/UW-Hydro/VIC/pull/695)
+   2. [GH#695](https://github.com/UW-Hydro/VIC/pull/695)
 
     - Fix sign for latent heat fluxes passed from VIC to the coupler
     - Fix sign for longwave radiation passed from VIC to the coupler
 
-   1. [GH#696](https://github.com/UW-Hydro/VIC/pull/696)
+   3. [GH#696](https://github.com/UW-Hydro/VIC/pull/696)
 
     - Changes names of CESM driver functions `trim` and `advance_time` to `trimstr` and `advance_vic_time`, respectively, to avoid conflicts with WRF functions with the same names when compiling RFR case.
 
-   1. [GH#702](https://github.com/UW-Hydro/VIC/pull/702)
+   4. [GH#702](https://github.com/UW-Hydro/VIC/pull/702)
 
     - Fixes Julian day for the first timestep in the dmy struct for the CESM driver.
 
-   1. [GH#710](https://github.com/UW-Hydro/VIC/pull/710)
+   5. [GH#710](https://github.com/UW-Hydro/VIC/pull/710)
 
     - Refactor the cesm_put_data.c routine in the CESM driver to use values from out_data directly, rather than computing them separately in cesm_put_data.c.
 
-   1. [GH#716](https://github.com/UW-Hydro/VIC/pull/716)
+   6. [GH#716](https://github.com/UW-Hydro/VIC/pull/716)
 
     - Fixes initialization of coupler fields and calculates temperature and upwelling longwave to pass to WRF during initialization.
 
-   1. [GH#718](https://github.com/UW-Hydro/VIC/pull/718)
+   7. [GH#718](https://github.com/UW-Hydro/VIC/pull/718)
 
     - Updates the cesm_put_data.c routine in the CESM driver to pass gridcell-averaged albedo to the coupler.
 
-   1. [GH#726](https://github.com/UW-Hydro/VIC/pull/726)
+   8. [GH#726](https://github.com/UW-Hydro/VIC/pull/726)
 
     - Updates the cesm_put_data.c routine in the CESM driver to include the correct units for evap passed to the coupler.
 
-   1. [GH#732](https://github.com/UW-Hydro/VIC/pull/732)
+   9. [GH#732](https://github.com/UW-Hydro/VIC/pull/732)
 
      - Updates the cesm_put_data.c routine in the CESM driver to include the correct units for sensible heat flux and updates the rofliq calculation to be correct (previously only OUT_BASEFLOW was being divided by global_param.dt).
 
-   1. [GH#734](https://github.com/UW-Hydro/VIC/pull/734)
+   10. [GH#734](https://github.com/UW-Hydro/VIC/pull/734)
 
      - Updates the cesm_put_data.c routine in the CESM driver to include the correct signs for turbulent heat fluxes and evaporation. Previously we had switched the signs to agree with the image driver and they should instead be in accordance with the sign conventions for coupled models, which differ from those of land surface models. Also, eliminate populating the `l2x_Sl_ram1` field with aero_resist to agree with the VIC 4 implementation in RASM.
 
-   1. [GH#739](https://github.com/UW-Hydro/VIC/pull/739)
+   11. [GH#739](https://github.com/UW-Hydro/VIC/pull/739)
 
     - Updates the cesm_put_data.c routine in the CESM driver to include the correct signs for the wind stresses and fixes a bug in calculating friction velocity (previously it was missing a square root).
 
-   1. [GH#744](https://github.com/UW-Hydro/VIC/pull/744)
+   12. [GH#744](https://github.com/UW-Hydro/VIC/pull/744)
 
     - Updates the cesm_interface_c.c routine to include missing timers and the VIC RUN timer in the CESM driver.
 
-   1. [GH#746](https://github.com/UW-Hydro/VIC/pull/746)
+   13. [GH#746](https://github.com/UW-Hydro/VIC/pull/746)
 
     - Updates the cesm_interface_c.c routine in the CESM driver to populate the nrecs, endyear, endmonth and endday fields in the global_param struct to make them available to vic_finalize for timing tables (specifically the secs/day columns).  
+
+   14. [GH#800](https://github.com/UW-Hydro/VIC/pull/800)
+
+    - Updates the default namelist settings for the CESM driver to include output filenames consistent with the RASM naming conventions, default thermal nodes to 10, `FULL_ENERGY` to `TRUE`, and sets defaults for daily and monthly mean output. 
 
 3. Speed up NetCDF operations in the image/CESM drivers ([GH#684](https://github.com/UW-Hydro/VIC/pull/684))
 

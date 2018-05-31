@@ -30,6 +30,19 @@
 
 /******************************************************************************
  * @brief    This routine computes the fraction of roots in each soil layer.
+ *
+ *           Overview: take the union of the set of soil layer boundaries and
+ *           the set of root zone boundaries, and define depth intervals 'dD'
+ *           that are the spaces between these boundaries. For each soil layer,
+ *           the total root fraction is the sum of root fractions in all of the
+ *           dD[i] that fall within the layer.  To accomplish this sum
+ *           efficiently, first compute root density (fraction per unit depth)
+ *           as:
+ *             root_dens[zone] = fract[zone] / depth[zone]
+ *           Assign root densities to each dD[i] as:
+ *             root_dens[i] = root_dens[zone] for the zone that dD[i] is in
+ *           Then, compute each layer's total root fraction as:
+ *             root[layer] = sum_over_i(dD[i] * root_dens[i])
  *****************************************************************************/
 void
 calc_root_fractions(veg_con_struct  *veg_con,
@@ -41,128 +54,140 @@ calc_root_fractions(veg_con_struct  *veg_con,
     int                  veg;
     size_t               layer;
     size_t               zone;
-    size_t               i;
-    size_t               n_iter;
-    double               sum_fract;
-    double               dum;
-    double               Zstep;
-    double               Zsum;
-    double               Lstep;
+    size_t               ltmp;
     double               Lsum;
-    double               Zmin_fract;
-    double               Zmin_depth;
-    double               Zmax;
+    double               Lsumprev;
+    double               Zsum;
+    double               Dsum;
+    double               Dsumprev;
+    double               dD;
+    double               sum_fract;
+    double              *root_dens;
+    double               dum;
+
+    root_dens = calloc(options.ROOT_ZONES, sizeof(double));
 
     Nveg = veg_con[0].vegetat_type_num;
 
     for (veg = 0; veg < Nveg; veg++) {
-        sum_fract = 0;
-        layer = 0;
-        Lstep = soil_con->depth[layer];
-        Lsum = Lstep;
-        Zsum = 0;
-        zone = 0;
 
-        n_iter = 0;
-        while (zone < options.ROOT_ZONES) {
-            n_iter++;
-            if (n_iter > MAX_ROOT_ITER) {
-                log_warn("veg=%d of Nveg=%d", veg, Nveg);
-                log_warn("zone %zu of %zu ROOT_ZONES", zone,
-                         options.ROOT_ZONES);
-                log_err("stuck in an infinite loop");
-            }
+        // Check that root fractions sum to 1.0
+        dum = 0.0;
+        for (zone = 0; zone < options.ROOT_ZONES; zone++) {
+            dum += veg_con[veg].zone_fract[zone];
+        }
+        if (!assert_close_double(dum, 1, 0, 1e-4)) {
+            log_err("Input root fractions do not sum to 1.0: %f, "
+                    "veg class: %d", dum, veg_con[veg].veg_class);
+        }
 
-            Zstep = veg_con[veg].zone_depth[zone];
-            if ((Zsum + Zstep) <= Lsum && Zsum >= Lsum - Lstep) {
-                /** CASE 1: Root Zone Completely in Soil Layer **/
-                sum_fract += veg_con[veg].zone_fract[zone];
+        // Compute density of root fractions in each root zone
+        for (zone = 0; zone < options.ROOT_ZONES; zone++) {
+            if (veg_con[veg].zone_depth[zone] > 0) {
+                root_dens[zone] = veg_con[veg].zone_fract[zone] /
+                                  veg_con[veg].zone_depth[zone];
             }
             else {
-                /** CASE 2: Root Zone Partially in Soil Layer **/
-                if (Zsum < Lsum - Lstep) {
-                    /** Root zone starts in previous soil layer **/
-                    Zmin_depth = Lsum - Lstep;
-                    Zmin_fract = linear_interp(Zmin_depth, Zsum, Zsum + Zstep,
-                                               0,
-                                               veg_con[veg].zone_fract[zone]);
-                }
-                else {
-                    /** Root zone starts in current soil layer **/
-                    Zmin_depth = Zsum;
-                    Zmin_fract = 0.;
-                }
-                if (Zsum + Zstep <= Lsum) {
-                    /** Root zone ends in current layer **/
-                    Zmax = Zsum + Zstep;
-                }
-                else {
-                    /** Root zone extends beyond bottom of current layer **/
-                    Zmax = Lsum;
-                }
-                sum_fract += linear_interp(Zmax, Zsum, Zsum + Zstep, 0,
-                                           veg_con[veg].zone_fract[zone]) -
-                             Zmin_fract;
+                root_dens[zone] = 1.0;
+            }
+        }
+
+        layer = 0;
+        zone = 0;
+        Lsum = soil_con->depth[layer];
+        Lsumprev = 0;
+        Zsum = veg_con[veg].zone_depth[zone];
+        Dsum = 0;
+        Dsumprev = 0;
+        sum_fract = 0;
+
+        while (layer < options.Nlayer || zone < options.ROOT_ZONES) {
+
+            // Determine the depth interval for consideration
+            // Depth intervals span from the previous layer or zone boundary
+            // to the next layer or zone boundary.
+            if (Lsum <= Zsum && layer < options.Nlayer) {
+                Dsum = Lsum;
+            }
+            else {
+                Dsum = Zsum;
+            }
+            dD = Dsum - Dsumprev;
+            Dsumprev = Dsum;
+
+            // Add root fraction in this interval to the running total
+            // for this layer
+            if (zone < options.ROOT_ZONES) {
+                sum_fract += dD * root_dens[zone];
             }
 
-            /** Update Root Zone and Soil Layer **/
-            if (Zsum + Zstep < Lsum) {
-                Zsum += Zstep;
-                zone++;
-            }
-            else if (Zsum + Zstep == Lsum) {
-                Zsum += Zstep;
-                zone++;
-                if (layer < options.Nlayer) {
-                    veg_con[veg].root[layer] = sum_fract;
-                    sum_fract = 0.;
+            // Assign the total root fraction for this soil layer
+            // Wait to do this until we've completed a soil layer
+            // and either we're not at the final soil layer,
+            // or we're at the final layer and we've completed all root zones
+            if ( Lsum > Lsumprev && Dsum == Lsum &&
+                 ( layer < options.Nlayer - 1 ||
+                   ( zone >= options.ROOT_ZONES - 1 && Dsum == Zsum ) ) ) {
+
+                // Assign the total root fraction
+                ltmp = layer;
+                if (layer >= options.Nlayer - 1) {
+                    ltmp = options.Nlayer - 1;
                 }
+                veg_con[veg].root[ltmp] = sum_fract;
+
+                // Reset running total for next layer
+                sum_fract = 0;
+
+            }
+
+            // Decide whether to increment layer or zone
+            if (Lsum < Zsum) {
+                // zone extends beyond layer, so increment layer
+                // it's ok to exceed limit; this tells algorithm we're done
                 layer++;
                 if (layer < options.Nlayer) {
-                    Lstep = soil_con->depth[layer];
-                    Lsum += Lstep;
+                    Lsumprev = Lsum;
+                    Lsum += soil_con->depth[layer];
                 }
-                else if (layer == options.Nlayer && zone < options.ROOT_ZONES) {
-                    Zstep = (double) veg_con[veg].zone_depth[zone];
-                    Lstep = Zsum + Zstep - Lsum;
-                    if (zone < options.ROOT_ZONES - 1) {
-                        for (i = zone + 1; i < options.ROOT_ZONES; i++) {
-                            Lstep += veg_con[veg].zone_depth[i];
-                        }
-                    }
-                    Lsum += Lstep;
+                else {
+                    // We have reached the bottom of the soil column;
+                    // extend Lsum to include all remaining roots within
+                    // the final soil layer
+                    Lsum = Zsum;
                 }
             }
-            else if (Zsum + Zstep > Lsum) {
+            else if (Lsum > Zsum) {
+                // layer extends beyond zone, so increment zone
+                // it's ok to exceed limit; this tells algorithm we're done
                 zone++;
-                if (layer < options.Nlayer) {
-                    veg_con[veg].root[layer] = sum_fract;
-                    sum_fract = 0.;
+                if (zone < options.ROOT_ZONES) {
+                    Zsum += veg_con[veg].zone_depth[zone];
                 }
+                else {
+                    // We have reached the bottom of the root zone;
+                    // extend Zsum to include the remainder of the soil layer
+                    Zsum = Lsum;
+                }
+            }
+            else {
+                // layer and zone end at the same depth, so increment both
+                // it's ok to exceed limit; this tells algorithm we're done
                 layer++;
                 if (layer < options.Nlayer) {
-                    Lstep = soil_con->depth[layer];
-                    Lsum += Lstep;
+                    Lsumprev = Lsum;
+                    Lsum += soil_con->depth[layer];
                 }
-                else if (layer == options.Nlayer) {
-                    Lstep = Zsum + Zstep - Lsum;
-                    if (zone < options.ROOT_ZONES - 1) {
-                        for (i = zone + 1; i < options.ROOT_ZONES; i++) {
-                            Lstep += veg_con[veg].zone_depth[i];
-                        }
-                    }
-                    Lsum += Lstep;
+                zone++;
+                if (zone < options.ROOT_ZONES) {
+                    Zsum += veg_con[veg].zone_depth[zone];
                 }
             }
+
         }
 
-        if (sum_fract > 0 && layer >= options.Nlayer) {
-            veg_con[veg].root[options.Nlayer - 1] += sum_fract;
-        }
-        else if (sum_fract > 0) {
-            veg_con[veg].root[layer] += sum_fract;
-        }
-
+        // Final check on root fractions. If they don't sum to 1, throw error
+        // Otherwise, rescale by sum to eliminate small rounding errors
         dum = 0.;
         for (layer = 0; layer < options.Nlayer; layer++) {
             if (veg_con[veg].root[layer] < 1.e-4) {
@@ -170,12 +195,16 @@ calc_root_fractions(veg_con_struct  *veg_con,
             }
             dum += veg_con[veg].root[layer];
         }
-        if (dum == 0.0) {
-            log_err("Root fractions sum equals zero: %f , Vege Class: %d",
-                    dum, veg_con[veg].veg_class);
+        if (!assert_close_double(dum, 1, 0, 1e-4)) {
+            log_err("Soil layer root fractions do not sum to 1.0: %f, "
+                    "veg class: %d", dum, veg_con[veg].veg_class);
         }
-        for (layer = 0; layer < options.Nlayer; layer++) {
-            veg_con[veg].root[layer] /= dum;
+        else {
+            for (layer = 0; layer < options.Nlayer; layer++) {
+                veg_con[veg].root[layer] /= dum;
+            }
         }
     }
+
+    free((char *) root_dens);
 }

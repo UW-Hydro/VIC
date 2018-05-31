@@ -92,7 +92,7 @@ def copy_to_rundir(grid_config, caseid, rundir, casedocs):
         # copy file
         copy_clean_vic_config(grid_config[filekey], dst_file,
                               header=header, rundir=rundir, 
-			      caseid=caseid, **grid_config)
+			       caseid=caseid, **grid_config)
 
         # update the grid config
         grid_config[filekey] = dst_file

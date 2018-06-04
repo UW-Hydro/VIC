@@ -146,6 +146,7 @@ setup_logging(int    id,
 void
 print_trace(void)
 {
+#ifndef _WIN32
     void  *array[50];
     size_t size;
     char **strings;
@@ -165,4 +166,5 @@ print_trace(void)
     }
 
     free(strings);
+#endif
 }

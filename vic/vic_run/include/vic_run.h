@@ -174,7 +174,7 @@ double func_atmos_energy_bal(double, va_list);
 double func_atmos_moist_bal(double, va_list);
 double func_canopy_energy_bal(double, va_list);
 double func_surf_energy_bal(double, va_list);
-double (*funcd)(double z, double es, double Wind, double AirDens, double ZO,
+extern double (*funcd)(double z, double es, double Wind, double AirDens, double ZO,
                 double EactAir, double F, double hsalt, double phi_r,
                 double ushear,
                 double Zrh);

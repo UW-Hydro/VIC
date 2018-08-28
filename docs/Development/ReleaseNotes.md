@@ -103,6 +103,10 @@ This is a minor update from VIC 5.0.1. The VIC 5.1.0 includes new features, such
 
     - Updates the cesm_interface_c.c routine in the CESM driver to populate the nrecs, endyear, endmonth and endday fields in the global_param struct to make them available to vic_finalize for timing tables (specifically the secs/day columns).  
 
+   1. [GH#800](https://github.com/UW-Hydro/VIC/pull/800)
+
+    - Updates the default namelist settings for the CESM driver to include output filenames consistent with the RASM naming conventions, default thermal nodes to 10, `FULL_ENERGY` to `TRUE`, and sets defaults for daily and monthly mean output. 
+
 3. Speed up NetCDF operations in the image/CESM drivers ([GH#684](https://github.com/UW-Hydro/VIC/pull/684))
 
     These changes speed up image driver initialization, forcing reads, and history writes by only opening and closing each input netCDF file once.

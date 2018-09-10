@@ -618,6 +618,7 @@ vic_init(void)
             for (i = 0; i < local_domain.ncells_active; i++) {
                 soil_con[i].bulk_density[j] = (double) dvar[i];
             }
+        }
     }
     else {
         for (i = 0; i < local_domain.ncells_active; i++) {

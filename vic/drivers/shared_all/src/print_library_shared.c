@@ -954,11 +954,6 @@ print_soil_con(soil_con_struct *scon,
         fprintf(LOG_DEST, "\t%f", scon->bulk_density[i]);
     }
     fprintf(LOG_DEST, "\n");
-    fprintf(LOG_DEST, "\tbulk_dens_comb         :");
-    for (i = 0; i < nlayers; i++) {
-        printf(LOG_DEST, "\t%f", scon->bulk_dens_comb[i]);
-    }
-    fprintf(LOG_DEST, "\n");
     fprintf(LOG_DEST, "\tbulk_dens_min         :");
     for (i = 0; i < nlayers; i++) {
         fprintf(LOG_DEST, "\t%f", scon->bulk_dens_min[i]);

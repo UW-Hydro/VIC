@@ -84,6 +84,7 @@ initialize_options()
     options.JULY_TAVG_SUPPLIED = false;
     options.LAI_SRC = FROM_VEGLIB;
     options.ORGANIC_FRACT = false;
+    options.BULK_DENSITY_COMB = false;
     options.VEGLIB_FCAN = false;
     options.VEGLIB_PHOTO = false;
     options.VEGPARAM_ALB = false;

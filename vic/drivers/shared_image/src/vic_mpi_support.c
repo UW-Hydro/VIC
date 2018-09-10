@@ -706,6 +706,10 @@ create_MPI_option_struct_type(MPI_Datatype *mpi_type)
     offsets[i] = offsetof(option_struct, ORGANIC_FRACT);
     mpi_types[i++] = MPI_C_BOOL;
 
+    // book BULK_DENSITY_COMB; 
+    offsets[i] = offsetof(option_struct, BULK_DENSITY_COMB);
+    mpi_types[i++] = MPI_C_BOOL;
+
     // unsigned short STATE_FORMAT;
     offsets[i] = offsetof(option_struct, STATE_FORMAT);
     mpi_types[i++] = MPI_UNSIGNED_SHORT;

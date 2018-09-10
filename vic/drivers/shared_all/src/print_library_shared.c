@@ -516,6 +516,8 @@ print_option(option_struct *option)
             option->LAKE_PROFILE ? "true" : "false");
     fprintf(LOG_DEST, "\tORGANIC_FRACT        : %s\n",
             option->ORGANIC_FRACT ? "true" : "false");
+    fprintf(LOG_DEST, "\tBULK_DENSITY_COMB        : %s\n",
+            option->BULK_DENSITY_COMB ? "true" : "false");
     fprintf(LOG_DEST, "\tSTATE_FORMAT         : %d\n", option->STATE_FORMAT);
     fprintf(LOG_DEST, "\tINIT_STATE           : %s\n",
             option->INIT_STATE ? "true" : "false");
@@ -950,6 +952,11 @@ print_soil_con(soil_con_struct *scon,
     fprintf(LOG_DEST, "\tbulk_density          :");
     for (i = 0; i < nlayers; i++) {
         fprintf(LOG_DEST, "\t%f", scon->bulk_density[i]);
+    }
+    fprintf(LOG_DEST, "\n");
+    fprintf(LOG_DEST, "\tbulk_dens_comb         :");
+    for (i = 0; i < nlayers; i++) {
+        printf(LOG_DEST, "\t%f", scon->bulk_dens_comb[i]);
     }
     fprintf(LOG_DEST, "\n");
     fprintf(LOG_DEST, "\tbulk_dens_min         :");

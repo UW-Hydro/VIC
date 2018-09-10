@@ -609,6 +609,26 @@ vic_init(void)
             }
         }
     }
+    // bulk density of mineral and organic soil 
+    if (options.BULK_DENSITY_COMB) {
+        for (j = 0; j < options.Nlayer; j++) {
+            d3start[0] = j;
+            get_scatter_nc_field_double(&(filenames.params), "bulk_dens_comb",
+                                        d3start, d3count, dvar);
+            for (i = 0; i < local_domain.ncells_active; i++) {
+                soil_con[i].bulk_density[j] = (double) dvar[i];
+            }
+    }
+    else {
+        for (i = 0; i < local_domain.ncells_active; i++) {
+            for (j = 0; j < options.Nlayer; j++) {
+                soil_con[i].bulk_density[j] =
+                        (1 - soil_con[i].organic[j]) * soil_con[i].bulk_dens_min[j] +
+                        soil_con[i].organic[j] * soil_con[i].bulk_dens_org[j];
+            }
+        }
+    }
+        
 
     // Wcr: critical point for each layer
     // Note this value is  multiplied with the maximum moisture in each layer
@@ -714,9 +734,6 @@ vic_init(void)
     for (i = 0; i < local_domain.ncells_active; i++) {
         for (j = 0; j < options.Nlayer; j++) {
             // compute layer properties
-            soil_con[i].bulk_density[j] =
-                (1 - soil_con[i].organic[j]) * soil_con[i].bulk_dens_min[j] +
-                soil_con[i].organic[j] * soil_con[i].bulk_dens_org[j];
             soil_con[i].soil_density[j] =
                 (1 - soil_con[i].organic[j]) * soil_con[i].soil_dens_min[j] +
                 soil_con[i].organic[j] * soil_con[i].soil_dens_org[j];

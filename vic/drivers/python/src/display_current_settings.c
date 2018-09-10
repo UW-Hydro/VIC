@@ -257,6 +257,13 @@ display_current_settings(int mode)
     else {
         fprintf(LOG_DEST, "ORGANIC_FRACT\t\tFALSE\n");
     }
+    if (options.BULK_DENSITY_COMB) {
+        fprintf(LOG_DEST, "BULK_DENSITY_COMB\t\tTRUE\n");
+    }   
+    else {
+        fprintf(LOG_DEST, "BULK_DENSITY_COMB\t\tFALSE\n");
+    }   
+
 
     fprintf(LOG_DEST, "\n");
     if (options.VEGLIB_PHOTO) {

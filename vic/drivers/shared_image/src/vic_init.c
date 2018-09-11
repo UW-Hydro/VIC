@@ -613,7 +613,7 @@ vic_init(void)
     if (options.BULK_DENSITY_COMB) {
         for (j = 0; j < options.Nlayer; j++) {
             d3start[0] = j;
-            get_scatter_nc_field_double(&(filenames.params), "bulk_dens_comb",
+            get_scatter_nc_field_double(&(filenames.params), "bulk_density_comb",
                                         d3start, d3count, dvar);
             for (i = 0; i < local_domain.ncells_active; i++) {
                 soil_con[i].bulk_density[j] = (double) dvar[i];

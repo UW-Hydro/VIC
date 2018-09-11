@@ -616,10 +616,6 @@ read_soilparam(FILE            *soilparam,
            Compute Soil Layer Properties
         *******************************************/
         for (layer = 0; layer < options.Nlayer; layer++) {
-            temp->bulk_density[layer] =
-                (1 -
-                 temp->organic[layer]) * temp->bulk_dens_min[layer] +
-                temp->organic[layer] * temp->bulk_dens_org[layer];
             temp->soil_density[layer] =
                 (1 -
                  temp->organic[layer]) * temp->soil_dens_min[layer] +

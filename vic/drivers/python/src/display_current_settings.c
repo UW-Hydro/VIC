@@ -259,10 +259,10 @@ display_current_settings(int mode)
     }
     if (options.BULK_DENSITY_COMB) {
         fprintf(LOG_DEST, "BULK_DENSITY_COMB\t\tTRUE\n");
-    }   
+    }
     else {
         fprintf(LOG_DEST, "BULK_DENSITY_COMB\t\tFALSE\n");
-    }   
+    }
 
 
     fprintf(LOG_DEST, "\n");

@@ -341,7 +341,7 @@ read_soilparam(FILE            *soilparam,
         if (options.BULK_DENSITY_COMB) {
             /* read soil bulk density */
             for (layer = 0; layer < options.Nlayer; layer++) {
-                token = strtok(NULL, delimiters); 
+                token = strtok(NULL, delimiters);
                 while (token != NULL && (length = strlen(token)) == 0) {
                     token = strtok(NULL, delimiters);
                 }
@@ -352,12 +352,11 @@ read_soilparam(FILE            *soilparam,
                 sscanf(token, "%lf", &(temp->bulk_density)[layer]);
             }
         }
-
         else {
             for (layer = 0; layer < options.Nlayer; layer++) {
                 temp->bulk_density[layer] =
-                    (1 - 
-                    temp->organic[layer]) * temp->bulk_dens_min[layer] +
+                    (1 -
+                     temp->organic[layer]) * temp->bulk_dens_min[layer] +
                     temp->organic[layer] * temp->bulk_dens_org[layer];
             }
         }

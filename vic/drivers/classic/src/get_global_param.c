@@ -446,10 +446,10 @@ get_global_param(FILE *gp)
                 sscanf(cmdstr, "%*s %s", flgstr);
                 options.ORGANIC_FRACT = str_to_bool(flgstr);
             }
-            else if (strcasecmp("BULK_DENSITY_COMB", optstr) == 0) { 
+            else if (strcasecmp("BULK_DENSITY_COMB", optstr) == 0) {
                 sscanf(cmdstr, "%*s %s", flgstr);
                 options.BULK_DENSITY_COMB = str_to_bool(flgstr);
-            }    
+            }
             else if (strcasecmp("VEGLIB", optstr) == 0) {
                 sscanf(cmdstr, "%*s %s", filenames.veglib);
             }

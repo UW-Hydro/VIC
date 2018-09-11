@@ -341,7 +341,7 @@ get_global_param(FILE *gp)
             else if (strcasecmp("BULK_DENSITY_COMB", optstr) == 0) {
                 sscanf(cmdstr, "%*s %s", flgstr);
                 options.BULK_DENSITY_COMB = str_to_bool(flgstr);
-            }   
+            }
             else if (strcasecmp("VEGLIB_PHOTO", optstr) == 0) {
                 sscanf(cmdstr, "%*s %s", flgstr);
                 options.VEGLIB_PHOTO = str_to_bool(flgstr);

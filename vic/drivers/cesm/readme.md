@@ -64,6 +64,5 @@ The CESM driver for VIC can be built in two ways.
 
   ** Supported Machines **
   - [x] Thunder
-  - [x] Lightning
-  - [x] Garnet
+  - [x] Topaz
   - [ ] Copper *(Not currently supported by RASM)*

@@ -260,7 +260,7 @@ vic_init(void)
         }
     }
 
-    // default value for fcanopy
+    // fcanopy
     for (j = 0; j < options.NVEGTYPES; j++) {
         if (options.FCAN_SRC == FROM_DEFAULT) {
             for (k = 0; k < MONTHS_PER_YEAR; k++) {
@@ -272,7 +272,6 @@ vic_init(void)
                     else {
                         veg_lib[i][j].fcanopy[k] = MIN_FCANOPY;
                     }
-                    veg_lib[i][j].fcanopy[k] = 1.0;
                 }
             }
         }

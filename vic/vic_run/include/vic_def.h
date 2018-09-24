@@ -279,6 +279,7 @@ typedef struct {
                                           FROM_VEGPARAM = use LAI values from the veg param file */
     bool LAKE_PROFILE;   /**< TRUE = user-specified lake/area profile */
     bool ORGANIC_FRACT;  /**< TRUE = organic matter fraction of each layer is read from the soil parameter file; otherwise set to 0.0. */
+    bool BULK_DENSITY_COMB; /**< TRUE = soil bulk density (combined mineral and organic matter) read from soil parameter file; otherwise set to 0.0 */
 
     // state options
     unsigned short int STATE_FORMAT;  /**< TRUE = model state file is binary (default) */

@@ -189,7 +189,9 @@ solve_snow(char               overstory,
 
                 (*ShortUnderIn) *= (*surf_atten); // SW transmitted through canopy
                 ShortOverIn = (1. - (*surf_atten)) * shortwave; // canopy incident SW
-                ShortOverIn /= veg_var->fcanopy;
+                if (veg_var->fcanopy > 0) {
+                    ShortOverIn /= veg_var->fcanopy;
+                }
                 ErrorFlag = snow_intercept(dt, 1.,
                                            veg_var->LAI,
                                            (*Le), longwave, LongUnderOut,

@@ -237,10 +237,13 @@ vic_run(force_data_struct   *force,
                     energy = &(all_vars->energy[iveg][band]);
 
                     // Convert LAI from global to local
-                    veg_var->LAI /= veg_var->fcanopy;
-                    veg_var->Wdew /= veg_var->fcanopy;
-                    veg_var->Wdmax = veg_var->LAI * param.VEG_LAI_WATER_FACTOR;
-                    snow->snow_canopy /= veg_var->fcanopy;
+                    if (veg_var->fcanopy > 0) {
+                        veg_var->LAI /= veg_var->fcanopy;
+                        veg_var->Wdew /= veg_var->fcanopy;
+                        veg_var->Wdmax = veg_var->LAI *
+                                         param.VEG_LAI_WATER_FACTOR;
+                        snow->snow_canopy /= veg_var->fcanopy;
+                    }
 
                     /******************************************
                        Initialize Band-dependent Model Parameters

@@ -750,7 +750,8 @@ func_surf_energy_bal(double  Ts,
     }
     Evap = 0.;
     if (!SNOWING) {
-        if (VEG && veg_var->fcanopy > 0) {
+        // if VEG is true, then fcanopy > 0 and LAI > 0
+        if (VEG) {
             Evap = canopy_evap(layer, veg_var, true, veg_class, Wdew,
                                delta_t, NetBareRad, vpd, NetShortBare,
                                Tair, Ra_veg[1], elevation, rainfall,

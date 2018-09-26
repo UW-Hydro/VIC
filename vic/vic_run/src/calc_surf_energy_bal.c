@@ -163,7 +163,7 @@ calc_surf_energy_bal(double             Le,
     }
 
     if (iveg != Nveg) {
-        if (veg_var->fcanopy > 0.0) {
+        if (veg_var->fcanopy > 0.0 && veg_var->LAI > 0.0) {
             VEG = true;
         }
         else {

@@ -18,7 +18,7 @@ The CESM driver for VIC can be built in two ways.
 
 1. The `Makefile` is in the root driver directory is configured to build the CESM driver as a shared object. This makefile is provided for testing purposes only.
 
-1. The `bld/` directory contains the build scripts used by the CESM  `$case.build` script. To build the model in this configuration, follow these temporary steps on Garnet, Spirit, or Lightning:
+1. The `bld/` directory contains the build scripts used by the CESM  `$case.build` script. To build the model in this configuration, follow these temporary steps on Topaz or Thunder:
 
   ```bash
   # Get vic5 input data
@@ -42,14 +42,19 @@ The CESM driver for VIC can be built in two ways.
   git checkout develop
 
   # follow typical steps to build RASM
-  # NOTE: only set DEBUG flag to TRUE if running RI compset
+  # NOTE: only set DEBUG flag to TRUE if running RI or RI_CRUNCEP compset
   # (it does not work with WRF)
   cd $HOME/rasm_vic5/scripts
   today=$(date +'%Y%m%d')
-  compset=RI # adjust for compset
-  mach=spirit_intel # adjust for machine
-  case_name=vic5.${compset}.test.${today}a
-  create_newcase -case ${case_name} -res w5a_a94 -compset ${compset} -mach ${mach}
+  # adjust for compset
+  compset=RI 
+  # adjust for machine
+  mach=thunder_intel
+  # adjust for resolution 
+  # w5a_a94 for 50km VIC/WRF, w2b_a94 for 25km VIC/WRF
+  res=w5a_a94
+  case_name=vic5.${compset}.${res}.test.${today}a
+  create_newcase -case ${case_name} -res ${res} -compset ${compset} -mach ${mach}
   cd ${case_name}
   ./cesm_setup
   ./xmlchange -file env_build.xml -id DEBUG -val TRUE
@@ -59,6 +64,5 @@ The CESM driver for VIC can be built in two ways.
 
   ** Supported Machines **
   - [x] Thunder
-  - [x] Lightning
-  - [x] Garnet
+  - [x] Topaz
   - [ ] Copper *(Not currently supported by RASM)*

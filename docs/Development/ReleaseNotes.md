@@ -139,6 +139,10 @@ This is a minor update from VIC 5.0.1. The VIC 5.1.0 includes new features, such
 
     Previously the change in cold content of the snowpack term (deltaCC in the snow_data_struct) would get unreasonably large if the Hedstrom and Pomeroy 1998 equation used to calculate snow density, which depends only on air temperature, was calculated with air temperatures above about 2 deg C. We use this term to calculate the ground flux from the snowpack and snow depth, which resulted in extremely small snow depths and unreasonably large ground fluxes from the snowpack (and thus changes in snowpack cold content). Now there is a cap on new snow density with the new parameter SNOW_NEW_SNOW_DENS_MAX as well as a snow depth below which we disregard the ground flux from the snowpack (1.e-8).
 
+11. Added new option BULK_DENSITY_COMB that enables soil bulk density (mineral and organic) to be read from the parameters file ([GH#817](https://github.com/UW-Hydro/VIC/pull/817))
+
+    The option BULK_DENSITY_COMB enables soil bulk density (mineral and organic) to be read in as a parameter when the option is set to true in the global parameter file. Default is false.
+
 10. Miscellaneous clean-up:
 
     [GH#723](https://github.com/UW-Hydro/VIC/pull/723)

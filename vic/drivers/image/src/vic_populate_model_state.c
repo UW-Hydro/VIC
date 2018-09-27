@@ -57,8 +57,8 @@ vic_populate_model_state(dmy_struct *dmy_current)
             generate_default_state(&(all_vars[i]), &(soil_con[i]), veg_con[i],
                                    dmy_current);
             if (options.LAKES) {
-                generate_default_lake_state(&(all_vars[i]), &(soil_con[i]),
-                                            lake_con[i]);
+                generate_default_lake_state(&(all_vars[i].lake_var),
+                                            &(soil_con[i]), lake_con[i]);
             }
         }
     }

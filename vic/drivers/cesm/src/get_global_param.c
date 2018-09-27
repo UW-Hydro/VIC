@@ -416,6 +416,9 @@ get_global_param(FILE *gp)
                 sscanf(cmdstr, "%*s %s", flgstr);
                 options.LAKE_PROFILE = str_to_bool(flgstr);
             }
+            else if (strcasecmp("LAKE_NODES", optstr) == 0) {
+                sscanf(cmdstr, "%*s %zu", &options.Nlakenode);
+            }
 
             /*************************************
                Define output files
@@ -508,6 +511,10 @@ validate_filenames(filenames_struct *filenames)
     // Validate lake parameter information
     if (options.LAKES) {
         log_err("Lakes are not implemented in CESM driver");
+        if (options.Nlakenode < 1 || options.Nlakenode > MAX_LAKE_NODES) {
+            log_err("LAKE_NODES must be between 1 and %d.",
+                    MAX_LAKE_NODES);
+        }
     }
 }
 

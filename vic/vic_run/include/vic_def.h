@@ -63,6 +63,7 @@
 #define MAX_NODES       50     /**< maximum number of soil thermal nodes */
 #define MAX_FRONTS      3      /**< maximum number of freezing and thawing front depths to store */
 #define MAX_FROST_AREAS 10     /**< maximum number of frost sub-areas */
+#define MAX_LAKE_BASIN_NODES 20 /**< maximum number of points to define lake basin shape */
 #define MAX_LAKE_NODES  20     /**< maximum number of lake thermal nodes */
 #define MAX_ZWTVMOIST   11     /**< maximum number of points in water table vs moisture curve for each soil layer; should include points at lower and upper boundaries of the layer */
 
@@ -228,13 +229,13 @@ typedef struct {
     bool LAKES;          /**< TRUE = use lake energy code */
     size_t Ncanopy;      /**< Number of canopy layers in the model. */
     size_t Nfrost;       /**< Number of frost subareas in model */
-    size_t Nlakenode;    /**< Number of lake thermal nodes in the model. */
+    size_t Nlakebasnode; /**< Number of points defining lake basin shape. */
+    size_t Nlakenode;    /**< Number of lake layers in the model. */
     size_t Nlayer;       /**< Number of layers in model */
     size_t Nnode;        /**< Number of soil thermal nodes in the model */
     bool NOFLUX;         /**< TRUE = Use no flux lower bondary when computing
                             soil thermal fluxes */
     size_t NVEGTYPES;    /**< number of vegetation types in veg_param file */
-    size_t NLAKENODES;   /**< number of lake layers in lake_param file */
     unsigned short int RC_MODE;        /**< RC_JARVIS = compute canopy resistance via Jarvis formulation (default)
                                           RC_PHOTO = compute canopy resistance based on photosynthetic activity */
     size_t ROOT_ZONES;   /**< Number of root zones used in simulation */
@@ -1016,9 +1017,9 @@ typedef struct {
 typedef struct {
     // Lake basin dimensions
     size_t numnod;                /**< Maximum number of lake nodes for this grid cell */
-    double z[MAX_LAKE_NODES + 1]; /**< Elevation of each lake node (when lake storage is at maximum), relative to lake's deepest point (m) */
-    double basin[MAX_LAKE_NODES + 1]; /**< Area of lake basin at each lake node (when lake storage is at maximum) (m^2) */
-    double Cl[MAX_LAKE_NODES + 1]; /**< Fractional coverage of lake basin at each node (when lake storage is at maximum) (fraction of grid cell area) */
+    double z[MAX_LAKE_BASIN_NODES + 1]; /**< Elevation of each lake node, relative to lake's deepest point (m) */
+    double basin[MAX_LAKE_BASIN_NODES + 1]; /**< Area of lake basin at each lake node (when lake storage is at maximum) (m^2) */
+    double Cl[MAX_LAKE_BASIN_NODES + 1]; /**< Fractional coverage of lake basin at each node (when lake storage is at maximum) (fraction of grid cell area) */
     double b;                     /**< Exponent in default lake depth-area profile (y=Ax^b) */
     double maxdepth;              /**< Maximum allowable depth of liquid portion of lake (m) */
     double mindepth;              /**< Minimum allowable depth of liquid portion of lake (m) */

@@ -1031,7 +1031,7 @@ vic_store(dmy_struct *dmy_state,
 
         // lake layer surface areas: lake_var.surface[ndix]
         nc_var = &(nc_state_file.nc_vars[STATE_LAKE_LAYER_SURF_AREA]);
-        for (j = 0; j < options.NLAKENODES; j++) {
+        for (j = 0; j < options.Nlakenode; j++) {
             d3start[0] = j;
             for (i = 0; i < local_domain.ncells_active; i++) {
                 dvar[i] = (double) all_vars[i].lake_var.surface[j];
@@ -1073,7 +1073,7 @@ vic_store(dmy_struct *dmy_state,
 
         // lake layer temperatures: lake_var.temp[nidx]
         nc_var = &(nc_state_file.nc_vars[STATE_LAKE_LAYER_TEMP]);
-        for (j = 0; j < options.NLAKENODES; j++) {
+        for (j = 0; j < options.Nlakenode; j++) {
             d3start[0] = j;
             for (i = 0; i < local_domain.ncells_active; i++) {
                 dvar[i] = (double) all_vars[i].lake_var.temp[j];
@@ -1321,7 +1321,7 @@ set_nc_state_file_info(nc_file_struct *nc_state_file)
     nc_state_file->band_size = options.SNOW_BAND;
     nc_state_file->front_size = MAX_FRONTS;
     nc_state_file->frost_size = options.Nfrost;
-    nc_state_file->lake_node_size = MAX_LAKE_NODES;
+    nc_state_file->lake_node_size = options.Nlakenode;
     nc_state_file->layer_size = options.Nlayer;
     nc_state_file->ni_size = global_domain.n_nx;
     nc_state_file->nj_size = global_domain.n_ny;

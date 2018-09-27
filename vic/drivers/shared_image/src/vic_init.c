@@ -1365,15 +1365,15 @@ vic_init(void)
             if (lake_con[i].lake_idx >= 0 &&
                 lake_con[i].lake_idx < (int) veg_con[i][0].vegetat_type_num) {
                 if (!(lake_con[i].numnod > 0 &&
-                      lake_con[i].numnod < MAX_LAKE_NODES)) {
+                      lake_con[i].numnod < MAX_LAKE_BASIN_NODES)) {
                     log_err("cell %zu numnod is %zu but we must have 1 "
                             "<= numnod < %d.", i, lake_con[i].numnod,
-                            MAX_LAKE_NODES);
+                            MAX_LAKE_BASIN_NODES);
                 }
-                else if (!(lake_con[i].numnod <= options.NLAKENODES)) {
+                else if (!(lake_con[i].numnod <= options.Nlakebasnode)) {
                     log_err("cell %zu numnod is %zu but this exceeds "
                             "the file lake_node dimension length of %zu.",
-                            i, lake_con[i].numnod, options.NLAKENODES);
+                            i, lake_con[i].numnod, options.Nlakebasnode);
                 }
                 if (lake_con[i].numnod > max_numnod) {
                     max_numnod = lake_con[i].numnod;
@@ -1440,7 +1440,7 @@ vic_init(void)
 
         // lake depth-area relationship
         for (i = 0; i < local_domain.ncells_active; i++) {
-            for (j = 0; j <= MAX_LAKE_NODES; j++) {
+            for (j = 0; j <= MAX_LAKE_BASIN_NODES; j++) {
                 lake_con[i].z[j] = 0;
                 lake_con[i].Cl[j] = 0;
             }

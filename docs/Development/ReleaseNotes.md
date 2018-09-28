@@ -22,6 +22,9 @@ To check which release of VIC you are running:
 
 1. Fixed datetime handling bug in unit test module ([GH#796](https://github.com/UW-Hydro/VIC/pull/796))
 
+2. Removed descriptions of forcing disaggregation options from documentation of classic driver global parameter file ([GH#831](https://github.com/UW-Hydro/VIC/pull/831))
+
+
 ------------------------------
 
 ## VIC 5.1.0 rc1

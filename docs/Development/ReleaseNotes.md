@@ -24,6 +24,15 @@ To check which release of VIC you are running:
 
 2. Removed descriptions of forcing disaggregation options from documentation of classic driver global parameter file ([GH#831](https://github.com/UW-Hydro/VIC/pull/831))
 
+3. Fixed segmentation fault in lake model caused by incorrect passing of pointer argument to vic_run(). ([GH#826]((https://github.com/UW-Hydro/VIC/pull/826))
+
+4. Relaxed some of the validation of lake parameters, to allow them to be null in cells containing no lakes. ([GH#826]((https://github.com/UW-Hydro/VIC/pull/826))
+
+5. Fixed passing of lake data structures to generate_default_lake_state(). ([GH#826]((https://github.com/UW-Hydro/VIC/pull/826))
+
+6. Separated the dimensions of arrays related to lake basin shape and of arrays related to the number of lake simulation layers. ([GH#826]((https://github.com/UW-Hydro/VIC/pull/826))
+
+7. Added global parameter option to set the maximum number of (dynamic) lake simulation layers. ([GH#826]((https://github.com/UW-Hydro/VIC/pull/826))
 
 ------------------------------
 

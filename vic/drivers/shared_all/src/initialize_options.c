@@ -72,6 +72,8 @@ initialize_options()
     // Model dimensions
     options.Ncanopy = 3;
     options.Nfrost = 1;
+    options.Nlakebasnode = MAX_LAKE_BASIN_NODES;
+    options.Nlakenode = MAX_LAKE_NODES;
     options.Nlayer = 3;
     options.Nnode = 3;
     options.ROOT_ZONES = 0;

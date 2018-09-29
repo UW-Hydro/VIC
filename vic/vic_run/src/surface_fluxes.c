@@ -544,7 +544,7 @@ surface_fluxes(bool                 overstory,
                 if (options.MAX_SNOW_ALBEDO) {
                     // use maximum snow albedo from parameter file
                     if (iveg != Nveg) {
-                        new_snow_albedo = vic_run_veg_lib.new_snow_albedo;
+                        new_snow_albedo = vic_run_veg_lib[veg_class].max_snow_albedo;
                     }   
                     else {
                         new_snow_albedo = param.SNOW_NEW_SNOW_ALB;

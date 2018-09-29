@@ -207,7 +207,7 @@ vic_init(void)
         get_scatter_nc_field_double(&(filenames.params), "max_snow_albedo",
                                     d2start, d2count, dvar);
         for (i = 0; i < local_domain.ncells_active; i++) {
-            veg_lib[i].max_snow_albedo = (double) dvar[i];
+            veg_lib[i][j].max_snow_albedo = (double) dvar[i];
         }
     }
 

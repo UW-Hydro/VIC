@@ -202,6 +202,15 @@ vic_init(void)
         }
     }
 
+    // new_snow_albedo
+    if (options.MAX_SNOW_ALBEDO) {
+        get_scatter_nc_field_double(&(filenames.params), "max_snow_albedo",
+                                    d2start, d2count, dvar);
+        for (i = 0; i < local_domain.ncells_active; i++) {
+            veg_lib[i].max_snow_albedo = (double) dvar[i];
+        }
+    }
+
     // LAI and Wdmax
     if (options.LAI_SRC == FROM_VEGLIB || options.LAI_SRC == FROM_VEGPARAM) {
         for (j = 0; j < options.NVEGTYPES; j++) {

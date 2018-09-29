@@ -266,7 +266,7 @@ double solve_canopy_energy_bal(double Tfoliage, ...);
 int solve_lake(double, double, double, double, double, double, double, double,
                double, double, lake_var_struct *, soil_con_struct, double,
                double, dmy_struct, double);
-double solve_snow(char, double, double, double, double, double, double, double,
+double solve_snow(char, double, double, double, double, double, double, double, double,
                   double, double, double *, double *, double *, double *,
                   double *, double *, double *, double *, double *, double *,
                   double *, double *, double *, double *, double *, double *,

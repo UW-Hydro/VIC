@@ -39,6 +39,7 @@ solve_snow(char               overstory,
            double             LongUnderOut,          // LW from understory
            double             MIN_RAIN_TEMP,
            double             MAX_SNOW_TEMP,
+           double             new_snow_albedo,
            double             Tcanopy,          // canopy air temperature
            double             Tgrnd,          // soil surface temperature
            double             air_temp,          // air temperature
@@ -321,6 +322,15 @@ solve_snow(char               overstory,
                     (*coverage * snow->albedo + (1. - *coverage) * BareAlbedo);
             }
             else {
+                if (options.MAX_SNOW_ALBEDO) {
+                    // use maximum snow albedo from parameter file
+                    if (iveg != Nveg) {
+                        snow->albedo = new_snow_albedo;
+                    }
+                    else {
+                        snow->albedo = param.SNOW_NEW_SNOW_ALB;
+                    }
+                }
                 // set snow albedo to new snow albedo
                 snow->last_snow = 0;
                 snow->albedo = param.SNOW_NEW_SNOW_ALB;

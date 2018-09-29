@@ -36,6 +36,8 @@ To check which release of VIC you are running:
 
 8. Added global parameter option to set the maximum number of (dynamic) lake simulation layers. ([GH#826]((https://github.com/UW-Hydro/VIC/pull/826))
 
+9. Fixed bug causing ET to be 0 in pure bare soil tiles. ([GH#823]((https://github.com/UW-Hydro/VIC/pull/823))
+
 ------------------------------
 
 ## VIC 5.1.0 rc1

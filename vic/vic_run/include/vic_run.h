@@ -237,9 +237,9 @@ void set_node_parameters(double *, double *, double *, double *, double *,
                          double *, int, int);
 void shear_stress(double U10, double ZO, double *ushear, double *Zo_salt,
                   double utshear);
-double snow_albedo(double, double, double, double, double, int, bool);
+double snow_albedo(double, double, double, double, double, double, int, bool);
 double snow_density(snow_data_struct *, double, double, double, double);
-int snow_intercept(double, double, double, double, double, double, double,
+int snow_intercept(double, double, double, double, double, double, double, double,
                    double, double, double, double *, double *, double *,
                    double *, double *, double *, double *, double *, double *,
                    double *, double *, double *, double *, double *, double *,

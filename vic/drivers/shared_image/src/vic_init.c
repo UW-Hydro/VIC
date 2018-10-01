@@ -589,15 +589,16 @@ vic_init(void)
         }
 
         if (!options.BULK_DENSITY_COMB) {
-            // read in bulk_dens_org: 
+            // read in bulk_dens_org:
             // organic bulk density for each soil layer
             for (j = 0; j < options.Nlayer; j++) {
                 d3start[0] = j;
-                get_scatter_nc_field_double(&(filenames.params), "bulk_density_org",
+                get_scatter_nc_field_double(&(filenames.params),
+                                            "bulk_density_org",
                                             d3start, d3count, dvar);
                 for (i = 0; i < local_domain.ncells_active; i++) {
                     soil_con[i].bulk_dens_org[j] = (double) dvar[i];
-                }   
+                }
             }
         }
         // soil_dens_org: organic soil density for each soil layer
@@ -1486,7 +1487,6 @@ vic_init(void)
         for (i = 0; i < local_domain.ncells_active; i++) {
             if (lake_con[i].lake_idx >= 0 &&
                 lake_con[i].lake_idx < (int) veg_con[i][0].vegetat_type_num) {
-
                 // validate top node
                 if (!(lake_con[i].z[0] > 0)) {
                     log_err("cell %zu lake basin max depth is %f but must "
@@ -1527,7 +1527,8 @@ vic_init(void)
                               lake_con[i].Cl[j] < lake_con[i].Cl[j - 1])) {
                             log_err("cell %zu lake basin node %zu area fraction "
                                     "is %f but must be > 0 and < node %zu area "
-                                    "fraction %f.", i, j, lake_con[i].Cl[j], j - 1,
+                                    "fraction %f.", i, j, lake_con[i].Cl[j],
+                                    j - 1,
                                     lake_con[i].Cl[j - 1]);
                         }
                     }
@@ -1536,7 +1537,6 @@ vic_init(void)
                 // compute other lake parameters here
                 soil_con[i].cell_area = local_domain.locations[i].area;
                 compute_lake_params(&(lake_con[i]), soil_con[i]);
-
             }
         }
     }

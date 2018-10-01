@@ -155,6 +155,10 @@ This is a minor update from VIC 5.0.1. The VIC 5.1.0 includes new features, such
 
     The option BULK_DENSITY_COMB enables soil bulk density (mineral and organic) to be read in as a parameter when the option is set to true in the global parameter file. Default is false.
 
+12. Turns on `ORGANIC_FRACT` option that previously existed in VIC 4 and enables the `BULK_DENSITY_COMB` option to be used in conjunction with it ([GH#837](https://github.com/UW-Hydro/VIC/pull/837))
+
+    The option `ORGANIC_FRACT`, if set to True, means that the organic fraction of the soil, soil density of the organic matter, and bulk density of the organic matter (if `BULK_DENSITY_COMB` is set to false) will be read in from the parameter file. If `BULK_DENSITY_COMB` is set to True, the bulk density of the organic matter will not be read in separately. Default is false. 
+
 10. Miscellaneous clean-up:
 
     [GH#723](https://github.com/UW-Hydro/VIC/pull/723)

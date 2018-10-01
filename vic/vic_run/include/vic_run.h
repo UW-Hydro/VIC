@@ -220,8 +220,7 @@ void polint(double xa[], double ya[], int n, double x, double *y, double *dy);
 void prepare_full_energy(cell_data_struct *, energy_bal_struct *,
                          soil_con_struct *, double *, double *);
 double qromb(
-    double (*sub_with_height)(), double es, double Wind, double AirDens, double ZO, double EactAir, double F, double hsalt, double phi_r, double ushear, double Zrh, double a,
-    double b);
+    double (*sub_with_height)(), double es, double Wind, double AirDens, double ZO, double EactAir, double F, double hsalt, double phi_r, double ushear, double Zrh, double a, double b);
 void rescale_snow_energy_fluxes(double, double, snow_data_struct *,
                                 energy_bal_struct *);
 void rescale_snow_storage(double, double, snow_data_struct *);
@@ -314,8 +313,7 @@ double transport_with_height(double z, double es, double Wind, double AirDens,
                              double ZO, double EactAir, double F, double hsalt,
                              double phi_r, double ushear, double Zrh);
 double trapzd(
-    double (*funcd)(), double es, double Wind, double AirDens, double ZO, double EactAir, double F, double hsalt, double phi_r, double ushear, double Zrh, double a, double b,
-    int n);
+    double (*funcd)(), double es, double Wind, double AirDens, double ZO, double EactAir, double F, double hsalt, double phi_r, double ushear, double Zrh, double a, double b, int n);
 void tridia(int, double *, double *, double *, double *, double *);
 void tridiag(double *, double *, double *, double *, unsigned int);
 int vic_run(force_data_struct *, all_vars_struct *, dmy_struct *,

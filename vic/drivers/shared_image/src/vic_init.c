@@ -1484,7 +1484,6 @@ vic_init(void)
         for (i = 0; i < local_domain.ncells_active; i++) {
             if (lake_con[i].lake_idx >= 0 &&
                 lake_con[i].lake_idx < (int) veg_con[i][0].vegetat_type_num) {
-
                 // validate top node
                 if (!(lake_con[i].z[0] > 0)) {
                     log_err("cell %zu lake basin max depth is %f but must "
@@ -1525,7 +1524,8 @@ vic_init(void)
                               lake_con[i].Cl[j] < lake_con[i].Cl[j - 1])) {
                             log_err("cell %zu lake basin node %zu area fraction "
                                     "is %f but must be > 0 and < node %zu area "
-                                    "fraction %f.", i, j, lake_con[i].Cl[j], j - 1,
+                                    "fraction %f.", i, j, lake_con[i].Cl[j],
+                                    j - 1,
                                     lake_con[i].Cl[j - 1]);
                         }
                     }
@@ -1534,7 +1534,6 @@ vic_init(void)
                 // compute other lake parameters here
                 soil_con[i].cell_area = local_domain.locations[i].area;
                 compute_lake_params(&(lake_con[i]), soil_con[i]);
-
             }
         }
     }

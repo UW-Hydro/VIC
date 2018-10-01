@@ -292,10 +292,10 @@ display_current_settings(int mode)
     }
     if (options.MAX_SNOW_ALBEDO) {
         fprintf(LOG_DEST, "MAX_SNOW_ALBEDO\t\tTRUE\n");
-    }   
+    }
     else {
         fprintf(LOG_DEST, "MAX_SNOW_ALBEDO\t\tFALSE\n");
-    }   
+    }
 
     fprintf(LOG_DEST, "\n");
     if (options.VEGLIB_PHOTO) {

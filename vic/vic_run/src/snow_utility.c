@@ -272,15 +272,15 @@ snow_albedo(double new_snow,
         if (cold_content < 0.0 && !MELTING) {
             albedo = new_snow_albedo * pow(param.SNOW_ALB_ACCUM_A,
                                            pow((double) last_snow * dt /
-                                           SEC_PER_DAY,
-                                           param.SNOW_ALB_ACCUM_B));
+                                               SEC_PER_DAY,
+                                               param.SNOW_ALB_ACCUM_B));
         }
         /* Melt Season */
         else {
             albedo = new_snow_albedo * pow(param.SNOW_ALB_THAW_A,
                                            pow((double) last_snow * dt /
-                                           SEC_PER_DAY,
-                                           param.SNOW_ALB_THAW_B));
+                                               SEC_PER_DAY,
+                                               param.SNOW_ALB_THAW_B));
         }
     }
     else {

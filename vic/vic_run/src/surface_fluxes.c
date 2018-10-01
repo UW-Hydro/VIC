@@ -114,7 +114,7 @@ surface_fluxes(bool                 overstory,
     double                   snowfall; // snowfall
     double                   snow_flux; // heat flux through snowpack
     double                   snow_grnd_flux; // ground heat flux into snowpack
-    double                   new_snow_albedo; // new snow albedo 
+    double                   new_snow_albedo; // new snow albedo
     double                   tol_under;
     double                   tol_over;
     double                  *aero_resist_used;
@@ -544,17 +544,17 @@ surface_fluxes(bool                 overstory,
                 if (options.MAX_SNOW_ALBEDO) {
                     // use maximum snow albedo from parameter file
                     if (iveg != Nveg) {
-                        new_snow_albedo = vic_run_veg_lib[veg_class].max_snow_albedo;
-                    }   
+                        new_snow_albedo =
+                            vic_run_veg_lib[veg_class].max_snow_albedo;
+                    }
                     else {
                         new_snow_albedo = param.SNOW_NEW_SNOW_ALB;
-                    }   
+                    }
                 }
                 else {
                     new_snow_albedo = param.SNOW_NEW_SNOW_ALB;
                 }
- 
-                
+
 
                 /** Solve snow accumulation, ablation and interception **/
                 step_melt = solve_snow(overstory, BareAlbedo, LongUnderOut,

@@ -666,7 +666,7 @@ typedef struct {
                               library */
     bool overstory;        /**< TRUE = overstory present, important for snow
                               accumulation in canopy */
-    double max_snow_albedo;/**< new maximum snow albedo from Barlage et al 
+    double max_snow_albedo;/**< new maximum snow albedo from Barlage et al
                               2005 (fraction) */
     double rad_atten;      /**< radiation attenuation due to canopy,
                               default = 0.5 (N/A) */

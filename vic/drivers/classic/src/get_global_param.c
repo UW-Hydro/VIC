@@ -450,7 +450,7 @@ get_global_param(FILE *gp)
                 sscanf(cmdstr, "%*s %s", flgstr);
                 options.BULK_DENSITY_COMB = str_to_bool(flgstr);
             }
-            else if (strcasecmp("MAX_SNOW_ALBEDO", optstr) == 0) {  
+            else if (strcasecmp("MAX_SNOW_ALBEDO", optstr) == 0) {
                 sscanf(cmdstr, "%*s %s", flgstr);
                 options.MAX_SNOW_ALBEDO = str_to_bool(flgstr);
             }

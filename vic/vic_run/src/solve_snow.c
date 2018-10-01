@@ -315,7 +315,8 @@ solve_snow(char               overstory,
                 // age snow albedo if no new snowfall
                 // ignore effects of snow dropping from canopy; only consider fresh snow from sky
                 snow->last_snow++;
-                snow->albedo = snow_albedo(*snowfall, new_snow_albedo, snow->swq, 
+                snow->albedo = snow_albedo(*snowfall, new_snow_albedo,
+                                           snow->swq,
                                            snow->albedo,
                                            snow->coldcontent, dt,
                                            snow->last_snow, snow->MELTING);

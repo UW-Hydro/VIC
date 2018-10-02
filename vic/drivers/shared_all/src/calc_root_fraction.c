@@ -70,7 +70,6 @@ calc_root_fractions(veg_con_struct  *veg_con,
     Nveg = veg_con[0].vegetat_type_num;
 
     for (veg = 0; veg < Nveg; veg++) {
-
         // Check that root fractions sum to 1.0
         dum = 0.0;
         for (zone = 0; zone < options.ROOT_ZONES; zone++) {
@@ -102,7 +101,6 @@ calc_root_fractions(veg_con_struct  *veg_con,
         sum_fract = 0;
 
         while (layer < options.Nlayer || zone < options.ROOT_ZONES) {
-
             // Determine the depth interval for consideration
             // Depth intervals span from the previous layer or zone boundary
             // to the next layer or zone boundary.
@@ -125,10 +123,9 @@ calc_root_fractions(veg_con_struct  *veg_con,
             // Wait to do this until we've completed a soil layer
             // and either we're not at the final soil layer,
             // or we're at the final layer and we've completed all root zones
-            if ( Lsum > Lsumprev && Dsum == Lsum &&
-                 ( layer < options.Nlayer - 1 ||
-                   ( zone >= options.ROOT_ZONES - 1 && Dsum == Zsum ) ) ) {
-
+            if (Lsum > Lsumprev && Dsum == Lsum &&
+                (layer < options.Nlayer - 1 ||
+                 (zone >= options.ROOT_ZONES - 1 && Dsum == Zsum))) {
                 // Assign the total root fraction
                 ltmp = layer;
                 if (layer >= options.Nlayer - 1) {
@@ -138,7 +135,6 @@ calc_root_fractions(veg_con_struct  *veg_con,
 
                 // Reset running total for next layer
                 sum_fract = 0;
-
             }
 
             // Decide whether to increment layer or zone
@@ -183,7 +179,6 @@ calc_root_fractions(veg_con_struct  *veg_con,
                     Zsum += veg_con[veg].zone_depth[zone];
                 }
             }
-
         }
 
         // Final check on root fractions. If they don't sum to 1, throw error

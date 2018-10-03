@@ -39,6 +39,7 @@ solve_snow(char               overstory,
            double             LongUnderOut,          // LW from understory
            double             MIN_RAIN_TEMP,
            double             MAX_SNOW_TEMP,
+           double             new_snow_albedo,
            double             Tcanopy,          // canopy air temperature
            double             Tgrnd,          // soil surface temperature
            double             air_temp,          // air temperature
@@ -192,7 +193,7 @@ solve_snow(char               overstory,
                 if (veg_var->fcanopy > 0) {
                     ShortOverIn /= veg_var->fcanopy;
                 }
-                ErrorFlag = snow_intercept(dt, 1.,
+                ErrorFlag = snow_intercept(dt, 1., new_snow_albedo,
                                            veg_var->LAI,
                                            (*Le), longwave, LongUnderOut,
                                            veg_var->Wdmax,
@@ -314,7 +315,9 @@ solve_snow(char               overstory,
                 // age snow albedo if no new snowfall
                 // ignore effects of snow dropping from canopy; only consider fresh snow from sky
                 snow->last_snow++;
-                snow->albedo = snow_albedo(*snowfall, snow->swq, snow->albedo,
+                snow->albedo = snow_albedo(*snowfall, new_snow_albedo,
+                                           snow->swq,
+                                           snow->albedo,
                                            snow->coldcontent, dt,
                                            snow->last_snow, snow->MELTING);
                 (*AlbedoUnder) =
@@ -323,7 +326,7 @@ solve_snow(char               overstory,
             else {
                 // set snow albedo to new snow albedo
                 snow->last_snow = 0;
-                snow->albedo = param.SNOW_NEW_SNOW_ALB;
+                snow->albedo = new_snow_albedo;
                 (*AlbedoUnder) = snow->albedo;
             }
             (*NetShortSnow) = (1.0 - *AlbedoUnder) * (*ShortUnderIn);

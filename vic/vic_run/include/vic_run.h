@@ -236,10 +236,10 @@ void set_node_parameters(double *, double *, double *, double *, double *,
                          double *, int, int);
 void shear_stress(double U10, double ZO, double *ushear, double *Zo_salt,
                   double utshear);
-double snow_albedo(double, double, double, double, double, int, bool);
+double snow_albedo(double, double, double, double, double, double, int, bool);
 double snow_density(snow_data_struct *, double, double, double, double);
 int snow_intercept(double, double, double, double, double, double, double,
-                   double, double, double, double *, double *, double *,
+                   double, double, double, double, double *, double *, double *,
                    double *, double *, double *, double *, double *, double *,
                    double *, double *, double *, double *, double *, double *,
                    double *, bool *, unsigned int *, double *, double *,
@@ -266,13 +266,13 @@ int solve_lake(double, double, double, double, double, double, double, double,
                double, double, lake_var_struct *, soil_con_struct, double,
                double, dmy_struct, double);
 double solve_snow(char, double, double, double, double, double, double, double,
-                  double, double, double *, double *, double *, double *,
+                  double, double, double, double *, double *, double *,
                   double *, double *, double *, double *, double *, double *,
                   double *, double *, double *, double *, double *, double *,
                   double *, double *, double *, double *, double *, double *,
                   double *, double *, double *, double *, double *, double *,
-                  int, size_t, unsigned short int, unsigned short int, double,
-                  size_t, int, int *, double *, double *, dmy_struct *,
+                  double *, int, size_t, unsigned short int, unsigned short int,
+                  double, size_t, int, int *, double *, double *, dmy_struct *,
                   force_data_struct *, energy_bal_struct *, layer_data_struct *,
                   snow_data_struct *, soil_con_struct *, veg_var_struct *);
 double solve_surf_energy_bal(double Tsurf, ...);

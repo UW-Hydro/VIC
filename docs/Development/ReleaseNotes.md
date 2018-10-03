@@ -155,6 +155,10 @@ This is a minor update from VIC 5.0.1. The VIC 5.1.0 includes new features, such
 
     The option BULK_DENSITY_COMB enables soil bulk density (mineral and organic) to be read in as a parameter when the option is set to true in the global parameter file. Default is false.
 
+12. Added new option `MAX_SNOW_ALBEDO` that enables new snow albedo to be read in from the parameters file ([GH#835](https://github.com/UW-Hydro/VIC/pull/835))
+
+    The option `MAX_SNOW_ALBEDO`, if set to true in the global parameter file, means that new snow albedo will be read in from the parameter file and used in the snow routines for all vegetation types except for bare soil. 
+
 10. Miscellaneous clean-up:
 
     [GH#723](https://github.com/UW-Hydro/VIC/pull/723)

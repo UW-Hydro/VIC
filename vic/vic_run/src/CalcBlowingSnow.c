@@ -271,18 +271,18 @@ CalcBlowingSnow(double   Dt,
  *****************************************************************************/
 double
 qromb(double (*funcd)(),
-      double   es,
-      double   Wind,
-      double   AirDens,
-      double   ZO,
-      double   EactAir,
-      double   F,
-      double   hsalt,
-      double   phi_r,
-      double   ushear,
-      double   Zrh,
-      double   a,
-      double   b)
+      double es,
+      double Wind,
+      double AirDens,
+      double ZO,
+      double EactAir,
+      double F,
+      double hsalt,
+      double phi_r,
+      double ushear,
+      double Zrh,
+      double a,
+      double b)
 {
     extern parameters_struct param;
 
@@ -363,19 +363,19 @@ polint(double  xa[],
  *****************************************************************************/
 double
 trapzd(double (*funcd)(),
-       double   es,
-       double   Wind,
-       double   AirDens,
-       double   ZO,
-       double   EactAir,
-       double   F,
-       double   hsalt,
-       double   phi_r,
-       double   ushear,
-       double   Zrh,
-       double   a,
-       double   b,
-       int      n)
+       double es,
+       double Wind,
+       double AirDens,
+       double ZO,
+       double EactAir,
+       double F,
+       double hsalt,
+       double phi_r,
+       double ushear,
+       double Zrh,
+       double a,
+       double b,
+       int    n)
 {
     double x, tnm, sum, del;
     int    it, j;

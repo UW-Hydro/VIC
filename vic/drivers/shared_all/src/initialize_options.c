@@ -87,6 +87,7 @@ initialize_options()
     options.LAI_SRC = FROM_VEGLIB;
     options.ORGANIC_FRACT = false;
     options.BULK_DENSITY_COMB = false;
+    options.MAX_SNOW_ALBEDO = false;
     options.VEGLIB_FCAN = false;
     options.VEGLIB_PHOTO = false;
     options.VEGPARAM_ALB = false;

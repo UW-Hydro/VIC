@@ -281,6 +281,7 @@ typedef struct {
     bool LAKE_PROFILE;   /**< TRUE = user-specified lake/area profile */
     bool ORGANIC_FRACT;  /**< TRUE = organic matter fraction of each layer is read from the soil parameter file; otherwise set to 0.0. */
     bool BULK_DENSITY_COMB; /**< TRUE = soil bulk density (combined mineral and organic matter) read from soil parameter file; otherwise set to 0.0 */
+    bool MAX_SNOW_ALBEDO; /**< TRUE = maximum snow albedo taken from the parameter file if veg type is not bare soil; otherwise use param option */
 
     // state options
     unsigned short int STATE_FORMAT;  /**< TRUE = model state file is binary (default) */
@@ -665,6 +666,8 @@ typedef struct {
                               library */
     bool overstory;        /**< TRUE = overstory present, important for snow
                               accumulation in canopy */
+    double max_snow_albedo;/**< new maximum snow albedo from Barlage et al
+                              2005 (fraction) */
     double rad_atten;      /**< radiation attenuation due to canopy,
                               default = 0.5 (N/A) */
     double rarc;           /**< architectural resistance (s/m) */

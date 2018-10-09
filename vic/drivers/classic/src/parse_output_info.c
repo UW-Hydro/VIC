@@ -35,29 +35,29 @@ parse_output_info(FILE           *gp,
                   stream_struct **streams,
                   dmy_struct     *dmy_current)
 {
-    extern option_struct       options;
+    extern option_struct options;
 
-    char                       cmdstr[MAXSTRING];
-    char                       optstr[MAXSTRING];
-    char                       flgstr[MAXSTRING];
-    short int                  streamnum;
-    char                       varname[MAXSTRING];
-    int                        outvarnum;
-    char                       freq_type_str[MAXSTRING];
-    char                       freq_value_str[MAXSTRING];
-    char                       format[MAXSTRING];
-    char                       typestr[MAXSTRING];
-    int                        type;
-    char                       multstr[MAXSTRING];
-    char                       aggstr[MAXSTRING];
-    double                     mult;
-    unsigned short int         freq;
-    int                        freq_n;
-    dmy_struct                 freq_dmy;
-    unsigned short int         agg_type;
-    int                        found;
-    size_t                     nstream_vars[MAX_OUTPUT_STREAMS];
-    bool                       default_outputs = false;
+    char                 cmdstr[MAXSTRING];
+    char                 optstr[MAXSTRING];
+    char                 flgstr[MAXSTRING];
+    short int            streamnum;
+    char                 varname[MAXSTRING];
+    int                  outvarnum;
+    char                 freq_type_str[MAXSTRING];
+    char                 freq_value_str[MAXSTRING];
+    char                 format[MAXSTRING];
+    char                 typestr[MAXSTRING];
+    int                  type;
+    char                 multstr[MAXSTRING];
+    char                 aggstr[MAXSTRING];
+    double               mult;
+    unsigned short int   freq;
+    int                  freq_n;
+    dmy_struct           freq_dmy;
+    unsigned short int   agg_type;
+    int                  found;
+    size_t               nstream_vars[MAX_OUTPUT_STREAMS];
+    bool                 default_outputs = false;
 
     /** Read through global control file to find output info **/
 

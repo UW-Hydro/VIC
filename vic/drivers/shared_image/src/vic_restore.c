@@ -970,7 +970,7 @@ check_init_state_file(void)
             dimlen = get_nc_dimension(&(filenames.init_state), "lake_node");
             if (dimlen != options.Nlakenode) {
                 log_err("Number of lake nodes in state file does not "
-                        "match LAKE_NODES (%d) in global parameter file",
+                        "match LAKE_NODES (%zu) in global parameter file",
                         options.Nlakenode);
             }
         }

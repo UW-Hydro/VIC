@@ -229,7 +229,6 @@ vic_run(force_data_struct   *force,
             for (band = 0; band < Nbands; band++) {
                 /** Solve band only if coverage greater than 0% **/
                 if (soil_con->AreaFract[band] > 0) {
-
                     /* Set local pointers */
                     cell = &(all_vars->cell[iveg][band]);
                     veg_var = &(all_vars->veg_var[iveg][band]);
@@ -251,9 +250,8 @@ vic_run(force_data_struct   *force,
 
                     /** Surface Attenuation due to Vegetation Coverage **/
                     surf_atten = (1 - veg_var->fcanopy) * 1.0 +
-                                 veg_var->fcanopy *
-                                 exp(-vic_run_veg_lib[veg_class].rad_atten *
-                                     veg_var->LAI);
+                                 veg_var->fcanopy *exp(-vic_run_veg_lib[veg_class].rad_atten *
+                                                       veg_var->LAI);
 
                     /** Bare (free of snow) Albedo **/
                     if (iveg != Nveg) {

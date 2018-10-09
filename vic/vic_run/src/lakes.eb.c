@@ -689,7 +689,8 @@ alblake(double         Tcutoff,
 
     // compute snow surface albedo
     if (swq > 0.0) {
-        *snowalbedo = snow_albedo(newsnow, swq, *snowalbedo, coldcontent,
+        *snowalbedo = snow_albedo(newsnow, param.SNOW_NEW_SNOW_ALB,
+                                  swq, *snowalbedo, coldcontent,
                                   dt, *last_snow, *MELTING);
     }
     else if (swq == 0.0 && newsnow > 0.0) {

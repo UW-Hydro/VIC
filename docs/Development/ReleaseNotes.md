@@ -163,7 +163,6 @@ This is a minor update from VIC 5.0.1. The VIC 5.1.0 includes new features, such
 
     The option `MAX_SNOW_ALBEDO`, if set to true in the global parameter file, means that new snow albedo will be read in from the parameter file and used in the snow routines for all vegetation types except for bare soil. 
 
-
 10. Miscellaneous clean-up:
 
     [GH#723](https://github.com/UW-Hydro/VIC/pull/723)

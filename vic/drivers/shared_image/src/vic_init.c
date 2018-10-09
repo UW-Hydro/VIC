@@ -600,16 +600,19 @@ vic_init(void)
             }
         }
 
-        // bulk_dens_org: organic bulk density for each soil layer
-        for (j = 0; j < options.Nlayer; j++) {
-            d3start[0] = j;
-            get_scatter_nc_field_double(&(filenames.params), "bulk_density_org",
-                                        d3start, d3count, dvar);
-            for (i = 0; i < local_domain.ncells_active; i++) {
-                soil_con[i].bulk_dens_org[j] = (double) dvar[i];
+        if (!options.BULK_DENSITY_COMB) {
+            // read in bulk_dens_org:
+            // organic bulk density for each soil layer
+            for (j = 0; j < options.Nlayer; j++) {
+                d3start[0] = j;
+                get_scatter_nc_field_double(&(filenames.params),
+                                            "bulk_density_org",
+                                            d3start, d3count, dvar);
+                for (i = 0; i < local_domain.ncells_active; i++) {
+                    soil_con[i].bulk_dens_org[j] = (double) dvar[i];
+                }
             }
         }
-
         // soil_dens_org: organic soil density for each soil layer
         for (j = 0; j < options.Nlayer; j++) {
             d3start[0] = j;

@@ -659,10 +659,9 @@ read_soilparam(FILE            *soilparam,
            Compute Soil Layer Critical and Wilting Point Moisture Contents
         ****************************************************************/
         for (layer = 0; layer < options.Nlayer; layer++) {
-            temp->Wcr[layer] = Wcr_FRACT[layer] * temp->max_moist[layer];
-            temp->Wpwp[layer] = Wpwp_FRACT[layer] * temp->max_moist[layer];
-            temp->resid_moist[layer] = resid_FRACT[layer] *
-                                       temp->max_moist[layer];
+            temp->Wcr[layer] *= temp->max_moist[layer];
+            temp->Wpwp[layer] *= temp->max_moist[layer];
+            temp->resid_moist[layer] *= temp->max_moist[layer];
             if (temp->Wpwp[layer] > temp->Wcr[layer]) {
                 log_err("Calculated wilting point moisture (%f mm) is "
                         "greater than calculated critical point moisture "

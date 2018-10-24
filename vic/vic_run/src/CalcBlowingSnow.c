@@ -271,18 +271,18 @@ CalcBlowingSnow(double   Dt,
  *****************************************************************************/
 double
 qromb(double (*funcd)(),
-      double es,
-      double Wind,
-      double AirDens,
-      double ZO,
-      double EactAir,
-      double F,
-      double hsalt,
-      double phi_r,
-      double ushear,
-      double Zrh,
-      double a,
-      double b)
+      double   es,
+      double   Wind,
+      double   AirDens,
+      double   ZO,
+      double   EactAir,
+      double   F,
+      double   hsalt,
+      double   phi_r,
+      double   ushear,
+      double   Zrh,
+      double   a,
+      double   b)
 {
     extern parameters_struct param;
 
@@ -305,6 +305,7 @@ qromb(double (*funcd)(),
         h[j + 1] = 0.25 * h[j];
     }
     log_err("Too many steps");
+    return 0.; // To avoid warnings.
 }
 
 /******************************************************************************
@@ -363,19 +364,19 @@ polint(double  xa[],
  *****************************************************************************/
 double
 trapzd(double (*funcd)(),
-       double es,
-       double Wind,
-       double AirDens,
-       double ZO,
-       double EactAir,
-       double F,
-       double hsalt,
-       double phi_r,
-       double ushear,
-       double Zrh,
-       double a,
-       double b,
-       int    n)
+       double   es,
+       double   Wind,
+       double   AirDens,
+       double   ZO,
+       double   EactAir,
+       double   F,
+       double   hsalt,
+       double   phi_r,
+       double   ushear,
+       double   Zrh,
+       double   a,
+       double   b,
+       int      n)
 {
     double x, tnm, sum, del;
     int    it, j;
@@ -409,6 +410,7 @@ trapzd(double (*funcd)(),
         s = 0.5 * (s + (b - a) * sum / tnm);
         return s;
     }
+    return 0.; // To avoid warnings.
 }
 
 /******************************************************************************
@@ -484,6 +486,7 @@ rtnewt(double x1,
         }
     }
     log_err("Maximum number of iterations exceeded");
+    return 0.; // To avoid warnings.
 }
 
 /******************************************************************************

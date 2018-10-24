@@ -30,7 +30,7 @@
  * @brief   String to bool conversion
  *****************************************************************************/
 bool
-str_to_bool(char str[])
+str_to_bool(const char str[])
 {
     if (strcasecmp("TRUE", str) == 0) {
         return true;
@@ -41,6 +41,7 @@ str_to_bool(char str[])
     else {
         log_err("%s is neither TRUE nor FALSE", str);
     }
+    return false; // To avoid warnings.
 }
 
 /******************************************************************************
@@ -104,7 +105,7 @@ count_nstreams_nvars(FILE   *gp,
  * @brief    Convert string version of AGG_TYPE_* to enum value
  *****************************************************************************/
 unsigned short int
-str_to_agg_type(char aggstr[])
+str_to_agg_type(const char aggstr[])
 {
     if ((strcasecmp("", aggstr) == 0) || (strcasecmp("*", aggstr) == 0)) {
         return AGG_TYPE_DEFAULT;
@@ -132,13 +133,14 @@ str_to_agg_type(char aggstr[])
             log_err("Unknown aggregation type found: %s", aggstr);
         }
     }
+    return 0; // To avoid warnings.
 }
 
 /******************************************************************************
  * @brief    Convert string version of OUT_TYPE* to enum value
  *****************************************************************************/
 unsigned short int
-str_to_out_type(char typestr[])
+str_to_out_type(const char typestr[])
 {
     if ((strcasecmp("", typestr) == 0) || (strcasecmp("*", typestr) == 0)) {
         return OUT_TYPE_DEFAULT;
@@ -166,13 +168,14 @@ str_to_out_type(char typestr[])
             log_err("Unknown out type found: %s", typestr);
         }
     }
+    return 0; // To avoid warnings.
 }
 
 /******************************************************************************
  * @brief    Convert string version of mult to double
  *****************************************************************************/
 double
-str_to_out_mult(char multstr[])
+str_to_out_mult(const char multstr[])
 {
     if ((strcasecmp("", multstr) == 0) || (strcasecmp("*", multstr) == 0)) {
         return OUT_MULT_DEFAULT;
@@ -180,13 +183,14 @@ str_to_out_mult(char multstr[])
     else {
         return (double) atof(multstr);
     }
+    return 0.; // To avoid warnings.
 }
 
 /******************************************************************************
  * @brief    Convert string version of frequency flags to enum value
  *****************************************************************************/
 unsigned short int
-str_to_freq_flag(char freq[])
+str_to_freq_flag(const char freq[])
 {
     if (strcasecmp("NEVER", freq) == 0) {
         return FREQ_NEVER;
@@ -221,13 +225,14 @@ str_to_freq_flag(char freq[])
     else {
         log_err("Unknown frequency flag found: %s", freq);
     }
+    return 0; // To avoid warnings.
 }
 
 /******************************************************************************
  * @brief    Convert string version of frequency flags to enum value
  *****************************************************************************/
 void
-str_to_ascii_format(char *format)
+str_to_ascii_format(const char *format)
 {
     if ((strcasecmp("", format) == 0) || (strcasecmp("*", format) == 0)) {
         strcpy(format, OUT_ASCII_FORMAT_DEFAULT);
@@ -240,7 +245,7 @@ str_to_ascii_format(char *format)
  * @return enum integer representing calendar
  *****************************************************************************/
 unsigned short int
-str_to_calendar(char *cal_chars)
+str_to_calendar(const char *cal_chars)
 {
     if (strcasecmp("STANDARD", cal_chars) == 0) {
         return CALENDAR_STANDARD;
@@ -273,6 +278,7 @@ str_to_calendar(char *cal_chars)
     else {
         log_err("Unknown calendar specified: %s", cal_chars);
     }
+    return 0; // To avoid warnings.
 }
 
 /******************************************************************************
@@ -280,7 +286,7 @@ str_to_calendar(char *cal_chars)
  * @return enum integer representing time units
  *****************************************************************************/
 unsigned short int
-str_to_timeunits(char units_chars[])
+str_to_timeunits(const char units_chars[])
 {
     if (strcasecmp("SECONDS", units_chars) == 0) {
         return TIME_UNITS_SECONDS;
@@ -297,6 +303,7 @@ str_to_timeunits(char units_chars[])
     else {
         log_err("Unknown time units specified: %s", units_chars);
     }
+    return 0; // To avoid warnings.
 }
 
 /******************************************************************************
@@ -304,7 +311,7 @@ str_to_timeunits(char units_chars[])
  *****************************************************************************/
 void
 str_from_time_units(unsigned short int time_units,
-                    char              *unit_str)
+                    const char              *unit_str)
 {
     if (time_units == TIME_UNITS_SECONDS) {
         sprintf(unit_str, "seconds");
@@ -329,7 +336,7 @@ str_from_time_units(unsigned short int time_units,
  *****************************************************************************/
 void
 str_from_calendar(unsigned short int calendar,
-                  char              *calendar_str)
+                  const char              *calendar_str)
 {
     if (calendar == CALENDAR_STANDARD) {
         sprintf(calendar_str, "standard");
@@ -370,7 +377,7 @@ str_from_calendar(unsigned short int calendar,
  *****************************************************************************/
 bool
 cell_method_from_agg_type(unsigned short int aggtype,
-                          char               cell_method[])
+                          const char               cell_method[])
 {
     if (aggtype == AGG_TYPE_AVG) {
         strcpy(cell_method, "time: mean");
@@ -399,4 +406,5 @@ cell_method_from_agg_type(unsigned short int aggtype,
     else {
         return false;
     }
+    return false; // To avoid warnings.
 }

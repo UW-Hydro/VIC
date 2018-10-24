@@ -767,8 +767,7 @@ func_surf_energy_bal(double  Ts,
             SurfRad = NetBareRad;
         }
         Evap += (1 - veg_var->fcanopy) *
-                arno_evap(layer, SurfRad, Tair, vpd,
-                          depth[0], max_moist[0],
+                arno_evap(layer, SurfRad, Tair, vpd, max_moist[0],
                           elevation, b_infilt, Ra_used[0], delta_t,
                           resid_moist[0], frost_fract);
         for (i = 0; i < options.Nlayer; i++) {

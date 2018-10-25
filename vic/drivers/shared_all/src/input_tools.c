@@ -30,7 +30,7 @@
  * @brief   String to bool conversion
  *****************************************************************************/
 bool
-str_to_bool(const char str[])
+str_to_bool(char str[])
 {
     if (strcasecmp("TRUE", str) == 0) {
         return true;
@@ -105,7 +105,7 @@ count_nstreams_nvars(FILE   *gp,
  * @brief    Convert string version of AGG_TYPE_* to enum value
  *****************************************************************************/
 unsigned short int
-str_to_agg_type(const char aggstr[])
+str_to_agg_type(char aggstr[])
 {
     if ((strcasecmp("", aggstr) == 0) || (strcasecmp("*", aggstr) == 0)) {
         return AGG_TYPE_DEFAULT;
@@ -140,7 +140,7 @@ str_to_agg_type(const char aggstr[])
  * @brief    Convert string version of OUT_TYPE* to enum value
  *****************************************************************************/
 unsigned short int
-str_to_out_type(const char typestr[])
+str_to_out_type(char typestr[])
 {
     if ((strcasecmp("", typestr) == 0) || (strcasecmp("*", typestr) == 0)) {
         return OUT_TYPE_DEFAULT;
@@ -175,7 +175,7 @@ str_to_out_type(const char typestr[])
  * @brief    Convert string version of mult to double
  *****************************************************************************/
 double
-str_to_out_mult(const char multstr[])
+str_to_out_mult(char multstr[])
 {
     if ((strcasecmp("", multstr) == 0) || (strcasecmp("*", multstr) == 0)) {
         return OUT_MULT_DEFAULT;
@@ -190,7 +190,7 @@ str_to_out_mult(const char multstr[])
  * @brief    Convert string version of frequency flags to enum value
  *****************************************************************************/
 unsigned short int
-str_to_freq_flag(const char freq[])
+str_to_freq_flag(char freq[])
 {
     if (strcasecmp("NEVER", freq) == 0) {
         return FREQ_NEVER;
@@ -232,7 +232,7 @@ str_to_freq_flag(const char freq[])
  * @brief    Convert string version of frequency flags to enum value
  *****************************************************************************/
 void
-str_to_ascii_format(const char *format)
+str_to_ascii_format(char *format)
 {
     if ((strcasecmp("", format) == 0) || (strcasecmp("*", format) == 0)) {
         strcpy(format, OUT_ASCII_FORMAT_DEFAULT);
@@ -245,7 +245,7 @@ str_to_ascii_format(const char *format)
  * @return enum integer representing calendar
  *****************************************************************************/
 unsigned short int
-str_to_calendar(const char *cal_chars)
+str_to_calendar(char *cal_chars)
 {
     if (strcasecmp("STANDARD", cal_chars) == 0) {
         return CALENDAR_STANDARD;
@@ -286,7 +286,7 @@ str_to_calendar(const char *cal_chars)
  * @return enum integer representing time units
  *****************************************************************************/
 unsigned short int
-str_to_timeunits(const char units_chars[])
+str_to_timeunits(char units_chars[])
 {
     if (strcasecmp("SECONDS", units_chars) == 0) {
         return TIME_UNITS_SECONDS;
@@ -311,7 +311,7 @@ str_to_timeunits(const char units_chars[])
  *****************************************************************************/
 void
 str_from_time_units(unsigned short int time_units,
-                    const char              *unit_str)
+                    char              *unit_str)
 {
     if (time_units == TIME_UNITS_SECONDS) {
         sprintf(unit_str, "seconds");
@@ -336,7 +336,7 @@ str_from_time_units(unsigned short int time_units,
  *****************************************************************************/
 void
 str_from_calendar(unsigned short int calendar,
-                  const char              *calendar_str)
+                  char              *calendar_str)
 {
     if (calendar == CALENDAR_STANDARD) {
         sprintf(calendar_str, "standard");
@@ -377,7 +377,7 @@ str_from_calendar(unsigned short int calendar,
  *****************************************************************************/
 bool
 cell_method_from_agg_type(unsigned short int aggtype,
-                          const char               cell_method[])
+                          char               cell_method[])
 {
     if (aggtype == AGG_TYPE_AVG) {
         strcpy(cell_method, "time: mean");

@@ -438,6 +438,29 @@ read_soilparam(FILE            *soilparam,
             }
         }
 
+        if (options.BULK_DENSITY_COMB) {
+            /* read soil bulk density */
+            for (layer = 0; layer < options.Nlayer; layer++) {
+                token = strtok(NULL, delimiters);
+                while (token != NULL && (length = strlen(token)) == 0) {
+                    token = strtok(NULL, delimiters);
+                }
+                if (token == NULL) {
+                    log_err("Can't find values for SOIL BULK DENSITY for "
+                            "layer %zu in soil file", layer);
+                }
+                sscanf(token, "%lf", &(temp->bulk_density)[layer]);
+            }
+        }
+        else {
+            for (layer = 0; layer < options.Nlayer; layer++) {
+                temp->bulk_density[layer] =
+                    (1 -
+                     temp->organic[layer]) * temp->bulk_dens_min[layer] +
+                    temp->organic[layer] * temp->bulk_dens_org[layer];
+            }
+        }
+
         /* read cell gmt offset */
         token = strtok(NULL, delimiters);
         while (token != NULL && (length = strlen(token)) == 0) {
@@ -593,10 +616,6 @@ read_soilparam(FILE            *soilparam,
            Compute Soil Layer Properties
         *******************************************/
         for (layer = 0; layer < options.Nlayer; layer++) {
-            temp->bulk_density[layer] =
-                (1 -
-                 temp->organic[layer]) * temp->bulk_dens_min[layer] +
-                temp->organic[layer] * temp->bulk_dens_org[layer];
             temp->soil_density[layer] =
                 (1 -
                  temp->organic[layer]) * temp->soil_dens_min[layer] +

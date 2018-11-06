@@ -338,6 +338,14 @@ get_global_param(FILE *gp)
                 sscanf(cmdstr, "%*s %s", flgstr);
                 options.ORGANIC_FRACT = str_to_bool(flgstr);
             }
+            else if (strcasecmp("BULK_DENSITY_COMB", optstr) == 0) {
+                sscanf(cmdstr, "%*s %s", flgstr);
+                options.BULK_DENSITY_COMB = str_to_bool(flgstr);
+            }
+            else if (strcasecmp("MAX_SNOW_ALBEDO", optstr) == 0) {
+                sscanf(cmdstr, "%*s %s", flgstr);
+                options.MAX_SNOW_ALBEDO = str_to_bool(flgstr);
+            }
             else if (strcasecmp("VEGLIB_PHOTO", optstr) == 0) {
                 sscanf(cmdstr, "%*s %s", flgstr);
                 options.VEGLIB_PHOTO = str_to_bool(flgstr);
@@ -411,6 +419,9 @@ get_global_param(FILE *gp)
             else if (strcasecmp("LAKE_PROFILE", optstr) == 0) {
                 sscanf(cmdstr, "%*s %s", flgstr);
                 options.LAKE_PROFILE = str_to_bool(flgstr);
+            }
+            else if (strcasecmp("LAKE_NODES", optstr) == 0) {
+                sscanf(cmdstr, "%*s %zu", &options.Nlakenode);
             }
 
             /*************************************
@@ -504,6 +515,10 @@ validate_filenames(filenames_struct *filenames)
     // Validate lake parameter information
     if (options.LAKES) {
         log_err("Lakes are not implemented in CESM driver");
+        if (options.Nlakenode < 1 || options.Nlakenode > MAX_LAKE_NODES) {
+            log_err("LAKE_NODES must be between 1 and %d.",
+                    MAX_LAKE_NODES);
+        }
     }
 }
 

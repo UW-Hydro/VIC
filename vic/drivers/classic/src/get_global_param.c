@@ -446,6 +446,14 @@ get_global_param(FILE *gp)
                 sscanf(cmdstr, "%*s %s", flgstr);
                 options.ORGANIC_FRACT = str_to_bool(flgstr);
             }
+            else if (strcasecmp("BULK_DENSITY_COMB", optstr) == 0) {
+                sscanf(cmdstr, "%*s %s", flgstr);
+                options.BULK_DENSITY_COMB = str_to_bool(flgstr);
+            }
+            else if (strcasecmp("MAX_SNOW_ALBEDO", optstr) == 0) {
+                sscanf(cmdstr, "%*s %s", flgstr);
+                options.MAX_SNOW_ALBEDO = str_to_bool(flgstr);
+            }
             else if (strcasecmp("VEGLIB", optstr) == 0) {
                 sscanf(cmdstr, "%*s %s", filenames.veglib);
             }
@@ -543,6 +551,9 @@ get_global_param(FILE *gp)
             else if (strcasecmp("LAKE_PROFILE", optstr) == 0) {
                 sscanf(cmdstr, "%*s %s", flgstr);
                 options.LAKE_PROFILE = str_to_bool(flgstr);
+            }
+            else if (strcasecmp("LAKE_NODES", optstr) == 0) {
+                sscanf(cmdstr, "%*s %zu", &options.Nlakenode);
             }
 
             /*************************************
@@ -1336,6 +1347,10 @@ get_global_param(FILE *gp)
         if (options.COMPUTE_TREELINE) {
             log_err("LAKES = TRUE and COMPUTE_TREELINE = TRUE are "
                     "incompatible options.");
+        }
+        if (options.Nlakenode < 1 || options.Nlakenode > MAX_LAKE_NODES) {
+            log_err("LAKE_NODES must be between 1 and %d.",
+                    MAX_LAKE_NODES);
         }
     }
 

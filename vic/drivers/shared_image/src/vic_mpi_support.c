@@ -488,7 +488,7 @@ create_MPI_option_struct_type(MPI_Datatype *mpi_type)
     MPI_Datatype   *mpi_types;
 
     // nitems has to equal the number of elements in option_struct
-    nitems = 53;
+    nitems = 55;
     blocklengths = malloc(nitems * sizeof(*blocklengths));
     check_alloc_status(blocklengths, "Memory allocation error.");
 
@@ -704,6 +704,14 @@ create_MPI_option_struct_type(MPI_Datatype *mpi_type)
 
     // bool ORGANIC_FRACT;
     offsets[i] = offsetof(option_struct, ORGANIC_FRACT);
+    mpi_types[i++] = MPI_C_BOOL;
+
+    // bool BULK_DENSITY_COMB;
+    offsets[i] = offsetof(option_struct, BULK_DENSITY_COMB);
+    mpi_types[i++] = MPI_C_BOOL;
+
+    // bool MAX_SNOW_ALBEDO;
+    offsets[i] = offsetof(option_struct, MAX_SNOW_ALBEDO);
     mpi_types[i++] = MPI_C_BOOL;
 
     // unsigned short STATE_FORMAT;

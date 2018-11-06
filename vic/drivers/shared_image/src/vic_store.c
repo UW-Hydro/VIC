@@ -966,12 +966,12 @@ vic_store(dmy_struct *dmy_state,
         for (j = 0; j < options.Nnode; j++) {
             d3start[0] = j;
             for (i = 0; i < local_domain.ncells_active; i++) {
-                dvar[i] = (double) all_vars[i].lake_var.soil.layer[j].moist;
+                dvar[i] = (double) all_vars[i].lake_var.energy.T[j];
             }
             gather_put_nc_field_double(nc_state_file.nc_id,
                                        nc_var->nc_varid,
                                        nc_state_file.d_fillvalue,
-                                       d2start, nc_var->nc_counts, dvar);
+                                       d3start, nc_var->nc_counts, dvar);
             for (i = 0; i < local_domain.ncells_active; i++) {
                 dvar[i] = nc_state_file.d_fillvalue;
             }
@@ -1031,7 +1031,7 @@ vic_store(dmy_struct *dmy_state,
 
         // lake layer surface areas: lake_var.surface[ndix]
         nc_var = &(nc_state_file.nc_vars[STATE_LAKE_LAYER_SURF_AREA]);
-        for (j = 0; j < options.NLAKENODES; j++) {
+        for (j = 0; j < options.Nlakenode; j++) {
             d3start[0] = j;
             for (i = 0; i < local_domain.ncells_active; i++) {
                 dvar[i] = (double) all_vars[i].lake_var.surface[j];
@@ -1073,7 +1073,7 @@ vic_store(dmy_struct *dmy_state,
 
         // lake layer temperatures: lake_var.temp[nidx]
         nc_var = &(nc_state_file.nc_vars[STATE_LAKE_LAYER_TEMP]);
-        for (j = 0; j < options.NLAKENODES; j++) {
+        for (j = 0; j < options.Nlakenode; j++) {
             d3start[0] = j;
             for (i = 0; i < local_domain.ncells_active; i++) {
                 dvar[i] = (double) all_vars[i].lake_var.temp[j];
@@ -1081,7 +1081,7 @@ vic_store(dmy_struct *dmy_state,
             gather_put_nc_field_double(nc_state_file.nc_id,
                                        nc_var->nc_varid,
                                        nc_state_file.d_fillvalue,
-                                       d2start, nc_var->nc_counts, dvar);
+                                       d3start, nc_var->nc_counts, dvar);
             for (i = 0; i < local_domain.ncells_active; i++) {
                 dvar[i] = nc_state_file.d_fillvalue;
             }
@@ -1321,6 +1321,7 @@ set_nc_state_file_info(nc_file_struct *nc_state_file)
     nc_state_file->band_size = options.SNOW_BAND;
     nc_state_file->front_size = MAX_FRONTS;
     nc_state_file->frost_size = options.Nfrost;
+    nc_state_file->lake_node_size = options.Nlakenode;
     nc_state_file->layer_size = options.Nlayer;
     nc_state_file->ni_size = global_domain.n_nx;
     nc_state_file->nj_size = global_domain.n_ny;
@@ -1886,7 +1887,7 @@ initialize_state_file(char           *filename,
                                      "long_name",
                                      strlen("lake_node"), "lake_node");
             check_nc_status(status, "Error adding attribute in %s", filename);
-            status = nc_put_att_text(nc_state_file->nc_id, dz_node_var_id,
+            status = nc_put_att_text(nc_state_file->nc_id, lake_node_var_id,
                                      "standard_name", strlen(
                                          "lake_node_number"),
                                      "lake_node_number");
@@ -2159,11 +2160,16 @@ initialize_state_file(char           *filename,
             dvar[i] = nc_state_file->d_fillvalue;
         }
     }
+    for (i = 0; i < MAXDIMS; i++) {
+        dimids[i] = -1;
+        dcount[i] = 0;
+    }
     free(dvar);
 
     if (options.LAKES) {
         // lake nodes
         dimids[0] = nc_state_file->lake_node_dimid;
+        dstart[0] = 0;
         dcount[0] = nc_state_file->lake_node_size;
         ivar = malloc(nc_state_file->lake_node_size * sizeof(*ivar));
         check_alloc_status(ivar, "Memory allocation error");
@@ -2171,12 +2177,13 @@ initialize_state_file(char           *filename,
         for (j = 0; j < nc_state_file->lake_node_size; j++) {
             ivar[j] = (int) j;
         }
-        status = nc_put_vara_int(nc_state_file->nc_id, lake_node_var_id, dstart,
-                                 dcount, ivar);
+        status = nc_put_vara_int(nc_state_file->nc_id, lake_node_var_id,
+                                 dstart, dcount, ivar);
         check_nc_status(status, "Error writing lake nodes");
 
         for (i = 0; i < MAXDIMS; i++) {
             dimids[i] = -1;
+            dstart[i] = 0;
             dcount[i] = 0;
         }
         free(ivar);

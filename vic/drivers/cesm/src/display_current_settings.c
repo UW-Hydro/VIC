@@ -58,6 +58,7 @@ display_current_settings(int mode)
     fprintf(LOG_DEST, "Maximum Array Sizes:\n");
     fprintf(LOG_DEST, "MAX_FRONTS\t\t%2d\n", MAX_FRONTS);
     fprintf(LOG_DEST, "MAX_FROST_AREAS\t\t\t%2d\n", MAX_FROST_AREAS);
+    fprintf(LOG_DEST, "MAX_LAKE_BASIN_NODES\t\t%2d\n", MAX_LAKE_BASIN_NODES);
     fprintf(LOG_DEST, "MAX_LAKE_NODES\t\t%2d\n", MAX_LAKE_NODES);
     fprintf(LOG_DEST, "MAX_ZWTVMOIST\t\t%2d\n", MAX_ZWTVMOIST);
     fprintf(LOG_DEST, "MAX_LAYERS\t\t%2d\n", MAX_LAYERS);
@@ -282,6 +283,18 @@ display_current_settings(int mode)
     }
     else {
         fprintf(LOG_DEST, "ORGANIC_FRACT\t\tFALSE\n");
+    }
+    if (options.BULK_DENSITY_COMB) {
+        fprintf(LOG_DEST, "BULK_DENSITY_COMB\t\tTRUE\n");
+    }
+    else {
+        fprintf(LOG_DEST, "BULK_DENSITY_COMB\t\tFALSE\n");
+    }
+    if (options.MAX_SNOW_ALBEDO) {
+        fprintf(LOG_DEST, "MAX_SNOW_ALBEDO\t\tTRUE\n");
+    }
+    else {
+        fprintf(LOG_DEST, "MAX_SNOW_ALBEDO\t\tFALSE\n");
     }
 
     fprintf(LOG_DEST, "\n");

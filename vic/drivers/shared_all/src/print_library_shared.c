@@ -516,6 +516,10 @@ print_option(option_struct *option)
             option->LAKE_PROFILE ? "true" : "false");
     fprintf(LOG_DEST, "\tORGANIC_FRACT        : %s\n",
             option->ORGANIC_FRACT ? "true" : "false");
+    fprintf(LOG_DEST, "\tBULK_DENSITY_COMB        : %s\n",
+            option->BULK_DENSITY_COMB ? "true" : "false");
+    fprintf(LOG_DEST, "\tMAX_SNOW_ALBEDO        : %s\n",
+            option->MAX_SNOW_ALBEDO ? "true" : "false");
     fprintf(LOG_DEST, "\tSTATE_FORMAT         : %d\n", option->STATE_FORMAT);
     fprintf(LOG_DEST, "\tINIT_STATE           : %s\n",
             option->INIT_STATE ? "true" : "false");

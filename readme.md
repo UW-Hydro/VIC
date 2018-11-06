@@ -2,7 +2,7 @@
 
 | VIC Links & Badges              |                                                                             |
 |------------------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| VIC Documentation      | [![Documentation Status](https://readthedocs.org/projects/vic/badge/?version=latest]](http://vic.readthedocs.org/en/latest/)                                                                             |
+| VIC Documentation      | [![Documentation Status](https://readthedocs.org/projects/vic/badge/?version=latest)](http://vic.readthedocs.org/en/latest/)                                                                             |
 | Travis Build           | [![Build Status](https://travis-ci.org/UW-Hydro/VIC.png)](https://travis-ci.org/UW-Hydro/VIC)                                                                                                            |
 | VIC Users Listserve    | [![VIC Users Listserve](https://img.shields.io/badge/VIC%20Users%20Listserve-Active-blue.svg)](https://mailman.u.washington.edu/mailman/listinfo/vic_users)                                              |
 | Developers Gitter Room | [![Join the chat at https://gitter.im/UW-Hydro/VIC](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/UW-Hydro/VIC?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge) |

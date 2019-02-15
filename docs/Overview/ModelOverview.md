@@ -1,5 +1,8 @@
 # VIC Model Overview
 
+!!! note
+    You are viewing the documentation for VIC version 5 (VIC-5). Relative to VIC-4, this version includes many infrastructure improvements. Those enhancements are described in [Hamman et al, 2018](https://doi.org/10.5194/gmd-11-3481-2018).
+
 ## Main Features
 
 The VIC model ([Liang et al., 1994](../Documentation/References.md#primary-historical-reference)) is a large-scale, semi-distributed hydrologic model.  As such, it shares several basic features with the other land surface models (LSMs) that are commonly coupled to global circulation models (GCMs):

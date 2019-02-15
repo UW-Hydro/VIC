@@ -460,7 +460,6 @@ vic_force(void)
     }
 
 
-
     // Put average value in NR field
     for (i = 0; i < local_domain.ncells_active; i++) {
         force[i].air_temp[NR] = average(force[i].air_temp, NF);

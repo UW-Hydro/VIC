@@ -966,7 +966,7 @@ vic_store(dmy_struct *dmy_state,
         for (j = 0; j < options.Nnode; j++) {
             d3start[0] = j;
             for (i = 0; i < local_domain.ncells_active; i++) {
-                dvar[i] = (double) all_vars[i].lake_var.soil.layer[j].moist;
+                dvar[i] = (double) all_vars[i].lake_var.energy.T[j];
             }
             gather_put_nc_field_double(nc_state_file.nc_id,
                                        nc_var->nc_varid,

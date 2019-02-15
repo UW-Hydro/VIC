@@ -202,6 +202,18 @@ vic_init(void)
         }
     }
 
+    // new_snow_albedo
+    if (options.MAX_SNOW_ALBEDO) {
+        for (j = 0; j < options.NVEGTYPES; j++) {
+            d3start[0] = j;
+            get_scatter_nc_field_double(&(filenames.params), "max_snow_albedo",
+                                        d3start, d3count, dvar);
+            for (i = 0; i < local_domain.ncells_active; i++) {
+                veg_lib[i][j].max_snow_albedo = (double) dvar[i];
+            }
+        }
+    }
+
     // LAI and Wdmax
     if (options.LAI_SRC == FROM_VEGLIB || options.LAI_SRC == FROM_VEGPARAM) {
         for (j = 0; j < options.NVEGTYPES; j++) {
@@ -588,16 +600,19 @@ vic_init(void)
             }
         }
 
-        // bulk_dens_org: organic bulk density for each soil layer
-        for (j = 0; j < options.Nlayer; j++) {
-            d3start[0] = j;
-            get_scatter_nc_field_double(&(filenames.params), "bulk_density_org",
-                                        d3start, d3count, dvar);
-            for (i = 0; i < local_domain.ncells_active; i++) {
-                soil_con[i].bulk_dens_org[j] = (double) dvar[i];
+        if (!options.BULK_DENSITY_COMB) {
+            // read in bulk_dens_org:
+            // organic bulk density for each soil layer
+            for (j = 0; j < options.Nlayer; j++) {
+                d3start[0] = j;
+                get_scatter_nc_field_double(&(filenames.params),
+                                            "bulk_density_org",
+                                            d3start, d3count, dvar);
+                for (i = 0; i < local_domain.ncells_active; i++) {
+                    soil_con[i].bulk_dens_org[j] = (double) dvar[i];
+                }
             }
         }
-
         // soil_dens_org: organic soil density for each soil layer
         for (j = 0; j < options.Nlayer; j++) {
             d3start[0] = j;
@@ -1484,7 +1499,6 @@ vic_init(void)
         for (i = 0; i < local_domain.ncells_active; i++) {
             if (lake_con[i].lake_idx >= 0 &&
                 lake_con[i].lake_idx < (int) veg_con[i][0].vegetat_type_num) {
-
                 // validate top node
                 if (!(lake_con[i].z[0] > 0)) {
                     log_err("cell %zu lake basin max depth is %f but must "
@@ -1525,7 +1539,8 @@ vic_init(void)
                               lake_con[i].Cl[j] < lake_con[i].Cl[j - 1])) {
                             log_err("cell %zu lake basin node %zu area fraction "
                                     "is %f but must be > 0 and < node %zu area "
-                                    "fraction %f.", i, j, lake_con[i].Cl[j], j - 1,
+                                    "fraction %f.", i, j, lake_con[i].Cl[j],
+                                    j - 1,
                                     lake_con[i].Cl[j - 1]);
                         }
                     }
@@ -1534,7 +1549,6 @@ vic_init(void)
                 // compute other lake parameters here
                 soil_con[i].cell_area = local_domain.locations[i].area;
                 compute_lake_params(&(lake_con[i]), soil_con[i]);
-
             }
         }
     }

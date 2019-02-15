@@ -115,6 +115,9 @@ read_veglib(FILE   *veglib,
                             temp[i].albedo[j]);
                 }
             }
+            if (options.MAX_SNOW_ALBEDO) {
+                fscanf(veglib, "%lf", &temp[i].max_snow_albedo);
+            }
             for (j = 0; j < MONTHS_PER_YEAR; j++) {
                 fscanf(veglib, "%lf", &temp[i].roughness[j]);
             }

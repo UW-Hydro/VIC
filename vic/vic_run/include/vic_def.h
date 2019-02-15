@@ -362,7 +362,7 @@ typedef struct {
 
     // Soil Constraints
     double SOIL_RARC;  /**< Architectural resistance (s/m) of soil when computing soil evaporation via Penman-Monteith eqn */
-    double SOIL_RESID_MOIST;  /**< Default residual moisture content (fraction of porosity) of soil colum */
+    double SOIL_RESID_MOIST;  /**< Default residual moisture content (fraction of porosity) of soil column */
     double SOIL_SLAB_MOIST_FRACT;  /**< Moisture content (fraction of porosity) in the soil/rock below the bottom soil layer; this assumes that the soil below the bottom layer has the same texture as the bottom layer. */
     double SOIL_WINDH;  /**< Default wind measurement height over soil (m) */
 

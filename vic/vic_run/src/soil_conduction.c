@@ -133,14 +133,14 @@ volumetric_heat_capacity(double soil_fract,
 ******************************************************************************/
 void
 set_node_parameters(double *Zsum_node,
-                    double *max_moist_node,
+                    double *porosity_node,
                     double *expt_node,
                     double *bubble_node,
                     double *alpha,
                     double *beta,
                     double *gamma,
                     double *depth,
-                    double *max_moist,
+                    double *porosity,
                     double *expt,
                     double *bubble,
                     int     Nnodes,
@@ -161,16 +161,13 @@ set_node_parameters(double *Zsum_node,
         if (Zsum_node[nidx] == Lsum + depth[lidx] && nidx != 0 && lidx !=
             Nlayers - 1) {
             /* node on layer boundary */
-            max_moist_node[nidx] = (max_moist[lidx] / depth[lidx] +
-                                    max_moist[lidx +
-                                              1] /
-                                    depth[lidx + 1]) / MM_PER_M / 2.;
+            porosity_node[nidx] = (porosity[lidx] + porosity[lidx + 1]) / 2.;
             expt_node[nidx] = (expt[lidx] + expt[lidx + 1]) / 2.;
             bubble_node[nidx] = (bubble[lidx] + bubble[lidx + 1]) / 2.;
         }
         else {
             /* node completely in layer */
-            max_moist_node[nidx] = max_moist[lidx] / depth[lidx] / MM_PER_M;
+            porosity_node[nidx] = porosity[lidx];
             expt_node[nidx] = expt[lidx];
             bubble_node[nidx] = bubble[lidx];
         }
@@ -213,7 +210,7 @@ distribute_node_moisture_properties(double *moist_node,
                                     double *Cs_node,
                                     double *Zsum_node,
                                     double *T_node,
-                                    double *max_moist_node,
+                                    double *porosity_node,
                                     double *expt_node,
                                     double *bubble_node,
                                     double *moist,
@@ -257,20 +254,20 @@ distribute_node_moisture_properties(double *moist_node,
         else {
             // use constant soil moisture below bottom soil layer
             moist_node[nidx] = param.SOIL_SLAB_MOIST_FRACT *
-                               max_moist_node[nidx];
+                               porosity_node[nidx];
         }
 
 
         // Check that node moisture does not exceed maximum node moisture
-        if (moist_node[nidx] - max_moist_node[nidx] > 0) {
+        if (moist_node[nidx] - porosity_node[nidx] > 0) {
             // HACK!!!!!!!!!!!
-            moist_node[nidx] = max_moist_node[nidx];
+            moist_node[nidx] = porosity_node[nidx];
         }
         if (T_node[nidx] < 0 && (FS_ACTIVE && options.FROZEN_SOIL)) {
             /* compute moisture and ice contents */
             ice_node[nidx] =
                 moist_node[nidx] - maximum_unfrozen_water(T_node[nidx],
-                                                          max_moist_node[nidx],
+                                                          porosity_node[nidx],
                                                           bubble_node[nidx],
                                                           expt_node[nidx]);
             if (ice_node[nidx] < 0) {

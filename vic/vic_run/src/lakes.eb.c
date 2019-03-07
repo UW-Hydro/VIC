@@ -1839,7 +1839,7 @@ water_balance(lake_var_struct *lake,
     energy_bal_struct        **energy;
     size_t                     lindex;
     double                     frac;
-    double                     Dsmax, resid_moist, liq, rel_moist;
+    double                     Dsmax, liq, rel_moist;
     double                    *frost_fract;
     double                     volume_save;
     double                    *delta_moist = NULL;
@@ -2023,20 +2023,19 @@ water_balance(lake_var_struct *lake,
              cell[iveg][band].layer[lindex].ice[frost_area]) *
             frost_fract[frost_area];
     }
-    resid_moist = soil_con.resid_moist[lindex] * soil_con.depth[lindex] *
-                  MM_PER_M;
 
     /** Compute relative moisture **/
     rel_moist =
-        (liq - resid_moist) / (soil_con.max_moist[lindex] - resid_moist);
+        (liq - soil_con.resid_moist[lindex]) /
+        (soil_con.max_moist[lindex] - soil_con.resid_moist[lindex]);
 
     /** Compute baseflow as function of relative moisture **/
     frac = Dsmax * soil_con.Ds / soil_con.Ws;
     baseflow_out_mm = frac * rel_moist;
     if (rel_moist > soil_con.Ws) {
         frac = (rel_moist - soil_con.Ws) / (1 - soil_con.Ws);
-        baseflow_out_mm += Dsmax * (1 - soil_con.Ds / soil_con.Ws) * pow(frac,
-                                                                         soil_con.c);
+        baseflow_out_mm += Dsmax * (1 - soil_con.Ds / soil_con.Ws) *
+             pow(frac, soil_con.c);
     }
     if (baseflow_out_mm < 0) {
         baseflow_out_mm = 0;
@@ -2201,7 +2200,7 @@ water_balance(lake_var_struct *lake,
             energy[iveg][band].Cs_node,
             soil_con.Zsum_node,
             energy[iveg][band].T,
-            soil_con.max_moist_node,
+            soil_con.porosity_node,
             soil_con.expt_node,
             soil_con.bubble_node,
             moist, soil_con.depth,

@@ -661,7 +661,7 @@ read_soilparam(FILE            *soilparam,
         for (layer = 0; layer < options.Nlayer; layer++) {
             temp->Wcr[layer] *= temp->max_moist[layer];
             temp->Wpwp[layer] *= temp->max_moist[layer];
-            temp->resid_moist[layer] *= temp->max_moist[layer];
+            temp->resid_moist[layer] *= temp->depth[layer] * MM_PER_M;
             if (temp->Wpwp[layer] > temp->Wcr[layer]) {
                 log_err("Calculated wilting point moisture (%f mm) is "
                         "greater than calculated critical point moisture "
@@ -674,9 +674,8 @@ read_soilparam(FILE            *soilparam,
                         "less than calculated residual moisture (%f mm) "
                         "for layer %zu.\n\tIn the soil parameter file, "
                         "Wpwp_FRACT MUST be >= resid_moist / (1.0 - "
-                        "bulk_density/soil_density).",
-                        temp->Wpwp[layer], temp->resid_moist[layer] *
-                        temp->depth[layer] * MM_PER_M, layer);
+                        "bulk_density/soil_density).", temp->Wpwp[layer],
+                        temp->resid_moist[layer], layer);
             }
         }
 

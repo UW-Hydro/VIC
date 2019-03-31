@@ -792,7 +792,7 @@ vic_init(void)
         for (j = 0; j < options.Nlayer; j++) {
             soil_con[i].Wcr[j] *= soil_con[i].max_moist[j];
             soil_con[i].Wpwp[j] *= soil_con[i].max_moist[j];
-            soil_con[i].resid_moist[j] *= soil_con[i].max_moist[j];
+            soil_con[i].resid_moist[j] *= soil_con[i].depth[j] * MM_PER_M;
             if (soil_con[i].Wpwp[j] > soil_con[i].Wcr[j]) {
                 sprint_location(locstr, &(local_domain.locations[i]));
                 log_err("Calculated wilting point moisture (%f mm) is "

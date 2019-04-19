@@ -121,7 +121,11 @@ This is a minor update from VIC 5.0.1. The VIC 5.1.0 includes new features, such
 
    1. [GH#800](https://github.com/UW-Hydro/VIC/pull/800)
 
-    - Updates the default namelist settings for the CESM driver to include output filenames consistent with the RASM naming conventions, default thermal nodes to 10, `FULL_ENERGY` to `TRUE`, and sets defaults for daily and monthly mean output. 
+    - Updates the default namelist settings for the CESM driver to include output filenames consistent with the RASM naming conventions, default thermal nodes to 10, `FULL_ENERGY` to `TRUE`, and sets defaults for daily and monthly mean output.
+
+   1. [GH#866](https://github.com/UW-Hydro/VIC/pull/866) 
+
+    - Updates the default output variables for the CESM driver. Also updates the VIC5 parameter file location to be the RASM inputdata directory and updates the name of the VIC5 parameter file to the new VIC5 parameters. 
 
 3. Speed up NetCDF operations in the image/CESM drivers ([GH#684](https://github.com/UW-Hydro/VIC/pull/684))
 

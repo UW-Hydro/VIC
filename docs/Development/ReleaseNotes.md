@@ -128,7 +128,10 @@ This is a minor update from VIC 5.0.1. The VIC 5.1.0 includes new features, such
     - Updates the default output variables for the CESM driver. Also updates the VIC5 parameter file location to be the RASM inputdata directory and updates the name of the VIC5 parameter file to the new VIC5 parameters.
 
    1. [GH#869](https://github.com/UW-Hydro/VIC/pull/869)
-    - Adds support to the CESM driver for 25km resolution RASM runs. 
+    - Adds support to the CESM driver for 25km resolution RASM runs.
+
+   1. [GH#871](https://github.com/UW-Hydro/VIC/pull/871) 
+    - Adds initial state files to default 50km and 25km builds so that these are used by other groups running RASM rather than VIC5 starting up from a clean start. 
 
 3. Speed up NetCDF operations in the image/CESM drivers ([GH#684](https://github.com/UW-Hydro/VIC/pull/684))
 

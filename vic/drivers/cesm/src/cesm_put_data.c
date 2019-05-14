@@ -146,27 +146,27 @@ vic_cesm_put_data()
 
         // longwave up, VIC: W/m2, CESM: W/m2
         // adjust sign for CESM sign convention
-        l2x_vic[i].l2x_Fall_lwup = (double) -1 *
+        l2x_vic[i].l2x_Fall_lwup = (double) (-1 *
                                    (out_data[i][OUT_LWDOWN][0] -
-                                    out_data[i][OUT_LWNET][0]);
+                                    out_data[i][OUT_LWNET][0]));
 
         // turbulent heat fluxes
         // Note: both are the opposite sign from image driver
         // in accordance with the sign convention for coupled models
         // latent heat, VIC: W/m2, CESM: W/m2
-        l2x_vic[i].l2x_Fall_lat = (double) -1 * out_data[i][OUT_LATENT][0];
+        l2x_vic[i].l2x_Fall_lat = (double) (-1 * out_data[i][OUT_LATENT][0]);
 
         // sensible heat, VIC: W/m2, CESM: W/m2
-        l2x_vic[i].l2x_Fall_sen = (double) -1 * out_data[i][OUT_SENSIBLE][0];
+        l2x_vic[i].l2x_Fall_sen = (double) (-1 * out_data[i][OUT_SENSIBLE][0]);
 
         // evaporation, VIC: mm, CESM: kg m-2 s-1
-        l2x_vic[i].l2x_Fall_evap = (double) -1 * out_data[i][OUT_EVAP][0] /
-                                    global_param.dt;
+        l2x_vic[i].l2x_Fall_evap = (double) (-1 * out_data[i][OUT_EVAP][0] /
+                                    global_param.dt);
 
         // lnd->rtm input fluxes
-        l2x_vic[i].l2x_Flrl_rofliq = (double) (out_data[i][OUT_RUNOFF][0] +
+        l2x_vic[i].l2x_Flrl_rofliq = (double) ((out_data[i][OUT_RUNOFF][0] +
                                       out_data[i][OUT_BASEFLOW][0]) /
-                                     global_param.dt;
+                                     global_param.dt);
 
 
         // running sum to make sure we get the full grid cell

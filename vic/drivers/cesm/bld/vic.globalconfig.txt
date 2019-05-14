@@ -39,6 +39,7 @@ CANOPY_LAYERS        3
 RC_MODE              RC_JARVIS
 
 # Input Files and PATHS
+INIT_STATE       {vic_initstate}
 CONSTANTS        {vic_constants}
 LOG_DIR          {rundir}/
 PARAMETERS       {vic_params}

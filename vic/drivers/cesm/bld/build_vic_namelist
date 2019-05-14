@@ -139,7 +139,7 @@ def copy_clean_vic_config(src, dst, header=None, **kwargs):
 
         remove comments and empty lines
     """
-    with open(src, 'r', encoding="utf8") as fsrc:
+    with open(src, 'r') as fsrc:
         with open(dst, 'w') as fdst:
             lines = fsrc.readlines()
             if header is not None:

@@ -125,7 +125,7 @@ calc_surf_energy_bal(double             Le,
     double                   kappa1;
     double                   kappa2;
     double                   kappa_snow;
-    double                   max_moist;
+    double                   porosity;
     double                   refrozen_water;
 
     double                   Wdew;
@@ -139,7 +139,7 @@ calc_surf_energy_bal(double             Le,
     double                  *moist_node;
     double                  *bubble_node;
     double                  *expt_node;
-    double                  *max_moist_node;
+    double                  *porosity_node;
     double                  *ice_node;
     double                  *alpha;
     double                  *beta;
@@ -212,7 +212,7 @@ calc_surf_energy_bal(double             Le,
     }
     emissivity = 1.;        // longwave emissivity
     delta_t = dt;
-    max_moist = soil_con->max_moist[0] / (soil_con->depth[0] * MM_PER_M);
+    porosity = soil_con->porosity[0];
     bubble = soil_con->bubble[0];
     expt = soil_con->expt[0];
     Tsnow_surf = snow->surf_temp;
@@ -249,7 +249,7 @@ calc_surf_energy_bal(double             Le,
 
     bubble_node = soil_con->bubble_node;
     expt_node = soil_con->expt_node;
-    max_moist_node = soil_con->max_moist_node;
+    porosity_node = soil_con->porosity_node;
     alpha = soil_con->alpha;
     beta = soil_con->beta;
     gamma = soil_con->gamma;
@@ -301,7 +301,7 @@ calc_surf_energy_bal(double             Le,
         Tsurf = root_brent(T_lower, T_upper, func_surf_energy_bal,
                            VEG, veg_class, delta_t, Cs1, Cs2, D1, D2,
                            T1_old, T2, Ts_old, energy->T, bubble, dp, expt,
-                           ice0, kappa1, kappa2, max_moist, moist, root,
+                           ice0, kappa1, kappa2, porosity, moist, root,
                            CanopLayerBnd, UnderStory, overstory, NetShortBare,
                            NetShortGrnd, TmpNetShortSnow, Tair, atmos_density,
                            atmos_pressure, emissivity, LongBareIn, LongSnowIn,
@@ -317,7 +317,7 @@ calc_surf_energy_bal(double             Le,
                            &snow->surface_flux, tmpNnodes, Cs_node, T_node,
                            Tnew_node, Tnew_fbflag, Tnew_fbcount, alpha, beta,
                            bubble_node, Zsum_node, expt_node, gamma, ice_node,
-                           kappa_node, max_moist_node, moist_node, soil_con,
+                           kappa_node, porosity_node, moist_node, soil_con,
                            layer, veg_var, INCLUDE_SNOW, options.NOFLUX,
                            options.EXP_TRANS,
                            snow->snow, FIRST_SOLN, &NetLongBare,
@@ -348,7 +348,7 @@ calc_surf_energy_bal(double             Le,
                                                    dp,
                                                    expt, ice0, kappa1, kappa2,
                                                    soil_con->max_infil,
-                                                   max_moist,
+                                                   porosity,
                                                    moist, soil_con->Wcr,
                                                    soil_con->Wpwp,
                                                    soil_con->depth,
@@ -388,7 +388,7 @@ calc_surf_energy_bal(double             Le,
                                                    bubble_node, Zsum_node,
                                                    expt_node,
                                                    gamma, ice_node, kappa_node,
-                                                   max_moist_node, moist_node,
+                                                   porosity_node, moist_node,
                                                    soil_con->frost_fract,
                                                    layer, veg_var,
                                                    INCLUDE_SNOW,
@@ -422,7 +422,7 @@ calc_surf_energy_bal(double             Le,
                                func_surf_energy_bal, VEG, veg_class,
                                delta_t, Cs1, Cs2, D1, D2, T1_old, T2, Ts_old,
                                energy->T, bubble, dp, expt, ice0, kappa1,
-                               kappa2, max_moist, moist, root, CanopLayerBnd,
+                               kappa2, porosity, moist, root, CanopLayerBnd,
                                UnderStory, overstory, NetShortBare,
                                NetShortGrnd,
                                TmpNetShortSnow, Tair, atmos_density,
@@ -440,7 +440,7 @@ calc_surf_energy_bal(double             Le,
                                &snow->surface_flux, tmpNnodes, Cs_node, T_node,
                                Tnew_node, Tnew_fbflag, Tnew_fbcount, alpha,
                                beta, bubble_node, Zsum_node, expt_node, gamma,
-                               ice_node, kappa_node, max_moist_node,
+                               ice_node, kappa_node, porosity_node,
                                moist_node, soil_con, layer, veg_var,
                                INCLUDE_SNOW, options.NOFLUX, options.EXP_TRANS,
                                snow->snow,
@@ -471,7 +471,7 @@ calc_surf_energy_bal(double             Le,
                                                        expt, ice0, kappa1,
                                                        kappa2,
                                                        soil_con->max_infil,
-                                                       max_moist,
+                                                       porosity,
                                                        moist, soil_con->Wcr,
                                                        soil_con->Wpwp,
                                                        soil_con->depth,
@@ -515,7 +515,7 @@ calc_surf_energy_bal(double             Le,
                                                        expt_node,
                                                        gamma, ice_node,
                                                        kappa_node,
-                                                       max_moist_node,
+                                                       porosity_node,
                                                        moist_node,
                                                        soil_con->frost_fract,
                                                        layer, veg_var,
@@ -552,7 +552,7 @@ calc_surf_energy_bal(double             Le,
     error = solve_surf_energy_bal(Tsurf, VEG, veg_class, delta_t, Cs1,
                                   Cs2, D1, D2, T1_old, T2, Ts_old, energy->T,
                                   bubble, dp, expt, ice0, kappa1, kappa2,
-                                  max_moist, moist, root, CanopLayerBnd,
+                                  porosity, moist, root, CanopLayerBnd,
                                   UnderStory, overstory, NetShortBare,
                                   NetShortGrnd, TmpNetShortSnow, Tair,
                                   atmos_density, atmos_pressure, emissivity,
@@ -571,7 +571,7 @@ calc_surf_energy_bal(double             Le,
                                   T_node, Tnew_node, Tnew_fbflag, Tnew_fbcount,
                                   alpha, beta, bubble_node, Zsum_node,
                                   expt_node, gamma, ice_node, kappa_node,
-                                  max_moist_node, moist_node, soil_con, layer,
+                                  porosity_node, moist_node, soil_con, layer,
                                   veg_var, INCLUDE_SNOW, options.NOFLUX,
                                   options.EXP_TRANS,
                                   snow->snow, FIRST_SOLN, &NetLongBare,
@@ -824,7 +824,7 @@ error_print_surf_energy_bal(double  Ts,
     double             kappa1;
     double             kappa2;
     double             max_infil;
-    double             max_moist;
+    double             porosity;
     double             moist;
 
     double            *Wcr;
@@ -899,7 +899,7 @@ error_print_surf_energy_bal(double  Ts,
     double            *gamma;
     double            *ice_node;
     double            *kappa_node;
-    double            *max_moist_node;
+    double            *porosity_node;
     double            *moist_node;
 
     /* spatial frost terms */
@@ -967,7 +967,7 @@ error_print_surf_energy_bal(double  Ts,
     kappa1 = (double) va_arg(ap, double);
     kappa2 = (double) va_arg(ap, double);
     max_infil = (double) va_arg(ap, double);
-    max_moist = (double) va_arg(ap, double);
+    porosity = (double) va_arg(ap, double);
     moist = (double) va_arg(ap, double);
 
     Wcr = (double *) va_arg(ap, double *);
@@ -1042,7 +1042,7 @@ error_print_surf_energy_bal(double  Ts,
     gamma = (double *) va_arg(ap, double *);
     ice_node = (double *) va_arg(ap, double *);
     kappa_node = (double *) va_arg(ap, double *);
-    max_moist_node = (double *) va_arg(ap, double *);
+    porosity_node = (double *) va_arg(ap, double *);
     moist_node = (double *) va_arg(ap, double *);
     frost_fract = (double *) va_arg(ap, double *);
 
@@ -1107,7 +1107,7 @@ error_print_surf_energy_bal(double  Ts,
     fprintf(LOG_DEST, "kappa1 = %f\n", kappa1);
     fprintf(LOG_DEST, "kappa2 = %f\n", kappa2);
     fprintf(LOG_DEST, "max_infil = %f\n", max_infil);
-    fprintf(LOG_DEST, "max_moist = %f\n", max_moist);
+    fprintf(LOG_DEST, "porosity = %f\n", porosity);
     fprintf(LOG_DEST, "moist = %f\n", moist);
 
     fprintf(LOG_DEST, "*Wcr = %f\n", *Wcr);
@@ -1203,14 +1203,14 @@ error_print_surf_energy_bal(double  Ts,
     if (!options.QUICK_FLUX) {
         fprintf(LOG_DEST,
                 "Node\tT\tTnew\tTold\talpha\tbeta\tZsum\tkappa\tCs\tmoist\t"
-                "bubble\texpt\tgamma\tmax_moist\tice\n");
+                "bubble\texpt\tgamma\tporosity\tice\n");
         for (i = 0; i < Nnodes; i++) {
             fprintf(LOG_DEST,
                     "%i\t%.4f\t%.4f\t%.4f\t%.4f\t%.4f\t%.4f\t%.4f\t%.4f\t%.4f"
                     "\t%.4f\t%.4f\t%.4f\t%.4f\t%.4f\n",
                     i, T_node[i], Told_node[i], alpha[i], beta[i], Tnew_node[i],
                     Zsum_node[i], kappa_node[i], Cs_node[i], moist_node[i],
-                    bubble_node[i], expt_node[i], gamma[i], max_moist_node[i],
+                    bubble_node[i], expt_node[i], gamma[i], porosity_node[i],
                     ice_node[i]);
         }
     }

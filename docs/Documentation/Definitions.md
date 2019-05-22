@@ -113,7 +113,9 @@ Default value is set to 0 m/s, which works well when the model is forced with da
 The parameter `phi_s` is the unitless soil moisture diffusion coefficient. This parameter is designed for the future inclusion of soil moisture diffusion in the VIC model moisture trasport equations. Currently this feature has not been implemented so a value of -999 can be used as a placeholder.
 
 ### resid_moist
-Residual moisture content is the amount of soil moisture that cannot be removed from the soil by drainage or evapotranspiration. Values are provided to the model as soil moisture contents (volume of residual soil moisture content / total volume of soil) [mm/mm]. When residual soil moisture is defined as 0 mm/mm the soil hydraulic conductivity relationship collapses to Campbell (1974), otherwise it follows Brooks and Corey (1964).
+Residual moisture content is the amount of soil moisture that cannot be removed from the soil by drainage or evapotranspiration. When residual soil moisture is defined as 0 mm/mm the soil hydraulic conductivity relationship collapses to Campbell (1974), otherwise it follows Brooks and Corey (1964).
+
+Values are provided to the model as soil moisture contents (volume of residual soil moisture content / total volume of soil) [mm/mm]. Note that these units are different from the input units of critical (Wcr_FRACT) and wilting point (Wpwp_FRACT), which are fractions of porosity [mm/mm].
 
 Brooks, R. H. and A. T. Corey, Hydraulic Properties of Porous Media, Hydrology Paper 3, Colorado State University, Fort Collins, Colo, 1964.
 

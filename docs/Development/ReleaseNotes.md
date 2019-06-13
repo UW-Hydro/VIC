@@ -133,6 +133,9 @@ This is a minor update from VIC 5.0.1. The VIC 5.1.0 includes new features, such
    1. [GH#871](https://github.com/UW-Hydro/VIC/pull/871) 
     - Adds initial state files to default 50km and 25km builds so that these are used by other groups running RASM rather than VIC5 starting up from a clean start. 
 
+   1. [GH#880](https://github.com/UW-Hydro/VIC/pull/880)
+    --Adds option STATENAME_CESM to the option_struct so that statefiles in the CESM driver can be in accordance with RASM naming conventions for model components. 
+
 3. Speed up NetCDF operations in the image/CESM drivers ([GH#684](https://github.com/UW-Hydro/VIC/pull/684))
 
     These changes speed up image driver initialization, forcing reads, and history writes by only opening and closing each input netCDF file once.

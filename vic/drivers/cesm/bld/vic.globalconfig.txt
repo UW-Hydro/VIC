@@ -40,6 +40,7 @@ RC_MODE              RC_JARVIS
 
 # Input Files and PATHS
 INIT_STATE       {vic_initstate}
+STATENAME_CESM   TRUE
 CONSTANTS        {vic_constants}
 LOG_DIR          {rundir}/
 PARAMETERS       {vic_params}

@@ -416,6 +416,14 @@ display_current_settings(int mode)
         fprintf(LOG_DEST, "SAVE_STATE\t\tFALSE\n");
     }
 
+    if (options.STATENAME_CESM) {
+        fprintf(LOG_DEST, "STATENAME_CESM\t\tTRUE\n");
+    }
+    else {
+        fprintf(LOG_DEST, "STATENAME_CESM\t\tFALSE\n");
+    }
+
+
     fprintf(LOG_DEST, "\n");
     fprintf(LOG_DEST, "Output Data:\n");
     fprintf(LOG_DEST, "Result dir:\t\t%s\n", filenames.result_dir);

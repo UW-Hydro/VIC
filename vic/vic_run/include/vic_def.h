@@ -287,6 +287,7 @@ typedef struct {
     unsigned short int STATE_FORMAT;  /**< TRUE = model state file is binary (default) */
     bool INIT_STATE;     /**< TRUE = initialize model state from file */
     bool SAVE_STATE;     /**< TRUE = save state file */
+    bool STATENAME_CESM; /**< TRUE = use CESM statefile naming conventions */
 
     // output options
     size_t Noutstreams;  /**< Number of output stream */

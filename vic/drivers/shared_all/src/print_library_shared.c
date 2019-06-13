@@ -526,7 +526,7 @@ print_option(option_struct *option)
     fprintf(LOG_DEST, "\tSAVE_STATE           : %s\n",
             option->SAVE_STATE ? "true" : "false");
     fprintf(LOG_DEST, "\tSTATENAME_CESM       : %s\n",
-	    option->STATENAME_CESM ? "true" : "false");
+            option->STATENAME_CESM ? "true" : "false");
     fprintf(LOG_DEST, "\tNoutstreams          : %zu\n", option->Noutstreams);
 }
 

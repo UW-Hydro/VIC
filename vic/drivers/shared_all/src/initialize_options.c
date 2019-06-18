@@ -95,6 +95,7 @@ initialize_options()
     options.VEGPARAM_LAI = false;
     // state options
     options.STATE_FORMAT = UNSET_FILE_FORMAT;
+    options.STATENAME_CESM = false;
     options.INIT_STATE = false;
     options.SAVE_STATE = false;
     // output options

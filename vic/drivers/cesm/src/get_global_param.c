@@ -278,6 +278,11 @@ get_global_param(FILE *gp)
                             "NETCDF3_64BIT_OFFSET, NETCDF4_CLASSIC, or NETCDF4.");
                 }
             }
+            // Define state file name format if using CESM conventions
+            else if (strcasecmp("STATENAME_CESM", optstr) == 0) {
+                sscanf(cmdstr, "%*s %s", flgstr);
+                options.STATENAME_CESM = str_to_bool(flgstr);
+            }
 
             /*************************************
                Define parameter files

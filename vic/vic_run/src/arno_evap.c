@@ -40,13 +40,12 @@ arno_evap(layer_data_struct *layer,
           double             rad,
           double             air_temp,
           double             vpd,
-          double             depth1,
           double             max_moist,
           double             elevation,
           double             b_infilt,
           double             ra,
           double             delta_t,
-          double             moist_resid,
+          double             resid_moist,
           double            *frost_fract)
 {
     extern parameters_struct param;
@@ -169,10 +168,10 @@ arno_evap(layer_data_struct *layer,
 
     /* only consider positive evaporation; we won't put limits on condensation */
     if (esoil > 0.0) {
-        if (moist > moist_resid * depth1 * MM_PER_M) {
+        if (moist > resid_moist) {
             /* there is liquid moisture available; cap esoil at available liquid moisture */
-            if (esoil > moist - moist_resid * depth1 * MM_PER_M) {
-                esoil = moist - moist_resid * depth1 * MM_PER_M;
+            if (esoil > moist - resid_moist) {
+                esoil = moist - resid_moist;
             }
         }
         else {

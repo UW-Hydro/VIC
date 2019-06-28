@@ -287,6 +287,7 @@ typedef struct {
     unsigned short int STATE_FORMAT;  /**< TRUE = model state file is binary (default) */
     bool INIT_STATE;     /**< TRUE = initialize model state from file */
     bool SAVE_STATE;     /**< TRUE = save state file */
+    bool STATENAME_CESM; /**< TRUE = use CESM statefile naming conventions */
 
     // output options
     size_t Noutstreams;  /**< Number of output stream */
@@ -362,8 +363,8 @@ typedef struct {
 
     // Soil Constraints
     double SOIL_RARC;  /**< Architectural resistance (s/m) of soil when computing soil evaporation via Penman-Monteith eqn */
-    double SOIL_RESID_MOIST;  /**< Default residual moisture content of soil colum */
-    double SOIL_SLAB_MOIST_FRACT;  /**< Volumetric moisture content (fraction of porosity) in the soil/rock below the bottom soil layer; this assumes that the soil below the bottom layer has the same texture as the bottom layer. */
+    double SOIL_RESID_MOIST;  /**< Default residual moisture content (fraction of porosity) of soil column */
+    double SOIL_SLAB_MOIST_FRACT;  /**< Moisture content (fraction of porosity) in the soil/rock below the bottom soil layer; this assumes that the soil below the bottom layer has the same texture as the bottom layer. */
     double SOIL_WINDH;  /**< Default wind measurement height over soil (m) */
 
     // Vegetation Parameters
@@ -584,13 +585,13 @@ typedef struct {
     double init_moist[MAX_LAYERS];    /**< initial layer moisture level (mm) */
     double max_infil;                 /**< maximum infiltration rate */
     double max_moist[MAX_LAYERS];     /**< maximum moisture content (mm) per layer */
-    double max_moist_node[MAX_NODES]; /**< maximum moisture content (mm/mm) per node */
     double max_snow_distrib_slope;    /**< Maximum slope of snow depth distribution [m].  This should equal 2*depth_min, where depth_min = minimum snow pack depth below which coverage < 1.  Comment, ported from user_def.h, with questionable units: SiB uses 0.076; Rosemount data imply 0.155cm depth ~ 0.028mm swq. */
     double phi_s[MAX_LAYERS];         /**< soil moisture diffusion parameter (mm/mm) */
     double porosity[MAX_LAYERS];      /**< porosity (fraction) */
+    double porosity_node[MAX_NODES];  /**< porosity (fraction) per node */
     double quartz[MAX_LAYERS];        /**< quartz content of soil (fraction of mineral soil volume) */
     double organic[MAX_LAYERS];       /**< organic content of soil (fraction of total soil volume) */
-    double resid_moist[MAX_LAYERS];   /**< residual moisture content of soil layer */
+    double resid_moist[MAX_LAYERS];   /**< residual moisture content of soil layer (mm) */
     double rough;                     /**< soil surface roughness (m) */
     double snow_rough;                /**< snow surface roughness (m) */
     double soil_density[MAX_LAYERS];  /**< soil particle density (kg/m^3) */

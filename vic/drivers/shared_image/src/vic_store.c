@@ -61,10 +61,18 @@ vic_store(dmy_struct *dmy_state,
     set_nc_state_file_info(&nc_state_file);
 
     // create netcdf file for storing model state
-    sprintf(filename, "%s.%04i%02i%02i_%05u.nc",
-            filenames.statefile, dmy_state->year,
-            dmy_state->month, dmy_state->day,
-            dmy_state->dayseconds);
+    if (options.STATENAME_CESM) {
+        sprintf(filename, "%s.vic.r.%04i-%02i-%02i-%05u.nc",
+                filenames.statefile, dmy_state->year,
+                dmy_state->month, dmy_state->day,
+                dmy_state->dayseconds);
+    }
+    else {
+        sprintf(filename, "%s.%04i%02i%02i_%05u.nc",
+                filenames.statefile, dmy_state->year,
+                dmy_state->month, dmy_state->day,
+                dmy_state->dayseconds);
+    }
 
     initialize_state_file(filename, &nc_state_file, dmy_state);
 

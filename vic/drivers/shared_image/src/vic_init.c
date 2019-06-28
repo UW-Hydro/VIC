@@ -648,7 +648,7 @@ vic_init(void)
 
 
     // Wcr: critical point for each layer
-    // Note this value is  multiplied with the maximum moisture in each layer
+    // Note this value is multiplied with the maximum moisture in each layer
     for (j = 0; j < options.Nlayer; j++) {
         d3start[0] = j;
         get_scatter_nc_field_double(&(filenames.params), "Wcr_FRACT",
@@ -659,7 +659,7 @@ vic_init(void)
     }
 
     // Wpwp: wilting point for each layer
-    // Note this value is  multiplied with the maximum moisture in each layer
+    // Note this value is multiplied with the maximum moisture in each layer
     for (j = 0; j < options.Nlayer; j++) {
         d3start[0] = j;
         get_scatter_nc_field_double(&(filenames.params), "Wpwp_FRACT",
@@ -691,6 +691,7 @@ vic_init(void)
     }
 
     // resid_moist: residual moisture content for each layer
+    // Note this value is multiplied with the maximum moisture in each layer
     for (j = 0; j < options.Nlayer; j++) {
         d3start[0] = j;
         get_scatter_nc_field_double(&(filenames.params), "resid_moist",
@@ -791,6 +792,7 @@ vic_init(void)
         for (j = 0; j < options.Nlayer; j++) {
             soil_con[i].Wcr[j] *= soil_con[i].max_moist[j];
             soil_con[i].Wpwp[j] *= soil_con[i].max_moist[j];
+            soil_con[i].resid_moist[j] *= soil_con[i].depth[j] * MM_PER_M;
             if (soil_con[i].Wpwp[j] > soil_con[i].Wcr[j]) {
                 sprint_location(locstr, &(local_domain.locations[i]));
                 log_err("Calculated wilting point moisture (%f mm) is "
@@ -800,16 +802,15 @@ vic_init(void)
                         "Wpwp_FRACT MUST be <= Wcr_FRACT.\n%s",
                         soil_con[i].Wpwp[j], soil_con[i].Wcr[j], j, locstr);
             }
-            if (soil_con[i].Wpwp[j] < soil_con[i].resid_moist[j] *
-                soil_con[i].depth[j] * MM_PER_M) {
+            if (soil_con[i].Wpwp[j] < soil_con[i].resid_moist[j]) {
                 sprint_location(locstr, &(local_domain.locations[i]));
                 log_err("Calculated wilting point moisture (%f mm) is "
                         "less than calculated residual moisture (%f mm) for "
                         "layer %zd.\n\tIn the soil parameter file, "
                         "Wpwp_FRACT MUST be >= resid_moist / "
                         "(1.0 - bulk_density/soil_density).\n%s",
-                        soil_con[i].Wpwp[j], soil_con[i].resid_moist[j] *
-                        soil_con[i].depth[j] * MM_PER_M, j, locstr);
+                        soil_con[i].Wpwp[j], soil_con[i].resid_moist[j],
+                        j, locstr);
             }
         }
 

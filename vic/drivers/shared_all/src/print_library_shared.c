@@ -525,6 +525,8 @@ print_option(option_struct *option)
             option->INIT_STATE ? "true" : "false");
     fprintf(LOG_DEST, "\tSAVE_STATE           : %s\n",
             option->SAVE_STATE ? "true" : "false");
+    fprintf(LOG_DEST, "\tSTATENAME_CESM       : %s\n",
+            option->STATENAME_CESM ? "true" : "false");
     fprintf(LOG_DEST, "\tNoutstreams          : %zu\n", option->Noutstreams);
 }
 
@@ -1015,11 +1017,6 @@ print_soil_con(soil_con_struct *scon,
         fprintf(LOG_DEST, "\t%f", scon->max_moist[i]);
     }
     fprintf(LOG_DEST, "\n");
-    fprintf(LOG_DEST, "\tmax_moist_node        :");
-    for (i = 0; i < nnodes; i++) {
-        fprintf(LOG_DEST, "\t%f", scon->max_moist_node[i]);
-    }
-    fprintf(LOG_DEST, "\n");
     fprintf(LOG_DEST, "\tmax_snow_distrib_slope: %f\n",
             scon->max_snow_distrib_slope);
     fprintf(LOG_DEST, "\tphi_s                 :");
@@ -1030,6 +1027,11 @@ print_soil_con(soil_con_struct *scon,
     fprintf(LOG_DEST, "\tporosity              :");
     for (i = 0; i < nlayers; i++) {
         fprintf(LOG_DEST, "\t%f", scon->porosity[i]);
+    }
+    fprintf(LOG_DEST, "\n");
+    fprintf(LOG_DEST, "\tporosity_node        :");
+    for (i = 0; i < nnodes; i++) {
+        fprintf(LOG_DEST, "\t%f", scon->porosity_node[i]);
     }
     fprintf(LOG_DEST, "\n");
     fprintf(LOG_DEST, "\tquartz              :");

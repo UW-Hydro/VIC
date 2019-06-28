@@ -24,15 +24,19 @@ To check which release of VIC you are running:
 
 2. Removed descriptions of forcing disaggregation options from documentation of classic driver global parameter file ([GH#831](https://github.com/UW-Hydro/VIC/pull/831))
 
-3. Fixed segmentation fault in lake model caused by incorrect passing of pointer argument to vic_run(). ([GH#826]((https://github.com/UW-Hydro/VIC/pull/826))
+3. Removed descriptions of forcing disaggregation options from documentation of image driver global parameter file ([GH#833](https://github.com/UW-Hydro/VIC/pull/833))
 
-4. Relaxed some of the validation of lake parameters, to allow them to be null in cells containing no lakes. ([GH#826]((https://github.com/UW-Hydro/VIC/pull/826))
+4. Fixed segmentation fault in lake model caused by incorrect passing of pointer argument to vic_run(). ([GH#826]((https://github.com/UW-Hydro/VIC/pull/826))
 
-5. Fixed passing of lake data structures to generate_default_lake_state(). ([GH#826]((https://github.com/UW-Hydro/VIC/pull/826))
+5. Relaxed some of the validation of lake parameters, to allow them to be null in cells containing no lakes. ([GH#826]((https://github.com/UW-Hydro/VIC/pull/826))
 
-6. Separated the dimensions of arrays related to lake basin shape and of arrays related to the number of lake simulation layers. ([GH#826]((https://github.com/UW-Hydro/VIC/pull/826))
+6. Fixed passing of lake data structures to generate_default_lake_state(). ([GH#826]((https://github.com/UW-Hydro/VIC/pull/826))
 
-7. Added global parameter option to set the maximum number of (dynamic) lake simulation layers. ([GH#826]((https://github.com/UW-Hydro/VIC/pull/826))
+7. Separated the dimensions of arrays related to lake basin shape and of arrays related to the number of lake simulation layers. ([GH#826]((https://github.com/UW-Hydro/VIC/pull/826))
+
+8. Added global parameter option to set the maximum number of (dynamic) lake simulation layers. ([GH#826]((https://github.com/UW-Hydro/VIC/pull/826))
+
+9. Fixed bug causing ET to be 0 in pure bare soil tiles. ([GH#823]((https://github.com/UW-Hydro/VIC/pull/823))
 
 ------------------------------
 
@@ -117,7 +121,20 @@ This is a minor update from VIC 5.0.1. The VIC 5.1.0 includes new features, such
 
    1. [GH#800](https://github.com/UW-Hydro/VIC/pull/800)
 
-    - Updates the default namelist settings for the CESM driver to include output filenames consistent with the RASM naming conventions, default thermal nodes to 10, `FULL_ENERGY` to `TRUE`, and sets defaults for daily and monthly mean output. 
+    - Updates the default namelist settings for the CESM driver to include output filenames consistent with the RASM naming conventions, default thermal nodes to 10, `FULL_ENERGY` to `TRUE`, and sets defaults for daily and monthly mean output.
+
+   1. [GH#866](https://github.com/UW-Hydro/VIC/pull/866) 
+
+    - Updates the default output variables for the CESM driver. Also updates the VIC5 parameter file location to be the RASM inputdata directory and updates the name of the VIC5 parameter file to the new VIC5 parameters.
+
+   1. [GH#869](https://github.com/UW-Hydro/VIC/pull/869)
+    - Adds support to the CESM driver for 25km resolution RASM runs.
+
+   1. [GH#871](https://github.com/UW-Hydro/VIC/pull/871) 
+    - Adds initial state files to default 50km and 25km builds so that these are used by other groups running RASM rather than VIC5 starting up from a clean start. 
+
+   1. [GH#880](https://github.com/UW-Hydro/VIC/pull/880)
+    --Adds option STATENAME_CESM to the option_struct so that statefiles in the CESM driver can be in accordance with RASM naming conventions for model components. 
 
 3. Speed up NetCDF operations in the image/CESM drivers ([GH#684](https://github.com/UW-Hydro/VIC/pull/684))
 

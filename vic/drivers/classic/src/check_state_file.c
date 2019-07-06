@@ -51,7 +51,7 @@ check_state_file(char  *init_state_name,
         init_state = open_file(init_state_name, "rb");
     }
     else {
-        init_state = open_file(init_state_name, "r");
+        init_state = open_file(init_state_name, READ_MODE);
     }
 
     /* Initialize startrec */

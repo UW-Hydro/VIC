@@ -43,7 +43,9 @@
 
 #include <stdio.h>
 #include <errno.h>
+#ifndef _WIN32
 #include <execinfo.h>
+#endif
 #include <string.h>
 
 // Set the log level

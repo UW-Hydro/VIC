@@ -37,13 +37,13 @@ check_files(filep_struct     *filep,
     extern option_struct options;
     extern FILE          *open_file(char string[], char type[]);
 
-    filep->soilparam = open_file(fnames->soil, "r");
-    filep->veglib = open_file(fnames->veglib, "r");
-    filep->vegparam = open_file(fnames->veg, "r");
+    filep->soilparam = open_file(fnames->soil, READ_MODE);
+    filep->veglib = open_file(fnames->veglib, READ_MODE);
+    filep->vegparam = open_file(fnames->veg, READ_MODE);
     if (options.SNOW_BAND > 1) {
-        filep->snowband = open_file(fnames->snowband, "r");
+        filep->snowband = open_file(fnames->snowband, READ_MODE);
     }
     if (options.LAKES) {
-        filep->lakeparam = open_file(fnames->lakeparam, "r");
+        filep->lakeparam = open_file(fnames->lakeparam, READ_MODE);
     }
 }

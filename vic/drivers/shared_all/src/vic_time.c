@@ -31,6 +31,10 @@
 
 #define small_offset 0.000005  // Small offset to handle precision issues in rounding
 
+#ifdef _WIN32
+char *strptime(const char *, const char *, struct tm *);
+#endif
+
 /******************************************************************************
  * @brief   Get fractional day of month from dmy structure.
  * @return  Fractional Day.

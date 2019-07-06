@@ -102,7 +102,7 @@ main(int   argc,
     initialize_forcing_files();
 
     /** Read Global Control File **/
-    filep.globalparam = open_file(filenames.global, "r");
+    filep.globalparam = open_file(filenames.global, READ_MODE);
     get_global_param(filep.globalparam);
     fclose(filep.globalparam);
 
@@ -111,7 +111,7 @@ main(int   argc,
 
     /** Set model constants **/
     if (strcmp(filenames.constants, "MISSING") != 0) {
-        filep.constants = open_file(filenames.constants, "r");
+        filep.constants = open_file(filenames.constants, READ_MODE);
         get_parameters(filep.constants);
     }
     // Check that model parameters are valid
@@ -129,7 +129,7 @@ main(int   argc,
     set_output_met_data_info();
     // out_data is shape [ngridcells (1), N_OUTVAR_TYPES]
     alloc_out_data(1, out_data);
-    filep.globalparam = open_file(filenames.global, "r");
+    filep.globalparam = open_file(filenames.global, READ_MODE);
     parse_output_info(filep.globalparam, &streams, &(dmy[0]));
     validate_streams(&streams);
 

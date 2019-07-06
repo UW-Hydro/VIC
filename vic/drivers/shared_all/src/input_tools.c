@@ -58,7 +58,9 @@ count_nstreams_nvars(FILE   *gp,
     size_t        i;
 
     // Figure out where we are in the input file
+#ifndef _WIN32
     fflush(gp);
+#endif
     start_position = ftell(gp);
 
     // Move the position to the begining of the file

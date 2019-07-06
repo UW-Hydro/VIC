@@ -60,7 +60,7 @@ make_in_and_outfiles(filep_struct     *filep,
         filep->forcing[0] = open_file(filenames->forcing[0], "rb");
     }
     else {
-        filep->forcing[0] = open_file(filenames->forcing[0], "r");
+        filep->forcing[0] = open_file(filenames->forcing[0], READ_MODE);
     }
 
     filep->forcing[1] = NULL;
@@ -73,7 +73,7 @@ make_in_and_outfiles(filep_struct     *filep,
             filep->forcing[1] = open_file(filenames->forcing[1], "rb");
         }
         else {
-            filep->forcing[1] = open_file(filenames->forcing[1], "r");
+            filep->forcing[1] = open_file(filenames->forcing[1], READ_MODE);
         }
     }
 

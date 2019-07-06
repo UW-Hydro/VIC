@@ -42,12 +42,20 @@
 #include <stddef.h>
 #include <unistd.h>
 #include <time.h>
+#ifndef _WIN32
 #include <pwd.h>
+#endif
 #include <sys/time.h>
 #include <sys/types.h>
 
 #include <vic_physical_constants.h>
 #include <vic_log.h>
+
+#ifdef _WIN32
+#define READ_MODE "rb"
+#else
+#define READ_MODE "r"
+#endif
 
 /***** Model Constants *****/
 #define MAXSTRING    2048

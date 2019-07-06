@@ -41,8 +41,12 @@ VICPATH = ../../vic_run
 SHELL = /bin/bash
 
 # Set CC = your compiler here
+ifdef MINGW32
+CC=x86_64-w64-mingw32.static-gcc
+else
 ifndef CC
 CC=gcc
+endif
 endif
 
 GIT_VERSION := $(shell git describe --abbrev=4 --dirty --always --tags)
@@ -66,11 +70,19 @@ INCLUDES = -I ${DRIVERPATH}/include -I $(SHAREDPATH)/include -I ${VICPATH}/inclu
 # LIBRARY = -lm
 
 # Uncomment to include debugging information
+ifdef MINGW32
+CFLAGS  =  ${INCLUDES} -g -Wall -Wextra -std=c99 -posix \
+					 -DLOG_LVL=$(LOG_LVL) \
+					 -DGIT_VERSION=\"$(GIT_VERSION)\" \
+					 -DUSERNAME=\"$(USER)\" \
+					 -DHOSTNAME=\"$(HOSTNAME)\"
+else
 CFLAGS  =  ${INCLUDES} -g -Wall -Wextra -std=c99 \
 					 -DLOG_LVL=$(LOG_LVL) \
 					 -DGIT_VERSION=\"$(GIT_VERSION)\" \
 					 -DUSERNAME=\"$(USER)\" \
 					 -DHOSTNAME=\"$(HOSTNAME)\"
+endif
 LIBRARY = -lm
 
 # Uncomment to include execution profiling information

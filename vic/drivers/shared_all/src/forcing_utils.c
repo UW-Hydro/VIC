@@ -133,7 +133,9 @@ count_force_vars(FILE *gp)
     char          optstr[MAXSTRING];
 
     // Figure out where we are in the input file
+#ifndef _WIN32
     fflush(gp);
+#endif
     start_position = ftell(gp);
 
     // read the first line

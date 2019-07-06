@@ -40,8 +40,10 @@ write_vic_timing_table(timer_struct *timers)
     char                       user[MAXSTRING];
     time_t                     curr_date_time;
     struct tm                 *timeinfo;
+#ifndef _WIN32
     uid_t                      uid;
     struct passwd             *pw;
+#endif
     double                     ndays;
     double                     nyears;
 
@@ -53,18 +55,24 @@ write_vic_timing_table(timer_struct *timers)
     timeinfo = localtime(&curr_date_time);
 
     // hostname
-    if (gethostname(machine, MAXSTRING) != 0) {
+#ifndef _WIN32
+    if (gethostname(machine, MAXSTRING) != 0)
+#endif
+    {
         strcpy(machine, "unknown");
     }
 
     // username
+#ifndef _WIN32
     uid = geteuid();
     pw = getpwuid(uid);
 
     if (pw) {
         strcpy(user, pw->pw_name);
     }
-    else {
+    else
+#endif
+    {
         strcpy(user, "unknown");
     }
 

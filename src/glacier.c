@@ -81,7 +81,7 @@ gl_volume_area(snow_data_struct **snow,
             if (ice_vol > 0.0) {
                 // ice_vol in km3 and ice_area in km2
                 ice_vol *= cell_area / MMPERMETER / METERS_PER_KM;
-                ice_area_old *= veg_con[iveg].Cv * cell_area;
+                ice_area_old *= cell_area;
 
                 // find new ice area
                 ice_area_temp = pow((ice_vol / BAHR_C), (1 / BAHR_LAMBDA));

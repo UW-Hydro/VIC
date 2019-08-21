@@ -90,6 +90,12 @@ gl_volume_area(snow_data_struct **snow,
                 ice_area_new = ice_area_old +
                                (ice_area_temp - ice_area_old) * exp(stepsize / BAHR_T);
 
+                // Check for negative new area after scaling due to ice volume loss
+                // Ignore scaling in this edge case
+                if (ice_area_new < 0.0) {
+                    ice_area_new = ice_area_old;
+                }
+
                 // Make sure the area isn't too big
                 overflow_vol = 0.;
                 if (ice_area_new > tile_area) {

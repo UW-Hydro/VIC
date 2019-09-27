@@ -33,7 +33,7 @@ matrix:
   # CESM Driver
   - compiler: gcc
     os: linux
-    env: TESTID='cesm'
+    env: TESTID='cesm' USE_CC=gcc-4.8
     addons:
       apt_packages:
         - libnetcdf-dev

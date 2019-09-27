@@ -33,14 +33,13 @@ matrix:
   # CESM Driver
   - compiler: gcc
     os: linux
-    env: TESTID='cesm' USE_CC=gcc-4.8
+    env: TESTID='cesm'
     addons:
       apt_packages:
         - libnetcdf-dev
         - netcdf-bin
         - netcdf-doc
-        - gcc-4.8
-        - gfortran-4.8
+        - gfortran
         # open-mpi is built from source in cesm.travis
   # Classic Driver
   - compiler: clang
@@ -90,6 +89,16 @@ matrix:
   - compiler: gcc
     os: osx
     env: TESTID=classic BREW_INSTALLS=valgrind
+  # CESM Driver, started failing when travis upgraded to gcc5
+  - compiler: gcc
+    os: linux
+    env: TESTID='cesm'
+    addons:
+      apt_packages:
+        - libnetcdf-dev
+        - netcdf-bin
+        - netcdf-doc
+        - gfortran
 before_install:
   - source ci/vic_install_utils
   - source ci/${TESTID}.travis

@@ -39,7 +39,8 @@ matrix:
         - libnetcdf-dev
         - netcdf-bin
         - netcdf-doc
-        - gfortran
+        - gcc-4.8
+        - gfortran-4.8
         # open-mpi is built from source in cesm.travis
   # Classic Driver
   - compiler: clang

@@ -1,6 +1,6 @@
 # VIC Image Driver
 
-The Image Driver represents the modern implementation of the VIC model.  It uses netCDF I/O, runs in a time-before-space evaluation order, and uses MPI for parallel processing.  
+The Image Driver represents the modern implementation of the VIC model.  It uses netCDF I/O, runs in a space-before-time evaluation order, and uses MPI for parallel processing.  
 
 ## Modeling the Land Surface using VIC
 1.  [VIC Input Files](Inputs.md)

@@ -124,7 +124,7 @@ def make_cffi_headers():
                  'zwtvmoist_zwt',
                  'zwtvmoist_moist']
 
-    args = ['gcc', '-std=c99', '-E',
+    args = [os.environ.get('CC') or 'gcc', '-std=c99', '-E',
             '-P', os.path.join(vic_root_abs_path, 'vic', 'drivers',
                                'python', 'src', 'globals.c'),
             '-I%s' % os.path.join(vic_root_abs_path, 'vic', 'drivers',

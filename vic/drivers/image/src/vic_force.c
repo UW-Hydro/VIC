@@ -186,14 +186,17 @@ vic_force(void)
     // Optional inputs
     if (options.LAKES) {
         // Channel inflow to lake
-        d3start[0] = global_param.forceskip[0] + global_param.forceoffset[0] +
-                     j;
-        get_scatter_nc_field_double(&(filenames.forcing[0]),
-                                    param_set.TYPE[CHANNEL_IN].varname,
-                                    d3start, d3count, dvar);
-        for (j = 0; j < NF; j++) {
-            for (i = 0; i < local_domain.ncells_active; i++) {
-                force[i].channel_in[j] = (double) dvar[i];
+        // If channel_in not supplied, it defaults to 0 from calloc
+        if (param_set.TYPE[CHANNEL_IN].SUPPLIED) {
+            d3start[0] = global_param.forceskip[0] +
+                         global_param.forceoffset[0] + j;
+            get_scatter_nc_field_double(&(filenames.forcing[0]),
+                                        param_set.TYPE[CHANNEL_IN].varname,
+                                        d3start, d3count, dvar);
+            for (j = 0; j < NF; j++) {
+                for (i = 0; i < local_domain.ncells_active; i++) {
+                    force[i].channel_in[j] = (double) dvar[i];
+                }
             }
         }
     }
@@ -429,20 +432,27 @@ vic_force(void)
                                                 param.SNOW_MAX_SNOW_TEMP,
                                                 &(force[i].prec[j]), 1);
         }
-        // Check on fcanopy
+    }
+
+    // Checks on fcanopy and LAI
+    for (i = 0; i < local_domain.ncells_active; i++) {
         for (v = 0; v < options.NVEGTYPES; v++) {
             vidx = veg_con_map[i].vidx[v];
             if (vidx != NODATA_VEG) {
                 for (j = 0; j < NF; j++) {
-                    if ((veg_hist[i][vidx].fcanopy[j] < MIN_FCANOPY) &&
-                        ((current == 0) ||
-                         (options.FCAN_SRC == FROM_VEGHIST))) {
-                        // Only issue this warning once if not using veg hist fractions
-                        log_warn(
-                            "cell %zu, veg` %d substep %zu fcanopy %f < minimum of %f; setting = %f", i, vidx, j,
-                            veg_hist[i][vidx].fcanopy[j], MIN_FCANOPY,
-                            MIN_FCANOPY);
-                        veg_hist[i][vidx].fcanopy[j] = MIN_FCANOPY;
+                    if (veg_hist[i][vidx].fcanopy[j] < MIN_FCANOPY ||
+                        veg_hist[i][vidx].LAI[j] == 0) {
+                        if (current == 0 || options.FCAN_SRC == FROM_VEGHIST) {
+                            // Only issue this warning once
+                            log_warn(
+                                "cell %zu, veg %d substep %zu either fcanopy "
+                                "%f < minimum of %f or LAI %f == 0; setting "
+                                "both LAI and fcanopy to 0", i, vidx, j,
+                                veg_hist[i][vidx].fcanopy[j], MIN_FCANOPY,
+                                veg_hist[i][vidx].LAI[j]);
+                        }
+                        veg_hist[i][vidx].fcanopy[j] = 0;
+                        veg_hist[i][vidx].LAI[j] = 0;
                     }
                 }
             }

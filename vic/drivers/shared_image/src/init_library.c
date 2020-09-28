@@ -96,7 +96,7 @@ initialize_soil_con(soil_con_struct *soil_con)
         soil_con->Zsum_node[i] = 0.;
         soil_con->expt_node[i] = 0.;
         soil_con->gamma[i] = 0.;
-        soil_con->max_moist_node[i] = 0.;
+        soil_con->porosity_node[i] = 0.;
     }
 
     for (i = 0; i < MAX_FROST_AREAS; i++) {

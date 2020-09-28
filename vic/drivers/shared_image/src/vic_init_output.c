@@ -324,6 +324,13 @@ initialize_history_file(nc_file_struct *nc,
     check_nc_status(status, "Error defining time bounds dimension in %s",
                     stream->filename);
 
+    if (options.LAKES) {
+        status = nc_def_dim(nc->nc_id, "lake_node", nc->lake_node_size,
+                            &(nc->lake_node_dimid));
+        check_nc_status(status, "Error defining lake_node dimension in %s",
+                        stream->filename);
+    }
+
     // define the netcdf variable time
     status = nc_def_var(nc->nc_id, "time", NC_DOUBLE, 1,
                         &(nc->time_dimid), &(nc->time_varid));
@@ -694,6 +701,7 @@ initialize_nc_file(nc_file_struct     *nc_file,
     nc_file->band_size = options.SNOW_BAND;
     nc_file->front_size = MAX_FRONTS;
     nc_file->frost_size = options.Nfrost;
+    nc_file->lake_node_size = MAX_LAKE_NODES;
     nc_file->layer_size = options.Nlayer;
     nc_file->ni_size = global_domain.n_nx;
     nc_file->nj_size = global_domain.n_ny;

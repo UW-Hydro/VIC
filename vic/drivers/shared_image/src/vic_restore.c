@@ -728,7 +728,7 @@ vic_restore(void)
         }
 
         // lake layer surface areas: lake_var.surface[ndix]
-        for (j = 0; j < options.NLAKENODES; j++) {
+        for (j = 0; j < options.Nlakenode; j++) {
             d3start[0] = j;
             get_scatter_nc_field_double(&(filenames.init_state),
                                         state_metadata[
@@ -756,7 +756,7 @@ vic_restore(void)
         }
 
         // lake layer temperatures: lake_var.temp[nidx]
-        for (j = 0; j < options.NLAKENODES; j++) {
+        for (j = 0; j < options.Nlakenode; j++) {
             d3start[0] = j;
             get_scatter_nc_field_double(&(filenames.init_state),
                                         state_metadata[STATE_LAKE_LAYER_TEMP].varname,
@@ -968,9 +968,10 @@ check_init_state_file(void)
         }
         if (options.LAKES) {
             dimlen = get_nc_dimension(&(filenames.init_state), "lake_node");
-            if (dimlen != options.NLAKENODES) {
+            if (dimlen != options.Nlakenode) {
                 log_err("Number of lake nodes in state file does not "
-                        "match parameter file");
+                        "match LAKE_NODES (%zu) in global parameter file",
+                        options.Nlakenode);
             }
         }
     }

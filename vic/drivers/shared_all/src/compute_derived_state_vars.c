@@ -136,12 +136,12 @@ compute_derived_state_vars(all_vars_struct *all_vars,
                     if (FIRST_VEG) {
                         FIRST_VEG = false;
                         set_node_parameters(soil_con->Zsum_node,
-                                            soil_con->max_moist_node,
+                                            soil_con->porosity_node,
                                             soil_con->expt_node,
                                             soil_con->bubble_node,
                                             soil_con->alpha, soil_con->beta,
                                             soil_con->gamma, soil_con->depth,
-                                            soil_con->max_moist, soil_con->expt,
+                                            soil_con->porosity, soil_con->expt,
                                             soil_con->bubble,
                                             options.Nnode, options.Nlayer);
                     }
@@ -156,7 +156,7 @@ compute_derived_state_vars(all_vars_struct *all_vars,
                                 energy[veg][band].Cs_node,
                                 soil_con->Zsum_node,
                                 energy[veg][band].T,
-                                soil_con->max_moist_node,
+                                soil_con->porosity_node,
                                 soil_con->expt_node,
                                 soil_con->bubble_node,
                                 tmpM[veg][band],

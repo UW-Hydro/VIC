@@ -260,13 +260,15 @@ vic_force(force_data_struct *force,
                             veg_hist_data[FCANOPY][v][uidx];
                     }
                 }
-                // Check on fcanopy
-                if (veg_hist[rec][v].fcanopy[i] < MIN_FCANOPY) {
+                // Checks on fcanopy and LAI
+                if (veg_hist[rec][v].fcanopy[i] < MIN_FCANOPY ||
+                    veg_hist[rec][v].LAI[i] == 0) {
                     log_warn(
-                        "rec %zu, veg %zu substep %zu fcanopy %f < minimum of %f; setting = %f", rec, v, i,
-                        veg_hist[rec][v].fcanopy[i], MIN_FCANOPY,
-                        MIN_FCANOPY);
-                    veg_hist[rec][v].fcanopy[i] = MIN_FCANOPY;
+                        "rec %zu, veg %zu substep %zu fcanopy %f < "
+                        "minimum of %f; setting = 0", rec, v, i,
+                        veg_hist[rec][v].fcanopy[i], MIN_FCANOPY);
+                    veg_hist[rec][v].fcanopy[i] = 0;
+                    veg_hist[rec][v].LAI[i] = 0;
                 }
             }
             if (NF > 1) {

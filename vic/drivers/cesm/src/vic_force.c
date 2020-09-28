@@ -230,6 +230,28 @@ vic_force(void)
         }
     }
 
+    // Checks on fcanopy and LAI
+    for (i = 0; i < local_domain.ncells_active; i++) {
+        for (v = 0; v < options.NVEGTYPES; v++) {
+            vidx = veg_con_map[i].vidx[v];
+            if (vidx != NODATA_VEG) {
+                for (j = 0; j < NF; j++) {
+                    if (veg_hist[i][vidx].fcanopy[j] < MIN_FCANOPY ||
+                        veg_hist[i][vidx].LAI[j] == 0) {
+                        if (current == 0) {
+                            // Only issue this warning once
+                            log_warn(
+                                "cell %zu, veg %d substep %zu fcanopy %f < "
+                                "minimum of %f; setting = 0", i, vidx, j,
+                                veg_hist[i][vidx].fcanopy[j], MIN_FCANOPY);
+                        }
+                        veg_hist[i][vidx].fcanopy[j] = 0;
+                        veg_hist[i][vidx].LAI[j] = 0;
+                    }
+                }
+            }
+        }
+    }
 
     // Put average value in NR field
     for (i = 0; i < local_domain.ncells_active; i++) {

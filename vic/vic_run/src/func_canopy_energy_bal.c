@@ -245,6 +245,9 @@ func_canopy_energy_bal(double  Tfoliage,
                             elevation, prec, Wmax, Wcr, Wpwp, frost_fract,
                             root, dryFrac, shortwave, Catm, CanopLayerBnd);
         *Wdew /= MM_PER_M;
+        // Account for fractional canopy cover
+        *Evap *= veg_var->fcanopy;
+        *Wdew *= veg_var->fcanopy;
 
         *LatentHeat = Le * (*Evap) * CONST_RHOFW;
         *LatentHeatSub = 0;

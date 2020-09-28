@@ -89,6 +89,16 @@ matrix:
   - compiler: gcc
     os: osx
     env: TESTID=classic BREW_INSTALLS=valgrind
+  # CESM Driver, started failing when travis upgraded to gcc5
+  - compiler: gcc
+    os: linux
+    env: TESTID='cesm'
+    addons:
+      apt_packages:
+        - libnetcdf-dev
+        - netcdf-bin
+        - netcdf-doc
+        - gfortran
 before_install:
   - source ci/vic_install_utils
   - source ci/${TESTID}.travis

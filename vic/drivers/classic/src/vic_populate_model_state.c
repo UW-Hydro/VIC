@@ -90,7 +90,7 @@ vic_populate_model_state(all_vars_struct *all_vars,
         // else generate a default state
         generate_default_state(all_vars, soil_con, veg_con, dmy_current);
         if (options.LAKES) {
-            generate_default_lake_state(all_vars, soil_con, lake_con);
+            generate_default_lake_state(lake, soil_con, lake_con);
         }
     }
 

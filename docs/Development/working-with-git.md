@@ -128,6 +128,9 @@ To register the deletion of a file:
 
 This will bring up a commit log in your default editor.  The list of files whose changes will be committed (i.e. were registered via "git add" etc) is shown in the header at the top of the file.  If you disagree with this list, exit the editor and do "git add" etc as necessary to correct the list, and then try "git commit" again.  If satisfied with the list of changed files, add a description of the set of changes (including a brief description of the problem that motivated the changes).  Save and exit.
 
+### 3. Correcting code syntax issues prior to creating a PR
+After completing your code commits, you also need to check that your code is compliant with VIC style conventions for indentation and spacing. Please make sure you have `uncrustify` installed (version `0.64` or later). Once you have installed `uncrustify`, you should navigate to the `...VIC/tools/code_format` directory in the VIC repo and run `uncrustify`, which you can do by running the script in that directory, `./run_uncrustify.bash`. A simple `git diff --name-only` will list all files that `uncrustify` has updated the syntax for. If any files come up that you have edited, you should commit those syntax edits.
+
 ### Pushing commits to your fork
 
 After committing your changes, you should push them to your fork (which has the alias `origin`) stored on GitHub:

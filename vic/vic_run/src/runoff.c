@@ -81,10 +81,12 @@ runoff(cell_data_struct  *cell,
     layer_data_struct          tmp_layer;
     unsigned short             runoff_steps_per_dt;
 
-    /** Set Residual Moisture **/
+    /** Set Temporary Variables **/
     for (lindex = 0; lindex < options.Nlayer; lindex++) {
-        resid_moist[lindex] = soil_con->resid_moist[lindex] *
-                              soil_con->depth[lindex] * MM_PER_M;
+        resid_moist[lindex] = soil_con->resid_moist[lindex];
+        max_moist[lindex] = soil_con->max_moist[lindex];
+        Ksat[lindex] = soil_con->Ksat[lindex] /
+                       global_param.runoff_steps_per_day;
     }
 
     /** Allocate and Set Values for Soil Sublayers **/
@@ -148,17 +150,11 @@ runoff(cell_data_struct  *cell,
            Initialize Variables
         **************************************************/
         for (lindex = 0; lindex < options.Nlayer; lindex++) {
-            Ksat[lindex] = soil_con->Ksat[lindex] /
-                           global_param.runoff_steps_per_day;
-
             /** Set Layer Liquid Moisture Content **/
             liq[lindex] = org_moist[lindex] - layer[lindex].ice[fidx];
 
             /** Set Layer Frozen Moisture Content **/
             ice[lindex] = layer[lindex].ice[fidx];
-
-            /** Set Layer Maximum Moisture Content **/
-            max_moist[lindex] = soil_con->max_moist[lindex];
         }
 
         /******************************************************
@@ -202,7 +198,7 @@ runoff(cell_data_struct  *cell,
                 if (tmp_liq > resid_moist[lindex]) {
                     Q12[lindex] = calc_Q12(Ksat[lindex], tmp_liq,
                                            resid_moist[lindex],
-                                           soil_con->max_moist[lindex],
+                                           max_moist[lindex],
                                            soil_con->expt[lindex]);
                 }
                 else {
@@ -303,7 +299,7 @@ runoff(cell_data_struct  *cell,
             rel_moist =
                 (liq[lindex] -
                  resid_moist[lindex]) /
-                (soil_con->max_moist[lindex] - resid_moist[lindex]);
+                (max_moist[lindex] - resid_moist[lindex]);
 
             /** Compute baseflow as function of relative moisture **/
             frac = Dsmax * soil_con->Ds / soil_con->Ws;
@@ -408,7 +404,7 @@ runoff(cell_data_struct  *cell,
                                                         energy->Cs_node,
                                                         soil_con->Zsum_node,
                                                         energy->T,
-                                                        soil_con->max_moist_node,
+                                                        soil_con->porosity_node,
                                                         soil_con->expt_node,
                                                         soil_con->bubble_node,
                                                         moist, soil_con->depth,

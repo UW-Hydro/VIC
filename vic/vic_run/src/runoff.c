@@ -393,7 +393,8 @@ runoff(cell_data_struct  *cell,
                                                         soil_con->quartz,
                                                         soil_con->soil_density,
                                                         soil_con->bulk_density,
-                                                        soil_con->organic, Nnodes,
+                                                        soil_con->organic,
+                                                        Nnodes,
                                                         options.Nlayer,
                                                         soil_con->FS_ACTIVE);
         if (ErrorFlag == ERROR) {

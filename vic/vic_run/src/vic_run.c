@@ -230,8 +230,9 @@ vic_run(force_data_struct   *force,
 
                     /** Surface Attenuation due to Vegetation Coverage **/
                     surf_atten = (1 - veg_var->fcanopy) * 1.0 +
-                                 veg_var->fcanopy *exp(-vic_run_veg_lib[veg_class].rad_atten *
-                                                       veg_var->LAI);
+                                 veg_var->fcanopy *
+                                 exp(-vic_run_veg_lib[veg_class].rad_atten *
+                                     veg_var->LAI);
 
                     /** Bare (free of snow) Albedo **/
                     if (iveg != Nveg) {

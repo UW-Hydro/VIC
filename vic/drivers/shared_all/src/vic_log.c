@@ -30,10 +30,10 @@ finalize_logging(void)
 void
 get_current_datetime(char *cdt)
 {
-    char         ymd[MAXSTRING];
-    struct tm   *timeinfo;
+    char               ymd[MAXSTRING];
+    struct tm         *timeinfo;
     unsigned long long seconds_since_midnight;
-    time_t       curr_date_time;
+    time_t             curr_date_time;
 
     curr_date_time = time(NULL);
     if (curr_date_time == -1) {

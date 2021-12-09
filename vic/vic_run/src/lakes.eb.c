@@ -2015,7 +2015,7 @@ water_balance(lake_var_struct *lake,
     if (rel_moist > soil_con.Ws) {
         frac = (rel_moist - soil_con.Ws) / (1 - soil_con.Ws);
         baseflow_out_mm += Dsmax * (1 - soil_con.Ds / soil_con.Ws) *
-             pow(frac, soil_con.c);
+                           pow(frac, soil_con.c);
     }
     if (baseflow_out_mm < 0) {
         baseflow_out_mm = 0;

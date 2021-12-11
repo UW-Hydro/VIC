@@ -3,26 +3,6 @@
 *
 * This subroutine controls the model core, it solves both the energy and water
 * balance models, as well as frozen soils.
-*
-* @section LICENSE
-*
-* The Variable Infiltration Capacity (VIC) macroscale hydrological model
-* Copyright (C) 2016 The Computational Hydrology Group, Department of Civil
-* and Environmental Engineering, University of Washington.
-*
-* The VIC model is free software; you can redistribute it and/or
-* modify it under the terms of the GNU General Public License
-* as published by the Free Software Foundation; either version 2
-* of the License, or (at your option) any later version.
-*
-* This program is distributed in the hope that it will be useful,
-* but WITHOUT ANY WARRANTY; without even the implied warranty of
-* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-* GNU General Public License for more details.
-*
-* You should have received a copy of the GNU General Public License along with
-* this program; if not, write to the Free Software Foundation, Inc.,
-* 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 ******************************************************************************/
 
 #include <vic_run.h>
@@ -250,8 +230,9 @@ vic_run(force_data_struct   *force,
 
                     /** Surface Attenuation due to Vegetation Coverage **/
                     surf_atten = (1 - veg_var->fcanopy) * 1.0 +
-                                 veg_var->fcanopy *exp(-vic_run_veg_lib[veg_class].rad_atten *
-                                                       veg_var->LAI);
+                                 veg_var->fcanopy *
+                                 exp(-vic_run_veg_lib[veg_class].rad_atten *
+                                     veg_var->LAI);
 
                     /** Bare (free of snow) Albedo **/
                     if (iveg != Nveg) {

@@ -2,26 +2,6 @@
  * @section DESCRIPTION
  *
  * Header file for vic_run routines
- *
- * @section LICENSE
- *
- * The Variable Infiltration Capacity (VIC) macroscale hydrological model
- * Copyright (C) 2016 The Computational Hydrology Group, Department of Civil
- * and Environmental Engineering, University of Washington.
- *
- * The VIC model is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License
- * as published by the Free Software Foundation; either version 2
- * of the License, or (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License along with
- * this program; if not, write to the Free Software Foundation, Inc.,
- * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  *****************************************************************************/
 
 #ifndef VIC_RUN_H
@@ -220,7 +200,7 @@ void polint(double xa[], double ya[], int n, double x, double *y, double *dy);
 void prepare_full_energy(cell_data_struct *, energy_bal_struct *,
                          soil_con_struct *, double *, double *);
 double qromb(
-    double (*sub_with_height)(), double es, double Wind, double AirDens, double ZO, double EactAir, double F, double hsalt, double phi_r, double ushear, double Zrh, double a, double b);
+    double (*sub_with_height )(), double es, double Wind, double AirDens, double ZO, double EactAir, double F, double hsalt, double phi_r, double ushear, double Zrh, double a, double b);
 void rescale_snow_energy_fluxes(double, double, snow_data_struct *,
                                 energy_bal_struct *);
 void rescale_snow_storage(double, double, snow_data_struct *);
@@ -313,7 +293,7 @@ double transport_with_height(double z, double es, double Wind, double AirDens,
                              double ZO, double EactAir, double F, double hsalt,
                              double phi_r, double ushear, double Zrh);
 double trapzd(
-    double (*funcd)(), double es, double Wind, double AirDens, double ZO, double EactAir, double F, double hsalt, double phi_r, double ushear, double Zrh, double a, double b, int n);
+    double (*funcd )(), double es, double Wind, double AirDens, double ZO, double EactAir, double F, double hsalt, double phi_r, double ushear, double Zrh, double a, double b, int n);
 void tridia(int, double *, double *, double *, double *, double *);
 void tridiag(double *, double *, double *, double *, unsigned int);
 int vic_run(force_data_struct *, all_vars_struct *, dmy_struct *,

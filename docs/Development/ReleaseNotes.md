@@ -15,6 +15,11 @@ To check which release of VIC you are running:
 
 ------------------------------
 
+## VIC 5.1.0
+
+#### Announcements
+
+1. VIC is now shared under the MIT license ([GH#917](https://github.com/UW-Hydro/VIC/pull/917))
 
 ## VIC 5.1.0 rc2
 

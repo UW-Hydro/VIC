@@ -4,26 +4,6 @@
 * This routine was written to handle the various calls and data
 * handling needed to solve the various components of the new VIC
 * snow code for both the full_energy and water_balance models.
-*
-* @section LICENSE
-*
-* The Variable Infiltration Capacity (VIC) macroscale hydrological model
-* Copyright (C) 2014  The Land Surface Hydrology Group, Department of Civil
-* and Environmental Engineering, University of Washington.
-*
-* The VIC model is free software; you can redistribute it and/or
-* modify it under the terms of the GNU General Public License
-* as published by the Free Software Foundation; either version 2
-* of the License, or (at your option) any later version.
-*
-* This program is distributed in the hope that it will be useful,
-* but WITHOUT ANY WARRANTY; without even the implied warranty of
-* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-* GNU General Public License for more details.
-*
-* You should have received a copy of the GNU General Public License along with
-* this program; if not, write to the Free Software Foundation, Inc.,
-* 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 ******************************************************************************/
 
 #include <vic_run.h>
@@ -39,6 +19,7 @@ solve_snow(char               overstory,
            double             LongUnderOut,          // LW from understory
            double             MIN_RAIN_TEMP,
            double             MAX_SNOW_TEMP,
+           double             new_snow_albedo,
            double             Tcanopy,          // canopy air temperature
            double             Tgrnd,          // soil surface temperature
            double             air_temp,          // air temperature
@@ -189,8 +170,10 @@ solve_snow(char               overstory,
 
                 (*ShortUnderIn) *= (*surf_atten); // SW transmitted through canopy
                 ShortOverIn = (1. - (*surf_atten)) * shortwave; // canopy incident SW
-                ShortOverIn /= veg_var->fcanopy;
-                ErrorFlag = snow_intercept(dt, 1.,
+                if (veg_var->fcanopy > 0) {
+                    ShortOverIn /= veg_var->fcanopy;
+                }
+                ErrorFlag = snow_intercept(dt, 1., new_snow_albedo,
                                            veg_var->LAI,
                                            (*Le), longwave, LongUnderOut,
                                            veg_var->Wdmax,
@@ -312,7 +295,9 @@ solve_snow(char               overstory,
                 // age snow albedo if no new snowfall
                 // ignore effects of snow dropping from canopy; only consider fresh snow from sky
                 snow->last_snow++;
-                snow->albedo = snow_albedo(*snowfall, snow->swq, snow->albedo,
+                snow->albedo = snow_albedo(*snowfall, new_snow_albedo,
+                                           snow->swq,
+                                           snow->albedo,
                                            snow->coldcontent, dt,
                                            snow->last_snow, snow->MELTING);
                 (*AlbedoUnder) =
@@ -321,7 +306,7 @@ solve_snow(char               overstory,
             else {
                 // set snow albedo to new snow albedo
                 snow->last_snow = 0;
-                snow->albedo = param.SNOW_NEW_SNOW_ALB;
+                snow->albedo = new_snow_albedo;
                 (*AlbedoUnder) = snow->albedo;
             }
             (*NetShortSnow) = (1.0 - *AlbedoUnder) * (*ShortUnderIn);

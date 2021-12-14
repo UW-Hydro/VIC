@@ -3,26 +3,6 @@
 *
 * Calculates the interception and subsequent release of by the forest canopy
 * using an energy balance approach.
-*
-* @section LICENSE
-*
-* The Variable Infiltration Capacity (VIC) macroscale hydrological model
-* Copyright (C) 2016 The Computational Hydrology Group, Department of Civil
-* and Environmental Engineering, University of Washington.
-*
-* The VIC model is free software; you can redistribute it and/or
-* modify it under the terms of the GNU General Public License
-* as published by the Free Software Foundation; either version 2
-* of the License, or (at your option) any later version.
-*
-* This program is distributed in the hope that it will be useful,
-* but WITHOUT ANY WARRANTY; without even the implied warranty of
-* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-* GNU General Public License for more details.
-*
-* You should have received a copy of the GNU General Public License along with
-* this program; if not, write to the Free Software Foundation, Inc.,
-* 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 ******************************************************************************/
 
 #include <vic_run.h>
@@ -33,6 +13,7 @@
 int
 snow_intercept(double             Dt,
                double             F,
+               double             new_snow_albedo,
                double             LAI,
                double             Le,
                double             LongOverIn, // incominf LW from sky
@@ -295,7 +276,7 @@ snow_intercept(double             Dt,
     if (*IntSnow > 0 || *SnowFall > 0) {
         /* Snow present or accumulating in the canopy */
 
-        *AlbedoOver = param.SNOW_NEW_SNOW_ALB; // albedo of intercepted snow in canopy
+        *AlbedoOver = new_snow_albedo; // albedo of intercepted snow in canopy
         *NetShortOver = (1. - *AlbedoOver) * ShortOverIn; // net SW in canopy
 
         Qnet = solve_canopy_energy_bal(0., Dt, soil_con->elevation,

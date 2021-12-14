@@ -3,26 +3,6 @@
  *
  * This routine initializes atmospheric variables for both the model time step,
  * and the time step used by the snow algorithm (if different).
- *
- * @section LICENSE
- *
- * The Variable Infiltration Capacity (VIC) macroscale hydrological model
- * Copyright (C) 2016 The Computational Hydrology Group, Department of Civil
- * and Environmental Engineering, University of Washington.
- *
- * The VIC model is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License
- * as published by the Free Software Foundation; either version 2
- * of the License, or (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License along with
- * this program; if not, write to the Free Software Foundation, Inc.,
- * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  *****************************************************************************/
 
 #include <vic_driver_classic.h>
@@ -260,13 +240,15 @@ vic_force(force_data_struct *force,
                             veg_hist_data[FCANOPY][v][uidx];
                     }
                 }
-                // Check on fcanopy
-                if (veg_hist[rec][v].fcanopy[i] < MIN_FCANOPY) {
+                // Checks on fcanopy and LAI
+                if (veg_hist[rec][v].fcanopy[i] < MIN_FCANOPY ||
+                    veg_hist[rec][v].LAI[i] == 0) {
                     log_warn(
-                        "rec %zu, veg %zu substep %zu fcanopy %f < minimum of %f; setting = %f", rec, v, i,
-                        veg_hist[rec][v].fcanopy[i], MIN_FCANOPY,
-                        MIN_FCANOPY);
-                    veg_hist[rec][v].fcanopy[i] = MIN_FCANOPY;
+                        "rec %zu, veg %zu substep %zu fcanopy %f < "
+                        "minimum of %f; setting = 0", rec, v, i,
+                        veg_hist[rec][v].fcanopy[i], MIN_FCANOPY);
+                    veg_hist[rec][v].fcanopy[i] = 0;
+                    veg_hist[rec][v].LAI[i] = 0;
                 }
             }
             if (NF > 1) {

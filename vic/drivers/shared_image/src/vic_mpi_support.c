@@ -2,26 +2,6 @@
  * @section DESCRIPTION
  *
  * MPI support routines for VIC
- *
- * @section LICENSE
- *
- * The Variable Infiltration Capacity (VIC) macroscale hydrological model
- * Copyright (C) 2016 The Computational Hydrology Group, Department of Civil
- * and Environmental Engineering, University of Washington.
- *
- * The VIC model is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License
- * as published by the Free Software Foundation; either version 2
- * of the License, or (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License along with
- * this program; if not, write to the Free Software Foundation, Inc.,
- * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  *****************************************************************************/
 
 #include <vic_driver_shared_image.h>
@@ -488,7 +468,7 @@ create_MPI_option_struct_type(MPI_Datatype *mpi_type)
     MPI_Datatype   *mpi_types;
 
     // nitems has to equal the number of elements in option_struct
-    nitems = 53;
+    nitems = 56;
     blocklengths = malloc(nitems * sizeof(*blocklengths));
     check_alloc_status(blocklengths, "Memory allocation error.");
 
@@ -706,6 +686,14 @@ create_MPI_option_struct_type(MPI_Datatype *mpi_type)
     offsets[i] = offsetof(option_struct, ORGANIC_FRACT);
     mpi_types[i++] = MPI_C_BOOL;
 
+    // bool BULK_DENSITY_COMB;
+    offsets[i] = offsetof(option_struct, BULK_DENSITY_COMB);
+    mpi_types[i++] = MPI_C_BOOL;
+
+    // bool MAX_SNOW_ALBEDO;
+    offsets[i] = offsetof(option_struct, MAX_SNOW_ALBEDO);
+    mpi_types[i++] = MPI_C_BOOL;
+
     // unsigned short STATE_FORMAT;
     offsets[i] = offsetof(option_struct, STATE_FORMAT);
     mpi_types[i++] = MPI_UNSIGNED_SHORT;
@@ -716,6 +704,10 @@ create_MPI_option_struct_type(MPI_Datatype *mpi_type)
 
     // bool SAVE_STATE;
     offsets[i] = offsetof(option_struct, SAVE_STATE);
+    mpi_types[i++] = MPI_C_BOOL;
+
+    // bool STATENAME_CESM
+    offsets[i] = offsetof(option_struct, STATENAME_CESM);
     mpi_types[i++] = MPI_C_BOOL;
 
     // make sure that the we have the right number of elements

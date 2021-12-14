@@ -3,26 +3,6 @@
  *
  * This routine reads the VIC model global control file, getting values for
  * global parameters, model options, and debugging controls.
- *
- * @section LICENSE
- *
- * The Variable Infiltration Capacity (VIC) macroscale hydrological model
- * Copyright (C) 2016 The Computational Hydrology Group, Department of Civil
- * and Environmental Engineering, University of Washington.
- *
- * The VIC model is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License
- * as published by the Free Software Foundation; either version 2
- * of the License, or (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License along with
- * this program; if not, write to the Free Software Foundation, Inc.,
- * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  *****************************************************************************/
 
 #include <vic_driver_cesm.h>
@@ -278,6 +258,11 @@ get_global_param(FILE *gp)
                             "NETCDF3_64BIT_OFFSET, NETCDF4_CLASSIC, or NETCDF4.");
                 }
             }
+            // Define state file name format if using CESM conventions
+            else if (strcasecmp("STATENAME_CESM", optstr) == 0) {
+                sscanf(cmdstr, "%*s %s", flgstr);
+                options.STATENAME_CESM = str_to_bool(flgstr);
+            }
 
             /*************************************
                Define parameter files
@@ -337,6 +322,14 @@ get_global_param(FILE *gp)
             else if (strcasecmp("ORGANIC_FRACT", optstr) == 0) {
                 sscanf(cmdstr, "%*s %s", flgstr);
                 options.ORGANIC_FRACT = str_to_bool(flgstr);
+            }
+            else if (strcasecmp("BULK_DENSITY_COMB", optstr) == 0) {
+                sscanf(cmdstr, "%*s %s", flgstr);
+                options.BULK_DENSITY_COMB = str_to_bool(flgstr);
+            }
+            else if (strcasecmp("MAX_SNOW_ALBEDO", optstr) == 0) {
+                sscanf(cmdstr, "%*s %s", flgstr);
+                options.MAX_SNOW_ALBEDO = str_to_bool(flgstr);
             }
             else if (strcasecmp("VEGLIB_PHOTO", optstr) == 0) {
                 sscanf(cmdstr, "%*s %s", flgstr);
@@ -411,6 +404,9 @@ get_global_param(FILE *gp)
             else if (strcasecmp("LAKE_PROFILE", optstr) == 0) {
                 sscanf(cmdstr, "%*s %s", flgstr);
                 options.LAKE_PROFILE = str_to_bool(flgstr);
+            }
+            else if (strcasecmp("LAKE_NODES", optstr) == 0) {
+                sscanf(cmdstr, "%*s %zu", &options.Nlakenode);
             }
 
             /*************************************
@@ -504,6 +500,10 @@ validate_filenames(filenames_struct *filenames)
     // Validate lake parameter information
     if (options.LAKES) {
         log_err("Lakes are not implemented in CESM driver");
+        if (options.Nlakenode < 1 || options.Nlakenode > MAX_LAKE_NODES) {
+            log_err("LAKE_NODES must be between 1 and %d.",
+                    MAX_LAKE_NODES);
+        }
     }
 }
 

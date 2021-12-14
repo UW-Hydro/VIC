@@ -15,6 +15,39 @@ To check which release of VIC you are running:
 
 ------------------------------
 
+## VIC 5.1.0 (December 14, 2021)
+
+This is a maintanence release that includes numerous bug fixes and a few model enhancements. All code changes were included in the two release candidates (5.1.0.rc1 and 5.1.0.rc2). See the notes below from the two release candidates for more details.
+
+#### Announcements
+
+1. VIC is now shared under the MIT license ([GH#917](https://github.com/UW-Hydro/VIC/pull/917)).
+2. Travis-CI was disabled folling the platform's migration to travis-ci.com. See [GH#919](https://github.com/UW-Hydro/VIC/issues/919) for more details ([GH918](https://github.com/UW-Hydro/VIC/pull/918)).
+
+## VIC 5.1.0 rc2 (September 28, 2020)
+
+#### Bug Fixes:
+
+1. Fixed datetime handling bug in unit test module ([GH#796](https://github.com/UW-Hydro/VIC/pull/796))
+
+2. Removed descriptions of forcing disaggregation options from documentation of classic driver global parameter file ([GH#831](https://github.com/UW-Hydro/VIC/pull/831))
+
+3. Removed descriptions of forcing disaggregation options from documentation of image driver global parameter file ([GH#833](https://github.com/UW-Hydro/VIC/pull/833))
+
+4. Fixed segmentation fault in lake model caused by incorrect passing of pointer argument to `vic_run()`. ([GH#826]((https://github.com/UW-Hydro/VIC/pull/826))
+
+5. Relaxed some of the validation of lake parameters, to allow them to be null in cells containing no lakes. ([GH#826]((https://github.com/UW-Hydro/VIC/pull/826))
+
+6. Fixed passing of lake data structures to `generate_default_lake_state()`. ([GH#826]((https://github.com/UW-Hydro/VIC/pull/826))
+
+7. Separated the dimensions of arrays related to lake basin shape and of arrays related to the number of lake simulation layers. ([GH#826]((https://github.com/UW-Hydro/VIC/pull/826))
+
+8. Added global parameter option to set the maximum number of (dynamic) lake simulation layers. ([GH#826]((https://github.com/UW-Hydro/VIC/pull/826))
+
+9. Fixed bug causing ET to be 0 in pure bare soil tiles. ([GH#823]((https://github.com/UW-Hydro/VIC/pull/823))
+
+------------------------------
+
 ## VIC 5.1.0 rc1
 
 <!-- TODO -->
@@ -94,6 +127,23 @@ This is a minor update from VIC 5.0.1. The VIC 5.1.0 includes new features, such
 
     - Updates the cesm_interface_c.c routine in the CESM driver to populate the nrecs, endyear, endmonth and endday fields in the global_param struct to make them available to vic_finalize for timing tables (specifically the secs/day columns).  
 
+   1. [GH#800](https://github.com/UW-Hydro/VIC/pull/800)
+
+    - Updates the default namelist settings for the CESM driver to include output filenames consistent with the RASM naming conventions, default thermal nodes to 10, `FULL_ENERGY` to `TRUE`, and sets defaults for daily and monthly mean output.
+
+   1. [GH#866](https://github.com/UW-Hydro/VIC/pull/866) 
+
+    - Updates the default output variables for the CESM driver. Also updates the VIC5 parameter file location to be the RASM inputdata directory and updates the name of the VIC5 parameter file to the new VIC5 parameters.
+
+   1. [GH#869](https://github.com/UW-Hydro/VIC/pull/869)
+    - Adds support to the CESM driver for 25km resolution RASM runs.
+
+   1. [GH#871](https://github.com/UW-Hydro/VIC/pull/871) 
+    - Adds initial state files to default 50km and 25km builds so that these are used by other groups running RASM rather than VIC5 starting up from a clean start. 
+
+   1. [GH#880](https://github.com/UW-Hydro/VIC/pull/880)
+    --Adds option STATENAME_CESM to the option_struct so that statefiles in the CESM driver can be in accordance with RASM naming conventions for model components. 
+
 3. Speed up NetCDF operations in the image/CESM drivers ([GH#684](https://github.com/UW-Hydro/VIC/pull/684))
 
     These changes speed up image driver initialization, forcing reads, and history writes by only opening and closing each input netCDF file once.
@@ -125,6 +175,18 @@ This is a minor update from VIC 5.0.1. The VIC 5.1.0 includes new features, such
 10. Updated new snow density function by adding a cap to new snow density that is set in the parameters struct by the parameter SNOW_NEW_SNOW_DENS_MAX ([GH#776](https://github.com/UW-Hydro/VIC/pull/776))
 
     Previously the change in cold content of the snowpack term (deltaCC in the snow_data_struct) would get unreasonably large if the Hedstrom and Pomeroy 1998 equation used to calculate snow density, which depends only on air temperature, was calculated with air temperatures above about 2 deg C. We use this term to calculate the ground flux from the snowpack and snow depth, which resulted in extremely small snow depths and unreasonably large ground fluxes from the snowpack (and thus changes in snowpack cold content). Now there is a cap on new snow density with the new parameter SNOW_NEW_SNOW_DENS_MAX as well as a snow depth below which we disregard the ground flux from the snowpack (1.e-8).
+
+11. Added new option BULK_DENSITY_COMB that enables soil bulk density (mineral and organic) to be read from the parameters file ([GH#817](https://github.com/UW-Hydro/VIC/pull/817))
+
+    The option BULK_DENSITY_COMB enables soil bulk density (mineral and organic) to be read in as a parameter when the option is set to true in the global parameter file. Default is false.
+
+12. Turns on `ORGANIC_FRACT` option that previously existed in VIC 4 and enables the `BULK_DENSITY_COMB` option to be used in conjunction with it ([GH#837](https://github.com/UW-Hydro/VIC/pull/837))
+
+    The option `ORGANIC_FRACT`, if set to True, means that the organic fraction of the soil, soil density of the organic matter, and bulk density of the organic matter (if `BULK_DENSITY_COMB` is set to false) will be read in from the parameter file. If `BULK_DENSITY_COMB` is set to True, the bulk density of the organic matter will not be read in separately. Default is false. 
+
+13. Added new option `MAX_SNOW_ALBEDO` that enables new snow albedo to be read in from the parameters file ([GH#835](https://github.com/UW-Hydro/VIC/pull/835))
+
+    The option `MAX_SNOW_ALBEDO`, if set to true in the global parameter file, means that new snow albedo will be read in from the parameter file and used in the snow routines for all vegetation types except for bare soil. 
 
 10. Miscellaneous clean-up:
 

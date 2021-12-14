@@ -2,26 +2,6 @@
  * @section DESCRIPTION
  *
  * Initialize output structures.
- *
- * @section LICENSE
- *
- * The Variable Infiltration Capacity (VIC) macroscale hydrological model
- * Copyright (C) 2016 The Computational Hydrology Group, Department of Civil
- * and Environmental Engineering, University of Washington.
- *
- * The VIC model is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License
- * as published by the Free Software Foundation; either version 2
- * of the License, or (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License along with
- * this program; if not, write to the Free Software Foundation, Inc.,
- * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  *****************************************************************************/
 
 #include <vic_driver_shared_image.h>
@@ -323,6 +303,13 @@ initialize_history_file(nc_file_struct *nc,
     status = nc_def_dim(nc->nc_id, "nv", 2, &(nc->time_bounds_dimid));
     check_nc_status(status, "Error defining time bounds dimension in %s",
                     stream->filename);
+
+    if (options.LAKES) {
+        status = nc_def_dim(nc->nc_id, "lake_node", nc->lake_node_size,
+                            &(nc->lake_node_dimid));
+        check_nc_status(status, "Error defining lake_node dimension in %s",
+                        stream->filename);
+    }
 
     // define the netcdf variable time
     status = nc_def_var(nc->nc_id, "time", NC_DOUBLE, 1,
@@ -694,6 +681,7 @@ initialize_nc_file(nc_file_struct     *nc_file,
     nc_file->band_size = options.SNOW_BAND;
     nc_file->front_size = MAX_FRONTS;
     nc_file->frost_size = options.Nfrost;
+    nc_file->lake_node_size = MAX_LAKE_NODES;
     nc_file->layer_size = options.Nlayer;
     nc_file->ni_size = global_domain.n_nx;
     nc_file->nj_size = global_domain.n_ny;

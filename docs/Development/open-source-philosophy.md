@@ -1,6 +1,6 @@
 # VIC Model Open Source Philosophy
 
-VIC is Open Source software.  We have licensed the source code with the [GNU GPL v2.0 license](http://www.gnu.org/licenses/gpl-2.0.html).  This license provides very few restrictions on use.
+VIC is Open Source software.  We have licensed the source code with the [MIT license](https://opensource.org/licenses/MIT).  This license provides very few restrictions on use.
 
 Our rationale for moving the VIC model development to the open source community is that we want:
 - to encourage other researchers and developers to contribute to the VIC development,  and

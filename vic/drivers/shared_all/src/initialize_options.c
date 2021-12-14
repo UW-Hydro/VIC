@@ -3,26 +3,6 @@
  *
  * This subroutine initalizes all options before they are called by
  * the model.
- *
- * @section LICENSE
- *
- * The Variable Infiltration Capacity (VIC) macroscale hydrological model
- * Copyright (C) 2016 The Computational Hydrology Group, Department of Civil
- * and Environmental Engineering, University of Washington.
- *
- * The VIC model is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License
- * as published by the Free Software Foundation; either version 2
- * of the License, or (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License along with
- * this program; if not, write to the Free Software Foundation, Inc.,
- * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  *****************************************************************************/
 
 #include <vic_driver_shared_all.h>
@@ -72,6 +52,8 @@ initialize_options()
     // Model dimensions
     options.Ncanopy = 3;
     options.Nfrost = 1;
+    options.Nlakebasnode = MAX_LAKE_BASIN_NODES;
+    options.Nlakenode = MAX_LAKE_NODES;
     options.Nlayer = 3;
     options.Nnode = 3;
     options.ROOT_ZONES = 0;
@@ -84,6 +66,8 @@ initialize_options()
     options.JULY_TAVG_SUPPLIED = false;
     options.LAI_SRC = FROM_VEGLIB;
     options.ORGANIC_FRACT = false;
+    options.BULK_DENSITY_COMB = false;
+    options.MAX_SNOW_ALBEDO = false;
     options.VEGLIB_FCAN = false;
     options.VEGLIB_PHOTO = false;
     options.VEGPARAM_ALB = false;
@@ -91,6 +75,7 @@ initialize_options()
     options.VEGPARAM_LAI = false;
     // state options
     options.STATE_FORMAT = UNSET_FILE_FORMAT;
+    options.STATENAME_CESM = false;
     options.INIT_STATE = false;
     options.SAVE_STATE = false;
     // output options

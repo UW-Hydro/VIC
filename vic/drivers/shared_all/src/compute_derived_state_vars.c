@@ -4,26 +4,6 @@
  * This routine computes the state variables (energy balance, water balance,
  * and snow components) that are derived from the variables that are stored in
  * state files.
- *
- * @section LICENSE
- *
- * The Variable Infiltration Capacity (VIC) macroscale hydrological model
- * Copyright (C) 2016 The Computational Hydrology Group, Department of Civil
- * and Environmental Engineering, University of Washington.
- *
- * The VIC model is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License
- * as published by the Free Software Foundation; either version 2
- * of the License, or (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License along with
- * this program; if not, write to the Free Software Foundation, Inc.,
- * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  *****************************************************************************/
 
 #include <vic_driver_shared_all.h>
@@ -136,12 +116,12 @@ compute_derived_state_vars(all_vars_struct *all_vars,
                     if (FIRST_VEG) {
                         FIRST_VEG = false;
                         set_node_parameters(soil_con->Zsum_node,
-                                            soil_con->max_moist_node,
+                                            soil_con->porosity_node,
                                             soil_con->expt_node,
                                             soil_con->bubble_node,
                                             soil_con->alpha, soil_con->beta,
                                             soil_con->gamma, soil_con->depth,
-                                            soil_con->max_moist, soil_con->expt,
+                                            soil_con->porosity, soil_con->expt,
                                             soil_con->bubble,
                                             options.Nnode, options.Nlayer);
                     }
@@ -156,7 +136,7 @@ compute_derived_state_vars(all_vars_struct *all_vars,
                                 energy[veg][band].Cs_node,
                                 soil_con->Zsum_node,
                                 energy[veg][band].T,
-                                soil_con->max_moist_node,
+                                soil_con->porosity_node,
                                 soil_con->expt_node,
                                 soil_con->bubble_node,
                                 tmpM[veg][band],

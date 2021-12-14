@@ -3,26 +3,6 @@
  *
  * This routine reads the VIC model global control file, getting information
  * for output variables list (if any).
- *
- * @section LICENSE
- *
- * The Variable Infiltration Capacity (VIC) macroscale hydrological model
- * Copyright (C) 2016 The Computational Hydrology Group, Department of Civil
- * and Environmental Engineering, University of Washington.
- *
- * The VIC model is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License
- * as published by the Free Software Foundation; either version 2
- * of the License, or (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License along with
- * this program; if not, write to the Free Software Foundation, Inc.,
- * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  *****************************************************************************/
 
 #include <vic_driver_classic.h>
@@ -35,29 +15,29 @@ parse_output_info(FILE           *gp,
                   stream_struct **streams,
                   dmy_struct     *dmy_current)
 {
-    extern option_struct       options;
+    extern option_struct options;
 
-    char                       cmdstr[MAXSTRING];
-    char                       optstr[MAXSTRING];
-    char                       flgstr[MAXSTRING];
-    short int                  streamnum;
-    char                       varname[MAXSTRING];
-    int                        outvarnum;
-    char                       freq_type_str[MAXSTRING];
-    char                       freq_value_str[MAXSTRING];
-    char                       format[MAXSTRING];
-    char                       typestr[MAXSTRING];
-    int                        type;
-    char                       multstr[MAXSTRING];
-    char                       aggstr[MAXSTRING];
-    double                     mult;
-    unsigned short int         freq;
-    int                        freq_n;
-    dmy_struct                 freq_dmy;
-    unsigned short int         agg_type;
-    int                        found;
-    size_t                     nstream_vars[MAX_OUTPUT_STREAMS];
-    bool                       default_outputs = false;
+    char                 cmdstr[MAXSTRING];
+    char                 optstr[MAXSTRING];
+    char                 flgstr[MAXSTRING];
+    short int            streamnum;
+    char                 varname[MAXSTRING];
+    int                  outvarnum;
+    char                 freq_type_str[MAXSTRING];
+    char                 freq_value_str[MAXSTRING];
+    char                 format[MAXSTRING];
+    char                 typestr[MAXSTRING];
+    int                  type;
+    char                 multstr[MAXSTRING];
+    char                 aggstr[MAXSTRING];
+    double               mult;
+    unsigned short int   freq;
+    int                  freq_n;
+    dmy_struct           freq_dmy;
+    unsigned short int   agg_type;
+    int                  found;
+    size_t               nstream_vars[MAX_OUTPUT_STREAMS];
+    bool                 default_outputs = false;
 
     /** Read through global control file to find output info **/
 

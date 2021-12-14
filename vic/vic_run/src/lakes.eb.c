@@ -2,26 +2,6 @@
  * @section DESCRIPTION
  *
  * This set of routines handel the energy balance of lakes
- *
- * @section LICENSE
- *
- * The Variable Infiltration Capacity (VIC) macroscale hydrological model
- * Copyright (C) 2016 The Computational Hydrology Group, Department of Civil
- * and Environmental Engineering, University of Washington.
- *
- * The VIC model is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License
- * as published by the Free Software Foundation; either version 2
- * of the License, or (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License along with
- * this program; if not, write to the Free Software Foundation, Inc.,
- * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  *****************************************************************************/
 
 #include <vic_run.h>
@@ -689,7 +669,8 @@ alblake(double         Tcutoff,
 
     // compute snow surface albedo
     if (swq > 0.0) {
-        *snowalbedo = snow_albedo(newsnow, swq, *snowalbedo, coldcontent,
+        *snowalbedo = snow_albedo(newsnow, param.SNOW_NEW_SNOW_ALB,
+                                  swq, *snowalbedo, coldcontent,
                                   dt, *last_snow, *MELTING);
     }
     else if (swq == 0.0 && newsnow > 0.0) {
@@ -1838,7 +1819,7 @@ water_balance(lake_var_struct *lake,
     energy_bal_struct        **energy;
     size_t                     lindex;
     double                     frac;
-    double                     Dsmax, resid_moist, liq, rel_moist;
+    double                     Dsmax, liq, rel_moist;
     double                    *frost_fract;
     double                     volume_save;
     double                    *delta_moist = NULL;
@@ -2022,20 +2003,19 @@ water_balance(lake_var_struct *lake,
              cell[iveg][band].layer[lindex].ice[frost_area]) *
             frost_fract[frost_area];
     }
-    resid_moist = soil_con.resid_moist[lindex] * soil_con.depth[lindex] *
-                  MM_PER_M;
 
     /** Compute relative moisture **/
     rel_moist =
-        (liq - resid_moist) / (soil_con.max_moist[lindex] - resid_moist);
+        (liq - soil_con.resid_moist[lindex]) /
+        (soil_con.max_moist[lindex] - soil_con.resid_moist[lindex]);
 
     /** Compute baseflow as function of relative moisture **/
     frac = Dsmax * soil_con.Ds / soil_con.Ws;
     baseflow_out_mm = frac * rel_moist;
     if (rel_moist > soil_con.Ws) {
         frac = (rel_moist - soil_con.Ws) / (1 - soil_con.Ws);
-        baseflow_out_mm += Dsmax * (1 - soil_con.Ds / soil_con.Ws) * pow(frac,
-                                                                         soil_con.c);
+        baseflow_out_mm += Dsmax * (1 - soil_con.Ds / soil_con.Ws) *
+                           pow(frac, soil_con.c);
     }
     if (baseflow_out_mm < 0) {
         baseflow_out_mm = 0;
@@ -2200,7 +2180,7 @@ water_balance(lake_var_struct *lake,
             energy[iveg][band].Cs_node,
             soil_con.Zsum_node,
             energy[iveg][band].T,
-            soil_con.max_moist_node,
+            soil_con.porosity_node,
             soil_con.expt_node,
             soil_con.bubble_node,
             moist, soil_con.depth,

@@ -2,26 +2,6 @@
 * @section DESCRIPTION
 *
 * Collection of snow utilities.
-*
-* @section LICENSE
-*
-* The Variable Infiltration Capacity (VIC) macroscale hydrological model
-* Copyright (C) 2014  The Land Surface Hydrology Group, Department of Civil
-* and Environmental Engineering, University of Washington.
-*
-* The VIC model is free software; you can redistribute it and/or
-* modify it under the terms of the GNU General Public License
-* as published by the Free Software Foundation; either version 2
-* of the License, or (at your option) any later version.
-*
-* This program is distributed in the hope that it will be useful,
-* but WITHOUT ANY WARRANTY; without even the implied warranty of
-* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-* GNU General Public License for more details.
-*
-* You should have received a copy of the GNU General Public License along with
-* this program; if not, write to the Free Software Foundation, Inc.,
-* 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 ******************************************************************************/
 
 #include <vic_run.h>
@@ -252,6 +232,7 @@ new_snow_density(double air_temp)
 ******************************************************************************/
 double
 snow_albedo(double new_snow,
+            double new_snow_albedo,
             double swq,
             double albedo,
             double cold_content,
@@ -263,23 +244,23 @@ snow_albedo(double new_snow,
 
     /** New Snow **/
     if (new_snow > param.SNOW_TRACESNOW && cold_content < 0.0) {
-        albedo = param.SNOW_NEW_SNOW_ALB;
+        albedo = new_snow_albedo;
     }
     /** Aged Snow **/
     else if (swq > 0.0) {
         /* Accumulation season */
         if (cold_content < 0.0 && !MELTING) {
-            albedo = param.SNOW_NEW_SNOW_ALB * pow(param.SNOW_ALB_ACCUM_A,
-                                                   pow((double) last_snow * dt /
-                                                       SEC_PER_DAY,
-                                                       param.SNOW_ALB_ACCUM_B));
+            albedo = new_snow_albedo * pow(param.SNOW_ALB_ACCUM_A,
+                                           pow((double) last_snow * dt /
+                                               SEC_PER_DAY,
+                                               param.SNOW_ALB_ACCUM_B));
         }
         /* Melt Season */
         else {
-            albedo = param.SNOW_NEW_SNOW_ALB * pow(param.SNOW_ALB_THAW_A,
-                                                   pow((double) last_snow * dt /
-                                                       SEC_PER_DAY,
-                                                       param.SNOW_ALB_THAW_B));
+            albedo = new_snow_albedo * pow(param.SNOW_ALB_THAW_A,
+                                           pow((double) last_snow * dt /
+                                               SEC_PER_DAY,
+                                               param.SNOW_ALB_THAW_B));
         }
     }
     else {

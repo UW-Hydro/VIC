@@ -2,32 +2,12 @@
  * @section DESCRIPTION
  *
  * Print library.
- *
- * @section LICENSE
- *
- * The Variable Infiltration Capacity (VIC) macroscale hydrological model
- * Copyright (C) 2016 The Computational Hydrology Group, Department of Civil
- * and Environmental Engineering, University of Washington.
- *
- * The VIC model is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License
- * as published by the Free Software Foundation; either version 2
- * of the License, or (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License along with
- * this program; if not, write to the Free Software Foundation, Inc.,
- * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  *****************************************************************************/
 
 #include <vic_driver_shared_all.h>
 
 /******************************************************************************
- * @brief    Print dell data structure.
+ * @brief    Print cell data structure.
  *****************************************************************************/
 void
 print_cell_data(cell_data_struct *cell,
@@ -516,11 +496,17 @@ print_option(option_struct *option)
             option->LAKE_PROFILE ? "true" : "false");
     fprintf(LOG_DEST, "\tORGANIC_FRACT        : %s\n",
             option->ORGANIC_FRACT ? "true" : "false");
+    fprintf(LOG_DEST, "\tBULK_DENSITY_COMB        : %s\n",
+            option->BULK_DENSITY_COMB ? "true" : "false");
+    fprintf(LOG_DEST, "\tMAX_SNOW_ALBEDO        : %s\n",
+            option->MAX_SNOW_ALBEDO ? "true" : "false");
     fprintf(LOG_DEST, "\tSTATE_FORMAT         : %d\n", option->STATE_FORMAT);
     fprintf(LOG_DEST, "\tINIT_STATE           : %s\n",
             option->INIT_STATE ? "true" : "false");
     fprintf(LOG_DEST, "\tSAVE_STATE           : %s\n",
             option->SAVE_STATE ? "true" : "false");
+    fprintf(LOG_DEST, "\tSTATENAME_CESM       : %s\n",
+            option->STATENAME_CESM ? "true" : "false");
     fprintf(LOG_DEST, "\tNoutstreams          : %zu\n", option->Noutstreams);
 }
 
@@ -1011,11 +997,6 @@ print_soil_con(soil_con_struct *scon,
         fprintf(LOG_DEST, "\t%f", scon->max_moist[i]);
     }
     fprintf(LOG_DEST, "\n");
-    fprintf(LOG_DEST, "\tmax_moist_node        :");
-    for (i = 0; i < nnodes; i++) {
-        fprintf(LOG_DEST, "\t%f", scon->max_moist_node[i]);
-    }
-    fprintf(LOG_DEST, "\n");
     fprintf(LOG_DEST, "\tmax_snow_distrib_slope: %f\n",
             scon->max_snow_distrib_slope);
     fprintf(LOG_DEST, "\tphi_s                 :");
@@ -1026,6 +1007,11 @@ print_soil_con(soil_con_struct *scon,
     fprintf(LOG_DEST, "\tporosity              :");
     for (i = 0; i < nlayers; i++) {
         fprintf(LOG_DEST, "\t%f", scon->porosity[i]);
+    }
+    fprintf(LOG_DEST, "\n");
+    fprintf(LOG_DEST, "\tporosity_node        :");
+    for (i = 0; i < nnodes; i++) {
+        fprintf(LOG_DEST, "\t%f", scon->porosity_node[i]);
     }
     fprintf(LOG_DEST, "\n");
     fprintf(LOG_DEST, "\tquartz              :");

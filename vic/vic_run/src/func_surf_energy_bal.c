@@ -8,26 +8,6 @@
  *
  * The Energy Balance Equation used comes from Xu Liang's Paper "Insights of
  * the Ground Heat Flux in Land Surface Parameterization Schemes."
- *
- * @section LICENSE
- *
- * The Variable Infiltration Capacity (VIC) macroscale hydrological model
- * Copyright (C) 2016 The Computational Hydrology Group, Department of Civil
- * and Environmental Engineering, University of Washington.
- *
- * The VIC model is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License
- * as published by the Free Software Foundation; either version 2
- * of the License, or (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License along with
- * this program; if not, write to the Free Software Foundation, Inc.,
- * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  *****************************************************************************/
 
 #include <vic_run.h>
@@ -68,10 +48,10 @@ func_surf_energy_bal(double  Ts,
     double             ice0;
     double             kappa1;
     double             kappa2;
-    double             max_moist;
+    double             porosity;
     double             moist;
 
-    double            *Wmax;
+    double            *max_moist;
     double            *Wcr;
     double            *Wpwp;
     double            *depth;
@@ -153,7 +133,7 @@ func_surf_energy_bal(double  Ts,
     double            *gamma;
     double            *ice_node;
     double            *kappa_node;
-    double            *max_moist_node;
+    double            *porosity_node;
     double            *moist_node;
 
     /* spatial frost terms */
@@ -238,7 +218,7 @@ func_surf_energy_bal(double  Ts,
     ice0 = (double) va_arg(ap, double);
     kappa1 = (double) va_arg(ap, double);
     kappa2 = (double) va_arg(ap, double);
-    max_moist = (double) va_arg(ap, double);
+    porosity = (double) va_arg(ap, double);
     moist = (double) va_arg(ap, double);
 
     root = (double  *) va_arg(ap, double  *);
@@ -310,7 +290,7 @@ func_surf_energy_bal(double  Ts,
     gamma = (double *) va_arg(ap, double *);
     ice_node = (double *) va_arg(ap, double *);
     kappa_node = (double *) va_arg(ap, double *);
-    max_moist_node = (double *) va_arg(ap, double *);
+    porosity_node = (double *) va_arg(ap, double *);
     moist_node = (double *) va_arg(ap, double *);
 
     /* model structures */
@@ -341,7 +321,7 @@ func_surf_energy_bal(double  Ts,
 
     /* take additional variables from soil_con structure */
     b_infilt = soil_con->b_infilt;
-    Wmax = soil_con->max_moist;
+    max_moist = soil_con->max_moist;
     Wcr = soil_con->Wcr;
     Wpwp = soil_con->Wpwp;
     depth = soil_con->depth;
@@ -434,7 +414,7 @@ func_surf_energy_bal(double  Ts,
             Error = solve_T_profile_implicit(Tnew_node, T_node, Tnew_fbflag,
                                              Tnew_fbcount, Zsum_node,
                                              kappa_node, Cs_node, moist_node,
-                                             delta_t, max_moist_node,
+                                             delta_t, porosity_node,
                                              bubble_node, expt_node, ice_node,
                                              alpha, beta, gamma, dp, Nnodes,
                                              FIRST_SOLN, NOFLUX, EXP_TRANS,
@@ -455,7 +435,7 @@ func_surf_energy_bal(double  Ts,
             Error = solve_T_profile(Tnew_node, T_node, Tnew_fbflag,
                                     Tnew_fbcount, Zsum_node, kappa_node,
                                     Cs_node, moist_node, delta_t,
-                                    max_moist_node, bubble_node,
+                                    porosity_node, bubble_node,
                                     expt_node, ice_node, alpha, beta, gamma, dp,
                                     Nnodes, FIRST_SOLN, FS_ACTIVE, NOFLUX,
                                     EXP_TRANS);
@@ -556,7 +536,7 @@ func_surf_energy_bal(double  Ts,
         if (!options.EXP_TRANS) {
             if ((TMean + *T1) / 2. < 0.) {
                 ice = moist - maximum_unfrozen_water((TMean + *T1) / 2.,
-                                                     max_moist, bubble, expt);
+                                                     porosity, bubble, expt);
                 if (ice < 0.) {
                     ice = 0.;
                 }
@@ -575,7 +555,7 @@ func_surf_energy_bal(double  Ts,
                     ice0 = moist -
                            maximum_unfrozen_water(
                         (Told_node[i] + Told_node[i + 1]) / 2.,
-                        max_moist, bubble,
+                        porosity, bubble,
                         expt);
                     if (ice0 < 0.) {
                         ice0 = 0.;
@@ -588,7 +568,7 @@ func_surf_energy_bal(double  Ts,
                     ice = moist -
                           maximum_unfrozen_water(
                         (Tnew_node[i] + Tnew_node[i + 1]) / 2.,
-                        max_moist, bubble,
+                        porosity, bubble,
                         expt);
                     if (ice < 0.) {
                         ice = 0.;
@@ -609,7 +589,7 @@ func_surf_energy_bal(double  Ts,
             if ((Told_node[i] + T1_old) / 2. < 0.) {
                 ice0 = moist - maximum_unfrozen_water(
                     (Told_node[i] + T1_old) / 2.,
-                    max_moist, bubble, expt);
+                    porosity, bubble, expt);
                 if (ice0 < 0.) {
                     ice0 = 0.;
                 }
@@ -619,7 +599,7 @@ func_surf_energy_bal(double  Ts,
             }
             if ((Tnew_node[i] + *T1) / 2. < 0.) {
                 ice = moist - maximum_unfrozen_water((Tnew_node[i] + *T1) / 2.,
-                                                     max_moist, bubble, expt);
+                                                     porosity, bubble, expt);
                 if (ice < 0.) {
                     ice = 0.;
                 }
@@ -750,11 +730,12 @@ func_surf_energy_bal(double  Ts,
     }
     Evap = 0.;
     if (!SNOWING) {
-        if (VEG && veg_var->fcanopy > 0) {
+        // if VEG is true, then fcanopy > 0 and LAI > 0
+        if (VEG) {
             Evap = canopy_evap(layer, veg_var, true, veg_class, Wdew,
                                delta_t, NetBareRad, vpd, NetShortBare,
                                Tair, Ra_veg[1], elevation, rainfall,
-                               Wmax, Wcr, Wpwp, frost_fract, root,
+                               max_moist, Wcr, Wpwp, frost_fract, root,
                                dryFrac, shortwave, Catm, CanopLayerBnd);
             Evap *= veg_var->fcanopy;
             for (i = 0; i < options.Nlayer; i++) {
@@ -766,8 +747,7 @@ func_surf_energy_bal(double  Ts,
             SurfRad = NetBareRad;
         }
         Evap += (1 - veg_var->fcanopy) *
-                arno_evap(layer, SurfRad, Tair, vpd,
-                          depth[0], max_moist * depth[0] * MM_PER_M,
+                arno_evap(layer, SurfRad, Tair, vpd, max_moist[0],
                           elevation, b_infilt, Ra_used[0], delta_t,
                           resid_moist[0], frost_fract);
         for (i = 0; i < options.Nlayer; i++) {

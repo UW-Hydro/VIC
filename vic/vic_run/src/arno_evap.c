@@ -8,26 +8,6 @@
  * the potential for the area which is partial saturated.
  *
  * Evaporation from bare soil calculated only from uppermost layer.
- *
- * @section LICENSE
- *
- * The Variable Infiltration Capacity (VIC) macroscale hydrological model
- * Copyright (C) 2016 The Computational Hydrology Group, Department of Civil
- * and Environmental Engineering, University of Washington.
- *
- * The VIC model is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License
- * as published by the Free Software Foundation; either version 2
- * of the License, or (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License along with
- * this program; if not, write to the Free Software Foundation, Inc.,
- * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  *****************************************************************************/
 
 #include <vic_run.h>
@@ -40,13 +20,12 @@ arno_evap(layer_data_struct *layer,
           double             rad,
           double             air_temp,
           double             vpd,
-          double             depth1,
           double             max_moist,
           double             elevation,
           double             b_infilt,
           double             ra,
           double             delta_t,
-          double             moist_resid,
+          double             resid_moist,
           double            *frost_fract)
 {
     extern parameters_struct param;
@@ -169,10 +148,10 @@ arno_evap(layer_data_struct *layer,
 
     /* only consider positive evaporation; we won't put limits on condensation */
     if (esoil > 0.0) {
-        if (moist > moist_resid * depth1 * MM_PER_M) {
+        if (moist > resid_moist) {
             /* there is liquid moisture available; cap esoil at available liquid moisture */
-            if (esoil > moist - moist_resid * depth1 * MM_PER_M) {
-                esoil = moist - moist_resid * depth1 * MM_PER_M;
+            if (esoil > moist - resid_moist) {
+                esoil = moist - resid_moist;
             }
         }
         else {

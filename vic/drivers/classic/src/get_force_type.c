@@ -3,26 +3,6 @@
  *
  * This routine determines the current forcing file data type and stores its
  * location in the description of the current forcing file.
- *
- * @section LICENSE
- *
- * The Variable Infiltration Capacity (VIC) macroscale hydrological model
- * Copyright (C) 2016 The Computational Hydrology Group, Department of Civil
- * and Environmental Engineering, University of Washington.
- *
- * The VIC model is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License
- * as published by the Free Software Foundation; either version 2
- * of the License, or (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License along with
- * this program; if not, write to the Free Software Foundation, Inc.,
- * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  *****************************************************************************/
 
 #include <vic_driver_classic.h>
@@ -109,15 +89,11 @@ get_force_type(char *cmdstr,
     else if (strcasecmp("SWDOWN", optstr) == 0) {
         type = SWDOWN;
     }
-    /* type 13: vegetation cover fraction */
-    else if (strcasecmp("FCANOPY", optstr) == 0) {
-        type = FCANOPY;
-    }
-    /* type 14: wind speed [m/s] */
+    /* type 13: wind speed [m/s] */
     else if (strcasecmp("WIND", optstr) == 0) {
         type = WIND;
     }
-    /* type 15: unused (blank) data */
+    /* type 14: unused (blank) data */
     else if (strcasecmp("SKIP", optstr) == 0) {
         type = SKIP;
     }

@@ -2,26 +2,6 @@
  * @section DESCRIPTION
  *
  * Run function for image mode driver.
- *
- * @section LICENSE
- *
- * The Variable Infiltration Capacity (VIC) macroscale hydrological model
- * Copyright (C) 2016 The Computational Hydrology Group, Department of Civil
- * and Environmental Engineering, University of Washington.
- *
- * The VIC model is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License
- * as published by the Free Software Foundation; either version 2
- * of the License, or (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License along with
- * this program; if not, write to the Free Software Foundation, Inc.,
- * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  *****************************************************************************/
 
 #include <vic_driver_shared_image.h>
@@ -39,7 +19,7 @@ vic_image_run(dmy_struct *dmy_current)
     extern domain_struct       local_domain;
     extern option_struct       options;
     extern global_param_struct global_param;
-    extern lake_con_struct     lake_con;
+    extern lake_con_struct    *lake_con;
     extern double           ***out_data;
     extern stream_struct      *output_streams;
     extern save_data_struct   *save_data;
@@ -67,11 +47,11 @@ vic_image_run(dmy_struct *dmy_current)
 
         timer_start(&timer);
         vic_run(&(force[i]), &(all_vars[i]), dmy_current, &global_param,
-                &lake_con, &(soil_con[i]), veg_con[i], veg_lib[i]);
+                &(lake_con[i]), &(soil_con[i]), veg_con[i], veg_lib[i]);
         timer_stop(&timer);
 
         put_data(&(all_vars[i]), &(force[i]), &(soil_con[i]), veg_con[i],
-                 veg_lib[i], &lake_con, out_data[i], &(save_data[i]),
+                 veg_lib[i], &(lake_con[i]), out_data[i], &(save_data[i]),
                  &timer);
     }
 

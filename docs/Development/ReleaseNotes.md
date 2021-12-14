@@ -15,13 +15,16 @@ To check which release of VIC you are running:
 
 ------------------------------
 
-## VIC 5.1.0
+## VIC 5.1.0 (December 14, 2021)
+
+This is a maintanence release that includes numerous bug fixes and a few model enhancements. All code changes were included in the two release candidates (5.1.0.rc1 and 5.1.0.rc2). See the notes below from the two release candidates for more details.
 
 #### Announcements
 
-1. VIC is now shared under the MIT license ([GH#917](https://github.com/UW-Hydro/VIC/pull/917))
+1. VIC is now shared under the MIT license ([GH#917](https://github.com/UW-Hydro/VIC/pull/917)).
+2. Travis-CI was disabled folling the platform's migration to travis-ci.com. See [GH#919](https://github.com/UW-Hydro/VIC/issues/919) for more details ([GH918](https://github.com/UW-Hydro/VIC/pull/918)).
 
-## VIC 5.1.0 rc2
+## VIC 5.1.0 rc2 (September 28, 2020)
 
 #### Bug Fixes:
 
@@ -31,11 +34,11 @@ To check which release of VIC you are running:
 
 3. Removed descriptions of forcing disaggregation options from documentation of image driver global parameter file ([GH#833](https://github.com/UW-Hydro/VIC/pull/833))
 
-4. Fixed segmentation fault in lake model caused by incorrect passing of pointer argument to vic_run(). ([GH#826]((https://github.com/UW-Hydro/VIC/pull/826))
+4. Fixed segmentation fault in lake model caused by incorrect passing of pointer argument to `vic_run()`. ([GH#826]((https://github.com/UW-Hydro/VIC/pull/826))
 
 5. Relaxed some of the validation of lake parameters, to allow them to be null in cells containing no lakes. ([GH#826]((https://github.com/UW-Hydro/VIC/pull/826))
 
-6. Fixed passing of lake data structures to generate_default_lake_state(). ([GH#826]((https://github.com/UW-Hydro/VIC/pull/826))
+6. Fixed passing of lake data structures to `generate_default_lake_state()`. ([GH#826]((https://github.com/UW-Hydro/VIC/pull/826))
 
 7. Separated the dimensions of arrays related to lake basin shape and of arrays related to the number of lake simulation layers. ([GH#826]((https://github.com/UW-Hydro/VIC/pull/826))
 

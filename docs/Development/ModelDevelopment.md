@@ -2,7 +2,7 @@
 
 We encourage any users who have modified (or would like to modify) VIC, either to fix bugs or develop new features, to contact us and coordinate development work with us. The VIC model source code is archived in Git and is publicly available through [GitHub](https://github.com). To access the source code, visit [GitHub](https://github.com), create an account, and visit [github.com/UW-Hydro/VIC](https://github.com/UW-Hydro/VIC). The routing model will soon be added to the archive as well.
 
-VIC is an [open source](open-source-philosophy.md) development model and is released under the terms of the [GNU General Public License v2 (GPL).](http://www.gnu.org/licenses/old-licenses/gpl-2.0.html)
+VIC is an [open source](open-source-philosophy.md) development model and is released under the terms of the [MIT License](https://opensource.org/licenses/MIT).
 
 Instructions for using Git and GitHub to access the VIC code and contribute changes are here:
 

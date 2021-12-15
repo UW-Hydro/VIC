@@ -44,3 +44,7 @@ TAGS
 __pycache__
 .ipynb_checkpoints
 .eggs
+
+# docs
+_build/
+site/

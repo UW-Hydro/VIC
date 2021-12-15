@@ -1,4 +1,4 @@
-# Object files
+ Object files
 *.o
 *.ko
 *.obj
@@ -44,3 +44,7 @@ TAGS
 __pycache__
 .ipynb_checkpoints
 .eggs
+
+# docs
+_build/
+site/

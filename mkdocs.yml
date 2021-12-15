@@ -3,15 +3,16 @@ site_description: Variable Infiltration Capacity Model
 site_author: UW Hydro | Computational Hydrology
 repo_url: https://github.com/UW-Hydro/VIC
 site_url: http://vic.readthedocs.org/
-theme: readthedocs
-theme_dir: 'docs/custom_rtd_theme'
-site_favicon: vic_favicon.jpg
-copyright: 2016
+theme:
+    name: readthedocs
+    analytics:
+        gtag: UA-65965729-1
+copyright: 2021
 docs_dir: docs
 site_dir: site
 use_directory_urls: true
 
-pages:
+nav:
 # Main pages
 - Home: 'index.md'
 - About:
@@ -27,6 +28,8 @@ pages:
         - 'Image': 'Documentation/Drivers/Image/ImageDriver.md'
         - 'CESM': 'Documentation/Drivers/CESM/CESMDriver.md'
         - 'Python': 'Documentation/Drivers/Python/PythonDriver.md'
+    - 'Extensions':
+        - 'Routing (Image Driver)': 'Documentation/Drivers/Image/Routing.md'
 - Development:
     - 'Development': 'Development/ModelDevelopment.md'
     - 'Release Notes': 'Development/ReleaseNotes.md'
@@ -97,6 +100,4 @@ markdown_extensions:
     - admonition:
     - fenced_code:
 
-copyright: 'Copyright &copy; 2016, <a href="http://uw-hydro.github.io/">University of Washington Computational Hydrology Group</a>.'
-
-google_analytics: ['UA-65965729-1', 'vic.readthedocs.org']
+copyright: 'Copyright &copy; 2021, <a href="http://uw-hydro.github.io/">University of Washington Computational Hydrology Group</a>.'

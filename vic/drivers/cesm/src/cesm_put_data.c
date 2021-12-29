@@ -98,7 +98,7 @@ vic_cesm_put_data()
         // that is already in the put_data routine
 
         // temperature, VIC: K, CESM: K
-        l2x_vic[i].l2x_Sl_t = out_data[i][OUT_RAD_TEMP][0];
+        l2x_vic[i].l2x_Sl_t = (double) out_data[i][OUT_RAD_TEMP][0];
 
         // albedo, VIC: fraction, CESM: fraction
         // Note: VIC does not partition its albedo, thus all types are
@@ -126,27 +126,27 @@ vic_cesm_put_data()
 
         // longwave up, VIC: W/m2, CESM: W/m2
         // adjust sign for CESM sign convention
-        l2x_vic[i].l2x_Fall_lwup = -1 *
+        l2x_vic[i].l2x_Fall_lwup = (double) (-1 *
                                    (out_data[i][OUT_LWDOWN][0] -
-                                    out_data[i][OUT_LWNET][0]);
+                                    out_data[i][OUT_LWNET][0]));
 
         // turbulent heat fluxes
         // Note: both are the opposite sign from image driver
         // in accordance with the sign convention for coupled models
         // latent heat, VIC: W/m2, CESM: W/m2
-        l2x_vic[i].l2x_Fall_lat = -1 * out_data[i][OUT_LATENT][0];
+        l2x_vic[i].l2x_Fall_lat = (double) (-1 * out_data[i][OUT_LATENT][0]);
 
         // sensible heat, VIC: W/m2, CESM: W/m2
-        l2x_vic[i].l2x_Fall_sen += -1 * out_data[i][OUT_SENSIBLE][0];
+        l2x_vic[i].l2x_Fall_sen = (double) (-1 * out_data[i][OUT_SENSIBLE][0]);
 
         // evaporation, VIC: mm, CESM: kg m-2 s-1
-        l2x_vic[i].l2x_Fall_evap += -1 * out_data[i][OUT_EVAP][0] /
-                                    global_param.dt;
+        l2x_vic[i].l2x_Fall_evap = (double) (-1 * out_data[i][OUT_EVAP][0] /
+                                    global_param.dt);
 
         // lnd->rtm input fluxes
-        l2x_vic[i].l2x_Flrl_rofliq = (out_data[i][OUT_RUNOFF][0] +
+        l2x_vic[i].l2x_Flrl_rofliq = (double) ((out_data[i][OUT_RUNOFF][0] +
                                       out_data[i][OUT_BASEFLOW][0]) /
-                                     global_param.dt;
+                                     global_param.dt);
 
 
         // running sum to make sure we get the full grid cell
@@ -217,21 +217,21 @@ vic_cesm_put_data()
                 // CESM units: N m-2
                 wind_stress_x = out_data[i][OUT_DENSITY][0] *
                                 x2l_vic[i].x2l_Sa_u / aero_resist;
-                l2x_vic[i].l2x_Fall_taux += AreaFactor * wind_stress_x;
+                l2x_vic[i].l2x_Fall_taux += (double) (AreaFactor * wind_stress_x);
 
                 // wind stress, meridional
                 // CESM units: N m-2
                 wind_stress_y = out_data[i][OUT_DENSITY][0] *
                                 x2l_vic[i].x2l_Sa_v / aero_resist;
-                l2x_vic[i].l2x_Fall_tauy += AreaFactor * wind_stress_y;
+                l2x_vic[i].l2x_Fall_tauy += (double) (AreaFactor * wind_stress_y);
 
                 // friction velocity
                 // CESM units: m s-1
                 wind_stress =
                     sqrt(pow(wind_stress_x, 2) + pow(wind_stress_y, 2));
-                l2x_vic[i].l2x_Sl_fv += AreaFactor *
+                l2x_vic[i].l2x_Sl_fv += (double) (AreaFactor *
                                         sqrt(wind_stress /
-                                             out_data[i][OUT_DENSITY][0]);
+                                             out_data[i][OUT_DENSITY][0]));
             }
         }
 

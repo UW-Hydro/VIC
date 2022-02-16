@@ -21,6 +21,7 @@ str_to_bool(char str[])
     else {
         log_err("%s is neither TRUE nor FALSE", str);
     }
+    return false; // To avoid warnings.
 }
 
 /******************************************************************************
@@ -112,6 +113,7 @@ str_to_agg_type(char aggstr[])
             log_err("Unknown aggregation type found: %s", aggstr);
         }
     }
+    return 0; // To avoid warnings.
 }
 
 /******************************************************************************
@@ -146,6 +148,7 @@ str_to_out_type(char typestr[])
             log_err("Unknown out type found: %s", typestr);
         }
     }
+    return 0; // To avoid warnings.
 }
 
 /******************************************************************************
@@ -160,6 +163,7 @@ str_to_out_mult(char multstr[])
     else {
         return (double) atof(multstr);
     }
+    return 0.; // To avoid warnings.
 }
 
 /******************************************************************************
@@ -201,6 +205,7 @@ str_to_freq_flag(char freq[])
     else {
         log_err("Unknown frequency flag found: %s", freq);
     }
+    return 0; // To avoid warnings.
 }
 
 /******************************************************************************
@@ -253,6 +258,7 @@ str_to_calendar(char *cal_chars)
     else {
         log_err("Unknown calendar specified: %s", cal_chars);
     }
+    return 0; // To avoid warnings.
 }
 
 /******************************************************************************
@@ -277,6 +283,7 @@ str_to_timeunits(char units_chars[])
     else {
         log_err("Unknown time units specified: %s", units_chars);
     }
+    return 0; // To avoid warnings.
 }
 
 /******************************************************************************
@@ -379,4 +386,5 @@ cell_method_from_agg_type(unsigned short int aggtype,
     else {
         return false;
     }
+    return false; // To avoid warnings.
 }

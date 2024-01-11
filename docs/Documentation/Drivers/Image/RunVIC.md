@@ -34,7 +34,7 @@ The flags and libraries required to compile VIC with netCDF are automatically de
         NC_LIBS="-L/path/to/libs ..."
         NC_CFLAGS="-I/path/to/includes -your_c_flags ..."
 
-In some versions of the MPI library (e.g. OPEN-MPI with Intel), you may also need to set the environment variable `MX_RCACHE=2` prior to compiling.
+In some versions of the MPI library (e.g. OPEN-MPI with Intel), you may also need to set the environment variable `MX_RCACHE=2` prior to compiling. Additionally, some versions or configurations of OpenMPI may conflict with OpenMP resulting in NA values in the VIC output, in which case you can set OpenMP to only use one thread by setting export OMP_NUM_THREADS=1 prior to running the VIC image driver with any number of OpenMPI threads (see https://github.com/UW-Hydro/VIC/issues/787).
 
 To enable the river routing extension, you must set the ROUT option. This includes setting extension in the Makefile and adding routing-specific input parameter file. For more information on how to enable the routing extension, see the [routing extension documentation](Routing.md).
 

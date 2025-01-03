@@ -5,6 +5,7 @@
  * level.
  *****************************************************************************/
 
+#define _MAIN_
 #include <vic_driver_python.h>
 
 // global variables

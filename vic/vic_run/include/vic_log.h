@@ -58,7 +58,13 @@
 #define LOG_LVL 25
 #endif
 
-FILE *LOG_DEST;
+#ifdef _MAIN_
+#define GLOBAL
+#else
+#define GLOBAL extern
+#endif
+
+GLOBAL FILE *LOG_DEST;
 
 void finalize_logging(void);
 void get_logname(const char *path, int id, char *filename);

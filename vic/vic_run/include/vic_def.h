@@ -69,11 +69,17 @@
 #define min(a, b) (a < b) ? a : b
 #define max(a, b) (a > b) ? a : b
 
+#ifdef _MAIN_
+#define GLOBAL
+#else
+#define GLOBAL extern
+#endif
+
 extern size_t NR;       /**< array index for force struct that indicates
                              the model step avarage or sum */
 extern size_t NF;       /**< array index loop counter limit for force
                              struct that indicates the SNOW_STEP values */
-char          vic_run_ref_str[MAXSTRING];
+GLOBAL char          vic_run_ref_str[MAXSTRING];
 
 /******************************************************************************
  * @brief   Snow Density parametrizations

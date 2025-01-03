@@ -4,6 +4,7 @@
  * Classic driver of the VIC model
  *****************************************************************************/
 
+#define _MAIN_
 #include <vic_driver_classic.h>
 
 // global variables

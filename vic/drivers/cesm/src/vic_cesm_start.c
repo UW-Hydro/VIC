@@ -4,6 +4,7 @@
  * These routine handles the startup tasks for the CESM driver.
  *****************************************************************************/
 
+#define _MAIN_
 #include <ctype.h>  // Do we need this line?
 #include <vic_driver_cesm.h>
 

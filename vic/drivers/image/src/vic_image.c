@@ -4,6 +4,7 @@
  * Stand-alone image mode driver of the VIC model
  *****************************************************************************/
 
+#define _MAIN_
 #include <vic_driver_image.h>
 #include <rout.h>   // Routing routine (extension)
 

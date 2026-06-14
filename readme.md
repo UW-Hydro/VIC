@@ -25,3 +25,8 @@ VIC is a research model developed by graduate students, post-docs and research s
 While we would like to hear about your particular application (especially a copy of any published paper), we cannot give you individual support in setting up and running the model. The [VIC documentation website](http://vic.readthedocs.org) includes reasonably complete instructions on how to run the model, as well as the opportunity to sign up for the VIC Users Email List. The [VIC listserve](https://mailman.u.washington.edu/mailman/listinfo/vic_users) should be used for questions about model setup and application. It is basically VIC users helping other VIC users. All other exchanges about VIC source code are managed through the [VIC github page](https://github.com/UW-Hydro/VIC).
 
 If you make use of this model, please acknowledge [Liang et al. [1994]](http://dx.doi.org/10.1029/94jd00483) and [Hamman et al. [2018]](https://doi.org/10.5194/gmd-11-3481-2018) plus any other references appropriate to the features you used that are cited in the [model overview](http://vic.readthedocs.org/en/latest/Overview/ModelOverview/).
+
+## Community resources
+
+- Unofficial, community-maintained AI-agent skill for onboarding new users (not an official UW-Hydro resource): [earth-space-ai/vic-skill](https://github.com/earth-space-ai/vic-skill). It restructures the existing VIC documentation for AI coding agents and defers to this repository as the source of truth.
+

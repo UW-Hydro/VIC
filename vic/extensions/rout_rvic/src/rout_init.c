@@ -49,8 +49,8 @@ rout_init(void)
 
         // The Ring
         for (j = 0; j < rout.rout_param.n_outlets; j++) {
-            for (i = 0; i < rout.rout_param.n_timesteps; i++) {
-                rout.ring[j * rout.rout_param.n_timesteps + i] = 0.0;
+            for (i = 0; i < rout.rout_param.full_time_length; i++) {
+                rout.ring[j * rout.rout_param.full_time_length + i] = 0.0;
             }
         }
 

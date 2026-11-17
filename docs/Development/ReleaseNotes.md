@@ -15,6 +15,12 @@ To check which release of VIC you are running:
 
 ------------------------------
 
+## Unreleased
+
+#### Bug Fixes:
+
+1. Updated the version strings in `vic_version.h` and in the Python driver `setup.py`, which still were those of VIC 5.0.1. The VIC 5.1.0 drivers reported "5.0.1 February 1, 2017" in `-v`, in the log and in the `VIC_Model_Version` global attribute and `MODEL_VERSION` header line of the output files.
+
 ## VIC 5.1.0 (December 14, 2021)
 
 This is a maintanence release that includes numerous bug fixes and a few model enhancements. All code changes were included in the two release candidates (5.1.0.rc1 and 5.1.0.rc2). See the notes below from the two release candidates for more details.

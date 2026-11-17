@@ -15,6 +15,12 @@ To check which release of VIC you are running:
 
 ------------------------------
 
+## Unreleased
+
+#### Bug Fixes:
+
+1. Fixed the time index used to read the `CHANNEL_IN` forcing in the image driver (`vic_force.c`). The index was computed outside the loop over the forcing steps with the value of the loop counter left by the previous read (`NF`), so the records of the next forcing block were read (and a record beyond the end of the file at the last step of a year), and the single record read was copied to all `NF` forcing steps. `CHANNEL_IN` is now read record by record, like the other forcing variables.
+
 ## VIC 5.1.0 (December 14, 2021)
 
 This is a maintanence release that includes numerous bug fixes and a few model enhancements. All code changes were included in the two release candidates (5.1.0.rc1 and 5.1.0.rc2). See the notes below from the two release candidates for more details.

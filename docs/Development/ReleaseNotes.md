@@ -15,6 +15,12 @@ To check which release of VIC you are running:
 
 ------------------------------
 
+## Unreleased
+
+#### Bug Fixes:
+
+1. Fixed `get_volume()` in `lake_utils.c`. For a depth above the top of the lake basin the function set the volume to the maximum lake volume and the warning status, but did not return, so the loop over the lake nodes added the volume of the whole basin once more and the function returned twice the maximum volume.
+
 ## VIC 5.1.0 (December 14, 2021)
 
 This is a maintanence release that includes numerous bug fixes and a few model enhancements. All code changes were included in the two release candidates (5.1.0.rc1 and 5.1.0.rc2). See the notes below from the two release candidates for more details.

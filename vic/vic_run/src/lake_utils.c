@@ -65,6 +65,7 @@ get_volume(lake_con_struct lake_con,
     if (depth > lake_con.z[0]) {
         status = 1;
         *volume = lake_con.maxvolume;
+        return status;
     }
 
     for (i = lake_con.numnod - 1; i >= 0; i--) {

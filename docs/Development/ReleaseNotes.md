@@ -15,6 +15,12 @@ To check which release of VIC you are running:
 
 ------------------------------
 
+## Unreleased
+
+#### Bug Fixes:
+
+1. Fixed the time unit of the turnover times of the intermediate and slow soil carbon pools in `compute_soil_resp()`. The time step `dt` is in seconds, but these two pools divided by `HOURS_PER_DAY` (a leftover from VIC 4, where `dt` was in hours) instead of `SEC_PER_DAY`, as the litter pool already did, so both pools decayed 3600 times too fast. Results of simulations with `CARBON` set to `TRUE` change.
+
 ## VIC 5.1.0 (December 14, 2021)
 
 This is a maintanence release that includes numerous bug fixes and a few model enhancements. All code changes were included in the two release candidates (5.1.0.rc1 and 5.1.0.rc2). See the notes below from the two release candidates for more details.

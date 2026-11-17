@@ -165,11 +165,11 @@ compute_soil_resp(int     Nnodes,
         RhInter[i] = param.SRESP_RFACTOR *
                      (fTSoil[i] * fMSoil[i] /
                       (param.SRESP_TAUINTER * CONST_DDAYS_PER_YEAR *
-                       HOURS_PER_DAY / dt)) * CInterNode[i];
+                       SEC_PER_DAY / dt)) * CInterNode[i];
         RhSlow[i] = param.SRESP_RFACTOR *
                     (fTSoil[i] * fMSoil[i] /
                      (param.SRESP_TAUSLOW * CONST_DDAYS_PER_YEAR *
-                      HOURS_PER_DAY / dt)) * CSlowNode[i];
+                      SEC_PER_DAY / dt)) * CSlowNode[i];
         *RhInterTot += RhInter[i];
         *RhSlowTot += RhSlow[i];
     }

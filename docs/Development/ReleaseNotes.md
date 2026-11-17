@@ -15,6 +15,12 @@ To check which release of VIC you are running:
 
 ------------------------------
 
+## Unreleased
+
+#### Bug Fixes:
+
+1. Fixed the gas constant used in `photosynth()`. The Arrhenius temperature factors of Vcmax, KC, KO, Rdark and K (activation energies in J/mol) and the conversions between stomatal resistance and conductance (mol m-3) used `CONST_RGAS` (J/K/kmole) instead of the gas constant per mole, so the temperature dependence was almost switched off and the stomatal resistance was off by a factor of 1000. Added `CONST_RMOL` (J/K/mole) to `vic_physical_constants.h`. Results of simulations with `CARBON` set to `TRUE` change.
+
 ## VIC 5.1.0 (December 14, 2021)
 
 This is a maintanence release that includes numerous bug fixes and a few model enhancements. All code changes were included in the two release candidates (5.1.0.rc1 and 5.1.0.rc2). See the notes below from the two release candidates for more details.

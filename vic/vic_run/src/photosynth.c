@@ -66,7 +66,7 @@ photosynth(char    Ctype,
        ! and Jmax at 25 Celsius (Vcmax * nscl),  Knorr (107/108)
     ********************************************************************************/
     Vcmax = MaxCarboxRate * NscaleFactor *
-            exp(param.PHOTO_EV * (T0 / T1) / (CONST_RGAS * T));
+            exp(param.PHOTO_EV * (T0 / T1) / (CONST_RMOL * T));
 
     /********************************************************************************
        ! Determine temperature-dependent rates, compensation point, and 'dark' respiration
@@ -89,9 +89,9 @@ photosynth(char    Ctype,
            !    Knorr (106)
         ********************************************************************************/
         KC = param.PHOTO_KC *
-             exp(param.PHOTO_EC * (T0 / T1) / (CONST_RGAS * T));
+             exp(param.PHOTO_EC * (T0 / T1) / (CONST_RMOL * T));
         KO = param.PHOTO_KO *
-             exp(param.PHOTO_EO * (T0 / T1) / (CONST_RGAS * T));
+             exp(param.PHOTO_EO * (T0 / T1) / (CONST_RMOL * T));
 
         /********************************************************************************
            ! CO2 compensation point without leaf respiration, gamma* is assumed to be linearly
@@ -132,7 +132,7 @@ photosynth(char    Ctype,
         *Rdark = param.PHOTO_FRDC3 * MaxCarboxRate * NscaleFactor *
                  exp(param.PHOTO_ER *
                      (T0 /
-                      T1) / (CONST_RGAS * T)) * hiTinhib(Tfoliage) * darkinhib(
+                      T1) / (CONST_RMOL * T)) * hiTinhib(Tfoliage) * darkinhib(
             PIRRIN);
     }
     else if (Ctype == PHOTO_C4) {
@@ -164,7 +164,7 @@ photosynth(char    Ctype,
            ! K scales of course with EK
         ********************************************************************************/
         K = CO2Specificity * 1.E3 * NscaleFactor * exp(
-            param.PHOTO_EK * (T0 / T1) / (CONST_RGAS * T));
+            param.PHOTO_EK * (T0 / T1) / (CONST_RMOL * T));
 
         /********************************************************************************
            !  Compute 'dark' respiration
@@ -174,7 +174,7 @@ photosynth(char    Ctype,
         *Rdark = param.PHOTO_FRDC4 * MaxCarboxRate * NscaleFactor *
                  exp(param.PHOTO_ER *
                      (T0 /
-                      T1) / (CONST_RGAS * T)) * hiTinhib(Tfoliage) * darkinhib(
+                      T1) / (CONST_RMOL * T)) * hiTinhib(Tfoliage) * darkinhib(
             PIRRIN);
     } // End computation of T-dependent rates and dark respiration
 
@@ -261,7 +261,7 @@ photosynth(char    Ctype,
                ! and r0 = 1/G0
                ! So Ci = Catm - 1.6*(Rgas*T/Psurf)*rs * A = Catm - A * r0
             ********************************************************************************/
-            r0 = (*rs) * 1.6 * CONST_RGAS * T / Psurf;
+            r0 = (*rs) * 1.6 * CONST_RMOL * T / Psurf;
 
             /********************************************************************************
                ! A = min{JC, JE} - Rdark
@@ -320,7 +320,7 @@ photosynth(char    Ctype,
                ! and r0 = 1/G0
                ! So Ci = Catm - 1.6*(Rgas*T/Psurf)*rs * A = Catm - A * r0
             ********************************************************************************/
-            r0 = (*rs) * 1.6 * CONST_RGAS * T / Psurf;
+            r0 = (*rs) * 1.6 * CONST_RMOL * T / Psurf;
 
             /********************************************************************************
                !  J0=1/2/Theta *(Vcmax + Ji) = (alphai * aPAR + Vcmax) / 2 / Theta
@@ -418,7 +418,7 @@ photosynth(char    Ctype,
         else {
             *rs = 0.625 *
                   (Catm -
-                   (*Ci)) / ((*Agross) - (*Rdark)) * (Psurf / (CONST_RGAS * T));
+                   (*Ci)) / ((*Agross) - (*Rdark)) * (Psurf / (CONST_RMOL * T));
         }
         if (*rs > param.HUGE_RESIST) {
             *rs = param.HUGE_RESIST;

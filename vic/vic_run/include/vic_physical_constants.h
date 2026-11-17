@@ -68,6 +68,7 @@
 #define CONST_MWC 12.01  /**< molecular weight of carbon ~ kg/kmole */
 /**< gas constants */
 #define CONST_RGAS (CONST_AVOGAD * CONST_BOLTZ) /**< Universal gas constant ~ J/K/kmole */
+#define CONST_RMOL (CONST_RGAS / MOLE_PER_KMOLE) /**< Universal gas constant ~ J/K/mole */
 #define CONST_RDAIR (CONST_RGAS / CONST_MWDAIR)  /**< Dry air gas constant ~ J/K/kg */
 #define CONST_RWV (CONST_RGAS / CONST_MWWV)  /**< Water vapor gas constant ~ J/K/kg */
 #define CONST_EPS (CONST_MWWV / CONST_MWAIR)  /**< Ratio of molecular weights */

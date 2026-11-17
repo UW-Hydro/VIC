@@ -15,6 +15,12 @@ To check which release of VIC you are running:
 
 ------------------------------
 
+## Unreleased
+
+#### Bug Fixes:
+
+1. Fixed the rotation of the routing ring buffer in `convolution()` of the RVIC extension. The ring has `full_time_length` rows, but only the first `n_timesteps` rows were rotated, so water that a source with a non-zero `source_time_offset` added to rows beyond `n_timesteps` never reached the row read as discharge and was lost. The whole ring is now rotated, as in RVIC (`np.roll` over the full ring), and it is now zeroed completely at initialization (before, only the first `n_timesteps` rows were). Routing state files written by earlier versions have undefined values in the rows beyond `n_timesteps` and should not be used to restart a run with this fix.
+
 ## VIC 5.1.0 (December 14, 2021)
 
 This is a maintanence release that includes numerous bug fixes and a few model enhancements. All code changes were included in the two release candidates (5.1.0.rc1 and 5.1.0.rc2). See the notes below from the two release candidates for more details.

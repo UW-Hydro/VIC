@@ -24,8 +24,8 @@ from setuptools.extension import Extension
 log_level = 0
 
 MAJOR = 5
-MINOR = 0
-MICRO = 1
+MINOR = 1
+MICRO = 0
 ISRELEASED = True
 VERSION = '%d.%d.%d' % (MAJOR, MINOR, MICRO)
 QUALIFIER = ''

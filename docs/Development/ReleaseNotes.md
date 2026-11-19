@@ -15,6 +15,12 @@ To check which release of VIC you are running:
 
 ------------------------------
 
+## Unreleased
+
+#### Bug Fixes:
+
+1. Fixed `generate_default_lake_state()`. It set the lake node temperatures in a loop over `activenod`, but `activenod` is derived from the lake depth by `compute_derived_lake_dimensions()`, which the drivers call only afterwards. The loop therefore ran zero times and a lake started without a state file kept the 0 C that `initialize_lake()` writes into every node instead of the average soil temperature. The lake dimensions are now derived before the temperatures are set.
+
 ## VIC 5.1.0 (December 14, 2021)
 
 This is a maintanence release that includes numerous bug fixes and a few model enhancements. All code changes were included in the two release candidates (5.1.0.rc1 and 5.1.0.rc2). See the notes below from the two release candidates for more details.

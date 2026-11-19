@@ -29,6 +29,10 @@ generate_default_lake_state(lake_var_struct *lake,
     ************************************************************************/
     if (options.LAKES) {
         lake->ldepth = lake_con.depth_in;
+        // activenod follows from the depth; derive it here, because
+        // compute_derived_lake_dimensions() otherwise runs only after this
+        // routine and activenod would still be 0 (no node initialized)
+        compute_derived_lake_dimensions(lake, lake_con);
         for (k = 0; k < lake->activenod; k++) {
             // lake model requires FULL_ENERGY set to true
             lake->temp[k] = soil_con->avg_temp;
